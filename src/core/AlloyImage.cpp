@@ -239,11 +239,18 @@ void WriteImageToFile(const std::string& file, const ImageRGB& image) {
 	if (ext == "xml") {
 		WriteImageToRawFile(file, image);
 	} else if (ext == "png") {
+		/*
 		ImageRGBA tmp;
 		ConvertImage(image, tmp);
 		//Work around for malloc() error on linux.
 		if (!stbi_write_png(file.c_str(), tmp.width, tmp.height, 4,
 				tmp.data.data(), 4 * tmp.width)) {
+			throw std::runtime_error(
+					MakeString() << "Could not write " << file);
+		}
+		*/
+		if (!stbi_write_png(file.c_str(), image.width, image.height, 3,
+				image.data.data(), 3 * image.width)) {
 			throw std::runtime_error(
 					MakeString() << "Could not write " << file);
 		}
