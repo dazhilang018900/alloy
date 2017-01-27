@@ -1011,12 +1011,26 @@ void ReadImageFromFile(const std::string& file, ImageRGBf& img);
 
 void ConvertImage(const ImageRGBAf& in, ImageRGBA& out);
 void ConvertImage(const ImageRGBf& in, ImageRGB& out);
+
 void ConvertImage(const ImageRGBA& in, ImageRGBAf& out);
 void ConvertImage(const ImageRGB& in, ImageRGBf& out);
-void ConvertImage(const ImageRGBA& in, ImageRGB& out);
-void ConvertImage(const ImageRGBAf& in, ImageRGBf& out);
-void ConvertImage(const ImageRGB& in, ImageRGBA& out);
+
 void ConvertImage(const ImageRGBf& in, ImageRGBAf& out);
+void ConvertImage(const ImageRGBAf& in, ImageRGBf& out);
+
+void ConvertImage(const ImageRGBA& in, ImageRGB& out);
+void ConvertImage(const ImageRGB& in, ImageRGBA& out);
+
+void ConvertImage(const ImageRGBA& in, ImageRGBf& out);
+void ConvertImage(const ImageRGBAf& in, ImageRGB& out);
+
+void ConvertImage(const ImageRGB& in, ImageRGBAf& out);
+void ConvertImage(const ImageRGBf& in, ImageRGBA& out);
+
+inline void ConvertImage(const ImageRGB& in, ImageRGB& out){out=in;}
+inline void ConvertImage(const ImageRGBA& in, ImageRGBA& out){out=in;}
+inline void ConvertImage(const ImageRGBf& in, ImageRGBf& out){out=in;}
+inline void ConvertImage(const ImageRGBAf& in, ImageRGBAf& out){out=in;}
 
 template<class T, ImageType I> void ConvertImage(const Image<T, 4, I>& in,
 		Image<T, 1, I>& out, bool sRGB = true) {

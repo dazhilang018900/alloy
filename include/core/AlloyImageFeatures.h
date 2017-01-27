@@ -148,7 +148,7 @@ namespace aly {
 			std::vector<Descriptor> data;
 		public:
 			int width, height;
-			DescriptorField(int w = 0, int h = 0):width(w),height(h),data(w*h) {
+			DescriptorField(int w = 0, int h = 0):data(w*h),width(w),height(h) {
 
 			}
 			size_t size() const {

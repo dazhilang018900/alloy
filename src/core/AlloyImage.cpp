@@ -724,6 +724,49 @@ void WriteImageToFile(const std::string& file, const ImageRGBf& img) {
 		WriteImageToFile(file, rgb);
 	}
 }
+void ConvertImage(const ImageRGBAf& in, ImageRGB& out) {
+	out.resize(in.width, in.height);
+	out.id = in.id;
+	out.setPosition(in.position());
+	size_t index = 0;
+	for (const RGBAf& ct : in.data) {
+		out[index++] = RGB(clamp((int) (ct.x * 255.0f), 0, 255),
+				clamp((int) (ct.y * 255.0f), 0, 255),
+				clamp((int) (ct.z * 255.0f), 0, 255));
+	}
+}
+
+void ConvertImage(const ImageRGBA& in, ImageRGBf& out) {
+	out.resize(in.width, in.height);
+	out.id = in.id;
+	out.setPosition(in.position());
+	size_t index = 0;
+	for (const RGBA& ct : in.data) {
+		out[index++] = RGBf(ct.x / 255.0f, ct.y / 255.0f, ct.z / 255.0f);
+	}
+}
+
+void ConvertImage(const ImageRGBf& in, ImageRGBA& out) {
+	out.resize(in.width, in.height);
+	out.id = in.id;
+	out.setPosition(in.position());
+	size_t index = 0;
+	for (const RGBf& ct : in.data) {
+		out[index++] = RGBA(clamp((int) (ct.x * 255.0f), 0, 255),
+				clamp((int) (ct.y * 255.0f), 0, 255),
+				clamp((int) (ct.z * 255.0f), 0, 255),255);
+	}
+}
+
+void ConvertImage(const ImageRGB& in, ImageRGBAf& out) {
+	out.resize(in.width, in.height);
+	out.id = in.id;
+	out.setPosition(in.position());
+	size_t index = 0;
+	for (const RGB& ct : in.data) {
+		out[index++] = RGBAf(ct.x / 255.0f, ct.y / 255.0f, ct.z / 255.0f,1.0f);
+	}
+}
 
 void ConvertImage(const ImageRGBf& in, ImageRGB& out) {
 	out.resize(in.width, in.height);
@@ -794,8 +837,7 @@ void ConvertImage(const ImageRGBAf& in, ImageRGBf& out) {
 	out.setPosition(in.position());
 	size_t index = 0;
 	for (RGBf& ct : out.data) {
-		RGBAf cs = in[index++];
-		ct = cs.xyz();
+		ct = in[index++].xyz();
 	}
 }
 void ConvertImage(const ImageRGBA& in, ImageRGB& out) {
@@ -804,8 +846,8 @@ void ConvertImage(const ImageRGBA& in, ImageRGB& out) {
 	out.setPosition(in.position());
 	size_t index = 0;
 	for (RGB& ct : out.data) {
-		RGBA cs = in[index++];
-		ct = cs.xyz();
+		ct = in[index++].xyz();
 	}
 }
+
 }
