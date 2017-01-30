@@ -225,6 +225,84 @@ public:
 	}
 	static const float sDeg2rad;
 };
+struct IntrinsicParameters{
+public:
+	float fx, fy, cx, cy, k1, k2, k3, p1, p2;
+	template<class Archive> void save(Archive & archive) const {
+		archive(
+				CEREAL_NVP(fx),CEREAL_NVP(fy),
+				CEREAL_NVP(cx),CEREAL_NVP(cy),
+				CEREAL_NVP(k1),CEREAL_NVP(k2),
+				CEREAL_NVP(k3),CEREAL_NVP(p1),CEREAL_NVP(p2));
+	}
+
+	template<class Archive> void load(Archive & archive) {
+		archive(
+				CEREAL_NVP(fx),CEREAL_NVP(fy),
+				CEREAL_NVP(cx),CEREAL_NVP(cy),
+				CEREAL_NVP(k1),CEREAL_NVP(k2),
+				CEREAL_NVP(k3),CEREAL_NVP(p1),CEREAL_NVP(p2));
+	}
+	IntrinsicParameters(
+				float fx=0.0f, float fy=0.0f,
+				float cx=0.0f, float cy=0.0f,
+				float k1=0.0f, float k2=0.0f,
+				float k3=0.0f, float p1=0.0f,
+				float p2=0.0f):
+					fx(fx), fy(fy), cx(cx),
+					cy(cy), k1(k1), k2(k2),
+					k3(k3), p1(p1), p2(p2)
+	{
+
+	}
+	inline float2 getUndistortedPoint(int i,int j){
+		float x,y,xp,yp,rs;
+		x=(i-cx)/fx;
+		y=(j-cy)/fy;
+		rs=x*x+y*y;
+		xp=x*(1+k1*rs+k2*rs*rs+k3*rs*rs*rs)+2*p1*x*y+p2*(rs+2*x*x);
+		yp=y*(1+k1*rs+k2*rs*rs+k3*rs*rs*rs)+2*p2*x*y+p1*(rs+2*y*y);
+		x=xp*fx+cx;
+		y=yp*fy+cy;
+		return float2(x,y);
+	}
+	inline float2 getUndistortedPoint(float i,float j){
+		float x,y,xp,yp,rs;
+		x=(i-cx)/fx;
+		y=(j-cy)/fy;
+		rs=x*x+y*y;
+		xp=x*(1+k1*rs+k2*rs*rs+k3*rs*rs*rs)+2*p1*x*y+p2*(rs+2*x*x);
+		yp=y*(1+k1*rs+k2*rs*rs+k3*rs*rs*rs)+2*p2*x*y+p1*(rs+2*y*y);
+		x=xp*fx+cx;
+		y=yp*fy+cy;
+		return float2(x,y);
+	}
+	inline float2 getUndistortedPoint(float2 pt){
+		return getUndistortedPoint(pt.x,pt.y);
+	}
+	IntrinsicParameters(float intrinsics[4],float distort[5]){
+		fx = intrinsics[0];
+		fy = intrinsics[1];
+		cx = intrinsics[2];
+		cy = intrinsics[3];
+		k1 = distort[0];
+		k2 = distort[1];
+		k3 = distort[2];
+		p1 = distort[3];
+		p2 = distort[4];
+	}
+	void set(float intrinsics[4],float distort[5]){
+		fx = intrinsics[0];
+		fy = intrinsics[1];
+		cx = intrinsics[2];
+		cy = intrinsics[3];
+		k1 = distort[0];
+		k2 = distort[1];
+		k3 = distort[2];
+		p1 = distort[3];
+		p2 = distort[4];
+	}
+};
 void WriteCameraParametersToFile(const std::string& file, const CameraParameters& params);
 void ReadCameraParametersFromFile(const std::string& file, CameraParameters& params);
 

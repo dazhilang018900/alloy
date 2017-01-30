@@ -61,7 +61,6 @@ public:
 	GLuint vertexCount;
 	GLuint triIndexCount;
 	GLuint quadIndexCount;
-
 	virtual void draw() const override;
 	virtual void draw(const PrimitiveType& type,bool forceVertexColor) const;
 	virtual void update() override;
