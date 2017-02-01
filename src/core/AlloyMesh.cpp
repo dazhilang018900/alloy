@@ -782,7 +782,7 @@ void WritePlyMeshToFile(const std::string& file, const Mesh& mesh, bool binary) 
 // compute colors, if any
 	int numPts = (int) (mesh.vertexLocations.size());
 
-	int numPolys = (int) (mesh.quadIndexes.size() + mesh.triIndexes.size());
+	int numPolys = (int) (mesh.quadIndexes.size() + mesh.triIndexes.size()+mesh.lineIndexes.size());
 	std::vector<unsigned char> pointColors;
 
 	if (mesh.vertexColors.size() > 0) {
