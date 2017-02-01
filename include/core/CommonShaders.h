@@ -781,6 +781,18 @@ public:
 		draw(imageTexture, box2px(location, dimensions), viewport);
 	}
 };
+class LineShader: public GLShader {
+public:
+	void draw(Mesh& mesh,CameraParameters& camera, const box2px& bounds, float lineWidth, const aly::Color& color);
+	void draw(const std::initializer_list<Mesh*>& meshes,CameraParameters& camera, const box2px& bounds, float lineWidth, const aly::Color& color);
+	void draw(const std::initializer_list<std::pair<Mesh*, float4x4>>& meshes,CameraParameters& camera, const box2px& bounds, float lineWidth, const aly::Color& color);
+	void draw(const std::list<Mesh*>& meshes, CameraParameters& camera, const box2px& bounds, float lineWidth, const aly::Color& color);
+	void draw(const std::list<std::pair<Mesh*, float4x4>>& meshes,CameraParameters& camera, const box2px& bounds, float lineWidth, const aly::Color& color);
+
+
+	LineShader(bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
+
+};
 }
 
 #endif /* COMMONSHADERS_H_ */

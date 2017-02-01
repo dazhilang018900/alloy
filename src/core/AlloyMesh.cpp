@@ -42,6 +42,7 @@ void GLMesh::draw() const {
 	draw(PrimitiveType::ALL, onScreen);
 }
 void GLMesh::draw(const PrimitiveType& type, bool forceVertexColor) const {
+	CHECK_GL_ERROR();
 	if (mesh.isDirty(onScreen)) {
 		mesh.update(onScreen);
 		mesh.setDirty(onScreen, false);
@@ -67,6 +68,7 @@ void GLMesh::draw(const PrimitiveType& type, bool forceVertexColor) const {
 		}
 		glDrawArrays(GL_POINTS, 0, vertexCount);
 	}
+	CHECK_GL_ERROR();
 	if ((type == GLMesh::PrimitiveType::ALL || type == GLMesh::PrimitiveType::QUADS) && quadIndexCount > 0) {
 		for (int n = 0; n < 4; n++) {
 			if (quadVertexBuffer[n] > 0) {
@@ -139,7 +141,8 @@ void GLMesh::draw(const PrimitiveType& type, bool forceVertexColor) const {
 		}
 		glDrawArrays(GL_POINTS, 0, triIndexCount);
 	}
-	if ((type == GLMesh::PrimitiveType::ALL || type == GLMesh::PrimitiveType::LINES) && triIndexCount > 0) {
+	CHECK_GL_ERROR();
+	if ((type == GLMesh::PrimitiveType::ALL || type == GLMesh::PrimitiveType::LINES) && lineIndexCount > 0) {
 		for (int n = 0; n < 2; n++) {
 			if (lineVertexBuffer[n] > 0) {
 				glEnableVertexAttribArray(3 + n);
@@ -149,20 +152,20 @@ void GLMesh::draw(const PrimitiveType& type, bool forceVertexColor) const {
 		}
 		for (int n = 0; n < 2; n++) {
 			if (lineColorBuffer[n] > 0) {
-				glEnableVertexAttribArray(7 + n);
+				glEnableVertexAttribArray(5 + n);
 				glBindBuffer(GL_ARRAY_BUFFER, lineColorBuffer[n]);
 				glVertexAttribPointer(5 + n, 4, GL_FLOAT, GL_FALSE, 0, 0);
 			}
 		}
-		glDrawArrays(GL_LINE, 0, lineIndexCount);
+		glDrawArrays(GL_POINTS, 0, lineIndexCount);
 	}
+	CHECK_GL_ERROR();
 	for (int i = 0; i <= 14; i++) {
 		glDisableVertexAttribArray(i);
 	}
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	CHECK_GL_ERROR();
-
 	context->end();
 }
 GLMesh::GLMesh(Mesh& mesh, bool onScreen, const std::shared_ptr<AlloyContext>& context) :
@@ -262,9 +265,11 @@ void GLMesh::update() {
 	triIndexCount = 0;
 	quadIndexCount = 0;
 	lineIndexCount = 0;
-	if (vao == 0)
+	CHECK_GL_ERROR();
+	if (vao == 0){
 		glGenVertexArrays(1, &vao);
-
+		CHECK_GL_ERROR();
+	}
 	if (mesh.vertexLocations.size() > 0) {
 		if (glIsBuffer(vertexBuffer) == GL_TRUE)
 			glDeleteBuffers(1, &vertexBuffer);
@@ -275,6 +280,7 @@ void GLMesh::update() {
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * mesh.vertexLocations.size(), mesh.vertexLocations.ptr(), GL_STATIC_DRAW);
 		vertexCount = (uint32_t) mesh.vertexLocations.size();
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		CHECK_GL_ERROR();
 	}
 	if (mesh.vertexNormals.size() > 0) {
 		if (glIsBuffer(normalBuffer) == GL_TRUE)
@@ -286,6 +292,7 @@ void GLMesh::update() {
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * mesh.vertexNormals.size(), mesh.vertexNormals.ptr(), GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		CHECK_GL_ERROR();
 	}
 	if (mesh.vertexColors.size() > 0) {
 		if (glIsBuffer(colorBuffer) == GL_TRUE)
@@ -296,6 +303,7 @@ void GLMesh::update() {
 			throw std::runtime_error("Error: Unable to create color buffer");
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * mesh.vertexColors.size(), mesh.vertexColors.ptr(), GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		CHECK_GL_ERROR();
 	}
 	if (mesh.lineIndexes.size() > 0) {
 		int offset = 0;
@@ -569,7 +577,7 @@ void GLMesh::update() {
 			else {
 				for(offset=0;offset<(int)mesh.lineIndexes.size();offset++) {
 					for (int n = 0; n < 2; n++) {
-						lines[n][offset] = mesh.vertexColors[offset*3+n];
+						lines[n][offset] = mesh.vertexColors[offset*2+n];
 					}
 				}
 			}
@@ -585,7 +593,6 @@ void GLMesh::update() {
 			CHECK_GL_ERROR();
 		}
 	}
-
 	context->end();
 }
 void Mesh::setContext(const std::shared_ptr<AlloyContext>& context) {

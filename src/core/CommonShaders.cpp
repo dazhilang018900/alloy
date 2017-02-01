@@ -221,7 +221,7 @@ void main(void) {
 		float rxy=length(pos-vec4(center.xyz,1.0));
 		float cr=sqrt(r*r-rxy*rxy);
 		float d=(-pos.z-cr-MIN_DEPTH)/(MAX_DEPTH-MIN_DEPTH);
-        if(d<0.0)discard;
+        if(d<=0.0||d>=1.0)discard;
 		vec3 norm=normalize(vec3(pos.x-center.x,pos.y-center.y,cr));
 		FragColor=color*texture(matcapTexture,-0.5*norm.xy+0.5);
 		gl_FragDepth=d;
@@ -3311,5 +3311,156 @@ void LineDistanceShader::draw(
 	}
 	end();
 }
+
+
+LineShader::LineShader(bool onScreen,const std::shared_ptr<AlloyContext>& context) :GLShader(onScreen, context){
+	initialize({},
+			R"(	#version 330
+					layout(location = 3) in vec3 vp0;
+					layout(location = 4) in vec3 vp1;
+					layout(location = 5) in vec4 vc0;
+					layout(location = 6) in vec4 vc1;
+					out VS_OUT {
+						vec3 p0;
+						vec3 p1;
+						vec4 c0;
+						vec4 c1;
+					} vs_out;
+					void main(void) {
+						vs_out.p0=vp0;
+						vs_out.p1=vp1;
+						vs_out.c0=vc0;
+						vs_out.c1=vc1;
+					})",
+			R"(	#version 330
+						in vec3 vert;
+                        in vec4 vertColor;
+						uniform float MIN_DEPTH;
+						uniform float MAX_DEPTH;
+                        uniform int HAS_COLOR;
+                        uniform vec4 color;
+						out vec4 FragColor;
+						void main() {
+                            float d=(-vert.z-MIN_DEPTH)/(MAX_DEPTH-MIN_DEPTH);
+                            if(d<=0||d>=1.0)discard;
+                            gl_FragDepth=d; 
+							FragColor = (HAS_COLOR!=0)?vertColor:color;
+						}
+						)",
+				R"(	#version 330
+						layout (points) in;
+						layout (triangle_strip, max_vertices=4) out;
+						in VS_OUT {
+							vec3 p0;
+							vec3 p1;
+							vec4 c0;
+							vec4 c1;
+						} line[];
+						out vec3 vert;
+                        out vec4 vertColor;
+					    uniform mat4 ProjMat, ViewMat, ModelMat,ViewModelMat,NormalMat,PoseMat; 
+                        uniform float lineWidth;
+						uniform float MIN_DEPTH;
+						void main() {
+						  mat4 PVM=ProjMat*ViewModelMat*PoseMat;
+						  mat4 VM=ViewModelMat*PoseMat;
+						  
+						  vec3 p0=line[0].p0;
+						  vec3 p1=line[0].p1;
+						  vec3 v0 = (VM*vec4(p0,1)).xyz;
+						  vec3 v1 = (VM*vec4(p1,1)).xyz;
+                          vec4 pt0=PVM*vec4(p0,1);
+                          vec4 pt1=PVM*vec4(p1,1);
+                          pt0=pt0/pt0.w;
+                          pt1=pt1/pt1.w;
+                          vec2 dir=normalize(pt1.xy-pt0.xy);
+                          vec4 off=lineWidth*vec4(-dir.y,dir.x,0.0f,0.0f);
+                         
+		    if(-v0.z>MIN_DEPTH&&-v1.z>MIN_DEPTH){
+			vert = v0;
+			vertColor=line[0].c0;
+			gl_Position=pt0+off;
+			EmitVertex();
+			gl_Position=pt0-off;
+			EmitVertex();
+	
+			vert = v1;
+			vertColor=line[0].c1;
+			gl_Position=pt1-off;
+			EmitVertex();
+			gl_Position=pt1+off;
+			EmitVertex();
+			EndPrimitive();
+            }
+
+})");
+
+
+}
+void LineShader::draw(Mesh& mesh,CameraParameters& camera, const box2px& bounds, float lineWidth, const aly::Color& color){
+
+	begin()
+	.set("MIN_DEPTH", camera.getNearPlane())
+	.set("MAX_DEPTH", camera.getFarPlane())
+	.set("HAS_COLOR",(mesh.vertexColors.size()>0?1:0))
+	.set(camera, bounds)
+	.set("color",color)
+	.set("lineWidth",lineWidth/bounds.dimensions.y)
+	.set("PoseMat",float4x4::identity())
+	.draw(mesh,GLMesh::PrimitiveType::LINES)
+	.end();
+}
+void LineShader::draw(const std::initializer_list<Mesh*>& meshes,CameraParameters& camera, const box2px& bounds, float lineWidth, const aly::Color& color){
+	begin()
+	.set("MIN_DEPTH", camera.getNearPlane())
+	.set("MAX_DEPTH", camera.getFarPlane())
+	.set(camera, bounds)
+	.set("color",color)
+	.set("lineWidth",lineWidth/bounds.dimensions.y)
+	.set("PoseMat",float4x4::identity());
+	for(Mesh* mesh:meshes){
+		set("HAS_COLOR",(mesh->vertexColors.size()>0?1:0)).draw(mesh,GLMesh::PrimitiveType::LINES);
+	}
+	end();
+
+}
+void LineShader::draw(const std::initializer_list<std::pair<Mesh*, float4x4>>& meshes,CameraParameters& camera, const box2px& bounds, float lineWidth, const aly::Color& color){
+	begin()
+	.set("MIN_DEPTH", camera.getNearPlane())
+	.set("MAX_DEPTH", camera.getFarPlane())
+	.set(camera, bounds)
+	.set("color",color)
+	.set("lineWidth",lineWidth/bounds.dimensions.y);
+	for(auto pr:meshes){
+		set("PoseMat",pr.second).set("HAS_COLOR",(pr.first->vertexColors.size()>0?1:0)).draw(pr.first,GLMesh::PrimitiveType::LINES);
+	}
+	end();
+}
+void LineShader::draw(const std::list<Mesh*>& meshes, CameraParameters& camera, const box2px& bounds, float lineWidth, const aly::Color& color){
+	begin()
+	.set("MIN_DEPTH", camera.getNearPlane())
+	.set("MAX_DEPTH", camera.getFarPlane())
+	.set(camera, bounds)
+	.set("color",color)
+	.set("lineWidth",lineWidth/bounds.dimensions.y)
+	.set("PoseMat",float4x4::identity());
+	for(Mesh* mesh:meshes){
+		set("HAS_COLOR",(mesh->vertexColors.size()>0?1:0)).draw(mesh,GLMesh::PrimitiveType::LINES);
+	}
+	end();
+}
+void LineShader::draw(const std::list<std::pair<Mesh*, float4x4>>& meshes,CameraParameters& camera, const box2px& bounds, float lineWidth, const aly::Color& color){
+	begin()
+	.set("MIN_DEPTH", camera.getNearPlane())
+	.set("MAX_DEPTH", camera.getFarPlane())
+	.set(camera, bounds)
+	.set("color",color)
+	.set("lineWidth",lineWidth/bounds.dimensions.y);
+	for(auto pr:meshes){
+		set("PoseMat",pr.second).set("HAS_COLOR",(pr.first->vertexColors.size()>0?1:0)).draw(pr.first,GLMesh::PrimitiveType::LINES);
+	}
+	end();
+}
+
 }
 
