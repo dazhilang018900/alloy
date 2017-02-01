@@ -434,7 +434,7 @@ namespace aly {
 		float  sc = 1.0f / totalArea;
 		int index=0;
 		mesh.textureMap.resize(mesh.triIndexes.size() * 3, float2(0, 0));
-		for (int id = 0; id < rectId.size(); id++){
+		for (int id = 0; id < (int)rectId.size(); id++){
 			Mosaic& mosaic = mosaics[id];
 
 			bvec2f& rect = rects[id];
@@ -462,7 +462,7 @@ namespace aly {
 			mesh.textureImage.set(float4(0.0f));
 			int textureHeight = mesh.textureImage.height;
 			int textureWidth = mesh.textureImage.width;
-			for (int id = 0; id < rectId.size(); id++) {
+			for (int id = 0; id < (int)rectId.size(); id++) {
 
 				bvec2f& rect = rects[id];
 				std::multimap<bvec2f, float2, TextureBoxCompare>::iterator boxPair = boxes.find(rect);
@@ -665,7 +665,7 @@ namespace aly {
 			freeBoxes.erase(minIterFreeBoxes);
 
 			float2 a1 = float2(insertedBox.x, insertedBox.y);
-			float2 a2 = float2(insertedBox.x + insertedBox.z, insertedBox.y);
+			//float2 a2 = float2(insertedBox.x + insertedBox.z, insertedBox.y);
 			float2 a3 = float2(insertedBox.x + insertedBox.z, insertedBox.y + insertedBox.w);
 			//float2 a4 = float2(insertedBox.x, insertedBox.y + insertedBox.w);
 
@@ -744,7 +744,7 @@ namespace aly {
 					//float2 b4 = float2(iterFreeBoxes->x, iterFreeBoxes->y + iterFreeBoxes->w);
 
 					float2 c1 = float2(iterFreeBoxes2->x, iterFreeBoxes2->y);
-					float2 c2 = float2(iterFreeBoxes2->x + iterFreeBoxes2->z, iterFreeBoxes2->y);
+					//float2 c2 = float2(iterFreeBoxes2->x + iterFreeBoxes2->z, iterFreeBoxes2->y);
 					float2 c3 = float2(iterFreeBoxes2->x + iterFreeBoxes2->z, iterFreeBoxes2->y + iterFreeBoxes2->w);
 					//float2 c4 = float2(iterFreeBoxes2->x, iterFreeBoxes2->y + iterFreeBoxes2->w);
 

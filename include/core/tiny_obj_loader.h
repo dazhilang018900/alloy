@@ -43,6 +43,7 @@ typedef struct {
   std::vector<float> texcoords;
   std::vector<unsigned int> quadIndices;
   std::vector<unsigned int> triIndices;
+  std::vector<unsigned int> lineIndices;
   std::vector<int> material_ids; // per-mesh material ID
 } mesh_t;
 

@@ -126,6 +126,38 @@ namespace aly {
 		updateBoundingBox();
 		setDirty(true);
 	}
+	void Frustum::set(const CameraParameters& cam, bool flipZ){
+		float3 pt1 = cam.transformNormalizedImageDepthToWorld(float3(0, 0, 0));
+		float3 pt2 = cam.transformNormalizedImageDepthToWorld(float3(1, 0, 0));
+		float3 pt3 = cam.transformNormalizedImageDepthToWorld(float3(1, 1, 0));
+		float3 pt4 = cam.transformNormalizedImageDepthToWorld(float3(0, 1, 0));
+
+		float z=(flipZ)?-1.0f:1.0f;
+		float3 qt1 = cam.transformNormalizedImageDepthToWorld(float3(0, 0, z));
+		float3 qt2 = cam.transformNormalizedImageDepthToWorld(float3(1, 0, z));
+		float3 qt3 = cam.transformNormalizedImageDepthToWorld(float3(1, 1, z));
+		float3 qt4 = cam.transformNormalizedImageDepthToWorld(float3(0, 1, z));
+
+		vertexLocations[0]=pt1;
+		vertexLocations[1]=pt2;
+		vertexLocations[2]=pt3;
+		vertexLocations[3]=pt4;
+		vertexLocations[4]=qt1;
+		vertexLocations[5]=qt2;
+		vertexLocations[6]=qt3;
+		vertexLocations[7]=qt4;
+
+		quadIndexes[0]=uint4(3, 2, 1, 0);
+		quadIndexes[1]=uint4(6, 7, 4, 5);
+		quadIndexes[2]=uint4(5, 1, 2, 6);
+		quadIndexes[3]=uint4(0, 4, 7, 3);
+		quadIndexes[4]=uint4(6, 2, 3, 7);
+		quadIndexes[5]=uint4(4, 0, 1, 5);
+
+		updateVertexNormals();
+		updateBoundingBox();
+		setDirty(true);
+	}
 	Box::Box(const box3f& box,const  std::shared_ptr<AlloyContext>& context) :Mesh(context) {
 		float3 minPt = box.min();
 		float3 maxPt = box.max();

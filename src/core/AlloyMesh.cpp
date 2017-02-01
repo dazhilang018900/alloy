@@ -139,6 +139,23 @@ void GLMesh::draw(const PrimitiveType& type, bool forceVertexColor) const {
 		}
 		glDrawArrays(GL_POINTS, 0, triIndexCount);
 	}
+	if ((type == GLMesh::PrimitiveType::ALL || type == GLMesh::PrimitiveType::LINES) && triIndexCount > 0) {
+		for (int n = 0; n < 2; n++) {
+			if (lineVertexBuffer[n] > 0) {
+				glEnableVertexAttribArray(3 + n);
+				glBindBuffer(GL_ARRAY_BUFFER, lineVertexBuffer[n]);
+				glVertexAttribPointer(3 + n, 3, GL_FLOAT, GL_FALSE, 0, 0);
+			}
+		}
+		for (int n = 0; n < 2; n++) {
+			if (lineColorBuffer[n] > 0) {
+				glEnableVertexAttribArray(7 + n);
+				glBindBuffer(GL_ARRAY_BUFFER, lineColorBuffer[n]);
+				glVertexAttribPointer(5 + n, 4, GL_FLOAT, GL_FALSE, 0, 0);
+			}
+		}
+		glDrawArrays(GL_LINE, 0, lineIndexCount);
+	}
 	for (int i = 0; i <= 14; i++) {
 		glDisableVertexAttribArray(i);
 	}
@@ -149,8 +166,8 @@ void GLMesh::draw(const PrimitiveType& type, bool forceVertexColor) const {
 	context->end();
 }
 GLMesh::GLMesh(Mesh& mesh, bool onScreen, const std::shared_ptr<AlloyContext>& context) :
-		GLComponent(onScreen, context), mesh(mesh), vao(0), vertexBuffer(0), normalBuffer(0), colorBuffer(0), triIndexBuffer(0), quadIndexBuffer(0), triCount(
-				0), quadCount(0), vertexCount(0), triIndexCount(0), quadIndexCount(0) {
+		GLComponent(onScreen, context), mesh(mesh), vao(0), vertexBuffer(0), normalBuffer(0), colorBuffer(0),lineIndexBuffer(0), triIndexBuffer(0), quadIndexBuffer(0), lineCount(0),  triCount(
+				0), quadCount(0), vertexCount(0),lineIndexCount(0), triIndexCount(0), quadIndexCount(0) {
 
 	for (int n = 0; n < 4; n++)
 		quadColorBuffer[n] = 0;
@@ -168,6 +185,11 @@ GLMesh::GLMesh(Mesh& mesh, bool onScreen, const std::shared_ptr<AlloyContext>& c
 		triTextureBuffer[n] = 0;
 	for (int n = 0; n < 3; n++)
 		triColorBuffer[n] = 0;
+	for (int n = 0; n < 2; n++)
+		lineVertexBuffer[n] = 0;
+	for (int n = 0; n < 2; n++)
+		lineColorBuffer[n] = 0;
+
 }
 GLMesh::~GLMesh() {
 	if (context.get() == nullptr)
@@ -179,8 +201,12 @@ GLMesh::~GLMesh() {
 		glDeleteBuffers(1, &normalBuffer);
 	if (glIsBuffer(colorBuffer) == GL_TRUE)
 		glDeleteBuffers(1, &colorBuffer);
+	if (glIsBuffer(lineIndexBuffer) == GL_TRUE)
+		glDeleteBuffers(1, &lineIndexBuffer);
 	if (glIsBuffer(triIndexBuffer) == GL_TRUE)
 		glDeleteBuffers(1, &triIndexBuffer);
+	if (glIsBuffer(lineIndexBuffer) == GL_TRUE)
+		glDeleteBuffers(1, &lineIndexBuffer);
 	if (glIsBuffer(quadIndexBuffer) == GL_TRUE)
 		glDeleteBuffers(1, &quadIndexBuffer);
 
@@ -190,12 +216,23 @@ GLMesh::~GLMesh() {
 	for (int n = 0; n < 3; n++)
 		if (glIsBuffer(triVertexBuffer[n]) == GL_TRUE)
 			glDeleteBuffers(1, &triVertexBuffer[n]);
+	for (int n = 0; n < 2; n++)
+		if (glIsBuffer(lineVertexBuffer[n]) == GL_TRUE)
+			glDeleteBuffers(1, &lineVertexBuffer[n]);
+	for (int n = 0; n < 2; n++)
+		if (glIsBuffer(lineVertexBuffer[n]) == GL_TRUE)
+			glDeleteBuffers(1, &lineVertexBuffer[n]);
+
 	for (int n = 0; n < 4; n++)
 		if (glIsBuffer(quadColorBuffer[n]) == GL_TRUE)
 			glDeleteBuffers(1, &quadColorBuffer[n]);
 	for (int n = 0; n < 3; n++)
 		if (glIsBuffer(triColorBuffer[n]) == GL_TRUE)
 			glDeleteBuffers(1, &triColorBuffer[n]);
+	for (int n = 0; n < 2; n++)
+		if (glIsBuffer(lineColorBuffer[n]) == GL_TRUE)
+			glDeleteBuffers(1, &lineColorBuffer[n]);
+
 	for (int n = 0; n < 4; n++)
 		if (glIsBuffer(quadNormalBuffer[n]) == GL_TRUE)
 			glDeleteBuffers(1, &quadNormalBuffer[n]);
@@ -209,7 +246,6 @@ GLMesh::~GLMesh() {
 	for (int n = 0; n < 3; n++)
 		if (glIsBuffer(triTextureBuffer[n]) == GL_TRUE)
 			glDeleteBuffers(1, &triTextureBuffer[n]);
-
 	if (vao != 0)
 		glDeleteVertexArrays(1, &vao);
 	context->end();
@@ -220,14 +256,16 @@ void GLMesh::update() {
 	context->begin(onScreen);
 	quadCount = 0;
 	triCount = 0;
+	lineCount=0;
+	vertexCount = 0;
+
 	triIndexCount = 0;
 	quadIndexCount = 0;
-	vertexCount = 0;
+	lineIndexCount = 0;
 	if (vao == 0)
 		glGenVertexArrays(1, &vao);
 
 	if (mesh.vertexLocations.size() > 0) {
-
 		if (glIsBuffer(vertexBuffer) == GL_TRUE)
 			glDeleteBuffers(1, &vertexBuffer);
 		glGenBuffers(1, &vertexBuffer);
@@ -258,6 +296,32 @@ void GLMesh::update() {
 			throw std::runtime_error("Error: Unable to create color buffer");
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * mesh.vertexColors.size(), mesh.vertexColors.ptr(), GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
+	}
+	if (mesh.lineIndexes.size() > 0) {
+		int offset = 0;
+		std::vector<float3> lines[2];
+		for (int n = 0; n < 2; n++) {
+			lines[n].resize(mesh.lineIndexes.size());
+			if (glIsBuffer(lineVertexBuffer[n]) == GL_TRUE)
+				glDeleteBuffers(1, &lineVertexBuffer[n]);
+			glGenBuffers(1, &lineVertexBuffer[n]);
+		}
+		for (uint2 face : mesh.lineIndexes.data) {
+			for (int n = 0; n < 2; n++) {
+				lines[n][offset] = mesh.vertexLocations[face[n]];
+			}
+			offset++;
+		}
+		for (int n = 0; n < 2; n++) {
+			if (glIsBuffer(lineVertexBuffer[n]) == GL_TRUE)
+				glDeleteBuffers(1, &lineVertexBuffer[n]);
+			glGenBuffers(1, &lineVertexBuffer[n]);
+			glBindBuffer(GL_ARRAY_BUFFER, lineVertexBuffer[n]);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * lines[n].size(), lines[n].data(), GL_STATIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		}
+		CHECK_GL_ERROR();
+		lineIndexCount = (GLuint) mesh.lineIndexes.size();
 	}
 	if (mesh.triIndexes.size() > 0) {
 		int offset = 0;
@@ -468,11 +532,10 @@ void GLMesh::update() {
 				}
 			}
 			else {
-				for (uint3 face : mesh.triIndexes.data) {
+				for(offset=0;offset<(int)mesh.triIndexes.size();offset++) {
 					for (int n = 0; n < 3; n++) {
 						tris[n][offset] = mesh.vertexColors[offset*3+n];
 					}
-					offset++;
 				}
 			}
 			for (int n = 0; n < 3; n++) {
@@ -481,6 +544,41 @@ void GLMesh::update() {
 				glGenBuffers(1, &triColorBuffer[n]);
 				glBindBuffer(GL_ARRAY_BUFFER, triColorBuffer[n]);
 				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * tris[n].size(), tris[n].data(),
+				GL_STATIC_DRAW);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+			}
+			CHECK_GL_ERROR();
+		}
+		if (mesh.lineIndexes.size() > 0) {
+			int offset = 0;
+			std::vector<float4> lines[2];
+			for (int n = 0; n < 2; n++) {
+				lines[n].resize(mesh.lineIndexes.size());
+				if (glIsBuffer(lineColorBuffer[n]) == GL_TRUE)
+					glDeleteBuffers(1, &lineColorBuffer[n]);
+				glGenBuffers(1, &lineColorBuffer[n]);
+			}
+			if (mesh.vertexColors.size() == mesh.vertexLocations.size()) {
+				for (uint2 face : mesh.lineIndexes.data) {
+					for (int n = 0; n < 2; n++) {
+						lines[n][offset] = mesh.vertexColors[face[n]];
+					}
+					offset++;
+				}
+			}
+			else {
+				for(offset=0;offset<(int)mesh.lineIndexes.size();offset++) {
+					for (int n = 0; n < 2; n++) {
+						lines[n][offset] = mesh.vertexColors[offset*3+n];
+					}
+				}
+			}
+			for (int n = 0; n < 2; n++) {
+				if (glIsBuffer(lineColorBuffer[n]) == GL_TRUE)
+					glDeleteBuffers(1, &lineColorBuffer[n]);
+				glGenBuffers(1, &lineColorBuffer[n]);
+				glBindBuffer(GL_ARRAY_BUFFER, lineColorBuffer[n]);
+				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * lines[n].size(), lines[n].data(),
 				GL_STATIC_DRAW);
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 			}
@@ -529,6 +627,7 @@ void Mesh::clear() {
 	vertexColors.clear();
 	quadIndexes.clear();
 	triIndexes.clear();
+	lineIndexes.clear();
 	textureMap.clear();
 	textureImage.clear();
 	setDirty(true);
@@ -617,6 +716,12 @@ void WriteObjMeshToFile(const std::string& file, const Mesh& mesh) {
 	if (mesh.textureMap.size() > 0 && mesh.textureImage.size() > 0)
 		out << "usemtl material_0\n";
 	i = 0;
+	for (uint2 line : mesh.lineIndexes.data) {
+		out << "f ";
+		out << (line.x + 1) << " ";
+		out << (line.y + 1) << "\n";
+		i += 2;
+	}
 	for (uint3 tri : mesh.triIndexes.data) {
 		out << "f ";
 		if (mesh.vertexNormals.size() > 0 && mesh.textureMap.size() == 0) {
@@ -788,6 +893,15 @@ void WritePlyMeshToFile(const std::string& file, const Mesh& mesh, bool binary) 
 			}
 			ply.putElement(&faceT);
 		}
+		sz = (int) (mesh.lineIndexes.size());
+		for (int i = 0; i < sz; i++) {
+			faceT.nverts = 2;
+			faceT.uvcount = 0;
+			for (j = 0; j < 2; j++) {
+				faceT.verts[j] = mesh.lineIndexes[i][j];
+			}
+			ply.putElement(&faceT);
+		}
 	} else {
 		int sz = (int) (mesh.quadIndexes.size());
 		for (int i = 0; i < sz; i++) {
@@ -802,6 +916,14 @@ void WritePlyMeshToFile(const std::string& file, const Mesh& mesh, bool binary) 
 			for (j = 0; j < 3; j++) {
 				face.nverts = 3;
 				face.verts[j] = mesh.triIndexes[i][j];
+			}
+			ply.putElement(&face);
+		}
+		sz = (int) (mesh.lineIndexes.size());
+		for (int i = 0; i < sz; i++) {
+			for (j = 0; j < 2; j++) {
+				face.nverts = 2;
+				face.verts[j] = mesh.lineIndexes[i][j];
 			}
 			ply.putElement(&face);
 		}
@@ -1040,6 +1162,7 @@ void ReadObjMeshFromFile(const std::string& file, std::vector<Mesh>& meshList) {
 			mesh.vertexNormals.resize(shape.mesh.normals.size() / 3);
 			mesh.vertexNormals.set(shape.mesh.normals.data());
 		}
+		//Doesn't support reading lines!
 		if (shape.mesh.triIndices.size() > 0) {
 			mesh.triIndexes.resize(shape.mesh.triIndices.size() / 3);
 			mesh.triIndexes.set(shape.mesh.triIndices.data());
@@ -1090,6 +1213,7 @@ void ReadObjMeshFromFile(const std::string& file, Mesh& mesh) {
 	uint32_t colorCount = 0;
 	uint32_t normalCount = 0;
 	uint32_t texCount = 0;
+	uint32_t lineIndexCount = 0;
 	uint32_t triIndexCount = 0;
 	uint32_t quadIndexCount = 0;
 	for (int n = 0; n < (int) shapes.size(); n++) {
@@ -1098,6 +1222,7 @@ void ReadObjMeshFromFile(const std::string& file, Mesh& mesh) {
 		colorCount += (uint32_t) shape.mesh.colors.size();
 		normalCount += (uint32_t) shape.mesh.normals.size();
 		texCount += (uint32_t) shape.mesh.texcoords.size();
+		lineIndexCount += (uint32_t)shape.mesh.lineIndices.size();
 		triIndexCount += (uint32_t) shape.mesh.triIndices.size();
 		quadIndexCount += (uint32_t) shape.mesh.quadIndices.size();
 	}
@@ -1105,17 +1230,22 @@ void ReadObjMeshFromFile(const std::string& file, Mesh& mesh) {
 	mesh.vertexColors.resize(colorCount / 3);
 	mesh.vertexLocations.resize(positionCount / 3);
 	mesh.vertexNormals.resize(normalCount / 3);
+	mesh.lineIndexes.resize(lineIndexCount / 2);
 	mesh.triIndexes.resize(triIndexCount / 3);
 	mesh.quadIndexes.resize(quadIndexCount / 4);
 	positionCount = 0;
 	colorCount=0;
 	normalCount = 0;
 	texCount = 0;
+	lineIndexCount = 0;
 	triIndexCount = 0;
 	quadIndexCount = 0;
 	mesh.textureMap.clear();
 	for (int n = 0; n < (int) shapes.size(); n++) {
 		shape_t& shape = shapes[n];
+		for (size_t i = 0; i < shape.mesh.lineIndices.size(); i += 2) {
+			mesh.lineIndexes[lineIndexCount++] = uint2(positionCount + shape.mesh.lineIndices[i], positionCount + shape.mesh.lineIndices[i + 1]);
+		}
 		for (size_t i = 0; i < shape.mesh.triIndices.size(); i += 3) {
 			mesh.triIndexes[triIndexCount++] = uint3(positionCount + shape.mesh.triIndices[i], positionCount + shape.mesh.triIndices[i + 1],
 					positionCount + shape.mesh.triIndices[i + 2]);
@@ -1194,7 +1324,7 @@ void ReadPlyMeshFromFile(const std::string& file, Mesh &mesh) {
 	// triplet red, green, blue.
 	bool RGBPointsAvailable = false;
 	bool hasNormals = false;
-
+	mesh.lineIndexes.clear();
 	mesh.triIndexes.clear();
 	mesh.quadIndexes.clear();
 	mesh.vertexLocations.clear();
@@ -1297,11 +1427,16 @@ void ReadPlyMeshFromFile(const std::string& file, Mesh &mesh) {
 					ply.getElement(&faceTex);
 					if (faceTex.nverts == 4) {
 						mesh.quadIndexes.append(uint4(faceTex.verts[0], faceTex.verts[1], faceTex.verts[2], faceTex.verts[3]));
+						for (int i = 0; i < faceTex.nverts; i++) {
+							mesh.textureMap.append(float2(faceTex.uvs[2 * i], faceTex.uvs[2 * i + 1]));
+						}
 					} else if (faceTex.nverts == 3) {
 						mesh.triIndexes.append(uint3(faceTex.verts[0], faceTex.verts[1], faceTex.verts[2]));
-					}
-					for (int i = 0; i < faceTex.nverts; i++) {
-						mesh.textureMap.append(float2(faceTex.uvs[2 * i], faceTex.uvs[2 * i + 1]));
+						for (int i = 0; i < faceTex.nverts; i++) {
+							mesh.textureMap.append(float2(faceTex.uvs[2 * i], faceTex.uvs[2 * i + 1]));
+						}
+					} else if(faceTex.nverts == 2) {
+						mesh.lineIndexes.append(uint2(faceTex.verts[0], faceTex.verts[1]));
 					}
 				}
 			} else {
@@ -1312,6 +1447,8 @@ void ReadPlyMeshFromFile(const std::string& file, Mesh &mesh) {
 						mesh.quadIndexes.append(uint4(face.verts[0], face.verts[1], face.verts[2], face.verts[3]));
 					} else if (face.nverts == 3) {
 						mesh.triIndexes.append(uint3(face.verts[0], face.verts[1], face.verts[2]));
+					} else if (face.nverts == 2) {
+						mesh.lineIndexes.append(uint2(face.verts[0], face.verts[1]));
 					}
 				}
 			}

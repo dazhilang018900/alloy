@@ -221,6 +221,7 @@ void main(void) {
 		float rxy=length(pos-vec4(center.xyz,1.0));
 		float cr=sqrt(r*r-rxy*rxy);
 		float d=(-pos.z-cr-MIN_DEPTH)/(MAX_DEPTH-MIN_DEPTH);
+        if(d<0.0)discard;
 		vec3 norm=normalize(vec3(pos.x-center.x,pos.y-center.y,cr));
 		FragColor=color*texture(matcapTexture,-0.5*norm.xy+0.5);
 		gl_FragDepth=d;
@@ -1533,7 +1534,7 @@ DepthAndNormalShader::DepthAndNormalShader(bool onScreen,
 				layout(location = 5) in vec3 vp2;
 				layout(location = 6) in vec3 vp3;
 
-															layout(location = 7) in vec3 vn0;
+				layout(location = 7) in vec3 vn0;
 				layout(location = 8) in vec3 vn1;
 				layout(location = 9) in vec3 vn2;
 				layout(location = 10) in vec3 vn3;

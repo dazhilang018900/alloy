@@ -39,28 +39,41 @@ enum class SubDivisionScheme {
 struct GLMesh: public GLComponent {
 public:
 	enum class PrimitiveType {
-		ALL = 0, QUADS = 4, TRIANGLES = 3, POINTS = 1
+		ALL = 0, QUADS = 4, TRIANGLES = 3, LINES = 2, POINTS = 1
 	};
 	Mesh& mesh;
 	GLuint vao;
 	GLuint vertexBuffer;
 	GLuint normalBuffer;
 	GLuint colorBuffer;
+	GLuint lineIndexBuffer;
 	GLuint triIndexBuffer;
 	GLuint quadIndexBuffer;
+
+	GLuint lineColorBuffer[2];
+	GLuint lineVertexBuffer[2];
+
 	GLuint triColorBuffer[3];
 	GLuint triVertexBuffer[3];
+
 	GLuint quadVertexBuffer[4];
 	GLuint triNormalBuffer[3];
+
 	GLuint quadColorBuffer[4];
 	GLuint quadNormalBuffer[4];
+
 	GLuint triTextureBuffer[3];
 	GLuint quadTextureBuffer[4];
+
+	GLuint lineCount;
 	GLuint triCount;
 	GLuint quadCount;
 	GLuint vertexCount;
+
+	GLuint lineIndexCount;
 	GLuint triIndexCount;
 	GLuint quadIndexCount;
+
 	virtual void draw() const override;
 	virtual void draw(const PrimitiveType& type,bool forceVertexColor) const;
 	virtual void update() override;
@@ -76,13 +89,13 @@ protected:
 	box3f boundingBox;
 public:
 	friend struct GLMesh;
-
 	Vector3f vertexLocations;
 	Vector3f vertexNormals;
 	Vector4f vertexColors;
 
 	Vector4ui quadIndexes;
 	Vector3ui triIndexes;
+	Vector2ui lineIndexes;
 
 	Vector2f textureMap;
 	Image4f textureImage;
@@ -99,6 +112,7 @@ public:
 
 		mesh.quadIndexes = quadIndexes;
 		mesh.triIndexes = triIndexes;
+		mesh.lineIndexes = lineIndexes;
 
 		mesh.textureMap = textureMap;
 		mesh.textureImage = textureImage;
@@ -108,12 +122,12 @@ public:
 
 	}
 	bool isEmpty()const {
-		return (vertexLocations.size()==0&&vertexNormals.size()==0&&vertexColors.size()==0&&quadIndexes.size()==0&&triIndexes.size()==0&&textureMap.size()==0);
+		return (vertexLocations.size()==0&&vertexNormals.size()==0&&vertexColors.size()==0&&lineIndexes.size()==0&&quadIndexes.size()==0&&triIndexes.size()==0&&textureMap.size()==0);
 	}
 	template<class Archive> void serialize(Archive & archive) {
 		archive(CEREAL_NVP(pose), CEREAL_NVP(vertexLocations),
 				CEREAL_NVP(vertexNormals), CEREAL_NVP(vertexColors),
-				CEREAL_NVP(quadIndexes), CEREAL_NVP(triIndexes),
+				CEREAL_NVP(quadIndexes), CEREAL_NVP(triIndexes),CEREAL_NVP(lineIndexes),
 				CEREAL_NVP(textureMap), CEREAL_NVP(textureImage));
 	}
 	void setContext(const std::shared_ptr<AlloyContext>& context);
@@ -162,6 +176,7 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 	ss << "\tVertex Colors: " << m.vertexColors.size() << std::endl;
 	ss << "\tQuad Faces: " << m.quadIndexes.size() << std::endl;
 	ss << "\tTriangle Faces: " << m.triIndexes.size() << std::endl;
+	ss << "\tLine Indexes: " << m.lineIndexes.size() << std::endl;
 	ss << "\tUVs: " << m.textureMap.size() << std::endl;
 	ss << "\tTexture: " << m.textureImage << std::endl;
 	ss << "\tPose: " << m.pose << std::endl;

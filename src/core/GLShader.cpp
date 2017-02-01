@@ -89,6 +89,10 @@ GLShader& GLShader::draw(const std::initializer_list<Mesh*>& meshes,
 	}
 	return *this;
 }
+GLShader& GLShader::draw(Mesh* mesh,const GLMesh::PrimitiveType& type, bool forceVertexColor) {
+	mesh->draw(type,onScreen,forceVertexColor);
+	return *this;
+}
 void GLShader::initialize(
 		const std::initializer_list<std::string>& pAttributeLocations,
 		const std::string& pVertexShaderString,

@@ -3615,7 +3615,7 @@ void SelectionBox::draw(AlloyContext* context) {
 
 }
 std::string SelectionBox::getSelection(int index) {
-        return (selectedIndex >= 0&&selectedIndex<(int)options.size()) ? options[selectedIndex] : name;
+        return (index >= 0&&index<(int)options.size()) ? options[index] : name;
 }
 void SelectionBox::setSelectedIndex(int index) {
 	selectedIndex = index;

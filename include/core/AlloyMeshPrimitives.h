@@ -54,6 +54,7 @@ namespace aly {
 	class Frustum : public Mesh {
 	public:
 		Frustum(const CameraParameters& cam,bool flipZ=false,const std::shared_ptr<AlloyContext>& context = AlloyDefaultContext());
+		void set(const CameraParameters& cam,bool flipZ=false);
 	};
 	class Plane : public Mesh {
 	public:

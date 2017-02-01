@@ -333,15 +333,12 @@ public:
 
 	GLShader& begin();
 	GLShader& draw(const std::initializer_list<const GLComponent*>& comps);
-	GLShader& draw(const std::initializer_list<Mesh*>& meshes,
-			const GLMesh::PrimitiveType& type,bool froceVertexColor = false);
+	GLShader& draw(const std::initializer_list<Mesh*>& meshes,const GLMesh::PrimitiveType& type,bool froceVertexColor = false);
 	GLShader& draw(const std::list<const GLComponent*>& comps);
 	GLShader& draw(const std::vector<const GLComponent*>& comps);
-	GLShader& draw(const std::vector<Mesh*>& meshes,
-		const GLMesh::PrimitiveType& type, bool froceVertexColor = false);
-	GLShader& draw(const std::list<Mesh*>& meshes,
-			const GLMesh::PrimitiveType& type, bool froceVertexColor=false );
-
+	GLShader& draw(const std::vector<Mesh*>& meshes,const GLMesh::PrimitiveType& type, bool froceVertexColor = false);
+	GLShader& draw(const std::list<Mesh*>& meshes,const GLMesh::PrimitiveType& type, bool froceVertexColor=false );
+	GLShader& draw(Mesh* mesh,const GLMesh::PrimitiveType& type, bool froceVertexColor=false );
 	GLShader& draw(const GLComponent& comps);
 	GLShader& draw(Mesh& meshes, const GLMesh::PrimitiveType& type,bool froceVertexColor = false);
 
