@@ -63,25 +63,25 @@ public:
 		return data.rend();
 	}
 	template<class Archive>
-	void save(Archive & archive) const {
+	inline void save(Archive & archive) const {
 		archive(cereal::make_nvp(MakeString() << "vector" << C, data));
 	}
 
 	template<class Archive>
-	void load(Archive & archive) {
+	inline void load(Archive & archive) {
 		archive(cereal::make_nvp(MakeString() << "vector" << C, data));
 	}
 
-	void set(const T& val) {
+	inline void set(const T& val) {
 		data.assign(data.size(), vec<T, C>(val));
 	}
-	void set(const vec<T, C>& val) {
+	inline void set(const vec<T, C>& val) {
 		data.assign(data.size(), val);
 	}
-	void set(const std::vector<vec<T, C>>& val) {
+	inline void set(const std::vector<vec<T, C>>& val) {
 		data = val;
 	}
-	void set(T* val) {
+	inline void set(T* val) {
 		if (val == nullptr)
 			return;
 		size_t offset = 0;
@@ -91,7 +91,7 @@ public:
 			}
 		}
 	}
-	void set(const T* val) {
+	inline void set(const T* val) {
 		if (val == nullptr)
 			return;
 		size_t offset = 0;
@@ -101,7 +101,7 @@ public:
 			}
 		}
 	}
-	void set(vec<T, C>* val) {
+	inline void set(vec<T, C>* val) {
 		if (val == nullptr)
 			return;
 		size_t offset = 0;
@@ -122,6 +122,9 @@ public:
 	Vector(const Vector<T, C>& img) :
 			Vector(img.size()) {
 		set(img.data);
+	}
+	Vector(const std::initializer_list<vec<T,C>>& list){
+		data.insert(data.begin(),list.begin(),list.end());
 	}
 	Vector<T, C>& operator=(const Vector<T, C>& rhs) {
 		if (this == &rhs)
@@ -146,37 +149,43 @@ public:
 	Vector(const std::vector<vec<T, C>>& ref) :
 			data(ref) {
 	}
-	size_t size() const {
+	inline size_t size() const {
 		return data.size();
 	}
-	size_t typeSize() const {
+	inline size_t typeSize() const {
 		return sizeof(vec<T, C> );
 	}
-	void resize(size_t sz) {
+	inline void resize(size_t sz) {
 		data.resize(sz);
 		data.shrink_to_fit();
 	}
-	void resize(size_t sz, const vec<T, C>& val) {
+	inline void resize(size_t sz, const vec<T, C>& val) {
 		data.resize(sz, val);
 		data.shrink_to_fit();
 	}
-	void append(const vec<T, C>& val) {
+	inline void append(const vec<T, C>& val) {
 		data.push_back(val);
 	}
-	void push_back(const vec<T, C>& val) {
+	inline void append(const Vector<T, C>& vec) {
+		data.insert(data.end(),vec.data.begin(),vec.data.end());
+	}
+	inline void append(const std::vector<vec<T, C>>& vec) {
+		data.insert(data.end(),vec.begin(),vec.end());
+	}
+	inline void push_back(const vec<T, C>& val) {
 		data.push_back(val);
 	}
-	T* ptr() {
+	inline T* ptr() {
 		if (data.size() == 0)
 			return nullptr;
 		return &(data.front()[0]);
 	}
-	const T* ptr() const {
+	inline const T* ptr() const {
 		if (data.size() == 0)
 			return nullptr;
 		return &(data.front()[0]);
 	}
-	void setZero() {
+	inline void setZero() {
 		data.assign(data.size(), vec<T, C>((T) 0));
 	}
 	const vec<T, C>& operator[](const size_t i) const {
@@ -197,21 +206,21 @@ public:
 		data.clear();
 		data.shrink_to_fit();
 	}
-	vec<T, C> min() const {
+	inline vec<T, C> min() const {
 		vec<T, C> minVal(std::numeric_limits<T>::max());
 		for (const vec<T, C>& val : data) {
 			minVal = aly::minVec(val, minVal);
 		}
 		return minVal;
 	}
-	vec<T, C> max() const {
+	inline vec<T, C> max() const {
 		vec<T, C> maxVal(std::numeric_limits<T>::min());
 		for (const vec<T, C>& val : data) {
 			maxVal = aly::maxVec(val, maxVal);
 		}
 		return maxVal;
 	}
-	std::pair<vec<T, C>, vec<T, C>> range() const {
+	inline std::pair<vec<T, C>, vec<T, C>> range() const {
 		vec<T, C> maxVal(std::numeric_limits<T>::min());
 		vec<T, C> minVal(std::numeric_limits<T>::max());
 		for (const vec<T, C>& val : data) {
@@ -220,7 +229,7 @@ public:
 		}
 		return std::pair<vec<T, C>, vec<T, C>>(minVal, maxVal);
 	}
-	vec<T, C> mean() const {
+	inline vec<T, C> mean() const {
 		vec<double, C> mean(0.0);
 		for (const vec<T, C>& val : data) {
 			mean += vec<double, C>(val);
@@ -228,14 +237,14 @@ public:
 		mean = mean / (double) data.size();
 		return vec<T, C>(mean);
 	}
-	vec<T, C> sum() const {
+	inline vec<T, C> sum() const {
 		vec<T, C> sum(T(0));
 		for (const vec<T, C>& val : data) {
 			sum += vec<T, C>(val);
 		}
 		return vec<T, C>(sum);
 	}
-	vec<T, C> median() const {
+	inline vec<T, C> median() const {
 		std::vector<T> bands[C];
 		for (int c = 0; c < C; c++) {
 			bands[c].resize(data.size());
@@ -266,7 +275,7 @@ public:
 		}
 		return med;
 	}
-	vec<T, C> mad() const {
+	inline vec<T, C> mad() const {
 		if (data.size() <= 2)
 			return vec<T, C>(T(0));
 		vec<T, C> med = median();

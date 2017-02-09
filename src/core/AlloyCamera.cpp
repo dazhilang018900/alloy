@@ -139,7 +139,7 @@ namespace aly {
 		float C = Projection(3, 2);
 		float fx = Projection(0, 0);
 		float fy = Projection(1, 1);
-		ptp.z = -(pt.z * (farPlane - nearPlane) + nearPlane);
+		ptp.z = -aly::sign(pt.z) * (std::abs(pt.z) * (farPlane - nearPlane) + nearPlane);
 		ptp.x = pt.x * ptp.z * C / fx;
 		ptp.y = pt.y * ptp.z * C / fy;
 		ptp.w = 1.0f;
@@ -151,7 +151,7 @@ namespace aly {
 		float C = Projection(3, 2);
 		float fx = Projection(0, 0);
 		float fy = Projection(1, 1);
-		ptp.z = -(pt.z * (farPlane - nearPlane) + nearPlane);
+		ptp.z = -aly::sign(pt.z)*(std::abs(pt.z) * (farPlane - nearPlane) + nearPlane);
 		ptp.x = (2.0f * pt.x - 1.0f) * ptp.z * C / fx;
 		ptp.y = (flip) ? (1.0f - 2.0f * pt.y) * ptp.z * C / fy : (2.0f * pt.y - 1.0f) * ptp.z * C / fy;
 		ptp.w = 1.0f;
@@ -163,7 +163,7 @@ namespace aly {
 		float C = Projection(3, 2);
 		float fx = Projection(0, 0);
 		float fy = Projection(1, 1);
-		ptp.z = -(pt.z * (farPlane - nearPlane) + nearPlane);
+		ptp.z = -aly::sign(pt.z)*(std::abs(pt.z) * (farPlane - nearPlane) + nearPlane);
 		ptp.x = (2.0f * pt.x / (float) w - 1.0f) * ptp.z * C / fx;
 		ptp.y = (flip) ? ((1.0f - 2.0f * pt.y / (float) h) * ptp.z * C / fy) : ((2.0f * pt.y / (float) h - 1.0f) * ptp.z * C / fy);
 		ptp.w = 1.0f;

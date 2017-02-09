@@ -1229,7 +1229,6 @@ FileButton::FileButton(const std::string& name, const AUnit2D& pos, const AUnit2
 			if (onOpen)onOpen(file);
 		};
 	}
-
 	foregroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	iconColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	borderColor = MakeColor(0, 0, 0, 0);

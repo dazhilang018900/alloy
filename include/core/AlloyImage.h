@@ -1000,9 +1000,14 @@ void WriteImageToFile(const std::string& file, const ImageRGBAf& img);
 void WriteImageToFile(const std::string& file, const ImageRGBf& img);
 
 void WriteImageToFile(const std::string& file, const Image1f& img);
+void WriteImageToFile(const std::string& file, const Image2ub& img);
+void WriteImageToFile(const std::string& file, const Image2f& img);
 void WriteImageToFile(const std::string& file, const Image1ub& img);
+
 void ReadImageFromFile(const std::string& file, Image1ub& img);
+void ReadImageFromFile(const std::string& file, Image2ub& img);
 void ReadImageFromFile(const std::string& file, Image1f& img);
+void ReadImageFromFile(const std::string& file, Image2f& img);
 
 void ReadImageFromFile(const std::string& file, ImageRGBA& img);
 void ReadImageFromFile(const std::string& file, ImageRGB& img);
@@ -1321,15 +1326,34 @@ void ConvertImage(const ImageRGBf& in, Image1ub& out, bool sRGB = true);
 void ConvertImage(const ImageRGB& in, Image1f& out, bool sRGB = true);
 void ConvertImage(const ImageRGBA& in, Image1f& out, bool sRGB = true);
 
+void ConvertImage(const ImageRGBAf& in, Image2ub& out, bool sRGB = true);
+void ConvertImage(const ImageRGBf& in, Image2ub& out, bool sRGB = true);
+void ConvertImage(const ImageRGB& in, Image2f& out, bool sRGB = true);
+void ConvertImage(const ImageRGBA& in, Image2f& out, bool sRGB = true);
+
 void ConvertImage(const Image1f& in, ImageRGBAf& out);
 void ConvertImage(const Image2f& in, ImageRGBAf& out);
+
 void ConvertImage(const Image1f& in, ImageRGBf& out);
-void ConvertImage(const Image1b& in, ImageRGBAf& out);
-void ConvertImage(const Image1b& in, ImageRGBf& out);
-void ConvertImage(const Image1b& in, ImageRGBA& out);
-void ConvertImage(const Image1b& in, ImageRGB& out);
+void ConvertImage(const Image2f& in, ImageRGBf& out);
+
+
 void ConvertImage(const Image1f& in, ImageRGBA& out);
+void ConvertImage(const Image2f& in, ImageRGBA& out);
+
 void ConvertImage(const Image1f& in, ImageRGB& out);
+void ConvertImage(const Image2f& in, ImageRGB& out);
+
+void ConvertImage(const Image1ub& in, ImageRGBAf& out);
+void ConvertImage(const Image1ub& in, ImageRGBf& out);
+void ConvertImage(const Image1ub& in, ImageRGBA& out);
+void ConvertImage(const Image1ub& in, ImageRGB& out);
+
+void ConvertImage(const Image2ub& in, ImageRGBAf& out);
+void ConvertImage(const Image2ub& in, ImageRGBf& out);
+void ConvertImage(const Image2ub& in, ImageRGBA& out);
+void ConvertImage(const Image2ub& in, ImageRGB& out);
+
 }
 ;
 

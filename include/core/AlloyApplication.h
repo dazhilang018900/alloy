@@ -49,6 +49,7 @@ private:
 	std::list<std::exception_ptr> caughtExceptions;
 	//std::shared_ptr<GLFrameBuffer> uiFrameBuffer;
 	std::function<void(const int2& dimensions)> onResize;
+	std::function<void()> onExit;
 	void initInternal();
 public:
 
@@ -61,6 +62,9 @@ public:
 	void setOnResize(
 			const std::function<void(const int2& dimensions)>& onResizeEvent) {
 		onResize = onResizeEvent;
+	}
+	void setOnExit(const std::function<void()>& onExitEvent) {
+		onExit= onExitEvent;
 	}
 	static inline std::shared_ptr<AlloyContext>& getContext() {
 		return context;
@@ -131,7 +135,7 @@ public:
 		ConvertImage(img, tmp);
 		return context->createImageGlyph(tmp);
 	}
-	inline std::shared_ptr<ImageGlyph> createImageGlyph(const Image1b& img,
+	inline std::shared_ptr<ImageGlyph> createImageGlyph(const Image1ub& img,
 			bool mipmap = false) {
 		ImageRGBA tmp;
 		ConvertImage(img, tmp);

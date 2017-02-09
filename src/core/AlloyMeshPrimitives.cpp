@@ -99,12 +99,18 @@ namespace aly {
 		float3 pt3 = cam.transformNormalizedImageDepthToWorld(float3(1, 1, 0));
 		float3 pt4 = cam.transformNormalizedImageDepthToWorld(float3(0, 1, 0));
 
-		float z=(flipZ)?-1.0f:1.0f;
-		float3 qt1 = cam.transformNormalizedImageDepthToWorld(float3(0, 0, z));
-		float3 qt2 = cam.transformNormalizedImageDepthToWorld(float3(1, 0, z));
-		float3 qt3 = cam.transformNormalizedImageDepthToWorld(float3(1, 1, z));
-		float3 qt4 = cam.transformNormalizedImageDepthToWorld(float3(0, 1, z));
-
+		float3 qt1,qt2,qt3,qt4;
+		if(flipZ){
+			qt4 = cam.transformNormalizedImageDepthToWorld(float3(0.0f, 0.0f, -1.0f));
+			qt3 = cam.transformNormalizedImageDepthToWorld(float3(1.0f, 0.0f, -1.0f));
+			qt2 = cam.transformNormalizedImageDepthToWorld(float3(1.0f, 1.0f, -1.0f));
+			qt1 = cam.transformNormalizedImageDepthToWorld(float3(0.0f, 1.0f, -1.0f));
+		} else {
+			qt1 = cam.transformNormalizedImageDepthToWorld(float3(0.0f, 0.0f, 1.0f));
+			qt2 = cam.transformNormalizedImageDepthToWorld(float3(1.0f, 0.0f, 1.0f));
+			qt3 = cam.transformNormalizedImageDepthToWorld(float3(1.0f, 1.0f, 1.0f));
+			qt4 = cam.transformNormalizedImageDepthToWorld(float3(0.0f, 1.0f, 1.0f));
+		}
 		vertexLocations.push_back(pt1);
 		vertexLocations.push_back(pt2);
 		vertexLocations.push_back(pt3);

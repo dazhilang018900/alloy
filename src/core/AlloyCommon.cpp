@@ -110,6 +110,24 @@ bool EndsWith(const std::string& str, const std::string& pattern) {
 		return (str == pattern);
 	}
 }
+std::vector<int> ExtractIntegers(const std::string& str){
+	std::vector<int> buffer;
+	std::string current;
+	for(char c:str){
+		if(c>='0'&&c<='9'){
+			current+=c;
+		} else {
+			if(current.length()>0){
+				buffer.push_back(std::atoi(current.c_str()));
+				current.clear();
+			}
+		}
+	}
+	if(current.length()>0){
+		buffer.push_back(std::atoi(current.c_str()));
+	}
+	return buffer;
+}
 std::string ToLower(const std::string& str) {
 	std::stringstream ss;
 	static const std::locale local;

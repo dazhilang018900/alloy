@@ -50,6 +50,8 @@
 #include "AlloyImage.h"
 #include "AlloyAnimator.h"
 #include "AlloyEnum.h"
+#include "AlloyEvent.h"
+
 #include "AlloyCursorLocator.h"
 int printOglError(const char *file, int line);
 #define CHECK_GL_ERROR() printOglError(__FILE__, __LINE__)
@@ -123,44 +125,8 @@ namespace aly {
 	template<class C, class R> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const Glyph & v) {
 		return ss << "Glyph: " << v.name << ": dimensions= (" << v.width << ", " << v.height << ")";
 	}
-	struct InputEvent {
-		InputType type = InputType::Unspecified;
-		pixel2 cursor = pixel2(-1, -1);
-		pixel2 scroll = pixel2(0, 0);
-		uint32_t codepoint = 0;
-		int action = 0;
-		int mods = 0;
-		int scancode = 0;
-		int key = 0;
-		int clicks = 0;
-		int button = -1;
-		bool isDown() const {
-			return (action != GLFW_RELEASE);
-		}
-		bool isUp() const {
-			return (action == GLFW_RELEASE);
-		}
-		bool isShiftDown() const {
-			return ((mods & GLFW_MOD_SHIFT) != 0);
-		}
-		bool isControlDown() const {
-			return ((mods & GLFW_MOD_CONTROL) != 0);
-		}
-		bool isAltDown() const {
-			return ((mods & GLFW_MOD_ALT) != 0);
-		}
-		bool isSuperDown() const {
-			return ((mods & GLFW_MOD_SUPER) != 0);
-		}
-	};
-	template<class C, class R> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const InputEvent& e) {
-		return ss << "event type=" << e.type << " button=" << e.button << " key=" << e.key << " clicks=" << e.clicks;
-	}
-	struct EventHandler {
-		virtual bool onEventHandler(AlloyContext* context, const InputEvent& event) = 0;
-		virtual std::string getName() const = 0;
-		virtual ~EventHandler();
-	};
+
+
 	struct Cursor {
 		static const Cursor Normal, Horizontal, Vertical, Position, Hand, Grab, SlantUp, SlantDown, TextInsert, CrossHairs;
 		std::string codeString;

@@ -660,6 +660,7 @@ void Application::run(int swapInterval) {
 			context->setOffScreenVisible(false);
 		}
 	} while (!glfwWindowShouldClose(context->window) && !forceClose);
+	if(onExit)onExit();
 }
 }
 
