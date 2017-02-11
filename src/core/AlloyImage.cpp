@@ -718,14 +718,14 @@ void ReadImageFromFile(const std::string& file, Image1f& img) {
 void ReadImageFromFile(const std::string& file, Image2f& img) {
 	throw std::runtime_error("Reading two channel float images unsupported");
 }
-void WriteImageToFile(const std::string& file, Image2f& img) {
-	throw std::runtime_error("Writing two channel float images unsupported");
+void WriteImageToFile(const std::string& file,const Image2f& img) {
+	WriteImageToRawFile(GetFileWithoutExtension(file)+".xml",img);
 }
 void ReadImageFromFile(const std::string& file, Image2ub& img) {
 	throw std::runtime_error("Reading two channel ubyte images unsupported");
 }
-void WriteImageToFile(const std::string& file, Image2ub& img) {
-	throw std::runtime_error("Writing two channel ubyte images unsupported");
+void WriteImageToFile(const std::string& file,const Image2ub& img) {
+	WriteImageToRawFile(GetFileWithoutExtension(file)+".xml",img);
 }
 void WriteImageToFile(const std::string& file, const ImageRGBAf& img) {
 	std::string ext = GetFileExtension(file);
