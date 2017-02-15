@@ -1178,26 +1178,50 @@ template<class T, int C, ImageType I> void FlipHorizontal(Image<T, C, I>& in) {
 		}
 	}
 }
-template<class T, int C, ImageType I> void DownSample(const Image<T, C, I>& in,
+template<class T, int C, ImageType I> void DownSample5x5(const Image<T, C, I>& in,
 		Image<T, C, I>& out) {
-	static const double Kernel[5][5] = { { 1, 4, 6, 4, 1 },
+	static const float Kernel[5][5] = { { 1, 4, 6, 4, 1 },
 			{ 4, 16, 24, 16, 4 }, { 6, 24, 36, 24, 6 }, { 4, 16, 24, 16, 4 }, {
 					1, 4, 6, 4, 1 } };
 	out.resize(in.width / 2, in.height / 2);
 #pragma omp parallel for
-	for (int i = 0; i < out.width; i++) {
-		for (int j = 0; j < out.height; j++) {
-			vec<double, C> vsum(0.0);
+	for (int j = 0; j < out.height; j++) {
+		for (int i = 0; i < out.width; i++) {
+			vec<float, C> vsum(0.0);
 			for (int ii = 0; ii < 5; ii++) {
 				for (int jj = 0; jj < 5; jj++) {
 					vsum += Kernel[ii][jj]
-							* vec<double, C>(
+							* vec<float, C>(
 									in(2 * i + ii - 2, 2 * j + jj - 2));
 				}
 			}
-			out(i, j) = vec<T, C>(vsum / 256.0);
+			out(i, j) = vec<T, C>(vsum / 256.0f);
 		}
 	}
+}
+template<class T, int C, ImageType I> void DownSample3x3(const Image<T, C, I>& in,
+		Image<T, C, I>& out) {
+	static const float Kernel[3][3] = {
+			{ 1,  2,  1},
+			{ 2,  4,  2},
+			{ 1,  2,  1} };
+	out.resize(in.width / 2, in.height / 2);
+#pragma omp parallel for
+	for (int j = 0; j < out.height; j++) {
+		for (int i = 0; i < out.width; i++) {
+			vec<float, C> vsum(0.0);
+			for (int ii = 0; ii < 3; ii++) {
+				for (int jj = 0; jj < 3; jj++) {
+					vsum += Kernel[ii][jj]* vec<float, C>(in(2 * i + ii - 2, 2 * j + jj - 2));
+				}
+			}
+			out(i, j) = vec<T, C>(vsum / 16.0f);
+		}
+	}
+}
+template<class T, int C, ImageType I> void DownSample(const Image<T, C, I>& in,
+		Image<T, C, I>& out) {
+	DownSample5x5(in,out);
 }
 template<class T, int C, ImageType I> void UpSample(const Image<T, C, I>& in,
 		Image<T, C, I>& out) {
@@ -1207,8 +1231,8 @@ template<class T, int C, ImageType I> void UpSample(const Image<T, C, I>& in,
 	if (out.size() == 0)
 		out.resize(in.width * 2, in.height * 2);
 #pragma omp parallel for
-	for (int i = 0; i < out.width; i++) {
-		for (int j = 0; j < out.height; j++) {
+	for (int j = 0; j < out.height; j++) {
+		for (int i = 0; i < out.width; i++) {
 			vec<double, C> vsum(0.0);
 			for (int ii = 0; ii < 5; ii++) {
 				for (int jj = 0; jj < 5; jj++) {
