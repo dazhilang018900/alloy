@@ -27,6 +27,7 @@ template<class T, size_t M, size_t N> void GaussianKernel(T (&kernel)[M][N],
 		T sigmaX = T(0.607902736 * (M - 1) * 0.5),
 		T sigmaY = T(0.607902736 * (N - 1) * 0.5)) {
 	T sum = 0;
+#pragma omp parallel for reduction(+:sum)
 	for (int i = 0; i < (int)M; i++) {
 		for (int j = 0; j < (int)N; j++) {
 			T x = T(i - 0.5 * (M - 1));
@@ -39,6 +40,7 @@ template<class T, size_t M, size_t N> void GaussianKernel(T (&kernel)[M][N],
 		}
 	}
 	sum = T(1) / sum;
+#pragma omp parallel for
 	for (int i = 0; i < (int)M; i++) {
 		for (int j = 0; j < (int)N; j++) {
 			kernel[i][j] *= sum;
@@ -50,6 +52,7 @@ template<class T, size_t M, size_t N> void GaussianKernelDerivative(
 		T (&gX)[M][N], T (&gY)[M][N], T sigmaX = T(0.607902736 * (M - 1) * 0.5),
 		T sigmaY = T(0.607902736 * (N - 1) * 0.5)) {
 	T sum = 0;
+#pragma omp parallel for reduction(+:sum)
 	for (int i = 0; i < (int)M; i++) {
 		for (int j = 0; j < (int)N; j++) {
 			T x = T(i - 0.5 * (M - 1));
@@ -64,6 +67,7 @@ template<class T, size_t M, size_t N> void GaussianKernelDerivative(
 		}
 	}
 	sum = T(1) / sum;
+#pragma omp parallel for
 	for (int i = 0; i < (int)M; i++) {
 		for (int j = 0; j < (int)N; j++) {
 			gX[i][j] *= sum;
@@ -76,6 +80,7 @@ template<class T, size_t M, size_t N> void GaussianKernelLaplacian(
 				T(0.607902736 * (N - 1) * 0.5)) {
 	T sum = 0;
 	T sum2 = 0;
+#pragma omp parallel for
 	for (int i = 0; i < (int)M; i++) {
 		for (int j = 0; j < (int)N; j++) {
 			T x = T(i - 0.5 * (M - 1));
@@ -167,17 +172,17 @@ template<size_t M, size_t N, class T, int C, ImageType I> void Gradient(
 template<size_t M, size_t N, class T, int C, ImageType I> void Laplacian(
 		const Image<T, C, I>& image, Image<T, C, I>& L, double sigmaX = (0.607902736 * (M - 1) * 0.5),
 	double sigmaY = (0.607902736 * (N - 1) * 0.5)) {
-	double filter[M][N];
-	GaussianKernelLaplacian(filter,sigmaX,sigmaY);
+	float filter[M][N];
+	GaussianKernelLaplacian(filter,(float)sigmaX,(float)sigmaY);
 	L.resize(image.width, image.height);
 #pragma omp parallel for
 	for (int j = 0; j < image.height; j++) {
 		for (int i = 0; i < image.width; i++) {
-			vec<double, C> vsum(0.0);
+			vec<float, C> vsum(0.0);
 			for (int ii = 0; ii < (int)M; ii++) {
 				for (int jj = 0; jj < (int)N; jj++) {
 					vec<T, C> val = image(i + ii - (int)M / 2, j + jj - (int)N / 2);
-					vsum += filter[ii][jj] * vec<double, C>(val);
+					vsum += filter[ii][jj] * vec<float, C>(val);
 				}
 			}
 			L(i, j) = vec<T, C>(vsum);
@@ -187,17 +192,17 @@ template<size_t M, size_t N, class T, int C, ImageType I> void Laplacian(
 template<size_t M, size_t N, class T, int C, ImageType I> void Smooth(
 		const Image<T, C, I>& image, Image<T, C, I>& B, double sigmaX = (0.607902736 * (M - 1) * 0.5),
 	double sigmaY = (0.607902736 * (N - 1) * 0.5)) {
-	double filter[M][N];
-	GaussianKernel(filter,sigmaX,sigmaY);
+	float filter[M][N];
+	GaussianKernel(filter,(float)sigmaX,(float)sigmaY);
 	B.resize(image.width, image.height);
 #pragma omp parallel for
 	for (int j = 0; j < image.height; j++) {
 		for (int i = 0; i < image.width; i++) {
-			vec<double, C> vsum(0.0);
+			vec<float, C> vsum(0.0);
 			for (int ii = 0; ii < (int)M; ii++) {
 				for (int jj = 0; jj < (int)N; jj++) {
 					vec<T, C> val = image(i + ii - (int)M / 2, j + jj - (int)N / 2);
-					vsum += filter[ii][jj] * vec<double, C>(val);
+					vsum += filter[ii][jj] * vec<float, C>(val);
 				}
 			}
 			B(i, j) = vec<T, C>(vsum);
