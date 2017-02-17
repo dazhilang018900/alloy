@@ -1743,7 +1743,7 @@ template<class T, int K, class C, class R> std::basic_ostream<C, R> & operator <
 }
 typedef lineseg<float, 2> lineseg2f;
 typedef lineseg<float, 3> lineseg3f;
-typedef lineseg<float, 2> lineseg2d;
+typedef lineseg<double, 2> lineseg2d;
 typedef lineseg<double, 3> lineseg3d;
 
 template<class C, class R, class T, int M> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const box<T, M> & v) {
@@ -2139,6 +2139,26 @@ inline aly::ubyte3 ToRGB(const RGBA& r) {
 }
 inline aly::RGBA ToRGBA(const ubyte3& r) {
 	return aly::RGBA(r, 255);
+}
+bool ClipLine(float2& pt1,float2& pt2,const float2& minPt,const float2& maxPt);
+bool ClipLine(float2& pt1,float2& pt2,const box2f& box){
+	return ClipLine(pt1,pt2,box.min(),box.max());
+}
+bool ClipLine(lineseg2f& line,const box2f& box){
+	return ClipLine(line.start,line.end,box.min(),box.max());
+}
+bool ClipLine(lineseg2f& line,const float2& minPt,const float2& maxPt){
+	return ClipLine(line.start,line.end,minPt,maxPt);
+}
+bool ClipLine(double2& pt1,double2& pt2,const double2& minPt,const double2& maxPt);
+bool ClipLine(double2& pt1,double2& pt2,const box2d& box){
+	return ClipLine(pt1,pt2,box.min(),box.max());
+}
+bool ClipLine(lineseg2d& line,const box2d& box){
+	return ClipLine(line.start,line.end,box.min(),box.max());
+}
+bool ClipLine(lineseg2d& line,const double2& minPt,const double2& maxPt){
+	return ClipLine(line.start,line.end,minPt,maxPt);
 }
 float RandomUniform(float min, float max);
 int RandomUniform(int min, int max);

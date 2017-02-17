@@ -347,7 +347,134 @@ void SVD(const matrix<double, 4, 4> &A, matrix<double, 4, 4>& U,
 	SVD_INTERNAL(A, U, D, Vt);
 }
 
-
+bool ClipLine(float2& pt1,float2& pt2,const float2& minPt,const float2& maxPt){
+	const int INSIDE = 0; // 0000
+	const int LEFT = 1;   // 0001
+	const int RIGHT = 2;  // 0010
+	const int BOTTOM = 4; // 0100
+	const int TOP = 8;    // 1000
+	std::function<int(float x, float y,const float2& minPt,const float2& maxPt)> ComputeOutCode=[=](float x, float y,const float2& minPt,const float2& maxPt){
+		int code = INSIDE;          // initialised as being inside of [[clip window]]
+		if (x < minPt.x)           // to the left of clip window
+			code |= LEFT;
+		else if (x > maxPt.x)      // to the right of clip window
+			code |= RIGHT;
+		if (y < minPt.y)           // below the clip window
+			code |= BOTTOM;
+		else if (y > maxPt.y)      // above the clip window
+			code |= TOP;
+		return code;
+	};
+	// compute outcodes for P0, P1, and whatever point lies outside the clip rectangle
+	int outcode0 = ComputeOutCode(pt1.x, pt1.y,minPt,maxPt);
+	int outcode1 = ComputeOutCode(pt2.x, pt2.y,minPt,maxPt);
+	bool accept = false;
+	while (true) {
+		if (!(outcode0 | outcode1)) { // Bitwise OR is 0. Trivially accept and get out of loop
+			accept = true;
+			break;
+		} else if (outcode0 & outcode1) { // Bitwise AND is not 0. (implies both end points are in the same region outside the window). Reject and get out of loop
+			break;
+		} else {
+			// failed both tests, so calculate the line segment to clip
+			// from an outside point to an intersection with clip edge
+			float x=0.0f, y=0.0f;
+			// At least one endpoint is outside the clip rectangle; pick it.
+			int outcodeOut = outcode0 ? outcode0 : outcode1;
+			// Now find the intersection point;
+			// use formulas y = pt1.y + slope * (x - pt1.x), x = pt1.x + (1 / slope) * (y - pt1.y)
+			if (outcodeOut & TOP) {           // point is above the clip rectangle
+				x = pt1.x + (pt2.x - pt1.x) * (maxPt.y - pt1.y) / (pt2.y - pt1.y);
+				y = maxPt.y;
+			} else if (outcodeOut & BOTTOM) { // point is below the clip rectangle
+				x = pt1.x + (pt2.x - pt1.x) * (minPt.y - pt1.y) / (pt2.y - pt1.y);
+				y = minPt.y;
+			} else if (outcodeOut & RIGHT) {  // point is to the right of clip rectangle
+				y = pt1.y + (pt2.y - pt1.y) * (maxPt.x - pt1.x) / (pt2.x - pt1.x);
+				x = maxPt.x;
+			} else if (outcodeOut & LEFT) {   // point is to the left of clip rectangle
+				y = pt1.y + (pt2.y - pt1.y) * (minPt.x - pt1.x) / (pt2.x - pt1.x);
+				x = minPt.x;
+			}
+			// Now we move outside point to intersection point to clip
+			// and get ready for next pass.
+			if (outcodeOut == outcode0) {
+				pt1.x = x;
+				pt1.y = y;
+				outcode0 = ComputeOutCode(pt1.x, pt1.y,minPt,maxPt);
+			} else {
+				pt2.x = x;
+				pt2.y = y;
+				outcode1 = ComputeOutCode(pt2.x, pt2.y,minPt,maxPt);
+			}
+		}
+	}
+	return accept;
+}
+bool ClipLine(double2& pt1,double2& pt2,const double2& minPt,const double2& maxPt){
+	const int INSIDE = 0; // 0000
+	const int LEFT = 1;   // 0001
+	const int RIGHT = 2;  // 0010
+	const int BOTTOM = 4; // 0100
+	const int TOP = 8;    // 1000
+	std::function<int(double x, double y,const double2& minPt,const double2& maxPt)> ComputeOutCode=[=](double x, double y,const double2& minPt,const double2& maxPt){
+		int code = INSIDE;          // initialised as being inside of [[clip window]]
+		if (x < minPt.x)           // to the left of clip window
+			code |= LEFT;
+		else if (x > maxPt.x)      // to the right of clip window
+			code |= RIGHT;
+		if (y < minPt.y)           // below the clip window
+			code |= BOTTOM;
+		else if (y > maxPt.y)      // above the clip window
+			code |= TOP;
+		return code;
+	};
+	// compute outcodes for P0, P1, and whatever point lies outside the clip rectangle
+	int outcode0 = ComputeOutCode(pt1.x, pt1.y,minPt,maxPt);
+	int outcode1 = ComputeOutCode(pt2.x, pt2.y,minPt,maxPt);
+	bool accept = false;
+	while (true) {
+		if (!(outcode0 | outcode1)) { // Bitwise OR is 0. Trivially accept and get out of loop
+			accept = true;
+			break;
+		} else if (outcode0 & outcode1) { // Bitwise AND is not 0. (implies both end points are in the same region outside the window). Reject and get out of loop
+			break;
+		} else {
+			// failed both tests, so calculate the line segment to clip
+			// from an outside point to an intersection with clip edge
+			double x=0.0, y=0.0;
+			// At least one endpoint is outside the clip rectangle; pick it.
+			int outcodeOut = outcode0 ? outcode0 : outcode1;
+			// Now find the intersection point;
+			// use formulas y = pt1.y + slope * (x - pt1.x), x = pt1.x + (1 / slope) * (y - pt1.y)
+			if (outcodeOut & TOP) {           // point is above the clip rectangle
+				x = pt1.x + (pt2.x - pt1.x) * (maxPt.y - pt1.y) / (pt2.y - pt1.y);
+				y = maxPt.y;
+			} else if (outcodeOut & BOTTOM) { // point is below the clip rectangle
+				x = pt1.x + (pt2.x - pt1.x) * (minPt.y - pt1.y) / (pt2.y - pt1.y);
+				y = minPt.y;
+			} else if (outcodeOut & RIGHT) {  // point is to the right of clip rectangle
+				y = pt1.y + (pt2.y - pt1.y) * (maxPt.x - pt1.x) / (pt2.x - pt1.x);
+				x = maxPt.x;
+			} else if (outcodeOut & LEFT) {   // point is to the left of clip rectangle
+				y = pt1.y + (pt2.y - pt1.y) * (minPt.x - pt1.x) / (pt2.x - pt1.x);
+				x = minPt.x;
+			}
+			// Now we move outside point to intersection point to clip
+			// and get ready for next pass.
+			if (outcodeOut == outcode0) {
+				pt1.x = x;
+				pt1.y = y;
+				outcode0 = ComputeOutCode(pt1.x, pt1.y,minPt,maxPt);
+			} else {
+				pt2.x = x;
+				pt2.y = y;
+				outcode1 = ComputeOutCode(pt2.x, pt2.y,minPt,maxPt);
+			}
+		}
+	}
+	return accept;
+}
 float RandomUniform(float min, float max) {
 	static std::random_device rd;
 	static std::mt19937 gen(rd());
