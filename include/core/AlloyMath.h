@@ -2141,23 +2141,23 @@ inline aly::RGBA ToRGBA(const ubyte3& r) {
 	return aly::RGBA(r, 255);
 }
 bool ClipLine(float2& pt1,float2& pt2,const float2& minPt,const float2& maxPt);
-bool ClipLine(float2& pt1,float2& pt2,const box2f& box){
+inline bool ClipLine(float2& pt1,float2& pt2,const box2f& box){
 	return ClipLine(pt1,pt2,box.min(),box.max());
 }
-bool ClipLine(lineseg2f& line,const box2f& box){
+inline bool ClipLine(lineseg2f& line,const box2f& box){
 	return ClipLine(line.start,line.end,box.min(),box.max());
 }
-bool ClipLine(lineseg2f& line,const float2& minPt,const float2& maxPt){
+inline bool ClipLine(lineseg2f& line,const float2& minPt,const float2& maxPt){
 	return ClipLine(line.start,line.end,minPt,maxPt);
 }
 bool ClipLine(double2& pt1,double2& pt2,const double2& minPt,const double2& maxPt);
-bool ClipLine(double2& pt1,double2& pt2,const box2d& box){
+inline bool ClipLine(double2& pt1,double2& pt2,const box2d& box){
 	return ClipLine(pt1,pt2,box.min(),box.max());
 }
-bool ClipLine(lineseg2d& line,const box2d& box){
+inline bool ClipLine(lineseg2d& line,const box2d& box){
 	return ClipLine(line.start,line.end,box.min(),box.max());
 }
-bool ClipLine(lineseg2d& line,const double2& minPt,const double2& maxPt){
+inline bool ClipLine(lineseg2d& line,const double2& minPt,const double2& maxPt){
 	return ClipLine(line.start,line.end,minPt,maxPt);
 }
 float RandomUniform(float min, float max);
