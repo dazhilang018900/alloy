@@ -193,7 +193,7 @@ public:
 		return A;
 	}
 	inline Vector<T, C> getRow(int i) const {
-		Vector<T, C> v(data[i].data);
+		Vector<T, C> v(data[i]);
 		return v;
 	}
 	inline Vector<T, C> getColumn(int j) const {
