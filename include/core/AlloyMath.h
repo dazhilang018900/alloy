@@ -1453,7 +1453,12 @@ matrix<T, 3, 3> inverse(matrix<T, 3, 3> const& M) {
 	}
 	return result;
 }
-
+template<typename T>matrix<T, 3, 3> MakeSkew(const vec<T,3>& v) {
+	return matrix<T,3,3>(
+			0  , -v.z, v.y,
+			v.z,    0,-v.x,
+			-v.y, v.x,   0);
+}
 //----------------------------------------------------------------------------
 template<class T> matrix<T, 4, 4> inverse(matrix<T, 4, 4> const& M) {
 	matrix<T, 4, 4> result;
@@ -1678,6 +1683,36 @@ public:
 			s = std::numeric_limits<T>::max();
 			return false;
 		}
+	}
+	bool intersects(const vec<T, M>& origin,const vec<T, M>& ray, T& t, T tolerance = T(1E-15)) const {
+		vec<T, M> a = (end - start);
+		vec<T, M> b = ray;
+		vec<T, M> c = (origin - start);
+		vec<T, 3> cb = cross(c, b);
+		vec<T, 3> ab = cross(a, b);
+		T len = lengthSqr(ab);
+		if (len >= tolerance) {
+			t = dot(cb, ab) / len;
+			start+t*a;
+			if (t >= T(0) && t <= T(1)) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			t = std::numeric_limits<T>::max();
+			return false;
+		}
+	}
+	vec<T, M> intersects(const vec<T, M>& origin,const vec<T, M>& ray) const {
+		vec<T, M> a = (end - start);
+		vec<T, M> b = ray;
+		vec<T, M> c = (origin - start);
+		vec<T, 3> cb = cross(c, b);
+		vec<T, 3> ab = cross(a, b);
+		T len = lengthSqr(ab);
+		T t = dot(cb, ab) / len;
+		return (start+t*a);
 	}
 	// Geometric Tools LLC, Redmond WA 98052
 	// Copyright (c) 1998-2015
