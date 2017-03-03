@@ -1693,7 +1693,6 @@ public:
 		T len = lengthSqr(ab);
 		if (len >= tolerance) {
 			t = dot(cb, ab) / len;
-			start+t*a;
 			if (t >= T(0) && t <= T(1)) {
 				return true;
 			} else {

@@ -245,6 +245,42 @@ template<class T, int C, ImageType I> void Smooth(const Image<T, C, I>& image, I
 		Smooth<25, 25>(image, B, sigmaX, sigmaY);
 	}
 }
+template<class T, int C, ImageType I> void Gradient(const Image<T, C, I>& image, Image<T, C, I>& gX,Image<T, C, I>& gY,double sigmaX,double sigmaY) {
+	double sigma = std::max(sigmaX, sigmaY);
+	if (sigma < 1.5f) {
+		Gradient<3, 3>(image, gX, gY,sigmaX, sigmaY);
+	}
+	else if (sigma < 2.5f) {
+		Gradient<5, 5>(image, gX, gY, sigmaX, sigmaY);
+	}
+	else if (sigma < 3.5f) {
+		Gradient<7, 7>(image, gX, gY, sigmaX, sigmaY);
+	}
+	else if (sigma < 5.5f) {
+		Gradient<11, 11>(image, gX, gY, sigmaX, sigmaY);
+	}
+	else if (sigma < 6.5f) {
+		Gradient<13, 13>(image, gX, gY, sigmaX, sigmaY);
+	}
+	else if (sigma < 7.5f) {
+		Gradient<15, 15>(image, gX, gY, sigmaX, sigmaY);
+	}
+	else if (sigma < 8.5f) {
+		Gradient<17, 17>(image, gX, gY, sigmaX, sigmaY);
+	}
+	else if (sigma < 9.5f) {
+		Gradient<19, 19>(image, gX, gY, sigmaX, sigmaY);
+	}
+	else if (sigma < 10.5f) {
+		Gradient<21, 21>(image, gX, gY, sigmaX, sigmaY);
+	}
+	else if (sigma < 11.5f) {
+		Gradient<23, 23>(image, gX, gY, sigmaX, sigmaY);
+	}
+	else if (sigma < 12.5f) {
+		Gradient<25, 25>(image, gX, gY, sigmaX, sigmaY);
+	}
+}
 template<class T, int C, ImageType I> void Smooth3x3(
 		const Image<T, C, I>& image, Image<T, C, I>& B) {
 	Smooth<3, 3>(image, B);
