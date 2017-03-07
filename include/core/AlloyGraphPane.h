@@ -27,6 +27,7 @@ namespace aly {
 		std::string name;
 		Color color;
 		std::vector<float2> points;
+		std::vector<float2> markers;
 		static const float NO_INTERSECT;
 		GraphData(const std::string& name = "", Color color = Color(200, 64, 64)) :
 			name(name), color(color) {
@@ -46,7 +47,7 @@ namespace aly {
 		std::string yAxisLabel;
 		bool xAxisInteger;
 		bool yAxisInteger;
-
+		std::function<void(const GraphDataPtr&,float x)> onHover;
 		void add(const GraphDataPtr& curve);
 		std::shared_ptr<GraphData> add(const GraphData& curve);
 		void clear() {

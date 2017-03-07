@@ -144,6 +144,24 @@ namespace aly {
 				nvgStroke(nvg);
 			}
 		}
+		for (GraphDataPtr& curve : curves) {
+			const std::vector<float2>& markers = curve->markers;
+			if(markers.size() > 0 && graphBounds.dimensions.x > 0.0f && graphBounds.dimensions.y > 0.0f) {
+				nvgBeginPath(nvg);
+				nvgFillColor(nvg, curve->color);
+				nvgStrokeColor(nvg, context->theme.DARK);
+				nvgStrokeWidth(nvg, 1.0f);
+				for (int i = 0; i < (int)markers.size(); i++) {
+					float2 pt = markers[i];
+					pt = aly::clamp((pt - graphBounds.position) / graphBounds.dimensions, 0.0f, 1.0f);
+					pt.y = 1.0f - pt.y;
+					pt = pt * gbounds.dimensions + gbounds.position;
+					nvgCircle(nvg,pt.x, pt.y, 3);
+				}
+				nvgFill(nvg);
+				nvgStroke(nvg);
+			}
+		}
 		nvgLineCap(nvg, NVG_SQUARE);
 		nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
 		nvgFontSize(nvg, LARGE_TEXT);
@@ -212,6 +230,9 @@ namespace aly {
 				}
 			}
 			if (closestCurve.get() != nullptr) {
+				if(onHover){
+					onHover(closestCurve,gpos.x);
+				}
 				nvgBeginPath(nvg);
 				nvgStrokeWidth(nvg, 2.0f);
 				nvgFillColor(nvg, closestCurve->color);
