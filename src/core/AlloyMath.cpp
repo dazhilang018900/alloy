@@ -475,6 +475,23 @@ bool ClipLine(double2& pt1,double2& pt2,const double2& minPt,const double2& maxP
 	}
 	return accept;
 }
+float IntersectPlane(const float3& pt, const float3& ray, const float4& plane) {
+	const float3 n = plane.xyz();
+	return -(plane.w + dot(n, pt)) / dot(n, ray);
+}
+bool IntersectBox(float3 rayOrig, float3 rayDir, const box3f& bbox, float& near,float& far) {
+	// find the ray intersections with the grid
+	float3 botc = (bbox.min() - rayOrig)/rayDir;
+	float3 topc = (bbox.max() - rayOrig)/rayDir;
+	// find the range of intersections
+	float3 minc = aly::min(botc, topc);
+	float3 maxc = aly::max(botc, topc);
+
+	// now find the closest and furthest
+	near = std::max(std::max(minc.x, minc.y), minc.z);
+	far = std::min(std::min(maxc.x, maxc.y), maxc.z);
+	return far > near;
+}
 float RandomUniform(float min, float max) {
 	static std::random_device rd;
 	static std::mt19937 gen(rd());

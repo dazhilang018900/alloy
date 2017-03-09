@@ -2040,6 +2040,7 @@ template<class T> double LineSearch(T& value, const T& minValue, const T& maxVal
 	value = a;
 	return scoreFunc(a);
 }
+
 /////////////////////////
 // Convenience aliases //
 /////////////////////////
@@ -2194,6 +2195,9 @@ inline bool ClipLine(lineseg2d& line,const box2d& box){
 inline bool ClipLine(lineseg2d& line,const double2& minPt,const double2& maxPt){
 	return ClipLine(line.start,line.end,minPt,maxPt);
 }
+
+float IntersectPlane(const aly::float3& pt, const aly::float3& ray, const aly::float4& plane);
+bool IntersectBox(aly::float3 rayOrig, aly::float3 rayDir, const aly::box3f& bbox, float& near,float& far);
 float RandomUniform(float min, float max);
 int RandomUniform(int min, int max);
 double RandomUniform(double min, double max);
