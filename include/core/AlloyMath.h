@@ -1650,7 +1650,7 @@ public:
 			start(start), end(end) {
 	}
 	inline float length() const {
-		return distance(start, end);
+		return aly::distance(start, end);
 	}
 	T distance(const vec<T, M>& pt) const {
 		T l2 = aly::distanceSqr(start, end);
@@ -1971,6 +1971,7 @@ template<class T, int C> double LineSearch(vec<T, C>& value, const vec<T, C>& mi
 	const T sqrt5 = T(2.236067977499789696);
 	const T lambda = T(0.5 * (sqrt5 - 1.0));
 	const T mu = T(0.5 * (3.0 - sqrt5));
+	const int MAX_ITERATIONS=256;
 	vec<T, C> x1;
 	vec<T, C> x2;
 	double fx1;
@@ -1981,7 +1982,8 @@ template<class T, int C> double LineSearch(vec<T, C>& value, const vec<T, C>& mi
 	x2 = a + lambda * (b - a);
 	fx1 = scoreFunc(x1);
 	fx2 = scoreFunc(x2);
-	while (lengthL1(b - a) >= tolerance) {
+	int count=0;
+	while (lengthL1(b - a) >= tolerance&&count<MAX_ITERATIONS) {
 		if (fx1 > fx2) {
 			a = x1;
 			if (lengthL1(b - a) < tolerance)
@@ -1999,6 +2001,7 @@ template<class T, int C> double LineSearch(vec<T, C>& value, const vec<T, C>& mi
 			x1 = a + mu * (b - a);
 			fx1 = scoreFunc(x1);
 		}
+		count++;
 	}
 	value = a;
 	return scoreFunc(a);
@@ -2008,6 +2011,7 @@ template<class T> double LineSearch(T& value, const T& minValue, const T& maxVal
 	const T sqrt5 = T(2.236067977499789696);
 	const T lambda = T(0.5 * (sqrt5 - 1.0));
 	const T mu = T(0.5 * (3.0 - sqrt5));
+	const int MAX_ITERATIONS=256;
 	T x1;
 	T x2;
 	double fx1;
@@ -2018,7 +2022,8 @@ template<class T> double LineSearch(T& value, const T& minValue, const T& maxVal
 	x2 = a + lambda * (b - a);
 	fx1 = scoreFunc(x1);
 	fx2 = scoreFunc(x2);
-	while (b - a >= tolerance) {
+	int count=0;
+	while (b - a >= tolerance&&count<MAX_ITERATIONS) {
 		if (fx1 > fx2) {
 			a = x1;
 			if (b - a < tolerance)
@@ -2036,6 +2041,7 @@ template<class T> double LineSearch(T& value, const T& minValue, const T& maxVal
 			x1 = a + mu * (b - a);
 			fx1 = scoreFunc(x1);
 		}
+		count++;
 	}
 	value = a;
 	return scoreFunc(a);
