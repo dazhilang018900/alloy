@@ -1948,7 +1948,7 @@ template<class T> matrix<T, 4, 4> MakeLookAtMatrix(vec<T, 3> eyePosition3D, vec<
 }
 
 template<class T> vec<T, 3> Transform(const matrix<T, 4, 4>& M, const vec<T, 3>& v) {
-	vec<T, 4> out = M * vec<T, 4>(v, 1.0f);
+	vec<T, 4> out = M * vec<T, 4>(v, T(1.0));
 	return out.xyz() / out.w;
 }
 template<class T> vec<T, 4> Transform(const matrix<T, 3, 3>& M, const vec<T, 4>& v) {
@@ -1956,7 +1956,12 @@ template<class T> vec<T, 4> Transform(const matrix<T, 3, 3>& M, const vec<T, 4>&
 	return vec<T, 4>(out, v.w);
 }
 template<class T> vec<T, 3> Transform(const matrix<T, 3, 3>& M, const vec<T, 3>& v) {
-	return M * v;
+	vec<T, 3> out = M * v;
+	return (out/out.z);
+}
+template<class T> vec<T, 2> Transform(const matrix<T, 3, 3>& M, const vec<T, 2>& v) {
+	vec<T, 3> out = M * vec<T, 3>(v,T(1.0));
+	return (out.xy()/out.z);
 }
 template<class T> vec<T, 4> Transform(const matrix<T, 4, 4>& M, const vec<T, 4>& v) {
 	vec<T, 4> out = M * v;
