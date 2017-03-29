@@ -2208,6 +2208,9 @@ inline bool ClipLine(lineseg2d& line,const double2& minPt,const double2& maxPt){
 }
 
 float IntersectPlane(const aly::float3& pt, const aly::float3& ray, const aly::float4& plane);
+float IntersectCylinder(aly::float3 pt,aly::float3 ray,float3 start,float3 end,float radius);
+aly::float3 MakeOrthogonalComplement(const aly::float3& v);
+aly::float2 MakeOrthogonalComplement(const aly::float2& v);
 bool IntersectBox(aly::float3 rayOrig, aly::float3 rayDir, const aly::box3f& bbox, float& near,float& far);
 float RandomUniform(float min, float max);
 int RandomUniform(int min, int max);

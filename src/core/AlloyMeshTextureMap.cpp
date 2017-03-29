@@ -972,8 +972,6 @@ namespace aly {
 		}
 		return static_cast<int>(cclist.size());
 	}
-	
-
 	float4x4 MeshTextureMap::fitPlane(const aly::Mesh& mesh, std::list<int2>& indexes,float3* deviations){
 		float3x3 AtA= float3x3::zero();
 		float3 v;

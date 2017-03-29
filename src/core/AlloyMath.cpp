@@ -208,7 +208,7 @@ template<class T, int m, int n> void SVD_INTERNAL(const matrix<T, m, n>& M,
 					flag = 0;
 					break;
 				}
-				if (nm>=0&&std::abs(w[nm]) + anorm == anorm)
+				if (nm >= 0 && std::abs(w[nm]) + anorm == anorm)
 					break;
 			}
 			if (flag) {
@@ -347,27 +347,30 @@ void SVD(const matrix<double, 4, 4> &A, matrix<double, 4, 4>& U,
 	SVD_INTERNAL(A, U, D, Vt);
 }
 
-bool ClipLine(float2& pt1,float2& pt2,const float2& minPt,const float2& maxPt){
+bool ClipLine(float2& pt1, float2& pt2, const float2& minPt,
+		const float2& maxPt) {
 	const int INSIDE = 0; // 0000
 	const int LEFT = 1;   // 0001
 	const int RIGHT = 2;  // 0010
 	const int BOTTOM = 4; // 0100
 	const int TOP = 8;    // 1000
-	std::function<int(float x, float y,const float2& minPt,const float2& maxPt)> ComputeOutCode=[=](float x, float y,const float2& minPt,const float2& maxPt){
-		int code = INSIDE;          // initialised as being inside of [[clip window]]
-		if (x < minPt.x)           // to the left of clip window
-			code |= LEFT;
-		else if (x > maxPt.x)      // to the right of clip window
-			code |= RIGHT;
-		if (y < minPt.y)           // below the clip window
-			code |= BOTTOM;
-		else if (y > maxPt.y)      // above the clip window
-			code |= TOP;
-		return code;
-	};
+	std::function<
+			int(float x, float y, const float2& minPt, const float2& maxPt)> ComputeOutCode =
+			[=](float x, float y,const float2& minPt,const float2& maxPt) {
+				int code = INSIDE; // initialised as being inside of [[clip window]]
+				if (x < minPt.x)// to the left of clip window
+				code |= LEFT;
+				else if (x > maxPt.x)// to the right of clip window
+				code |= RIGHT;
+				if (y < minPt.y)// below the clip window
+				code |= BOTTOM;
+				else if (y > maxPt.y)// above the clip window
+				code |= TOP;
+				return code;
+			};
 	// compute outcodes for P0, P1, and whatever point lies outside the clip rectangle
-	int outcode0 = ComputeOutCode(pt1.x, pt1.y,minPt,maxPt);
-	int outcode1 = ComputeOutCode(pt2.x, pt2.y,minPt,maxPt);
+	int outcode0 = ComputeOutCode(pt1.x, pt1.y, minPt, maxPt);
+	int outcode1 = ComputeOutCode(pt2.x, pt2.y, minPt, maxPt);
 	bool accept = false;
 	while (true) {
 		if (!(outcode0 | outcode1)) { // Bitwise OR is 0. Trivially accept and get out of loop
@@ -378,22 +381,26 @@ bool ClipLine(float2& pt1,float2& pt2,const float2& minPt,const float2& maxPt){
 		} else {
 			// failed both tests, so calculate the line segment to clip
 			// from an outside point to an intersection with clip edge
-			float x=0.0f, y=0.0f;
+			float x = 0.0f, y = 0.0f;
 			// At least one endpoint is outside the clip rectangle; pick it.
 			int outcodeOut = outcode0 ? outcode0 : outcode1;
 			// Now find the intersection point;
 			// use formulas y = pt1.y + slope * (x - pt1.x), x = pt1.x + (1 / slope) * (y - pt1.y)
-			if (outcodeOut & TOP) {           // point is above the clip rectangle
-				x = pt1.x + (pt2.x - pt1.x) * (maxPt.y - pt1.y) / (pt2.y - pt1.y);
+			if (outcodeOut & TOP) {         // point is above the clip rectangle
+				x = pt1.x
+						+ (pt2.x - pt1.x) * (maxPt.y - pt1.y) / (pt2.y - pt1.y);
 				y = maxPt.y;
 			} else if (outcodeOut & BOTTOM) { // point is below the clip rectangle
-				x = pt1.x + (pt2.x - pt1.x) * (minPt.y - pt1.y) / (pt2.y - pt1.y);
+				x = pt1.x
+						+ (pt2.x - pt1.x) * (minPt.y - pt1.y) / (pt2.y - pt1.y);
 				y = minPt.y;
-			} else if (outcodeOut & RIGHT) {  // point is to the right of clip rectangle
-				y = pt1.y + (pt2.y - pt1.y) * (maxPt.x - pt1.x) / (pt2.x - pt1.x);
+			} else if (outcodeOut & RIGHT) { // point is to the right of clip rectangle
+				y = pt1.y
+						+ (pt2.y - pt1.y) * (maxPt.x - pt1.x) / (pt2.x - pt1.x);
 				x = maxPt.x;
-			} else if (outcodeOut & LEFT) {   // point is to the left of clip rectangle
-				y = pt1.y + (pt2.y - pt1.y) * (minPt.x - pt1.x) / (pt2.x - pt1.x);
+			} else if (outcodeOut & LEFT) { // point is to the left of clip rectangle
+				y = pt1.y
+						+ (pt2.y - pt1.y) * (minPt.x - pt1.x) / (pt2.x - pt1.x);
 				x = minPt.x;
 			}
 			// Now we move outside point to intersection point to clip
@@ -401,37 +408,40 @@ bool ClipLine(float2& pt1,float2& pt2,const float2& minPt,const float2& maxPt){
 			if (outcodeOut == outcode0) {
 				pt1.x = x;
 				pt1.y = y;
-				outcode0 = ComputeOutCode(pt1.x, pt1.y,minPt,maxPt);
+				outcode0 = ComputeOutCode(pt1.x, pt1.y, minPt, maxPt);
 			} else {
 				pt2.x = x;
 				pt2.y = y;
-				outcode1 = ComputeOutCode(pt2.x, pt2.y,minPt,maxPt);
+				outcode1 = ComputeOutCode(pt2.x, pt2.y, minPt, maxPt);
 			}
 		}
 	}
 	return accept;
 }
-bool ClipLine(double2& pt1,double2& pt2,const double2& minPt,const double2& maxPt){
+bool ClipLine(double2& pt1, double2& pt2, const double2& minPt,
+		const double2& maxPt) {
 	const int INSIDE = 0; // 0000
 	const int LEFT = 1;   // 0001
 	const int RIGHT = 2;  // 0010
 	const int BOTTOM = 4; // 0100
 	const int TOP = 8;    // 1000
-	std::function<int(double x, double y,const double2& minPt,const double2& maxPt)> ComputeOutCode=[=](double x, double y,const double2& minPt,const double2& maxPt){
-		int code = INSIDE;          // initialised as being inside of [[clip window]]
-		if (x < minPt.x)           // to the left of clip window
-			code |= LEFT;
-		else if (x > maxPt.x)      // to the right of clip window
-			code |= RIGHT;
-		if (y < minPt.y)           // below the clip window
-			code |= BOTTOM;
-		else if (y > maxPt.y)      // above the clip window
-			code |= TOP;
-		return code;
-	};
+	std::function<
+			int(double x, double y, const double2& minPt, const double2& maxPt)> ComputeOutCode =
+			[=](double x, double y,const double2& minPt,const double2& maxPt) {
+				int code = INSIDE; // initialised as being inside of [[clip window]]
+				if (x < minPt.x)// to the left of clip window
+				code |= LEFT;
+				else if (x > maxPt.x)// to the right of clip window
+				code |= RIGHT;
+				if (y < minPt.y)// below the clip window
+				code |= BOTTOM;
+				else if (y > maxPt.y)// above the clip window
+				code |= TOP;
+				return code;
+			};
 	// compute outcodes for P0, P1, and whatever point lies outside the clip rectangle
-	int outcode0 = ComputeOutCode(pt1.x, pt1.y,minPt,maxPt);
-	int outcode1 = ComputeOutCode(pt2.x, pt2.y,minPt,maxPt);
+	int outcode0 = ComputeOutCode(pt1.x, pt1.y, minPt, maxPt);
+	int outcode1 = ComputeOutCode(pt2.x, pt2.y, minPt, maxPt);
 	bool accept = false;
 	while (true) {
 		if (!(outcode0 | outcode1)) { // Bitwise OR is 0. Trivially accept and get out of loop
@@ -442,22 +452,26 @@ bool ClipLine(double2& pt1,double2& pt2,const double2& minPt,const double2& maxP
 		} else {
 			// failed both tests, so calculate the line segment to clip
 			// from an outside point to an intersection with clip edge
-			double x=0.0, y=0.0;
+			double x = 0.0, y = 0.0;
 			// At least one endpoint is outside the clip rectangle; pick it.
 			int outcodeOut = outcode0 ? outcode0 : outcode1;
 			// Now find the intersection point;
 			// use formulas y = pt1.y + slope * (x - pt1.x), x = pt1.x + (1 / slope) * (y - pt1.y)
-			if (outcodeOut & TOP) {           // point is above the clip rectangle
-				x = pt1.x + (pt2.x - pt1.x) * (maxPt.y - pt1.y) / (pt2.y - pt1.y);
+			if (outcodeOut & TOP) {         // point is above the clip rectangle
+				x = pt1.x
+						+ (pt2.x - pt1.x) * (maxPt.y - pt1.y) / (pt2.y - pt1.y);
 				y = maxPt.y;
 			} else if (outcodeOut & BOTTOM) { // point is below the clip rectangle
-				x = pt1.x + (pt2.x - pt1.x) * (minPt.y - pt1.y) / (pt2.y - pt1.y);
+				x = pt1.x
+						+ (pt2.x - pt1.x) * (minPt.y - pt1.y) / (pt2.y - pt1.y);
 				y = minPt.y;
-			} else if (outcodeOut & RIGHT) {  // point is to the right of clip rectangle
-				y = pt1.y + (pt2.y - pt1.y) * (maxPt.x - pt1.x) / (pt2.x - pt1.x);
+			} else if (outcodeOut & RIGHT) { // point is to the right of clip rectangle
+				y = pt1.y
+						+ (pt2.y - pt1.y) * (maxPt.x - pt1.x) / (pt2.x - pt1.x);
 				x = maxPt.x;
-			} else if (outcodeOut & LEFT) {   // point is to the left of clip rectangle
-				y = pt1.y + (pt2.y - pt1.y) * (minPt.x - pt1.x) / (pt2.x - pt1.x);
+			} else if (outcodeOut & LEFT) { // point is to the left of clip rectangle
+				y = pt1.y
+						+ (pt2.y - pt1.y) * (minPt.x - pt1.x) / (pt2.x - pt1.x);
 				x = minPt.x;
 			}
 			// Now we move outside point to intersection point to clip
@@ -465,24 +479,94 @@ bool ClipLine(double2& pt1,double2& pt2,const double2& minPt,const double2& maxP
 			if (outcodeOut == outcode0) {
 				pt1.x = x;
 				pt1.y = y;
-				outcode0 = ComputeOutCode(pt1.x, pt1.y,minPt,maxPt);
+				outcode0 = ComputeOutCode(pt1.x, pt1.y, minPt, maxPt);
 			} else {
 				pt2.x = x;
 				pt2.y = y;
-				outcode1 = ComputeOutCode(pt2.x, pt2.y,minPt,maxPt);
+				outcode1 = ComputeOutCode(pt2.x, pt2.y, minPt, maxPt);
 			}
 		}
 	}
 	return accept;
+}
+float3 MakeOrthogonalComplement(const float3& v){
+	if (std::abs(v.x) > std::abs(v.y)){
+		return normalize(float3(-v.z,0.0f,v.x));
+    } else {
+        return normalize(float3(0.0f,v.z,v.y));
+    }
+}
+float2 MakeOrthogonalComplement(const float2& v){
+	return normalize(float2(-v.y,v.x));
+}
+float IntersectCylinder(aly::float3 pt,aly::float3 ray, float3 start, float3 end, float radius) {
+		float t0, t1;
+		float3 yaxis = normalize(end - start);
+		float3 xaxis=MakeOrthogonalComplement(yaxis);
+		float3 zaxis=cross(xaxis,yaxis);
+		float3x3 Rt=transpose(float3x3(xaxis,yaxis,zaxis));
+		float3 T=start;
+		pt=Rt*(pt-T);
+		start=Rt*(start-T);
+		end=Rt*(end-T);
+		ray=Rt*ray;
+		float minY=start.y;
+		float maxY=end.y;
+		// a=xD2+yD2, b=2xExD+2yEyD, and c=xE2+yE2-1.
+		float a = ray.x * ray.x + ray.z * ray.z;
+		float b = 2 * pt.x * ray.x + 2 * pt.z * ray.z;
+		float c = pt.x * pt.x + pt.z * pt.z - radius*radius;
+		float b24ac = b * b - 4 * a * c;
+		if (b24ac < 0)
+			return -1.0f;
+		float sqb24ac = std::sqrt(b24ac);
+		t0 = (-b + sqb24ac) / (2 * a);
+		t1 = (-b - sqb24ac) / (2 * a);
+		if (t0 > t1) {
+			std::swap(t0, t1);
+		}
+		float y0 = pt.y + t0 * ray.y;
+		float y1 = pt.y + t1 * ray.y;
+		if (y0 < start.y) {
+			if (y1 < start.y)
+				return -1.0f;
+			else {
+				// hit the cap
+				float th = t0 + (t1 - t0) * (y0 - start.y) / (y0 - y1);
+				if (th <= 0){
+					return -1.0f;
+				}
+				return th;
+			}
+		} else if (y0 >= start.y && y0 <= end.y) {
+			// hit the cylinder bit
+			if (t0 <= 0){
+				return -1.0f;
+			}
+			return t0;
+		} else if (y0 > end.y) {
+			if (y1 > end.y){
+				return -1.0f;
+			} else {
+				// hit the cap
+				float th = t0 + (t1 - t0) * (y0 - end.y) / (y0 - y1);
+				if (th <= 0){
+					return -1.0f;
+				}
+				return th;
+			}
+		}
+		return -1.0f;
 }
 float IntersectPlane(const float3& pt, const float3& ray, const float4& plane) {
 	const float3 n = plane.xyz();
 	return -(plane.w + dot(n, pt)) / dot(n, ray);
 }
-bool IntersectBox(float3 rayOrig, float3 rayDir, const box3f& bbox, float& near,float& far) {
+bool IntersectBox(float3 rayOrig, float3 rayDir, const box3f& bbox, float& near,
+		float& far) {
 	// find the ray intersections with the grid
-	float3 botc = (bbox.min() - rayOrig)/rayDir;
-	float3 topc = (bbox.max() - rayOrig)/rayDir;
+	float3 botc = (bbox.min() - rayOrig) / rayDir;
+	float3 topc = (bbox.max() - rayOrig) / rayDir;
 	// find the range of intersections
 	float3 minc = aly::min(botc, topc);
 	float3 maxc = aly::max(botc, topc);
@@ -495,7 +579,7 @@ bool IntersectBox(float3 rayOrig, float3 rayDir, const box3f& bbox, float& near,
 float RandomUniform(float min, float max) {
 	static std::random_device rd;
 	static std::mt19937 gen(rd());
-	std::uniform_real_distribution<float> noise(min,max);
+	std::uniform_real_distribution<float> noise(min, max);
 	return noise(gen);
 }
 int RandomUniform(int min, int max) {
@@ -523,11 +607,11 @@ float RandomGaussian(float mean, float stddev) {
 	return noise(gen);
 }
 float InvSqrt(float x) {
-	float xhalf = 0.5f*x;
-	int i = *(int*)&x;
+	float xhalf = 0.5f * x;
+	int i = *(int*) &x;
 	i = 0x5f3759df - (i >> 1);
-	x = *(float*)&i;
-	x = x*(1.5f - xhalf*x*x);
+	x = *(float*) &i;
+	x = x * (1.5f - xhalf * x * x);
 	return x;
 }
 }
