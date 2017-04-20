@@ -108,14 +108,22 @@ namespace aly {
 	}
 	bool ComputeCL::lockGL(std::vector<cl_mem>& memobjs) {
 		glFinish();
-		int err = clEnqueueAcquireGLObjects(commandQueue, static_cast<cl_uint>(memobjs.size()), &memobjs[0], 0, NULL, NULL);
-		PrintCLError(err);
-		return (CL_SUCCESS == err);
+		if(memobjs.size()>0){
+			int err = clEnqueueAcquireGLObjects(commandQueue, static_cast<cl_uint>(memobjs.size()), &memobjs[0], 0, NULL, NULL);
+			PrintCLError(err);
+			return (CL_SUCCESS == err);
+		} else {
+			return true;
+		}
 	}
 	bool ComputeCL::unlockGL(std::vector<cl_mem>& memobjs) {
-		int err = clEnqueueReleaseGLObjects(commandQueue, static_cast<cl_uint>(memobjs.size()), &memobjs[0], 0, NULL, NULL);
-		PrintCLError(err);
-		return (CL_SUCCESS == err);
+		if(memobjs.size()>0){
+			int err = clEnqueueReleaseGLObjects(commandQueue, static_cast<cl_uint>(memobjs.size()), &memobjs[0], 0, NULL, NULL);
+			PrintCLError(err);
+			return (CL_SUCCESS == err);
+		} else {
+			return true;
+		}
 	}
 	bool ComputeCL::lockGL(std::initializer_list<cl_mem>& memobjs) {
 		std::vector<cl_mem> tmp(memobjs.begin(), memobjs.end());
@@ -127,7 +135,8 @@ namespace aly {
 	}
 	ComputeCL::ComputeCL() :
 			platformId(0), deviceId(0), context(0), commandQueue(0), initialized(false), deviceType(Device::ALL) {
-		glewInit();
+		//glewInit(); Don't call twice!
+		CHECK_GL_ERROR();
 		buildOptions = "-cl-mad-enable -cl-std=CL1.1 -cl-kernel-arg-info";
 	}
 	ComputeCL::~ComputeCL() {
@@ -256,6 +265,7 @@ namespace aly {
 			}
 			std::string deviceInfo = getDeviceInfo(deviceId);
 			if (deviceType == Device::GPU && hasExtension(deviceId, "cl_khr_gl_sharing")) {
+				std::cout<<"Initializing GL"<<std::endl;
 				cl_context_properties properties[] = {
 #ifdef ALY_WINDOWS
 						CL_GL_CONTEXT_KHR, (cl_context_properties) wglGetCurrentContext(),

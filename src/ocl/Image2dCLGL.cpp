@@ -59,6 +59,7 @@ namespace aly {
 		regions[1] = height;
 		regions[2] = 1;
 		glBindTexture(GL_TEXTURE_2D, 0);
+
 		return textureId;
 	}
 

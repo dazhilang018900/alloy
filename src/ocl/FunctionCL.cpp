@@ -303,7 +303,12 @@ namespace aly {
 		if (!glObjects.empty()) {
 			if (CLInstance()->lockGL(glObjects)) {
 				execute(argValues, argSizes);
-				CLInstance()->unlockGL(glObjects);
+				if(!CLInstance()->unlockGL(glObjects)){
+					throw ocl_runtime_error("CL/GL unlock failed.");
+				}
+				glObjects.clear();
+			} else {
+				throw ocl_runtime_error("CL/GL lock failed.");
 			}
 		} else {
 			execute(argValues, argSizes);
@@ -320,7 +325,12 @@ namespace aly {
 				if (CLInstance()->lockGL(glObjects)) {
 					locked = true;
 					execute(argValues, argSizes);
-					CLInstance()->unlockGL(glObjects);
+					if(!CLInstance()->unlockGL(glObjects)){
+						throw ocl_runtime_error("CL/GL unlock failed.");
+					}
+					glObjects.clear();
+				} else {
+					throw ocl_runtime_error("CL/GL lock failed.");
 				}
 			} else {
 				execute(argValues, argSizes);
@@ -339,7 +349,12 @@ namespace aly {
 				if (CLInstance()->lockGL(glObjects)) {
 					locked = true;
 					execute(argValues, argSizes);
-					CLInstance()->unlockGL(glObjects);
+					if(!CLInstance()->unlockGL(glObjects)){
+						throw ocl_runtime_error("CL/GL unlock failed.");
+					}
+					glObjects.clear();
+				} else {
+					throw ocl_runtime_error("CL/GL lock failed.");
 				}
 			} else {
 				execute(argValues, argSizes);
@@ -360,8 +375,13 @@ namespace aly {
 				if (CLInstance()->lockGL(glObjects)) {
 					locked = true;
 					execute(argValues, argSizes);
-					CLInstance()->unlockGL(glObjects);
+					if(!CLInstance()->unlockGL(glObjects)){
+						throw ocl_runtime_error("CL/GL unlock failed.");
+					}
+				} else {
+					throw ocl_runtime_error("CL/GL lock failed.");
 				}
+				glObjects.clear();
 			} else {
 				execute(argValues, argSizes);
 			}
@@ -391,7 +411,6 @@ namespace aly {
 			if (err != CL_SUCCESS) {
 				throw ocl_runtime_error(aly::MakeString() << "Function " << kernelName << " failed.", err);
 			}
-			glObjects.clear();
 		} else {
 			throw ocl_runtime_error(
 					aly::MakeString() << "Function " << kernelName << " value and size arguments don't align " << args.size() << "/" << sizes.size() << ".");

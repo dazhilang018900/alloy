@@ -29,7 +29,7 @@ MeshReconstructionEx::MeshReconstructionEx() : Application(1200, 800, "Mesh Reco
 }
 bool MeshReconstructionEx::init(Composite& rootNode) {
 	srand((unsigned int)time(nullptr));
-	pointCloud.load(getFullPath("models/eagle.ply"));
+	pointCloud.load(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"pointcloud.ply");//getFullPath("models/eagle.ply")
 	objectBBox = pointCloud.getBoundingBox();
 	displayIndex = 0;
 	parametersDirty = true;

@@ -41,7 +41,7 @@ namespace aly {
 		void create(const cl_image_format& formats, int w, int h, int c, int typeSize, void *data = nullptr) {
 			create(formats, w, h, c, typeSize, data);
 		}
-		template<class T, int C, ImageType I> void create(cl_mem_flags f, const Image<T, C, I>& img) {
+		template<class T, int C, ImageType I> void create(cl_mem_flags f, Image<T, C, I>& img) {
 			cl_image_format format;
 			switch (C) {
 			case 1:
