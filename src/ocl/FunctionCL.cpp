@@ -328,10 +328,10 @@ namespace aly {
 					if(!CLInstance()->unlockGL(glObjects)){
 						throw ocl_runtime_error("CL/GL unlock failed.");
 					}
-					glObjects.clear();
 				} else {
 					throw ocl_runtime_error("CL/GL lock failed.");
 				}
+				glObjects.clear();
 			} else {
 				execute(argValues, argSizes);
 			}
@@ -352,10 +352,10 @@ namespace aly {
 					if(!CLInstance()->unlockGL(glObjects)){
 						throw ocl_runtime_error("CL/GL unlock failed.");
 					}
-					glObjects.clear();
 				} else {
 					throw ocl_runtime_error("CL/GL lock failed.");
 				}
+				glObjects.clear();
 			} else {
 				execute(argValues, argSizes);
 			}
