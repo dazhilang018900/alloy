@@ -425,6 +425,32 @@ namespace aly {
 			z2 = float2(dot(p2 - p0, X), dot(p2 - p0, Y));
 
 	}
+	box2f MeshTextureMap::evaluate(const std::vector<box2f>& boundsIn,std::vector<box2f>& boundOut){
+		std::multimap<bvec2f, float2, TextureBoxCompare> boxes;
+		boundOut.resize(boundsIn.size(),box2f());
+		std::vector<int> rectId(boundsIn.size());
+		std::vector<bvec2f> rects(boundsIn.size());
+		for(int n=0;n<boundsIn.size();n++){
+			rectId[n]=n;
+			rects[n]=bvec2f(boundsIn[n].dimensions,n);
+		}
+		float totalArea = pack(rects, boxes);
+		float2 minPt(1E30,1E30);
+		float2 maxPt(-1E30,-1E30);
+		for (int id = 0; id < (int)rectId.size(); id++) {
+			bvec2f& rect = rects[id];
+			std::multimap<bvec2f, float2, TextureBoxCompare>::iterator boxPair = boxes.find(rect);
+			if (boxPair == boxes.end())continue;
+			float2 pt = boxPair->second;
+			box2f newBounds;
+			newBounds.position=pt;
+			newBounds.dimensions=boxPair->first;
+			minPt=aly::min(newBounds.position,minPt);
+			maxPt=aly::max(newBounds.position+newBounds.dimensions,maxPt);
+			boundOut[id]=newBounds;
+		}
+		return box2f(minPt,maxPt-minPt);
+	}
 	void MeshTextureMap::computeMap(aly::Mesh& mesh, const std::function<bool(const std::string& status, float progress)>& statusHandler){
 		std::multimap<bvec2f, float2, TextureBoxCompare> boxes;
 		std::vector<int> rectId;

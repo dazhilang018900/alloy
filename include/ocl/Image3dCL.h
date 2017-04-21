@@ -89,7 +89,8 @@ namespace aly {
 			default:
 				break;
 			}
-			create(f, format, img.rows, img.cols, img.slices, img.channels, sizeof(T), img.ptr());
+			create(f, format, img.rows, img.cols, img.slices, img.channels, sizeof(T),nullptr);
+			write(img,true);
 		}
 		void write(cl_mem mem);
 		inline int getHeight() const {

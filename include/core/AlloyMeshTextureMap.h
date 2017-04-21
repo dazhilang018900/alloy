@@ -145,6 +145,7 @@ namespace aly{
 			smoothness = w;
 		}
 		~MeshTextureMap() {}
+		box2f evaluate(const std::vector<box2f>& boundsIn,std::vector<box2f>& boundsOut);
 		void evaluate(aly::Mesh& mesh,const std::function<bool(const std::string& status, float progress)>& statusHandler =nullptr);
 	};
 	int LabelTextureRegions(const aly::Mesh& mesh, std::vector<int>& indexes, std::vector<int>& cc, std::vector<int>& labels, float distanceTolerance=1E-6f);

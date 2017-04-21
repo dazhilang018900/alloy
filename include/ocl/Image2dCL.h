@@ -84,7 +84,8 @@ namespace aly {
 			default:
 				break;
 			}
-			create(f, format, img.width, img.height, img.channels, sizeof(T), img.ptr());
+			create(f, format, img.width, img.height, img.channels, sizeof(T), nullptr);
+			write(img,true);
 		}
 		template<typename T> void read(std::vector<T>& vec, bool block = true) const {
 			read(&(vec[0]), block);
@@ -118,9 +119,6 @@ namespace aly {
 			read(vec.data, block);
 		}
 		template<class T, int M, ImageType I> void write(const Image<T, M, I>& vec, bool block = true) {
-			if(buffer==nullptr){
-				create(CL_MEM_READ_WRITE, vec);
-			}
 			write(vec.data, block);
 		}
 	};

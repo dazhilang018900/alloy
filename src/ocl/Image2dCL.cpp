@@ -73,7 +73,6 @@ namespace aly {
 		if (err != CL_SUCCESS)
 			throw ocl_runtime_error("Could not read image from device.", err);
 	}
-
 	void Image2dCL::write(const void* data, bool block) {
 		const size_t origin[3] = { 0, 0, 0 };
 		int err = clEnqueueWriteImage(CLQueue(), buffer, (block) ? CL_TRUE : CL_FALSE, origin, &regions[0], width * channels * typeSize, 0, data, 0, nullptr,
