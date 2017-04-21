@@ -34,6 +34,7 @@ namespace aly {
 	class BufferCL;
 	class BufferCLGL;
 	class Image2dCL;
+	class ImageArray2dCL;
 	class Image2dCLGL;
 	class Image3dCL;
 	class ProgramCL;
@@ -102,6 +103,7 @@ namespace aly {
 		FunctionCL& set(const std::string& name, const BufferCL& value);
 		FunctionCL& set(const std::string& name, const BufferCLGL& value);
 		FunctionCL& set(const std::string& name, const Image2dCL& value);
+		FunctionCL& set(const std::string& name, const ImageArray2dCL& value);
 		FunctionCL& set(const std::string& name, const Image2dCLGL& value);
 		FunctionCL& set(const std::string& name, const Image3dCL& value);
 		FunctionCL& set(const std::string& name, const int8_t& value);

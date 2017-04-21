@@ -28,12 +28,7 @@ namespace aly {
 	public:
 		BufferCL();
 		void create(const cl_mem_flags& f, size_t bufferSize,void* data = nullptr);
-		void create(size_t bufferSize,void* data = nullptr) {
-			create(CL_MEM_READ_WRITE, bufferSize, data);
-		}
-		template<class T, int M> void create(const cl_mem_flags& f, Vector<T, M>& vec) {
-			create(f, vec.size() * vec.typeSize(), vec.ptr());
-		}
+
 		void* mapRead(bool block = true, int wait_events_num = 0, cl_event* wait_events = nullptr);
 		void* mapWrite(bool block = true, int wait_events_num = 0, cl_event* wait_events = nullptr) const;
 		void unmap(void* data) const;
@@ -49,6 +44,23 @@ namespace aly {
 				create(CL_MEM_READ_WRITE, vec.size() * vec.typeSize());
 			}
 			MemoryCL::write(vec.data, block);
+		}
+		template<class T> void write(const std::vector<T>& vec, bool block = true) {
+			if(buffer==nullptr){
+				create(CL_MEM_READ_WRITE, vec.size() * sizeof(T));
+			}
+			MemoryCL::write(vec, block);
+		}
+		void create(size_t bufferSize,void* data = nullptr) {
+			create(CL_MEM_READ_WRITE, bufferSize, data);
+		}
+		template<class T, int M> void create(const cl_mem_flags& f, Vector<T, M>& vec) {
+			create(f, vec.size() * vec.typeSize(), nullptr);
+			write(vec,true);
+		}
+		template<class T> void create(const cl_mem_flags& f,  std::vector<T>& vec) {
+			create(f, vec.size() * sizeof(T),nullptr);
+			write(vec,true);
 		}
 	};
 }

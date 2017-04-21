@@ -27,6 +27,7 @@
 #include "ocl/Image2dCL.h"
 #include "ocl/Image2dCLGL.h"
 #include "ocl/Image3dCL.h"
+#include "ocl/ImageArray2dCL.h"
 #include "ocl/ProgramCL.h"
 #include <CL/cl.h>
 #include <iostream>
@@ -162,6 +163,19 @@ namespace aly {
 		argSizes[index] = (sizeof(cl_mem));
 		if (value.getTextureId() >= 0)
 			glObjects.push_back(arguments[index].memory);
+		return *this;
+	}
+	FunctionCL& FunctionCL::set(const std::string& name, const ImageArray2dCL& value) {
+		auto pos = argMap.find(name);
+		if (pos == argMap.end()) {
+			throw std::runtime_error(aly::MakeString() << "Could not set argument " << name << " in " << *this);
+		}
+		size_t index = pos->second;
+		arguments[index].memory = value.getHandle();
+		if (arguments[index].memory == nullptr)
+			throw ocl_runtime_error("ImageArray2d has not been allocated.");
+		argValues[index] = (&arguments[index].memory);
+		argSizes[index] = (sizeof(cl_mem));
 		return *this;
 	}
 	FunctionCL& FunctionCL::set(const std::string& name, const Image2dCLGL& value) {
