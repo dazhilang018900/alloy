@@ -508,6 +508,7 @@ protected:
 	box2px dragBox;
 	int startItem;
 	int endItem;
+	float downOffsetPosition;
 	std::shared_ptr<TimerTask> downTimer, upTimer;
 	bool scrollingDown;
 	bool scrollingUp;

@@ -1618,6 +1618,7 @@ ListBox::ListBox(const std::string& name, const AUnit2D& pos, const AUnit2D& dim
 	scrollingUp = false;
 	startItem=-1;
 	endItem=-1;
+	downOffsetPosition=0;
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	borderColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	borderWidth = UnitPX(1.0f);
@@ -1643,36 +1644,40 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (e.type == InputType::Cursor || e.type == InputType::MouseButton) {
 		if (context->isMouseDrag()&&e.button==GLFW_MOUSE_BUTTON_LEFT) {
 			if (enableMultiSelection) {
-				float2 cursorDown = context->getCursorDownPosition();
-				float2 stPt = aly::min(cursorDown, e.cursor);
-				float2 endPt = aly::max(cursorDown, e.cursor);
 				if(startItem<0){
-					int index=0;
+					downOffsetPosition=extents.position.y;
+				}
+				float2 cursorDown = context->getCursorDownPosition();
+				int index=0;
+				if(startItem<0){
 					for (std::shared_ptr<ListEntry> entry : listEntries) {
-						if (entry->getBounds().contains(e.cursor)) {
+						if (entry->getBounds().contains(cursorDown)) {
 							startItem=index;
 							break;
 						}
 						index++;
 					}
-					endItem=startItem;
-				} else 	{
-					int index=0;
-					for (std::shared_ptr<ListEntry> entry : listEntries) {
-						if (entry->getBounds().contains(e.cursor)) {
-							endItem=index;
-							break;
-						}
-						index++;
-					}
-
 				}
-				dragBox.position = stPt;
-				dragBox.dimensions = endPt - stPt;
-				dragBox.intersect(getBounds());
+				index=0;
+				for (std::shared_ptr<ListEntry> entry : listEntries) {
+					if (entry->getBounds().contains(e.cursor)) {
+						endItem=index;
+						break;
+					}
+					index++;
+				}
+
 			}
 		} else if (!context->isMouseDown() && e.type == InputType::MouseButton) {
 			if (enableMultiSelection) {
+				int index=0;
+				for (std::shared_ptr<ListEntry> entry : listEntries) {
+					if (entry->getBounds().contains(e.cursor)) {
+						endItem=index;
+						break;
+					}
+					index++;
+				}
 				if(endItem<startItem){
 					std::swap(startItem,endItem);
 				}
@@ -1761,6 +1766,16 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	}
 }
 void ListBox::draw(AlloyContext* context) {
+	if(startItem>=0){
+		float2 cursorDown = context->getCursorDownPosition();
+		float2 cursorPos=context->getCursorPosition();
+		cursorDown.y+=extents.position.y-downOffsetPosition;
+		float2 stPt = aly::min(cursorDown, cursorPos);
+		float2 endPt = aly::max(cursorDown, cursorPos);
+		dragBox.position = stPt;
+		dragBox.dimensions = endPt - stPt;
+		dragBox.intersect(getBounds());
+	}
 	pushScissor(context->nvgContext, getCursorBounds());
 	Composite::draw(context);
 	popScissor(context->nvgContext);
