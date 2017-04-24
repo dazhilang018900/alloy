@@ -2938,7 +2938,7 @@ namespace aly {
 			return source->getGraph()->remove(this);
 		}
 		Direction Connection::getDirection() const {
-			Direction direction;
+			Direction direction= Direction::North;
 			if (source->getType() == PortType::Parent) {
 				direction = Direction::West;
 			}
