@@ -34,6 +34,30 @@ namespace aly {
 			clReleaseMemObject(buffer);
 		buffer = nullptr;
 	}
+	void Image2dCL::createRGBAf(cl_mem_flags f,int w,int h){
+		cl_image_format format;
+		format.image_channel_data_type = CL_FLOAT;
+		format.image_channel_order = CL_RGBA;
+		create(f, format, w, h, 4, sizeof(float), nullptr);
+	}
+	void Image2dCL::createRGBA(cl_mem_flags f,int w,int h){
+		cl_image_format format;
+		format.image_channel_data_type = CL_UNSIGNED_INT8;
+		format.image_channel_order = CL_RGBA;
+		create(f, format, w, h, 4, sizeof(uint8_t), nullptr);
+	}
+	void Image2dCL::createRGBf(cl_mem_flags f,int w,int h){
+		cl_image_format format;
+		format.image_channel_data_type = CL_FLOAT;
+		format.image_channel_order = CL_RGB;
+		create(f, format, w, h, 3, sizeof(float), nullptr);
+	}
+	void Image2dCL::createRGB(cl_mem_flags f,int w,int h){
+		cl_image_format format;
+		format.image_channel_data_type = CL_UNSIGNED_INT8;
+		format.image_channel_order = CL_RGB;
+		create(f, format, w, h, 3, sizeof(uint8_t), nullptr);
+	}
 
 	void Image2dCL::create(cl_mem_flags f, const cl_image_format& formats, int w, int h, int c, int bytesPerChannel, void* data) {
 		int err = -1;

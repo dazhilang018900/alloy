@@ -36,6 +36,10 @@ namespace aly {
 		int textureId;
 		std::array<size_t, 3> regions;
 	public:
+		void createRGBAf(cl_mem_flags f,int w,int h);
+		void createRGBA(cl_mem_flags f,int w,int h);
+		void createRGBf(cl_mem_flags f,int w,int h);
+		void createRGB(cl_mem_flags f,int w,int h);
 
 		void create(cl_mem_flags f, const cl_image_format& formats, int w, int h, int c, int typeSize, void *data = nullptr);
 		void create(const cl_image_format& formats, int w, int h, int c, int typeSize, void *data = nullptr) {
