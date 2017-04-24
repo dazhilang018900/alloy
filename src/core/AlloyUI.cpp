@@ -3636,6 +3636,9 @@ SelectionBox::SelectionBox(const std::string& name,const std::vector<std::string
 		SelectionBox(name,CoordPX(0.0f,0.0f),CoordPercent(1.0f,1.0f),labels) {
 
 }
+void SelectionBox::setSelectionOffset(int offset) {
+	selectionOffset = std::max(0, selectedIndex + 1 - maxDisplayEntries);
+}
 SelectionBox::SelectionBox(const std::string& name,const AUnit2D& pos,const AUnit2D& dims,
 		const std::vector<std::string>& labels) :
 		Region(name,pos,dims), label(name), options(labels) {

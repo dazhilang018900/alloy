@@ -645,9 +645,7 @@ public:
 		return selectedIndex;
 	}
 
-	inline void setSelectionOffset(bool offset) {
-		selectionOffset = offset;
-	}
+	void setSelectionOffset(int offset);
 	void setSelectedIndex(int index);
 	void draw(AlloyContext* context) override;
 	void addSelection(const std::string& selection) {

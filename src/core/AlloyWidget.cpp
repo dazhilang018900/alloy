@@ -714,8 +714,14 @@ bool Selection::handleMouseClick(AlloyContext* context, const InputEvent& event)
 	if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
 		box2px bounds = getBounds(false);
 		selectionBox->pack(bounds.position, bounds.dimensions, context->dpmm, context->pixelRatio);
-		selectionBox->setSelectionOffset(0);
-		selectionBox->setSelectedIndex(0);
+		int current=getSelectedIndex();
+		if(current>=0){
+			selectionBox->setSelectedIndex(current);
+			selectionBox->setSelectionOffset(current);
+		}else {
+			selectionBox->setSelectionOffset(0);
+			selectionBox->setSelectedIndex(0);
+		}
 		show(context);
 		return true;
 	} else if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
