@@ -29,13 +29,14 @@ namespace aly {
 	protected:
 		virtual void read(void* data, bool block = true) const;
 		virtual void write(const void* data, bool block = true);
-		int height;
-		int width;
-		int channels;
+
 		int typeSize;
 		int textureId;
 		std::array<size_t, 3> regions;
 	public:
+		int height;
+		int width;
+		int channels;
 		void createRGBAf(cl_mem_flags f,int w,int h);
 		void createRGBA(cl_mem_flags f,int w,int h);
 		void createRGBf(cl_mem_flags f,int w,int h);

@@ -938,6 +938,7 @@ void WritePlyMeshToFile(const std::string& file, const Mesh& mesh, bool binary) 
 }
 void Mesh::updateVertexNormals(int SMOOTH_ITERATIONS, float DOT_TOLERANCE) {
 	uint32_t sz = (uint32_t) triIndexes.size();
+	if(sz==0)return;
 	float3 pt;
 	vertexNormals.clear();
 	vertexNormals.resize(vertexLocations.size(), float3(0.0f));
@@ -1464,7 +1465,7 @@ void ReadPlyMeshFromFile(const std::string& file, Mesh &mesh) {
 	if (mesh.vertexLocations.size() > 0) {
 		mesh.updateBoundingBox();
 	}
-	if (mesh.vertexNormals.size() == 0) {
+	if (mesh.vertexNormals.size() == 0&&(mesh.triIndexes.size()>0||mesh.quadIndexes.size()>0)) {
 		mesh.updateVertexNormals();
 	}
 	mesh.setDirty(true);

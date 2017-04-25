@@ -27,15 +27,16 @@
 namespace aly {
 	class Image3dCL: public MemoryCL {
 	protected:
-		int width;
-		int height;
-		int depth;
-		int channels;
+
 		int typeSize;
 		std::array<size_t, 3> regions;
 		void read(void* data, bool block = true) const;
 		void write(const void* data,bool block=true);
 	public:
+		int width;
+		int height;
+		int depth;
+		int channels;
 		template<typename T> void read(std::vector<T>& vec, bool block = true) const {
 			read(&(vec[0]), block);
 		}
