@@ -3637,7 +3637,7 @@ SelectionBox::SelectionBox(const std::string& name,const std::vector<std::string
 
 }
 void SelectionBox::setSelectionOffset(int offset) {
-	selectionOffset = aly::clamp(offset,0,(int)options.size()-maxDisplayEntries);
+	selectionOffset = aly::clamp(offset,0,std::max((int)options.size()-maxDisplayEntries,0));
 }
 SelectionBox::SelectionBox(const std::string& name,const AUnit2D& pos,const AUnit2D& dims,
 		const std::vector<std::string>& labels) :
