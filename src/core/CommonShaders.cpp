@@ -492,7 +492,7 @@ void ParticleIdShader::initialize(int w, int h) {
 	framebuffer.initialize(w, h);
 }
 void ParticleIdShader::read(Image2i& faceIdMap) {
-	faceIdMap.resize(framebuffer.width(), framebuffer.height());
+	faceIdMap.resize(framebuffer.getWidth(), framebuffer.getHeight());
 	ImageRGBAf& irgba = framebuffer.getTexture().read();
 	size_t idx = 0;
 	int hash;
@@ -550,7 +550,7 @@ void ParticleIdShader::draw(
 void ParticleIdShader::draw(const std::list<Mesh*>& meshes,
 		CameraParameters& camera, Image2i& faceIdMap, int faceIdOffset,
 		int objectIdOffset, float radius) {
-	faceIdMap.resize(framebuffer.width(), framebuffer.height());
+	faceIdMap.resize(framebuffer.getWidth(), framebuffer.getHeight());
 	framebuffer.begin();
 	glDisable(GL_BLEND);
 	begin().set("MIN_DEPTH", camera.getNearPlane()).set("MAX_DEPTH",
@@ -1229,7 +1229,7 @@ int FaceIdShader::draw(
 	return faceIdOffset;
 }
 void FaceIdShader::read(Image2i& faceIdMap) {
-	faceIdMap.resize(framebuffer.width(), framebuffer.height());
+	faceIdMap.resize(framebuffer.getWidth(), framebuffer.getHeight());
 	ImageRGBAf& irgba = framebuffer.getTexture().read();
 	size_t idx = 0;
 	int hash;

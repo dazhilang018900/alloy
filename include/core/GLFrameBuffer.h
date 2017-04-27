@@ -35,21 +35,21 @@ public:
 	virtual void update() override;
 	virtual void draw() const override;
 	void initialize(int w, int h);
-	int width() const {
-		return texture.width();
+	inline int getWidth() const {
+		return texture.getWidth();
 	}
-	int height() const {
-		return texture.height();
+	inline int getHeight() const {
+		return texture.getHeight();
 	}
 	void begin(const float4& clearColor = float4(0, 0, 0, 0),
 			bool clearColorBit = true, bool clearDepthBit = true) const;
 	void end() const;
 	int2 getDimensions() const {
-		return int2(texture.width(), texture.height());
+		return int2(texture.getWidth(), texture.getHeight());
 	}
 	box2px getViewport() const {
 		return box2px(pixel2(0.0f, 0.0f),
-				pixel2((pixel) texture.width(), (pixel) texture.height()));
+				pixel2((pixel) texture.getWidth(), (pixel) texture.getHeight()));
 	}
 	GLTexture<float, 4, ImageType::FLOAT>& getTexture() {
 		return texture;

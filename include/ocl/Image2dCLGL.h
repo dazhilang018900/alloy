@@ -40,10 +40,10 @@ namespace aly {
 			write(data.data(), block);
 		}
 		template<class T, int C, ImageType I> int create(cl_mem_flags f, const GLTexture<T, C, I>& texture) {
-			return create(f, texture.getTextureId(),I, texture.width(), texture.height(), C, (int)sizeof(T));
+			return create(f, texture.getTextureId(),I, texture.getWidth(), texture.getHeight(), C, (int)sizeof(T));
 		}
 		template<class T, int C, ImageType I> int create(const GLTexture<T, C, I>& texture) {
-			return create(CL_MEM_READ_WRITE, texture.getTextureId(),I,texture.width(), texture.height(), C, (int)sizeof(T));
+			return create(CL_MEM_READ_WRITE, texture.getTextureId(),I,texture.getWidth(), texture.getHeight(), C, (int)sizeof(T));
 		}
 		ImageType getImageType() const {
 			return imageType;

@@ -295,8 +295,8 @@ void MeshOptimizationEx::draw(AlloyContext* context) {
 		depthAndNormalShader.draw(targetMesh, camera, targetDepthBuffer);
 	}
 	//Recompute lighting at every draw pass.
-	box2f srcBox = context->pixelRatio * box2px(float2(0.0f, 0.0f), float2((float)sourceDepthBuffer.width(), (float)sourceDepthBuffer.height()));
-	box2f tarBox = context->pixelRatio * box2px(float2((float)sourceDepthBuffer.width(), 0.0f), float2((float)targetDepthBuffer.width(), (float)targetDepthBuffer.height()));
+	box2f srcBox = context->pixelRatio * box2px(float2(0.0f, 0.0f), float2((float)sourceDepthBuffer.getWidth(), (float)sourceDepthBuffer.getHeight()));
+	box2f tarBox = context->pixelRatio * box2px(float2((float)sourceDepthBuffer.getWidth(), 0.0f), float2((float)targetDepthBuffer.getWidth(), (float)targetDepthBuffer.getHeight()));
 
 	matcapShader.draw(sourceDepthBuffer.getTexture(), camera, srcBox, context->getViewport(), RGBAf(1.0f, 0.5f, 0.5f, 1.0f));
 	matcapShader.draw(targetDepthBuffer.getTexture(), camera, tarBox, context->getViewport(), RGBAf(0.5f, 1.0f, 0.5f, 1.0f));

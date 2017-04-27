@@ -311,10 +311,10 @@ public:
 		CHECK_GL_ERROR();
 	}
 public:
-	inline int width() const {
+	inline int getWidth() const {
 		return textureImage.width;
 	}
-	inline int height() const {
+	inline int getHeight() const {
 		return textureImage.height;
 	}
 	inline int2 dimensions() const {
