@@ -218,14 +218,13 @@ public:
 		lookAtPoint = float3(0, 0, 0);
 		changed = true;
 	}
-
+	Camera& operator=(const CameraParameters& cam);
 	void setZoom(float z) {
 		distanceToObject = z;
 		changed = true;
 	}
 	static const float sDeg2rad;
 };
-
 void WriteCameraParametersToFile(const std::string& file, const CameraParameters& params);
 void ReadCameraParametersFromFile(const std::string& file, CameraParameters& params);
 

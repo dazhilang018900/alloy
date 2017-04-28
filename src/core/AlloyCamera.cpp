@@ -10,7 +10,21 @@
 
 namespace aly {
 	const float Camera::sDeg2rad = ALY_PI / 180.0f;
-
+	Camera& Camera::operator=(const CameraParameters& camParams){
+		this->View=camParams.View;
+		this->Model=camParams.Model;
+		this->Projection=camParams.Projection;
+		this->ViewInverse=camParams.ViewInverse;
+		this->ViewModel=camParams.ViewModel;
+		this->ViewModelInverse=camParams.ViewModelInverse;
+		this->NormalViewModel=camParams.NormalViewModel;
+		this->NormalView=camParams.NormalView;
+		this->dimensions=camParams.dimensions;
+		this->nearPlane=camParams.nearPlane;
+		this->farPlane=camParams.farPlane;
+		this->changed=true;
+		return *this;
+	}
 	float3 CameraParameters::transformWorldToScreen(const float3& pt) const {
 		float4 ptp(pt[0], pt[1], pt[2], 1.0f);
 		float4 p = Projection * ViewModel * ptp;

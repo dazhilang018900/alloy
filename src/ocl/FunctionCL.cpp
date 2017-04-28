@@ -275,17 +275,7 @@ namespace aly {
 		argSizes[index] = (sizeof(uint8_t));
 		return *this;
 	}
-	FunctionCL& FunctionCL::set(const std::string& name, const int16_t& value) {
-		auto pos = argMap.find(name);
-		if (pos == argMap.end()) {
-			throw std::runtime_error(aly::MakeString() << "Could not set argument " << name << " in " << *this);
-		}
-		size_t index = pos->second;
 
-		argValues[index] = (&value);
-		argSizes[index] = (sizeof(uint16_t));
-		return *this;
-	}
 	FunctionCL& FunctionCL::set(const std::string& name, const int32_t& value) {
 		auto pos = argMap.find(name);
 		if (pos == argMap.end()) {
@@ -413,7 +403,7 @@ namespace aly {
 				err = clSetKernelArg(kernel, i, sizes[i], args[i]);
 				if (CL_SUCCESS != err) {
 					throw ocl_runtime_error(
-							aly::MakeString() << "Function " << kernelName << " could not set argument [" << (i + 1) << " / [" << args.size() << "].", err);
+							aly::MakeString() << "Function " << kernelName << " could not set argument [" << (i + 1) << "] / [" << args.size() << "] with size "<<sizes[i]<<" bytes.", err);
 				}
 			}
 			if (localSizes.empty()) {

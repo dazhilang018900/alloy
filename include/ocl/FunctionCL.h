@@ -114,6 +114,16 @@ namespace aly {
 		FunctionCL& set(const std::string& name, const uint32_t& value);
 		FunctionCL& set(const std::string& name, const float& value);
 		FunctionCL& set(const std::string& name, const double& value);
+		template<class T> FunctionCL& setOther(const std::string& name, const T& value) {
+			auto pos = argMap.find(name);
+			if (pos == argMap.end()) {
+				throw std::runtime_error(aly::MakeString() << "Could not set argument " << name << " in " << *this);
+			}
+			size_t index = pos->second;
+			argValues[index] = (&value);
+			argSizes[index] = (sizeof(T));
+			return *this;
+		}
 		template<class T, int M> FunctionCL& set(const std::string& name, const vec<T, M>& value) {
 			auto pos = argMap.find(name);
 			if (pos == argMap.end()) {
