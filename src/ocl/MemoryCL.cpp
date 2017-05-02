@@ -47,16 +47,18 @@ namespace aly {
 		release();
 	}
 	void MemoryCL::read(void* data, size_t sz, bool block) const {
-		if (sz != 0)
-			sz = bufferSize;
+		if(sz>bufferSize){
+			throw ocl_runtime_error(MakeString()<<"Read size of "<<sz<<" bytes exceeds allocation "<<bufferSize<<" bytes.");
+		}
 		int err = clEnqueueReadBuffer(CLQueue(), buffer, (block) ? CL_TRUE : CL_FALSE, 0, sz, data, 0, 0, NULL);
 		if (err != CL_SUCCESS) {
 			throw ocl_runtime_error("Could not read memory.", err);
 		}
 	}
 	void MemoryCL::write(const void* data, size_t sz, bool block) {
-		if (sz != 0)
-			sz = bufferSize;
+		if(sz>bufferSize){
+			throw ocl_runtime_error(MakeString()<<"Write size of "<<sz<<" bytes exceeds allocation "<<bufferSize<<" bytes.");
+		}
 		int err = clEnqueueWriteBuffer(CLQueue(), buffer, (block) ? CL_TRUE : CL_FALSE, 0, sz, data, 0, NULL, NULL);
 		if (err != CL_SUCCESS)
 			throw ocl_runtime_error("Could not write.", err);
