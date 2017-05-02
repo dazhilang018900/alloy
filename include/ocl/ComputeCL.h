@@ -25,9 +25,20 @@
 #include <string>
 #include <memory>
 #include <CL/cl.h>
+#include <AlloyNumber.h>
+#include <AlloyCommon.h>
 void SANITY_CHECK_OPENCL();
 namespace aly {
 	class ProgramCL;
+	struct ConstantCL {
+		std::string name;
+		aly::Number value;
+		ConstantCL(const std::string& name,int value):name(name),value(Integer(value)){}
+		ConstantCL(const std::string& name,float value):name(name),value(Float(value)){}
+		ConstantCL(const std::string& name,double value):name(name),value(Double(value)){}
+		std::string toCode() const ;
+		std::string toString() const;
+	};
 	class ComputeCL {
 	public:
 		enum class Device {
@@ -80,11 +91,11 @@ namespace aly {
 		bool isVendor(cl_platform_id id, const std::string& vendor) const;
 		bool isVendor(cl_device_id id, const std::string& vendor) const;
 		void initialize(const std::string& devicename = "", const ComputeCL::Device& device = ComputeCL::Device::GPU);
-		std::shared_ptr<ProgramCL> compileFiles(const std::vector<std::string>& fileNames);
-		std::shared_ptr<ProgramCL> compileSources(const std::vector<std::string>& srcCodes);
-		std::shared_ptr<ProgramCL> compileFile(const std::string& fileName);
-		std::shared_ptr<ProgramCL> compileSource(const std::string& srcCode);
-		std::shared_ptr<ProgramCL> compileFiles(const std::string& name, const std::vector<std::string>& fileNames);
+		std::shared_ptr<ProgramCL> compileFiles(const std::vector<std::string>& fileNames, const std::vector<ConstantCL>& constants);
+		std::shared_ptr<ProgramCL> compileSources(const std::vector<std::string>& srcCodes, const std::vector<ConstantCL>& constants);
+		std::shared_ptr<ProgramCL> compileFile(const std::string& fileName, const std::vector<ConstantCL>& constants);
+		std::shared_ptr<ProgramCL> compileSource(const std::string& srcCode, const std::vector<ConstantCL>& constants);
+		std::shared_ptr<ProgramCL> compileFiles(const std::string& name, const std::vector<std::string>& fileNames, const std::vector<ConstantCL>& constants);
 		bool lockGL(std::vector<cl_mem>& memobjs);
 		bool unlockGL(std::vector<cl_mem>& memobjs);
 		bool lockGL(std::initializer_list<cl_mem>& memobjs);
@@ -93,15 +104,14 @@ namespace aly {
 	inline std::shared_ptr<ComputeCL> CLInstance() {
 		return ComputeCL::Instance();
 	}
-	std::shared_ptr<ProgramCL> CLCompile(const std::string& name, const std::vector<std::string>& fileNames);
-	std::shared_ptr<ProgramCL> CLCompile(const std::string& name, const std::initializer_list<std::string>& fileNames);
-	std::shared_ptr<ProgramCL> CLCompile(const std::string& fileName);
+	std::shared_ptr<ProgramCL> CLCompile(const std::string& name, const std::vector<std::string>& fileNames, const std::vector<ConstantCL>& constants=std::vector<ConstantCL>());
+	std::shared_ptr<ProgramCL> CLCompile(const std::string& name, const std::initializer_list<std::string>& fileNames, const std::vector<ConstantCL>& constants=std::vector<ConstantCL>());
+	std::shared_ptr<ProgramCL> CLCompile(const std::string& fileName, const std::vector<ConstantCL>& constants=std::vector<ConstantCL>());
+	std::shared_ptr<ProgramCL> CLCompile(const std::string& fileName,const std::initializer_list<ConstantCL>& constants);
 	inline cl_command_queue CLQueue() {
 		return ComputeCL::Instance()->getCommandQueue();
 	}
-	inline cl_context CLContext() {
-		return ComputeCL::Instance()->getContext();
-	}
+	cl_context CLContext();
 	void CLInitialize(const std::string& vendor = "", const ComputeCL::Device& device=ComputeCL::Device::GPU);
 	void CLDestroy();
 	template<class C, class R> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const ComputeCL::Device& type) {
