@@ -83,9 +83,8 @@
 									<listOptionValue builtIn="false" value="m"/>
 									<listOptionValue builtIn="false" value="dl"/>
 								</option>
-								<option id="gnu.cpp.link.option.paths.714322512" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
+								<option id="gnu.cpp.link.option.paths.714322512" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" useByScannerDiscovery="false" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ext/glfw/src}&quot;"/>
-									<listOptionValue builtIn="false" value="/usr/lib64/gcc/x86_64-redhat-linux/4.8.4/"/>
 								</option>
 								<option defaultValue="true" id="gnu.cpp.link.option.shared.1173396387" name="Shared (-shared)" superClass="gnu.cpp.link.option.shared" valueType="boolean"/>
 								<option id="gnu.cpp.link.option.flags.1003579652" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="-static-libstdc++ -static-libgcc" valueType="string"/>
@@ -101,7 +100,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="ext_build|CMakeFiles|ext|build/|src/ocl/|include/ocl/|src/example/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+						<entry excluding="ext_build|CMakeFiles|ext|build/|src/example/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
