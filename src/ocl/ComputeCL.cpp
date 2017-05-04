@@ -204,7 +204,9 @@ std::shared_ptr<ProgramCL> CLCompile(const std::string& fileName,
 			tmp, constants);
 }
 void CLInitialize(const std::string& vendor, const ComputeCL::Device& device) {
-	ComputeCL::Instance()->initialize(vendor, device);
+	if(!ComputeCL::Instance()->isInitialized()){
+		ComputeCL::Instance()->initialize(vendor, device);
+	}
 }
 void CLDestroy() {
 	ComputeCL::Destroy();
