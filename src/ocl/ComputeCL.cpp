@@ -400,8 +400,8 @@ std::shared_ptr<ProgramCL> ComputeCL::compileSources(
 		err = clBuildProgram(program, 1, &deviceId, buildOptions.c_str(), NULL,
 				NULL);
 		if (err != CL_SUCCESS) {
-			std::cerr << "Build Log:\n" << getBuildLog(program) << std::endl;
 			std::cerr << "Source Code [" << srcCodes[0] << "]" << std::endl;
+			std::cerr << "Build Log:\n" << getBuildLog(program) << std::endl;
 			std::cerr.flush();
 			clReleaseProgram(program);
 			program = 0;
@@ -434,8 +434,8 @@ std::shared_ptr<ProgramCL> ComputeCL::compileSource(const std::string& srcCode,
 		err = clBuildProgram(program, 1, &deviceId, buildOptions.c_str(), NULL,
 				NULL);
 		if (err != CL_SUCCESS) {
-			std::cerr << "Build Log:\n" << getBuildLog(program) << std::endl;
 			std::cerr << "Source Code [" << srcCode << "]" << std::endl;
+			std::cerr << "Build Log:\n" << getBuildLog(program) << std::endl;
 			std::cerr.flush();
 			clReleaseProgram(program);
 			program = 0;
@@ -486,8 +486,8 @@ std::shared_ptr<ProgramCL> ComputeCL::compileFiles(
 		err = clBuildProgram(program, 1, &deviceId, buildOptions.c_str(), NULL,
 				NULL);
 		if (err != CL_SUCCESS) {
-			std::cerr << "Build Log:\n" << getBuildLog(program) << std::endl;
 			std::cerr << "Source Code [" << srcCodes[0] << "]" << std::endl;
+			std::cerr << "Build Log:\n" << getBuildLog(program) << std::endl;
 			std::cerr.flush();
 			clReleaseProgram(program);
 			program = 0;
@@ -521,8 +521,8 @@ std::shared_ptr<ProgramCL> ComputeCL::compileFile(const std::string& fileName,
 		err = clBuildProgram(program, 1, &deviceId, buildOptions.c_str(), NULL,
 				NULL);
 		if (err != CL_SUCCESS) {
-			std::cerr << "Build Log:\n" << getBuildLog(program) << std::endl;
 			std::cerr << "Source Code [" << srcCodes[0] << "]" << std::endl;
+			std::cerr << "Build Log:\n" << getBuildLog(program) << std::endl;
 			std::cerr.flush();
 			clReleaseProgram(program);
 			program = 0;
