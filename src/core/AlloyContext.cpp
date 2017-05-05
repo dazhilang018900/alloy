@@ -240,7 +240,17 @@ void AlloyContext::addAssetDirectory(const std::string& dir) {
 			}
 		}
 	}
-	assetDirectories.push_back(dirCopy);
+	//Mitigate duplicate entries
+	bool found=false;
+	for(std::string str:assetDirectories){
+		if(str==dirCopy){
+			found=true;
+			break;
+		}
+	}
+	if(!found){
+		assetDirectories.push_back(dirCopy);
+	}
 }
 std::shared_ptr<Font>& AlloyContext::loadFont(FontType type,
 		const std::string& name, const std::string& file) {
