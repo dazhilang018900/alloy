@@ -35,6 +35,13 @@ namespace aly {
 	size_t RoundToWorkgroup(size_t size, size_t workgroupSize) {
 		return (size % workgroupSize == 0) ? size : workgroupSize * (size / workgroupSize + 1);
 	}
+	size_t RoundToPowerOfTwo(size_t size) {
+		size_t newSize=1;
+		while(newSize<size){
+			newSize<<=1;
+		}
+		return newSize;
+	}
 	FunctionCL::FunctionCL() :
 			kernel(nullptr) {
 	}

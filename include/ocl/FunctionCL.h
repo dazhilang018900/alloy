@@ -62,6 +62,7 @@ namespace aly {
 		}
 	};
 	size_t RoundToWorkgroup(size_t size, size_t workgroupSize);
+	size_t RoundToPowerOfTwo(size_t size);
 	class FunctionCL {
 	protected:
 		std::string kernelName;
