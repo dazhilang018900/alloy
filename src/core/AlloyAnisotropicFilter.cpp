@@ -28,7 +28,7 @@ void AnisotropicDiffusion(const ImageRGBAf& imageIn, ImageRGBAf& out,
 	float kernelGX[M][N];
 	float kernelGY[M][N];
 	float kernelL[M][N];
-	float sigma = 1.5f;
+	float sigma = 1.2f;
 	GaussianKernelDerivative(kernelGX, kernelGY, sigma, sigma);
 	GaussianKernelLaplacian(kernelL, sigma, sigma);
 	aly::ImageRGBAf imageGx(imageIn.width, imageIn.height);
@@ -55,7 +55,7 @@ void AnisotropicDiffusion(const ImageRGBAf& imageIn, ImageRGBAf& out,
 				imageGx(i, j) = gX;
 				imageGy(i, j) = gY;
 				imageL(i, j) = L;
-				RGBAf score;
+				RGBAf score(0.0f);
 				RGBAf mag = gX * gX + gY * gY;
 				for (int n = 0; n < 4; n++) {
 					score[n] = std::exp(-mag[n] / (K * K));
@@ -63,9 +63,7 @@ void AnisotropicDiffusion(const ImageRGBAf& imageIn, ImageRGBAf& out,
 				imageC(i, j) = score;
 			}
 		}
-		//WriteImageToFile(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"Gx.xml",imageGx);
-		//WriteImageToFile(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"Gy.xml",imageGy);
-		//WriteImageToFile(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"L.xml",imageL);
+		//WriteImageToFile(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"out"<<iter<<".png",out);
 		//WriteImageToFile(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"C"<<iter<<".png",imageC);
 #pragma omp parallel for
 		for (int j = 0; j < imageIn.height; j++) {
@@ -77,15 +75,8 @@ void AnisotropicDiffusion(const ImageRGBAf& imageIn, ImageRGBAf& out,
 				RGBAf cX = imageC(i + 1, j) - imageC(i - 1, j);
 				RGBAf cY = imageC(i, j + 1) - imageC(i, j - 1);
 				RGBAf c = dt * (cX * gX + cY * gY + C * L);
-				out(i, j) += c;
+				out(i, j) =out(i, j)+ c;
 			}
-		}
-	}
-#pragma omp parallel for
-	for (int j = 0; j < out.height; j++) {
-		for (int i = 0; i < out.width; i++) {
-			RGBAf c = out(i, j);
-			out(i, j) = clamp(c, RGBAf(0.0f), RGBAf(1.0f));
 		}
 	}
 }
