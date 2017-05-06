@@ -58,7 +58,7 @@ void AnisotropicDiffusion(const ImageRGBAf& imageIn, ImageRGBAf& out,
 				RGBAf score(0.0f);
 				RGBAf mag = gX * gX + gY * gY;
 				for (int n = 0; n < 4; n++) {
-					score[n] = std::exp(-mag[n] / (K * K));
+					score[n] = (float)std::exp(-std::max(mag[n],0.0f) / (K * K));
 				}
 				imageC(i, j) = score;
 			}
