@@ -23,10 +23,10 @@
 #define INCLUDE_CORE_ALLOYANISOTROPICFILTER_H_
 #include <AlloyImageProcessing.h>
 namespace aly{
-	void AnisotropicDiffusion(const Image1f& imageIn,Image1f& out,int iterations=16,float K=0.01f,float dt=0.9f);
-	void AnisotropicDiffusion(const Image2f& imageIn,Image2f& out,int iterations=16,float K=0.01f,float dt=0.9f);
-	void AnisotropicDiffusion(const Image3f& imageIn,Image3f& out,int iterations=16,float K=0.01f,float dt=0.9f);
-	void AnisotropicDiffusion(const Image4f& imageIn,Image4f& out,int iterations=16,float K=0.01f,float dt=0.9f);
+	void AnisotropicDiffusion(const Image1f& imageIn,Image1f& out,int iterations=32,float K=0.02f,float dt=0.3f);
+	void AnisotropicDiffusion(const Image2f& imageIn,Image2f& out,int iterations=32,float K=0.02f,float dt=0.3f);
+	void AnisotropicDiffusion(const Image3f& imageIn,Image3f& out,int iterations=32,float K=0.02f,float dt=0.3f);
+	void AnisotropicDiffusion(const Image4f& imageIn,Image4f& out,int iterations=32,float K=0.02f,float dt=0.3f);
 
 }
 

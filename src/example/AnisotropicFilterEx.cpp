@@ -1,5 +1,5 @@
 /*
- * Copyright(C) 2015, Blake C. Lucas, Ph.D. (img.science@gmail.com)
+ * Copyright(C) 2017, Blake C. Lucas, Ph.D. (img.science@gmail.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -18,7 +18,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 #include "Alloy.h"
 #include "AlloyAnisotropicFilter.h"
 #include "../../include/example/AnisotropicFilterEx.h"
@@ -30,7 +29,7 @@ bool AnisotropicFilterEx::init(Composite& rootNode) {
 	ImageRGBAf img,out;
 	ReadImageFromFile(getFullPath("images/sfmarket.png"),out);
 	DownSample(out,img);
-	AnisotropicDiffusion(img,out,16,0.01f,0.9f);
+	AnisotropicDiffusion(img,out,32,0.02f,0.3f);
 	imageGlyph=createImageGlyph(out);
 	imageRegion = MakeGlyphRegion(imageGlyph, CoordPerPX(0.5f,0.5f,-out.width/2,-out.height/2), CoordPX(out.width, out.height), AspectRule::FixedHeight,COLOR_NONE, COLOR_NONE, Color(200, 200, 200, 255), UnitPX(1.0f));
 	imageRegion->setDragEnabled(true);
