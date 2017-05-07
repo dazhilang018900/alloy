@@ -80,7 +80,6 @@ template<class T, size_t M, size_t N> void GaussianKernelLaplacian(
 				T(0.607902736 * (N - 1) * 0.5)) {
 	T sum = 0;
 	T sum2 = 0;
-#pragma omp parallel for
 	for (int i = 0; i < (int)M; i++) {
 		for (int j = 0; j < (int)N; j++) {
 			T x = T(i - 0.5 * (M - 1));

@@ -58,13 +58,12 @@ void AnisotropicDiffusion(const ImageRGBAf& imageIn, ImageRGBAf& out,
 				RGBAf score(0.0f);
 				RGBAf mag = gX * gX + gY * gY;
 				for (int n = 0; n < 4; n++) {
-					score[n] = (float)std::exp(-std::max(mag[n],0.0f) / (K * K));
+					score[n] = (float) std::exp(
+							-std::max(mag[n], 0.0f) / (K * K));
 				}
 				imageC(i, j) = score;
 			}
 		}
-		//WriteImageToFile(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"out"<<iter<<".png",out);
-		//WriteImageToFile(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"C"<<iter<<".png",imageC);
 #pragma omp parallel for
 		for (int j = 0; j < imageIn.height; j++) {
 			for (int i = 0; i < imageIn.width; i++) {
@@ -75,10 +74,17 @@ void AnisotropicDiffusion(const ImageRGBAf& imageIn, ImageRGBAf& out,
 				RGBAf cX = imageC(i + 1, j) - imageC(i - 1, j);
 				RGBAf cY = imageC(i, j + 1) - imageC(i, j - 1);
 				RGBAf c = dt * (cX * gX + cY * gY + C * L);
-				out(i, j) =out(i, j)+ c;
+				out(i, j) = out(i, j) + c;
 			}
 		}
 	}
+#pragma omp parallel for
+	for (int j = 0; j < imageIn.height; j++) {
+		for (int i = 0; i < imageIn.width; i++) {
+			out(i, j) = clamp(out(i, j), RGBAf(0.0f), RGBAf(1.0f));
+		}
+	}
+
 }
 }
 
