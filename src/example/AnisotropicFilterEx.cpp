@@ -30,7 +30,7 @@ bool AnisotropicFilterEx::init(Composite& rootNode) {
 	ImageRGBAf img,out;
 	ReadImageFromFile(getFullPath("images/sfmarket.png"),out);
 	DownSample(out,img);
-	AnisotropicDiffusion(img,out,16,0.01f,0.3f);
+	AnisotropicDiffusion(img,out,16,0.01f,0.9f);
 	imageGlyph=createImageGlyph(out);
 	imageRegion = MakeGlyphRegion(imageGlyph, CoordPerPX(0.5f,0.5f,-out.width/2,-out.height/2), CoordPX(out.width, out.height), AspectRule::FixedHeight,COLOR_NONE, COLOR_NONE, Color(200, 200, 200, 255), UnitPX(1.0f));
 	imageRegion->setDragEnabled(true);

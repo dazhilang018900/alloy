@@ -24,10 +24,11 @@ namespace aly {
 template <int C> void AnisotropicDiffusionT(const Image<float,C,ImageType::FLOAT>& imageIn, Image<float,C,ImageType::FLOAT>& out,int iterations, float K, float dt) {
 	const int M = 3;
 	const int N = 3;
+	const float sigma = 1.2f;
 	float kernelGX[M][N];
 	float kernelGY[M][N];
 	float kernelL[M][N];
-	float sigma = 1.2f;
+
 	GaussianKernelDerivative(kernelGX, kernelGY, sigma, sigma);
 	GaussianKernelLaplacian(kernelL, sigma, sigma);
 	aly::Image<float,C,ImageType::FLOAT> imageGx(imageIn.width, imageIn.height);
@@ -69,8 +70,15 @@ template <int C> void AnisotropicDiffusionT(const Image<float,C,ImageType::FLOAT
 				vec<float,C> gY = imageGy(i, j);
 				vec<float,C> L = imageL(i, j);
 				vec<float,C> score = imageC(i, j);
-				vec<float,C> cX = imageC(i + 1, j) - imageC(i - 1, j);
-				vec<float,C> cY = imageC(i, j + 1) - imageC(i, j - 1);
+				vec<float,C> cX(0.0f);
+				vec<float,C> cY(0.0f);
+				for (int ii = 0; ii < M; ii++) {
+					for (int jj = 0; jj < N; jj++) {
+						vec<float,C> val = imageC((int) (i + ii - M / 2),(int) (j + jj - N / 2));
+						cX += kernelGX[ii][jj] * val;
+						cY += kernelGY[ii][jj] * val;
+					}
+				}
 				vec<float,C> c = dt * (cX * gX + cY * gY + score * L);
 				out(i, j) = out(i, j) + c;
 			}
