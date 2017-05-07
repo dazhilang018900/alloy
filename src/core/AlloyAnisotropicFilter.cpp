@@ -19,10 +19,9 @@
  * THE SOFTWARE.
  */
 #include <AlloyAnisotropicFilter.h>
-
+#include <AlloyImage.h>
 namespace aly {
-void AnisotropicDiffusion(const ImageRGBAf& imageIn, ImageRGBAf& out,
-		int iterations, float K, float dt) {
+template <int C> void AnisotropicDiffusionT(const Image<float,C,ImageType::FLOAT>& imageIn, Image<float,C,ImageType::FLOAT>& out,int iterations, float K, float dt) {
 	const int M = 3;
 	const int N = 3;
 	float kernelGX[M][N];
@@ -31,22 +30,21 @@ void AnisotropicDiffusion(const ImageRGBAf& imageIn, ImageRGBAf& out,
 	float sigma = 1.2f;
 	GaussianKernelDerivative(kernelGX, kernelGY, sigma, sigma);
 	GaussianKernelLaplacian(kernelL, sigma, sigma);
-	aly::ImageRGBAf imageGx(imageIn.width, imageIn.height);
-	aly::ImageRGBAf imageGy(imageIn.width, imageIn.height);
-	aly::ImageRGBAf imageL(imageIn.width, imageIn.height);
-	aly::ImageRGBAf imageC(imageIn.width, imageIn.height);
+	aly::Image<float,C,ImageType::FLOAT> imageGx(imageIn.width, imageIn.height);
+	aly::Image<float,C,ImageType::FLOAT> imageGy(imageIn.width, imageIn.height);
+	aly::Image<float,C,ImageType::FLOAT> imageL(imageIn.width, imageIn.height);
+	aly::Image<float,C,ImageType::FLOAT> imageC(imageIn.width, imageIn.height);
 	out = imageIn;
 	for (int iter = 0; iter < iterations; iter++) {
 #pragma omp parallel for
 		for (int j = 0; j < imageIn.height; j++) {
 			for (int i = 0; i < imageIn.width; i++) {
-				RGBAf gX(0.0f);
-				RGBAf gY(0.0f);
-				RGBAf L(0.0f);
+				vec<float,C> gX(0.0f);
+				vec<float,C> gY(0.0f);
+				vec<float,C> L(0.0f);
 				for (int ii = 0; ii < M; ii++) {
 					for (int jj = 0; jj < N; jj++) {
-						RGBAf val = out((int) (i + ii - M / 2),
-								(int) (j + jj - N / 2));
+						vec<float,C> val = out((int) (i + ii - M / 2),(int) (j + jj - N / 2));
 						gX += kernelGX[ii][jj] * val;
 						gY += kernelGY[ii][jj] * val;
 						L += kernelL[ii][jj] * val;
@@ -55,9 +53,9 @@ void AnisotropicDiffusion(const ImageRGBAf& imageIn, ImageRGBAf& out,
 				imageGx(i, j) = gX;
 				imageGy(i, j) = gY;
 				imageL(i, j) = L;
-				RGBAf score(0.0f);
-				RGBAf mag = gX * gX + gY * gY;
-				for (int n = 0; n < 4; n++) {
+				vec<float,C> score(0.0f);
+				vec<float,C> mag = gX * gX + gY * gY;
+				for (int n = 0; n < C; n++) {
 					score[n] = (float) std::exp(
 							-std::max(mag[n], 0.0f) / (K * K));
 				}
@@ -67,13 +65,13 @@ void AnisotropicDiffusion(const ImageRGBAf& imageIn, ImageRGBAf& out,
 #pragma omp parallel for
 		for (int j = 0; j < imageIn.height; j++) {
 			for (int i = 0; i < imageIn.width; i++) {
-				RGBAf gX = imageGx(i, j);
-				RGBAf gY = imageGy(i, j);
-				RGBAf L = imageL(i, j);
-				RGBAf C = imageC(i, j);
-				RGBAf cX = imageC(i + 1, j) - imageC(i - 1, j);
-				RGBAf cY = imageC(i, j + 1) - imageC(i, j - 1);
-				RGBAf c = dt * (cX * gX + cY * gY + C * L);
+				vec<float,C> gX = imageGx(i, j);
+				vec<float,C> gY = imageGy(i, j);
+				vec<float,C> L = imageL(i, j);
+				vec<float,C> score = imageC(i, j);
+				vec<float,C> cX = imageC(i + 1, j) - imageC(i - 1, j);
+				vec<float,C> cY = imageC(i, j + 1) - imageC(i, j - 1);
+				vec<float,C> c = dt * (cX * gX + cY * gY + score * L);
 				out(i, j) = out(i, j) + c;
 			}
 		}
@@ -81,10 +79,23 @@ void AnisotropicDiffusion(const ImageRGBAf& imageIn, ImageRGBAf& out,
 #pragma omp parallel for
 	for (int j = 0; j < imageIn.height; j++) {
 		for (int i = 0; i < imageIn.width; i++) {
-			out(i, j) = clamp(out(i, j), RGBAf(0.0f), RGBAf(1.0f));
+			out(i, j) = clamp(out(i, j), vec<float,C>(0.0f), vec<float,C>(1.0f));
 		}
 	}
-
 }
+
+void AnisotropicDiffusion(const Image1f& imageIn,Image1f& out,int iterations,float K,float dt){
+	AnisotropicDiffusionT(imageIn,out,iterations,K,dt);
+}
+void AnisotropicDiffusion(const Image2f& imageIn,Image2f& out,int iterations,float K,float dt){
+	AnisotropicDiffusionT(imageIn,out,iterations,K,dt);
+}
+void AnisotropicDiffusion(const Image3f& imageIn,Image3f& out,int iterations,float K,float dt){
+	AnisotropicDiffusionT(imageIn,out,iterations,K,dt);
+}
+void AnisotropicDiffusion(const Image4f& imageIn,Image4f& out,int iterations,float K,float dt){
+	AnisotropicDiffusionT(imageIn,out,iterations,K,dt);
+}
+
 }
 
