@@ -75,6 +75,7 @@ namespace aly {
 		std::vector<cl_mem> glObjects;
 		std::vector<const void*> argValues;
 		std::vector<size_t> argSizes;
+		void setWorkGroupSize(size_t gx, size_t gy, size_t gz, size_t lx, size_t ly,size_t lz);
 		void setWorkGroupSize(size_t gx, size_t gy, size_t lx, size_t ly);
 		void setWorkGroupSize(size_t gx, size_t lx);
 		void execute(const std::vector<const void*>& args, std::vector<size_t>& sizes);
@@ -166,6 +167,8 @@ namespace aly {
 			return *this;
 		}
 		void create(const ProgramCL &p, const std::string& name);
+		void execute3D(size_t gx, size_t gy, size_t gz, size_t lx, size_t ly,size_t lz);
+		void execute3D(size_t gx, size_t gy,size_t gz);
 		void execute2D(size_t gx, size_t gy, size_t lx, size_t ly);
 		void execute2D(size_t gx, size_t gy);
 		void execute1D(size_t gx, size_t lx);

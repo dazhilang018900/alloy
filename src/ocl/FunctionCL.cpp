@@ -309,8 +309,35 @@ namespace aly {
 		localSizes[0] = lx;
 		localSizes[1] = ly;
 	}
+	void FunctionCL::setWorkGroupSize(size_t gx, size_t gy,size_t gz, size_t lx, size_t ly,size_t lz) {
+		globalSizes.resize(3);
+		localSizes.resize(3);
+		globalSizes[0] = RoundToWorkgroup(gx, lx);
+		globalSizes[1] = RoundToWorkgroup(gy, gy);
+		globalSizes[2] = RoundToWorkgroup(gz, gz);
+		localSizes[0] = lx;
+		localSizes[1] = ly;
+		localSizes[2] = ly;
+
+	}
 	void FunctionCL::execute2D(size_t gx, size_t gy, size_t lx, size_t ly) {
 		setWorkGroupSize(gx, gy, lx, ly);
+		if (!glObjects.empty()) {
+			if (CLInstance()->lockGL(glObjects)) {
+				execute(argValues, argSizes);
+				if(!CLInstance()->unlockGL(glObjects)){
+					throw ocl_runtime_error("CL/GL unlock failed.");
+				}
+				glObjects.clear();
+			} else {
+				throw ocl_runtime_error("CL/GL lock failed.");
+			}
+		} else {
+			execute(argValues, argSizes);
+		}
+	}
+	void FunctionCL::execute3D(size_t gx, size_t gy, size_t gz, size_t lx, size_t ly,size_t lz) {
+		setWorkGroupSize(gx, gy, gz, lx, ly,lz);
 		if (!glObjects.empty()) {
 			if (CLInstance()->lockGL(glObjects)) {
 				execute(argValues, argSizes);
@@ -329,6 +356,34 @@ namespace aly {
 		globalSizes.resize(2);
 		globalSizes[0] = gx;
 		globalSizes[1] = gy;
+		localSizes.clear();
+		bool locked = false;
+		try {
+			if (!glObjects.empty()) {
+				if (CLInstance()->lockGL(glObjects)) {
+					locked = true;
+					execute(argValues, argSizes);
+					if(!CLInstance()->unlockGL(glObjects)){
+						throw ocl_runtime_error("CL/GL unlock failed.");
+					}
+				} else {
+					throw ocl_runtime_error("CL/GL lock failed.");
+				}
+				glObjects.clear();
+			} else {
+				execute(argValues, argSizes);
+			}
+		} catch (const ocl_runtime_error& e) {
+			if (locked)
+				CLInstance()->unlockGL(glObjects);
+			throw e;
+		}
+	}
+	void FunctionCL::execute3D(size_t gx, size_t gy,size_t gz) {
+		globalSizes.resize(3);
+		globalSizes[0] = gx;
+		globalSizes[1] = gy;
+		globalSizes[2] = gz;
 		localSizes.clear();
 		bool locked = false;
 		try {

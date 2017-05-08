@@ -818,6 +818,33 @@ template<class T, int C, ImageType I> Image<T, C, I> operator/=(
 	return out;
 }
 
+
+template<class T, int C, ImageType I> Image<T, C, I> operator+=(
+		Image<T, C, I>& out, const T& scalar) {
+	std::function<void(vec<T, C>&)> f = [=](vec<T,C>& val1) {val1+=scalar;};
+	Transform(out, f);
+	return out;
+}
+template<class T, int C, ImageType I> Image<T, C, I> operator-=(
+		Image<T, C, I>& out, const T& scalar) {
+	std::function<void(vec<T, C>&)> f = [=](vec<T,C>& val1) {val1-=scalar;};
+	Transform(out, f);
+	return out;
+}
+template<class T, int C, ImageType I> Image<T, C, I> operator*=(
+		Image<T, C, I>& out, const T& scalar) {
+	std::function<void(vec<T, C>&)> f = [=](vec<T,C>& val1) {val1*=scalar;};
+	Transform(out, f);
+	return out;
+}
+template<class T, int C, ImageType I> Image<T, C, I> operator/=(
+		Image<T, C, I>& out, const T& scalar) {
+	std::function<void(vec<T, C>&)> f = [=](vec<T,C>& val1) {val1/=scalar;};
+	Transform(out, f);
+	return out;
+}
+
+
 template<class T, int C, ImageType I> Image<T, C, I> operator+(
 		const Image<T, C, I>& img1, const Image<T, C, I>& img2) {
 	Image<T, C, I> out(img1.width, img1.height);

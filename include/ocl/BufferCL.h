@@ -48,6 +48,26 @@ namespace aly {
 		template<class T> void read(std::vector<T>& vec, bool block = true) {
 			MemoryCL::read(vec, block);
 		}
+		template<class T> T readFront() {
+			T value=(T)0;
+			MemoryCL::read(&value,sizeof(T), true);
+			return value;
+		}
+		template<class T> void writeFront(T value) {
+			MemoryCL::write(&value,sizeof(T), true);
+		}
+		inline float readFloat() {
+			return readFront<float>();
+		}
+		inline int readInteger() {
+			return readFront<int>();
+		}
+		inline char readChar() {
+			return readFront<char>();
+		}
+		inline double readDouble() {
+			return readFront<double>();
+		}
 		void create(size_t bufferSize,void* data = nullptr) {
 			create(CL_MEM_READ_WRITE, bufferSize, data);
 		}
