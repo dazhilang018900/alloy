@@ -1264,6 +1264,38 @@ template<class T> matrix<T, 4, 4> MakeScale(const vec<T, 4>& scale) {
 template<class T> matrix<T, 4, 4> MakeScale(T scale) {
 	return matrix<T, 4, 4>(vec<T, 4>(scale, 0, 0, 0), vec<T, 4>(0, scale, 0, 0), vec<T, 4>(0, 0, scale, 0), vec<T, 4>(0, 0, 0, 1));
 }
+template<class T> matrix<T, 3, 3> MakeTranslation(const vec<T, 2>& translation) {
+	return matrix<T, 3, 3>(
+			vec<T, 3>((T) 1, (T) 0, (T) 0),
+			vec<T, 3>((T) 0, (T) 1, (T) 0),
+			vec<T, 3>(translation.x, translation.y, (T) 1));
+}
+template<class T> matrix<T, 3, 3> MakeTranslation(const T tx, const T ty) {
+	return matrix<T, 3, 3>(
+			vec<T, 3>((T) 1, (T) 0, (T) 0),
+			vec<T, 3>((T) 0, (T) 1, (T) 0),
+			vec<T, 3>(tx, ty, (T) 1));
+}
+template<class T> matrix<T, 3, 3> MakeRotation(const T angle) {
+	T cs=std::cos(angle);
+	T sn=std::sin(angle);
+	return matrix<T, 3, 3>(
+			vec<T, 3>(  cs,   sn, (T) 0),
+			vec<T, 3>( -sn,   cs, (T) 0),
+			vec<T, 3>((T)0, (T)0, (T) 1));
+}
+template<class T> matrix<T, 3, 3> MakeScale(const T sx,const T sy) {
+	return matrix<T, 3, 3>(
+			vec<T, 3>((T) sx, (T) 0, (T) 0),
+			vec<T, 3>((T) 0, (T) sy, (T) 0),
+			vec<T, 3>( (T)0,        (T)0, (T) 1));
+}
+template<class T> matrix<T, 3, 3> MakeScale(const vec<T, 2>& scale) {
+	return matrix<T, 3, 3>(
+			vec<T, 3>((T) scale.x, (T) 0, (T) 0),
+			vec<T, 3>((T) 0, (T) scale.y, (T) 0),
+			vec<T, 3>( (T)0,        (T)0, (T) 1));
+}
 /*
 
  The MIT License (MIT)
