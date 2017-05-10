@@ -22,6 +22,7 @@
 #include <AlloyImage.h>
 namespace aly {
 template <int C> void AnisotropicDiffusionT(const Image<float,C,ImageType::FLOAT>& imageIn, Image<float,C,ImageType::FLOAT>& out,int iterations, float K, float dt) {
+	//T=dt*iterations = 0.5*sigma*sigma where sigma refers to equivalent gaussian filter
 	const int M = 3;
 	const int N = 3;
 	const float sigma = 1.2f;
