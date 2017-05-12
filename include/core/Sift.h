@@ -7,8 +7,8 @@
  * of the BSD 3-Clause license. See the LICENSE.txt file for details.
  *
  * Notes:
- * - The implementation allows a minmum octave of -1 only.
- * - The descriptor extration supports 128 dimensions only.
+ * - The implementation allows a minimum octave of -1 only.
+ * - The descriptor extraction supports 128 dimensions only.
  * - Coordinates in the keypoint are relative to the octave.
  *   Absolute coordinates are obtained by (TODO why? explain):
  *   (x + 0.5, y + 0.5) * 2^octave - (0.5, 0.5).

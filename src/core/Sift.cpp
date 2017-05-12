@@ -39,7 +39,6 @@ Sift::Sift(	SiftOptions options):options(options) {
 /* ---------------------------------------------------------------- */
 
 void Sift::solve() {
-	this->options = options;
 	if (this->options.minOctave < -1
 			|| this->options.minOctave > this->options.maxOctave)
 		throw std::invalid_argument("Invalid octave range");
