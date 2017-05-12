@@ -21,8 +21,9 @@
 #include <AlloyAnisotropicFilter.h>
 #include <AlloyImage.h>
 namespace aly {
-template <int C> void AnisotropicDiffusionT(const Image<float,C,ImageType::FLOAT>& imageIn, Image<float,C,ImageType::FLOAT>& out,int iterations, float K, float dt) {
+template <int C> void AnisotropicDiffusionT(const Image<float,C,ImageType::FLOAT>& imageIn, Image<float,C,ImageType::FLOAT>& out,int iterations,const AnisotropicKernel& kernel, float K, float dt) {
 	//T=dt*iterations = 0.5*sigma*sigma where sigma refers to equivalent gaussian filter
+	//SIFT uses sigmas separated by 2^1/S where S is scale space S=1...4
 	const int M = 3;
 	const int N = 3;
 	const float sigma = 1.2f;
@@ -37,6 +38,7 @@ template <int C> void AnisotropicDiffusionT(const Image<float,C,ImageType::FLOAT
 	aly::Image<float,C,ImageType::FLOAT> imageL(imageIn.width, imageIn.height);
 	aly::Image<float,C,ImageType::FLOAT> imageC(imageIn.width, imageIn.height);
 	out = imageIn;
+	const float ZERO_TOLERANCE=1E-6f;
 	for (int iter = 0; iter < iterations; iter++) {
 #pragma omp parallel for
 		for (int j = 0; j < imageIn.height; j++) {
@@ -56,10 +58,27 @@ template <int C> void AnisotropicDiffusionT(const Image<float,C,ImageType::FLOAT
 				imageGy(i, j) = gY;
 				imageL(i, j) = L;
 				vec<float,C> score(0.0f);
-				vec<float,C> mag = gX * gX + gY * gY;
-				for (int n = 0; n < C; n++) {
-					score[n] = (float) std::exp(
-							-std::max(mag[n], 0.0f) / (K * K));
+				if(kernel==AnisotropicKernel::Gaussian){
+					vec<float,C> mag = gX * gX + gY * gY;
+					for (int n = 0; n < C; n++) {
+						score[n] = (float) std::exp(
+								-std::max(mag[n], 0.0f) / (K * K));
+					}
+				} else if(kernel==AnisotropicKernel::PeronaMalik){
+					vec<float,C> mag = gX * gX + gY * gY;
+					for (int n = 0; n < C; n++) {
+						score[n] = (float) 1.0f/std::max(ZERO_TOLERANCE,1+mag[n]/(K*K));
+					}
+				} else if(kernel==AnisotropicKernel::Weickert){//Used in KAZE filters
+					vec<float,C> mag = gX * gX + gY * gY;
+					for (int n = 0; n < C; n++) {
+						double det=std::pow(std::sqrt(mag[n])/K,8.0);
+						if(det<=ZERO_TOLERANCE){
+							score[n]=1.0f;
+						} else {
+							score[n] = 1-std::exp(-3.315/det);
+						}
+					}
 				}
 				imageC(i, j) = score;
 			}
@@ -92,17 +111,17 @@ template <int C> void AnisotropicDiffusionT(const Image<float,C,ImageType::FLOAT
 	}
 }
 
-void AnisotropicDiffusion(const Image1f& imageIn,Image1f& out,int iterations,float K,float dt){
-	AnisotropicDiffusionT(imageIn,out,iterations,K,dt);
+void AnisotropicDiffusion(const Image1f& imageIn,Image1f& out,int iterations,const AnisotropicKernel& kernel,float K,float dt){
+	AnisotropicDiffusionT(imageIn,out,iterations,kernel,K,dt);
 }
-void AnisotropicDiffusion(const Image2f& imageIn,Image2f& out,int iterations,float K,float dt){
-	AnisotropicDiffusionT(imageIn,out,iterations,K,dt);
+void AnisotropicDiffusion(const Image2f& imageIn,Image2f& out,int iterations,const AnisotropicKernel& kernel,float K,float dt){
+	AnisotropicDiffusionT(imageIn,out,iterations,kernel,K,dt);
 }
-void AnisotropicDiffusion(const Image3f& imageIn,Image3f& out,int iterations,float K,float dt){
-	AnisotropicDiffusionT(imageIn,out,iterations,K,dt);
+void AnisotropicDiffusion(const Image3f& imageIn,Image3f& out,int iterations,const AnisotropicKernel& kernel,float K,float dt){
+	AnisotropicDiffusionT(imageIn,out,iterations,kernel,K,dt);
 }
-void AnisotropicDiffusion(const Image4f& imageIn,Image4f& out,int iterations,float K,float dt){
-	AnisotropicDiffusionT(imageIn,out,iterations,K,dt);
+void AnisotropicDiffusion(const Image4f& imageIn,Image4f& out,int iterations,const AnisotropicKernel& kernel,float K,float dt){
+	AnisotropicDiffusionT(imageIn,out,iterations,kernel,K,dt);
 }
 
 }
