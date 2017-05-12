@@ -23,7 +23,7 @@
 namespace aly {
 template <int C> void AnisotropicDiffusionT(const Image<float,C,ImageType::FLOAT>& imageIn, Image<float,C,ImageType::FLOAT>& out,int iterations,const AnisotropicKernel& kernel, float K, float dt) {
 	//T=dt*iterations = 0.5*sigma*sigma where sigma refers to equivalent gaussian filter
-	//SIFT uses sigmas separated by 2^1/S where S is scale space S=1...4
+	//SIFT uses sigmas separated by 2^1/S where S is the total number of scales
 	const int M = 3;
 	const int N = 3;
 	const float sigma = 1.2f;
