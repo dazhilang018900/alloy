@@ -206,9 +206,21 @@ public:
 		solve();
 	}
 	/** Returns the list of keypoints. */
-	Keypoints const& getKeypoints(void) const;
-	Octaves const& getOctaves(void) const;
-	ImageFeatures getImageFeatures(void) const;
+	Keypoints const& getKeypoints(void) const{
+		return keypoints;
+	}
+	Octaves const& getOctaves(void) const{
+		return octaves;
+	}
+	ImageFeatures const& getImageFeatures(void) const{
+		return ImageFeatures(descriptors,keypoints,octaves);
+	}
+	Keypoints& getKeypoints(void) {
+		return keypoints;
+	}
+	Octaves& getOctaves(void){
+		return octaves;
+	}
 	/** Returns the list of descriptors. */
 	Descriptors const& getDescriptors(void) const;
 
@@ -243,23 +255,6 @@ private:
 	Keypoints keypoints; // Detected keypoints
 	Descriptors descriptors; // Final SIFT descriptors
 };
-
-/* ---------------------------------------------------------------- */
-
-inline Keypoints const&
-Sift::getKeypoints(void) const {
-	return this->keypoints;
-}
-inline Octaves const& Sift::getOctaves() const {
-	return octaves;
-}
-inline Descriptors const&
-Sift::getDescriptors(void) const {
-	return this->descriptors;
-}
-inline ImageFeatures Sift::getImageFeatures(void) const{
-	return ImageFeatures(descriptors,keypoints,octaves);
-}
 
 }
 
