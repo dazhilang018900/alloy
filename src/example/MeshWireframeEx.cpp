@@ -29,7 +29,7 @@ MeshWireframeEx::MeshWireframeEx() :
 bool MeshWireframeEx::init(Composite& rootNode) {
 	box3f renderBBox = box3f(float3(-0.5f, -0.5f, -0.5f),
 			float3(1.0f, 1.0f, 1.0f));
-	mesh.load(getFullPath("models/monkey.obj"));
+	mesh.load(getFullPath("models/monkey.ply"));
 	Subdivide(mesh,SubDivisionScheme::CatmullClark);
 	mesh.updateVertexNormals();
 	//Make region on screen to render 3d view

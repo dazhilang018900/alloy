@@ -448,7 +448,6 @@ std::shared_ptr<ProgramCL> ComputeCL::compileSource(const std::string& srcCode,
 std::shared_ptr<ProgramCL> ComputeCL::compileFiles(
 		const std::vector<std::string>& fileNames,
 		const std::vector<ConstantCL>& constants) {
-
 	std::vector<std::string> srcCodes;
 	std::vector<const char*> ptrs;
 	std::string constantStr;
@@ -472,8 +471,7 @@ std::shared_ptr<ProgramCL> ComputeCL::compileFiles(
 		ptrs.resize(fileNames.size());
 		srcCodes.resize(fileNames.size());
 		for (int k = 0; k < (int) fileNames.size(); k++) {
-			std::string textFile = ReadTextFile(
-					AlloyDefaultContext()->getFullPath(fileNames[k]));
+			std::string textFile = ReadTextFile(AlloyDefaultContext()->getFullPath(fileNames[k]));
 			srcCodes[k] = textFile;
 			ptrs[k] = srcCodes[k].c_str();
 		}
@@ -510,6 +508,7 @@ std::shared_ptr<ProgramCL> ComputeCL::compileFile(const std::string& fileName,
 	std::string srcCodes[1];
 	const char* ptrs[1];
 	std::string textFile = constantStr+ ReadTextFile(AlloyDefaultContext()->getFullPath(fileName));
+	if(textFile.size()==0)throw ocl_runtime_error("Could not read OpenCL program.");
 	srcCodes[0] = textFile;
 	ptrs[0] = srcCodes[0].c_str();
 	int err = -1;
@@ -558,6 +557,7 @@ std::shared_ptr<ProgramCL> ComputeCL::compileFiles(const std::string& name,
 		ss << txtFile;
 	}
 	std::string hashString = ss.str();
+	if(hashString.size()==0)throw ocl_runtime_error("Could not read OpenCL program.");
 	std::vector<char> hashData(hashString.begin(), hashString.end());
 	std::string hashCode = aly::HashCode(hashData, HashMethod::SHA256);
 	std::string binaryName = aly::MakeString() << name << "."

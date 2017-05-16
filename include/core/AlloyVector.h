@@ -109,6 +109,19 @@ public:
 			x = val[offset++];
 		}
 	}
+	inline void erase(size_t start,size_t end){
+		if(end>start){
+			std::swap(start, end);
+		}
+		start=std::min(size(),start);
+		end=std::min(size(),end);
+		if(start<end){
+			data.erase(data.begin()+start,data.begin()+end);
+		}
+	}
+	inline void erase(size_t pos){
+		data.erase(data.begin()+pos);
+	}
 	template<class F> void apply(F f) {
 		size_t sz = size();
 #pragma omp parallel for
