@@ -24,6 +24,7 @@
 #include "AlloyMath.h"
 #include "sha2.h"
 #include "AlloyFileUtil.h"
+#include "AlloyVector.h"
 #include "cereal/types/vector.hpp"
 #include <vector>
 #include <functional>
@@ -76,7 +77,8 @@ protected:
 	int x, y;
 	std::string hashCode;
 public:
-	std::vector<vec<T, C>> data;
+	Vector<T,C> vector;//Treat whole image as vector. Useful!
+	std::vector<vec<T, C>>& data;
 	typedef vec<T, C> ValueType;
 	typedef typename std::vector<ValueType>::iterator iterator;
 	typedef typename std::vector<ValueType>::const_iterator const_iterator;
@@ -175,12 +177,14 @@ public:
 	}
 
 	Image(int w, int h, int x = 0, int y = 0, uint64_t id = 0) :
-		x(x), y(y), data(w * h), width(w), height(h), id(id), channels(C), type(
+		x(x), y(y),data(vector.data), width(w), height(h), id(id), channels(C), type(
 			I) {
+		data.resize(w*h);
 	}
 	Image(int w, int h, int2 pos, uint64_t id = 0) :
-		x(pos.x), y(pos.y), data(w * h), width(w), height(h), id(id), channels(
+		x(pos.x), y(pos.y),data(vector.data), width(w), height(h), id(id), channels(
 			C), type(I) {
+		data.resize(w*h);
 	}
 	Image(T* ptr, int w, int h, int x = 0, int y = 0, uint64_t id = 0) :
 		Image(w, h, x, y, id) {
@@ -195,12 +199,12 @@ public:
 		set(ptr);
 	}
 	Image(std::vector<vec<T, C>>& ref, int w, int h, int x = 0, int y = 0,
-		uint64_t id = 0) :
+		uint64_t id = 0) :data(vector.data),
 		x(x), y(y), data(ref), width(w), height(h), id(id), channels(C), type(
 			I) {
 	}
 	Image() :
-		x(0), y(0), width(0), height(0), id(0), channels(C), type(I) {
+		x(0), y(0),data(vector.data), width(0), height(0), id(0), channels(C), type(I) {
 	}
 	Image(const Image<T, C, I>& img) :
 		Image(img.width, img.height, img.x, img.y, img.id) {

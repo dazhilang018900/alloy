@@ -20,8 +20,13 @@
  */
 #include <AlloyAnisotropicFilter.h>
 #include <AlloyImage.h>
+#include <AlloySparseMatrix.h>
+#include <AlloySparseSolve.h>
 namespace aly {
-template <int C> void AnisotropicDiffusionT(const Image<float,C,ImageType::FLOAT>& imageIn, Image<float,C,ImageType::FLOAT>& out,int iterations,const AnisotropicKernel& kernel, float K, float dt) {
+template<int C> void AnisotropicDiffusionT(
+		const Image<float, C, ImageType::FLOAT>& imageIn,
+		Image<float, C, ImageType::FLOAT>& out, int iterations,
+		const AnisotropicKernel& kernel, float K, float dt) {
 	//T=dt*iterations = 0.5*sigma*sigma where sigma refers to equivalent gaussian filter
 	//SIFT uses sigmas separated by 2^1/S where S is the total number of scales
 	const int M = 3;
@@ -33,22 +38,30 @@ template <int C> void AnisotropicDiffusionT(const Image<float,C,ImageType::FLOAT
 
 	GaussianKernelDerivative(kernelGX, kernelGY, sigma, sigma);
 	GaussianKernelLaplacian(kernelL, sigma, sigma);
-	aly::Image<float,C,ImageType::FLOAT> imageGx(imageIn.width, imageIn.height);
-	aly::Image<float,C,ImageType::FLOAT> imageGy(imageIn.width, imageIn.height);
-	aly::Image<float,C,ImageType::FLOAT> imageL(imageIn.width, imageIn.height);
-	aly::Image<float,C,ImageType::FLOAT> imageC(imageIn.width, imageIn.height);
+	aly::Image<float, C, ImageType::FLOAT> imageGx(imageIn.width,
+			imageIn.height);
+	aly::Image<float, C, ImageType::FLOAT> imageGy(imageIn.width,
+			imageIn.height);
+	aly::Image<float, C, ImageType::FLOAT> imageL(imageIn.width,
+			imageIn.height);
+	aly::Image<float, C, ImageType::FLOAT> imageC(imageIn.width,
+			imageIn.height);
 	out = imageIn;
-	const float ZERO_TOLERANCE=1E-6f;
+	const float ZERO_TOLERANCE = 1E-6f;
+	int R = (int) (imageIn.width * imageIn.height);
+	aly::SparseMatrix<float,C> A(R, R);
+	Vector<float,C> b;
 	for (int iter = 0; iter < iterations; iter++) {
 #pragma omp parallel for
 		for (int j = 0; j < imageIn.height; j++) {
 			for (int i = 0; i < imageIn.width; i++) {
-				vec<float,C> gX(0.0f);
-				vec<float,C> gY(0.0f);
-				vec<float,C> L(0.0f);
+				vec<float, C> gX(0.0f);
+				vec<float, C> gY(0.0f);
+				vec<float, C> L(0.0f);
 				for (int ii = 0; ii < M; ii++) {
 					for (int jj = 0; jj < N; jj++) {
-						vec<float,C> val = out((int) (i + ii - M / 2),(int) (j + jj - N / 2));
+						vec<float, C> val = out((int) (i + ii - M / 2),
+								(int) (j + jj - N / 2));
 						gX += kernelGX[ii][jj] * val;
 						gY += kernelGY[ii][jj] * val;
 						L += kernelL[ii][jj] * val;
@@ -57,71 +70,108 @@ template <int C> void AnisotropicDiffusionT(const Image<float,C,ImageType::FLOAT
 				imageGx(i, j) = gX;
 				imageGy(i, j) = gY;
 				imageL(i, j) = L;
-				vec<float,C> score(0.0f);
-				if(kernel==AnisotropicKernel::Gaussian){
-					vec<float,C> mag = gX * gX + gY * gY;
+				vec<float, C> score(0.0f);
+				if (kernel == AnisotropicKernel::Gaussian) {
+					vec<float, C> mag = gX * gX + gY * gY;
 					for (int n = 0; n < C; n++) {
 						score[n] = (float) std::exp(
 								-std::max(mag[n], 0.0f) / (K * K));
 					}
-				} else if(kernel==AnisotropicKernel::PeronaMalik){
-					vec<float,C> mag = gX * gX + gY * gY;
+				} else if (kernel == AnisotropicKernel::PeronaMalik) {
+					vec<float, C> mag = gX * gX + gY * gY;
 					for (int n = 0; n < C; n++) {
-						score[n] = (float) 1.0f/std::max(ZERO_TOLERANCE,1+mag[n]/(K*K));
+						score[n] = (float) 1.0f
+								/ std::max(ZERO_TOLERANCE,
+										1 + mag[n] / (K * K));
 					}
-				} else if(kernel==AnisotropicKernel::Weickert){//Used in KAZE filters
-					vec<float,C> mag = gX * gX + gY * gY;
+				} else if (kernel == AnisotropicKernel::Weickert) {	//Used in KAZE filters
+					vec<float, C> mag = gX * gX + gY * gY;
 					for (int n = 0; n < C; n++) {
-						double det=std::pow(std::sqrt(mag[n])/K,8.0);
-						if(det<=ZERO_TOLERANCE){
-							score[n]=1.0f;
+						double det = std::pow(std::sqrt(mag[n]) / K, 8.0);
+						if (det <= ZERO_TOLERANCE) {
+							score[n] = 1.0f;
 						} else {
-							score[n] = 1-std::exp(-3.315/det);
+							score[n] = 1 - std::exp(-3.315 / det);
 						}
 					}
 				}
 				imageC(i, j) = score;
 			}
 		}
-#pragma omp parallel for
-		for (int j = 0; j < imageIn.height; j++) {
-			for (int i = 0; i < imageIn.width; i++) {
-				vec<float,C> gX = imageGx(i, j);
-				vec<float,C> gY = imageGy(i, j);
-				vec<float,C> L = imageL(i, j);
-				vec<float,C> score = imageC(i, j);
-				vec<float,C> cX;
-				vec<float,C> cY;
+		for (int j = 1; j < imageIn.height - 1; j++) {
+			for (int i = 1; i < imageIn.width - 1; i++) {
+				int n11 = i + j * imageIn.width;
+				int n01 = (i - 1) + j * imageIn.width;
+				int n21 = (i + 1) + j * imageIn.width;
+				int n10 = i + (j - 1) * imageIn.width;
+				int n12 = i + (j + 1) * imageIn.width;
+				vec<float, C> score = imageC(i, j);
+				vec<float, C> cX;
+				vec<float, C> cY;
 				for (int ii = 0; ii < M; ii++) {
 					for (int jj = 0; jj < N; jj++) {
-						vec<float,C> val = imageC((int) (i + ii - M / 2),(int) (j + jj - N / 2));
+						vec<float, C> val = imageC((int) (i + ii - M / 2),
+								(int) (j + jj - N / 2));
 						cX += kernelGX[ii][jj] * val;
 						cY += kernelGY[ii][jj] * val;
 					}
 				}
-				out(i, j) +=  dt * (cX * gX + cY * gY + score * L);
+				A.set(n11, n11, score*dt+1.0f);
+				A.set(n01, n11, (-0.5f*cX-0.25f*score)*dt);
+				A.set(n21, n11, ( 0.5f*cX-0.25f*score)*dt);
+				A.set(n11, n10, (-0.5f*cY-0.25f*score)*dt);
+				A.set(n11, n12, ( 0.5f*cY-0.25f*score)*dt);
 			}
 		}
-	}
+		out=imageIn;
+		b=imageIn.vector;
+		SolveVecCG(b,A,out.vector);
+		/*
 #pragma omp parallel for
+		for (int j = 0; j < imageIn.height; j++) {
+			for (int i = 0; i < imageIn.width; i++) {
+				vec<float, C> gX = imageGx(i, j);
+				vec<float, C> gY = imageGy(i, j);
+				vec<float, C> L = imageL(i, j);
+				vec<float, C> score = imageC(i, j);
+				vec<float, C> cX;
+				vec<float, C> cY;
+				for (int ii = 0; ii < M; ii++) {
+					for (int jj = 0; jj < N; jj++) {
+						vec<float, C> val = imageC((int) (i + ii - M / 2),
+								(int) (j + jj - N / 2));
+						cX += kernelGX[ii][jj] * val;
+						cY += kernelGY[ii][jj] * val;
+					}
+				}
+				out(i, j) += dt * (cX * gX + cY * gY + score * L);
+			}
+		}
+		*/
+	}
+	#pragma omp parallel for
 	for (int j = 0; j < imageIn.height; j++) {
 		for (int i = 0; i < imageIn.width; i++) {
-			out(i, j) = clamp(out(i, j), vec<float,C>(0.0f), vec<float,C>(1.0f));
+			out(i, j) = clamp(out(i, j), vec<float, C>(0.0f), vec<float, C>(1.0f));
 		}
 	}
 }
 
-void AnisotropicDiffusion(const Image1f& imageIn,Image1f& out,int iterations,const AnisotropicKernel& kernel,float K,float dt){
-	AnisotropicDiffusionT(imageIn,out,iterations,kernel,K,dt);
+void AnisotropicDiffusion(const Image1f& imageIn, Image1f& out, int iterations,
+	const AnisotropicKernel& kernel, float K, float dt) {
+AnisotropicDiffusionT(imageIn, out, iterations, kernel, K, dt);
 }
-void AnisotropicDiffusion(const Image2f& imageIn,Image2f& out,int iterations,const AnisotropicKernel& kernel,float K,float dt){
-	AnisotropicDiffusionT(imageIn,out,iterations,kernel,K,dt);
+void AnisotropicDiffusion(const Image2f& imageIn, Image2f& out, int iterations,
+	const AnisotropicKernel& kernel, float K, float dt) {
+AnisotropicDiffusionT(imageIn, out, iterations, kernel, K, dt);
 }
-void AnisotropicDiffusion(const Image3f& imageIn,Image3f& out,int iterations,const AnisotropicKernel& kernel,float K,float dt){
-	AnisotropicDiffusionT(imageIn,out,iterations,kernel,K,dt);
+void AnisotropicDiffusion(const Image3f& imageIn, Image3f& out, int iterations,
+	const AnisotropicKernel& kernel, float K, float dt) {
+AnisotropicDiffusionT(imageIn, out, iterations, kernel, K, dt);
 }
-void AnisotropicDiffusion(const Image4f& imageIn,Image4f& out,int iterations,const AnisotropicKernel& kernel,float K,float dt){
-	AnisotropicDiffusionT(imageIn,out,iterations,kernel,K,dt);
+void AnisotropicDiffusion(const Image4f& imageIn, Image4f& out, int iterations,
+	const AnisotropicKernel& kernel, float K, float dt) {
+AnisotropicDiffusionT(imageIn, out, iterations, kernel, K, dt);
 }
 
 }

@@ -36,7 +36,8 @@ namespace aly {
 		std::string hashCode;
 		int x, y, z;
 	public:
-		std::vector<vec<T, C>> data;
+		Vector<T,C> vector;//Treat whole volume as vector. Useful!
+		std::vector<vec<T, C>>& data;
 		typedef vec<T, C> ValueType;
 		typedef typename std::vector<ValueType>::iterator iterator;
 		typedef typename std::vector<ValueType>::const_iterator const_iterator;
@@ -138,11 +139,14 @@ namespace aly {
 
 		Volume(int r, int c, int s, int x = 0, int y = 0, int z = 0,
 			uint64_t id = 0) :
-				 x(x), y(y), z(z), data(r * c * s) ,rows(r), cols(c), slices(s), id(id){
+				 x(x), y(y), z(z),data(vector.data),rows(r), cols(c), slices(s), id(id){
+		data.resize(r * c * s);
 		}
 		Volume(int r, int c, int s, int3 pos,
 			uint64_t id = 0) :
-			x(pos.x), y(pos.y), z(pos.z), data(r * c * s) , rows(r), cols(c), slices(s), id(id){
+			x(pos.x), y(pos.y), z(pos.z),data(vector.data), rows(r), cols(c), slices(s), id(id){
+			data.resize(r * c * s);
+
 		}
 		Volume(T* ptr, int r, int c, int s, int x = 0, int y = 0, int z = 0,
 			uint64_t id = 0) :
@@ -156,10 +160,10 @@ namespace aly {
 		}
 		Volume(std::vector<vec<T, C>>& ref, int r, int c, int s, int x = 0, int y =
 			0, int z = 0, uint64_t id = 0) :
-			x(x), y(y), z(z), data(ref) , rows(r), cols(c), slices(s), id(id){
+			x(x), y(y), z(z), data(vector.data),data(ref) , rows(r), cols(c), slices(s), id(id){
 		}
 		Volume() :
-			x(0), y(0), z(0), rows(0), cols(0), slices(0), id(0) {
+			x(0), y(0), z(0), data(vector.data),rows(0), cols(0), slices(0), id(0) {
 		}
 		Volume(const Volume<T, C, I>& img) :
 			Volume(img.rows, img.cols, img.slices, img.position(), img.id) {
