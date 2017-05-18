@@ -106,9 +106,11 @@ template<int C> void AnisotropicDiffusionT(
 				int n10 = i + (j - 1) * imageIn.width;
 				int n12 = i + (j + 1) * imageIn.width;
 				vec<float, C> score=imageC(i, j);
-				vec<float, C> cX=0.5f*(imageC(i+1,j)-imageC(i-1,j));
-				vec<float, C> cY=0.5f*(imageC(i,j+1)-imageC(i,j-1));
-				/*
+				//vec<float, C> cX=0.5f*(imageC(i+1,j)-imageC(i-1,j));
+				//vec<float, C> cY=0.5f*(imageC(i,j+1)-imageC(i,j-1));
+				out(i, j) = clamp(out(i, j), vec<float, C>(0.0f), vec<float, C>(1.0f));
+				vec<float, C> cX(0.0f);
+				vec<float, C> cY(0.0f);
 				for (int ii = 0; ii < M; ii++) {
 					for (int jj = 0; jj < N; jj++) {
 						vec<float, C> val = imageC((int) (i + ii - M / 2),(int) (j + jj - N / 2));
@@ -116,7 +118,7 @@ template<int C> void AnisotropicDiffusionT(
 						cY += kernelGY[ii][jj] * val;
 					}
 				}
-				*/
+
 				if(i>0&&j>0&&i<imageIn.width-1&&j<imageIn.height-1){
 					A.set(n11, n11,   score*dt+1.0f);
 					A.set(n11, n01,  -(-0.5f*cX+0.25f*score)*dt);
@@ -129,34 +131,10 @@ template<int C> void AnisotropicDiffusionT(
 			}
 		}
 		b=out.vector;
-		SolveVecCG(b,A,out.vector,64, 1E-24f);
-		//WriteImageToFile(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"smooth"<<iter<<".png",out);
-		/*
-#pragma omp parallel for
-		for (int j = 0; j < imageIn.height; j++) {
-			for (int i = 0; i < imageIn.width; i++) {
-				vec<float, C> gX = imageGx(i, j);
-				vec<float, C> gY = imageGy(i, j);
-				vec<float, C> L = imageL(i, j);
-				vec<float, C> score = imageC(i, j);
-				vec<float, C> cX;
-				vec<float, C> cY;
-				for (int ii = 0; ii < M; ii++) {
-					for (int jj = 0; jj < N; jj++) {
-						vec<float, C> val = imageC((int) (i + ii - M / 2),
-								(int) (j + jj - N / 2));
-						cX += kernelGX[ii][jj] * val;
-						cY += kernelGY[ii][jj] * val;
-					}
-				}
-				out(i, j) += dt * (cX * gX + cY * gY + score * L);
-			}
-		}
-		*/
+		SolveVecCG(b,A,out.vector,32, 1E-16f);
 	}
-	#pragma omp parallel for
-	for (int j = 0; j < imageIn.height; j++) {
-		for (int i = 0; i < imageIn.width; i++) {
+	for (int j = 0; j < imageIn.height ; j++) {
+		for (int i = 0; i < imageIn.width ; i++) {
 			out(i, j) = clamp(out(i, j), vec<float, C>(0.0f), vec<float, C>(1.0f));
 		}
 	}
