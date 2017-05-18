@@ -98,34 +98,39 @@ template<int C> void AnisotropicDiffusionT(
 				imageC(i, j) = score;
 			}
 		}
-		for (int j = 1; j < imageIn.height - 1; j++) {
-			for (int i = 1; i < imageIn.width - 1; i++) {
+		for (int j = 0; j < imageIn.height ; j++) {
+			for (int i = 0; i < imageIn.width ; i++) {
 				int n11 = i + j * imageIn.width;
 				int n01 = (i - 1) + j * imageIn.width;
 				int n21 = (i + 1) + j * imageIn.width;
 				int n10 = i + (j - 1) * imageIn.width;
 				int n12 = i + (j + 1) * imageIn.width;
-				vec<float, C> score = imageC(i, j);
-				vec<float, C> cX;
-				vec<float, C> cY;
+				vec<float, C> score=imageC(i, j);
+				vec<float, C> cX=0.5f*(imageC(i+1,j)-imageC(i-1,j));
+				vec<float, C> cY=0.5f*(imageC(i,j+1)-imageC(i,j-1));
+				/*
 				for (int ii = 0; ii < M; ii++) {
 					for (int jj = 0; jj < N; jj++) {
-						vec<float, C> val = imageC((int) (i + ii - M / 2),
-								(int) (j + jj - N / 2));
+						vec<float, C> val = imageC((int) (i + ii - M / 2),(int) (j + jj - N / 2));
 						cX += kernelGX[ii][jj] * val;
 						cY += kernelGY[ii][jj] * val;
 					}
 				}
-				A.set(n11, n11, score*dt+1.0f);
-				A.set(n01, n11, (-0.5f*cX-0.25f*score)*dt);
-				A.set(n21, n11, ( 0.5f*cX-0.25f*score)*dt);
-				A.set(n11, n10, (-0.5f*cY-0.25f*score)*dt);
-				A.set(n11, n12, ( 0.5f*cY-0.25f*score)*dt);
+				*/
+				if(i>0&&j>0&&i<imageIn.width-1&&j<imageIn.height-1){
+					A.set(n11, n11,   score*dt+1.0f);
+					A.set(n11, n01,  -(-0.5f*cX+0.25f*score)*dt);
+					A.set(n11, n21,  -( 0.5f*cX+0.25f*score)*dt);
+					A.set(n11, n10,  -(-0.5f*cY+0.25f*score)*dt);
+					A.set(n11, n12,  -( 0.5f*cY+0.25f*score)*dt);
+				} else {
+					A.set(n11, n11, 1.0f);
+				}
 			}
 		}
-		out=imageIn;
-		b=imageIn.vector;
-		SolveVecCG(b,A,out.vector);
+		b=out.vector;
+		SolveVecCG(b,A,out.vector,64, 1E-24f);
+		//WriteImageToFile(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"smooth"<<iter<<".png",out);
 		/*
 #pragma omp parallel for
 		for (int j = 0; j < imageIn.height; j++) {

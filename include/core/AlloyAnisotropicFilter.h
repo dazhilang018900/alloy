@@ -29,10 +29,10 @@ namespace aly{
 		PeronaMalik,
 		Weickert
 	};
-	void AnisotropicDiffusion(const Image1f& imageIn,Image1f& out,int iterations=32,const AnisotropicKernel& kernel=AnisotropicKernel::Gaussian,float K=0.02f,float dt=0.3f);
-	void AnisotropicDiffusion(const Image2f& imageIn,Image2f& out,int iterations=32,const AnisotropicKernel& kernel=AnisotropicKernel::Gaussian,float K=0.02f,float dt=0.3f);
-	void AnisotropicDiffusion(const Image3f& imageIn,Image3f& out,int iterations=32,const AnisotropicKernel& kernel=AnisotropicKernel::Gaussian,float K=0.02f,float dt=0.3f);
-	void AnisotropicDiffusion(const Image4f& imageIn,Image4f& out,int iterations=32,const AnisotropicKernel& kernel=AnisotropicKernel::Gaussian,float K=0.02f,float dt=0.3f);
+	void AnisotropicDiffusion(const Image1f& imageIn,Image1f& out,int iterations=4,const AnisotropicKernel& kernel=AnisotropicKernel::Gaussian,float K=0.02f,float dt=1.0f);
+	void AnisotropicDiffusion(const Image2f& imageIn,Image2f& out,int iterations=4,const AnisotropicKernel& kernel=AnisotropicKernel::Gaussian,float K=0.02f,float dt=1.0f);
+	void AnisotropicDiffusion(const Image3f& imageIn,Image3f& out,int iterations=4,const AnisotropicKernel& kernel=AnisotropicKernel::Gaussian,float K=0.02f,float dt=1.0f);
+	void AnisotropicDiffusion(const Image4f& imageIn,Image4f& out,int iterations=4,const AnisotropicKernel& kernel=AnisotropicKernel::Gaussian,float K=0.02f,float dt=1.0f);
 
 }
 
