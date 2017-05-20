@@ -757,6 +757,26 @@ namespace aly {
 		Transform(out, img1, img2, f);
 		return out;
 	}
+	template<class T, int C, ImageType I> void Stack(const std::vector<Image<T,C,I>>& images,Volume<T, C, I>& volume){
+		int rows=0;
+		int cols=0;
+		int slices=(int)images.size();
+		for(const Image<T,C,I>& img:images){
+			rows=std::max(img.width,rows);
+			cols=std::max(img.height,cols);
+		}
+		volume.resize(rows,cols,slices);
+		volume.set(vec<T,C>(T(0)));
+#pragma omp parallel for
+		for(int k=0;k<slices;k++){
+			const Image<T,C,I>& img=images[k];
+			for(int j=0;j<img.height;j++){
+				for(int i=0;i<img.width;i++){
+					volume(i,j,k)=img(i,j);
+				}
+			}
+		}
+	}
 	template<class T, int C, ImageType I> void WriteImageToRawFile(
 		const std::string& file, const Volume<T, C, I>& img) {
 		std::ostringstream vstr;
@@ -861,6 +881,10 @@ namespace aly {
 		}
 		myfile << sstr.str();
 		myfile.close();
+	}
+	template<class T, int C, ImageType I> void WriteVolumeToFile(
+		const std::string& file, const Volume<T, C, I>& img) {
+		WriteImageToRawFile(file,img);
 	}
 	typedef Volume<uint8_t, 4, ImageType::UBYTE> VolumeRGBA;
 	typedef Volume<int, 4, ImageType::INT> VolumeRGBAi;
