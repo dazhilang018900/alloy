@@ -257,6 +257,13 @@ public:
 		}
 		return vec<T, C>(sum);
 	}
+	inline vec<T, C> absSum() const {
+		vec<T, C> sum(T(0));
+		for (const vec<T, C>& val : data) {
+			sum += aly::abs(vec<T, C>(val));
+		}
+		return vec<T, C>(sum);
+	}
 	inline vec<T, C> median() const {
 		std::vector<T> bands[C];
 		for (int c = 0; c < C; c++) {
@@ -907,7 +914,7 @@ typedef Vector<uint8_t, 1> VectorA;
 typedef Vector<int, 1> VectorAi;
 typedef Vector<float, 1> VectorAf;
 
-typedef Vector<uint8_t, 4> Vector4b;
+typedef Vector<uint8_t, 4> Vector4ub;
 typedef Vector<uint16_t, 4> Vector4us;
 typedef Vector<int16_t, 4> Vector4s;
 typedef Vector<int, 4> Vector4i;
@@ -915,7 +922,7 @@ typedef Vector<uint32_t, 4> Vector4ui;
 typedef Vector<float, 4> Vector4f;
 typedef Vector<double, 4> Vector4d;
 
-typedef Vector<uint8_t, 3> Vector3b;
+typedef Vector<uint8_t, 3> Vector3ub;
 typedef Vector<uint16_t, 3> Vector3us;
 typedef Vector<int16_t, 3> Vector3s;
 typedef Vector<int, 3> Vector3i;
@@ -923,7 +930,7 @@ typedef Vector<uint32_t, 3> Vector3ui;
 typedef Vector<float, 3> Vector3f;
 typedef Vector<double, 3> Vector3d;
 
-typedef Vector<uint8_t, 2> Vector2b;
+typedef Vector<uint8_t, 2> Vector2ub;
 typedef Vector<uint16_t, 2> Vector2us;
 typedef Vector<int16_t, 2> Vector2s;
 typedef Vector<int, 2> Vector2i;
@@ -931,7 +938,7 @@ typedef Vector<uint32_t, 2> Vector2ui;
 typedef Vector<float, 2> Vector2f;
 typedef Vector<double, 2> Vector2d;
 
-typedef Vector<uint8_t, 1> Vector1b;
+typedef Vector<uint8_t, 1> Vector1ub;
 typedef Vector<uint16_t, 1> Vector1us;
 typedef Vector<int16_t, 1> Vector1s;
 typedef Vector<int, 1> Vector1i;
