@@ -103,7 +103,7 @@ namespace aly {
 		std::vector<double> w(n);
 		std::vector<double> rv1(n);
 
-		int flag, i, its, j, jj, k, l, nm;
+		int flag, i, its, j, jj, k, l, nm=0;
 		double c, f, h, s, x, y, z;
 		double anorm, g, scale;
 		U.resize(m, m);
