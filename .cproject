@@ -46,10 +46,6 @@
 									<listOptionValue builtIn="false" value="../include/"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.503523971" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="__cplusplus=201103L"/>
-									<listOptionValue builtIn="false" value="PLATFORM_LINUX_AMD64"/>
-									<listOptionValue builtIn="false" value="PLATFORM_LINUX"/>
-									<listOptionValue builtIn="false" value="NO_EXC_MATH"/>
 									<listOptionValue builtIn="false" value="GL_GLEXT_PROTOTYPES=1"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.optimization.level.379248701" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
@@ -139,7 +135,6 @@
 									<listOptionValue builtIn="false" value="../include/core/"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1480812402" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="__cplusplus=201103L"/>
 									<listOptionValue builtIn="false" value="GL_GLEXT_PROTOTYPES=1"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.optimization.level.484133638" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
@@ -243,7 +238,6 @@
 									<listOptionValue builtIn="false" value="../include/"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.731048327" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" useByScannerDiscovery="false" valueType="definedSymbols">
-									<listOptionValue builtIn="false" value="__cplusplus=201103L"/>
 									<listOptionValue builtIn="false" value="GL_GLEXT_PROTOTYPES=1"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.optimization.level.1277782251" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>

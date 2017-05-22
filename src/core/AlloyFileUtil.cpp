@@ -419,6 +419,7 @@ std::string GetFileWithoutExtension(const std::string& fileName) {
 std::string ReplaceFileExtension(const std::string& file, const std::string& ext) {
 	return GetFileWithoutExtension(file) + "." + ext;
 }
+
 std::string GetFileDirectoryPath(const std::string& fileName) {
 	if (fileName.size()>0&&fileName.find_last_of(ALY_PATH_SEPARATOR) != string::npos) {
 		size_t end = fileName.find_last_of(ALY_PATH_SEPARATOR);
