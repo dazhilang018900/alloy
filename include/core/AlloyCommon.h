@@ -31,6 +31,8 @@
 #include <locale>
 #include <memory>
 #define ALLOYERROR(err) throw std::runtime_error(aly::MakeString()<<"Runtime error in "<<std::string(__FILE__)<<" on line "<<__LINE__<<": "<<err);
+#define ALLOYWARNING(err) std::cerr<<"Warning in "<<std::string(__FILE__)<<" on line "<<__LINE__<<": "<<err;
+
 namespace aly {
 	//GCC doesn't have this for some reason.
 	template <typename T, typename... Args> inline std::shared_ptr<T> MakeShared(Args&&... args)
