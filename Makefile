@@ -23,18 +23,19 @@ LIBOBJS := $(patsubst %.cpp, %.o, $(SRC))
 LIBOBJS += $(patsubst %.c, %.o, $(call rwildcard, ./src/, *.c))
 default: all
 
-library: $(LIBOBJS)
-	$(CXX) -shared -o libAlloy.so $(LIBOBJS) $(LDLIBS) $(LIBS)
+release: $(LIBOBJS)
+	mkdir -p ./Release
+	$(CXX) -shared -o "Release/libAlloy.so" $(LIBOBJS) $(LDLIBS) $(LIBS)
 
 examples: $(EXOBJS)
-	$(CXX) -o examples $(EXOBJS) $(LDLIBS) -lAlloy $(LIBS) -Wl,-rpath="./"
+	$(CXX) -o ./Release/examples $(EXOBJS) $(LDLIBS) -L./Release -lAlloy $(LIBS) -Wl,-rpath="./:./Release/"
 
-all: library examples
+all: release examples
 
 clean:
 	rm -f $(LIBOBJS) $(EXOBJS)
-	rm -f libAlloy.so
-	rm -f examples
+	rm -f ./Release/libAlloy.so
+	rm -f ./Release/examples
 
 .PHONY : all
 
