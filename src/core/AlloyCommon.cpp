@@ -33,7 +33,9 @@ std::vector<std::string> Tokenize(const std::string& str) {
 	std::string delimString = "";
 	std::string comp;
 	for (char c : str) {
-		if (c == ' '||c=='\t'||c==','||c==']'||c=='['||c==')'||c=='('||c=='>'||c=='<'||c=='{'||c=='}') {
+		if (c == ' ' || c == '\t' || c == ',' || c == ']' || c == '['
+				|| c == ')' || c == '(' || c == '>' || c == '<' || c == '{'
+				|| c == '}') {
 			comp = ss.str();
 			if (comp.size() > 0) {
 				tokens.push_back(comp);
@@ -49,15 +51,15 @@ std::vector<std::string> Tokenize(const std::string& str) {
 	}
 	return tokens;
 	/*
-	std::regex re("[\\s,]+");
-	std::sregex_token_iterator it(ss.begin(), ss.end(), re, -1);
-	std::sregex_token_iterator reg_end;
-	std::vector<std::string> tokens;
-	for (; it != reg_end; ++it) {
-		tokens.push_back(it->str());
-	}
-	return tokens;
-	*/
+	 std::regex re("[\\s,]+");
+	 std::sregex_token_iterator it(ss.begin(), ss.end(), re, -1);
+	 std::sregex_token_iterator reg_end;
+	 std::vector<std::string> tokens;
+	 for (; it != reg_end; ++it) {
+	 tokens.push_back(it->str());
+	 }
+	 return tokens;
+	 */
 }
 std::vector<std::string> Split(const std::string &str, char delim) {
 	std::stringstream ss;
@@ -105,28 +107,37 @@ bool BeginsWith(const std::string& str, const std::string& pattern) {
 }
 bool EndsWith(const std::string& str, const std::string& pattern) {
 	if (str.size() > pattern.size()) {
-		return (str.substr(str.size() - pattern.size(), pattern.size()) == pattern);
+		return (str.substr(str.size() - pattern.size(), pattern.size())
+				== pattern);
 	} else {
 		return (str == pattern);
 	}
 }
-std::vector<int> ExtractIntegers(const std::string& str){
+std::vector<int> ExtractIntegers(const std::string& str) {
 	std::vector<int> buffer;
 	std::string current;
-	for(char c:str){
-		if(c>='0'&&c<='9'){
-			current+=c;
+	for (char c : str) {
+		if (c >= '0' && c <= '9') {
+			current += c;
 		} else {
-			if(current.length()>0){
+			if (current.length() > 0) {
 				buffer.push_back(std::atoi(current.c_str()));
 				current.clear();
 			}
 		}
 	}
-	if(current.length()>0){
+	if (current.length() > 0) {
 		buffer.push_back(std::atoi(current.c_str()));
 	}
 	return buffer;
+}
+int ExtractInteger(const std::string& str) {
+	std::vector<int> values = ExtractIntegers(str);
+	if (values.size() > 0) {
+		return values[0];
+	} else {
+		return std::numeric_limits<int>::infinity();
+	}
 }
 std::string ToLower(const std::string& str) {
 	std::stringstream ss;

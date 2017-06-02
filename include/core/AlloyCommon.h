@@ -57,6 +57,7 @@ namespace aly {
 	bool Contains(const std::string& str, const std::string& pattern);
 	int Contains(std::string& str,std::vector<std::string> tokens);
 	std::vector<int> ExtractIntegers(const std::string& str);
+	int ExtractInteger(const std::string& str);//Returns infinity if not found.
 	bool BeginsWith(const std::string& str, const std::string& pattern);
 	bool EndsWith(const std::string& str, const std::string& pattern);
 	std::string ToLower(const std::string& str);
