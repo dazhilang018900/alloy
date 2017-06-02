@@ -219,15 +219,15 @@ public:
 		data.clear();
 		data.shrink_to_fit();
 	}
-	inline vec<T, C> min() const {
-		vec<T, C> minVal(std::numeric_limits<T>::max());
+	inline vec<T, C> min(T val=std::numeric_limits<T>::max()) const {
+		vec<T, C> minVal(val);
 		for (const vec<T, C>& val : data) {
 			minVal = aly::minVec(val, minVal);
 		}
 		return minVal;
 	}
-	inline vec<T, C> max() const {
-		vec<T, C> maxVal(std::numeric_limits<T>::min());
+	inline vec<T, C> max(T val=std::numeric_limits<T>::min()) const {
+		vec<T, C> maxVal(val);
 		for (const vec<T, C>& val : data) {
 			maxVal = aly::maxVec(val, maxVal);
 		}
