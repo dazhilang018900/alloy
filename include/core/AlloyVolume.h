@@ -87,7 +87,18 @@ namespace aly {
 		std::string getHashCode() {
 			return hashCode;
 		}
-
+		inline bool contains(const float3& pt){
+			return (pt.x>=0&&pt.y>=0&&pt.z>=0&&pt.x<rows&&pt.y<cols&&pt.z<slices);
+		}
+		inline bool contains(const int3& pt){
+			return (pt.x>=0&&pt.y>=0&&pt.z>=0&&pt.x<rows&&pt.y<cols&&pt.z<slices);
+		}
+		inline bool contains(int x,int y,int z){
+			return (x>=0&&y>=0&&z>=0&&x<rows&&y<cols&&z<slices);
+		}
+		inline bool contains(float x,float y,float z){
+			return (x>=0&&y>=0&&z>=0&&x<rows&&y<cols&&z<slices);
+		}
 		template<class Archive> void serialize(Archive & archive) {
 			archive(cereal::make_nvp(MakeString() << type << channels, id),
 				CEREAL_NVP(rows), CEREAL_NVP(cols), CEREAL_NVP(slices),

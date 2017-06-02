@@ -133,7 +133,18 @@ public:
 	void set(const vec<T, C>& val) {
 		data.assign(data.size(), val);
 	}
-
+	inline bool contains(const float2& pt){
+		return (pt.x>=0&&pt.y>=0&&pt.x<width&&pt.y<height);
+	}
+	inline bool contains(const int2& pt){
+		return (pt.x>=0&&pt.y>=0&&pt.x<width&&pt.y<height);
+	}
+	inline bool contains(int x,int y){
+		return (x>=0&&y>=0&&x<width&&y<height);
+	}
+	inline bool contains(float x,float y){
+		return (x>=0&&y>=0&&x<width&&y<height);
+	}
 	void set(T* val) {
 		if (val == nullptr)
 			return;
@@ -1259,8 +1270,7 @@ template<class T, int C, ImageType I> void UpSample(const Image<T, C, I>& in,
 	static const double Kernel[5][5] = { { 1, 4, 6, 4, 1 },
 			{ 4, 16, 24, 16, 4 }, { 6, 24, 36, 24, 6 }, { 4, 16, 24, 16, 4 }, {
 					1, 4, 6, 4, 1 } };
-	if (out.size() == 0)
-		out.resize(in.width * 2, in.height * 2);
+	out.resize(in.width * 2, in.height * 2);
 #pragma omp parallel for
 	for (int j = 0; j < out.height; j++) {
 		for (int i = 0; i < out.width; i++) {
@@ -1270,8 +1280,7 @@ template<class T, int C, ImageType I> void UpSample(const Image<T, C, I>& in,
 					int iii = i + ii - 2;
 					int jjj = j + jj - 2;
 					if (iii % 2 == 0 && jjj % 2 == 0) {
-						vsum += Kernel[ii][jj]
-								* vec<double, C>(in(iii / 2, jjj / 2));
+						vsum += Kernel[ii][jj]* vec<double, C>(in(iii / 2, jjj / 2));
 					}
 				}
 			}
