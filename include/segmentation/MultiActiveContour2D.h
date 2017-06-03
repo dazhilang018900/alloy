@@ -113,6 +113,7 @@ namespace aly {
 			pressureImage = img;
 			rescale(pressureImage);
 		}
+
 		void setVectorField(const Image2f& img, float f) {
 			advectionParam.setValue(f);
 			vecFieldImage = img;
