@@ -19,13 +19,26 @@
 * THE SOFTWARE.
 */
 
-#ifndef INCLUDE_MAPPINGFIELD_H_
-#define INCLUDE_MAPPINGFIELD_H_
-#include <AlloyImage.h>
-#include <AlloyMath.h>
+#ifndef INCLUDE_MULTISPRINGLSSECONDORDER_H_
+#define INCLUDE_MULTISPRINGLSSECONDORDER_H_
+#include "ActiveContour2D.h"
+#include "Simulation.h"
+#include "SpringlCache2D.h"
+#include "ContourShaders.h"
+#include "AlloyLocator.h"
+#include "MultiSpringLevelSet2D.h"
 namespace aly {
-	void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField, int iterations, bool normalize);
-	void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField,float mu, int iterations, bool normalize);
-	void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField,const Image1f& weights,float mu,int iterations,  bool normalize);
+	class MultiSpringLevelSetSecondOrder2D : public MultiSpringLevelSet2D {
+
+	protected:
+		virtual void computeForce(size_t idx, float2& p1, float2& p2, float2& p) override;
+
+
+	public:
+
+		MultiSpringLevelSetSecondOrder2D(const std::shared_ptr<SpringlCache2D>& cache = nullptr);
+
+	};
 }
-#endif
+
+#endif /* INCLUDE_SpringlsSecondOrder_H_ */

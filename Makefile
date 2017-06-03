@@ -3,6 +3,7 @@ rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst 
 SRC := $(call rwildcard, ./src/core/, *.cpp)
 SRC += $(call rwildcard, ./src/physics/, *.cpp)
 SRC += $(call rwildcard, ./src/poisson/, *.cpp)
+SRC += $(call rwildcard, ./src/segmentation/, *.cpp)
 CXX = g++
 CC = gcc
 

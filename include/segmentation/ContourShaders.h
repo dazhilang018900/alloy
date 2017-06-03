@@ -18,14 +18,22 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-
-#ifndef INCLUDE_MAPPINGFIELD_H_
-#define INCLUDE_MAPPINGFIELD_H_
-#include <AlloyImage.h>
-#include <AlloyMath.h>
+#ifndef INCLUDE_CONTOURSHADERS_H_
+#define INCLUDE_CONTOURSHADERS_H_
+#include "AlloyImage.h"
+#include "CommonShaders.h"
+#include "Manifold2D.h"
 namespace aly {
-	void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField, int iterations, bool normalize);
-	void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField,float mu, int iterations, bool normalize);
-	void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField,const Image1f& weights,float mu,int iterations,  bool normalize);
+	class UnsignedDistanceShader : public GLShader {
+	protected:
+		std::shared_ptr<AlloyContext> context;
+		GLFrameBuffer texture;
+	public:
+		UnsignedDistanceShader(bool onScreen = true,
+			const std::shared_ptr<AlloyContext>& context =
+			AlloyDefaultContext());
+		void init(int width, int height);
+		Image1f solve(Manifold2D& contour,float maxDistance,int label=-1);
+	};
 }
-#endif
+#endif 

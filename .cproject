@@ -7,6 +7,7 @@
 					<externalSetting>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="includePath" name="/alloy"/>
 						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/alloy/Release"/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="libraryPath" name="/alloy"/>
 						<entry flags="RESOLVED" kind="libraryFile" name="Alloy" srcPrefixMapping="" srcRootPath=""/>
 					</externalSetting>
 				</externalSettings>
@@ -99,7 +100,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="ext_build|CMakeFiles|ext|build/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+						<entry excluding="CMakeFiles|ext|build/|ext_build" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -194,7 +195,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="ext_build|CMakeFiles|ext|build/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+						<entry excluding="CMakeFiles|ext|build/|ext_build" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -286,7 +287,7 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="ext_build|CMakeFiles|build|ext/|src/ocl/|include/ocl/" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+						<entry excluding="CMakeFiles|include/ocl/|src/ocl/|ext/|build|ext_build" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

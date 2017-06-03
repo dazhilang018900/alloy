@@ -21,7 +21,7 @@
 #include <AlloyGradientVectorFlow.h>
 #include <AlloySparseSolve.h>
 namespace aly {
-void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField, float mu,
+void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField, float mu,int iterations,
 		bool normalize) {
 	const int nbrX[] = { 0, 0, -1, 1 };
 	const int nbrY[] = { 1, -1, 0, 0 };
@@ -65,7 +65,7 @@ void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField, float mu,
 			}
 		}
 	}
-	SolveVecCG(b, A, x, src.width, 1E-20f);
+	SolveVecCG(b, A, x, iterations, 1E-20f);
 	vectorField.set(x.data);
 	const float minSpeed = 0.1f;
 	const float captureDist = 1.5f;
@@ -82,7 +82,7 @@ void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField, float mu,
 		}
 	}
 }
-void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField,const Image1f& weights,float mu,
+void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField,const Image1f& weights,float mu,int iterations,
 		bool normalize) {
 	const int nbrX[] = { 0, 0, -1, 1 };
 	const int nbrY[] = { 1, -1, 0, 0 };
@@ -127,7 +127,7 @@ void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField,const Imag
 			}
 		}
 	}
-	SolveVecCG(b, A, x, src.width, 1E-20f);
+	SolveVecCG(b, A, x, iterations, 1E-20f);
 	vectorField.set(x.data);
 	const float minSpeed = 0.1f;
 	const float captureDist = 1.5f;
@@ -144,7 +144,7 @@ void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField,const Imag
 		}
 	}
 }
-void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField,
+void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField,int iterations,
 		bool normalize) {
 	const int nbrX[] = { 0, 0, -1, 1 };
 	const int nbrY[] = { 1, -1, 0, 0 };
@@ -216,7 +216,7 @@ void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField,
 			}
 		}
 	}
-	SolveVecBICGStab(b, A, x, src.width, 1E-10f);
+	SolveVecBICGStab(b, A, x,iterations, 1E-10f);
 	vectorField.set(x.data);
 	const float minSpeed = 0.1f;
 	const float captureDist = 1.5f;
