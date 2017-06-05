@@ -96,6 +96,9 @@ namespace aly {
 			advectionParam.setValue(f);
 			vecFieldImage = img;
 		}
+		void setAdvection(float c) {
+			advectionParam.setValue(c);
+		}
 		Manifold2D* getContour();
 
 		virtual bool init()override;

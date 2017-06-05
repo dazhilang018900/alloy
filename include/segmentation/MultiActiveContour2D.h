@@ -93,6 +93,9 @@ namespace aly {
 		void setPressure(float c) {
 			pressureParam.setValue(c);
 		}
+		void setAdvection(float c) {
+			advectionParam.setValue(c);
+		}
 		aly::Color getColor(int l) {
 			return lineColors[l];
 		}
