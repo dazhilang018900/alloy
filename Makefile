@@ -4,6 +4,7 @@ SRC := $(call rwildcard, ./src/core/, *.cpp)
 SRC += $(call rwildcard, ./src/physics/, *.cpp)
 SRC += $(call rwildcard, ./src/poisson/, *.cpp)
 SRC += $(call rwildcard, ./src/segmentation/, *.cpp)
+
 CXX = g++
 CC = gcc
 
@@ -22,6 +23,8 @@ endif
 
 LIBOBJS := $(patsubst %.cpp, %.o, $(SRC))
 LIBOBJS += $(patsubst %.c, %.o, $(call rwildcard, ./src/, *.c))
+SRC += $(call rwildcard, ./src/, *.c)
+
 default: all
 
 release: $(LIBOBJS)
