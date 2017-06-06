@@ -18,6 +18,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#include <MipavFileReaderWriter.h>
 #include "Alloy.h"
 #include "../../include/example/UnitsEx.h"
 #include "../../include/example/CompositeEx.h"
@@ -122,7 +123,7 @@ typedef std::unique_ptr<Example> ExamplePtr;
 
 bool SANITY_CHECK() {
 	bool ret = true;
-	ret &= SANITY_CHECK_LOCATOR();
+	//ret &= SANITY_CHECK_LOCATOR();
 	//SANITY_CHECK_ANY();
 	//SANITY_CHECK_SVD();
 	//SANITY_CHECK_ALGO();
@@ -138,6 +139,7 @@ bool SANITY_CHECK() {
 	//SANITY_CHECK_IMAGE_IO();
 	//SANITY_CHECK_ROBUST_SOLVE();
 	//SANITY_CHECK_SUBDIVIDE();
+	SANITY_CHECK_XML();
 	return ret;
 }
 int main(int argc, char *argv[]) {
