@@ -31,6 +31,9 @@
 #include <fstream>
 #include <random>
 namespace aly {
+template<class T, int C, ImageType I> struct Volume;
+template<class T, int C, ImageType I> void WriteImageToRawFile(const std::string& fileName, const Volume<T, C, I>& img);
+template<class T, int C, ImageType I> bool ReadImageFromRawFile(const std::string& fileName, Volume<T, C, I>& img);
 	template<class T, int C, ImageType I> struct Volume {
 	private:
 		std::string hashCode;
@@ -106,8 +109,11 @@ namespace aly {
 				CEREAL_NVP(hashCode));
 		}
 
-		void writeToXML(const std::string& fileName) const {
+		inline void writeToXML(const std::string& fileName) const {
 			WriteImageToRawFile(fileName, *this);
+		}
+		inline bool readFromXML(const std::string& fileName) {
+			return ReadImageFromRawFile(fileName,*this);
 		}
 		void set(const T& val) {
 			data.assign(data.size(), vec<T, C>(val));
@@ -788,6 +794,72 @@ namespace aly {
 			}
 		}
 	}
+	template<class T, int C, ImageType I> bool ReadImageFromRawFile(
+			const std::string& file, Volume<T, C, I>& img) {
+		std::string xmlFile = GetFileWithoutExtension(file)+".xml";
+		std::string rawFile = GetFileWithoutExtension(file)+".raw";
+		MipavHeader header;
+		img.clear();
+		if(!ReadMipavHeaderFromFile(xmlFile,header))return false;
+		if(header.dimensions==4&&header.extents[3]!=C){
+			throw std::runtime_error(MakeString() << "Channels " <<header.dimensions<<"/"<<C<< " do not match.");
+		}
+		if(header.dimensions==3&&C!=1){
+			throw std::runtime_error(MakeString() << "Channels " <<header.dimensions<<"/"<<C<< " do not match.");
+		}
+		std::string typeName = "";
+		switch (img.type) {
+		case ImageType::BYTE:
+			typeName = "byte";
+			break;
+		case ImageType::UBYTE:
+			typeName = "unsigned byte";
+			break;
+		case ImageType::SHORT:
+			typeName = "short";
+			break;
+		case ImageType::USHORT:
+			typeName = "unsigned short";
+			break;
+		case ImageType::INT:
+			typeName = "integer";
+			break;
+		case ImageType::UINT:
+			typeName = "unsigned integer";
+			break;
+		case ImageType::FLOAT:
+			typeName = "float";
+			break;
+		case ImageType::DOUBLE:
+			typeName = "double";
+			break;
+		case ImageType::UNKNOWN:
+			typeName = "unknown";
+			break;
+		default:
+			break;
+		}
+		if(ToLower(header.dataType)!=typeName){
+			throw std::runtime_error(MakeString() << "Type " <<header.dataType<<"/"<<typeName<< " do not match.");
+		}
+		img.resize(header.extents[0],header.extents[1],header.extents[2]);
+		FILE* f = fopen(rawFile.c_str(), "rb");
+		if (f == NULL) {
+			throw std::runtime_error(MakeString() << "Could not open " <<rawFile<< " for reading.");
+		}
+		for (int c = 0; c < img.channels; c++) {
+			for (int k = 0; k < img.slices; k++) {
+				for (int j = 0; j < img.cols; j++) {
+					for (int i = 0; i < img.rows; i++) {
+						T val = img(i, j, k)[c];
+						fwrite(&val, sizeof(T), 1, f);
+					}
+				}
+			}
+		}
+		fclose(f);
+	}
+
 	template<class T, int C, ImageType I> void WriteImageToRawFile(
 		const std::string& file, const Volume<T, C, I>& img) {
 		std::ostringstream vstr;
@@ -896,6 +968,10 @@ namespace aly {
 	template<class T, int C, ImageType I> void WriteVolumeToFile(
 		const std::string& file, const Volume<T, C, I>& img) {
 		WriteImageToRawFile(file,img);
+	}
+	template<class T, int C, ImageType I> bool ReadVolumeFromFile(
+		const std::string& file, Volume<T, C, I>& img) {
+		return ReadImageFromRawFile(file,img);
 	}
 	typedef Volume<uint8_t, 4, ImageType::UBYTE> VolumeRGBA;
 	typedef Volume<int, 4, ImageType::INT> VolumeRGBAi;
