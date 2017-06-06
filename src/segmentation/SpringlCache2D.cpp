@@ -21,89 +21,97 @@
 #include "segmentation/SpringlCache2D.h"
 #include "AlloyFileUtil.h"
 namespace aly {
-	void CacheElement::load() {
-		std::lock_guard<std::mutex> lockMe(accessLock);
-		if (!loaded) {
-			contour.reset(new Manifold2D());
-			ReadContourFromFile(contourFile, *contour);
-			//std::cout << "Load: " << contour->getFile() << std::endl;
-			loaded = true;
-		}
-	}
-	void CacheElement::unload() {
-		std::lock_guard<std::mutex> lockMe(accessLock);
-		if (loaded) {
-			if (writeOnce) {
-				WriteContourToFile(contour->getFile(), *contour);
-				//std::cout<<"Unload: "<<contour->getFile()<<std::endl;
-				writeOnce = false;
-			}
-			contour.reset();
-			loaded = false;
-		}
-	}
-	void CacheElement::set(const Manifold2D& springl) {
+void CacheElement::load() {
+	std::lock_guard<std::mutex> lockMe(accessLock);
+	if (!loaded) {
 		contour.reset(new Manifold2D());
-		*contour = springl;
-		contourFile = springl.getFile();
+		ReadContourFromFile(contourFile, *contour);
+		//std::cout << "Load: " << contour->getFile() << std::endl;
 		loaded = true;
 	}
-	std::shared_ptr<Manifold2D> CacheElement::getContour() {
-		load();
-		return contour;
+}
+void CacheElement::unload() {
+	std::lock_guard<std::mutex> lockMe(accessLock);
+	if (loaded) {
+		if (writeOnce) {
+			WriteContourToFile(contour->getFile(), *contour);
+			//std::cout<<"Unload: "<<contour->getFile()<<std::endl;
+			writeOnce = false;
+		}
+		contour.reset();
+		loaded = false;
 	}
-	std::shared_ptr<CacheElement> SpringlCache2D::set(int frame, const Manifold2D& springl) {
-		std::lock_guard<std::mutex> lockMe(accessLock);
-		auto iter = cache.find(frame);
-		std::shared_ptr<CacheElement> elem;
-		if (iter != cache.end()) {
-			elem = iter->second;
+}
+void CacheElement::set(const Manifold2D& springl) {
+	contour.reset(new Manifold2D());
+	*contour = springl;
+	contourFile = springl.getFile();
+	loaded = true;
+}
+std::shared_ptr<Manifold2D> CacheElement::getContour() {
+	load();
+	return contour;
+}
+std::shared_ptr<CacheElement> SpringlCache2D::set(int frame,
+		const Manifold2D& springl) {
+	std::lock_guard<std::mutex> lockMe(accessLock);
+	auto iter = cache.find(frame);
+	std::shared_ptr<CacheElement> elem;
+	if (iter != cache.end()) {
+		elem = iter->second;
+	} else {
+		elem = std::shared_ptr<CacheElement>(new CacheElement());
+		cache[frame] = elem;
+	}
+	elem->set(springl);
+	if (elem->isLoaded()) {
+		while ((int) loadedList.size() >= maxElements) {
+			cache[loadedList.begin()->second]->unload();
+			loadedList.erase(loadedList.begin());
 		}
-		else {
-			elem = std::shared_ptr<CacheElement>(new CacheElement());
-			cache[frame] = elem;
-		}
-		elem->set(springl);
-		if (elem->isLoaded()) {
-			while ((int)loadedList.size() >= maxElements) {
+		loadedList.insert(std::pair<uint64_t, int>(counter++, frame));
+	}
+	return elem;
+}
+int SpringlCache2D::unload() {
+	int sz = loadedList.size();
+	for(auto pr:loadedList){
+		cache[pr.second]->unload();
+	}
+	loadedList.clear();
+	return sz;
+}
+std::shared_ptr<CacheElement> SpringlCache2D::get(int frame) {
+	std::lock_guard<std::mutex> lockMe(accessLock);
+	auto iter = cache.find(frame);
+	if (iter != cache.end()) {
+		std::shared_ptr<CacheElement> elem = iter->second;
+		if (!elem->isLoaded()) {
+			while ((int) loadedList.size() >= maxElements) {
 				cache[loadedList.begin()->second]->unload();
 				loadedList.erase(loadedList.begin());
 			}
+			elem->load();
 			loadedList.insert(std::pair<uint64_t, int>(counter++, frame));
 		}
 		return elem;
+	} else {
+		return std::shared_ptr<CacheElement>();
 	}
-	std::shared_ptr<CacheElement> SpringlCache2D::get(int frame) {
-		std::lock_guard<std::mutex> lockMe(accessLock);
-		auto iter = cache.find(frame);
-		if (iter != cache.end()) {
-			std::shared_ptr<CacheElement> elem = iter->second;
-			if (!elem->isLoaded()) {
-				while ((int)loadedList.size() >= maxElements) {
-					cache[loadedList.begin()->second]->unload();
-					loadedList.erase(loadedList.begin());
-				}
-				elem->load();
-				loadedList.insert(std::pair<uint64_t, int>(counter++, frame));
-			}
-			return elem;
-		}
-		else {
-			return std::shared_ptr<CacheElement>();
-		}
+}
+CacheElement::~CacheElement() {
+	if (FileExists(contourFile)) {
+		RemoveFile(contourFile);
+		std::string imageFile = GetFileWithoutExtension(contourFile) + ".png";
+		if (FileExists(imageFile))
+			RemoveFile(imageFile);
 	}
-	CacheElement::~CacheElement() {
-		if (FileExists(contourFile)) {
-			RemoveFile(contourFile);
-			std::string imageFile = GetFileWithoutExtension(contourFile) + ".png";
-			if(FileExists(imageFile))RemoveFile(imageFile);
-		}
-	}
-	void SpringlCache2D::clear() {
-		std::lock_guard<std::mutex> lockMe(accessLock);
-		counter = 0;
-		loadedList.clear();
-		cache.clear();
+}
+void SpringlCache2D::clear() {
+	std::lock_guard<std::mutex> lockMe(accessLock);
+	counter = 0;
+	loadedList.clear();
+	cache.clear();
 
-	}
+}
 }

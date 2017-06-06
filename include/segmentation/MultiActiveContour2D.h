@@ -99,6 +99,15 @@ namespace aly {
 		aly::Color getColor(int l) {
 			return lineColors[l];
 		}
+		const aly::Image1i& getLabelImage() const {
+			return labelImage;
+		}
+		const aly::Image1f& getLevelSet() const {
+			return levelSet;
+		}
+		const aly::ImageRGBA& getSegmentationOverlay() const {
+			return contour.overlay;
+		}
 		bool updateContour();
 		virtual bool updateOverlay();
 		void setPressure(const Image1f& img, float weight, float target) {

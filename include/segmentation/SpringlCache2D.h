@@ -60,11 +60,16 @@ namespace aly {
 		std::map<int, std::shared_ptr<CacheElement>> cache;
 		std::set<std::pair<uint64_t, int>, CacheCompare> loadedList;
 		std::mutex accessLock;
-		int maxElements = 32;
-		uint64_t counter = 0;
+		int maxElements;
+		uint64_t counter;
 	public:
+		SpringlCache2D(int elem=32):maxElements(elem),counter(0){
+
+		}
+
 		std::shared_ptr<CacheElement> set(int frame, const Manifold2D& springl);
 		std::shared_ptr<CacheElement> get(int frame);
+		int unload();
 		void clear();
 	};
 
