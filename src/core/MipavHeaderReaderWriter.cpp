@@ -7,7 +7,7 @@
 
 #include <AlloyFileUtil.h>
 #include <AlloyCommon.h>
-#include <MipavFileReaderWriter.h>
+#include <MipavHeaderReaderWriter.h>
 #include "tinyxml2.h"
 using namespace tinyxml2;
 namespace aly {

@@ -5,8 +5,8 @@
  *      Author: blake
  */
 
-#ifndef INCLUDE_CORE_MIPAVFILEREADERWRITER_H_
-#define INCLUDE_CORE_MIPAVFILEREADERWRITER_H_
+#ifndef INCLUDE_CORE_MIPAVHEADERREADERWRITER_H_
+#define INCLUDE_CORE_MIPAVHEADERREADERWRITER_H_
 #include <string>
 #include <AlloyCommon.h>
 namespace aly {
@@ -59,4 +59,4 @@ bool ReadMipavHeaderFromFile(const std::string& file,MipavHeader& header);
 void WriteMipavHeaderToFile(const std::string& file,const MipavHeader& header);
 } /* namespace intel */
 
-#endif /* INCLUDE_CORE_MIPAVFILEREADERWRITER_H_ */
+#endif /* INCLUDE_CORE_MIPAVHEADERREADERWRITER_H_ */

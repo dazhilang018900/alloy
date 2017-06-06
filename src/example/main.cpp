@@ -18,7 +18,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include <MipavFileReaderWriter.h>
+#include <MipavHeaderReaderWriter.h>
 #include "Alloy.h"
 #include "../../include/example/UnitsEx.h"
 #include "../../include/example/CompositeEx.h"
