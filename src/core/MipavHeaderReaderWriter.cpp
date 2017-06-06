@@ -1,14 +1,30 @@
 /*
- * MipavFileReader.cpp
+ * Copyright(C) 2017, Blake C. Lucas, Ph.D. (img.science@gmail.com)
  *
- *  Created on: Jun 6, 2017
- *      Author: blake
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
+#include "tinyxml2.h"
 
 #include <AlloyFileUtil.h>
 #include <AlloyCommon.h>
 #include <MipavHeaderReaderWriter.h>
-#include "tinyxml2.h"
+#include <AlloyImage.h>
+#include <AlloyVolume.h>
 using namespace tinyxml2;
 namespace aly {
 bool SANITY_CHECK_XML() {
@@ -51,6 +67,22 @@ bool SANITY_CHECK_XML() {
 	std::cout << header << std::endl;
 	f = MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"header_write_test.xml";
 	WriteMipavHeaderToFile(f,header);
+	Image1i img1(12,13,14);
+	WriteImageToRawFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"img1.xml",img1);
+	ReadImageFromRawFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"img1.xml",img1);
+
+	Image2ub img2(12,13,14);
+	WriteImageToRawFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"img2.xml",img2);
+	ReadImageFromRawFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"img2.xml",img2);
+
+	Volume1f vol1(12,13,14);
+	WriteVolumeToFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"vol1.xml",vol1);
+	ReadVolumeFromFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"vol1.xml",vol1);
+
+	Volume3f vol2(12,13,14);
+	WriteVolumeToFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"vol2.xml",vol1);
+	ReadVolumeFromFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"vol2.xml",vol1);
+
 	return true;
 }
 void WriteMipavHeaderToFile(const std::string& file,
