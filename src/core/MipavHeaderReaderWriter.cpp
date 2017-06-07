@@ -172,6 +172,7 @@ bool ReadMipavHeaderFromFile(const std::string& file, MipavHeader& header) {
 					header.modality = child->GetText();
 				}
 			}
+			return true;
 		}
 	}
 	return false;

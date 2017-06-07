@@ -1020,8 +1020,10 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(
 	std::string rawFile = GetFileWithoutExtension(file)+".raw";
 	MipavHeader header;
 	img.clear();
-	if(!ReadMipavHeaderFromFile(xmlFile,header))return false;
-	if(header.dimensions!=2){
+	if(!ReadMipavHeaderFromFile(xmlFile,header)){
+		return false;
+	}
+	if(header.dimensions>3||header.dimensions<2){
 		throw std::runtime_error(MakeString() << "Channels " <<header.dimensions<<"/"<<C<< " do not match.");
 	}
 	std::string typeName = "";
