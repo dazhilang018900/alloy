@@ -195,6 +195,11 @@ public:
 			I) {
 		data.resize(w*h);
 	}
+	Image(int2 dims, int x = 0, int y = 0, uint64_t id = 0) :
+		x(x), y(y),data(vector.data), width(dims.x), height(dims.y), id(id), channels(C), type(
+			I) {
+		data.resize(dims.x*dims.y);
+	}
 	Image(int w, int h, int2 pos, uint64_t id = 0) :
 		x(pos.x), y(pos.y),data(vector.data), width(w), height(h), id(id), channels(
 			C), type(I) {
@@ -1098,6 +1103,11 @@ typedef Image<int16_t, 1, ImageType::SHORT> Image1s;
 typedef Image<int, 1, ImageType::INT> Image1i;
 typedef Image<uint32_t, 1, ImageType::UINT> Image1ui;
 typedef Image<float, 1, ImageType::FLOAT> Image1f;
+
+typedef Image<double, 1, ImageType::DOUBLE> Image1d;
+typedef Image<double, 2, ImageType::DOUBLE> Image2d;
+typedef Image<double, 3, ImageType::DOUBLE> Image3d;
+typedef Image<double, 4, ImageType::DOUBLE> Image4d;
 
 void WriteImageToFile(const std::string& file, const ImageRGBA& img);
 void WriteImageToFile(const std::string& file, const ImageRGB& img);

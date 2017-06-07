@@ -1019,6 +1019,12 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(const std::strin
 	typedef Volume<int, 1, ImageType::INT> Volume1i;
 	typedef Volume<uint32_t, 1, ImageType::UINT> Volume1ui;
 	typedef Volume<float, 1, ImageType::FLOAT> Volume1f;
+
+	typedef Volume<double, 1, ImageType::DOUBLE> Volume1d;
+	typedef Volume<double, 2, ImageType::DOUBLE> Volume2d;
+	typedef Volume<double, 3, ImageType::DOUBLE> Volume3d;
+	typedef Volume<double, 4, ImageType::DOUBLE> Volume4d;
+
 }
 ;
 
