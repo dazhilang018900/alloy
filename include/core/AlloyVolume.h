@@ -286,7 +286,6 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(const std::strin
 			vec<K, C> rgb111 = ConvertType<K, T, C>(
 				operator()(i + 1, j + 1, k + 1));
 			vec<K, C> rgb011 = ConvertType<K, T, C>(operator()(i, j + 1, k + 1));
-
 			K dx = x - i;
 			K dy = y - j;
 			K dz = z - k;
@@ -296,6 +295,38 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(const std::strin
 				+ (rgb011 * (K(1) - dx) + rgb111 * dx) * dy);
 			return (K(1) - dz) * lower + dz * upper;
 
+		}
+		template<class K> vec<K, C> operator()(const K x, const K y, const K z) const {
+			int i = static_cast<int>(std::floor(x));
+			int j = static_cast<int>(std::floor(y));
+			int k = static_cast<int>(std::floor(z));
+			vec<K, C> rgb000 = ConvertType<K, T, C>(operator()(i, j, k));
+			vec<K, C> rgb100 = ConvertType<K, T, C>(operator()(i + 1, j, k));
+			vec<K, C> rgb110 = ConvertType<K, T, C>(operator()(i + 1, j + 1, k));
+			vec<K, C> rgb010 = ConvertType<K, T, C>(operator()(i, j + 1, k));
+
+			vec<K, C> rgb001 = ConvertType<K, T, C>(operator()(i, j, k + 1));
+			vec<K, C> rgb101 = ConvertType<K, T, C>(operator()(i + 1, j, k + 1));
+			vec<K, C> rgb111 = ConvertType<K, T, C>(
+				operator()(i + 1, j + 1, k + 1));
+			vec<K, C> rgb011 = ConvertType<K, T, C>(operator()(i, j + 1, k + 1));
+			K dx = x - i;
+			K dy = y - j;
+			K dz = z - k;
+			vec<K, C> lower = ((rgb000 * (K(1) - dx) + rgb100 * dx) * (K(1) - dy)
+				+ (rgb010 * (K(1) - dx) + rgb110 * dx) * dy);
+			vec<K, C> upper = ((rgb001 * (K(1) - dx) + rgb101 * dx) * (K(1) - dy)
+				+ (rgb011 * (K(1) - dx) + rgb111 * dx) * dy);
+			return (K(1) - dz) * lower + dz * upper;
+
+		}
+		T& operator()(int i, int j,int k, int c) {
+			return data[clamp((int)i, 0, rows - 1) + clamp((int)j, 0, cols - 1) * rows
+					+ clamp((int)k, 0, slices - 1) * rows * cols][c];
+				}
+		const T& operator()(int i, int j,int k, int c) const {
+			return data[clamp((int)i, 0, rows - 1) + clamp((int)j, 0, cols - 1) * rows
+					+ clamp((int)k, 0, slices - 1) * rows * cols][c];
 		}
 		template<class K> inline vec<K, C> operator()(const vec<K, 3>& pt) {
 			return operator()(pt.x, pt.y, pt.z);

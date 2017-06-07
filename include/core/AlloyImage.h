@@ -315,8 +315,24 @@ public:
 		return data[clamp(ij.x, 0, width - 1)
 			+ clamp(ij.y, 0, height - 1) * width];
 	}
-
-	vec<float, C> operator()(float x, float y) {
+	T& operator()(int i, int j, int c) {
+		return data[clamp(i, 0, width - 1) + clamp(j, 0, height - 1) * width][c];
+	}
+	const T& operator()(int i, int j, int c) const {
+		return data[clamp(i, 0, width - 1) + clamp(j, 0, height - 1) * width][c];
+	}
+	inline float operator()(float x, float y, int c) const {
+		int i = static_cast<int>(std::floor(x));
+		int j = static_cast<int>(std::floor(y));
+		float rgb00 = (float)operator()(i, j)[c];
+		float rgb10 = (float)operator()(i + 1, j)[c];
+		float rgb11 = (float)operator()(i + 1, j + 1)[c];
+		float rgb01 = (float)operator()(i, j + 1)[c];
+		float dx = x - i;
+		float dy = y - j;
+		return ((rgb00 * (1.0f - dx) + rgb10 * dx) * (1.0f - dy)+ (rgb01 * (1.0f - dx) + rgb11 * dx) * dy);
+	}
+	inline vec<float, C> operator()(float x, float y) {
 		int i = static_cast<int>(std::floor(x));
 		int j = static_cast<int>(std::floor(y));
 		vec<float, C> rgb00 = vec<float, C>(operator()(i, j));
@@ -328,7 +344,7 @@ public:
 		return ((rgb00 * (1.0f - dx) + rgb10 * dx) * (1.0f - dy)
 			+ (rgb01 * (1.0f - dx) + rgb11 * dx) * dy);
 	}
-	vec<float, C> operator()(float x, float y) const {
+	inline vec<float, C> operator()(float x, float y) const {
 		int i = static_cast<int>(std::floor(x));
 		int j = static_cast<int>(std::floor(y));
 		vec<float, C> rgb00 = vec<float, C>(operator()(i, j));
