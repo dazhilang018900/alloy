@@ -272,52 +272,47 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(const std::strin
 			return data[clamp(ijk.x, 0, rows - 1) + clamp(ijk.y, 0, cols - 1) * rows
 				+ clamp(ijk.z, 0, slices - 1) * rows * cols];
 		}
-		template<class K> vec<K, C> operator()(const K x, const K y, const K z) {
+		inline vec<float, C> operator()(float x,float y,float z) {
 			int i = static_cast<int>(std::floor(x));
 			int j = static_cast<int>(std::floor(y));
 			int k = static_cast<int>(std::floor(z));
-			vec<K, C> rgb000 = ConvertType<K, T, C>(operator()(i, j, k));
-			vec<K, C> rgb100 = ConvertType<K, T, C>(operator()(i + 1, j, k));
-			vec<K, C> rgb110 = ConvertType<K, T, C>(operator()(i + 1, j + 1, k));
-			vec<K, C> rgb010 = ConvertType<K, T, C>(operator()(i, j + 1, k));
-
-			vec<K, C> rgb001 = ConvertType<K, T, C>(operator()(i, j, k + 1));
-			vec<K, C> rgb101 = ConvertType<K, T, C>(operator()(i + 1, j, k + 1));
-			vec<K, C> rgb111 = ConvertType<K, T, C>(
-				operator()(i + 1, j + 1, k + 1));
-			vec<K, C> rgb011 = ConvertType<K, T, C>(operator()(i, j + 1, k + 1));
-			K dx = x - i;
-			K dy = y - j;
-			K dz = z - k;
-			vec<K, C> lower = ((rgb000 * (K(1) - dx) + rgb100 * dx) * (K(1) - dy)
-				+ (rgb010 * (K(1) - dx) + rgb110 * dx) * dy);
-			vec<K, C> upper = ((rgb001 * (K(1) - dx) + rgb101 * dx) * (K(1) - dy)
-				+ (rgb011 * (K(1) - dx) + rgb111 * dx) * dy);
-			return (K(1) - dz) * lower + dz * upper;
-
+			vec<float, C> rgb000 = vec<float,C>(operator()(i, j, k));
+			vec<float, C> rgb100 = vec<float,C>(operator()(i + 1, j, k));
+			vec<float, C> rgb110 = vec<float,C>(operator()(i + 1, j + 1, k));
+			vec<float, C> rgb010 = vec<float,C>(operator()(i, j + 1, k));
+			vec<float, C> rgb001 = vec<float,C>(operator()(i, j, k + 1));
+			vec<float, C> rgb101 = vec<float,C>(operator()(i + 1, j, k + 1));
+			vec<float, C> rgb111 = vec<float,C>(operator()(i + 1, j + 1, k + 1));
+			vec<float, C> rgb011 = vec<float,C>(operator()(i, j + 1, k + 1));
+			float dx = x - i;
+			float dy = y - j;
+			float dz = z - k;
+			vec<float, C> lower = ((rgb000 * (1.0f - dx) + rgb100 * dx) * (1.0f - dy)
+				+ (rgb010 * (1.0f - dx) + rgb110 * dx) * dy);
+			vec<float, C> upper = ((rgb001 * (1.0f - dx) + rgb101 * dx) * (1.0f - dy)
+				+ (rgb011 * (1.0f - dx) + rgb111 * dx) * dy);
+			return (1.0f - dz) * lower + dz * upper;
 		}
-		template<class K> vec<K, C> operator()(const K x, const K y, const K z) const {
+		inline vec<float, C> operator()(float x,float y,float z) const {
 			int i = static_cast<int>(std::floor(x));
 			int j = static_cast<int>(std::floor(y));
 			int k = static_cast<int>(std::floor(z));
-			vec<K, C> rgb000 = ConvertType<K, T, C>(operator()(i, j, k));
-			vec<K, C> rgb100 = ConvertType<K, T, C>(operator()(i + 1, j, k));
-			vec<K, C> rgb110 = ConvertType<K, T, C>(operator()(i + 1, j + 1, k));
-			vec<K, C> rgb010 = ConvertType<K, T, C>(operator()(i, j + 1, k));
-
-			vec<K, C> rgb001 = ConvertType<K, T, C>(operator()(i, j, k + 1));
-			vec<K, C> rgb101 = ConvertType<K, T, C>(operator()(i + 1, j, k + 1));
-			vec<K, C> rgb111 = ConvertType<K, T, C>(
-				operator()(i + 1, j + 1, k + 1));
-			vec<K, C> rgb011 = ConvertType<K, T, C>(operator()(i, j + 1, k + 1));
-			K dx = x - i;
-			K dy = y - j;
-			K dz = z - k;
-			vec<K, C> lower = ((rgb000 * (K(1) - dx) + rgb100 * dx) * (K(1) - dy)
-				+ (rgb010 * (K(1) - dx) + rgb110 * dx) * dy);
-			vec<K, C> upper = ((rgb001 * (K(1) - dx) + rgb101 * dx) * (K(1) - dy)
-				+ (rgb011 * (K(1) - dx) + rgb111 * dx) * dy);
-			return (K(1) - dz) * lower + dz * upper;
+			vec<float, C> rgb000 = vec<float,C>(operator()(i, j, k));
+			vec<float, C> rgb100 = vec<float,C>(operator()(i + 1, j, k));
+			vec<float, C> rgb110 = vec<float,C>(operator()(i + 1, j + 1, k));
+			vec<float, C> rgb010 = vec<float,C>(operator()(i, j + 1, k));
+			vec<float, C> rgb001 = vec<float,C>(operator()(i, j, k + 1));
+			vec<float, C> rgb101 = vec<float,C>(operator()(i + 1, j, k + 1));
+			vec<float, C> rgb111 = vec<float,C>(operator()(i + 1, j + 1, k + 1));
+			vec<float, C> rgb011 = vec<float,C>(operator()(i, j + 1, k + 1));
+			float dx = x - i;
+			float dy = y - j;
+			float dz = z - k;
+			vec<float, C> lower = ((rgb000 * (1.0f - dx) + rgb100 * dx) * (1.0f - dy)
+				+ (rgb010 * (1.0f - dx) + rgb110 * dx) * dy);
+			vec<float, C> upper = ((rgb001 * (1.0f - dx) + rgb101 * dx) * (1.0f - dy)
+				+ (rgb011 * (1.0f - dx) + rgb111 * dx) * dy);
+			return (1.0f - dz) * lower + dz * upper;
 
 		}
 		T& operator()(int i, int j,int k, int c) {
