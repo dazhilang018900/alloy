@@ -24,6 +24,7 @@
 #include "AlloyVector.h"
 #include "AlloyContext.h"
 #include "AlloyFileUtil.h"
+#include "FluidParticles2D.h"
 #include <cereal/cereal.hpp>
 #include <cereal/types/vector.hpp>
 #include <cereal/types/list.hpp>
@@ -50,6 +51,7 @@ namespace aly {
 		Vector1i particleLabels;
 		Vector1i vertexLabels;
 		ImageRGBA overlay;
+		FluidParticles2D fluidParticles;
 		std::array<Vector2f,4> velocities;
 		Vector2f correspondence;
 		Vector2f clusterCenters;
@@ -71,17 +73,16 @@ namespace aly {
 		void setFile(const std::string& file) {
 			this->file = file;
 		}
-
 		template<class Archive> void save(Archive & archive) const {
 			if (overlay.size() > 0) {
 				std::string imageFile = GetFileWithoutExtension(file) + ".png";
 				WriteImageToFile(imageFile, overlay);
 			}
-			archive( CEREAL_NVP(vertexes),CEREAL_NVP(file), CEREAL_NVP(indexes), CEREAL_NVP(particles), CEREAL_NVP(points),  CEREAL_NVP(normals), CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels),CEREAL_NVP(correspondence), CEREAL_NVP(clusterCenters),CEREAL_NVP(clusterColors));
+			archive( CEREAL_NVP(vertexes),CEREAL_NVP(file), CEREAL_NVP(indexes), CEREAL_NVP(particles), CEREAL_NVP(points),  CEREAL_NVP(normals), CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels),CEREAL_NVP(correspondence), CEREAL_NVP(clusterCenters),CEREAL_NVP(clusterColors),CEREAL_NVP(fluidParticles));
 		}
 		template<class Archive> void load(Archive & archive) 
 		{
-			archive(CEREAL_NVP(vertexes), CEREAL_NVP(file), CEREAL_NVP(indexes), CEREAL_NVP(particles), CEREAL_NVP(points), CEREAL_NVP(normals), CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels), CEREAL_NVP(correspondence),CEREAL_NVP(clusterCenters), CEREAL_NVP(clusterColors));
+			archive(CEREAL_NVP(vertexes), CEREAL_NVP(file), CEREAL_NVP(indexes), CEREAL_NVP(particles), CEREAL_NVP(points), CEREAL_NVP(normals), CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels), CEREAL_NVP(correspondence),CEREAL_NVP(clusterCenters), CEREAL_NVP(clusterColors),CEREAL_NVP(fluidParticles));
 			std::string imageFile = GetFileWithoutExtension(file) + ".png";
 			if (FileExists(imageFile)) {
 				ReadImageFromFile(imageFile, overlay);
