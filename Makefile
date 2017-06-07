@@ -30,10 +30,10 @@ default: all
 release: $(LIBOBJS)
 	mkdir -p ./Release
 	rm -f ./Release/libAlloy.so
-	$(CXX) -shared -o "Release/libAlloy.so" $(LIBOBJS) $(LDLIBS) $(LIBS)
+	$(CXX) -shared -o "Release/libAlloy.so" $(LIBOBJS) $(LDLIBS) $(LIBS) -Wl,-rpath="/usr/local/lib/:/usr/lib/x86_64-linux-gnu/"
 
 examples: $(LIBOBJS) $(EXOBJS)
-	$(CXX) -o ./Release/examples $(EXOBJS) $(LIBOBJS) $(LDLIBS) $(LIBS)
+	$(CXX) -o ./Release/examples $(EXOBJS) $(LIBOBJS) $(LDLIBS) $(LIBS) -Wl,-rpath="/usr/local/lib/:/usr/lib/x86_64-linux-gnu/"
 
 all: examples
 
