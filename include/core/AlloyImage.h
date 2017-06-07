@@ -1069,8 +1069,7 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(
 	for (int c = 0; c < img.channels; c++) {
 		for (int j = 0; j < img.height; j++) {
 			for (int i = 0; i < img.width; i++) {
-				T val = img(i, j)[c];
-				fread(&val, sizeof(T), 1, f);
+				fread(&img(i,j,c), sizeof(T), 1, f);
 			}
 		}
 	}

@@ -877,8 +877,7 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(const std::strin
 			for (int k = 0; k < img.slices; k++) {
 				for (int j = 0; j < img.cols; j++) {
 					for (int i = 0; i < img.rows; i++) {
-						T val = img(i, j, k)[c];
-						fwrite(&val, sizeof(T), 1, f);
+						fread(&img(i,j,k,c), sizeof(T), 1, f);
 					}
 				}
 			}
