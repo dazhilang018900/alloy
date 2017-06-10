@@ -24,7 +24,7 @@
 #include "AlloyVector.h"
 #include "AlloyContext.h"
 #include "AlloyFileUtil.h"
-#include "FluidParticles2D.h"
+#include "segmentation/FluidParticles2D.h"
 #include <cereal/cereal.hpp>
 #include <cereal/types/vector.hpp>
 #include <cereal/types/list.hpp>

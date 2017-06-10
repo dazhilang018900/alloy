@@ -42,6 +42,7 @@ void Manifold2D::operator=(const Manifold2D &c) {
 	file = c.file;
 	overlay = c.overlay;
 	particleLabels = c.particleLabels;
+	fluidParticles=c.fluidParticles;
 
 }
 Manifold2D::Manifold2D(const Manifold2D& c) :
@@ -62,6 +63,7 @@ Manifold2D::Manifold2D(const Manifold2D& c) :
 	file = c.file;
 	overlay = c.overlay;
 	particleLabels = c.particleLabels;
+	fluidParticles=c.fluidParticles;
 
 }
 Manifold2D::Manifold2D(bool onScreen,

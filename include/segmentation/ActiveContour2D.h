@@ -104,7 +104,6 @@ namespace aly {
 		virtual bool init()override;
 		virtual void cleanup() override;
 		virtual void setup(const aly::ParameterPanePtr& pane) override;
-
 		void setInitialDistanceField(const Image1f& img) {
 			initialLevelSet = img;
 		}
