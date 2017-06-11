@@ -491,15 +491,15 @@ public:
 		upSample(out);
 		return out;
 	}
-	vec<T, C> min() const {
-		vec<T, C> minVal(std::numeric_limits<T>::max());
+	vec<T, C> min(T valt=std::numeric_limits<T>::max()) const {
+		vec<T, C> minVal(valt);
 		for (const vec<T, C>& val : data) {
 			minVal = aly::minVec(val, minVal);
 		}
 		return minVal;
 	}
-	vec<T, C> max() const {
-		vec<T, C> maxVal(std::numeric_limits<T>::min());
+	vec<T, C> max(T valt=std::numeric_limits<T>::min()) const {
+		vec<T, C> maxVal(valt);
 		for (const vec<T, C>& val : data) {
 			maxVal = aly::maxVec(val, maxVal);
 		}
