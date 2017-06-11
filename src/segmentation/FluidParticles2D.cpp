@@ -8,7 +8,6 @@
 #include <segmentation/FluidParticles2D.h>
 
 namespace aly {
-
 FluidParticles2D::FluidParticles2D():radius(1.0f) {
 }
 void FluidParticles2D::updateBounds() {

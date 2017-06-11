@@ -106,7 +106,7 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(const std::strin
 			archive(cereal::make_nvp(MakeString() << type << channels, id),
 				CEREAL_NVP(rows), CEREAL_NVP(cols), CEREAL_NVP(slices),
 				CEREAL_NVP(x), CEREAL_NVP(y), CEREAL_NVP(z),
-				CEREAL_NVP(hashCode));
+				CEREAL_NVP(hashCode),CEREAL_NVP(vector));
 		}
 
 		inline void writeToXML(const std::string& fileName) const {

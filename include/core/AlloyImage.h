@@ -122,7 +122,7 @@ public:
 	template<class Archive> void serialize(Archive & archive) {
 		archive(cereal::make_nvp(MakeString() << type << channels, id),
 			CEREAL_NVP(width), CEREAL_NVP(height), CEREAL_NVP(x),
-			CEREAL_NVP(y), CEREAL_NVP(hashCode));
+			CEREAL_NVP(y), CEREAL_NVP(hashCode),CEREAL_NVP(vector));
 	}
 	inline void writeToXML(const std::string& fileName) const {
 		WriteImageToRawFile(fileName, *this);

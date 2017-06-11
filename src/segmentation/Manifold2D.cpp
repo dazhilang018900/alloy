@@ -24,7 +24,6 @@
 #include <cereal/archives/xml.hpp>
 #include <cereal/archives/json.hpp>
 #include <cereal/archives/portable_binary.hpp>
-
 namespace aly {
 void Manifold2D::operator=(const Manifold2D &c) {
 	onScreen = c.onScreen;
