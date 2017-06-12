@@ -1848,7 +1848,7 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos, const AUnit2
 		fileTypeSelect->addSelection(filterRule->toString());
 		fileTypeSelect->setSelectedIndex(0);
 		fileTypeSelect->onSelect = [this](int index) {
-			this->updateDirectoryList();
+			this->update();
 		};
 	}
 	actionButton->setOrigin(Origin::TopRight);
