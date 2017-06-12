@@ -42,7 +42,7 @@ template<class VecT, class T,int C, ImageType I> bool ReadImageFromRawFile(const
 	public:
 		Vec<VecT> vector;//Treat whole tensor as flat vector. Useful!
 		std::vector<VecT> data;
-		typedef T ValueType;
+		typedef VecT ValueType;
 		typedef typename std::vector<ValueType>::iterator iterator;
 		typedef typename std::vector<ValueType>::const_iterator const_iterator;
 		typedef typename std::vector<ValueType>::reverse_iterator reverse_iterator;
@@ -102,7 +102,7 @@ template<class VecT, class T,int C, ImageType I> bool ReadImageFromRawFile(const
 			return (x>=0&&y>=0&&z>=0&&x<rows&&y<cols&&z<slices);
 		}
 		template<class Archive> void serialize(Archive & archive) {
-			archive(CEREAL_NVP(id),CEREAL_NVP(rows), CEREAL_NVP(cols), CEREAL_NVP(slices),
+			archive(cereal::make_nvp(MakeString() << type << channels, id),CEREAL_NVP(id),CEREAL_NVP(rows), CEREAL_NVP(cols), CEREAL_NVP(slices),
 				CEREAL_NVP(x), CEREAL_NVP(y), CEREAL_NVP(z),
 				CEREAL_NVP(hashCode),CEREAL_NVP(vector));
 		}
