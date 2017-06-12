@@ -56,63 +56,6 @@ namespace aly {
 		void load(Archive & archive) {
 			archive(CEREAL_NVP(data));
 		}
-		T min() const {
-			T minVal(std::numeric_limits<T>::max());
-			for (const T& val : data) {
-				minVal = std::min(val, minVal);
-			}
-			return minVal;
-		}
-		T max() const {
-			T maxVal(std::numeric_limits<T>::min());
-			for (const T& val : data) {
-				maxVal = std::max(val, maxVal);
-			}
-			return maxVal;
-		}
-		vec<T, 2> range() const {
-			T maxVal(std::numeric_limits<T>::min());
-			T minVal(std::numeric_limits<T>::max());
-			for (const T& val : data) {
-				maxVal = std::max(val, maxVal);
-				minVal = std::min(val, minVal);
-			}
-			return vec<T, 2>(minVal, maxVal);
-		}
-		T mean() const {
-			double mean(0.0);
-			for (const T& val : data) {
-				mean += double(val);
-			}
-			mean = mean / (double) data.size();
-			return T(mean);
-		}
-		T median() const {
-			std::vector<T> bands = data;
-			std::sort(bands.begin(), bands.end());
-			T med;
-			if (data.size() % 2 == 0) {
-				med = T(((double) bands[data.size() / 2] + (double) bands[data.size() / 2 - 1]) * 0.5f);
-
-			} else {
-				med = bands[data.size() / 2];
-			}
-			return med;
-		}
-		T stdDev() const {
-			if (data.size() < 2) {
-				return T(0);
-			}
-			T avg = mean();
-			double var(0.0);
-			for (const T& val : data) {
-				double e = (val - avg);
-				var += e * e;
-			}
-			var = var / (double) (data.size() - 1);
-			return std::sqrt(var);
-		}
-
 		void resize(size_t sz) {
 			data.resize(sz);
 			data.shrink_to_fit();
@@ -1194,10 +1137,18 @@ namespace aly {
 	typedef DenseMat<double> DenseMatrixDouble;
 	typedef SparseMat<double> SparseMatrixDouble;
 	typedef Vec<double> VecDouble;
+	typedef Vec<double> Vec1d;
+	typedef Vec<double2> Vec2d;
+	typedef Vec<double3> Vec3d;
+	typedef Vec<double3> Vec4d;
 
 	typedef DenseMat<float> DenseMatrixFloat;
 	typedef SparseMat<float> SparseMatrixFloat;
 	typedef Vec<float> VecFloat;
+	typedef Vec<float> Vec1f;
+	typedef Vec<float2> Vec2f;
+	typedef Vec<float3> Vec3f;
+	typedef Vec<float3> Vec4f;
 
 }
 

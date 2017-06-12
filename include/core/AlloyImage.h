@@ -217,10 +217,11 @@ public:
 		Image(w, h, 0, 0, 0) {
 		set(ptr);
 	}
-	Image(std::vector<vec<T, C>>& ref, int w, int h, int x = 0, int y = 0,
+	Image(const std::vector<vec<T, C>>& ref, int w, int h, int x = 0, int y = 0,
 		uint64_t id = 0) :data(vector.data),
-		x(x), y(y), data(ref), width(w), height(h), id(id), channels(C), type(
+		x(x), y(y), width(w), height(h), id(id), channels(C), type(
 			I) {
+		data=ref;
 	}
 	Image() :
 		x(0), y(0),data(vector.data), width(0), height(0), id(0), channels(C), type(I) {

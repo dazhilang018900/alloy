@@ -75,7 +75,6 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(const std::strin
 		int slices;
 		uint64_t id;
 		const int channels = C;
-
 		const ImageType type = I;
 		int3 position() const {
 			return int3(x, y, z);
@@ -175,9 +174,10 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(const std::strin
 			Volume(r, c, s, x, y, z, id) {
 			set(ptr);
 		}
-		Volume(std::vector<vec<T, C>>& ref, int r, int c, int s, int x = 0, int y =
+		Volume(const std::vector<vec<T, C>>& ref, int r, int c, int s, int x = 0, int y =
 			0, int z = 0, uint64_t id = 0) :
-			x(x), y(y), z(z), data(vector.data),data(ref) , rows(r), cols(c), slices(s), id(id){
+			x(x), y(y), z(z), data(vector.data),  rows(r), cols(c), slices(s), id(id){
+			data=ref;
 		}
 		Volume() :
 			x(0), y(0), z(0), data(vector.data),rows(0), cols(0), slices(0), id(0) {

@@ -399,7 +399,6 @@ template<class T, int C> double dot(const Array<T, C>& a,
 	}
 	return ans;
 }
-
 template<class T, int C> T lengthSqr(const Array<T, C>& a) {
 	T ans(0);
 	size_t sz = a.size();
