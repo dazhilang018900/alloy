@@ -326,7 +326,7 @@ template<class VecT, class T,int C, ImageType I> bool ReadImageFromRawFile(const
 		const std::function<void(VecT&, VecT&)>& func) {
 		if (im1.dimensions() != im2.dimensions())
 			throw std::runtime_error(
-				MakeString() << "Volume dimensions do not match. "
+				MakeString() << "Tensor dimensions do not match. "
 				<< im1.dimensions() << "!=" << im2.dimensions());
 		size_t sz = im1.size();
 #pragma omp parallel for
@@ -342,7 +342,7 @@ template<class VecT, class T,int C, ImageType I> bool ReadImageFromRawFile(const
 			const VecT&)>& func) {
 		if (im1.dimensions() != im2.dimensions())
 			throw std::runtime_error(
-				MakeString() << "Volume dimensions do not match. "
+				MakeString() << "Tensor dimensions do not match. "
 				<< im1.dimensions() << "!=" << im2.dimensions());
 		size_t sz = im1.size();
 #pragma omp parallel for
@@ -364,7 +364,7 @@ template<class VecT, class T,int C, ImageType I> bool ReadImageFromRawFile(const
 		const std::function<void(VecT&, const VecT&)>& func) {
 		if (im1.dimensions() != im2.dimensions())
 			throw std::runtime_error(
-				MakeString() << "Volume dimensions do not match. "
+				MakeString() << "Tensor dimensions do not match. "
 				<< im1.dimensions() << "!=" << im2.dimensions());
 		size_t sz = im1.size();
 #pragma omp parallel for
@@ -377,7 +377,7 @@ template<class VecT, class T,int C, ImageType I> bool ReadImageFromRawFile(const
 		const std::function<void(VecT&, const VecT&, const VecT&)>& func) {
 		if (im1.dimensions() != im2.dimensions())
 			throw std::runtime_error(
-				MakeString() << "Volume dimensions do not match. "
+				MakeString() << "Tensor dimensions do not match. "
 				<< im1.dimensions() << "!=" << im2.dimensions());
 		size_t sz = im1.size();
 #pragma omp parallel for
@@ -391,7 +391,7 @@ template<class VecT, class T,int C, ImageType I> bool ReadImageFromRawFile(const
 		void(int i, int j, int k, VecT& val1, VecT& val2)>& func) {
 		if (im1.dimensions() != im2.dimensions())
 			throw std::runtime_error(
-				MakeString() << "Volume dimensions do not match. "
+				MakeString() << "Tensor dimensions do not match. "
 				<< im1.dimensions() << "!=" << im2.dimensions());
 #pragma omp parallel for
 		for (int k = 0; k < im1.slices; k++) {
@@ -409,7 +409,7 @@ template<class VecT, class T,int C, ImageType I> bool ReadImageFromRawFile(const
 		void(size_t offset, VecT& val1, VecT& val2)>& func) {
 		if (im1.dimensions() != im2.dimensions())
 			throw std::runtime_error(
-				MakeString() << "Volume dimensions do not match. "
+				MakeString() << "Tensor dimensions do not match. "
 				<< im1.dimensions() << "!=" << im2.dimensions());
 		size_t sz = im1.size();
 #pragma omp parallel for
