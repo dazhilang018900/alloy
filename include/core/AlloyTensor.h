@@ -41,7 +41,7 @@ template<class VecT, class T,int C, ImageType I> bool ReadImageFromRawFile(const
 		int x, y, z;
 	public:
 		Vec<VecT> vector;//Treat whole tensor as flat vector. Useful!
-		std::vector<VecT> data;
+		std::vector<VecT>& data;
 		typedef VecT ValueType;
 		typedef typename std::vector<ValueType>::iterator iterator;
 		typedef typename std::vector<ValueType>::const_iterator const_iterator;
@@ -249,26 +249,43 @@ template<class VecT, class T,int C, ImageType I> bool ReadImageFromRawFile(const
 			return data[clamp(ijk.x, 0, rows - 1) + clamp(ijk.y, 0, cols - 1) * rows
 				+ clamp(ijk.z, 0, slices - 1) * rows * cols];
 		}
-		inline VecT operator()(float x,float y,float z) {
+		inline VecT operator()(float x,float y,int k) const {
 			int i = static_cast<int>(std::floor(x));
 			int j = static_cast<int>(std::floor(y));
-			int k = static_cast<int>(std::floor(z));
 			VecT rgb000 = (VecT)(operator()(i, j, k));
 			VecT rgb100 = (VecT)(operator()(i + 1, j, k));
 			VecT rgb110 = (VecT)(operator()(i + 1, j + 1, k));
 			VecT rgb010 = (VecT)(operator()(i, j + 1, k));
-			VecT rgb001 = (VecT)(operator()(i, j, k + 1));
-			VecT rgb101 = (VecT)(operator()(i + 1, j, k + 1));
-			VecT rgb111 = (VecT)(operator()(i + 1, j + 1, k + 1));
-			VecT rgb011 = (VecT)(operator()(i, j + 1, k + 1));
 			VecT dx = x - i;
 			VecT dy = y - j;
 			VecT dz = z - k;
-			VecT lower = ((rgb000 * (1.0f - dx) + rgb100 * dx) * (1.0f - dy)
-				+ (rgb010 * (1.0f - dx) + rgb110 * dx) * dy);
-			VecT upper = ((rgb001 * (1.0f - dx) + rgb101 * dx) * (1.0f - dy)
-				+ (rgb011 * (1.0f - dx) + rgb111 * dx) * dy);
-			return (1.0f - dz) * lower + dz * upper;
+			VecT lower = ((rgb000 * (1.0f - dx) + rgb100 * dx) * (1.0f - dy)+ (rgb010 * (1.0f - dx) + rgb110 * dx) * dy);
+			return lower;
+		}
+
+		inline Vec<VecT> operator()(int i,int j) const {
+			Vec<VecT> out(slices);
+			for(int k=0;k<slices;k++){
+				out[k]=(VecT)(operator()(i, j, k));
+			}
+			return out;
+		}
+		inline Vec<VecT> operator()(float x,float y) const {
+			Vec<VecT> out(slices);
+			int i = static_cast<int>(std::floor(x));
+			int j = static_cast<int>(std::floor(y));
+			for(int k=0;k<slices;k++){
+				VecT rgb000 = (VecT)(operator()(i, j, k));
+				VecT rgb100 = (VecT)(operator()(i + 1, j, k));
+				VecT rgb110 = (VecT)(operator()(i + 1, j + 1, k));
+				VecT rgb010 = (VecT)(operator()(i, j + 1, k));
+				VecT dx = x - i;
+				VecT dy = y - j;
+				VecT dz = z - k;
+				out[k]= ((rgb000 * (1.0f - dx) + rgb100 * dx) * (1.0f - dy)
+					+ (rgb010 * (1.0f - dx) + rgb110 * dx) * dy);
+				}
+			return out;
 		}
 		inline VecT operator()(float x,float y,float z) const {
 			int i = static_cast<int>(std::floor(x));
@@ -753,11 +770,11 @@ template<class VecT, class T,int C, ImageType I> bool ReadImageFromRawFile(const
 			myfile << sstr.str();
 			myfile.close();
 		}
-	template<class VecT, class T,int C, ImageType I> void WriteVolumeToFile(
+	template<class VecT, class T,int C, ImageType I> void WriteTensorToFile(
 		const std::string& file, const Tensor<VecT, T, C, I>& img) {
 		WriteImageToRawFile(file,img);
 	}
-	template<class VecT, class T,int C, ImageType I> bool ReadVolumeFromFile(
+	template<class VecT, class T,int C, ImageType I> bool ReadTensorFromFile(
 		const std::string& file, Tensor<VecT, T, C, I>& img) {
 		return ReadImageFromRawFile(file,img);
 	}

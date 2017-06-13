@@ -485,7 +485,29 @@ bool Composite::addVerticalScrollPosition(float t) {
 	}
 	return false;
 }
-
+void Composite::scrollToBottom() {
+	float shift=this->verticalScrollTrack->getBoundsPositionY() + std::max(0.0f,this->verticalScrollTrack->getBoundsDimensionsY()- (float) this->verticalScrollHandle->getBoundsDimensionsY());
+		verticalScrollHandle->setDragOffset(pixel2(0.0f,shift));
+		this->scrollPosition.y =
+				(this->verticalScrollHandle->getBoundsPositionY()
+						- this->verticalScrollTrack->getBoundsPositionY())
+						/ std::max(1.0f,
+								(float) this->verticalScrollTrack->getBoundsDimensionsY()
+										- (float) this->verticalScrollHandle->getBoundsDimensionsY());
+	updateExtents();
+	AlloyApplicationContext()->requestPack();
+}
+void Composite::scrollToTop() {
+		verticalScrollHandle->setDragOffset(pixel2(0.0f,0.0f));
+		this->scrollPosition.y =
+				(this->verticalScrollHandle->getBoundsPositionY()
+						- this->verticalScrollTrack->getBoundsPositionY())
+						/ std::max(1.0f,
+								(float) this->verticalScrollTrack->getBoundsDimensionsY()
+										- (float) this->verticalScrollHandle->getBoundsDimensionsY());
+	updateExtents();
+	AlloyApplicationContext()->requestPack();
+}
 bool Composite::addHorizontalScrollPosition(float t) {
 	if (horizontalScrollHandle->addDragOffset(pixel2(t, 0.0f))) {
 		this->scrollPosition.x =

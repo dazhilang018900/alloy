@@ -299,6 +299,8 @@ public:
 		return children.cend();
 	}
 	bool addVerticalScrollPosition(float pix);
+	void scrollToBottom();
+	void scrollToTop();
 	bool addHorizontalScrollPosition(float pix);
 	void putLast(const std::shared_ptr<Region>& region);
 	void putFirst(const std::shared_ptr<Region>& region);
