@@ -117,6 +117,10 @@ public:
 	Locator(const Vector<T, C>& data) {
 		insert(data.data);
 	}
+	void build(const Vector<T, C>& data){
+		clear();
+		insert(data.data);
+	}
 	void insert(const std::vector<xvec<T, C>>& ptsi) {
 		for (xvec<T, C> pt : ptsi) {
 			indexCount = std::max(indexCount, (pt.index + 1));
