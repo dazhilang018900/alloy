@@ -115,7 +115,7 @@ template<class VecT, class T,int C, ImageType I> bool ReadImageFromRawFile(const
 		void set(const VecT& val) {
 			data.assign(data.size(), val);
 		}
-		void set(const std::vector<VecT>& val) {
+		void set(const std::vector<VecT,aligned_allocator<T,64>>& val) {
 			data = val;
 		}
 		void set(VecT* val) {
@@ -183,11 +183,17 @@ template<class VecT, class T,int C, ImageType I> bool ReadImageFromRawFile(const
 		}
 		void resize(int r, int c, int s) {
 			data.resize((size_t)r * (size_t)c * (size_t)s);
-			data.shrink_to_fit();
 			rows = r;
 			cols = c;
 			slices = s;
 		}
+		void resize(int3 dims) {
+			data.resize((size_t)dims.x * (size_t)dims.y * (size_t)dims.z);
+			rows = dims.x;
+			cols = dims.y;
+			slices=dims.z;
+		}
+
 		inline void clear() {
 			data.clear();
 			data.shrink_to_fit();
