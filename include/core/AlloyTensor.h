@@ -41,7 +41,7 @@ template<class VecT, class T,int C, ImageType I> bool ReadImageFromRawFile(const
 		int x, y, z;
 	public:
 		Vec<VecT> vector;//Treat whole tensor as flat vector. Useful!
-		std::vector<VecT>& data;
+		std::vector<T,aligned_allocator<T,64>>& data;
 		typedef VecT ValueType;
 		typedef typename std::vector<ValueType>::iterator iterator;
 		typedef typename std::vector<ValueType>::const_iterator const_iterator;
@@ -133,12 +133,18 @@ template<class VecT, class T,int C, ImageType I> bool ReadImageFromRawFile(const
 		Tensor(int r, int c, int s, int x = 0, int y = 0, int z = 0,
 			uint64_t id = 0) :
 				 x(x), y(y), z(z),data(vector.data),rows(r), cols(c), slices(s), id(id){
-		data.resize(r * c * s);
+		data.resize((size_t)r *(size_t) c * (size_t)s);
 		}
 		Tensor(int r, int c, int s, int3 pos,
 			uint64_t id = 0) :
 			x(pos.x), y(pos.y), z(pos.z),data(vector.data), rows(r), cols(c), slices(s), id(id){
-			data.resize(r * c * s);
+			data.resize((size_t)r * (size_t)c * (size_t)s);
+
+		}
+		Tensor(int3 dims, int3 pos=int3(0),
+			uint64_t id = 0) :
+			x(pos.x), y(pos.y), z(pos.z),data(vector.data), rows(dims.x), cols(dims.y), slices(dims.z), id(id){
+			data.resize((size_t)dims.x*(size_t)dims.y*(size_t)dims.z);
 
 		}
 		Tensor(VecT* ptr, int r, int c, int s, int x = 0, int y = 0, int z = 0,
@@ -176,7 +182,7 @@ template<class VecT, class T,int C, ImageType I> bool ReadImageFromRawFile(const
 			return sizeof(T);
 		}
 		void resize(int r, int c, int s) {
-			data.resize(r * c * s);
+			data.resize((size_t)r * (size_t)c * (size_t)s);
 			data.shrink_to_fit();
 			rows = r;
 			cols = c;

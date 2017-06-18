@@ -23,6 +23,7 @@
 #define INCLUDE_CORE_ALLOYOPTIMIZATIONMATH_H_
 #include <cereal/types/list.hpp>
 #include "AlloyVector.h"
+#include "AlignedAllocator.h"
 #include "cereal/types/vector.hpp"
 #include "cereal/types/tuple.hpp"
 #include "cereal/types/map.hpp"
@@ -34,7 +35,7 @@
 namespace aly {
 	template<class T> struct Vec {
 	public:
-		std::vector<T> data;
+		std::vector<T,aligned_allocator<T,64>> data;
 		Vec(size_t sz = 0, T value = T(0)) :data(sz, value) {
 		}
 		void set(const T& val) {
@@ -324,9 +325,9 @@ namespace aly {
 		return out;
 	}
 	template<class T> struct DenseMat {
-	private:
-		std::vector<std::vector<T>> data;
 	public:
+		Vec<T> vector;//Treat whole tensor as flat vector. Useful!
+		std::vector<T,aligned_allocator<T,64>>& data;
 		int rows, cols;
 		typedef T ValueType;
 		typedef typename std::vector<ValueType>::iterator iterator;
@@ -368,25 +369,20 @@ namespace aly {
 		template<class Archive> void serialize(Archive & archive) {
 			archive(CEREAL_NVP(rows), CEREAL_NVP(cols), cereal::make_nvp(MakeString() << "matrix", data));
 		}
-		std::vector<T>& operator[](size_t i) {
-			if ((int) i >= rows)
-				throw std::runtime_error(MakeString() << "Index (" << i << ",*) exceeds matrix bounds [" << rows << "," << cols << "]");
+		T& operator[](size_t i) {
 			return data[i];
 		}
-		const std::vector<T>& operator[](size_t i) const {
-			if ((int) i >= rows)
-				throw std::runtime_error(MakeString() << "Index (" << i << ",*) exceeds matrix bounds [" << rows << "," << cols << "]");
+		const T& operator[](size_t i) const {
 			return data[i];
 		}
-		DenseMat() :
-				rows(0), cols(0) {
+		DenseMat() :data(vector.data),rows(0), cols(0) {
 		}
-		DenseMat(int rows, int cols) :
-				data(rows, std::vector<T>(cols)), rows(rows), cols(cols) {
+		DenseMat(int rows, int cols) :data(vector.data), rows(rows), cols(cols) {
+			data.resize(rows*(size_t)cols);
 		}
 		void resize(int rows, int cols) {
 			if (this->rows != rows || this->cols != cols) {
-				data = std::vector<std::vector<T>>(rows, std::vector<T>(cols));
+				data.resize(rows*(size_t)cols);
 				this->rows = rows;
 				this->cols = cols;
 			}
@@ -394,27 +390,24 @@ namespace aly {
 		void set(size_t i, size_t j, const T& value) {
 			if (i >= (size_t)rows || j >= (size_t)cols || i < 0 || j < 0)
 				throw std::runtime_error(MakeString() << "Index (" << i << "," << j << ") exceeds matrix bounds [" << rows << "," << cols << "]");
-			data[i][j] = value;
+			data[i+cols*j] = value;
 		}
-		T& operator()(size_t i, size_t j) {
-			if (i >= (size_t)rows || j >= (size_t)cols || i < 0 || j < 0)
-				throw std::runtime_error(MakeString() << "Index (" << i << "," << j << ") exceeds matrix bounds [" << rows << "," << cols << "]");
-			return data[i][j];
-		}
-
 		T get(size_t i, size_t j) const {
 			if (i >= (size_t)rows || j >= (size_t)cols || i < 0 || j < 0)
 				throw std::runtime_error(MakeString() << "Index (" << i << "," << j << ") exceeds matrix bounds [" << rows << "," << cols << "]");
-			return data[i][j];
+			return data[i+cols*j];
+		}
+		T& operator()(size_t i, size_t j) {
+			return data[i+cols*j];
 		}
 		const T& operator()(size_t i, size_t j) const {
-			return data[i][j];
+			return data[i+cols*j];
 		}
 		inline DenseMat<T> transpose() const {
 			DenseMat<T> M(cols, rows);
 			for (int i = 0; i < rows; i++) {
 				for (int j = 0; j < cols; j++) {
-					M[j][i] = data[i][j];
+					M(j, i) = data[i+cols*j];
 				}
 			}
 			return M;
@@ -423,7 +416,7 @@ namespace aly {
 			DenseMat<T> A(M, N);
 			for (int i = 0; i < M; i++) {
 				for (int j = 0; j < N; j++) {
-					A[i][j] = T(T((i == j) ? 1 : 0));
+					A(i, j) = T(T((i == j) ? 1 : 0));
 				}
 			}
 			return A;
@@ -432,7 +425,7 @@ namespace aly {
 			DenseMat<T> A(M, N);
 			for (int i = 0; i < M; i++) {
 				for (int j = 0; j < N; j++) {
-					A[i][j] = T(T(0));
+					A(i, j) = T(T(0));
 				}
 			}
 			return A;
@@ -441,33 +434,10 @@ namespace aly {
 			DenseMat<T> A((int) v.size(), (int) v.size());
 			for (int i = 0; i < A.rows; i++) {
 				for (int j = 0; j < A.cols; j++) {
-					A[i][j] = T(T((i == j) ? v[i] : 0));
+					A(i, j) = T(T((i == j) ? v[i] : 0));
 				}
 			}
 			return A;
-		}
-		inline static DenseMat<T> columnVector(const Vec<T>& v) {
-			DenseMat<T> A((int) v.size(), 1);
-			for (int i = 0; i < A.rows; i++) {
-				A[i][0] = v[i];
-			}
-			return A;
-		}
-		inline static DenseMat<T> rowVector(const Vec<T>& v) {
-			DenseMat<T> A(1, (int) v.size());
-			A.data[0] = v.data;
-			return A;
-		}
-		inline Vec<T> getRow(int i) const {
-			Vec<T> v(data[i].data);
-			return v;
-		}
-		inline Vec<T> getColumn(int j) const {
-			Vec<T> v(rows);
-			for (int i = 0; i < rows; i++) {
-				v[i] = data[i][j];
-			}
-			return v;
 		}
 	};
 	template<class A, class B, class T, int C> std::basic_ostream<A, B> & operator <<(std::basic_ostream<A, B> & ss, const DenseMat<T>& M) {
@@ -476,14 +446,14 @@ namespace aly {
 			for (int i = 0; i < M.rows; i++) {
 				ss << "[";
 				for (int j = 0; j < M.cols; j++) {
-					ss << std::setprecision(10) << std::setw(16) << M[i][j] << ((j < M.cols - 1) ? "," : "]\n");
+					ss << std::setprecision(10) << std::setw(16) << M(i, j) << ((j < M.cols - 1) ? "," : "]\n");
 				}
 			}
 		} else {
 			for (int i = 0; i < M.rows; i++) {
 				ss << "[";
 				for (int j = 0; j < M.cols; j++) {
-					ss << M[i][j] << ((j < M.cols - 1) ? "," : "]\n");
+					ss << M(i, j) << ((j < M.cols - 1) ? "," : "]\n");
 				}
 			}
 		}
@@ -495,7 +465,7 @@ namespace aly {
 		for (int i = 0; i < A.rows; i++) {
 			T sum(0.0);
 			for (int j = 0; j < A.cols; j++) {
-				sum += A[i][j] * v[j];
+				sum += A(i, j) * v[j];
 			}
 			out[i] = sum;
 		}
@@ -511,9 +481,9 @@ namespace aly {
 			for (int j = 0; j < out.cols; j++) {
 				T sum(0.0);
 				for (int k = 0; k < A.cols; k++) {
-					sum += A[i][k] * B[k][j];
+					sum += A(i, k) * B(k, j);
 				}
-				out[i][j] = sum;
+				out(i, j) = sum;
 			}
 		}
 		return out;
@@ -528,7 +498,7 @@ namespace aly {
 		DenseMat<T> out(A.rows, A.cols);
 		for (int i = 0; i < out.rows; i++) {
 			for (int j = 0; j < out.cols; j++) {
-				out[i][j] = W[i] * A[i][j];
+				out(i, j) = W[i] * A(i, j);
 			}
 		}
 		return out;
@@ -539,7 +509,7 @@ namespace aly {
 					MakeString() << "Cannot scale matrix by vector. Rows must match. " << "[" << W.size() << "] * [" << A.rows << "," << A.cols << "]");
 		for (int i = 0; i < A.rows; i++) {
 			for (int j = 0; j < A.cols; j++) {
-				A[i][j] *= W[i];
+				A(i, j) *= W[i];
 			}
 		}
 		return A;
@@ -548,7 +518,7 @@ namespace aly {
 		DenseMat<T> out(A.rows, A.cols);
 		for (int i = 0; i < (int) out.rows; i++) {
 			for (int j = 0; j < out.cols; j++) {
-				out[i][j] = -A[i][j];
+				out(i, j) = -A(i, j);
 			}
 		}
 		return out;
@@ -560,7 +530,7 @@ namespace aly {
 		DenseMat<T> out(A.rows, A.cols);
 		for (int i = 0; i < (int) out.rows; i++) {
 			for (int j = 0; j < out.cols; j++) {
-				out[i][j] = A[i][j] - B[i][j];
+				out(i, j) = A(i, j) - B(i, j);
 			}
 		}
 		return out;
@@ -572,7 +542,7 @@ namespace aly {
 		DenseMat<T> out(A.rows, A.cols);
 		for (int i = 0; i < (int) out.rows; i++) {
 			for (int j = 0; j < out.cols; j++) {
-				out[i][j] = A[i][j] + B[i][j];
+				out(i, j) = A(i, j) + B(i, j);
 			}
 		}
 		return out;
@@ -581,7 +551,7 @@ namespace aly {
 		DenseMat<T> out(A.rows, A.cols);
 		for (int i = 0; i < A.rows; i++) {
 			for (int j = 0; j < A.cols; j++) {
-				out[i][j] = A[i][j] * v;
+				out(i, j) = A(i, j) * v;
 			}
 		}
 		return out;
@@ -590,7 +560,7 @@ namespace aly {
 		DenseMat<T> out(A.rows, A.cols);
 		for (int i = 0; i < A.rows; i++) {
 			for (int j = 0; j < A.cols; j++) {
-				out[i][j] = A[i][j] / v;
+				out(i, j) = A(i, j) / v;
 			}
 		}
 		return out;
@@ -599,7 +569,7 @@ namespace aly {
 		DenseMat<T> out(A.rows, A.cols);
 		for (int i = 0; i < A.rows; i++) {
 			for (int j = 0; j < A.cols; j++) {
-				out[i][j] = A[i][j] + v;
+				out(i, j) = A(i, j) + v;
 			}
 		}
 		return out;
@@ -608,7 +578,7 @@ namespace aly {
 		DenseMat<T> out(A.rows, A.cols);
 		for (int i = 0; i < A.rows; i++) {
 			for (int j = 0; j < A.cols; j++) {
-				out[i][j] = A[i][j] - v;
+				out(i, j) = A(i, j) - v;
 			}
 		}
 		return out;
@@ -617,7 +587,7 @@ namespace aly {
 		DenseMat<T> out(A.rows, A.cols);
 		for (int i = 0; i < A.rows; i++) {
 			for (int j = 0; j < A.cols; j++) {
-				out[i][j] = v * A[i][j];
+				out(i, j) = v * A(i, j);
 			}
 		}
 		return out;
@@ -626,7 +596,7 @@ namespace aly {
 		DenseMat<T> out(A.rows, A.cols);
 		for (int i = 0; i < A.rows; i++) {
 			for (int j = 0; j < A.cols; j++) {
-				out[i][j] = v / A[i][j];
+				out(i, j) = v / A(i, j);
 			}
 		}
 		return out;
@@ -635,7 +605,7 @@ namespace aly {
 		DenseMat<T> out(A.rows, A.cols);
 		for (int i = 0; i < A.rows; i++) {
 			for (int j = 0; j < A.cols; j++) {
-				out[i][j] = v + A[i][j];
+				out(i, j) = v + A(i, j);
 			}
 		}
 		return out;
@@ -644,7 +614,7 @@ namespace aly {
 		DenseMat<T> out(A.rows, A.cols);
 		for (int i = 0; i < A.rows; i++) {
 			for (int j = 0; j < A.cols; j++) {
-				out[i][j] = v - A[i][j];
+				out(i, j) = v - A(i, j);
 			}
 		}
 		return out;
@@ -652,7 +622,7 @@ namespace aly {
 	template<class T> DenseMat<T>& operator*=(DenseMat<T>& A, const T& v) {
 		for (int i = 0; i < A.rows; i++) {
 			for (int j = 0; j < A.cols; j++) {
-				A[i][j] = A[i][j] * v;
+				A(i, j) = A(i, j) * v;
 			}
 		}
 		return A;
@@ -660,7 +630,7 @@ namespace aly {
 	template<class T> DenseMat<T>& operator/=(DenseMat<T>& A, const T& v) {
 		for (int i = 0; i < A.rows; i++) {
 			for (int j = 0; j < A.cols; j++) {
-				A[i][j] = A[i][j] / v;
+				A(i, j) = A(i, j) / v;
 			}
 		}
 		return A;
@@ -668,7 +638,7 @@ namespace aly {
 	template<class T> DenseMat<T>& operator+=(DenseMat<T>& A, const T& v) {
 		for (int i = 0; i < A.rows; i++) {
 			for (int j = 0; j < A.cols; j++) {
-				A[i][j] = A[i][j] + v;
+				A(i, j) = A(i, j) + v;
 			}
 		}
 		return A;
@@ -676,7 +646,7 @@ namespace aly {
 	template<class T> DenseMat<T>& operator-=(DenseMat<T>& A, const T& v) {
 		for (int i = 0; i < A.rows; i++) {
 			for (int j = 0; j < A.cols; j++) {
-				A[i][j] = A[i][j] - v;
+				A(i, j) = A(i, j) - v;
 			}
 		}
 		return A;
@@ -850,7 +820,7 @@ namespace aly {
 				int k = (int) pr1.first;
 				for (std::pair<size_t, T> pr2 : B[k]) { //b[k,j]
 					int j = (int) pr2.first;
-					out[i][j] += pr1.second * pr2.second;
+					out(i, j) += pr1.second * pr2.second;
 				}
 			}
 		}
