@@ -119,6 +119,20 @@ public:
 							<< data.size());
 		return data[i];
 	}
+	T& at(const size_t i){
+		if (i >= data.size())
+			throw std::runtime_error(
+					MakeString() << "Vector index out of bounds " << i << "/"
+							<< data.size());
+		return data[i];
+	}
+	const T& at(const size_t i) const {
+		if (i >= data.size())
+			throw std::runtime_error(
+					MakeString() << "Vector index out of bounds " << i << "/"
+							<< data.size());
+		return data[i];
+	}
 	inline void clear() {
 		data.clear();
 		data.shrink_to_fit();
