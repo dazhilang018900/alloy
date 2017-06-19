@@ -37,9 +37,9 @@ template<class T> struct Vec {
 public:
 	std::vector<T, aligned_allocator<T, 64>> data;
 	typedef T ValueType;
-	typedef typename std::vector<ValueType>::iterator iterator;
-	typedef typename std::vector<ValueType>::const_iterator const_iterator;
-	typedef typename std::vector<ValueType>::reverse_iterator reverse_iterator;
+	typedef typename std::vector<ValueType, aligned_allocator<T, 64>>::iterator iterator;
+	typedef typename std::vector<ValueType, aligned_allocator<T, 64>>::const_iterator const_iterator;
+	typedef typename std::vector<ValueType, aligned_allocator<T, 64>>::reverse_iterator reverse_iterator;
 
 	inline iterator begin() {
 		return data.begin();
