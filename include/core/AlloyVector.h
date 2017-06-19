@@ -44,22 +44,22 @@ public:
 	typedef typename std::vector<ValueType>::const_iterator const_iterator;
 	typedef typename std::vector<ValueType>::reverse_iterator reverse_iterator;
 
-	iterator begin() {
+	inline iterator begin() {
 		return data.begin();
 	}
-	iterator end() {
+	inline iterator end() {
 		return data.end();
 	}
-	const_iterator cbegin() const {
-		return data.cbegin();
+	inline const_iterator begin() const {
+		return data.begin();
 	}
-	const_iterator cend() const {
-		return data.cend();
+	inline const_iterator end() const {
+		return data.end();
 	}
-	reverse_iterator rbegin() {
+	inline reverse_iterator rbegin() {
 		return data.rbegin();
 	}
-	reverse_iterator rend() {
+	inline reverse_iterator rend() {
 		return data.rend();
 	}
 	template<class Archive>

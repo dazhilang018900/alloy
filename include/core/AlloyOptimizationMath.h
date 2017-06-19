@@ -36,6 +36,29 @@ namespace aly {
 template<class T> struct Vec {
 public:
 	std::vector<T, aligned_allocator<T, 64>> data;
+	typedef T ValueType;
+	typedef typename std::vector<ValueType>::iterator iterator;
+	typedef typename std::vector<ValueType>::const_iterator const_iterator;
+	typedef typename std::vector<ValueType>::reverse_iterator reverse_iterator;
+
+	inline iterator begin() {
+		return data.begin();
+	}
+	inline iterator end() {
+		return data.end();
+	}
+	inline const_iterator begin() const {
+		return data.begin();
+	}
+	inline const_iterator end() const {
+		return data.end();
+	}
+	inline reverse_iterator rbegin() {
+		return data.rbegin();
+	}
+	inline reverse_iterator rend() {
+		return data.rend();
+	}
 	Vec(size_t sz = 0, T value = T(0)) :
 			data(sz, value) {
 	}
