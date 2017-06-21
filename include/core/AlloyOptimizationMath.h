@@ -88,6 +88,9 @@ public:
 		data.resize(sz, val);
 		data.shrink_to_fit();
 	}
+	bool empty() const {
+		return data.empty();
+	}
 	void append(const T& val) {
 		data.push_back(val);
 	}
