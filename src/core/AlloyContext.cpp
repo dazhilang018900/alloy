@@ -55,6 +55,7 @@ namespace aly {
 
 std::shared_ptr<AlloyContext> AlloyContext::defaultContext;
 const Cursor Cursor::Normal(0xf245, 24.0f);
+const Cursor Cursor::Hidden(0, -1.0f);
 const Cursor Cursor::Hand(0xf25a, 24.0f, NVG_ALIGN_TOP | NVG_ALIGN_LEFT, FontType::Icon,0.0f,pixel2(-8.0f,0.0f));
 const Cursor Cursor::Grab(0xf255, 24.0f, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER, FontType::Icon);
 const Cursor Cursor::Horizontal(0xf07e, 24.0f,

@@ -128,7 +128,7 @@ namespace aly {
 
 
 	struct Cursor {
-		static const Cursor Normal, Horizontal, Vertical, Position, Hand, Grab, SlantUp, SlantDown, TextInsert, CrossHairs;
+		static const Cursor Normal, Horizontal, Vertical, Position, Hand, Grab, SlantUp, SlantDown, TextInsert, CrossHairs,Hidden;
 		std::string codeString;
 		FontType fontType;
 		float fontSize;
