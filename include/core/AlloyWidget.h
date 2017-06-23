@@ -239,6 +239,12 @@ public:
 	const Number& getValue() {
 		return value;
 	}
+	const Number& getMinValue() {
+		return minValue;
+	}
+	const Number& getMaxValue() {
+		return maxValue;
+	}
 	inline void setOnChangeEvent(
 			const std::function<void(const Number& value)>& func) {
 		onChangeEvent = func;
