@@ -249,28 +249,28 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(const std::strin
 			return data[i];
 		}
 		vec<T, C>& operator()(const int i, const int j, const int k) {
-			return data[clamp(i, 0, rows - 1) + clamp(j, 0, cols - 1) * rows
-				+ clamp(k, 0, slices - 1) * rows * cols];
+			return data[clamp(i, 0, rows - 1) + clamp(j, 0, cols - 1) * (size_t)rows
+				+ clamp(k, 0, slices - 1) * (size_t)rows * (size_t)cols];
 		}
 		vec<T, C>& operator()(const size_t i, const size_t j, const size_t k) {
-			return data[clamp((int)i, 0, rows - 1) + clamp((int)j, 0, cols - 1) * rows
-				+ clamp((int)k, 0, slices - 1) * rows * cols];
+			return data[clamp((int)i, 0, rows - 1) + clamp((int)j, 0, cols - 1) * (size_t)rows
+				+ clamp((int)k, 0, slices - 1) * (size_t)rows * (size_t)cols];
 		}
 		vec<T, C>& operator()(const int3 ijk) {
-			return data[clamp(ijk.x, 0, rows - 1) + clamp(ijk.y, 0, cols - 1) * rows
-				+ clamp(ijk.z, 0, slices - 1) * rows * cols];
+			return data[clamp(ijk.x, 0, rows - 1) + clamp(ijk.y, 0, cols - 1) *(size_t) rows
+				+ clamp(ijk.z, 0, slices - 1) * (size_t)rows * (size_t)cols];
 		}
 		const vec<T, C>& operator()(const int i, const int j, const int k) const {
-			return data[clamp(i, 0, rows - 1) + clamp(j, 0, cols - 1) * rows
-				+ clamp(k, 0, slices - 1) * rows * cols];
+			return data[clamp(i, 0, rows - 1) + clamp(j, 0, cols - 1) * (size_t)rows
+				+ clamp(k, 0, slices - 1) * (size_t)rows * (size_t)cols];
 		}
 		const vec<T, C>& operator()(const size_t i, const size_t j, const size_t k) const {
-			return data[clamp((int)i, 0, rows - 1) + clamp((int)j, 0, cols - 1) * rows
-				+ clamp((int)k, 0, slices - 1) * rows * cols];
+			return data[clamp((int)i, 0, rows - 1) + clamp((int)j, 0, cols - 1) * (size_t)rows
+				+ clamp((int)k, 0, slices - 1) * (size_t)rows * (size_t)cols];
 		}
 		const vec<T, C>& operator()(const int3 ijk) const {
-			return data[clamp(ijk.x, 0, rows - 1) + clamp(ijk.y, 0, cols - 1) * rows
-				+ clamp(ijk.z, 0, slices - 1) * rows * cols];
+			return data[clamp(ijk.x, 0, rows - 1) + clamp(ijk.y, 0, cols - 1) *(size_t) rows
+				+ clamp(ijk.z, 0, slices - 1) *(size_t) rows * (size_t)cols];
 		}
 		inline vec<float, C> operator()(float x,float y,float z) {
 			int i = static_cast<int>(std::floor(x));

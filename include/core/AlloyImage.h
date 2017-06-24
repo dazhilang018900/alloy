@@ -303,24 +303,24 @@ public:
 		return data[i];
 	}
 	vec<T, C>& operator()(int i, int j) {
-		return data[clamp(i, 0, width - 1) + clamp(j, 0, height - 1) * width];
+		return data[clamp(i, 0, width - 1) + clamp(j, 0, height - 1) * (size_t)width];
 	}
 	vec<T, C>& operator()(const int2 ij) {
 		return data[clamp(ij.x, 0, width - 1)
 			+ clamp(ij.y, 0, height - 1) * width];
 	}
 	const vec<T, C>& operator()(int i, int j) const {
-		return data[clamp(i, 0, width - 1) + clamp(j, 0, height - 1) * width];
+		return data[clamp(i, 0, width - 1) + clamp(j, 0, height - 1) *(size_t) width];
 	}
 	const vec<T, C>& operator()(const int2 ij) const {
 		return data[clamp(ij.x, 0, width - 1)
 			+ clamp(ij.y, 0, height - 1) * width];
 	}
 	T& operator()(int i, int j, int c) {
-		return data[clamp(i, 0, width - 1) + clamp(j, 0, height - 1) * width][c];
+		return data[clamp(i, 0, width - 1) + clamp(j, 0, height - 1) *(size_t) width][c];
 	}
 	const T& operator()(int i, int j, int c) const {
-		return data[clamp(i, 0, width - 1) + clamp(j, 0, height - 1) * width][c];
+		return data[clamp(i, 0, width - 1) + clamp(j, 0, height - 1) *(size_t)width][c];
 	}
 	inline float operator()(float x, float y, int c) const {
 		int i = static_cast<int>(std::floor(x));
