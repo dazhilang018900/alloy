@@ -2256,5 +2256,44 @@ template<class T> void Shuffle(std::vector<T>& order){
 	shuffle(order.begin(), order.end(), g);
 }
 
+struct dim2: public int2 {
+	int& width;
+	int& height;
+
+	dim2(int x=0,int y=0):width(int2::x),height(int2::y),int2(x,y){}
+
+	inline size_t operator()(const int i,const int j) const {
+		return (size_t)clamp(i, 0, width - 1) + clamp(j, 0, height - 1) * (size_t)width;
+	}
+};
+
+struct dim3: public int3 {
+	int& rows;
+	int& cols;
+	int& slices;
+	dim3(int x=0,int y=0,int z=0):rows(int3::x),cols(int3::y),slices(int3::z),int3(x,y,z){}
+
+	inline size_t operator()(const int i,const int j,const int k) const {
+		return (size_t)clamp(i, 0, rows - 1) + (size_t)clamp(j, 0, cols - 1) * rows+ clamp(k, 0, slices - 1) * (size_t)rows * (size_t)cols;
+	}
+};
+
+struct dim4: public int4 {
+
+	int& rows;
+	int& cols;
+	int& slices;
+	int& channels;
+
+	dim4(int x=0,int y=0,int z=0,int =0):rows(int4::x),cols(int4::y),slices(int4::z),channels(int4::w),int4(x,y,z,w){}
+
+	inline size_t operator()(const int i,const int j,const int k,const int l) const {
+		return    (size_t)clamp(i, 0, rows - 1)
+				+ (size_t)clamp(j, 0, cols - 1) * rows
+				+ clamp(k, 0, slices - 1) * (size_t)rows * (size_t)cols
+				+ clamp(l, 0, channels - 1) * (size_t)rows * (size_t)cols* (size_t)slices;
+	}
+};
+
 }
 #endif
