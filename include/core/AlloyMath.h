@@ -2295,7 +2295,7 @@ struct dim4: public int4 {
 	int& slices;
 	int& channels;
 
-	dim4(int x=0,int y=0,int z=0,int =0):rows(int4::x),cols(int4::y),slices(int4::z),channels(int4::w),int4(x,y,z,w){}
+	dim4(int x=0,int y=0,int z=0,int w=0):rows(int4::x),cols(int4::y),slices(int4::z),channels(int4::w),int4(x,y,z,w){}
 	dim4(const int4& pt):dim4(pt.x,pt.y,pt.z,pt.w){}
 	dim4(int x):dim4(x,x,x,x){}
 
