@@ -2263,7 +2263,9 @@ struct dim2: public int2 {
 	dim2(int x=0,int y=0):width(int2::x),height(int2::y),int2(x,y){}
 	dim2(const int2& pt):dim2(pt.x,pt.y){}
 	dim2(int x):dim2(x,x){}
-
+	dim2 operator =(dim2&& d){
+		return dim2(d.x,d.y);
+	}
 	inline size_t operator()(const int i,const int j) const {
 		return (size_t)clamp(i, 0, width - 1) + clamp(j, 0, height - 1) * (size_t)width;
 	}
@@ -2280,7 +2282,9 @@ struct dim3: public int3 {
 	dim3(int x=0,int y=0,int z=0):rows(int3::x),cols(int3::y),slices(int3::z),int3(x,y,z){}
 	dim3(const int3& pt):dim3(pt.x,pt.y,pt.z){}
 	dim3(int x):dim3(x,x,x){}
-
+	dim3 operator =(dim3&& d){
+		return dim3(d.x,d.y,d.z);
+	}
 	inline size_t operator()(const int i,const int j,const int k) const {
 		return (size_t)clamp(i, 0, rows - 1) + (size_t)clamp(j, 0, cols - 1) * rows+ clamp(k, 0, slices - 1) * (size_t)rows * (size_t)cols;
 	}
@@ -2298,7 +2302,9 @@ struct dim4: public int4 {
 	dim4(int x=0,int y=0,int z=0,int w=0):rows(int4::x),cols(int4::y),slices(int4::z),channels(int4::w),int4(x,y,z,w){}
 	dim4(const int4& pt):dim4(pt.x,pt.y,pt.z,pt.w){}
 	dim4(int x):dim4(x,x,x,x){}
-
+	dim4 operator =(dim4&& d){
+		return dim4(d.x,d.y,d.z,d.w);
+	}
 	inline size_t operator()(const int i,const int j,const int k,const int l) const {
 		return    (size_t)clamp(i, 0, rows - 1)
 				+ (size_t)clamp(j, 0, cols - 1) * rows
