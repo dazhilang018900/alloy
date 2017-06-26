@@ -891,6 +891,15 @@ namespace aly {
 	}
 	bool SANITY_CHECK_MATH() {
 		try {
+			int3 d3(1,2,3);
+			dim3 dd3=d3;
+			d3=dd3;
+			int2 d2(1,2);
+			dim2 dd2=d2;
+			d2=dd2;
+			int4 d4(1,2,3,4);
+			dim4 dd4=d4;
+			d4=dd4;
 			std::cout << "Sanity Check .." << std::endl;
 			float optimized1;
 			std::function<double(const float& value)> scoreFunc1 = [=](const float& val) {

@@ -2269,6 +2269,9 @@ struct dim2: public int2 {
 	inline size_t area() const {
 		return x*(size_t)y;
 	}
+	inline dim2 operator = (const int2& dim){
+		return dim2(dim);
+	}
 };
 
 struct dim3: public int3 {
@@ -2286,6 +2289,9 @@ struct dim3: public int3 {
 	}
 	inline size_t volume() const {
 		return x*(size_t)y*(size_t)z;
+	}
+	inline dim3 operator = (const int3& dim){
+		return dim3(dim);
 	}
 };
 
@@ -2308,7 +2314,14 @@ struct dim4: public int4 {
 	inline size_t volume() const {
 		return x*(size_t)y*(size_t)z;
 	}
+	inline dim4 operator = (const int4& dim){
+		return dim4(dim);
+	}
 };
+
+
+
+
 
 }
 #endif
