@@ -2266,6 +2266,9 @@ struct dim2: public int2 {
 	inline size_t size() const {
 		return x*(size_t)y;
 	}
+	inline size_t area() const {
+		return x*(size_t)y;
+	}
 };
 
 struct dim3: public int3 {
@@ -2276,6 +2279,12 @@ struct dim3: public int3 {
 		return (size_t)clamp(i, 0, x - 1) + (size_t)clamp(j, 0, y - 1) * x+ clamp(k, 0, z - 1) * (size_t)x * (size_t)y;
 	}
 	inline size_t size() const {
+		return x*(size_t)y*(size_t)z;
+	}
+	inline size_t area() const {
+		return x*(size_t)y;
+	}
+	inline size_t volume() const {
 		return x*(size_t)y*(size_t)z;
 	}
 };
@@ -2292,6 +2301,12 @@ struct dim4: public int4 {
 	}
 	inline size_t size() const {
 		return x*(size_t)y*(size_t)z*(size_t)w;
+	}
+	inline size_t area() const {
+		return x*(size_t)y;
+	}
+	inline size_t volume() const {
+		return x*(size_t)y*(size_t)z;
 	}
 };
 
