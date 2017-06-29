@@ -45,6 +45,10 @@ namespace aly {
 		template<class T> void write(const std::vector<T>& vec, bool block = true) {
 			MemoryCL::write(vec, block);
 		}
+		template<class T> void write(const T* vec, size_t sz, bool block = true) {
+			MemoryCL::write(vec, sz*sizeof(T), block);
+		}
+
 		template<class T> void read(std::vector<T>& vec, bool block = true) {
 			MemoryCL::read(vec, block);
 		}
