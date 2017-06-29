@@ -134,9 +134,7 @@ bool ReadMipavHeaderFromFile(const std::string& file, MipavHeader& header) {
 	if (elem) {
 		elem = elem->FirstChildElement("Dataset-attributes");
 		if (elem) {
-			for (XMLElement* child = elem->FirstChildElement();
-					child != nullptr && child <= elem->LastChildElement();
-					child++) {
+			for (XMLElement* child = elem->FirstChildElement();child != nullptr; child=child->NextSiblingElement()) {
 				std::string name = ToLower(child->Name());
 				int i;
 				float f;
