@@ -54,6 +54,7 @@ namespace aly {
 			create(format, img);
 		}
 		template<class T, int M, ImageType I> void read(Image<T, M, I>& vec, bool block = true) const {
+			vec.resize(width,height);
 			read(vec.data, block);
 		}
 		template<class T, int M, ImageType I> void write(const Image<T, M, I>& vec, bool block = true) {
