@@ -54,10 +54,10 @@ template<typename T> T sign(const T& a) {
 	return (a == 0) ? T(0) : ((a > 0.0) ? T(1) : T(-1));
 }
 template<typename T> T round(const T & v) {
-	return T(std::floor(T(v+0.5)));
+	return T(std::floor(T(v + 0.5)));
 }
-template<typename T> T round(const T & v,int sigs) {
-	return T(std::floor(T(v*pow(10, sigs) + 0.5))*pow(10, -sigs));
+template<typename T> T round(const T & v, int sigs) {
+	return T(std::floor(T(v * pow(10, sigs) + 0.5)) * pow(10, -sigs));
 }
 float InvSqrt(float x);
 
@@ -290,10 +290,12 @@ template<class T> struct vec<T, 4> {
 		return (x != r.x || y != r.y || z != r.z || w != r.w);
 	}
 	bool operator <(const vec & r) const {
-		return (std::make_tuple(x, y, z, w) < std::make_tuple(r.x, r.y, r.z, r.w));
+		return (std::make_tuple(x, y, z, w)
+				< std::make_tuple(r.x, r.y, r.z, r.w));
 	}
 	bool operator >(const vec & r) const {
-		return (std::make_tuple(x, y, z, w) > std::make_tuple(r.x, r.y, r.z, r.w));
+		return (std::make_tuple(x, y, z, w)
+				> std::make_tuple(r.x, r.y, r.z, r.w));
 	}
 
 };
@@ -335,7 +337,8 @@ template<class T, int M, int N> const matrix<T, M, N> Zero() {
 	return Zero;
 }
 ;
-template<class T, int M, int N> const matrix<T, M - 1, N - 1> SubMatrix(matrix<T, M, N> A) {
+template<class T, int M, int N> const matrix<T, M - 1, N - 1> SubMatrix(
+		matrix<T, M, N> A) {
 	static matrix<T, M - 1, N - 1> B;
 	for (int m = 0; m < M - 1; m++) {
 		for (int n = 0; n < N - 1; n++) {
@@ -345,7 +348,8 @@ template<class T, int M, int N> const matrix<T, M - 1, N - 1> SubMatrix(matrix<T
 	return B;
 }
 ;
-template<class T, int M, int N> const matrix<T, M - 1, N> SubRowMatrix(matrix<T, M, N> A) {
+template<class T, int M, int N> const matrix<T, M - 1, N> SubRowMatrix(
+		matrix<T, M, N> A) {
 	static matrix<T, M - 1, N> B;
 	for (int m = 0; m < M - 1; m++) {
 		for (int n = 0; n < N; n++) {
@@ -355,7 +359,8 @@ template<class T, int M, int N> const matrix<T, M - 1, N> SubRowMatrix(matrix<T,
 	return B;
 }
 ;
-template<class T, int M, int N> const matrix<T, M, N - 1> SubColMatrix(matrix<T, M, N> A) {
+template<class T, int M, int N> const matrix<T, M, N - 1> SubColMatrix(
+		matrix<T, M, N> A) {
 	static matrix<T, M, N - 1> B;
 	for (int m = 0; m < M; m++) {
 		for (int n = 0; n < N - 1; n++) {
@@ -385,11 +390,12 @@ template<class T, int M> struct matrix<T, M, 2> {
 	explicit matrix(T s) :
 			x(s), y(s) {
 	}
-	matrix( T a00,T a01,
-			T a10,T a11){
+	matrix(T a00, T a01, T a10, T a11) {
 
-		x.x=a00;x.y=a10;
-		y.x=a01;y.y=a11;
+		x.x = a00;
+		x.y = a10;
+		y.x = a01;
+		y.y = a11;
 	}
 	template<class U> explicit matrix(const matrix<U, M, 2> & r) :
 			x(C(r.x)), y(C(r.y)) {
@@ -442,13 +448,17 @@ template<class T, int M> struct matrix<T, M, 3> {
 			z[m] = A[m * 3 + 2];
 		}
 	}
-	matrix( T a00,T a01,T a02,
-			T a10,T a11,T a12,
-			T a20,T a21,T a22){
+	matrix(T a00, T a01, T a02, T a10, T a11, T a12, T a20, T a21, T a22) {
 
-		x.x=a00;x.y=a10;x.z=a20;
-		y.x=a01;y.y=a11;y.z=a21;
-		z.x=a02;z.y=a12;z.z=a22;
+		x.x = a00;
+		x.y = a10;
+		x.z = a20;
+		y.x = a01;
+		y.y = a11;
+		y.z = a21;
+		z.x = a02;
+		z.y = a12;
+		z.z = a22;
 
 	}
 	matrix(C x, C y, C z) :
@@ -512,15 +522,25 @@ template<class T, int M> struct matrix<T, M, 4> {
 	matrix(C x, C y, C z, C w) :
 			x(x), y(y), z(z), w(w) {
 	}
-	matrix( T a00,T a01,T a02,T a03,
-			T a10,T a11,T a12,T a13,
-			T a20,T a21,T a22,T a23,
-			T a30,T a31,T a32,T a33){
+	matrix(T a00, T a01, T a02, T a03, T a10, T a11, T a12, T a13, T a20, T a21,
+			T a22, T a23, T a30, T a31, T a32, T a33) {
 
-		x.x=a00;x.y=a10;x.z=a20;x.w=a30;
-		y.x=a01;y.y=a11;y.z=a21;y.w=a31;
-		z.x=a02;z.y=a12;z.z=a22;z.w=a32;
-		w.x=a03;w.y=a13;w.z=a23;w.w=a33;
+		x.x = a00;
+		x.y = a10;
+		x.z = a20;
+		x.w = a30;
+		y.x = a01;
+		y.y = a11;
+		y.z = a21;
+		y.w = a31;
+		z.x = a02;
+		z.y = a12;
+		z.z = a22;
+		z.w = a32;
+		w.x = a03;
+		w.y = a13;
+		w.z = a23;
+		w.w = a33;
 	}
 	explicit matrix(T s) :
 			x(s), y(s), z(s), w(s) {
@@ -593,7 +613,8 @@ template<class T, int M, class F> T reduce(const matrix<T, M, 3> & m, F f) {
 	return f(f(reduce(m.x, f), reduce(m.y, f)), reduce(m.z, f));
 }
 template<class T, int M, class F> T reduce(const matrix<T, M, 4> & m, F f) {
-	return f(f(f(reduce(m.x, f), reduce(m.y, f)), reduce(m.z, f)), reduce(m.w, f));
+	return f(f(f(reduce(m.x, f), reduce(m.y, f)), reduce(m.z, f)),
+			reduce(m.w, f));
 }
 
 /////////////////////////////////
@@ -659,38 +680,44 @@ template<class T, int M> vec<T, M> sqrt(const vec<T, M> & v) {
 		result[m] = std::sqrt(v[m]);
 	return result;
 }
-template<class T, int M> vec<T, M> clamp(const vec<T, M> & v, const T& mn, const T& mx) {
+template<class T, int M> vec<T, M> clamp(const vec<T, M> & v, const T& mn,
+		const T& mx) {
 	vec<T, M> result;
 	for (int m = 0; m < M; m++)
 		result[m] = clamp(v[m], mn, mx);
 	return result;
 }
-template<class T, int M> vec<T, M> clamp(const vec<T, M> & v, const vec<T, M>& mn, const vec<T, M>& mx) {
+template<class T, int M> vec<T, M> clamp(const vec<T, M> & v,
+		const vec<T, M>& mn, const vec<T, M>& mx) {
 	vec<T, M> result;
 	for (int m = 0; m < M; m++)
 		result[m] = clamp(v[m], mn[m], mx[m]);
 	return result;
 }
 // Form a vector or matrix by taking the componentwise max/min of two vectors or matrices
-template<class T, int M> vec<T, M> max(const vec<T, M> & l, const vec<T, M> & r) {
+template<class T, int M> vec<T, M> max(const vec<T, M> & l,
+		const vec<T, M> & r) {
 	vec<T, M> result;
 	for (int m = 0; m < M; m++)
 		result[m] = std::max(l[m], r[m]);
 	return result;
 }
-template<class T, int M> vec<T, M> min(const vec<T, M> & l, const vec<T, M> & r) {
+template<class T, int M> vec<T, M> min(const vec<T, M> & l,
+		const vec<T, M> & r) {
 	vec<T, M> result;
 	for (int m = 0; m < M; m++)
 		result[m] = std::min(l[m], r[m]);
 	return result;
 }
-template<class T, int M> vec<T, M> maxVec(const vec<T, M> & l, const vec<T, M> & r) {
+template<class T, int M> vec<T, M> maxVec(const vec<T, M> & l,
+		const vec<T, M> & r) {
 	vec<T, M> result;
 	for (int m = 0; m < M; m++)
 		result[m] = std::max(l[m], r[m]);
 	return result;
 }
-template<class T, int M> vec<T, M> minVec(const vec<T, M> & l, const vec<T, M> & r) {
+template<class T, int M> vec<T, M> minVec(const vec<T, M> & l,
+		const vec<T, M> & r) {
 	vec<T, M> result;
 	for (int m = 0; m < M; m++)
 		result[m] = std::min(l[m], r[m]);
@@ -709,17 +736,22 @@ template<class T, int M> T min(const vec<T, M> & l) {
 	return result;
 }
 
-template<class T, int M> vec<T, M> mix(const vec<T, M> & a, const vec<T, M> & b, const T& t) {
-	return vec<T, M>(vec<float, M>(a) * (1.0f - (float) t) + vec<float, M>(b) * t);
+template<class T, int M> vec<T, M> mix(const vec<T, M> & a, const vec<T, M> & b,
+		const T& t) {
+	return vec<T, M>(
+			vec<float, M>(a) * (1.0f - (float) t) + vec<float, M>(b) * t);
 }
-template<class T, int M> vec<T, M> mix(const vec<T, M> & a, const vec<T, M> & b, const double t) {
+template<class T, int M> vec<T, M> mix(const vec<T, M> & a, const vec<T, M> & b,
+		const double t) {
 	return vec<T, M>(vec<double, M>(a) * (1 - t) + vec<double, M>(b) * (t));
 }
 template<class T> T mix(const T & a, const T & b, double t) {
 	return (T) ((double) a * (1.0 - t) + (double) b * (t));
 }
-template<class T, int M> vec<T, M> mix(const vec<T, M> & a, const vec<T, M> & b, const vec<T, M> & t) {
-	return vec<T, M>(vec<float, M>(a) * (vec<float, M>(1) - t) + vec<float, M>(b) * t);
+template<class T, int M> vec<T, M> mix(const vec<T, M> & a, const vec<T, M> & b,
+		const vec<T, M> & t) {
+	return vec<T, M>(
+			vec<float, M>(a) * (vec<float, M>(1) - t) + vec<float, M>(b) * t);
 }
 //////////////////////////////
 // Vector algebra functions //
@@ -730,7 +762,8 @@ template<class T, int N> T dot(const vec<T, N> & l, const vec<T, N> & r) {
 	return sum(l * r);
 }
 template<class T> vec<T, 3> cross(const vec<T, 3> & l, const vec<T, 3> & r) {
-	return vec<T, 3>(l.y * r.z - l.z * r.y, l.z * r.x - l.x * r.z, l.x * r.y - l.y * r.x);
+	return vec<T, 3>(l.y * r.z - l.z * r.y, l.z * r.x - l.x * r.z,
+			l.x * r.y - l.y * r.x);
 }
 template<class T> vec<T, 3> cross(const vec<T, 2> & l, const vec<T, 2> & r) {
 	return vec<T, 3>(0, 0, l.x * r.y - l.y * r.x);
@@ -739,7 +772,9 @@ template<class T> T crossMag(const vec<T, 2> & l, const vec<T, 2> & r) {
 	return l.x * r.y - l.y * r.x;
 }
 template<class T> T crossMag(const vec<T, 3> & l, const vec<T, 3> & r) {
-	return length(vec<T, 3>(l.y * r.z - l.z * r.y, l.z * r.x - l.x * r.z, l.x * r.y - l.y * r.x));
+	return length(
+			vec<T, 3>(l.y * r.z - l.z * r.y, l.z * r.x - l.x * r.z,
+					l.x * r.y - l.y * r.x));
 }
 
 // Compute the length/square length of a vector
@@ -773,12 +808,14 @@ template<class T> vec<T, 2> reflect(const vec<T, 2> & I, const vec<T, 2> & N) {
 template<class T, int N> T distance(const vec<T, N> & l, const vec<T, N> & r) {
 	return length(r - l);
 }
-template<class T, int N> T distanceSqr(const vec<T, N> & l, const vec<T, N> & r) {
+template<class T, int N> T distanceSqr(const vec<T, N> & l,
+		const vec<T, N> & r) {
 	return lengthSqr(r - l);
 }
 
 // Compute a normalized vector with the same direction as the original vector
-template<class T, int N> vec<T, N> normalize(const vec<T, N> & v, const double eps = 1E-6) {
+template<class T, int N> vec<T, N> normalize(const vec<T, N> & v,
+		const double eps = 1E-6) {
 	return v / std::max(length(v), static_cast<T>(eps));
 }
 
@@ -819,20 +856,27 @@ template<class T> T determinant(const matrix<T, 2, 2> & a) {
 	return a.x.x * a.y.y - a.x.y * a.y.x;
 }
 template<class T> T determinant(const matrix<T, 3, 3> & a) {
-	return a.x.x * (a.y.y * a.z.z - a.z.y * a.y.z) + a.x.y * (a.y.z * a.z.x - a.z.z * a.y.x) + a.x.z * (a.y.x * a.z.y - a.z.x * a.y.y);
+	return a.x.x * (a.y.y * a.z.z - a.z.y * a.y.z)
+			+ a.x.y * (a.y.z * a.z.x - a.z.z * a.y.x)
+			+ a.x.z * (a.y.x * a.z.y - a.z.x * a.y.y);
 }
 template<class T> T determinant(const matrix<T, 4, 4> & a) {
 	return a.x.x
-			* (a.y.y * a.z.z * a.w.w + a.w.y * a.y.z * a.z.w + a.z.y * a.w.z * a.y.w - a.y.y * a.w.z * a.z.w - a.z.y * a.y.z * a.w.w - a.w.y * a.z.z * a.y.w)
+			* (a.y.y * a.z.z * a.w.w + a.w.y * a.y.z * a.z.w
+					+ a.z.y * a.w.z * a.y.w - a.y.y * a.w.z * a.z.w
+					- a.z.y * a.y.z * a.w.w - a.w.y * a.z.z * a.y.w)
 			+ a.x.y
-					* (a.y.z * a.w.w * a.z.x + a.z.z * a.y.w * a.w.x + a.w.z * a.z.w * a.y.x - a.y.z * a.z.w * a.w.x - a.w.z * a.y.w * a.z.x
-							- a.z.z * a.w.w * a.y.x)
+					* (a.y.z * a.w.w * a.z.x + a.z.z * a.y.w * a.w.x
+							+ a.w.z * a.z.w * a.y.x - a.y.z * a.z.w * a.w.x
+							- a.w.z * a.y.w * a.z.x - a.z.z * a.w.w * a.y.x)
 			+ a.x.z
-					* (a.y.w * a.z.x * a.w.y + a.w.w * a.y.x * a.z.y + a.z.w * a.w.x * a.y.y - a.y.w * a.w.x * a.z.y - a.z.w * a.y.x * a.w.y
-							- a.w.w * a.z.x * a.y.y)
+					* (a.y.w * a.z.x * a.w.y + a.w.w * a.y.x * a.z.y
+							+ a.z.w * a.w.x * a.y.y - a.y.w * a.w.x * a.z.y
+							- a.z.w * a.y.x * a.w.y - a.w.w * a.z.x * a.y.y)
 			+ a.x.w
-					* (a.y.x * a.w.y * a.z.z + a.z.x * a.y.y * a.w.z + a.w.x * a.z.y * a.y.z - a.y.x * a.z.y * a.w.z - a.w.x * a.y.y * a.z.z
-							- a.z.x * a.w.y * a.y.z);
+					* (a.y.x * a.w.y * a.z.z + a.z.x * a.y.y * a.w.z
+							+ a.w.x * a.z.y * a.y.z - a.y.x * a.z.y * a.w.z
+							- a.w.x * a.y.y * a.z.z - a.z.x * a.w.y * a.y.z);
 }
 
 // Compute the inverse of a square matrix
@@ -841,24 +885,30 @@ template<class T, int N> matrix<T, N, N> inverse(const matrix<T, N, N> & a) {
 }
 
 // Compute the product of a matrix post-multiplied by a column vector
-template<class T, int M> vec<T, M> mul(const matrix<T, M, 2> & a, const vec<T, 2> & b) {
+template<class T, int M> vec<T, M> mul(const matrix<T, M, 2> & a,
+		const vec<T, 2> & b) {
 	return a.x * b.x + a.y * b.y;
 }
-template<class T, int M> vec<T, M> mul(const matrix<T, M, 3> & a, const vec<T, 3> & b) {
+template<class T, int M> vec<T, M> mul(const matrix<T, M, 3> & a,
+		const vec<T, 3> & b) {
 	return a.x * b.x + a.y * b.y + a.z * b.z;
 }
-template<class T, int M> vec<T, M> mul(const matrix<T, M, 4> & a, const vec<T, 4> & b) {
+template<class T, int M> vec<T, M> mul(const matrix<T, M, 4> & a,
+		const vec<T, 4> & b) {
 	return a.x * b.x + a.y * b.y + a.z * b.z + a.w * b.w;
 }
 
 // Compute the product of two matrices
-template<class T, int M, int N> matrix<T, M, 2> mul(const matrix<T, M, N> & a, const matrix<T, N, 2> & b) {
+template<class T, int M, int N> matrix<T, M, 2> mul(const matrix<T, M, N> & a,
+		const matrix<T, N, 2> & b) {
 	return {mul(a,b.x), mul(a,b.y)};
 }
-template<class T, int M, int N> matrix<T, M, 3> mul(const matrix<T, M, N> & a, const matrix<T, N, 3> & b) {
+template<class T, int M, int N> matrix<T, M, 3> mul(const matrix<T, M, N> & a,
+		const matrix<T, N, 3> & b) {
 	return {mul(a,b.x), mul(a,b.y), mul(a,b.z)};
 }
-template<class T, int M, int N> matrix<T, M, 4> mul(const matrix<T, M, N> & a, const matrix<T, N, 4> & b) {
+template<class T, int M, int N> matrix<T, M, 4> mul(const matrix<T, M, N> & a,
+		const matrix<T, N, 4> & b) {
 	return {mul(a,b.x), mul(a,b.y), mul(a,b.z), mul(a,b.w)};
 }
 
@@ -916,28 +966,32 @@ template<class T, int M> vec<T, M> operator -(const vec<T, M> & a) {
 	};
 	return result;
 }
-template<class T, int M> vec<T, M> operator +(const vec<T, M> & a, const vec<T, M> & b) {
+template<class T, int M> vec<T, M> operator +(const vec<T, M> & a,
+		const vec<T, M> & b) {
 	vec<T, M> result;
 	for (int m = 0; m < M; m++) {
 		result[m] = a[m] + b[m];
 	};
 	return result;
 }
-template<class T, int M> vec<T, M> operator -(const vec<T, M> & a, const vec<T, M> & b) {
+template<class T, int M> vec<T, M> operator -(const vec<T, M> & a,
+		const vec<T, M> & b) {
 	vec<T, M> result;
 	for (int m = 0; m < M; m++) {
 		result[m] = a[m] - b[m];
 	};
 	return result;
 }
-template<class T, int M> vec<T, M> operator *(const vec<T, M> & a, const vec<T, M> & b) {
+template<class T, int M> vec<T, M> operator *(const vec<T, M> & a,
+		const vec<T, M> & b) {
 	vec<T, M> result;
 	for (int m = 0; m < M; m++) {
 		result[m] = a[m] * b[m];
 	};
 	return result;
 }
-template<class T, int M> vec<T, M> operator /(const vec<T, M> & a, const vec<T, M> & b) {
+template<class T, int M> vec<T, M> operator /(const vec<T, M> & a,
+		const vec<T, M> & b) {
 	vec<T, M> result;
 	for (int m = 0; m < M; m++) {
 		result[m] = a[m] / b[m];
@@ -945,28 +999,32 @@ template<class T, int M> vec<T, M> operator /(const vec<T, M> & a, const vec<T, 
 	return result;
 }
 
-template<class T, int M> vec<T, M> operator +(const vec<T, M> & a, const T & b) {
+template<class T, int M> vec<T, M> operator +(const vec<T, M> & a,
+		const T & b) {
 	vec<T, M> result;
 	for (int m = 0; m < M; m++) {
 		result[m] = a[m] + b;
 	};
 	return result;
 }
-template<class T, int M> vec<T, M> operator -(const vec<T, M> & a, const T & b) {
+template<class T, int M> vec<T, M> operator -(const vec<T, M> & a,
+		const T & b) {
 	vec<T, M> result;
 	for (int m = 0; m < M; m++) {
 		result[m] = a[m] - b;
 	};
 	return result;
 }
-template<class T, int M> vec<T, M> operator *(const vec<T, M> & a, const T & b) {
+template<class T, int M> vec<T, M> operator *(const vec<T, M> & a,
+		const T & b) {
 	vec<T, M> result;
 	for (int m = 0; m < M; m++) {
 		result[m] = a[m] * b;
 	};
 	return result;
 }
-template<class T, int M> vec<T, M> operator /(const vec<T, M> & a, const T & b) {
+template<class T, int M> vec<T, M> operator /(const vec<T, M> & a,
+		const T & b) {
 	vec<T, M> result;
 	for (int m = 0; m < M; m++) {
 		result[m] = a[m] / b;
@@ -974,28 +1032,32 @@ template<class T, int M> vec<T, M> operator /(const vec<T, M> & a, const T & b) 
 	return result;
 }
 
-template<class T, int M> vec<T, M> operator +(const T & a, const vec<T, M> & b) {
+template<class T, int M> vec<T, M> operator +(const T & a,
+		const vec<T, M> & b) {
 	vec<T, M> result;
 	for (int m = 0; m < M; m++) {
 		result[m] = a + b[m];
 	};
 	return result;
 }
-template<class T, int M> vec<T, M> operator -(const T & a, const vec<T, M> & b) {
+template<class T, int M> vec<T, M> operator -(const T & a,
+		const vec<T, M> & b) {
 	vec<T, M> result;
 	for (int m = 0; m < M; m++) {
 		result[m] = a - b[m];
 	};
 	return result;
 }
-template<class T, int M> vec<T, M> operator *(const T & a, const vec<T, M> & b) {
+template<class T, int M> vec<T, M> operator *(const T & a,
+		const vec<T, M> & b) {
 	vec<T, M> result;
 	for (int m = 0; m < M; m++) {
 		result[m] = a * b[m];
 	};
 	return result;
 }
-template<class T, int M> vec<T, M> operator /(const T & a, const vec<T, M> & b) {
+template<class T, int M> vec<T, M> operator /(const T & a,
+		const vec<T, M> & b) {
 	vec<T, M> result;
 	for (int m = 0; m < M; m++) {
 		result[m] = a / b[m];
@@ -1003,16 +1065,20 @@ template<class T, int M> vec<T, M> operator /(const T & a, const vec<T, M> & b) 
 	return result;
 }
 
-template<class T, int M> vec<T, M> & operator +=(vec<T, M> & a, const vec<T, M> & b) {
+template<class T, int M> vec<T, M> & operator +=(vec<T, M> & a,
+		const vec<T, M> & b) {
 	return a = a + b;
 }
-template<class T, int M> vec<T, M> & operator -=(vec<T, M> & a, const vec<T, M> & b) {
+template<class T, int M> vec<T, M> & operator -=(vec<T, M> & a,
+		const vec<T, M> & b) {
 	return a = a - b;
 }
-template<class T, int M> vec<T, M> & operator *=(vec<T, M> & a, const vec<T, M> & b) {
+template<class T, int M> vec<T, M> & operator *=(vec<T, M> & a,
+		const vec<T, M> & b) {
 	return a = a * b;
 }
-template<class T, int M> vec<T, M> & operator /=(vec<T, M> & a, const vec<T, M> & b) {
+template<class T, int M> vec<T, M> & operator /=(vec<T, M> & a,
+		const vec<T, M> & b) {
 	return a = a / b;
 }
 template<class T, int M> vec<T, M> & operator +=(vec<T, M> & a, const T & b) {
@@ -1028,77 +1094,88 @@ template<class T, int M> vec<T, M> & operator /=(vec<T, M> & a, const T & b) {
 	return a = a / b;
 }
 
-template<class T, int M, int N> matrix<T, M, N> operator -(const matrix<T, M, N> & a) {
+template<class T, int M, int N> matrix<T, M, N> operator -(
+		const matrix<T, M, N> & a) {
 	matrix<T, M, N> result;
 	for (int i = 0; i < N; i++) {
 		result[i] = -a[i];
 	};
 	return result;
 }
-template<class T, int M, int N> matrix<T, M, N> operator +(const matrix<T, M, N> & a, const matrix<T, M, N> & b) {
+template<class T, int M, int N> matrix<T, M, N> operator +(
+		const matrix<T, M, N> & a, const matrix<T, M, N> & b) {
 	matrix<T, M, N> result;
 	for (int i = 0; i < N; i++) {
 		result[i] = a[i] + b[i];
 	};
 	return result;
 }
-template<class T, int M, int N> matrix<T, M, N> operator -(const matrix<T, M, N> & a, const matrix<T, M, N> & b) {
+template<class T, int M, int N> matrix<T, M, N> operator -(
+		const matrix<T, M, N> & a, const matrix<T, M, N> & b) {
 	matrix<T, M, N> result;
 	for (int i = 0; i < N; i++) {
 		result[i] = a[i] - b[i];
 	};
 	return result;
 }
-template<class T, int M, int N> matrix<T, M, N> operator +(const matrix<T, M, N> & a, T b) {
+template<class T, int M, int N> matrix<T, M, N> operator +(
+		const matrix<T, M, N> & a, T b) {
 	matrix<T, M, N> result;
 	for (int i = 0; i < N; i++) {
 		result[i] = a[i] + b;
 	};
 	return result;
 }
-template<class T, int M, int N> matrix<T, M, N> operator -(const matrix<T, M, N> & a, T b) {
+template<class T, int M, int N> matrix<T, M, N> operator -(
+		const matrix<T, M, N> & a, T b) {
 	matrix<T, M, N> result;
 	for (int i = 0; i < N; i++) {
 		result[i] = a[i] - b;
 	};
 	return result;
 }
-template<class T, int M, int N> matrix<T, M, N> operator *(const matrix<T, M, N> & a, T b) {
+template<class T, int M, int N> matrix<T, M, N> operator *(
+		const matrix<T, M, N> & a, T b) {
 	matrix<T, M, N> result;
 	for (int i = 0; i < N; i++) {
 		result[i] = a[i] * b;
 	};
 	return result;
 }
-template<class T, int M, int N> matrix<T, M, N> operator /(const matrix<T, M, N> & a, T b) {
+template<class T, int M, int N> matrix<T, M, N> operator /(
+		const matrix<T, M, N> & a, T b) {
 	matrix<T, M, N> result;
 	for (int i = 0; i < N; i++) {
 		result[i] = a[i] / b;
 	};
 	return result;
 }
-template<class T, int M, int N> matrix<T, M, N> operator *(T a, const matrix<T, M, N> & b) {
+template<class T, int M, int N> matrix<T, M, N> operator *(T a,
+		const matrix<T, M, N> & b) {
 	matrix<T, M, N> result;
 	for (int i = 0; i < N; i++) {
 		result[i] = a * b[i];
 	};
 	return result;
 }
-template<class T, int M, int N> matrix<T, M, N> operator /(T a, const matrix<T, M, N> & b) {
+template<class T, int M, int N> matrix<T, M, N> operator /(T a,
+		const matrix<T, M, N> & b) {
 	matrix<T, M, N> result;
 	for (int i = 0; i < N; i++) {
 		result[i] = a / b[i];
 	};
 	return result;
 }
-template<class T, int M, int N> matrix<T, M, N> operator +(T a, const matrix<T, M, N> & b) {
+template<class T, int M, int N> matrix<T, M, N> operator +(T a,
+		const matrix<T, M, N> & b) {
 	matrix<T, M, N> result;
 	for (int i = 0; i < N; i++) {
 		result[i] = a + b[i];
 	};
 	return result;
 }
-template<class T, int M, int N> matrix<T, M, N> operator -(T a, const matrix<T, M, N> & b) {
+template<class T, int M, int N> matrix<T, M, N> operator -(T a,
+		const matrix<T, M, N> & b) {
 	matrix<T, M, N> result;
 	for (int i = 0; i < N; i++) {
 		result[i] = a - b[i];
@@ -1106,16 +1183,20 @@ template<class T, int M, int N> matrix<T, M, N> operator -(T a, const matrix<T, 
 	return result;
 }
 
-template<class T, int M, int N> matrix<T, M, N> & operator +=(matrix<T, M, N> & a, const matrix<T, M, N> & b) {
+template<class T, int M, int N> matrix<T, M, N> & operator +=(
+		matrix<T, M, N> & a, const matrix<T, M, N> & b) {
 	return a = a + b;
 }
-template<class T, int M, int N> matrix<T, M, N> & operator -=(matrix<T, M, N> & a, const matrix<T, M, N> & b) {
+template<class T, int M, int N> matrix<T, M, N> & operator -=(
+		matrix<T, M, N> & a, const matrix<T, M, N> & b) {
 	return a = a - b;
 }
-template<class T, int M, int N> matrix<T, M, N> & operator *=(matrix<T, M, N> & a, T b) {
+template<class T, int M, int N> matrix<T, M, N> & operator *=(
+		matrix<T, M, N> & a, T b) {
 	return a = a * b;
 }
-template<class T, int M, int N> matrix<T, M, N> & operator /=(matrix<T, M, N> & a, T b) {
+template<class T, int M, int N> matrix<T, M, N> & operator /=(
+		matrix<T, M, N> & a, T b) {
 	return a = a / b;
 }
 
@@ -1123,77 +1204,107 @@ template<class T, int M, int N> matrix<T, M, N> & operator /=(matrix<T, M, N> & 
 // Matrix multiplication operations //
 //////////////////////////////////////
 
-template<class T, int M, int N> vec<T, M> operator *(const matrix<T, M, N> & a, const vec<T, N> & b) {
+template<class T, int M, int N> vec<T, M> operator *(const matrix<T, M, N> & a,
+		const vec<T, N> & b) {
 	return mul(a, b);
 } // Interpret b as column vector (N x 1 matrix)
-template<class T, int M, int N> vec<T, N> operator *(const vec<T, M> & a, const matrix<T, M, N> & b) {
+template<class T, int M, int N> vec<T, N> operator *(const vec<T, M> & a,
+		const matrix<T, M, N> & b) {
 	return mul(transpose(b), a);
 } // Interpret a as row vector (1 x M matrix)
-template<class T, int M, int N, int P> matrix<T, M, P> operator *(const matrix<T, M, N> & a, const matrix<T, N, P> & b) {
+template<class T, int M, int N, int P> matrix<T, M, P> operator *(
+		const matrix<T, M, N> & a, const matrix<T, N, P> & b) {
 	return mul(a, b);
 }
-template<class T, int M> matrix<T, M, M> & operator *=(matrix<T, M, M> & a, const matrix<T, M, M> & b) {
+template<class T, int M> matrix<T, M, M> & operator *=(matrix<T, M, M> & a,
+		const matrix<T, M, M> & b) {
 	return a = a * b;
 }
 
-template<class C, class R, class T> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const vec<T, 1> & v) {
+template<class C, class R, class T> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const vec<T, 1> & v) {
 	return ss << v.x;
 }
-template<class C, class R, class T> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const vec<T, 2> & v) {
+template<class C, class R, class T> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const vec<T, 2> & v) {
 	return ss << "(" << v.x << ", " << v.y << ")";
 }
-template<class C, class R, class T> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const vec<T, 3> & v) {
+template<class C, class R, class T> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const vec<T, 3> & v) {
 	return ss << "(" << v.x << ", " << v.y << ", " << v.z << ")";
 }
-template<class C, class R, class T> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const vec<T, 4> & v) {
+template<class C, class R, class T> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const vec<T, 4> & v) {
 	return ss << "(" << v.x << ", " << v.y << ", " << v.z << ", " << v.w << ")";
 }
-template<class C, class R, class T> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const std::pair<vec<T, 1>, vec<T, 1>> & v) {
+template<class C, class R, class T> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss,
+		const std::pair<vec<T, 1>, vec<T, 1>> & v) {
 	return ss << "<" << v.first << ", " << v.second << ">";
 }
-template<class C, class R, class T> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const std::pair<vec<T, 2>, vec<T, 2>> & v) {
+template<class C, class R, class T> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss,
+		const std::pair<vec<T, 2>, vec<T, 2>> & v) {
 	return ss << "<" << v.first << ", " << v.second << ">";
 }
-template<class C, class R, class T> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const std::pair<vec<T, 3>, vec<T, 3>> & v) {
+template<class C, class R, class T> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss,
+		const std::pair<vec<T, 3>, vec<T, 3>> & v) {
 	return ss << "<" << v.first << ", " << v.second << ">";
 }
-template<class C, class R, class T> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const std::pair<vec<T, 4>, vec<T, 4>> & v) {
+template<class C, class R, class T> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss,
+		const std::pair<vec<T, 4>, vec<T, 4>> & v) {
 	return ss << "<" << v.first << ", " << v.second << ">";
 }
 
-template<class C, class R> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const vec<uint8_t, 1> & v) {
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const vec<uint8_t, 1> & v) {
 	return ss << (int) v.x;
 }
-template<class C, class R> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const vec<uint8_t, 2> & v) {
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const vec<uint8_t, 2> & v) {
 	return ss << "(" << (int) v.x << ", " << (int) v.y << ")";
 }
-template<class C, class R> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const vec<uint8_t, 3> & v) {
-	return ss << "(" << (int) v.x << ", " << (int) v.y << ", " << (int) v.z << ")";
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const vec<uint8_t, 3> & v) {
+	return ss << "(" << (int) v.x << ", " << (int) v.y << ", " << (int) v.z
+			<< ")";
 }
-template<class C, class R> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const vec<uint8_t, 4> & v) {
-	return ss << "(" << (int) v.x << ", " << (int) v.y << ", " << (int) v.z << ", " << (int) v.w << ")";
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const vec<uint8_t, 4> & v) {
+	return ss << "(" << (int) v.x << ", " << (int) v.y << ", " << (int) v.z
+			<< ", " << (int) v.w << ")";
 }
 
-template<class C, class R> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const vec<int8_t, 1> & v) {
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const vec<int8_t, 1> & v) {
 	return ss << (int) v.x;
 }
-template<class C, class R> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const vec<int8_t, 2> & v) {
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const vec<int8_t, 2> & v) {
 	return ss << "(" << (int) v.x << ", " << (int) v.y << ")";
 }
-template<class C, class R> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const vec<int8_t, 3> & v) {
-	return ss << "(" << (int) v.x << ", " << (int) v.y << ", " << (int) v.z << ")";
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const vec<int8_t, 3> & v) {
+	return ss << "(" << (int) v.x << ", " << (int) v.y << ", " << (int) v.z
+			<< ")";
 }
-template<class C, class R> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const vec<int8_t, 4> & v) {
-	return ss << "(" << (int) v.x << ", " << (int) v.y << ", " << (int) v.z << ", " << (int) v.w << ")";
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const vec<int8_t, 4> & v) {
+	return ss << "(" << (int) v.x << ", " << (int) v.y << ", " << (int) v.z
+			<< ", " << (int) v.w << ")";
 }
 
-template<class C, class R, class T, int M, int N> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const matrix<T, M, N> & A) {
+template<class C, class R, class T, int M, int N> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const matrix<T, M, N> & A) {
 	ss << "\n";
 
 	for (int m = 0; m < M; m++) {
 		ss << "[";
 		for (int n = 0; n < N; n++) {
-			ss << std::setprecision(10) << std::setw(16) << A(m, n) << ((n < N - 1) ? "," : "]\n");
+			ss << std::setprecision(10) << std::setw(16) << A(m, n)
+					<< ((n < N - 1) ? "," : "]\n");
 		}
 	}
 	return ss;
@@ -1242,59 +1353,65 @@ template<class T> matrix<T, 4, 4> MakeRotationY(T angle) {
 template<class T> matrix<T, 4, 4> MakeRotationZ(T angle) {
 	return MakeRotation(vec<T, 3>(0, 0, 1), angle);
 }
-template<class T> matrix<T, 4, 4> MakeTranslation(const vec<T, 3>& translation) {
-	return matrix<T, 4, 4>(vec<T, 4>((T) 1, (T) 0, (T) 0, (T) 0), vec<T, 4>((T) 0, (T) 1, (T) 0, (T) 0), vec<T, 4>((T) 0, (T) 0, (T) 1, (T) 0),
-			translation.xyzw());
+template<class T> matrix<T, 4, 4> MakeTranslation(
+		const vec<T, 3>& translation) {
+	return matrix<T, 4, 4>(vec<T, 4>((T) 1, (T) 0, (T) 0, (T) 0),
+			vec<T, 4>((T) 0, (T) 1, (T) 0, (T) 0),
+			vec<T, 4>((T) 0, (T) 0, (T) 1, (T) 0), translation.xyzw());
 }
-template<class T> matrix<T, 4, 4> MakeTranslation(const vec<T, 4>& translation) {
-	return matrix<T, 4, 4>(vec<T, 4>((T) 1, (T) 0, (T) 0, (T) 0), vec<T, 4>((T) 0, (T) 1, (T) 0, (T) 0), vec<T, 4>((T) 0, (T) 0, (T) 1, (T) 0), translation);
+template<class T> matrix<T, 4, 4> MakeTranslation(
+		const vec<T, 4>& translation) {
+	return matrix<T, 4, 4>(vec<T, 4>((T) 1, (T) 0, (T) 0, (T) 0),
+			vec<T, 4>((T) 0, (T) 1, (T) 0, (T) 0),
+			vec<T, 4>((T) 0, (T) 0, (T) 1, (T) 0), translation);
 }
 template<class T> matrix<T, 4, 4> MakeScale(const vec<T, 3>& scale) {
-	return matrix<T, 4, 4>(vec<T, 4>(scale.x, 0, 0, 0), vec<T, 4>(0, scale.y, 0, 0), vec<T, 4>(0, 0, scale.z, 0), vec<T, 4>(0, 0, 0, 1));
+	return matrix<T, 4, 4>(vec<T, 4>(scale.x, 0, 0, 0),
+			vec<T, 4>(0, scale.y, 0, 0), vec<T, 4>(0, 0, scale.z, 0),
+			vec<T, 4>(0, 0, 0, 1));
 }
 template<class T> matrix<T, 3, 3> MakeDiagonal(const vec<T, 3>& scale) {
-	return matrix<T, 3, 3>(vec<T, 3>(scale.x, 0, 0), vec<T, 3>(0, scale.y, 0), vec<T, 3>(0, 0, scale.z));
+	return matrix<T, 3, 3>(vec<T, 3>(scale.x, 0, 0), vec<T, 3>(0, scale.y, 0),
+			vec<T, 3>(0, 0, scale.z));
 }
 template<class T> matrix<T, 4, 4> MakeDiagonal(const vec<T, 4>& scale) {
-	return matrix<T, 4, 4>(vec<T, 4>(scale.x, 0, 0, 0), vec<T, 4>(0, scale.y, 0, 0), vec<T, 4>(0, 0, scale.z, 0), vec<T, 4>(0, 0, 0, scale.w));
+	return matrix<T, 4, 4>(vec<T, 4>(scale.x, 0, 0, 0),
+			vec<T, 4>(0, scale.y, 0, 0), vec<T, 4>(0, 0, scale.z, 0),
+			vec<T, 4>(0, 0, 0, scale.w));
 }
 template<class T> matrix<T, 4, 4> MakeScale(const vec<T, 4>& scale) {
-	return matrix<T, 4, 4>(vec<T, 4>(scale.x, 0, 0, 0), vec<T, 4>(0, scale.y, 0, 0), vec<T, 4>(0, 0, scale.z, 0), vec<T, 4>(0, 0, 0, scale.w));
+	return matrix<T, 4, 4>(vec<T, 4>(scale.x, 0, 0, 0),
+			vec<T, 4>(0, scale.y, 0, 0), vec<T, 4>(0, 0, scale.z, 0),
+			vec<T, 4>(0, 0, 0, scale.w));
 }
 template<class T> matrix<T, 4, 4> MakeScale(T scale) {
-	return matrix<T, 4, 4>(vec<T, 4>(scale, 0, 0, 0), vec<T, 4>(0, scale, 0, 0), vec<T, 4>(0, 0, scale, 0), vec<T, 4>(0, 0, 0, 1));
+	return matrix<T, 4, 4>(vec<T, 4>(scale, 0, 0, 0), vec<T, 4>(0, scale, 0, 0),
+			vec<T, 4>(0, 0, scale, 0), vec<T, 4>(0, 0, 0, 1));
 }
-template<class T> matrix<T, 3, 3> MakeTranslation(const vec<T, 2>& translation) {
-	return matrix<T, 3, 3>(
-			vec<T, 3>((T) 1, (T) 0, (T) 0),
+template<class T> matrix<T, 3, 3> MakeTranslation(
+		const vec<T, 2>& translation) {
+	return matrix<T, 3, 3>(vec<T, 3>((T) 1, (T) 0, (T) 0),
 			vec<T, 3>((T) 0, (T) 1, (T) 0),
 			vec<T, 3>(translation.x, translation.y, (T) 1));
 }
 template<class T> matrix<T, 3, 3> MakeTranslation(const T tx, const T ty) {
-	return matrix<T, 3, 3>(
-			vec<T, 3>((T) 1, (T) 0, (T) 0),
-			vec<T, 3>((T) 0, (T) 1, (T) 0),
-			vec<T, 3>(tx, ty, (T) 1));
+	return matrix<T, 3, 3>(vec<T, 3>((T) 1, (T) 0, (T) 0),
+			vec<T, 3>((T) 0, (T) 1, (T) 0), vec<T, 3>(tx, ty, (T) 1));
 }
 template<class T> matrix<T, 3, 3> MakeRotation(const T angle) {
-	T cs=std::cos(angle);
-	T sn=std::sin(angle);
-	return matrix<T, 3, 3>(
-			vec<T, 3>(  cs,   sn, (T) 0),
-			vec<T, 3>( -sn,   cs, (T) 0),
-			vec<T, 3>((T)0, (T)0, (T) 1));
+	T cs = std::cos(angle);
+	T sn = std::sin(angle);
+	return matrix<T, 3, 3>(vec<T, 3>(cs, sn, (T) 0), vec<T, 3>(-sn, cs, (T) 0),
+			vec<T, 3>((T) 0, (T) 0, (T) 1));
 }
-template<class T> matrix<T, 3, 3> MakeScale(const T sx,const T sy) {
-	return matrix<T, 3, 3>(
-			vec<T, 3>((T) sx, (T) 0, (T) 0),
-			vec<T, 3>((T) 0, (T) sy, (T) 0),
-			vec<T, 3>( (T)0,        (T)0, (T) 1));
+template<class T> matrix<T, 3, 3> MakeScale(const T sx, const T sy) {
+	return matrix<T, 3, 3>(vec<T, 3>((T) sx, (T) 0, (T) 0),
+			vec<T, 3>((T) 0, (T) sy, (T) 0), vec<T, 3>((T) 0, (T) 0, (T) 1));
 }
 template<class T> matrix<T, 3, 3> MakeScale(const vec<T, 2>& scale) {
-	return matrix<T, 3, 3>(
-			vec<T, 3>((T) scale.x, (T) 0, (T) 0),
+	return matrix<T, 3, 3>(vec<T, 3>((T) scale.x, (T) 0, (T) 0),
 			vec<T, 3>((T) 0, (T) scale.y, (T) 0),
-			vec<T, 3>( (T)0,        (T)0, (T) 1));
+			vec<T, 3>((T) 0, (T) 0, (T) 1));
 }
 /*
 
@@ -1327,7 +1444,8 @@ template<class T> vec<T, 3> GetDiagonal(const matrix<T, 3, 3> &m) {
 template<class T> vec<T, 4> GetDiagonal(const matrix<T, 4, 4> &m) {
 	return {m.x.x, m.y.y, m.z.z,m.w.w};
 }
-template<class T> vec<T, 4> Diagonalizer(const matrix<T, 3, 3> &A,bool sort=true) {
+template<class T> vec<T, 4> Diagonalizer(const matrix<T, 3, 3> &A, bool sort =
+		true) {
 	// A must be a symmetric matrix.
 	// returns orientation of the principle axes.
 	// returns quaternion q such that its corresponding column major matrix Q
@@ -1351,7 +1469,8 @@ template<class T> vec<T, 4> Diagonalizer(const matrix<T, 3, 3> &A,bool sort=true
 		float thet = (D[k2][k2] - D[k1][k1]) / (2.0f * offdiag[k]);
 		float sgn = (thet > 0.0f) ? 1.0f : -1.0f;
 		thet *= sgn; // make it positive
-		float t = sgn / (thet + ((thet < 1.E6f) ? sqrtf(thet * thet + 1.0f) : thet)); // sign(T)/(|T|+sqrt(T^2+1))
+		float t = sgn
+				/ (thet + ((thet < 1.E6f) ? sqrtf(thet * thet + 1.0f) : thet)); // sign(T)/(|T|+sqrt(T^2+1))
 		float c = 1.0f / sqrtf(t * t + 1.0f); //  c= 1/(t^2+1) , t=s/c
 		if (c == 1.0f)
 			break;  // no room for improvement - reached machine precision.
@@ -1366,7 +1485,8 @@ template<class T> vec<T, 4> Diagonalizer(const matrix<T, 3, 3> &A,bool sort=true
 	}
 	if (sort) {
 		float h = 1.0f / sqrtf(2.0f);  // M_SQRT2
-		auto e = [&q, &A]() {return GetDiagonal(transpose(q2matrix(q))* A* q2matrix(q)); }; // current ordering of eigenvals of q
+		auto e =
+				[&q, &A]() {return GetDiagonal(transpose(q2matrix(q))* A* q2matrix(q));}; // current ordering of eigenvals of q
 		q = (e().x < e().z) ? qmul(q, vec<T, 4>(0, h, 0, h)) : q;
 		q = (e().y < e().z) ? qmul(q, vec<T, 4>(h, 0, 0, h)) : q;
 		q = (e().x < e().y) ? qmul(q, vec<T, 4>(0, 0, h, h)) : q; // size order z,y,x so xy spans a planeish spread
@@ -1377,8 +1497,9 @@ template<class T> vec<T, 4> Diagonalizer(const matrix<T, 3, 3> &A,bool sort=true
 	//matrix<T,3,3> M = transpose(q2matrix(q)) * A * q2matrix(q);  // to test result
 	return q;
 }
-template<class T> void Eigen(const matrix<T, 3, 3> &A, matrix<T, 3, 3>& Q, matrix<T, 3, 3>& D,bool sort=true) {
-	vec<T, 4> q = Diagonalizer(A,sort);
+template<class T> void Eigen(const matrix<T, 3, 3> &A, matrix<T, 3, 3>& Q,
+		matrix<T, 3, 3>& D, bool sort = true) {
+	vec<T, 4> q = Diagonalizer(A, sort);
 	Q = q2matrix(q);
 	D = transpose(Q) * A * Q;
 }
@@ -1394,13 +1515,19 @@ inline static double pythag(double a, double b) {
 		result = 0.0;
 	return (result);
 }
-void SVD(const matrix<float, 2, 2> &A, matrix<float, 2, 2>& U, matrix<float, 2, 2>& D, matrix<float, 2, 2>& Vt);
-void SVD(const matrix<float, 3, 3> &A, matrix<float, 3, 3>& U, matrix<float, 3, 3>& D, matrix<float, 3, 3>& Vt);
-void SVD(const matrix<float, 4, 4> &A, matrix<float, 4, 4>& U, matrix<float, 4, 4>& D, matrix<float, 4, 4>& Vt);
+void SVD(const matrix<float, 2, 2> &A, matrix<float, 2, 2>& U,
+		matrix<float, 2, 2>& D, matrix<float, 2, 2>& Vt);
+void SVD(const matrix<float, 3, 3> &A, matrix<float, 3, 3>& U,
+		matrix<float, 3, 3>& D, matrix<float, 3, 3>& Vt);
+void SVD(const matrix<float, 4, 4> &A, matrix<float, 4, 4>& U,
+		matrix<float, 4, 4>& D, matrix<float, 4, 4>& Vt);
 
-void SVD(const matrix<double, 2, 2> &A, matrix<double, 2, 2>& U, matrix<double, 2, 2>& D, matrix<double, 2, 2>& Vt);
-void SVD(const matrix<double, 3, 3> &A, matrix<double, 3, 3>& U, matrix<double, 3, 3>& D, matrix<double, 3, 3>& Vt);
-void SVD(const matrix<double, 4, 4> &A, matrix<double, 4, 4>& U, matrix<double, 4, 4>& D, matrix<double, 4, 4>& Vt);
+void SVD(const matrix<double, 2, 2> &A, matrix<double, 2, 2>& U,
+		matrix<double, 2, 2>& D, matrix<double, 2, 2>& Vt);
+void SVD(const matrix<double, 3, 3> &A, matrix<double, 3, 3>& U,
+		matrix<double, 3, 3>& D, matrix<double, 3, 3>& Vt);
+void SVD(const matrix<double, 4, 4> &A, matrix<double, 4, 4>& U,
+		matrix<double, 4, 4>& D, matrix<double, 4, 4>& Vt);
 
 template<class T> matrix<T, 3, 3> FactorRotation(const matrix<T, 3, 3> A) {
 	matrix<T, 3, 3> U, D, Vt;
@@ -1411,7 +1538,8 @@ template<class T> matrix<T, 3, 3> FactorRotation(const matrix<T, 3, 3> A) {
 	}
 	return R;
 }
-template<class T> matrix<T, 3, 3> FactorRotationInverse(const matrix<T, 3, 3> A) {
+template<class T> matrix<T, 3, 3> FactorRotationInverse(
+		const matrix<T, 3, 3> A) {
 	matrix<T, 3, 3> U, D, Vt;
 	SVD(A, U, D, Vt);
 	matrix<T, 3, 3> R = transpose(Vt) * transpose(U);
@@ -1420,14 +1548,16 @@ template<class T> matrix<T, 3, 3> FactorRotationInverse(const matrix<T, 3, 3> A)
 	}
 	return R;
 }
-template<class T> T Angle(const vec<T, 3>& v0, const vec<T, 3>& v1, const vec<T, 3>& v2) {
+template<class T> T Angle(const vec<T, 3>& v0, const vec<T, 3>& v1,
+		const vec<T, 3>& v2) {
 	vec<T, 3> v = v0 - v1;
 	vec<T, 3> w = v2 - v1;
 	float len1 = length(v);
 	float len2 = length(w);
 	return std::acos(dot(v, w) / std::max(1E-8f, len1 * len2));
 }
-template<class K, class T, int C> void ConvertType(vec<T, C> in, vec<K, C>& out) {
+template<class K, class T, int C> void ConvertType(vec<T, C> in,
+		vec<K, C>& out) {
 	for (int c = 0; c < C; c++) {
 		out[c] = static_cast<K>(in[c]);
 	}
@@ -1449,7 +1579,9 @@ template<class T> matrix<T, 2, 2> inverse(matrix<T, 2, 2> const& M) {
 	T det = M(0, 0) * M(1, 1) - M(0, 1) * M(1, 0);
 	if (det != (T) 0) {
 		T invDet = ((T) 1) / det;
-		result = matrix<T, 2, 2>( { M(1, 1) * invDet, -M(0, 1) * invDet, -M(1, 0) * invDet, M(0, 0) * invDet });
+		result = matrix<T, 2, 2>(
+				{ M(1, 1) * invDet, -M(0, 1) * invDet, -M(1, 0) * invDet, M(0,
+						0) * invDet });
 	} else {
 		result = Zero<T, 2, 2>();
 		throw std::runtime_error("Could not invert matrix.");
@@ -1457,14 +1589,17 @@ template<class T> matrix<T, 2, 2> inverse(matrix<T, 2, 2> const& M) {
 
 	return result;
 }
-template<class T> matrix<T, 2, 2> outerProd(const vec<T,2> &a, const vec<T, 2>& b) {
-	return matrix<T, 2, 2>(b.x*a, b.y*a);
+template<class T> matrix<T, 2, 2> outerProd(const vec<T, 2> &a,
+		const vec<T, 2>& b) {
+	return matrix<T, 2, 2>(b.x * a, b.y * a);
 }
-template<class T> matrix<T, 3, 3> outerProd(const vec<T,3> &a, const vec<T,3>& b) {
-	return matrix<T, 3, 3>(b.x*a, b.y*a, b.z*a);
+template<class T> matrix<T, 3, 3> outerProd(const vec<T, 3> &a,
+		const vec<T, 3>& b) {
+	return matrix<T, 3, 3>(b.x * a, b.y * a, b.z * a);
 }
-template<class T> matrix<T, 4, 4> outerProd(const vec<T,4> &a, const vec<T, 4>& b){
-	return matrix<T, 4, 4>(b.x*a, b.y*a, b.z*a, b.w*a);
+template<class T> matrix<T, 4, 4> outerProd(const vec<T, 4> &a,
+		const vec<T, 4>& b) {
+	return matrix<T, 4, 4>(b.x * a, b.y * a, b.z * a, b.w * a);
 }
 template<typename T>
 matrix<T, 3, 3> inverse(matrix<T, 3, 3> const& M) {
@@ -1476,20 +1611,21 @@ matrix<T, 3, 3> inverse(matrix<T, 3, 3> const& M) {
 	if (det != (T) 0) {
 		T invDet = ((T) 1) / det;
 		result = matrix<T, 3, 3>(
-				{ c00 * invDet, (M(0, 2) * M(2, 1) - M(0, 1) * M(2, 2)) * invDet, (M(0, 1) * M(1, 2) - M(0, 2) * M(1, 1)) * invDet, c10 * invDet, (M(0, 0)
-						* M(2, 2) - M(0, 2) * M(2, 0)) * invDet, (M(0, 2) * M(1, 0) - M(0, 0) * M(1, 2)) * invDet, c20 * invDet, (M(0, 1) * M(2, 0)
-						- M(0, 0) * M(2, 1)) * invDet, (M(0, 0) * M(1, 1) - M(0, 1) * M(1, 0)) * invDet });
+				{ c00 * invDet, (M(0, 2) * M(2, 1) - M(0, 1) * M(2, 2))
+						* invDet, (M(0, 1) * M(1, 2) - M(0, 2) * M(1, 1))
+						* invDet, c10 * invDet, (M(0, 0) * M(2, 2)
+						- M(0, 2) * M(2, 0)) * invDet, (M(0, 2) * M(1, 0)
+						- M(0, 0) * M(1, 2)) * invDet, c20 * invDet, (M(0, 1)
+						* M(2, 0) - M(0, 0) * M(2, 1)) * invDet, (M(0, 0)
+						* M(1, 1) - M(0, 1) * M(1, 0)) * invDet });
 	} else {
 		result = Zero<T, 3, 3>();
 		throw std::runtime_error("Could not invert matrix.");
 	}
 	return result;
 }
-template<typename T>matrix<T, 3, 3> MakeSkew(const vec<T,3>& v) {
-	return matrix<T,3,3>(
-			0  , -v.z, v.y,
-			v.z,    0,-v.x,
-			-v.y, v.x,   0);
+template<typename T> matrix<T, 3, 3> MakeSkew(const vec<T, 3>& v) {
+	return matrix<T, 3, 3>(0, -v.z, v.y, v.z, 0, -v.x, -v.y, v.x, 0);
 }
 //----------------------------------------------------------------------------
 template<class T> matrix<T, 4, 4> inverse(matrix<T, 4, 4> const& M) {
@@ -1510,13 +1646,22 @@ template<class T> matrix<T, 4, 4> inverse(matrix<T, 4, 4> const& M) {
 	if (det != (T) 0) {
 		T invDet = ((T) 1) / det;
 		result = matrix<T, 4, 4>(
-				{ (+M(1, 1) * b5 - M(1, 2) * b4 + M(1, 3) * b3) * invDet, (-M(0, 1) * b5 + M(0, 2) * b4 - M(0, 3) * b3) * invDet, (+M(3, 1) * a5 - M(3, 2) * a4
-						+ M(3, 3) * a3) * invDet, (-M(2, 1) * a5 + M(2, 2) * a4 - M(2, 3) * a3) * invDet, (-M(1, 0) * b5 + M(1, 2) * b2 - M(1, 3) * b1)
-						* invDet, (+M(0, 0) * b5 - M(0, 2) * b2 + M(0, 3) * b1) * invDet, (-M(3, 0) * a5 + M(3, 2) * a2 - M(3, 3) * a1) * invDet, (+M(2, 0) * a5
-						- M(2, 2) * a2 + M(2, 3) * a1) * invDet, (+M(1, 0) * b4 - M(1, 1) * b2 + M(1, 3) * b0) * invDet, (-M(0, 0) * b4 + M(0, 1) * b2
-						- M(0, 3) * b0) * invDet, (+M(3, 0) * a4 - M(3, 1) * a2 + M(3, 3) * a0) * invDet, (-M(2, 0) * a4 + M(2, 1) * a2 - M(2, 3) * a0)
-						* invDet, (-M(1, 0) * b3 + M(1, 1) * b1 - M(1, 2) * b0) * invDet, (+M(0, 0) * b3 - M(0, 1) * b1 + M(0, 2) * b0) * invDet, (-M(3, 0) * a3
-						+ M(3, 1) * a1 - M(3, 2) * a0) * invDet, (+M(2, 0) * a3 - M(2, 1) * a1 + M(2, 2) * a0) * invDet });
+				{ (+M(1, 1) * b5 - M(1, 2) * b4 + M(1, 3) * b3) * invDet, (-M(0,
+						1) * b5 + M(0, 2) * b4 - M(0, 3) * b3) * invDet, (+M(3,
+						1) * a5 - M(3, 2) * a4 + M(3, 3) * a3) * invDet, (-M(2,
+						1) * a5 + M(2, 2) * a4 - M(2, 3) * a3) * invDet, (-M(1,
+						0) * b5 + M(1, 2) * b2 - M(1, 3) * b1) * invDet, (+M(0,
+						0) * b5 - M(0, 2) * b2 + M(0, 3) * b1) * invDet, (-M(3,
+						0) * a5 + M(3, 2) * a2 - M(3, 3) * a1) * invDet, (+M(2,
+						0) * a5 - M(2, 2) * a2 + M(2, 3) * a1) * invDet, (+M(1,
+						0) * b4 - M(1, 1) * b2 + M(1, 3) * b0) * invDet, (-M(0,
+						0) * b4 + M(0, 1) * b2 - M(0, 3) * b0) * invDet, (+M(3,
+						0) * a4 - M(3, 1) * a2 + M(3, 3) * a0) * invDet, (-M(2,
+						0) * a4 + M(2, 1) * a2 - M(2, 3) * a0) * invDet, (-M(1,
+						0) * b3 + M(1, 1) * b1 - M(1, 2) * b0) * invDet, (+M(0,
+						0) * b3 - M(0, 1) * b1 + M(0, 2) * b0) * invDet, (-M(3,
+						0) * a3 + M(3, 1) * a1 - M(3, 2) * a0) * invDet, (+M(2,
+						0) * a3 - M(2, 1) * a1 + M(2, 2) * a0) * invDet });
 	} else {
 		result = Zero<T, 4, 4>();
 		throw std::runtime_error("Could not invert matrix.");
@@ -1543,7 +1688,8 @@ template<class T, int M> struct box {
 	}
 	inline void clamp(const box<T, M>& other) {
 		dimensions = aly::min(dimensions, other.dimensions);
-		position = aly::clamp(position, other.position, other.position + other.dimensions - dimensions);
+		position = aly::clamp(position, other.position,
+				other.position + other.dimensions - dimensions);
 
 	}
 	inline vec<T, M> clamp(const vec<T, M>& qt) const {
@@ -1590,16 +1736,19 @@ template<class T, int M> struct box {
 		return position + dimensions / (T) (2);
 	}
 	inline vec<T, M> clamp(const vec<T, M>& pt, const box<T, M>& parent) {
-		return aly::clamp(pt, parent.position, parent.position + parent.dimensions - dimensions);
+		return aly::clamp(pt, parent.position,
+				parent.position + parent.dimensions - dimensions);
 	}
 	inline vec<T, M> clamp(const vec<T, M>& pt) {
 		return aly::clamp(pt, position, position + dimensions);
 	}
 };
-template<class T, int C> bool operator==(const box<T, C>& a, const box<T, C>& b) {
+template<class T, int C> bool operator==(const box<T, C>& a,
+		const box<T, C>& b) {
 	return (a.position == b.position && a.dimensions == b.dimensions);
 }
-template<class T, int C> bool operator!=(const box<T, C>& a, const box<T, C>& b) {
+template<class T, int C> bool operator!=(const box<T, C>& a,
+		const box<T, C>& b) {
 	return (a.position != b.position || a.dimensions != b.dimensions);
 }
 
@@ -1621,7 +1770,8 @@ template<class T, int C> box<T, C> operator /(const box<T, C>& a, const T& b) {
 	out.dimensions /= b;
 	return out;
 }
-template<class T, int C> box<T, C>& operator *=(box<T, C>& a, const vec<T, C>& b) {
+template<class T, int C> box<T, C>& operator *=(box<T, C>& a,
+		const vec<T, C>& b) {
 	a.position *= b;
 	a.dimensions *= b;
 	return a;
@@ -1631,7 +1781,8 @@ template<class T, int C> box<T, C>& operator *=(box<T, C>& a, const T& b) {
 	a.dimensions *= b;
 	return a;
 }
-template<class T, int C> box<T, C>& operator /=(box<T, C>& a, const vec<T, C>& b) {
+template<class T, int C> box<T, C>& operator /=(box<T, C>& a,
+		const vec<T, C>& b) {
 	a.position /= b;
 	a.dimensions /= b;
 	return a;
@@ -1642,11 +1793,13 @@ template<class T, int C> box<T, C>& operator /=(box<T, C>& a, const T& b) {
 	a.dimensions /= b;
 	return a;
 }
-template<class T, int C> box<T, C>& operator +=(box<T, C>& a, const vec<T, C>& b) {
+template<class T, int C> box<T, C>& operator +=(box<T, C>& a,
+		const vec<T, C>& b) {
 	a.position += b;
 	return a;
 }
-template<class T, int C> box<T, C>& operator -=(box<T, C>& a, const vec<T, C>& b) {
+template<class T, int C> box<T, C>& operator -=(box<T, C>& a,
+		const vec<T, C>& b) {
 	a.position -= b;
 	return a;
 }
@@ -1678,7 +1831,8 @@ private:
 	}
 
 public:
-	lineseg(const vec<T, M>& start = vec<T, M>(T(0)), const vec<T, M>& end = vec<T, M>(T(0))) :
+	lineseg(const vec<T, M>& start = vec<T, M>(T(0)), const vec<T, M>& end =
+			vec<T, M>(T(0))) :
 			start(start), end(end) {
 	}
 	inline float length() const {
@@ -1695,7 +1849,8 @@ public:
 			return aly::distance(pt, end);
 		return aly::distance(pt, start + t * (end - start));
 	}
-	bool intersects(const lineseg<T, M>& line, T& t, T& s, T tolerance = T(1E-15)) const {
+	bool intersects(const lineseg<T, M>& line, T& t, T& s,
+			T tolerance = T(1E-15)) const {
 		vec<T, M> a = (end - start);
 		vec<T, M> b = (line.end - line.start);
 		vec<T, M> c = (line.start - start);
@@ -1716,7 +1871,8 @@ public:
 			return false;
 		}
 	}
-	bool intersects(const vec<T, M>& origin,const vec<T, M>& ray, T& t, T tolerance = T(1E-15)) const {
+	bool intersects(const vec<T, M>& origin, const vec<T, M>& ray, T& t,
+			T tolerance = T(1E-15)) const {
 		vec<T, M> a = (end - start);
 		vec<T, M> b = ray;
 		vec<T, M> c = (origin - start);
@@ -1735,7 +1891,7 @@ public:
 			return false;
 		}
 	}
-	vec<T, M> intersects(const vec<T, M>& origin,const vec<T, M>& ray) const {
+	vec<T, M> intersects(const vec<T, M>& origin, const vec<T, M>& ray) const {
 		vec<T, M> a = (end - start);
 		vec<T, M> b = ray;
 		vec<T, M> c = (origin - start);
@@ -1743,7 +1899,7 @@ public:
 		vec<T, 3> ab = cross(a, b);
 		T len = lengthSqr(ab);
 		T t = dot(cb, ab) / len;
-		return (start+t*a);
+		return (start + t * a);
 	}
 	// Geometric Tools LLC, Redmond WA 98052
 	// Copyright (c) 1998-2015
@@ -1761,10 +1917,14 @@ public:
 		vec<T, M> lineOrigin = start - box.position - boxExtent;
 
 		if (M == 2) {
-			if (clip(+lineDirection[0], -lineOrigin[0] - boxExtent[0], t0, t1, tolerance)
-					&& clip(-lineDirection[0], +lineOrigin[0] - boxExtent[0], t0, t1, tolerance)
-					&& clip(+lineDirection[1], -lineOrigin[1] - boxExtent[1], t0, t1, tolerance)
-					&& clip(-lineDirection[1], +lineOrigin[1] - boxExtent[1], t0, t1, tolerance)) {
+			if (clip(+lineDirection[0], -lineOrigin[0] - boxExtent[0], t0, t1,
+					tolerance)
+					&& clip(-lineDirection[0], +lineOrigin[0] - boxExtent[0],
+							t0, t1, tolerance)
+					&& clip(+lineDirection[1], -lineOrigin[1] - boxExtent[1],
+							t0, t1, tolerance)
+					&& clip(-lineDirection[1], +lineOrigin[1] - boxExtent[1],
+							t0, t1, tolerance)) {
 				if (t1 > t0) {
 					if ((t1 <= len && t1 >= 0) || (t0 <= len && t0 >= 0))
 						return true;
@@ -1775,12 +1935,18 @@ public:
 				return false;
 			}
 		} else if (M == 3) {
-			if (clip(+lineDirection[0], -lineOrigin[0] - boxExtent[0], t0, t1, tolerance)
-					&& clip(-lineDirection[0], +lineOrigin[0] - boxExtent[0], t0, t1, tolerance)
-					&& clip(+lineDirection[1], -lineOrigin[1] - boxExtent[1], t0, t1, tolerance)
-					&& clip(-lineDirection[1], +lineOrigin[1] - boxExtent[1], t0, t1, tolerance)
-					&& clip(+lineDirection[2], -lineOrigin[2] - boxExtent[2], t0, t1, tolerance)
-					&& clip(-lineDirection[2], +lineOrigin[2] - boxExtent[2], t0, t1, tolerance)) {
+			if (clip(+lineDirection[0], -lineOrigin[0] - boxExtent[0], t0, t1,
+					tolerance)
+					&& clip(-lineDirection[0], +lineOrigin[0] - boxExtent[0],
+							t0, t1, tolerance)
+					&& clip(+lineDirection[1], -lineOrigin[1] - boxExtent[1],
+							t0, t1, tolerance)
+					&& clip(-lineDirection[1], +lineOrigin[1] - boxExtent[1],
+							t0, t1, tolerance)
+					&& clip(+lineDirection[2], -lineOrigin[2] - boxExtent[2],
+							t0, t1, tolerance)
+					&& clip(-lineDirection[2], +lineOrigin[2] - boxExtent[2],
+							t0, t1, tolerance)) {
 				if (t1 > t0) {
 					if ((t1 <= len && t1 >= 0) || (t0 <= len && t0 >= 0))
 						return true;
@@ -1795,16 +1961,20 @@ public:
 	}
 	static const lineseg<T, M> NONE;
 };
-template<class T, int C> const lineseg<T, C> lineseg<T, C>::NONE = lineseg<T, C>(vec<T, C>(std::numeric_limits<T>::min()),
-		vec<T, C>(std::numeric_limits<T>::min()));
+template<class T, int C> const lineseg<T, C> lineseg<T, C>::NONE =
+		lineseg<T, C>(vec<T, C>(std::numeric_limits<T>::min()),
+				vec<T, C>(std::numeric_limits<T>::min()));
 
-template<class T, int C> bool operator==(const lineseg<T, C>& a, const lineseg<T, C>& b) {
+template<class T, int C> bool operator==(const lineseg<T, C>& a,
+		const lineseg<T, C>& b) {
 	return (a.start == b.start && a.end == b.end);
 }
-template<class T, int C> bool operator!=(const lineseg<T, C>& a, const lineseg<T, C>& b) {
+template<class T, int C> bool operator!=(const lineseg<T, C>& a,
+		const lineseg<T, C>& b) {
 	return (a.start != b.start || a.end != b.end);
 }
-template<class T, int K, class C, class R> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const lineseg<T, K>& line) {
+template<class T, int K, class C, class R> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const lineseg<T, K>& line) {
 	return ss << "[" << line.start << "->" << line.end << "]";
 }
 typedef lineseg<float, 2> lineseg2f;
@@ -1812,129 +1982,143 @@ typedef lineseg<float, 3> lineseg3f;
 typedef lineseg<double, 2> lineseg2d;
 typedef lineseg<double, 3> lineseg3d;
 
-template<class C, class R, class T, int M> std::basic_ostream<C, R> & operator <<(std::basic_ostream<C, R> & ss, const box<T, M> & v) {
-	return ss << "{min: " << v.position << ", max: " << v.position + v.dimensions << ", dimensions: " << v.dimensions << "}";
+template<class C, class R, class T, int M> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const box<T, M> & v) {
+	return ss << "{min: " << v.position << ", max: "
+			<< v.position + v.dimensions << ", dimensions: " << v.dimensions
+			<< "}";
 }
-template<class T> matrix<T, 4, 4> MakeTransform(const box<T, 3>& src, const box<T, 3>& tar) {
+template<class T> matrix<T, 4, 4> MakeTransform(const box<T, 3>& src,
+		const box<T, 3>& tar) {
 	float scaleT = aly::min(tar.dimensions);
 	float scaleS = aly::max(src.dimensions);
-	return MakeTranslation((tar.position + 0.5f * tar.dimensions)) * MakeScale(scaleT / scaleS) * MakeTranslation(-(src.position + 0.5f * src.dimensions));
+	return MakeTranslation((tar.position + 0.5f * tar.dimensions))
+			* MakeScale(scaleT / scaleS)
+			* MakeTranslation(-(src.position + 0.5f * src.dimensions));
 }
-template<class T> matrix<T, 4, 4> MakeTransform(const matrix<T,3, 3>& R, const vec<T, 3>& t) {
+template<class T> matrix<T, 4, 4> MakeTransform(const matrix<T, 3, 3>& R,
+		const vec<T, 3>& t) {
 	matrix<T, 4, 4> M;
-	M.x=vec<T,4>(R.x,T(0));
-	M.y=vec<T,4>(R.y,T(0));
-	M.z=vec<T,4>(R.z,T(0));
-	M.w=vec<T,4>(t,T(1));
+	M.x = vec<T, 4>(R.x, T(0));
+	M.y = vec<T, 4>(R.y, T(0));
+	M.z = vec<T, 4>(R.z, T(0));
+	M.w = vec<T, 4>(t, T(1));
 	return M;
 }
-template<class T> vec<T,3> MakeEulerAngles(const matrix<T,3,3>& coeff,int a0=0,int a1=1,int a2=2) {
-  vec<T,3> res;
-  const int odd = ((a0+1)%3 == a1) ? 0 : 1;
-  const int i = a0;
-  const int j = (a0 + 1 + odd)%3;
-  const int k = (a0 + 2 - odd)%3;
-  if (a0==a2){
-    res[0] = std::atan2(coeff(j,i), coeff(k,i));
-    if((odd && res[0]<T(0)) || ((!odd) && res[0]>T(0))){
-      if(res[0] > T(0)) {
-        res[0] -= T(ALY_PI);
-      } else {
-        res[0] += T(ALY_PI);
-      }
-      T s2 = Vector2(coeff(j,i), coeff(k,i)).norm();
-      res[1] = -std::atan2(s2, coeff(i,i));
-    } else {
-      T s2 = Vector2(coeff(j,i), coeff(k,i)).norm();
-      res[1] = std::atan2(s2, coeff(i,i));
-    }
-    // With a=(0,1,0), we have i=0; j=1; k=2, and after computing the first two angles,
-    // we can compute their respective rotation, and apply its inverse to M. Since the result must
-    // be a rotation around x, we have:
-    //
-    //  c2  s1.s2 c1.s2                   1  0   0
-    //  0   c1    -s1       *    M    =   0  c3  s3
-    //  -s2 s1.c2 c1.c2                   0 -s3  c3
-    //
-    //  Thus:  m11.c1 - m21.s1 = c3  &   m12.c1 - m22.s1 = s3
-    T s1 = std::sin(res[0]);
-    T c1 = std::cos(res[0]);
-    res[2] = std::atan2(c1*coeff(j,k)-s1*coeff(k,k), c1*coeff(j,j) - s1 * coeff(k,j));
-  } else {
-    res[0] = std::atan2(coeff(j,k), coeff(k,k));
-    T c2 = Vector2(coeff(i,i), coeff(i,j)).norm();
-    if((odd && res[0]<T(0)) || ((!odd) && res[0]>T(0))) {
-      if(res[0] > T(0)) {
-        res[0] -= T(ALY_PI);
-      } else {
-        res[0] += T(ALY_PI);
-      }
-      res[1] = std::atan2(-coeff(i,k), -c2);
-    } else {
-      res[1] = std::atan2(-coeff(i,k), c2);
-    }
-    T s1 = std::sin(res[0]);
-    T c1 = std::cos(res[0]);
-    res[2] = std::atan2(s1*coeff(k,i)-c1*coeff(j,i), c1*coeff(j,j) - s1 * coeff(k,j));
-  }
-  if (!odd)
-	  res = -res;
-  return res;
+template<class T> vec<T, 3> MakeEulerAngles(const matrix<T, 3, 3>& coeff,
+		int a0 = 0, int a1 = 1, int a2 = 2) {
+	vec<T, 3> res;
+	const int odd = ((a0 + 1) % 3 == a1) ? 0 : 1;
+	const int i = a0;
+	const int j = (a0 + 1 + odd) % 3;
+	const int k = (a0 + 2 - odd) % 3;
+	if (a0 == a2) {
+		res[0] = std::atan2(coeff(j, i), coeff(k, i));
+		if ((odd && res[0] < T(0)) || ((!odd) && res[0] > T(0))) {
+			if (res[0] > T(0)) {
+				res[0] -= T(ALY_PI);
+			} else {
+				res[0] += T(ALY_PI);
+			}
+			T s2 = Vector2(coeff(j, i), coeff(k, i)).norm();
+			res[1] = -std::atan2(s2, coeff(i, i));
+		} else {
+			T s2 = Vector2(coeff(j, i), coeff(k, i)).norm();
+			res[1] = std::atan2(s2, coeff(i, i));
+		}
+		// With a=(0,1,0), we have i=0; j=1; k=2, and after computing the first two angles,
+		// we can compute their respective rotation, and apply its inverse to M. Since the result must
+		// be a rotation around x, we have:
+		//
+		//  c2  s1.s2 c1.s2                   1  0   0
+		//  0   c1    -s1       *    M    =   0  c3  s3
+		//  -s2 s1.c2 c1.c2                   0 -s3  c3
+		//
+		//  Thus:  m11.c1 - m21.s1 = c3  &   m12.c1 - m22.s1 = s3
+		T s1 = std::sin(res[0]);
+		T c1 = std::cos(res[0]);
+		res[2] = std::atan2(c1 * coeff(j, k) - s1 * coeff(k, k),
+				c1 * coeff(j, j) - s1 * coeff(k, j));
+	} else {
+		res[0] = std::atan2(coeff(j, k), coeff(k, k));
+		T c2 = Vector2(coeff(i, i), coeff(i, j)).norm();
+		if ((odd && res[0] < T(0)) || ((!odd) && res[0] > T(0))) {
+			if (res[0] > T(0)) {
+				res[0] -= T(ALY_PI);
+			} else {
+				res[0] += T(ALY_PI);
+			}
+			res[1] = std::atan2(-coeff(i, k), -c2);
+		} else {
+			res[1] = std::atan2(-coeff(i, k), c2);
+		}
+		T s1 = std::sin(res[0]);
+		T c1 = std::cos(res[0]);
+		res[2] = std::atan2(s1 * coeff(k, i) - c1 * coeff(j, i),
+				c1 * coeff(j, j) - s1 * coeff(k, j));
+	}
+	if (!odd)
+		res = -res;
+	return res;
 }
-template<class T> vec<T,3> MakeEulerAngles(const matrix<T,4,4>& coeff,int a0=0,int a1=1,int a2=2) {
-  vec<T,3> res;
-  const int odd = ((a0+1)%3 == a1) ? 0 : 1;
-  const int i = a0;
-  const int j = (a0 + 1 + odd)%3;
-  const int k = (a0 + 2 - odd)%3;
-  if (a0==a2){
-    res[0] = std::atan2(coeff(j,i), coeff(k,i));
-    if((odd && res[0]<T(0)) || ((!odd) && res[0]>T(0))){
-      if(res[0] > T(0)) {
-        res[0] -= T(ALY_PI);
-      } else {
-        res[0] += T(ALY_PI);
-      }
-      T s2 = Vector2(coeff(j,i), coeff(k,i)).norm();
-      res[1] = -std::atan2(s2, coeff(i,i));
-    } else {
-      T s2 = Vector2(coeff(j,i), coeff(k,i)).norm();
-      res[1] = std::atan2(s2, coeff(i,i));
-    }
-    // With a=(0,1,0), we have i=0; j=1; k=2, and after computing the first two angles,
-    // we can compute their respective rotation, and apply its inverse to M. Since the result must
-    // be a rotation around x, we have:
-    //
-    //  c2  s1.s2 c1.s2                   1  0   0
-    //  0   c1    -s1       *    M    =   0  c3  s3
-    //  -s2 s1.c2 c1.c2                   0 -s3  c3
-    //
-    //  Thus:  m11.c1 - m21.s1 = c3  &   m12.c1 - m22.s1 = s3
-    T s1 = std::sin(res[0]);
-    T c1 = std::cos(res[0]);
-    res[2] = std::atan2(c1*coeff(j,k)-s1*coeff(k,k), c1*coeff(j,j) - s1 * coeff(k,j));
-  } else {
-    res[0] = std::atan2(coeff(j,k), coeff(k,k));
-    T c2 = Vector2(coeff(i,i), coeff(i,j)).norm();
-    if((odd && res[0]<T(0)) || ((!odd) && res[0]>T(0))) {
-      if(res[0] > T(0)) {
-        res[0] -= T(ALY_PI);
-      } else {
-        res[0] += T(ALY_PI);
-      }
-      res[1] = std::atan2(-coeff(i,k), -c2);
-    } else {
-      res[1] = std::atan2(-coeff(i,k), c2);
-    }
-    T s1 = std::sin(res[0]);
-    T c1 = std::cos(res[0]);
-    res[2] = std::atan2(s1*coeff(k,i)-c1*coeff(j,i), c1*coeff(j,j) - s1 * coeff(k,j));
-  }
-  if (!odd)
-	  res = -res;
-  return res;
+template<class T> vec<T, 3> MakeEulerAngles(const matrix<T, 4, 4>& coeff,
+		int a0 = 0, int a1 = 1, int a2 = 2) {
+	vec<T, 3> res;
+	const int odd = ((a0 + 1) % 3 == a1) ? 0 : 1;
+	const int i = a0;
+	const int j = (a0 + 1 + odd) % 3;
+	const int k = (a0 + 2 - odd) % 3;
+	if (a0 == a2) {
+		res[0] = std::atan2(coeff(j, i), coeff(k, i));
+		if ((odd && res[0] < T(0)) || ((!odd) && res[0] > T(0))) {
+			if (res[0] > T(0)) {
+				res[0] -= T(ALY_PI);
+			} else {
+				res[0] += T(ALY_PI);
+			}
+			T s2 = Vector2(coeff(j, i), coeff(k, i)).norm();
+			res[1] = -std::atan2(s2, coeff(i, i));
+		} else {
+			T s2 = Vector2(coeff(j, i), coeff(k, i)).norm();
+			res[1] = std::atan2(s2, coeff(i, i));
+		}
+		// With a=(0,1,0), we have i=0; j=1; k=2, and after computing the first two angles,
+		// we can compute their respective rotation, and apply its inverse to M. Since the result must
+		// be a rotation around x, we have:
+		//
+		//  c2  s1.s2 c1.s2                   1  0   0
+		//  0   c1    -s1       *    M    =   0  c3  s3
+		//  -s2 s1.c2 c1.c2                   0 -s3  c3
+		//
+		//  Thus:  m11.c1 - m21.s1 = c3  &   m12.c1 - m22.s1 = s3
+		T s1 = std::sin(res[0]);
+		T c1 = std::cos(res[0]);
+		res[2] = std::atan2(c1 * coeff(j, k) - s1 * coeff(k, k),
+				c1 * coeff(j, j) - s1 * coeff(k, j));
+	} else {
+		res[0] = std::atan2(coeff(j, k), coeff(k, k));
+		T c2 = Vector2(coeff(i, i), coeff(i, j)).norm();
+		if ((odd && res[0] < T(0)) || ((!odd) && res[0] > T(0))) {
+			if (res[0] > T(0)) {
+				res[0] -= T(ALY_PI);
+			} else {
+				res[0] += T(ALY_PI);
+			}
+			res[1] = std::atan2(-coeff(i, k), -c2);
+		} else {
+			res[1] = std::atan2(-coeff(i, k), c2);
+		}
+		T s1 = std::sin(res[0]);
+		T c1 = std::cos(res[0]);
+		res[2] = std::atan2(s1 * coeff(k, i) - c1 * coeff(j, i),
+				c1 * coeff(j, j) - s1 * coeff(k, j));
+	}
+	if (!odd)
+		res = -res;
+	return res;
 }
-template<class T> matrix<T, 4, 4> MakePerspectiveMatrix(const T &fovy, const T &aspect, const T &zNear, const T &zFar) {
+template<class T> matrix<T, 4, 4> MakePerspectiveMatrix(const T &fovy,
+		const T &aspect, const T &zNear, const T &zFar) {
 	T f = 1.0f / tan(ALY_PI * fovy / 360.0f);
 	T sx = f / aspect;
 	T sy = f;
@@ -1948,7 +2132,8 @@ template<class T> matrix<T, 4, 4> MakePerspectiveMatrix(const T &fovy, const T &
 	M(2, 3) = pz;
 	return M;
 }
-template<class T> matrix<T, 4, 4> MakeOrthographicMatrix(const T& scaleX, const T& scaleY, const T &zNear, const T &zFar) {
+template<class T> matrix<T, 4, 4> MakeOrthographicMatrix(const T& scaleX,
+		const T& scaleY, const T &zNear, const T &zFar) {
 	T sx = 2.0f * scaleX;
 	T sy = 2.0f * scaleY;
 	T pz = -(zFar + zNear) / (zFar - zNear);
@@ -1961,7 +2146,8 @@ template<class T> matrix<T, 4, 4> MakeOrthographicMatrix(const T& scaleX, const 
 	M(2, 3) = pz;
 	return M;
 }
-template<class T> matrix<T, 4, 4> MakeLookAtMatrix(vec<T, 3> eyePosition3D, vec<T, 3> center3D, vec<T, 3> upVector3D) {
+template<class T> matrix<T, 4, 4> MakeLookAtMatrix(vec<T, 3> eyePosition3D,
+		vec<T, 3> center3D, vec<T, 3> upVector3D) {
 	vec<T, 3> forward, side, up;
 	matrix<T, 4, 4> matrix2;
 	matrix<T, 4, 4> resultMatrix;
@@ -1979,36 +2165,44 @@ template<class T> matrix<T, 4, 4> MakeLookAtMatrix(vec<T, 3> eyePosition3D, vec<
 	return transpose(matrix2) * M;
 }
 
-template<class T> vec<T, 3> Transform(const matrix<T, 4, 4>& M, const vec<T, 3>& v) {
+template<class T> vec<T, 3> Transform(const matrix<T, 4, 4>& M,
+		const vec<T, 3>& v) {
 	vec<T, 4> out = M * vec<T, 4>(v, T(1.0));
 	return out.xyz() / out.w;
 }
-template<class T> vec<T, 4> Transform(const matrix<T, 3, 3>& M, const vec<T, 4>& v) {
+template<class T> vec<T, 4> Transform(const matrix<T, 3, 3>& M,
+		const vec<T, 4>& v) {
 	vec<T, 3> out = M * v.xyz();
 	return vec<T, 4>(out, v.w);
 }
-template<class T> vec<T, 3> Transform(const matrix<T, 3, 3>& M, const vec<T, 3>& v) {
+template<class T> vec<T, 3> Transform(const matrix<T, 3, 3>& M,
+		const vec<T, 3>& v) {
 	vec<T, 3> out = M * v;
-	return (out/out.z);
+	return (out / out.z);
 }
-template<class T> vec<T, 2> Transform(const matrix<T, 3, 3>& M, const vec<T, 2>& v) {
-	vec<T, 3> out = M * vec<T, 3>(v,T(1.0));
-	return (out.xy()/out.z);
+template<class T> vec<T, 2> Transform(const matrix<T, 3, 3>& M,
+		const vec<T, 2>& v) {
+	vec<T, 3> out = M * vec<T, 3>(v, T(1.0));
+	return (out.xy() / out.z);
 }
-template<class T> vec<T, 4> Transform(const matrix<T, 4, 4>& M, const vec<T, 4>& v) {
+template<class T> vec<T, 4> Transform(const matrix<T, 4, 4>& M,
+		const vec<T, 4>& v) {
 	vec<T, 4> out = M * v;
 	return (out / out.w);
 }
-template<class T> vec<T, 3> TransformNormal(const matrix<T, 4, 4>& M, const vec<T, 3>& v) {
-	return normalize((M * vec<T, 4>(v,T(0))).xyz());
+template<class T> vec<T, 3> TransformNormal(const matrix<T, 4, 4>& M,
+		const vec<T, 3>& v) {
+	return normalize((M * vec<T, 4>(v, T(0))).xyz());
 }
-template<class T, int C> double LineSearch(vec<T, C>& value, const vec<T, C>& minValue, const vec<T, C>& maxValue,
-		const std::function<double(const vec<T, C>& value)>& scoreFunc, double err = 1E-5) {
+template<class T, int C> double LineSearch(vec<T, C>& value,
+		const vec<T, C>& minValue, const vec<T, C>& maxValue,
+		const std::function<double(const vec<T, C>& value)>& scoreFunc,
+		double err = 1E-5) {
 	const T tolerance = T(err * lengthL1(maxValue - minValue));
 	const T sqrt5 = T(2.236067977499789696);
 	const T lambda = T(0.5 * (sqrt5 - 1.0));
 	const T mu = T(0.5 * (3.0 - sqrt5));
-	const int MAX_ITERATIONS=256;
+	const int MAX_ITERATIONS = 256;
 	vec<T, C> x1;
 	vec<T, C> x2;
 	double fx1;
@@ -2019,8 +2213,8 @@ template<class T, int C> double LineSearch(vec<T, C>& value, const vec<T, C>& mi
 	x2 = a + lambda * (b - a);
 	fx1 = scoreFunc(x1);
 	fx2 = scoreFunc(x2);
-	int count=0;
-	while (lengthL1(b - a) >= tolerance&&count<MAX_ITERATIONS) {
+	int count = 0;
+	while (lengthL1(b - a) >= tolerance && count < MAX_ITERATIONS) {
 		if (fx1 > fx2) {
 			a = x1;
 			if (lengthL1(b - a) < tolerance)
@@ -2043,12 +2237,15 @@ template<class T, int C> double LineSearch(vec<T, C>& value, const vec<T, C>& mi
 	value = a;
 	return scoreFunc(a);
 }
-template<class T> double LineSearch(T& value, const T& minValue, const T& maxValue, const std::function<double(const T& value)>& scoreFunc, double err = 1E-5) {
+template<class T> double LineSearch(T& value, const T& minValue,
+		const T& maxValue,
+		const std::function<double(const T& value)>& scoreFunc, double err =
+				1E-5) {
 	const T tolerance = T(err * (maxValue - minValue));
 	const T sqrt5 = T(2.236067977499789696);
 	const T lambda = T(0.5 * (sqrt5 - 1.0));
 	const T mu = T(0.5 * (3.0 - sqrt5));
-	const int MAX_ITERATIONS=256;
+	const int MAX_ITERATIONS = 256;
 	T x1;
 	T x2;
 	double fx1;
@@ -2059,8 +2256,8 @@ template<class T> double LineSearch(T& value, const T& minValue, const T& maxVal
 	x2 = a + lambda * (b - a);
 	fx1 = scoreFunc(x1);
 	fx2 = scoreFunc(x2);
-	int count=0;
-	while (b - a >= tolerance&&count<MAX_ITERATIONS) {
+	int count = 0;
+	while (b - a >= tolerance && count < MAX_ITERATIONS) {
 		if (fx1 > fx2) {
 			a = x1;
 			if (b - a < tolerance)
@@ -2181,17 +2378,25 @@ typedef box<uint32_t, 3> box3ui;
 typedef box<uint32_t, 4> box4ui;
 
 inline RGBA ToRGBA(const RGBAf& r) {
-	return RGBA(clamp((int) (r.x * 255.0f), 0, 255), clamp((int) (r.y * 255.0f), 0, 255), clamp((int) (r.z * 255.0f), 0, 255),
+	return RGBA(clamp((int) (r.x * 255.0f), 0, 255),
+			clamp((int) (r.y * 255.0f), 0, 255),
+			clamp((int) (r.z * 255.0f), 0, 255),
 			clamp((int) (r.w * 255.0f), 0, 255));
 }
 inline RGBA ToRGBA(const RGBf& r) {
-	return RGBA(clamp((int) (r.x * 255.0f), 0, 255), clamp((int) (r.y * 255.0f), 0, 255), clamp((int) (r.z * 255.0f), 0, 255), 255);
+	return RGBA(clamp((int) (r.x * 255.0f), 0, 255),
+			clamp((int) (r.y * 255.0f), 0, 255),
+			clamp((int) (r.z * 255.0f), 0, 255), 255);
 }
 inline ubyte3 ToRGB(const RGBf& r) {
-	return ubyte3(clamp((int) (r.x * 255.0f), 0, 255), clamp((int) (r.y * 255.0f), 0, 255), clamp((int) (r.z * 255.0f), 0, 255));
+	return ubyte3(clamp((int) (r.x * 255.0f), 0, 255),
+			clamp((int) (r.y * 255.0f), 0, 255),
+			clamp((int) (r.z * 255.0f), 0, 255));
 }
 inline ubyte3 ToRGB(const RGBAf& r) {
-	return ubyte3(clamp((int) (r.x * 255.0f), 0, 255), clamp((int) (r.y * 255.0f), 0, 255), clamp((int) (r.z * 255.0f), 0, 255));
+	return ubyte3(clamp((int) (r.x * 255.0f), 0, 255),
+			clamp((int) (r.y * 255.0f), 0, 255),
+			clamp((int) (r.z * 255.0f), 0, 255));
 }
 
 inline RGBAf ToRGBAf(const RGBA& r) {
@@ -2218,110 +2423,168 @@ inline aly::ubyte3 ToRGB(const RGBA& r) {
 inline aly::RGBA ToRGBA(const ubyte3& r) {
 	return aly::RGBA(r, 255);
 }
-bool ClipLine(float2& pt1,float2& pt2,const float2& minPt,const float2& maxPt);
-inline bool ClipLine(float2& pt1,float2& pt2,const box2f& box){
-	return ClipLine(pt1,pt2,box.min(),box.max());
+bool ClipLine(float2& pt1, float2& pt2, const float2& minPt,
+		const float2& maxPt);
+inline bool ClipLine(float2& pt1, float2& pt2, const box2f& box) {
+	return ClipLine(pt1, pt2, box.min(), box.max());
 }
-inline bool ClipLine(lineseg2f& line,const box2f& box){
-	return ClipLine(line.start,line.end,box.min(),box.max());
+inline bool ClipLine(lineseg2f& line, const box2f& box) {
+	return ClipLine(line.start, line.end, box.min(), box.max());
 }
-inline bool ClipLine(lineseg2f& line,const float2& minPt,const float2& maxPt){
-	return ClipLine(line.start,line.end,minPt,maxPt);
+inline bool ClipLine(lineseg2f& line, const float2& minPt,
+		const float2& maxPt) {
+	return ClipLine(line.start, line.end, minPt, maxPt);
 }
-bool ClipLine(double2& pt1,double2& pt2,const double2& minPt,const double2& maxPt);
-inline bool ClipLine(double2& pt1,double2& pt2,const box2d& box){
-	return ClipLine(pt1,pt2,box.min(),box.max());
+bool ClipLine(double2& pt1, double2& pt2, const double2& minPt,
+		const double2& maxPt);
+inline bool ClipLine(double2& pt1, double2& pt2, const box2d& box) {
+	return ClipLine(pt1, pt2, box.min(), box.max());
 }
-inline bool ClipLine(lineseg2d& line,const box2d& box){
-	return ClipLine(line.start,line.end,box.min(),box.max());
+inline bool ClipLine(lineseg2d& line, const box2d& box) {
+	return ClipLine(line.start, line.end, box.min(), box.max());
 }
-inline bool ClipLine(lineseg2d& line,const double2& minPt,const double2& maxPt){
-	return ClipLine(line.start,line.end,minPt,maxPt);
+inline bool ClipLine(lineseg2d& line, const double2& minPt,
+		const double2& maxPt) {
+	return ClipLine(line.start, line.end, minPt, maxPt);
 }
 
-float IntersectPlane(const aly::float3& pt, const aly::float3& ray, const aly::float4& plane);
-float IntersectCylinder(aly::float3 pt,aly::float3 ray,float3 start,float3 end,float radius);
+float IntersectPlane(const aly::float3& pt, const aly::float3& ray,
+		const aly::float4& plane);
+float IntersectCylinder(aly::float3 pt, aly::float3 ray, float3 start,
+		float3 end, float radius);
 aly::float3 MakeOrthogonalComplement(const aly::float3& v);
 aly::float2 MakeOrthogonalComplement(const aly::float2& v);
-bool IntersectBox(aly::float3 rayOrig, aly::float3 rayDir, const aly::box3f& bbox, float& near,float& far);
+bool IntersectBox(aly::float3 rayOrig, aly::float3 rayDir,
+		const aly::box3f& bbox, float& near, float& far);
 float RandomUniform(float min, float max);
 int RandomUniform(int min, int max);
 double RandomUniform(double min, double max);
 double RandomGaussian(double mean, double stddev);
 float RandomGaussian(float mean, float stddev);
 
-template<class T> void Shuffle(std::vector<T>& order){
+template<class T> void Shuffle(std::vector<T>& order) {
 	static std::random_device rd;
 	static std::mt19937 g(rd());
 	shuffle(order.begin(), order.end(), g);
 }
 
 struct dim2: public int2 {
-	dim2(int x=0,int y=0):int2(x,y){}
-	dim2(const int2& pt):dim2(pt.x,pt.y){}
-	dim2(int x):dim2(x,x){}
-	inline size_t operator()(const int i,const int j) const {
-		return (size_t)clamp(i, 0, x - 1) + clamp(j, 0, y - 1) * (size_t)x;
+	dim2(int x = 0, int y = 0) :
+			int2(x, y) {
 	}
+	dim2(const int2& pt) :
+			dim2(pt.x, pt.y) {
+	}
+	dim2(int x) :
+			dim2(x, x) {
+	}
+	inline size_t operator()(const int i, const int j) const {
+		return (size_t) clamp(i, 0, x - 1) + clamp(j, 0, y - 1) * (size_t) x;
+	}
+	inline size_t operator()(const int2& pos) const {
+			return (size_t) clamp(pos.x, 0, x - 1) + clamp(pos.y, 0, y - 1) * (size_t) x;
+		}
 	inline size_t size() const {
-		return x*(size_t)y;
+		return x * (size_t) y;
 	}
 	inline size_t area() const {
-		return x*(size_t)y;
+		return x * (size_t) y;
 	}
-	inline dim2 operator = (const int2& dim){
+	inline int2 operator()(const size_t index) const {
+		int i = index % x;
+		int j = index / x;
+		return int2(i,j);
+	}
+	inline dim2 operator =(const int2& dim) {
 		return dim2(dim);
 	}
 };
 
 struct dim3: public int3 {
-	dim3(int x=0,int y=0,int z=0):int3(x,y,z){}
-	dim3(const int3& pt):dim3(pt.x,pt.y,pt.z){}
-	dim3(int x):dim3(x,x,x){}
-	inline size_t operator()(const int i,const int j,const int k) const {
-		return (size_t)clamp(i, 0, x - 1) + (size_t)clamp(j, 0, y - 1) * x+ clamp(k, 0, z - 1) * (size_t)x * (size_t)y;
+	dim3(int x = 0, int y = 0, int z = 0) :
+			int3(x, y, z) {
+	}
+	dim3(const int3& pt) :
+			dim3(pt.x, pt.y, pt.z) {
+	}
+	dim3(int x) :
+			dim3(x, x, x) {
+	}
+	inline size_t operator()(const int i, const int j, const int k) const {
+		return (size_t) clamp(i, 0, x - 1) + (size_t) clamp(j, 0, y - 1) * x
+				+ clamp(k, 0, z - 1) * (size_t) x * (size_t) y;
+	}
+	inline size_t operator()(const int3& pos) const {
+		return (size_t) clamp(pos.x, 0, x - 1) + (size_t) clamp(pos.y, 0, y - 1) * x
+				+ clamp(pos.z, 0, z - 1) * (size_t) x * (size_t) y;
 	}
 	inline size_t size() const {
-		return x*(size_t)y*(size_t)z;
+		return x * (size_t) y * (size_t) z;
 	}
 	inline size_t area() const {
-		return x*(size_t)y;
+		return x * (size_t) y;
+	}
+	inline int3 operator()(const size_t index) const {
+		size_t a=area();
+		size_t k = index / a;
+		size_t ij = index % a;
+		int i = ij % x;
+		int j = ij / x;
+		return int3(i,j,k);
 	}
 	inline size_t volume() const {
-		return x*(size_t)y*(size_t)z;
+		return x * (size_t) y * (size_t) z;
 	}
-	inline dim3 operator = (const int3& dim){
+	inline dim3 operator =(const int3& dim) {
 		return dim3(dim);
 	}
 };
 
 struct dim4: public int4 {
-	dim4(int x=0,int y=0,int z=0,int w=0):int4(x,y,z,w){}
-	dim4(const int4& pt):dim4(pt.x,pt.y,pt.z,pt.w){}
-	dim4(int x):dim4(x,x,x,x){}
-	inline size_t operator()(const int i,const int j,const int k,const int l) const {
-		return    (size_t)clamp(i, 0, x - 1)
-				+ (size_t)clamp(j, 0, y - 1) * x
-				+ clamp(k, 0, z - 1) * (size_t)x * (size_t)y
-				+ clamp(l, 0, w - 1) * (size_t)x * (size_t)y* (size_t)z;
+	dim4(int x = 0, int y = 0, int z = 0, int w = 0) :
+			int4(x, y, z, w) {
 	}
+	dim4(const int4& pt) :
+			dim4(pt.x, pt.y, pt.z, pt.w) {
+	}
+	dim4(int x) :
+			dim4(x, x, x, x) {
+	}
+	inline size_t operator()(const int i, const int j, const int k,
+			const int l) const {
+		return (size_t) clamp(i, 0, x - 1) + (size_t) clamp(j, 0, y - 1) * x
+				+ clamp(k, 0, z - 1) * (size_t) x * (size_t) y
+				+ clamp(l, 0, w - 1) * (size_t) x * (size_t) y * (size_t) z;
+	}
+	inline size_t operator()(const int4& pos) const {
+			return (size_t) clamp(pos.x, 0, x - 1) + (size_t) clamp(pos.y, 0, y - 1) * x
+					+ clamp(pos.z, 0, z - 1) * (size_t) x * (size_t) y
+					+ clamp(pos.w, 0, w - 1) * (size_t) x * (size_t) y * (size_t) z;
+		}
 	inline size_t size() const {
-		return x*(size_t)y*(size_t)z*(size_t)w;
+		return x * (size_t) y * (size_t) z * (size_t) w;
 	}
 	inline size_t area() const {
-		return x*(size_t)y;
+		return x * (size_t) y;
 	}
 	inline size_t volume() const {
-		return x*(size_t)y*(size_t)z;
+		return x * (size_t) y * (size_t) z;
 	}
-	inline dim4 operator = (const int4& dim){
+	inline dim4 operator =(const int4& dim) {
 		return dim4(dim);
 	}
+	inline int4 operator()(const size_t index) const {
+		size_t v=volume();
+		size_t l = index / v;
+		size_t ijk = index % v;
+		size_t a=area();
+		size_t k = ijk / a;
+		size_t ij = ijk % a;
+		int i = ij % x;
+		int j = ij / x;
+		return int4(i,j,k,l);
+	}
 };
-
-
-
-
 
 }
 #endif
