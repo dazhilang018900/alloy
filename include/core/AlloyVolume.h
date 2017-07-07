@@ -147,7 +147,7 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(const std::strin
 			x = other.x;
 			y = other.y;
 			z = other.z;
-			set(&other.data[0]);
+			set(other.data);
 		}
 		std::string getTypeName() const {
 			return MakeString() << type << channels;
@@ -636,9 +636,7 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(const std::strin
 	}
 	template<class T, class L, class R, int C, ImageType I> std::basic_ostream<L, R> & operator <<(
 		std::basic_ostream<L, R> & ss, const Volume<T, C, I> & A) {
-		ss << "Volume (" << A.getTypeName() << "): " << A.id << " Position: ("
-			<< A.x << "," << A.y << ") Dimensions: [" << A.rows << "," << A.cols
-			<< "]\n";
+		ss << "Volume (" << A.getTypeName() << "): " << A.id << " Position: "<<A.position()<<" Dimensions: [" << A.rows << "," << A.cols<< "]\n";
 		return ss;
 	}
 	template<class T, int C, ImageType I> Volume<T, C, I> operator+(

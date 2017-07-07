@@ -14,14 +14,15 @@
 #include <mm_malloc.h>
 #endif
 
+#include <memory>
+#include <stdint.h>
 namespace aly {
-
-template <typename T, std::size_t alignment>
+template <typename T, size_t alignment>
 class aligned_allocator {
  public:
   typedef T value_type;
   typedef T *pointer;
-  typedef std::size_t size_type;
+  typedef size_t size_type;
   typedef std::ptrdiff_t difference_type;
   typedef T &reference;
   typedef const T &const_reference;
