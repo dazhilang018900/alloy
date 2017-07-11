@@ -47,7 +47,7 @@ namespace aly {
 		void create(const cl_image_format& formats, int w, int h, int d, int ch, int bytesPerChannel, void *data = nullptr) {
 			return create(CL_MEM_READ_WRITE, formats, w, h, d, ch, bytesPerChannel, data);
 		}
-		template<class T, int C, ImageType I> void create(cl_mem_flags f, const Volume<T, C, I>& img) {
+		template<class T, int C, ImageType I> void create(cl_mem_flags f, Volume<T, C, I>& img) {
 			cl_image_format format;
 			switch (C) {
 			case 1:
@@ -90,8 +90,12 @@ namespace aly {
 			default:
 				break;
 			}
-			create(f, format, img.rows, img.cols, img.slices, img.channels, sizeof(T),nullptr);
+			create(f, format, img.rows, img.cols, img.slices, img.channels, sizeof(T), nullptr);
 			write(img,true);
+		}
+		template<class T, int C, ImageType I> void create(cl_mem_flags f, const Volume<T, C, I>& img) {
+			Volume<T, C, I> tmp=img;
+			create(f,tmp);
 		}
 		void write(cl_mem mem);
 		inline int getHeight() const {

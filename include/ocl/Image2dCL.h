@@ -92,6 +92,10 @@ namespace aly {
 			create(f, format, img.width, img.height, img.channels, sizeof(T), nullptr);
 			write(img,true);
 		}
+		template<class T, int C, ImageType I> void create(cl_mem_flags f, const Image<T, C, I>& img) {
+			Image<T, C, I> tmp=img;
+			create(f,tmp);
+		}
 		template<typename T> void read(std::vector<T>& vec, bool block = true) const {
 			read(&(vec[0]), block);
 		}

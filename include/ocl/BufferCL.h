@@ -83,6 +83,14 @@ namespace aly {
 			create(f, vec.size() * sizeof(T),nullptr);
 			write(vec,true);
 		}
+		template<class T, int M> void create(const cl_mem_flags& f, const Vector<T, M>& vec) {
+			Vector<T, M> tmp=vec;
+			create(f,tmp);
+		}
+		template<class T> void create(const cl_mem_flags& f,  const std::vector<T>& vec) {
+			std::vector<T> tmp=vec;
+			create(f,tmp);
+		}
 	};
 }
 #endif
