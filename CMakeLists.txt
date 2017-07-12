@@ -54,7 +54,7 @@ endif()
 
 # Compile with compiler warnings turned on
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -DGL_GLEXT_PROTOTYPES=1 -O3 -Wall -fmessage-length=0 -MMD -MP")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -DGL_GLEXT_PROTOTYPES=1 -O3 -w -fmessage-length=0 -MMD -MP")
 
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -DGL_GLEXT_PROTOTYPES=1 -O3 -Wall -fmessage-length=0 -MMD -MP")
   if(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
@@ -94,15 +94,15 @@ include_directories(include/core include/examples ext/glfw/include ext/glew/incl
 # Compile main Alloy library 
 
 
-file(GLOB lib_includes include/core/*.h include/core/cereal/*.h include/core/libkdtree/*h)
-file(GLOB lib_files src/core/*.cpp src/core/*.c)
+file(GLOB lib_includes include/core/*.h include/cereal/*.h include/segmentation/*.h include/physics/*.cpp include/poisson/*.h include/core/libkdtree/*h)
+file(GLOB lib_files src/core/*.cpp src/segmentation/*.cpp src/poisson/*.cpp src/physics/*.cpp src/core/*.c)
 file(GLOB ex_files src/example/*.cpp)
 file(GLOB ex_includes include/example/*.h)
 add_library(alloy STATIC ${lib_includes} ${lib_files} ${LIBALLOY_EXTRA_SOURCE})
 
 if(ALLOY_BUILD_EXAMPLE)
   add_executable(examples ${ex_includes} ${ex_files})
-  include_directories(include/core)
+  include_directories(include/core include/)
   if (APPLE)
     target_link_libraries(examples alloy ${ALLOY_EXTRA_LIBS})
   else()
