@@ -575,7 +575,7 @@ private:
 	std::shared_ptr<IconButton> cancelButton;
 	std::shared_ptr<BorderComposite> containerRegion;
 	std::string lastDirectory;
-	void setSelectedFile(const std::string& file);
+	void setSelectedFile(const std::string& file,bool changeDirectory=true);
 	const FileDialogType type;
 	pixel fileEntryHeight;
 	bool valid = false;
@@ -673,6 +673,9 @@ public:
 			const std::initializer_list<std::string>& extension) {
 		fileDialog->addFileExtensionRule(name, extension);
 	}
+	void addFileExtensionRule(const FileFilterRule& rule) {
+		fileDialog->addFileExtensionRule(rule);
+	}
 	void setFileExtensionRule(int index) {
 		fileDialog->setFileExtensionRule(index);
 	}
@@ -718,6 +721,7 @@ protected:
 	std::shared_ptr<IconButton> upButton;
 	std::shared_ptr<IconButton> downButton;
 	std::shared_ptr<IconButton> eraseButton;
+	bool directoryInput;
 	float entryHeight;
 	void update();
 	void fireEvent();
@@ -731,12 +735,15 @@ public:
 		const std::initializer_list<std::string>& extension) {
 		openFileButton->addFileExtensionRule(name, extension);
 	}
+	void addFileExtensionRule(const FileFilterRule& rule) {
+		openFileButton->addFileExtensionRule(rule);
+	}
 	void setFileExtensionRule(int index) {
 		openFileButton->setFileExtensionRule(index);
 	}
 	void addFiles(const std::vector<std::string>& files);
 	void clearEntries();
-	MultiFileSelector(const std::string& name, const AUnit2D& pos, const AUnit2D& dims, float entryHeight=30.0f);
+	MultiFileSelector(const std::string& name, const AUnit2D& pos, const AUnit2D& dims, bool directoryInput=false, float entryHeight=30.0f);
 };
 class NumberEntry : public aly::ListEntry {
 protected:

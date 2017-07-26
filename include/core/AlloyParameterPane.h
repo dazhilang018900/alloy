@@ -174,8 +174,8 @@ public:
 	FileSelectorPtr addFileField(const std::string& label, std::string& file, float aspect = -1.0f);
 	FileSelectorPtr addDirectoryField(const std::string& label, std::string& file, float aspect = -1.0f);
 	MultiFileSelectorPtr addMultiFileSelector(const std::string& label, std::vector<std::string>& files, float aspect = -1.0f);
+	MultiFileSelectorPtr addMultiDirectorySelector(const std::string& label, std::vector<std::string>& files, float aspect = -1.0f);
 	std::shared_ptr<Region> addNumberVectorField(const std::string& label, std::vector<Number>& value, const NumberType& type, float aspect = -1.0f);
-
 	template<int M, int N> std::shared_ptr<MatrixField<M, N>> addMatrixField(const std::string& label, aly::matrix<float, M, N>& value, float aspect = -1.0f) {
 		using namespace aly;
 		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, M * entryHeight)));

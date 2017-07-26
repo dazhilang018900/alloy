@@ -55,7 +55,7 @@ enum class MessageType {
 	Question, Information, Warning, Error
 };
 enum class FileDialogType {
-	SelectDirectory, OpenFile, OpenMultiFile, SaveFile
+	SelectDirectory,SelectMultiDirectory, OpenFile, OpenMultiFile, SaveFile
 };
 enum class GlyphType {
 	Image, Awesome

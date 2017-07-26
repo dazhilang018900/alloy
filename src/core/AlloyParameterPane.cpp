@@ -589,8 +589,35 @@ namespace aly {
 		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, 4 * entryHeight)));
 		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
 		MultiFileSelectorPtr valueRegion = MultiFileSelectorPtr(
-				new MultiFileSelector("Multi-File Field", CoordPerPX(1.0f, 0.0f, -aspect * entryHeight, 0.0f), CoordPX(aspect * entryHeight, 4 * entryHeight),
-						entryHeight));
+				new MultiFileSelector("Multi-File Field", CoordPerPX(1.0f, 0.0f, -aspect * entryHeight, 0.0f), CoordPX(aspect * entryHeight, 4 * entryHeight),false,entryHeight));
+
+		if (aspect <= 0) {
+			pixel2 labelBounds = labelRegion->getTextDimensions(AlloyDefaultContext().get());
+			labelBounds.x += entryHeight;
+			valueRegion->position = CoordPX(labelBounds.x, 0.0f);
+			valueRegion->dimensions = CoordPerPX(1.0f, 0.0f, -labelBounds.x, 4 * entryHeight);
+		} else {
+			labelRegion->position = CoordPX(0.0f, 0.0f);
+			labelRegion->dimensions = CoordPerPX(1.0f, 0.0f, -aspect * entryHeight, 4 * entryHeight);
+		}
+		std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(new AnyValue<std::vector<std::string>*>(&files));
+		valueRegion->addFiles(files);
+		values.push_back(ref);
+		valueRegion->onChange = [=](const std::vector<std::string>& value) {
+			*(ref->getValue<std::vector<std::string>*>()) = value;
+			if(this->onChange)this->onChange(label,*ref);
+		};
+		setCommonParameters(comp, labelRegion, valueRegion);
+		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
+		valueRegion->setRoundCorners(true);
+		estimatedHeight += 4 * entryHeight + SPACING;
+		return valueRegion;
+	}
+	MultiFileSelectorPtr ParameterPane::addMultiDirectorySelector(const std::string& label, std::vector<std::string>& files, float aspect) {
+		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, 4 * entryHeight)));
+		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+		MultiFileSelectorPtr valueRegion = MultiFileSelectorPtr(
+				new MultiFileSelector("Multi-Directory Field", CoordPerPX(1.0f, 0.0f, -aspect * entryHeight, 0.0f), CoordPX(aspect * entryHeight, 4 * entryHeight),true,entryHeight));
 		if (aspect <= 0) {
 			pixel2 labelBounds = labelRegion->getTextDimensions(AlloyDefaultContext().get());
 			labelBounds.x += entryHeight;

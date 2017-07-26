@@ -27,9 +27,11 @@ DialogsEx::DialogsEx() :
 }
 bool DialogsEx::init(Composite& rootNode) {
 	FileButtonPtr saveButton=FileButtonPtr(new FileButton("Save File", CoordPerPX(0.2f, 0.0f, 0.0f, 5.0f),CoordPX(40, 40), FileDialogType::SaveFile));
-	FileButtonPtr openMultiButton = FileButtonPtr(new FileButton("Open Multi-File", CoordPerPX(0.2f, 0.0f, 45.0f, 5.0f), CoordPX(40, 40), FileDialogType::OpenMultiFile));
-	FileSelectorPtr fileSelector=FileSelectorPtr(new FileSelector("Selector", CoordPerPX(0.5f, 0.0f,0.0f,90.0f),CoordPX(300.0f, 30.0f)));
-	ColorSelectorPtr colorselect = ColorSelectorPtr(new ColorSelector("Color", CoordPerPX(0.2f, 0.0f, 90.0f, 5.0f), CoordPX(150, 40)));
+	FileButtonPtr openMultiFileButton = FileButtonPtr(new FileButton("Open Multi-File", CoordPerPX(0.2f, 0.0f, 45.0f, 5.0f), CoordPX(40, 40), FileDialogType::OpenMultiFile));
+	FileButtonPtr openMultiDirButton = FileButtonPtr(new FileButton("Open Multi-Directory", CoordPerPX(0.2f, 0.0f, 90.0f, 5.0f), CoordPX(40, 40), FileDialogType::SelectMultiDirectory));
+
+	FileSelectorPtr fileSelector=FileSelectorPtr(new FileSelector("Selector", CoordPerPX(0.5f, 0.0f,0.0f,135.0f),CoordPX(300.0f, 30.0f)));
+	ColorSelectorPtr colorselect = ColorSelectorPtr(new ColorSelector("Color", CoordPerPX(0.2f, 0.0f, 135.0f, 5.0f), CoordPX(150, 40)));
 	MultiFileSelectorPtr mfileField = MultiFileSelectorPtr(new MultiFileSelector("Multi-File",CoordPercent(0.5f,0.5f),CoordPX(300,200)));
 	ListBoxPtr listBox = ListBoxPtr(new ListBox("List Box", CoordPX( 5.0f, 90.0f),CoordPX(300,300)));
 	for (int i = 0;i < 30;i++) {
@@ -38,7 +40,8 @@ bool DialogsEx::init(Composite& rootNode) {
 	listBox->setEnableMultiSelection(true);
 
 	rootNode.add(saveButton);
-	rootNode.add(openMultiButton);
+	rootNode.add(openMultiFileButton);
+	rootNode.add(openMultiDirButton);
 	rootNode.add(fileSelector);
 	rootNode.add(colorselect);
 	rootNode.add(listBox);
@@ -57,10 +60,10 @@ bool DialogsEx::init(Composite& rootNode) {
 	saveButton->addFileExtensionRule("Text", "txt");
 	saveButton->setValue(exampleFile);
 
-	openMultiButton->addFileExtensionRule("Portable Network Graphics", "png");
-	openMultiButton->addFileExtensionRule("XML", extensions { "raw", "xml" });
-	openMultiButton->addFileExtensionRule("Text", "txt");
-	openMultiButton->setValue(exampleFile);
+	openMultiFileButton->addFileExtensionRule("Portable Network Graphics", "png");
+	openMultiFileButton->addFileExtensionRule("XML", extensions { "raw", "xml" });
+	openMultiFileButton->addFileExtensionRule("Text", "txt");
+	openMultiFileButton->setValue(exampleFile);
 
 	TextIconButtonPtr warningButton = std::shared_ptr<TextIconButton>(
 			new TextIconButton("Warning", 0xf06a,
