@@ -103,10 +103,6 @@ float InvSqrt(float x);
 template<class T, int M> struct vec;
 template<class T> struct vec<T, 1> {
 	T x = T(0);
-
-	vec(T x, T y) :
-			x(x) {
-	}
 	vec(T* ptr) :
 			x(*ptr) {
 	}
@@ -128,7 +124,6 @@ template<class T> struct vec<T, 1> {
 	operator T() const {
 		return x;
 	}
-
 	bool operator ==(const vec & r) const {
 		return (x == r.x);
 	}
