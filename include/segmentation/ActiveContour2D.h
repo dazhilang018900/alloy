@@ -31,83 +31,98 @@
 #include "Simulation.h"
 #include "SpringlCache2D.h"
 namespace aly {
-	class ActiveManifold2D: public Simulation {
-	protected:
-		std::shared_ptr<SpringlCache2D> cache;
-		IsoContour isoContour;
-		Manifold2D contour;
-		bool preserveTopology;
-		bool clampSpeed;
+class ActiveManifold2D: public Simulation {
+protected:
+	std::shared_ptr<SpringlCache2D> cache;
+	IsoContour isoContour;
+	Manifold2D contour;
+	bool preserveTopology;
+	bool clampSpeed;
 
-		Number advectionParam;
-		Number pressureParam;
-		Number curvatureParam;
-		Number targetPressureParam;
-		
-		const float MAX_DISTANCE = 3.5f;
-		const int maxLayers = 3;
-		bool requestUpdateContour;
-		Image1f initialLevelSet;
-		Image1f levelSet;
-		Image1f swapLevelSet;
-		Image1f pressureImage;
-		Image2f vecFieldImage;
-		std::vector<float> deltaLevelSet;
-		std::vector<int2> activeList;
-		std::mutex contourLock;
-		bool getBitValue(int i);
-		void rescale(aly::Image1f& pressureForce);
-		void pressureMotion(int i, int j, size_t index);
-		void pressureAndAdvectionMotion(int i, int j, size_t index);
-		void advectionMotion(int i, int j, size_t index);
-		void applyForces(int i, int j, size_t index, float timeStep);
-		void plugLevelSet(int i, int j, size_t index);
-		void updateDistanceField(int i, int j, int band, size_t index);
-		int deleteElements();
-		int addElements();
-		virtual float evolve(float maxStep);
-		void rebuildNarrowBand();
+	Number advectionParam;
+	Number pressureParam;
+	Number curvatureParam;
+	Number targetPressureParam;
 
-		bool updateContour();
-		void applyForcesTopoRule(int i, int j, int offset, size_t index, float timeStep);
-		virtual bool stepInternal() override;
-	public:
-		ActiveManifold2D(const std::shared_ptr<SpringlCache2D>& cache=nullptr);
-		ActiveManifold2D(const std::string& name,const std::shared_ptr<SpringlCache2D>& cache = nullptr);
-		void setCurvature(float c) {
-			curvatureParam.setValue(c);
-		}
-		void setPressure(const Image1f& img, float weight, float target) {
-			pressureParam.setValue(weight);
-			targetPressureParam.setValue(target);
-			pressureImage = img;
-			rescale(pressureImage);
-		}
-		void setPressure(const Image1f& img, float weight) {
-			pressureParam.setValue(weight);
-			pressureImage = img;
-			rescale(pressureImage);
-		}
-		void setPressure(const Image1f& img) {
-			pressureImage = img;
-			rescale(pressureImage);
-		}
-		void setVectorField(const Image2f& img, float f) {
-			advectionParam.setValue(f);
-			vecFieldImage = img;
-		}
-		void setAdvection(float c) {
-			advectionParam.setValue(c);
-		}
-		Manifold2D* getContour();
+	const float MAX_DISTANCE = 3.5f;
+	const int maxLayers = 3;
+	bool requestUpdateContour;
+	Image1f initialLevelSet;
+	Image1f levelSet;
+	Image1f swapLevelSet;
+	Image1f pressureImage;
+	Image2f vecFieldImage;
+	std::vector<float> deltaLevelSet;
+	std::vector<int2> activeList;
+	std::mutex contourLock;
+	bool getBitValue(int i);
+	void rescale(aly::Image1f& pressureForce);
+	void pressureMotion(int i, int j, size_t index);
+	void pressureAndAdvectionMotion(int i, int j, size_t index);
+	void advectionMotion(int i, int j, size_t index);
+	void applyForces(int i, int j, size_t index, float timeStep);
+	void plugLevelSet(int i, int j, size_t index);
+	void updateDistanceField(int i, int j, int band, size_t index);
+	int deleteElements();
+	int addElements();
+	virtual float evolve(float maxStep);
+	void rebuildNarrowBand();
 
-		virtual bool init()override;
-		virtual void cleanup() override;
-		virtual void setup(const aly::ParameterPanePtr& pane) override;
-		void setInitialDistanceField(const Image1f& img) {
-			initialLevelSet = img;
-		}
-	};
+	bool updateContour();
+	void applyForcesTopoRule(int i, int j, int offset, size_t index,
+			float timeStep);
+	virtual bool stepInternal() override;
+public:
+	ActiveManifold2D(const std::shared_ptr<SpringlCache2D>& cache = nullptr);
+	ActiveManifold2D(const std::string& name,
+			const std::shared_ptr<SpringlCache2D>& cache = nullptr);
+	float evolve();
+	Image1f& getPressureImage();
+	const Image1f& getPressureImage() const;
+	void setCurvature(float c) {
+		curvatureParam.setValue(c);
+	}
+	void setClampSpeed(bool b) {
+		clampSpeed = b;
+	}
+	void setPressure(const Image1f& img, float weight, float target) {
+		pressureParam.setValue(weight);
+		targetPressureParam.setValue(target);
+		pressureImage = img;
+		rescale(pressureImage);
+	}
+	void setPressure(const Image1f& img, float weight) {
+		pressureParam.setValue(weight);
+		pressureImage = img;
+		rescale(pressureImage);
+	}
+	void setPressure(const Image1f& img) {
+		pressureImage = img;
+		rescale(pressureImage);
+	}
+	void setPressureWeight(float weight) {
+		pressureParam.setValue(weight);
+	}
+	void setVectorField(const Image2f& img, float f) {
+		advectionParam.setValue(f);
+		vecFieldImage = img;
+	}
+	void setVectorFieldWeight(float c) {
+		advectionParam.setValue(c);
+	}
+	void setAdvection(float c) {
+		advectionParam.setValue(c);
+	}
+	Manifold2D* getContour();
+	Image1f& getLevelSet();
+	const Image1f& getLevelSet() const;
+	virtual bool init() override;
+	virtual void cleanup() override;
+	virtual void setup(const aly::ParameterPanePtr& pane) override;
+	void setInitialDistanceField(const Image1f& img) {
+		initialLevelSet = img;
+	}
+};
 }
 
 #endif /* INCLUDE_ACTIVEManifold2D_H_ */
