@@ -31,6 +31,7 @@
 #include <functional>
 #include <fstream>
 #include <random>
+#include <list>
 namespace aly {
 bool SANITY_CHECK_IMAGE();
 bool SANITY_CHECK_IMAGE_IO();
@@ -1432,6 +1433,52 @@ template<class T, int C, ImageType I> void Tile(
 }
 template<class T, int C, ImageType I> void Tile(
 		const std::initializer_list<Image<T, C, I>>& in, Image<T, C, I>& out,
+		int rows, int cols) {
+	int maxX = 0;
+	int maxY = 0;
+	std::vector<int> lines(rows, 0);
+	{
+		auto iter = in.begin();
+		for (int r = 0; r < rows; r++) {
+			int runX = 0;
+			int runY = 0;
+			for (int c = 0; c < cols; c++) {
+				if (iter == in.end())
+					break;
+				const Image<T, C, I>& img = *iter;
+				iter++;
+				runX += img.width;
+				runY = std::max(runY, img.height);
+			}
+			maxX = std::max(runX, maxX);
+			lines[r] = maxY;
+			maxY += runY;
+			if (iter == in.end())
+				break;
+		}
+	}
+	out.resize(maxX, maxY);
+	out.set(vec<T, C>(T(0)));
+	{
+		auto iter = in.begin();
+		for (int r = 0; r < rows; r++) {
+			int runX = 0;
+			int runY = lines[r];
+			for (int c = 0; c < cols; c++) {
+				if (iter == in.end())
+					break;
+				const Image<T, C, I>& img = *iter;
+				iter++;
+				Set(img, out, int2(runX, runY));
+				runX += img.width;
+			}
+			if (iter == in.end())
+				break;
+		}
+	}
+}
+template<class T, int C, ImageType I> void Tile(
+		const std::list<Image<T, C, I>>& in, Image<T, C, I>& out,
 		int rows, int cols) {
 	int maxX = 0;
 	int maxY = 0;
