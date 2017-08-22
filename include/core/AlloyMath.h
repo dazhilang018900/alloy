@@ -2281,6 +2281,7 @@ template<class T> double LineSearch(T& value, const T& minValue,
 /////////////////////////
 
 typedef uint8_t ubyte;
+typedef uint16_t ushort;
 typedef int8_t byte;
 typedef uint32_t uint;
 typedef vec<uint8_t, 1> ubyte1;
