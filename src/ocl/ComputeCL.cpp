@@ -299,7 +299,7 @@ void ComputeCL::initialize(const std::string& vendor,
 		try {
 			setDevice(deviceType = device, vendor);
 			foundDevice = true;
-		} catch (const ocl_runtime_error& e) {
+		} catch (const ocl_runtime_error&) {
 			std::cerr << "Could not find GPU device for vendor " << vendor
 					<< "." << std::endl;
 		}
@@ -308,7 +308,7 @@ void ComputeCL::initialize(const std::string& vendor,
 			try {
 				setDevice(deviceType = device);
 				foundDevice = true;
-			} catch (const ocl_runtime_error& e) {
+			} catch (const ocl_runtime_error&) {
 				std::cerr << "Could not find GPU device." << std::endl;
 			}
 		}

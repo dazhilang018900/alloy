@@ -70,7 +70,7 @@ namespace aly {
 
 	void ImageArray2dCL::write(size_t index,const void* data, bool block) {
 		const size_t origin[3] = { 0, 0, index };
-		const size_t region[3] = { width, height, 1};
+		const size_t region[3] = { (size_t)width, (size_t)height, 1};
 		int err = clEnqueueWriteImage(CLQueue(), buffer, (block) ? CL_TRUE : CL_FALSE, origin, region, width * channels * typeSize, 0, data, 0, nullptr,
 				nullptr);
 		if (err != CL_SUCCESS)
@@ -78,7 +78,7 @@ namespace aly {
 	}
 	void ImageArray2dCL::write(size_t index,cl_mem mem) {
 		const size_t origin[3] = { 0, 0, index };
-		const size_t region[3] = { width, height, 1 };
+		const size_t region[3] = { (size_t)width, (size_t)height, 1 };
 		int err = clEnqueueCopyBufferToImage(CLQueue(), mem, buffer, 0, origin,region, 0, nullptr, nullptr);
 		if (err != CL_SUCCESS)
 			throw ocl_runtime_error("Could not copy buffer to image.", err);
