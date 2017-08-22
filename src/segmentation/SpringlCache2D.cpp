@@ -74,7 +74,7 @@ std::shared_ptr<CacheElement> SpringlCache2D::set(int frame,
 	return elem;
 }
 int SpringlCache2D::unload() {
-	int sz = loadedList.size();
+	int sz = (int)loadedList.size();
 	for(auto pr:loadedList){
 		cache[pr.second]->unload();
 	}

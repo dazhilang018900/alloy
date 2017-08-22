@@ -23,6 +23,7 @@
 #include "ocl/ProgramCL.h"
 #include <iostream>
 #include <vector>
+#include <array>
 #include <AlloyCommon.h>
 namespace aly {
 	ProgramCL::ProgramCL(const cl_program& program, const std::string& name) :

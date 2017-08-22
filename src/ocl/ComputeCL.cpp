@@ -30,6 +30,7 @@
 #include <fstream>
 #include <streambuf>
 #include <memory>
+#include <array>
 namespace aly {
 std::shared_ptr<ComputeCL> ComputeCL::computeInstance;
 std::shared_ptr<ComputeCL> ComputeCL::Instance() {

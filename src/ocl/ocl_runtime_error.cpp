@@ -291,7 +291,7 @@ namespace aly {
 		}
 		errorMessage = aly::MakeString() << "OpenCL Error [" << message << "]: " << m;
 	}
-	const char* ocl_runtime_error::what() const _GLIBCXX_USE_NOEXCEPT{
+	const char* ocl_runtime_error::what() const {
 		return errorMessage.c_str();
 	}
 

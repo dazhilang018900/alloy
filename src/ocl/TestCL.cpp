@@ -36,7 +36,7 @@ void SANITY_CHECK_OPENCL(){
 	std::cout<<*prog<<std::endl;
 	Vector4f vecInput(16);
 	vecInput.set(float4(1,2,3,1));
-	float4x4 mat=MakeRotationY((float)(M_PI*0.5f))*MakeTranslation(float3(1,1,1));
+	float4x4 mat=MakeRotationY((float)(ALY_PI*0.5f))*MakeTranslation(float3(1,1,1));
 	std::cout<<"Transform=\n"<<mat<<std::endl;
 	BufferCL input;
 	std::cout<<"Input=\n"<<vecInput<<std::endl;

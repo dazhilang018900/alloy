@@ -60,7 +60,7 @@ namespace aly {
 	}
 	void ImageArray2dCL::read(size_t index,void * data, bool block) const {
 		const size_t origin[3] = { 0, 0, index };
-		const size_t region[3] = { width, height, 1};
+		const size_t region[3] = { (size_t)width, (size_t)height, 1};
 		int err = clEnqueueReadImage(CLQueue(), buffer, (block) ? CL_TRUE : CL_FALSE, origin, region, width * channels * typeSize, 0, data, 0, nullptr,
 				nullptr);
 		clFlush(CLQueue());

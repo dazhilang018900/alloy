@@ -459,7 +459,7 @@ namespace aly {
 	}
 	void FunctionCL::execute(const std::vector<const void*>& args, std::vector<size_t>& sizes) {
 		cl_int err = -1;
-		int dims = globalSizes.size();
+		int dims = (int)globalSizes.size();
 		if (args.size() == sizes.size()) {
 			for (cl_uint i = 0; i < args.size(); i++) {
 				err = clSetKernelArg(kernel, i, sizes[i], args[i]);

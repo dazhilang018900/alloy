@@ -34,7 +34,7 @@ namespace aly {
 		std::string errorMessage;
 	public:
 		ocl_runtime_error(std::string message = std::string(""), int errorCode = 0);
-		virtual const char* what() const _GLIBCXX_USE_NOEXCEPT;
+		virtual const char* what() const;
 
 		int getErrorCode() const {
 			return errorCode;
