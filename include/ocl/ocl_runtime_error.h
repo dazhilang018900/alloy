@@ -25,6 +25,7 @@
 #include <iostream>
 #include <string>
 #include <stdexcept>
+#include <AlloyFileUtil.h>
 namespace aly {
 
 	void PrintCLError(int iErr);
@@ -34,8 +35,11 @@ namespace aly {
 		std::string errorMessage;
 	public:
 		ocl_runtime_error(std::string message = std::string(""), int errorCode = 0);
+#ifdef ALY_WINDOWS
 		virtual const char* what() const;
-
+#else
+		virtual const char* what() const _GLIBCXX_USE_NOEXCEPT;
+#endif
 		int getErrorCode() const {
 			return errorCode;
 		}
