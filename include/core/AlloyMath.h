@@ -2486,8 +2486,8 @@ struct dim2: public int2 {
 		return x * (size_t) y;
 	}
 	inline int2 operator()(const size_t index) const {
-		int i = index % x;
-		int j = index / x;
+		int i = (int)(index % (size_t)x);
+		int j = (int)(index / (size_t)x);
 		return int2(i,j);
 	}
 	inline dim2 operator =(const int2& dim) {
@@ -2523,9 +2523,9 @@ struct dim3: public int3 {
 		size_t a=area();
 		size_t k = index / a;
 		size_t ij = index % a;
-		int i = ij % x;
-		int j = ij / x;
-		return int3(i,j,k);
+		int i = (int)(ij % (size_t)x);
+		int j = (int)(ij / (size_t)x);
+		return int3(i,j,(int)k);
 	}
 	inline size_t volume() const {
 		return x * (size_t) y * (size_t) z;
@@ -2575,9 +2575,9 @@ struct dim4: public int4 {
 		size_t a=area();
 		size_t k = ijk / a;
 		size_t ij = ijk % a;
-		int i = ij % x;
-		int j = ij / x;
-		return int4(i,j,k,l);
+		int i = (int)(ij % (size_t)x);
+		int j = (int)(ij / (size_t)x);
+		return int4(i,j,(int)k,(int)l);
 	}
 };
 

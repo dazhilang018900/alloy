@@ -827,9 +827,11 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(const std::strin
 		if(!ReadMipavHeaderFromFile(xmlFile,header))return false;
 		if(header.dimensions==4&&header.extents[3]!=C){
 			throw std::runtime_error(MakeString() << "Channels " <<header.dimensions<<"/"<<C<< " do not match.");
+			return false;
 		}
 		if(header.dimensions==3&&C!=1){
 			throw std::runtime_error(MakeString() << "Channels " <<header.dimensions<<"/"<<C<< " do not match.");
+			return false;
 		}
 		std::string typeName = "";
 		switch (img.type) {
@@ -865,11 +867,13 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(const std::strin
 		}
 		if(ToLower(header.dataType)!=typeName){
 			throw std::runtime_error(MakeString() << "Type " <<header.dataType<<"/"<<typeName<< " do not match.");
+			return false;
 		}
 		img.resize(header.extents[0],header.extents[1],header.extents[2]);
 		FILE* f = fopen(rawFile.c_str(), "rb");
 		if (f == NULL) {
 			throw std::runtime_error(MakeString() << "Could not open " <<rawFile<< " for reading.");
+			return false;
 		}
 		for (int c = 0; c < img.channels; c++) {
 			for (int k = 0; k < img.slices; k++) {
@@ -881,6 +885,7 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(const std::strin
 			}
 		}
 		fclose(f);
+		return true;
 	}
 
 	template<class T, int C, ImageType I> void WriteImageToRawFile(

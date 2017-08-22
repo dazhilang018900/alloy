@@ -22,7 +22,12 @@
     <ClCompile Include="..\..\src\example\main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\example\BodyPhysicsEx.h" />
+    <ProjectReference Include="..\alloy\alloy.vcxproj">
+      <Project>{e990bb2d-d073-48a2-841a-8231a304f580}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\include\example\AnisotropicFilterEx.h" />
     <ClInclude Include="..\..\include\example\ColorSpaceEx.h" />
     <ClInclude Include="..\..\include\example\CompositeEx.h" />
     <ClInclude Include="..\..\include\example\ControlsEx.h" />
@@ -32,6 +37,7 @@
     <ClInclude Include="..\..\include\example\DragEx.h" />
     <ClInclude Include="..\..\include\example\EventsEx.h" />
     <ClInclude Include="..\..\include\example\ExpandBarEx.h" />
+    <ClInclude Include="..\..\include\example\ExpandTreeEx.h" />
     <ClInclude Include="..\..\include\example\ForceDirectedGraphEx.h" />
     <ClInclude Include="..\..\include\example\GraphPaneEx.h" />
     <ClInclude Include="..\..\include\example\ImageEx.h" />
@@ -43,6 +49,7 @@
     <ClInclude Include="..\..\include\example\MenuEx.h" />
     <ClInclude Include="..\..\include\example\MeshDepthEx.h" />
     <ClInclude Include="..\..\include\example\MeshMatcapEx.h" />
+    <ClInclude Include="..\..\include\example\MeshOptimizationEx.h" />
     <ClInclude Include="..\..\include\example\MeshParticleEx.h" />
     <ClInclude Include="..\..\include\example\MeshPhongEx.h" />
     <ClInclude Include="..\..\include\example\MeshPickerEx.h" />
@@ -55,24 +62,17 @@
     <ClInclude Include="..\..\include\example\MeshVertexColorEx.h" />
     <ClInclude Include="..\..\include\example\MeshWireframeEx.h" />
     <ClInclude Include="..\..\include\example\OneEuroFilterEx.h" />
-    <ClInclude Include="..\..\include\example\MeshOptimizationEx.h" />
     <ClInclude Include="..\..\include\example\ParameterPaneEx.h" />
     <ClInclude Include="..\..\include\example\PoissonBlendEx.h" />
     <ClInclude Include="..\..\include\example\PoissonInpaintEx.h" />
+    <ClInclude Include="..\..\include\example\SoftBodyEx.h" />
     <ClInclude Include="..\..\include\example\SplineEx.h" />
-    <ClInclude Include="..\..\include\example\stb_image_write.h" />
-    <ClInclude Include="..\..\include\example\ExpandTreeEx.h" />
     <ClInclude Include="..\..\include\example\TablePaneEx.h" />
     <ClInclude Include="..\..\include\example\TabPaneEx.h" />
     <ClInclude Include="..\..\include\example\TimelineEx.h" />
     <ClInclude Include="..\..\include\example\TweenEx.h" />
     <ClInclude Include="..\..\include\example\UnitsEx.h" />
     <ClInclude Include="..\..\include\example\WindowPaneEx.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\alloy\alloy.vcxproj">
-      <Project>{e990bb2d-d073-48a2-841a-8231a304f580}</Project>
-    </ProjectReference>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1A38C9F0-BB5B-4871-AEB2-B1B0DDF1FF14}</ProjectGuid>

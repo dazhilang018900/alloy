@@ -91,7 +91,7 @@ template<int C> void AnisotropicDiffusionT(
 						if (det <= ZERO_TOLERANCE) {
 							score[n] = 1.0f;
 						} else {
-							score[n] = 1 - std::exp(-3.315 / det);
+							score[n] = 1.0f - (float)std::exp(-3.315 / det);
 						}
 					}
 				}

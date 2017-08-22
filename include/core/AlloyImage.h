@@ -1062,11 +1062,13 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(
 	}
 	if(ToLower(header.dataType)!=typeName){
 		throw std::runtime_error(MakeString() << "Type " <<header.dataType<<"/"<<typeName<< " do not match.");
+		return false;
 	}
 	img.resize(header.extents[0],header.extents[1]);
 	FILE* f = fopen(rawFile.c_str(), "rb");
 	if (f == NULL) {
 		throw std::runtime_error(MakeString() << "Could not open " <<rawFile<< " for reading.");
+		return false;
 	}
 	for (int c = 0; c < img.channels; c++) {
 		for (int j = 0; j < img.height; j++) {
@@ -1076,6 +1078,7 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(
 		}
 	}
 	fclose(f);
+	return true;
 }
 typedef Image<uint8_t, 4, ImageType::UBYTE> ImageRGBA;
 typedef Image<int, 4, ImageType::INT> ImageRGBAi;

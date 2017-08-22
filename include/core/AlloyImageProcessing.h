@@ -61,8 +61,8 @@ template<class T, size_t M, size_t N> void GaussianKernelDerivative(
 			double yn = y / sigmaY;
 			T w = T(std::exp(-0.5 * (xn * xn + yn * yn)));
 			sum += w;
-			gX[i][j] = w * xn / sigmaX;
-			gY[i][j] = w * yn / sigmaY;
+			gX[i][j] = (T)(w * xn / sigmaX);
+			gY[i][j] = (T)(w * yn / sigmaY);
 
 		}
 	}
@@ -88,9 +88,9 @@ template<class T, size_t M, size_t N> void GaussianKernelLaplacian(
 			double yn = y / sigmaY;
 			T w = T(std::exp(-0.5 * (xn * xn + yn * yn)));
 			sum += w;
-			T ww = w
+			T ww = (T)(w
 					* (xn * xn / (sigmaX * sigmaX) + yn * yn / (sigmaY * sigmaY)
-						   - 1 / (sigmaX * sigmaX)       - 1 / (sigmaY * sigmaY));
+						   - 1 / (sigmaX * sigmaX)       - 1 / (sigmaY * sigmaY)));
 			sum2 += ww;
 			kernel[i][j] = ww;
 		}

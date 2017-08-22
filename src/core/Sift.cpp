@@ -322,7 +322,7 @@ void Sift::descriptorGeneration(void) {
 	}
 	/* Walk over all keypoints and compute descriptors. */
 #pragma omp parallel for
-	for (std::size_t i = 0; i < this->keypoints.size(); ++i) {
+	for (int i = 0; i < this->keypoints.size(); ++i) {
 		const SiftKeypoint& kp=this->keypoints[i];
 		Octave* octave = this->octaves[kp.octave - this->options.minOctave].get();
 		std::vector<float> orientations;
@@ -428,7 +428,7 @@ void Sift::orientationAssignment(SiftKeypoint const& kp, Octave const* octave,
 
 			float gm = grad[center + yoff + dx].x; // gradient magnitude
 			float go = ori[center + yoff + dx].x; // gradient orientation
-			float weight = gaussian_xx(dist, sigma * sigma_factor);
+			float weight = (float)gaussian_xx(dist, sigma * sigma_factor);
 			int bin = static_cast<int>(nbinsf * go / (2.0f * ALY_PI));
 			bin = aly::clamp(bin, 0, nbins - 1);
 			hist[bin] += gm * weight;
@@ -512,7 +512,7 @@ bool Sift::descriptorAssignment(SiftKeypoint const& kp, SiftDescriptor& desc,
 	 * 2W = sqrt(2) * 3 * sigma * (PXB + 1).
 	 */
 	float const binsize = 3.0f * sigma;
-	int win = MATH_SQRT2 * binsize * (float) (PXB + 1) * 0.5f;
+	int win =(int)( MATH_SQRT2 * binsize * (float) (PXB + 1) * 0.5f);
 	if (ix < win || ix + win >= width || iy < win || iy + win >= height)
 		return false;
 
@@ -551,7 +551,7 @@ bool Sift::descriptorAssignment(SiftKeypoint const& kp, SiftDescriptor& desc,
 
 			/* Compute circular window weight for the sample. */
 			float gaussian_sigma = 0.5f * (float) PXB;
-			float gaussian_weight = gaussian_xx(
+			float gaussian_weight = (float)gaussian_xx(
 			MATH_POW2(binx - binoff) + MATH_POW2(biny - binoff),
 					gaussian_sigma);
 

@@ -435,8 +435,8 @@ namespace aly {
 			rects[n]=bvec2f(boundsIn[n].dimensions,n);
 		}
 		float totalArea = pack(rects, boxes);
-		float2 minPt(1E30,1E30);
-		float2 maxPt(-1E30,-1E30);
+		float2 minPt(1E30f,1E30f);
+		float2 maxPt(-1E30f,-1E30f);
 		for (int id = 0; id < (int)rectId.size(); id++) {
 			bvec2f& rect = rects[id];
 			std::multimap<bvec2f, float2, TextureBoxCompare>::iterator boxPair = boxes.find(rect);
