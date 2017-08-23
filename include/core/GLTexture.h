@@ -86,8 +86,8 @@ public:
 		}
 		context->end();
 	}
-
-	virtual void update() override {
+	
+	virtual void update(bool writeImage) {
 		context->begin(onScreen);
 		if (textureId == 0) {
 			glGenTextures(1, &textureId);
@@ -235,22 +235,20 @@ public:
 		CHECK_GL_ERROR();
 		if (mipmap) {
 			glBindTexture( GL_TEXTURE_2D, textureId);
-			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat,textureImage.width, textureImage.height, 0,externalFormat, dataType, &textureImage[0]);
+			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat,textureImage.width, textureImage.height, 0,externalFormat, dataType, (writeImage) ? &textureImage[0]:nullptr);
 			glGenerateMipmap(GL_TEXTURE_2D); 
 		} else {
 			if (multisample) {
 				glBindTexture( GL_TEXTURE_2D_MULTISAMPLE, textureId);
-				glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8,
-						internalFormat, textureImage.width, textureImage.height,
-						true);
+				glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8,internalFormat, textureImage.width, textureImage.height,true);
 				glTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
 						textureImage.width, textureImage.height, 0,
-						externalFormat, dataType, &textureImage[0]);
+						externalFormat, dataType, (writeImage)?&textureImage[0]:nullptr);
 			} else {
 				glBindTexture( GL_TEXTURE_2D, textureId);
 				glTexImage2D( GL_TEXTURE_2D, 0, internalFormat,
 						textureImage.width, textureImage.height, 0,
-						externalFormat, dataType, &textureImage[0]);
+						externalFormat, dataType, (writeImage)?&textureImage[0]:nullptr);
 			}
 		}
 		CHECK_GL_ERROR();
@@ -266,6 +264,9 @@ public:
 		}
 		context->end();
 		CHECK_GL_ERROR();
+	}
+	virtual void update() override {
+		update(true);
 	}
 	Image<T, C, I>& read() {
 
@@ -366,6 +367,12 @@ public:
 		bounds = box2i( { 0, 0 }, { textureImage.width, textureImage.height });
 		setEnableMipmap(mipmap);
 		update();
+	}
+	void resize(int w,int h, bool mipmap = false) {
+		textureImage.resize(w,h);
+		bounds = box2i({ 0, 0 }, { textureImage.width, textureImage.height });
+		setEnableMipmap(mipmap);
+		update(false);
 	}
 	void load(const Image<T, C, I>& image, int x, int y, int width, int height,
 			bool mipmap = false) {
