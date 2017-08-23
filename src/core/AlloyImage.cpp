@@ -434,6 +434,8 @@ void WriteImageToFile(const std::string& file, const ImageRGB& image) {
 			throw std::runtime_error(
 					MakeString() << "Could not write " << file);
 		}
+	} else if (ext == "jpg" || ext == "jpeg") {
+		stbi_write_jpg(file.c_str(), image.width, image.height, 3,image.data.data(),90);
 	} else {
 		throw std::runtime_error(MakeString() << "Could not write " << file);
 	}
@@ -448,6 +450,8 @@ void WriteImageToFile(const std::string& file, const Image1ub& image) {
 			throw std::runtime_error(
 					MakeString() << "Could not write " << file);
 		}
+	} else if (ext == "jpg" || ext == "jpeg") {
+		stbi_write_jpg(file.c_str(), image.width, image.height, 1, image.data.data(), 90);
 	} else {
 		throw std::runtime_error(MakeString() << "Could not write " << file);
 	}
