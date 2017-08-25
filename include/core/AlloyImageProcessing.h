@@ -331,6 +331,95 @@ template<class T, int C, ImageType I> void Gradient11x11(
 	Gradient<11, 11>(image, gX, gY);
 }
 
+template<class C, class R, size_t M,size_t N> std::basic_ostream<C, R> & operator <<(
+	std::basic_ostream<C, R> & ss, float (&data)[M][N]) {
+	ss << std::endl;
+	for (size_t ii = 0; ii < M; ii++) {
+		for (size_t jj = 0; jj < N; jj++) {
+			ss<< std::setw(8) << std::setfill(' ') << data[ii][jj];
+			if (jj < N - 1) {
+				ss << ",";
+			}
+		}
+		ss << std::endl;
+	}
+	return ss;
+}
+
+template<class C, class R, size_t M, size_t N> std::basic_ostream<C, R> & operator <<(
+	std::basic_ostream<C, R> & ss, double(&data)[M][N]) {
+	ss << std::endl;
+	for (size_t ii = 0; ii < M; ii++) {
+		for (size_t jj = 0; jj < N; jj++) {
+			ss << std::setw(8) << std::setfill(' ') << data[ii][jj];
+			if (jj < N - 1) {
+				ss << ",";
+			}
+		}
+		ss << std::endl;
+	}
+	return ss;
+}
+
+template<class C, class R, size_t M, size_t N> std::basic_ostream<C, R> & operator <<(
+	std::basic_ostream<C, R> & ss, int(&data)[M][N]) {
+	ss << std::endl;
+	for (size_t ii = 0; ii < M; ii++) {
+		for (size_t jj = 0; jj < N; jj++) {
+			ss << std::setw(8) << std::setfill(' ') << data[ii][jj];
+			if (jj < N - 1) {
+				ss << ",";
+			}
+		}
+		ss << std::endl;
+	}
+	return ss;
+}
+
+template<class C, class R, size_t M> std::basic_ostream<C, R> & operator <<(
+	std::basic_ostream<C, R> & ss, float(&data)[M]) {
+	ss << "[";
+	for (int ii = 0; ii < M; ii++) {
+		ss << std::setw(8) << std::setfill(' ') << data[ii];
+		if (ii < M - 1) {
+			ss << ",";
+		} else {
+			ss << "]";
+		}
+	}
+	return ss;
+}
+
+template<class C, class R, size_t M> std::basic_ostream<C, R> & operator <<(
+	std::basic_ostream<C, R> & ss, double(&data)[M]) {
+	ss << "[";
+	for (int ii = 0; ii < M; ii++) {
+		ss << std::setw(8) << std::setfill(' ') << data[ii];
+		if (ii < M - 1) {
+			ss << ",";
+		}
+		else {
+			ss << "]";
+		}
+	}
+	return ss;
+}
+
+template<class C, class R, size_t M> std::basic_ostream<C, R> & operator <<(
+	std::basic_ostream<C, R> & ss, int(&data)[M]) {
+	ss << "[";
+	for (int ii = 0; ii < M; ii++) {
+		ss << std::setw(8) << std::setfill(' ') << data[ii];
+		if (ii < M - 1) {
+			ss << ",";
+		}
+		else {
+			ss << "]";
+		}
+	}
+	return ss;
+}
+
 }
 
 #endif /* INCLUDE_CORE_IMAGEPROCESSING_H_ */
