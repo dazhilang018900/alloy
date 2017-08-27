@@ -41,7 +41,7 @@ void Manifold2D::operator=(const Manifold2D &c) {
 	file = c.file;
 	overlay = c.overlay;
 	particleLabels = c.particleLabels;
-	fluidParticles=c.fluidParticles;
+	fluidParticles = c.fluidParticles;
 
 }
 Manifold2D::Manifold2D(const Manifold2D& c) :
@@ -62,7 +62,7 @@ Manifold2D::Manifold2D(const Manifold2D& c) :
 	file = c.file;
 	overlay = c.overlay;
 	particleLabels = c.particleLabels;
-	fluidParticles=c.fluidParticles;
+	fluidParticles = c.fluidParticles;
 
 }
 Manifold2D::Manifold2D(bool onScreen,
@@ -89,26 +89,28 @@ void Manifold2D::draw() {
 		update();
 	}
 	context->begin(onScreen);
-	if (vao > 0)
+	if (vao > 0) {
 		glBindVertexArray(vao);
-	if (vertexBuffer > 0) {
-		glEnableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
-		glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-		glEnableVertexAttribArray(1);
-		glBindBuffer(GL_ARRAY_BUFFER, particleBuffer);
-		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-
-		glEnableVertexAttribArray(2);
-		glBindBuffer(GL_ARRAY_BUFFER, labelBuffer);
-		glVertexAttribPointer(2, 1, GL_INT, GL_FALSE, 0, 0);
-
-		glDrawArrays(GL_POINTS, 0, (GLsizei) (points.size() / 2));
-		glDisableVertexAttribArray(2);
-		glDisableVertexAttribArray(1);
-		glDisableVertexAttribArray(0);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		if (vertexBuffer > 0) {
+			glEnableVertexAttribArray(0);
+			glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+			glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+			if (particleBuffer > 0) {
+				glEnableVertexAttribArray(1);
+				glBindBuffer(GL_ARRAY_BUFFER, particleBuffer);
+				glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+			}
+			if (labelBuffer > 0) {
+				glEnableVertexAttribArray(2);
+				glBindBuffer(GL_ARRAY_BUFFER, labelBuffer);
+				glVertexAttribPointer(2, 1, GL_INT, GL_FALSE, 0, 0);
+			}
+			glDrawArrays(GL_POINTS, 0, (GLsizei) (points.size() / 2));
+			glDisableVertexAttribArray(2);
+			glDisableVertexAttribArray(1);
+			glDisableVertexAttribArray(0);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		}
 	}
 	glBindVertexArray(0);
 	context->end();
