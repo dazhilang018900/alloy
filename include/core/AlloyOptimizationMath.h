@@ -122,7 +122,7 @@ public:
 							<< data.size());
 		return data[i];
 	}
-	T& at(const size_t i){
+	T& at(const size_t i) {
 		if (i >= data.size())
 			throw std::runtime_error(
 					MakeString() << "Vector index out of bounds " << i << "/"
@@ -458,84 +458,84 @@ public:
 		archive(CEREAL_NVP(rows), CEREAL_NVP(cols),
 				cereal::make_nvp(MakeString() << "matrix", data));
 	}
-	T& operator[](size_t i) {
-		return data[i];
-	}
-	const T& operator[](size_t i) const {
-		return data[i];
-	}
-	DenseMat() :
-			data(vector.data), rows(0), cols(0) {
-	}
-	DenseMat(int rows, int cols) :
-			data(vector.data), rows(rows), cols(cols) {
+	T* operator[](size_t i) {
+	return &data[cols*i];
+}
+const T* operator[](size_t i) const {
+	return &data[cols*i];
+}
+DenseMat() :
+		data(vector.data), rows(0), cols(0) {
+}
+DenseMat(int rows, int cols) :
+		data(vector.data), rows(rows), cols(cols) {
+	data.resize(rows * (size_t) cols);
+}
+void resize(int rows, int cols) {
+	if (this->rows != rows || this->cols != cols) {
 		data.resize(rows * (size_t) cols);
+		this->rows = rows;
+		this->cols = cols;
 	}
-	void resize(int rows, int cols) {
-		if (this->rows != rows || this->cols != cols) {
-			data.resize(rows * (size_t) cols);
-			this->rows = rows;
-			this->cols = cols;
+}
+void set(size_t i, size_t j, const T& value) {
+	if (i >= (size_t) rows || j >= (size_t) cols || i < 0 || j < 0)
+		throw std::runtime_error(
+				MakeString() << "Index (" << i << "," << j
+						<< ") exceeds matrix bounds [" << rows << "," << cols
+						<< "]");
+	data[i + cols * j] = value;
+}
+T get(size_t i, size_t j) const {
+	if (i >= (size_t) rows || j >= (size_t) cols || i < 0 || j < 0)
+		throw std::runtime_error(
+				MakeString() << "Index (" << i << "," << j
+						<< ") exceeds matrix bounds [" << rows << "," << cols
+						<< "]");
+	return data[cols * i + j];
+}
+T& operator()(size_t i, size_t j) {
+	return data[cols * i + j];
+}
+const T& operator()(size_t i, size_t j) const {
+	return data[cols * i + j];
+}
+inline DenseMat<T> transpose() const {
+	DenseMat<T> M(cols, rows);
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < cols; j++) {
+			M(j, i) = data[cols * i + j];
 		}
 	}
-	void set(size_t i, size_t j, const T& value) {
-		if (i >= (size_t) rows || j >= (size_t) cols || i < 0 || j < 0)
-			throw std::runtime_error(
-					MakeString() << "Index (" << i << "," << j
-							<< ") exceeds matrix bounds [" << rows << ","
-							<< cols << "]");
-		data[i + cols * j] = value;
-	}
-	T get(size_t i, size_t j) const {
-		if (i >= (size_t) rows || j >= (size_t) cols || i < 0 || j < 0)
-			throw std::runtime_error(
-					MakeString() << "Index (" << i << "," << j
-							<< ") exceeds matrix bounds [" << rows << ","
-							<< cols << "]");
-		return data[i + cols * j];
-	}
-	T& operator()(size_t i, size_t j) {
-		return data[i + cols * j];
-	}
-	const T& operator()(size_t i, size_t j) const {
-		return data[i + cols * j];
-	}
-	inline DenseMat<T> transpose() const {
-		DenseMat<T> M(cols, rows);
-		for (int i = 0; i < rows; i++) {
-			for (int j = 0; j < cols; j++) {
-				M(j, i) = data[i + cols * j];
-			}
+	return M;
+}
+inline static DenseMat<T> identity(size_t M, size_t N) {
+	DenseMat<T> A(M, N);
+	for (int i = 0; i < M; i++) {
+		for (int j = 0; j < N; j++) {
+			A(i, j) = T(T((i == j) ? 1 : 0));
 		}
-		return M;
 	}
-	inline static DenseMat<T> identity(size_t M, size_t N) {
-		DenseMat<T> A(M, N);
-		for (int i = 0; i < M; i++) {
-			for (int j = 0; j < N; j++) {
-				A(i, j) = T(T((i == j) ? 1 : 0));
-			}
+	return A;
+}
+inline static DenseMat<T> zero(size_t M, size_t N) {
+	DenseMat<T> A(M, N);
+	for (int i = 0; i < M; i++) {
+		for (int j = 0; j < N; j++) {
+			A(i, j) = T(T(0));
 		}
-		return A;
 	}
-	inline static DenseMat<T> zero(size_t M, size_t N) {
-		DenseMat<T> A(M, N);
-		for (int i = 0; i < M; i++) {
-			for (int j = 0; j < N; j++) {
-				A(i, j) = T(T(0));
-			}
+	return A;
+}
+inline static DenseMat<T> diagonal(const Vec<T>& v) {
+	DenseMat<T> A((int) v.size(), (int) v.size());
+	for (int i = 0; i < A.rows; i++) {
+		for (int j = 0; j < A.cols; j++) {
+			A(i, j) = T(T((i == j) ? v[i] : 0));
 		}
-		return A;
 	}
-	inline static DenseMat<T> diagonal(const Vec<T>& v) {
-		DenseMat<T> A((int) v.size(), (int) v.size());
-		for (int i = 0; i < A.rows; i++) {
-			for (int j = 0; j < A.cols; j++) {
-				A(i, j) = T(T((i == j) ? v[i] : 0));
-			}
-		}
-		return A;
-	}
+	return A;
+}
 };
 template<class A, class B, class T, int C> std::basic_ostream<A, B> & operator <<(
 		std::basic_ostream<A, B> & ss, const DenseMat<T>& M) {

@@ -296,6 +296,24 @@ namespace aly {
 			iter++;
 		}
 	}
+	template<class T> Vec<T> SolveOptInternal(const DenseMat<T>& A,const Vec<T>& b,const MatrixFactorization& factor) {
+		switch (factor) {
+			case MatrixFactorization::SVD:
+				return SolveSVD(A, b);
+			case MatrixFactorization::QR:
+				return SolveQR(A, b);
+			case MatrixFactorization::LU:
+				return SolveLU(A, b);
+		}
+		return Vec<T>();
+	}
+	Vec<float> Solve(const DenseMat<float>& A,const Vec<float>& b,const MatrixFactorization& factor){
+		return SolveOptInternal(A,b,factor);
+	}
+	Vec<double> Solve(const DenseMat<double>& A,const Vec<double>& b,const MatrixFactorization& factor){
+		return SolveOptInternal(A,b,factor);
+	}
+
 	void SolveCG(const Vec<float>& b, const SparseMat<float>& A, Vec<float>& x, int iters, double tolerance,
 			const std::function<bool(int, double)>& iterationMonitor) {
 		SolveCGInternal(b, A, x, iters, tolerance, iterationMonitor);

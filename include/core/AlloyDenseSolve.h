@@ -23,6 +23,7 @@
 #include "AlloyMath.h"
 #include "AlloyImage.h"
 #include "AlloyDenseMatrix.h"
+#include "AlloyEnum.h"
 namespace aly {
 	bool SANITY_CHECK_DENSE_SOLVE();
 	bool SANITY_CHECK_ROBUST_SOLVE();
@@ -117,7 +118,7 @@ namespace aly {
 			}
 			for (int i = 0; i < m; i++) {
 				for (int j = 0; j < n; j++) {
-					u[i][j] = (double)M[i][j][cc];
+					u[i][j] = (double)M(i,j)[cc];
 				}
 			}
 			for (i = 0; i < n; i++) {
@@ -714,9 +715,6 @@ namespace aly {
 			return x;
 		}
 	}
-	enum class MatrixFactorization {
-		SVD, QR, LU
-	};
 	template<class C, class R> std::basic_ostream<C, R> & operator <<(
 		std::basic_ostream<C, R> & ss, const MatrixFactorization& type) {
 		switch (type) {

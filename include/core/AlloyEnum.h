@@ -48,6 +48,9 @@ enum class MouseModifier {
 	Alt = 0x0004,
 	Super=0x0008
 };
+enum class MatrixFactorization {
+	SVD, QR, LU
+};
 enum class MessageOption {
 	YesNo, OkayCancel, Okay
 };
