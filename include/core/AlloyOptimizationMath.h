@@ -35,11 +35,11 @@
 namespace aly {
 template<class T> struct Vec {
 public:
-	std::vector<T, aligned_allocator<T, 64>> data;
+	std::vector<T> data;//, aligned_allocator<T, 64>
 	typedef T ValueType;
-	typedef typename std::vector<ValueType, aligned_allocator<T, 64>>::iterator iterator;
-	typedef typename std::vector<ValueType, aligned_allocator<T, 64>>::const_iterator const_iterator;
-	typedef typename std::vector<ValueType, aligned_allocator<T, 64>>::reverse_iterator reverse_iterator;
+	typedef typename std::vector<ValueType>::iterator iterator;
+	typedef typename std::vector<ValueType>::const_iterator const_iterator;
+	typedef typename std::vector<ValueType>::reverse_iterator reverse_iterator;
 
 	inline iterator begin() {
 		return data.begin();
@@ -68,7 +68,7 @@ public:
 	inline void set(const Vec<T>& val) {
 		this->data = val.data;
 	}
-	inline void set(const std::vector<T, aligned_allocator<T, 64>>& val) {
+	inline void set(const std::vector<T>& val) {
 		this->data = data;
 	}
 	template<class Archive>
@@ -415,7 +415,7 @@ template<class T> Vec<T> operator/(const Vec<T>& img1, const Vec<T>& img2) {
 template<class T> struct DenseMat {
 public:
 	Vec<T> vector; //Treat whole tensor as flat vector. Useful!
-	std::vector<T, aligned_allocator<T, 64>>& data;
+	std::vector<T>& data;//, aligned_allocator<T, 64>
 	int rows, cols;
 	typedef T ValueType;
 	typedef typename std::vector<ValueType>::iterator iterator;

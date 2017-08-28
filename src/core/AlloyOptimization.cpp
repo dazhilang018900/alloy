@@ -18,7 +18,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 #include <AlloyOptimization.h>
 namespace aly {
 	template<class T> void SolveCGInternal(const Vec<T>& b, const SparseMat<T>& A, Vec<T>& x, int iters, double tolerance,
