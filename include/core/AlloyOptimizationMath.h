@@ -40,7 +40,9 @@ public:
 	typedef typename std::vector<ValueType>::iterator iterator;
 	typedef typename std::vector<ValueType>::const_iterator const_iterator;
 	typedef typename std::vector<ValueType>::reverse_iterator reverse_iterator;
-
+	inline void setZero(){
+		data.assign(data.size(),T(0));
+	}
 	inline iterator begin() {
 		return data.begin();
 	}
@@ -102,11 +104,6 @@ public:
 	}
 	const T* ptr() const {
 		return data.data();
-	}
-	void setZero() {
-		for (T& val : data) {
-			val = T(0);
-		}
 	}
 	const T& operator[](const size_t i) const {
 		if (i >= data.size())
@@ -423,6 +420,9 @@ public:
 	typedef typename std::vector<ValueType>::reverse_iterator reverse_iterator;
 	size_t size() const {
 		return rows * cols;
+	}
+	inline void setZero(){
+		data.assign(data.size(),T(0));
 	}
 	iterator begin(int i) const {
 		return data[i].begin();
