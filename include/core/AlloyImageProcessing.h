@@ -380,7 +380,7 @@ template<class C, class R, size_t M> std::basic_ostream<C, R> & operator <<(
 	std::basic_ostream<C, R> & ss, float(&data)[M]) {
 	ss << "[";
 	for (int ii = 0; ii < M; ii++) {
-		ss << std::setw(8) << std::setfill(' ') << data[ii];
+		ss << data[ii];
 		if (ii < M - 1) {
 			ss << ",";
 		} else {
@@ -394,7 +394,7 @@ template<class C, class R, size_t M> std::basic_ostream<C, R> & operator <<(
 	std::basic_ostream<C, R> & ss, double(&data)[M]) {
 	ss << "[";
 	for (int ii = 0; ii < M; ii++) {
-		ss << std::setw(8) << std::setfill(' ') << data[ii];
+		ss << data[ii];
 		if (ii < M - 1) {
 			ss << ",";
 		}
@@ -409,11 +409,59 @@ template<class C, class R, size_t M> std::basic_ostream<C, R> & operator <<(
 	std::basic_ostream<C, R> & ss, int(&data)[M]) {
 	ss << "[";
 	for (int ii = 0; ii < M; ii++) {
-		ss << std::setw(8) << std::setfill(' ') << data[ii];
+		ss << data[ii];
 		if (ii < M - 1) {
 			ss << ",";
 		}
 		else {
+			ss << "]";
+		}
+	}
+	return ss;
+}
+
+
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+	std::basic_ostream<C, R> & ss, const std::vector<double>& data) {
+	ss << "[";
+	size_t M=data.size();
+	for (int ii = 0; ii < M; ii++) {
+		ss << data[ii];
+		if (ii < M - 1) {
+			ss << ",";
+		} else {
+			ss << "]";
+		}
+	}
+	return ss;
+}
+
+
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+	std::basic_ostream<C, R> & ss, const std::vector<float>& data) {
+	ss << "[";
+	size_t M=data.size();
+	for (int ii = 0; ii < M; ii++) {
+		ss << data[ii];
+		if (ii < M - 1) {
+			ss << ",";
+		} else {
+			ss << "]";
+		}
+	}
+	return ss;
+}
+
+
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+	std::basic_ostream<C, R> & ss, const std::vector<int>& data) {
+	ss << "[";
+	size_t M=data.size();
+	for (int ii = 0; ii < M; ii++) {
+		ss << data[ii];
+		if (ii < M - 1) {
+			ss << ",";
+		} else {
 			ss << "]";
 		}
 	}

@@ -484,7 +484,7 @@ void set(size_t i, size_t j, const T& value) {
 				MakeString() << "Index (" << i << "," << j
 						<< ") exceeds matrix bounds [" << rows << "," << cols
 						<< "]");
-	data[i + cols * j] = value;
+	data[cols * i + j] = value;
 }
 T get(size_t i, size_t j) const {
 	if (i >= (size_t) rows || j >= (size_t) cols || i < 0 || j < 0)
@@ -504,7 +504,7 @@ inline DenseMat<T> transpose() const {
 	DenseMat<T> M(cols, rows);
 	for (int i = 0; i < rows; i++) {
 		for (int j = 0; j < cols; j++) {
-			M(j, i) = data[cols * i + j];
+			M(j, i) = operator()(i,j);
 		}
 	}
 	return M;
