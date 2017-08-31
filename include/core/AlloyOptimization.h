@@ -386,7 +386,7 @@ template<class T> DenseMat<T> inverse(const DenseMat<T>& M,
 		if (std::abs(d) > zeroTolerance) {
 			d = 1.0 / d;
 		}
-		D[k][k] = d;
+		D[k][k] = T(d);
 	}
 	return (U * D * Vt).transpose();
 }
