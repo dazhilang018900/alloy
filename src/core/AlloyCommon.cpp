@@ -86,6 +86,38 @@ std::vector<std::string> Split(const std::string &str, char delim) {
 	return elems;
 
 }
+std::vector<std::string> Split(const std::string &str) {
+	std::stringstream ss;
+	std::vector<std::string> elems;
+	std::string comp;
+	for (char c : str) {
+		if (std::isspace(c)) {
+			comp = ss.str();
+			if (comp.size() > 0) {
+				elems.push_back(comp);
+				ss.str("");
+			}
+		} else {
+			ss << c;
+		}
+	}
+	comp = ss.str();
+	if (comp.size() > 0) {
+		elems.push_back(comp);
+	}
+	return elems;
+
+}
+void Trim(std::string &s) {
+	s.erase(
+			std::find_if(s.rbegin(), s.rend(),
+					std::not1(std::ptr_fun<int, int>(std::isspace))).base(),
+			s.end());
+	s.erase(s.begin(),
+			std::find_if(s.begin(), s.end(),
+					std::not1(std::ptr_fun<int, int>(std::isspace))));
+
+}
 bool Contains(const std::string& str, const std::string& pattern) {
 	return (str.find(pattern) != std::string::npos);
 }

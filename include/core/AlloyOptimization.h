@@ -681,8 +681,6 @@ template<class T> Vec<T> SolveQR(const DenseMat<T>& A, const Vec<T>& b) {
 		int n = AtA.cols;
 		Vec<T> x(A.cols);
 		DenseMat<T> Q, R;
-		std::cout << "AtA" << AtA.rows << " " << AtA.cols << " " << Atb.size()
-				<< std::endl;
 		bool nonSingular = QR(AtA, Q, R);
 		if (!nonSingular) {
 			throw std::runtime_error("Matrix is singular.");
