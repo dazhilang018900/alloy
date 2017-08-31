@@ -33,6 +33,8 @@
 #include <cereal/cereal.hpp>
 #define ALY_PI float(3.1415926535897932384626433832795)
 #define ALY_PI_2 float(0.5f*ALY_PI)
+#define ALY_1_PI float(1.0f/ALY_PI)
+#define ALY_2_PI float(2.0f/ALY_PI)
 #define ALY_PI_4 float(0.25f*ALY_PI)
 namespace aly {
 bool SANITY_CHECK_MATH();
