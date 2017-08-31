@@ -26,6 +26,8 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <cctype>
+#include <functional>
 namespace aly {
 std::vector<std::string> Tokenize(const std::string& str) {
 	std::stringstream ss;
