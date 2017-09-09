@@ -268,6 +268,9 @@ public:
 		width = w;
 		height = h;
 	}
+	void resize(int2 dims){
+		resize(dims.x,dims.y);
+	}
 	inline void clear() {
 		data.clear();
 		data.shrink_to_fit();

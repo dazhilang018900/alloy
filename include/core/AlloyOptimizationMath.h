@@ -494,6 +494,36 @@ T get(size_t i, size_t j) const {
 						<< "]");
 	return data[cols * i + j];
 }
+inline Vec<T> getRow(size_t i) const {
+	Vec<T> result(cols);
+	for(int j=0;j<cols;j++){
+		result[j]=data[cols * i + j];
+	}
+	return result;
+}
+inline Vec<T> getColumn(size_t j) const {
+	Vec<T> result(rows);
+	for(int i=0;i<rows;i++){
+		result[i]=data[cols * i + j];
+	}
+	return result;
+}
+inline void setRow(const Vec<T>& vec,size_t i) const {
+	if(vec.size()!=cols){
+		throw std::runtime_error("Could not set row because vector length doesn't match columns.");
+	}
+	for(int j=0;j<cols;j++){
+		data[cols * i + j]=vec[j];
+	}
+}
+inline void setColumn(const Vec<T>& vec,size_t j) const {
+	if(vec.size()!=rows){
+		throw std::runtime_error("Could not set column because vector length doesn't match rows.");
+	}
+	for(int i=0;i<rows;i++){
+		data[cols * i + j]=vec[i];
+	}
+}
 T& operator()(size_t i, size_t j) {
 	return data[cols * i + j];
 }

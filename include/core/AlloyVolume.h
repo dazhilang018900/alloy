@@ -212,6 +212,9 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(const std::strin
 			cols = c;
 			slices = s;
 		}
+		void resize(int3 dims){
+			resize(dims.x,dims.y,dims.z);
+		}
 		inline void clear() {
 			data.clear();
 			data.shrink_to_fit();
