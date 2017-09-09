@@ -61,7 +61,7 @@ private:
 					width = dec;
 				} else {
 					// Armijo condition is met
-					if (param.linesearch ==LBFS_SEARCH::BACKTRACKING_ARMIJO)
+					if (param.linesearch ==LineSearchType::BACKTRACKING_ARMIJO)
 						break;
 
 					const Scalar dg = dot(grad,drt);
@@ -69,7 +69,7 @@ private:
 						width = inc;
 					} else {
 						// Regular Wolfe condition is met
-						if (param.linesearch== LBFS_SEARCH::BACKTRACKING_WOLFE)
+						if (param.linesearch== LineSearchType::BACKTRACKING_WOLFE)
 							break;
 
 						if (dg > -param.wolfe * dg_init) {

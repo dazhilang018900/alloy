@@ -23,7 +23,7 @@ namespace aly {
 ///
 /// The enumeration of line search algorithms.
 ///
-enum class LBFS_SEARCH{
+enum class LineSearchType{
 	///
 	/// Backtracking method with the Armijo condition.
 	/// The backtracking method finds the step length such that it satisfies
@@ -118,7 +118,7 @@ public:
 	/// This parameter specifies the line search algorithm that will be used
 	/// by the LBFGS routine. The default value is `LBFGS_LINESEARCH_BACKTRACKING_ARMIJO`.
 	///
-	LBFS_SEARCH linesearch;
+	LineSearchType linesearch;
 	///
 	/// The maximum number of trials for the line search.
 	/// This parameter controls the number of function and gradients evaluations
@@ -163,7 +163,7 @@ public:
 		past = 0;
 		delta = Scalar(0);
 		max_iterations = 0;
-		linesearch = LBFS_SEARCH::BACKTRACKING_ARMIJO;
+		linesearch = LineSearchType::BACKTRACKING_ARMIJO;
 		max_linesearch = 20;
 		min_step = Scalar(1e-20);
 		max_step = Scalar(1e+20);
@@ -188,8 +188,8 @@ public:
 		if (max_iterations < 0)
 			throw std::invalid_argument(
 					"'max_iterations' must be non-negative");
-		if (static_cast<int>(linesearch) < static_cast<int>(LBFS_SEARCH::BACKTRACKING_ARMIJO)
-				|| static_cast<int>(linesearch) > static_cast<int>(LBFS_SEARCH::BACKTRACKING_STRONG_WOLFE))
+		if (static_cast<int>(linesearch) < static_cast<int>(LineSearchType::BACKTRACKING_ARMIJO)
+				|| static_cast<int>(linesearch) > static_cast<int>(LineSearchType::BACKTRACKING_STRONG_WOLFE))
 			throw std::invalid_argument("unsupported line search algorithm");
 		if (max_linesearch <= 0)
 			throw std::invalid_argument("'max_linesearch' must be positive");
@@ -205,8 +205,12 @@ public:
 					"'wolfe' must satisfy ftol < wolfe < 1");
 	}
 };
-int SolveLBFGS(const std::function<float(Vec<float>& x, Vec<float>& grad)>& f,aly::Vec<float>& x, float& fx,const LBFGSParam<float>& param);
-int SolveLBFGS(const std::function<double(Vec<double>& x, Vec<double>& grad)>& f,aly::Vec<double>& x, double& fx,const LBFGSParam<double>& param);
+
+typedef LBFGSParam<float> LBFGSParamFloat;
+typedef LBFGSParam<double> LBFGSParamDouble;
+
+int SolveLBFGS(const std::function<float(Vec<float>& x, Vec<float>& grad)>& f,aly::Vec<float>& x, float& fx,const LBFGSParam<float>& param=LBFGSParamFloat());
+int SolveLBFGS(const std::function<double(Vec<double>& x, Vec<double>& grad)>& f,aly::Vec<double>& x, double& fx,const LBFGSParam<double>& param=LBFGSParamDouble());
 
 } // namespace LBFGSpp
 #endif // LBFGS_H
