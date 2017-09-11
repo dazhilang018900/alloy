@@ -15,6 +15,7 @@ template<typename Scalar>
 class LBFGSSolver {
 private:
 	typedef Vec<Scalar> Vector;
+	typedef VecMap<Scalar> VectorM;
 	typedef DenseMat<Scalar> Matrix;
 	const LBFGSParam<Scalar>& m_param; // Parameters to control the LBFGS algorithm
 	Matrix m_s;      // History of the s vectors
@@ -190,11 +191,10 @@ public:
 			// Update s and y
 			// s_{k+1} = x_{k+1} - x_k
 			// y_{k+1} = g_{k+1} - g_k
-			m_s.setColumn(x - m_xp,end);
-			m_y.setColumn(m_grad - m_gradp,end);
-			Vector svec=m_s.getColumn(end);
-			Vector yvec=m_y.getColumn(end);
-
+			VectorM svec=m_s.getColumn(end);
+			VectorM yvec=m_y.getColumn(end);
+			svec=x - m_xp;
+			yvec=m_grad - m_gradp;
 			// ys = y's = 1/rho
 			// yy = y'y
 			Scalar ys = dot(yvec,svec);
@@ -208,8 +208,8 @@ public:
 			int j = end;
 			for (int i = 0; i < bound; i++) {
 				j = (j + m_param.m - 1) % m_param.m;
-				Vector sj=m_s.getColumn(j);
-				Vector yj=m_y.getColumn(j);
+				VectorM sj=m_s.getColumn(j);
+				VectorM yj=m_y.getColumn(j);
 				m_alpha[j] = dot(sj,m_drt) / m_ys[j];
 				m_drt -= m_alpha[j] * yj;
 			}
@@ -217,8 +217,8 @@ public:
 			m_drt *= (ys / yy);
 
 			for (int i = 0; i < bound; i++) {
-				Vector sj=m_s.getColumn(j);
-				Vector yj=m_y.getColumn(j);
+				VectorM sj=m_s.getColumn(j);
+				VectorM yj=m_y.getColumn(j);
 				Scalar beta = dot(yj,m_drt) / m_ys[j];
 				m_drt += (m_alpha[j] - beta) * sj;
 				j = (j + 1) % m_param.m;

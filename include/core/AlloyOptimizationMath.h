@@ -33,7 +33,52 @@
 #include <list>
 #include <map>
 namespace aly {
-template<class T> struct Vec {
+template<class T> struct VecType {
+	virtual size_t size() const=0;
+	virtual T& operator[](const size_t i)=0;
+	virtual const T& operator[](const size_t i) const =0;
+	virtual ~VecType(){}
+};
+template<class T> class Vec;
+template<class T> class VecMap:public VecType<T> {
+private:
+	const T* ptr;
+	const size_t sz;
+	const size_t stride;
+public:
+	VecMap(T* ptr, size_t sz, size_t stride=1): ptr(ptr),sz(sz),stride(stride){
+	}
+	VecMap(Vec<T>& vec);
+	VecMap(): ptr(nullptr),sz(0),stride(0){
+	}
+	T& operator[](const size_t i) override {
+		if(i>=sz){
+			throw std::runtime_error("Index exceeds vector map bounds.");
+		}
+		if(ptr==nullptr){
+			throw std::runtime_error("Pointer is null.");
+		}
+		return ptr[i*stride];
+	}
+	const T& operator[](const size_t i) const override {
+		if(i>=sz){
+			throw std::runtime_error("Index exceeds vector map bounds.");
+		}
+		if(ptr==nullptr){
+			throw std::runtime_error("Pointer is null.");
+		}
+		return ptr[i*stride];
+	}
+	size_t getStride() const {
+		return stride;
+	}
+	size_t size() const override {
+		return sz;
+	}
+	VecMap<T>& operator=(const Vec<T>& rhs);
+
+};
+template<class T> struct Vec: VecType<T> {
 public:
 	std::vector<T> data;//, aligned_allocator<T, 64>
 	typedef T ValueType;
@@ -73,6 +118,13 @@ public:
 	inline void set(const std::vector<T>& val) {
 		this->data = data;
 	}
+	Vec<T>& operator=(const VecMap<T>& rhs) {
+		this->resize(rhs.size());
+		for(size_t index=0;index<rhs.size();index++){
+			data[index]=rhs[index];
+		}
+		return *this;
+	}
 	template<class Archive>
 	void save(Archive & archive) const {
 		archive(CEREAL_NVP(data));
@@ -105,14 +157,14 @@ public:
 	const T* ptr() const {
 		return data.data();
 	}
-	const T& operator[](const size_t i) const {
+	const T& operator[](const size_t i) const override {
 		if (i >= data.size())
 			throw std::runtime_error(
 					MakeString() << "Vector index out of bounds " << i << "/"
 							<< data.size());
 		return data[i];
 	}
-	T& operator[](const size_t i) {
+	T& operator[](const size_t i) override {
 		if (i >= data.size())
 			throw std::runtime_error(
 					MakeString() << "Vector index out of bounds " << i << "/"
@@ -137,12 +189,23 @@ public:
 		data.clear();
 		data.shrink_to_fit();
 	}
-	size_t size() const {
+	size_t size() const override {
 		return data.size();
 	}
 };
-
-template<class T> void Transform(Vec<T>& im1, Vec<T>& im2,
+template<class T> VecMap<T>::VecMap(Vec<T>& vec):
+		ptr(vec.data.data()),sz(vec.size()),stride(1){
+}
+template<class T> VecMap<T>& VecMap<T>::operator=(const Vec<T>& rhs) {
+	if(rhs.size()!=sz||ptr==nullptr){
+		throw std::runtime_error("Could not assign vecmap.");
+	}
+	for(size_t index=0; index<sz; index++){
+		(*this)[index]=rhs[index];
+	}
+	return *this;
+}
+template<class T> void Transform(VecType<T>& im1, VecType<T>& im2,
 		const std::function<void(T&, T&)>& func) {
 	if (im1.size() != im2.size())
 		throw std::runtime_error(
@@ -154,15 +217,14 @@ template<class T> void Transform(Vec<T>& im1, Vec<T>& im2,
 		func(im1[offset], im2[offset]);
 	}
 }
-template<class T> void Transform(Vec<T>& im1,
-		const std::function<void(T&)>& func) {
+template<class T> void Transform(VecType<T>& im1,const std::function<void(T&)>& func) {
 	size_t sz = im1.size();
 #pragma omp parallel for
 	for (int offset = 0; offset < (int) sz; offset++) {
 		func(im1[offset]);
 	}
 }
-template<class T> void Transform(Vec<T>& im1, const Vec<T>& im2,
+template<class T> void Transform(VecType<T>& im1, const VecType<T>& im2,
 		const std::function<void(T&, const T&)>& func) {
 	if (im1.size() != im2.size())
 		throw std::runtime_error(
@@ -174,8 +236,8 @@ template<class T> void Transform(Vec<T>& im1, const Vec<T>& im2,
 		func(im1[offset], im2[offset]);
 	}
 }
-template<class T> void Transform(Vec<T>& im1, const Vec<T>& im2,
-		const Vec<T>& im3, const Vec<T>& im4,
+template<class T> void Transform(VecType<T>& im1, const VecType<T>& im2,
+		const VecType<T>& im3, const VecType<T>& im4,
 		const std::function<void(T&, const T&, const T&, const T&)>& func) {
 	if (im1.size() != im2.size())
 		throw std::runtime_error(
@@ -187,8 +249,8 @@ template<class T> void Transform(Vec<T>& im1, const Vec<T>& im2,
 		func(im1[offset], im2[offset], im3[offset], im4[offset]);
 	}
 }
-template<class T> void Transform(Vec<T>& im1, const Vec<T>& im2,
-		const Vec<T>& im3,
+template<class T> void Transform(VecType<T>& im1, const VecType<T>& im2,
+		const VecType<T>& im3,
 		const std::function<void(T&, const T&, const T&)>& func) {
 	if (im1.size() != im2.size())
 		throw std::runtime_error(
@@ -200,7 +262,7 @@ template<class T> void Transform(Vec<T>& im1, const Vec<T>& im2,
 		func(im1[offset], im2[offset], im3[offset]);
 	}
 }
-template<class T> void Transform(Vec<T>& im1, Vec<T>& im2,
+template<class T> void Transform(VecType<T>& im1, VecType<T>& im2,
 		const std::function<void(size_t offset, T& val1, T& val2)>& func) {
 	if (im1.size() != im2.size())
 		throw std::runtime_error(
@@ -213,37 +275,32 @@ template<class T> void Transform(Vec<T>& im1, Vec<T>& im2,
 	}
 }
 template<class T, class L, class R, int C> std::basic_ostream<L, R> & operator <<(
-		std::basic_ostream<L, R> & ss, const Vec<T> & A) {
-	size_t index = 0;
-	for (const T& val : A.data) {
-		ss << std::setw(5) << index++ << ": " << val << std::endl;
+		std::basic_ostream<L, R> & ss, const VecType<T> & A) {
+	for (size_t index=0;index<A.size();index++) {
+		ss << std::setw(5) << index << ": " << A[index] << std::endl;
 	}
 	return ss;
 }
-template<class T> Vec<T> operator+(const T& scalar, const Vec<T>& img) {
+template<class T> Vec<T> operator+(const T& scalar, const VecType<T>& img) {
 	Vec<T> out(img.size());
 	std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 = scalar + val2;};
 	Transform(out, img, f);
 	return out;
 }
-template<class T> void ScaleAdd(Vec<T>& out, const T& scalar,
-		const Vec<T>& in) {
+template<class T> void ScaleAdd(Vec<T>& out, const T& scalar,const VecType<T>& in) {
 	out.resize(in.size());
-	std::function<void(T&, const T&)> f =
-			[=](T& val1, const T& val2) {val1 += scalar * val2;};
+	std::function<void(T&, const T&)> f =[=](T& val1, const T& val2) {val1 += scalar * val2;};
 	Transform(out, in, f);
 }
-template<class T> void ScaleAdd(Vec<T>& out, const Vec<T>& in1, const T& scalar,
-		const Vec<T>& in2) {
+template<class T> void ScaleAdd(Vec<T>& out, const VecType<T>& in1, const T& scalar,const VecType<T>& in2) {
 	out.resize(in1.size());
-	std::function<void(T&, const T&, const T&)> f =
-			[=](T& val1, const T& val2, const T& val3) {val1 = val2+scalar * val3;};
+	std::function<void(T&, const T&, const T&)> f =[=](T& val1, const T& val2, const T& val3) {val1 = val2+scalar * val3;};
 	Transform(out, in1, in2, f);
 }
-template<class T> void ScaleAdd(Vec<T>& out, const Vec<T>& in1,
-		const T& scalar2, const Vec<T>& in2, const T& scalar3,
-		const Vec<T>& in3) {
+template<class T> void ScaleAdd(Vec<T>& out, const VecType<T>& in1,
+		const T& scalar2, const VecType<T>& in2, const T& scalar3,
+		const VecType<T>& in3) {
 	out.resize(in1.size());
 	std::function<void(T&, const T&, const T&, const T&)> f = [=](T& out,
 			const T& val1,
@@ -252,114 +309,110 @@ template<class T> void ScaleAdd(Vec<T>& out, const Vec<T>& in1,
 		out = val1+scalar2*val2+scalar3 * val3;};
 	Transform(out, in1, in2, in3, f);
 }
-template<class T> void ScaleSubtract(Vec<T>& out, const T& scalar,
-		const Vec<T>& in) {
+template<class T> void ScaleSubtract(Vec<T>& out, const T& scalar,const VecType<T>& in) {
 	out.resize(in.size());
 	std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 -= scalar * val2;};
 	Transform(out, in, f);
 }
-template<class T> void ScaleSubtract(Vec<T>& out, const Vec<T>& in1,
-		const T& scalar, const Vec<T>& in2) {
+template<class T> void ScaleSubtract(Vec<T>& out, const VecType<T>& in1,const T& scalar, const VecType<T>& in2) {
 	out.resize(in1.size());
 	std::function<void(T&, const T&, const T&)> f =
 			[=](T& val1, const T& val2, const T& val3) {val1 = val2 - scalar * val3;};
 	Transform(out, in1, in2, f);
 }
-template<class T> void Subtract(Vec<T>& out, const Vec<T>& v1,
-		const Vec<T>& v2) {
+template<class T> void Subtract(Vec<T>& out, const VecType<T>& v1,const VecType<T>& v2) {
 	out.resize(v1.size());
 	std::function<void(T&, const T&, const T&)> f =
 			[=](T& val1, const T& val2, const T& val3) {val1 = val2-val3;};
 	Transform(out, v1, v2, f);
 }
-template<class T> void Add(Vec<T>& out, const Vec<T>& v1, const Vec<T>& v2) {
+template<class T> void Add(Vec<T>& out, const VecType<T>& v1, const VecType<T>& v2) {
 	out.resize(v1.size());
 	std::function<void(T&, const T&, const T&)> f =
 			[=](T& val1, const T& val2, const T& val3) {val1 = val2 + val3;};
 	Transform(out, v1, v2, f);
 }
-template<class T> Vec<T> operator-(const T& scalar, const Vec<T>& img) {
+template<class T> Vec<T> operator-(const T& scalar, const VecType<T>& img) {
 	Vec<T> out(img.size());
 	std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 = scalar - val2;};
 	Transform(out, img, f);
 	return out;
 }
-template<class T> Vec<T> operator*(const T& scalar, const Vec<T>& img) {
+template<class T> Vec<T> operator*(const T& scalar, const VecType<T>& img) {
 	Vec<T> out(img.size());
 	std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 = scalar*val2;};
 	Transform(out, img, f);
 	return out;
 }
-template<class T> Vec<T> operator/(const T& scalar, const Vec<T>& img) {
+template<class T> Vec<T> operator/(const T& scalar, const VecType<T>& img) {
 	Vec<T> out(img.size());
 	std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 = scalar / val2;};
 	Transform(out, img, f);
 	return out;
 }
-template<class T> Vec<T> operator+(const Vec<T>& img, const T& scalar) {
+template<class T> Vec<T> operator+(const VecType<T>& img, const T& scalar) {
 	Vec<T> out(img.size());
 	std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 = val2 + scalar;};
 	Transform(out, img, f);
 	return out;
 }
-template<class T> Vec<T> operator-(const Vec<T>& img, const T& scalar) {
+template<class T> Vec<T> operator-(const VecType<T>& img, const T& scalar) {
 	Vec<T> out(img.size());
 	std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 = val2 - scalar;};
 	Transform(out, img, f);
 	return out;
 }
-template<class T> Vec<T> operator*(const Vec<T>& img, const T& scalar) {
+template<class T> Vec<T> operator*(const VecType<T>& img, const T& scalar) {
 	Vec<T> out(img.size());
 	std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 = val2*scalar;};
 	Transform(out, img, f);
 	return out;
 }
-template<class T> Vec<T> operator/(const Vec<T>& img, const T& scalar) {
+template<class T> Vec<T> operator/(const VecType<T>& img, const T& scalar) {
 	Vec<T> out(img.size());
 	std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 = val2 / scalar;};
 	Transform(out, img, f);
 	return out;
 }
-template<class T> Vec<T> operator-(const Vec<T>& img) {
+template<class T> Vec<T> operator-(const VecType<T>& img) {
 	Vec<T> out(img.size());
 	std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 = -val2;};
 	Transform(out, img, f);
 	return out;
 }
-template<class T> Vec<T> operator+=(Vec<T>& out, const Vec<T>& img) {
+template<class T> Vec<T> operator+=(Vec<T>& out, const VecType<T>& img) {
 	std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 += val2;};
 	Transform(out, img, f);
 	return out;
 }
-template<class T> Vec<T> operator-=(Vec<T>& out, const Vec<T>& img) {
+template<class T> Vec<T> operator-=(Vec<T>& out, const VecType<T>& img) {
 	std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 -= val2;};
 	Transform(out, img, f);
 	return out;
 }
-template<class T> Vec<T> operator*=(Vec<T>& out, const Vec<T>& img) {
+template<class T> Vec<T> operator*=(Vec<T>& out, const VecType<T>& img) {
 	std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 *= val2;};
 	Transform(out, img, f);
 	return out;
 }
-template<class T> Vec<T> operator/=(Vec<T>& out, const Vec<T>& img) {
+template<class T> Vec<T> operator/=(Vec<T>& out, const VecType<T>& img) {
 	std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 /= val2;};
 	Transform(out, img, f);
 	return out;
 }
-
 template<class T> Vec<T> operator+=(Vec<T>& out, const T& scalar) {
 	std::function<void(T&)> f = [=](T& val1) {val1 += scalar;};
 	Transform(out, f);
@@ -375,34 +428,79 @@ template<class T> Vec<T> operator*=(Vec<T>& out, const T& scalar) {
 	Transform(out, f);
 	return out;
 }
-template<class T> Vec<T> operator/=(Vec<T>& out, const T& scalar) {
+template<class T> VecType<T> operator/=(VecType<T>& out, const T& scalar) {
 	std::function<void(T&)> f = [=](T& val1) {val1 /= scalar;};
 	Transform(out, f);
 	return out;
 }
 
-template<class T> Vec<T> operator+(const Vec<T>& img1, const Vec<T>& img2) {
+template<class T> VecMap<T> operator+=(VecMap<T>& out, const VecType<T>& img) {
+	std::function<void(T&, const T&)> f =
+			[=](T& val1, const T& val2) {val1 += val2;};
+	Transform(out, img, f);
+	return out;
+}
+template<class T> VecMap<T> operator-=(VecMap<T>& out, const VecType<T>& img) {
+	std::function<void(T&, const T&)> f =
+			[=](T& val1, const T& val2) {val1 -= val2;};
+	Transform(out, img, f);
+	return out;
+}
+template<class T> VecMap<T> operator*=(VecMap<T>& out, const VecType<T>& img) {
+	std::function<void(T&, const T&)> f =
+			[=](T& val1, const T& val2) {val1 *= val2;};
+	Transform(out, img, f);
+	return out;
+}
+template<class T> VecMap<T> operator/=(VecMap<T>& out, const VecType<T>& img) {
+	std::function<void(T&, const T&)> f =
+			[=](T& val1, const T& val2) {val1 /= val2;};
+	Transform(out, img, f);
+	return out;
+}
+template<class T> VecMap<T> operator+=(VecMap<T>& out, const T& scalar) {
+	std::function<void(T&)> f = [=](T& val1) {val1 += scalar;};
+	Transform(out, f);
+	return out;
+}
+template<class T> VecMap<T> operator-=(VecMap<T>& out, const T& scalar) {
+	std::function<void(T&)> f = [=](T& val1) {val1 -= scalar;};
+	Transform(out, f);
+	return out;
+}
+template<class T> VecMap<T> operator*=(VecMap<T>& out, const T& scalar) {
+	std::function<void(T&)> f = [=](T& val1) {val1 *= scalar;};
+	Transform(out, f);
+	return out;
+}
+template<class T> VecMap<T> operator/=(VecMap<T>& out, const T& scalar) {
+	std::function<void(T&)> f = [=](T& val1) {val1 /= scalar;};
+	Transform(out, f);
+	return out;
+}
+
+template<class T> Vec<T> operator+(const VecType<T>& img1, const VecType<T>& img2) {
 	Vec<T> out(img1.size());
 	std::function<void(T&, const T&, const T&)> f =
 			[=](T& val1, const T& val2, const T& val3) {val1 = val2 + val3;};
 	Transform(out, img1, img2, f);
 	return out;
 }
-template<class T> Vec<T> operator-(const Vec<T>& img1, const Vec<T>& img2) {
+template<class T> Vec<T> operator-(const VecType<T>& img1, const VecType<T>& img2) {
 	Vec<T> out(img1.size());
 	std::function<void(T&, const T&, const T&)> f =
 			[=](T& val1, const T& val2, const T& val3) {val1 = val2 - val3;};
 	Transform(out, img1, img2, f);
 	return out;
 }
-template<class T> Vec<T> operator*(const Vec<T>& img1, const Vec<T>& img2) {
+template<class T> Vec<T> operator*(const VecType<T>& img1, const VecType<T>& img2) {
 	Vec<T> out(img1.size());
 	std::function<void(T&, const T&, const T&)> f =
 			[=](T& val1, const T& val2, const T& val3) {val1 = val2*val3;};
 	Transform(out, img1, img2, f);
 	return out;
 }
-template<class T> Vec<T> operator/(const Vec<T>& img1, const Vec<T>& img2) {
+template<class T> Vec<T> operator/(const VecType<T>& img1, const VecType<T>& img2) {
 	Vec<T> out(img1.size());
 	std::function<void(T&, const T&, const T&)> f =
 			[=](T& val1, const T& val2, const T& val3) {val1 = val2 / val3;};
@@ -494,19 +592,11 @@ T get(size_t i, size_t j) const {
 						<< "]");
 	return data[cols * i + j];
 }
-inline Vec<T> getRow(size_t i) const {
-	Vec<T> result(cols);
-	for(int j=0;j<cols;j++){
-		result[j]=data[cols * i + j];
-	}
-	return result;
+inline VecMap<T> getRow(size_t i) const {
+	return VecMap<T>(&data[cols*i],cols,1);
 }
-inline Vec<T> getColumn(size_t j) const {
-	Vec<T> result(rows);
-	for(int i=0;i<rows;i++){
-		result[i]=data[cols * i + j];
-	}
-	return result;
+inline VecMap<T> getColumn(size_t j) const {
+	return VecMap<T>(&data[0],rows, cols);
 }
 inline void setRow(const Vec<T>& vec,size_t i) const {
 	if(vec.size()!=cols){
@@ -589,7 +679,7 @@ template<class A, class B, class T, int C> std::basic_ostream<A, B> & operator <
 	return ss;
 }
 
-template<class T> Vec<T> operator*(const DenseMat<T>& A, const Vec<T>& v) {
+template<class T> Vec<T> operator*(const DenseMat<T>& A, const VecType<T>& v) {
 	Vec<T> out(A.rows);
 	for (int i = 0; i < A.rows; i++) {
 		T sum(0.0);
@@ -623,7 +713,7 @@ template<class T> DenseMat<T> operator*(const DenseMat<T>& A,
 //Slight abuse of mathematics here. Vectors are always interpreted as column vectors as a convention,
 //so this multiplcation is equivalent to multiplying "A" with a diagonal matrix constructed from "W".
 //To multiply a matrix with a column vector to get a row vector, convert "W" to a dense matrix.
-template<class T> DenseMat<T> operator*(const Vec<T>& W, const DenseMat<T>& A) {
+template<class T> DenseMat<T> operator*(const VecType<T>& W, const DenseMat<T>& A) {
 	if (A.rows != (int) W.size())
 		throw std::runtime_error(
 				MakeString()
@@ -638,7 +728,7 @@ template<class T> DenseMat<T> operator*(const Vec<T>& W, const DenseMat<T>& A) {
 	}
 	return out;
 }
-template<class T> DenseMat<T>& operator*=(DenseMat<T>& A, const Vec<T>& W) {
+template<class T> DenseMat<T>& operator*=(DenseMat<T>& A, const VecType<T>& W) {
 	if (A.rows != W.size())
 		throw std::runtime_error(
 				MakeString()
@@ -901,7 +991,7 @@ public:
 		}
 		return A;
 	}
-	static SparseMat<T> diagonal(const Vec<T>& v) {
+	static SparseMat<T> diagonal(const VecType<T>& v) {
 		SparseMat<T> A(v.size(), v.size());
 #pragma omp parallel for
 		for (int k = 0; k < (int) v.size(); k++) {
@@ -1160,8 +1250,8 @@ template<class T> void Multiply(Vec<T>& out, const SparseMat<T>& A,
 		out[i] = T(sum);
 	}
 }
-template<class T> void AddMultiply(Vec<T>& out, const Vec<T>& b,
-		const SparseMat<T>& A, const Vec<T>& v) {
+template<class T> void AddMultiply(Vec<T>& out, const VecType<T>& b,
+		const SparseMat<T>& A, const VecType<T>& v) {
 	out.resize(A.rows);
 #pragma omp parallel for
 	for (int i = 0; i < (int) A.rows; i++) {
@@ -1172,8 +1262,8 @@ template<class T> void AddMultiply(Vec<T>& out, const Vec<T>& b,
 		out[i] = b[i] + T(sum);
 	}
 }
-template<class T> void SubtractMultiply(Vec<T>& out, const Vec<T>& b,
-		const SparseMat<T>& A, const Vec<T>& v) {
+template<class T> void SubtractMultiply(Vec<T>& out, const VecType<T>& b,
+		const SparseMat<T>& A, const VecType<T>& v) {
 	out.resize(A.rows);
 #pragma omp parallel for
 	for (int i = 0; i < (int) A.rows; i++) {
@@ -1184,7 +1274,7 @@ template<class T> void SubtractMultiply(Vec<T>& out, const Vec<T>& b,
 		out[i] = b[i] - T(sum);
 	}
 }
-template<class T> Vec<T> operator*(const SparseMat<T>& A, const Vec<T>& v) {
+template<class T> Vec<T> operator*(const SparseMat<T>& A, const VecType<T>& v) {
 	Vec<T> out(A.rows);
 #pragma omp parallel for
 	for (int i = 0; i < (int) A.rows; i++) {
@@ -1197,7 +1287,7 @@ template<class T> Vec<T> operator*(const SparseMat<T>& A, const Vec<T>& v) {
 	return out;
 }
 template<class T> void MultiplyVec(Vec<T>& out, const SparseMat<T>& A,
-		const Vec<T>& v) {
+		const VecType<T>& v) {
 	out.resize(A.rows);
 #pragma omp parallel for
 	for (int i = 0; i < (int) A.rows; i++) {
@@ -1209,8 +1299,8 @@ template<class T> void MultiplyVec(Vec<T>& out, const SparseMat<T>& A,
 	}
 }
 
-template<class T> void AddMultiplyVec(Vec<T>& out, const Vec<T>& b,
-		const SparseMat<T>& A, const Vec<T>& v) {
+template<class T> void AddMultiplyVec(Vec<T>& out, const VecType<T>& b,
+		const SparseMat<T>& A, const VecType<T>& v) {
 	out.resize(A.rows);
 #pragma omp parallel for
 	for (int i = 0; i < A.rows; i++) {
@@ -1221,8 +1311,8 @@ template<class T> void AddMultiplyVec(Vec<T>& out, const Vec<T>& b,
 		out[i] = b[i] + T(sum);
 	}
 }
-template<class T> void SubtractMultiplyVec(Vec<T>& out, const Vec<T>& b,
-		const SparseMat<T>& A, const Vec<T>& v) {
+template<class T> void SubtractMultiplyVec(Vec<T>& out, const VecType<T>& b,
+		const SparseMat<T>& A, const VecType<T>& v) {
 	out.resize(A.rows);
 #pragma omp parallel for
 	for (int i = 0; i < (int) A.rows; i++) {
@@ -1245,7 +1335,7 @@ template<class T> void ReadSparseMatFromFile(const std::string& file,
 	cereal::PortableBinaryInputArchive ar(os);
 	ar(cereal::make_nvp("sparse_matrix", matrix));
 }
-template<class T> double lengthSqr(const Vec<T>& a) {
+template<class T> double lengthSqr(const VecType<T>& a) {
 	size_t sz = a.size();
 	double cans = 0;
 #pragma omp parallel for reduction(+:cans)
@@ -1255,10 +1345,10 @@ template<class T> double lengthSqr(const Vec<T>& a) {
 	}
 	return cans;
 }
-template<class T> double length(const Vec<T>& a) {
+template<class T> double length(const VecType<T>& a) {
 	return std::sqrt(lengthSqr(a));
 }
-template<class T> double dot(const Vec<T>& a, const Vec<T>& b) {
+template<class T> double dot(const VecType<T>& a, const VecType<T>& b) {
 	double ans = 0.0;
 	if (a.size() != b.size())
 		throw std::runtime_error(
@@ -1271,7 +1361,7 @@ template<class T> double dot(const Vec<T>& a, const Vec<T>& b) {
 	}
 	return ans;
 }
-template<class T> T lengthL1(const Vec<T>& a) {
+template<class T> T lengthL1(const VecType<T>& a) {
 	T ans(0);
 	size_t sz = a.size();
 #pragma omp parallel for reduction(+:ans)
@@ -1280,7 +1370,7 @@ template<class T> T lengthL1(const Vec<T>& a) {
 	}
 	return ans;
 }
-template<class T> T lengthInf(const Vec<T>& a) {
+template<class T> T lengthInf(const VecType<T>& a) {
 	T ans(0);
 	size_t sz = a.size();
 	for (int i = 0; i < (int) sz; i++) {
@@ -1296,6 +1386,12 @@ typedef Vec<double2> Vec2d;
 typedef Vec<double3> Vec3d;
 typedef Vec<double3> Vec4d;
 
+typedef VecMap<double> VecMapDouble;
+typedef VecMap<double> VecMap1d;
+typedef VecMap<double2> VecMap2d;
+typedef VecMap<double3> VecMap3d;
+typedef VecMap<double3> VecMap4d;
+
 typedef DenseMat<float> DenseMatrixFloat;
 typedef SparseMat<float> SparseMatrixFloat;
 typedef Vec<float> VecFloat;
@@ -1303,6 +1399,12 @@ typedef Vec<float> Vec1f;
 typedef Vec<float2> Vec2f;
 typedef Vec<float3> Vec3f;
 typedef Vec<float3> Vec4f;
+
+typedef VecMap<float> VecMapFloat;
+typedef VecMap<float> VecMap1f;
+typedef VecMap<float2> VecMap2f;
+typedef VecMap<float3> VecMap3f;
+typedef VecMap<float3> VecMap4f;
 
 }
 
