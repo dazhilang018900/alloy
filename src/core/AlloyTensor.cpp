@@ -18,7 +18,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "AlloyTensor.h"
+#include <AlloyTensor3.h>
 #include "AlloyCommon.h"
 #include "AlloyFileUtil.h"
 #include "AlloyMath.h"

@@ -18,8 +18,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#ifndef ALLOYTENSOR_H_
-#define ALLOYTENSOR_H_
+#ifndef ALLOYTENSOR2_H_
+#define ALLOYTENSOR2_H_
 #include "AlloyCommon.h"
 #include "AlloyMath.h"
 #include "AlloyOptimizationMath.h"
@@ -32,14 +32,13 @@
 #include <fstream>
 #include <random>
 namespace aly {
-template<class T, ImageType I> struct Tensor;
-template<class T, ImageType I> void WriteImageToRawFile(const std::string& fileName, const Tensor<T, I>& img);
-template<class T, ImageType I> bool ReadImageFromRawFile(const std::string& fileName, Tensor<T, I>& img);
-template<class T, ImageType I> struct Tensor {
+template<class T, ImageType I> struct Tensor2;
+template<class T, ImageType I> void WriteImageToRawFile(const std::string& fileName, const Tensor2<T, I>& img);
+template<class T, ImageType I> bool ReadImageFromRawFile(const std::string& fileName, Tensor2<T, I>& img);
+template<class T, ImageType I> struct Tensor2 {
 	public:
 		int rows;
 		int cols;
-		int slices;
 		int channels;
 		uint64_t id;
 		std::vector<T, aligned_allocator<T,64> > data;
@@ -73,38 +72,38 @@ template<class T, ImageType I> struct Tensor {
 		}
 		const ImageType type = I;
 		inline bool contains(const float3& pt){
-			return (pt.x>=0&&pt.y>=0&&pt.z>=0&&pt.x<rows&&pt.y<cols&&pt.z<slices);
+			return (pt.x>=0&&pt.y>=0&&pt.z>=0&&pt.x<rows&&pt.y<cols);
 		}
 		inline bool contains(const int3& pt){
-			return (pt.x>=0&&pt.y>=0&&pt.z>=0&&pt.x<rows&&pt.y<cols&&pt.z<slices);
+			return (pt.x>=0&&pt.y>=0&&pt.z>=0&&pt.x<rows&&pt.y<cols);
 		}
 		inline bool contains(int x,int y,int z){
-			return (x>=0&&y>=0&&z>=0&&x<rows&&y<cols&&z<slices);
+			return (x>=0&&y>=0&&z>=0&&x<rows&&y<cols);
 		}
 		inline bool contains(float x,float y,float z){
-			return (x>=0&&y>=0&&z>=0&&x<rows&&y<cols&&z<slices);
+			return (x>=0&&y>=0&&z>=0&&x<rows&&y<cols);
 		}
 		template<class Archive> void serialize(Archive & archive) {
-			archive(CEREAL_NVP(id),CEREAL_NVP(rows), CEREAL_NVP(cols), CEREAL_NVP(slices),CEREAL_NVP(channels),CEREAL_NVP(data));
+			archive(CEREAL_NVP(id),CEREAL_NVP(rows), CEREAL_NVP(cols),CEREAL_NVP(channels),CEREAL_NVP(data));
 		}
 
-		Tensor(int r, int c, int s,int ch, uint64_t id = 0) :rows(r), cols(c), slices(s),channels(ch), id(id){
+		Tensor2(int r, int c, int s,int ch, uint64_t id = 0) :rows(r), cols(c), channels(ch), id(id){
 		data.resize((size_t)r *(size_t) c * (size_t)s);
 		}
-		Tensor(const std::vector<T>& ref, int r, int c, int s, int ch, int x = 0, int y =
-			0, int z = 0, uint64_t id = 0) : data(ref) , rows(r), cols(c), slices(s),channels(ch), id(id){
+		Tensor2(const std::vector<T>& ref, int r, int c, int s, int ch, int x = 0, int y =
+			0, int z = 0, uint64_t id = 0) : data(ref) , rows(r), cols(c), channels(ch), id(id){
 		}
-		Tensor() : rows(0), cols(0), slices(0),channels(0), id(0) {
+		Tensor2() : rows(0), cols(0), channels(0), id(0) {
 		}
-		Tensor<T, I>& operator=(const Tensor<T, I>& rhs) {
+		Tensor2<T, I>& operator=(const Tensor2<T, I>& rhs) {
 			if (this == &rhs)return *this;
-			this->resize(rhs.rows, rhs.cols, rhs.slices,rhs.channels);
+			this->resize(rhs.rows, rhs.cols, rhs.channels);
 			this->id = rhs.id;
 			this->data=rhs.data;
 			return *this;
 		}
-		int4 dimensions() const {
-			return int3(rows, cols, slices, channels);
+		int3 dimensions() const {
+			return int3(rows, cols, channels);
 		}
 		size_t size() const {
 			return data.size();
@@ -112,27 +111,23 @@ template<class T, ImageType I> struct Tensor {
 		size_t typeSize() const {
 			return sizeof(T);
 		}
-		void resize(int r, int c, int s,int ch) {
-			data.resize((size_t)r * (size_t)c * (size_t)s*(size_t)ch);
+		void resize(int r, int c, int ch) {
+			data.resize((size_t)r * (size_t)c *(size_t)ch);
 			rows = r;
 			cols = c;
-			slices = s;
 			channels=ch;
 		}
-		void resize(int3 dims,int ch) {
-			data.resize((size_t)dims.x * (size_t)dims.y * (size_t)dims.z*(size_t)ch);
+		void resize(int2 dims, int ch) {
+			data.resize((size_t)dims.x * (size_t)dims.y *(size_t)ch);
 			rows = dims.x;
 			cols = dims.y;
-			slices=dims.z;
 			channels=ch;
 		}
-
 		inline void clear() {
 			data.clear();
 			data.shrink_to_fit();
 			rows = 0;
 			cols = 0;
-			slices = 0;
 			channels = 0;
 		}
 		T* ptr() {
@@ -160,8 +155,7 @@ template<class T, ImageType I> struct Tensor {
 		size_t getIndex(int i,int j,int k,int ch=0) const {
 			return	  clamp((int)ch, 0, channels)
 					+ clamp((int)i , 0, rows   - 1) * channels
-					+ clamp((int)j , 0, cols   - 1) * rows * channels
-					+ clamp((int)k , 0, slices - 1) * rows * cols * channels;
+					+ clamp((int)j , 0, cols   - 1) * rows * channels;
 		}
 
 		T& operator()(const size_t i, const size_t j, const size_t k,const int c) {
@@ -173,15 +167,84 @@ template<class T, ImageType I> struct Tensor {
 		inline VecMap<T> operator()(int i,int j,int k) const {
 			return VecMap<T>(&data[getIndex(i,j,k)], channels, 1);
 		}
-		/*
-		template<class F> void apply(F f) {
-			size_t sz = size();
-#pragma omp parallel for
-			for (int offset = 0; offset < (int)sz; offset++) {
-				f(offset, data[offset]);
+
+		template<int C> void set(const aly::Image<T,C,I>& img) {
+			size_t a=img.size();
+			resize(img.width,img.height,C);
+			for(size_t idx=0;idx<a;idx++){
+				for(int c=0;c<C;c++){
+					data[idx*C+c]=img[idx][c];
+				}
 			}
 		}
-		*/
+
+		template<int C> void set(const aly::Vector<T,C>& in) {
+			resize(in.size(),1,1);
+			size_t a=in.size();
+			for(size_t idx=0;idx<a;idx++){
+				for(int c=0;c<C;c++){
+					data[idx*C+c]=in.data[idx][c];
+				}
+			}
+		}
+
+		template<int C> void set(const std::vector<vec<T,C>>& in) {
+			resize(in.size(),1,1);
+			size_t a=in.size();
+			for(size_t idx=0;idx<a;idx++){
+				for(int c=0;c<C;c++){
+					data[idx*C+c]=in[idx][c];
+				}
+			}
+		}
+
+		void set(const std::vector<T>& data) {
+			resize(data.size(),1,1);
+			this->data.assign(data.begin(),data.end());
+		}
+
+
+		template<int C> void get(aly::Vector<T,C>& out) {
+			if(channels!=C){
+				throw std::runtime_error("Channel sizes do not match.");
+			}
+			out.resize(rows*cols);
+			size_t sz=out.size();
+			for(size_t idx=0;idx<sz;idx++){
+				for(int c=0;c<C;c++){
+					out[idx][c]=data[idx*C+c];
+				}
+			}
+		}
+		template<int C> void get(std::vector<vec<T,C>>& out) {
+			if(channels!=C){
+				throw std::runtime_error("Channel sizes do not match.");
+			}
+			out.resize(rows*cols);
+			size_t sz=out.size();
+			for(size_t idx=0;idx<sz;idx++){
+				for(int c=0;c<C;c++){
+					out[idx][c]=data[idx*C+c];
+				}
+			}
+		}
+		void get(std::vector<T>& out) {
+			out.resize(rows*cols*channels);
+			size_t sz=out.size();
+			for(size_t idx=0;idx<sz;idx++){
+				out[idx]=data[idx];
+			}
+		}
+		template<int C> void get(aly::Image<T,C,I>& img) {
+			img.resize(rows,cols);
+			size_t a=img.size();
+			for(size_t idx=0;idx<a;idx++){
+				for(int c=0;c<C;c++){
+					img[idx][c]=data[idx*C+c];
+				}
+			}
+		}
+
 		inline void apply(const std::function<void(size_t index,T& value)>& func){
 			size_t sz=data.size();
 #pragma omp parallel for
@@ -189,29 +252,20 @@ template<class T, ImageType I> struct Tensor {
 				func(offset, data[offset]);
 			}
 		}
-		inline void apply(const std::function<void(size_t index,size_t slice,T& value)>& func){
-			size_t sz=rows*cols*channels;
-#pragma omp parallel for
-			for (size_t i = 0; i < sz; i++) {
-				for (size_t s = 0; s < slices; s++) {
-					func(i,s, data[i+sz*s]);
-				}
-			}
-		}
 		inline void apply(const std::function<void(size_t index,VecMap<T>& value)>& func){
-			size_t sz=rows*cols*slices;
+			size_t sz=rows*cols;
 		#pragma omp parallel for
 			for (size_t i = 0; i < sz; i++) {
 				f(i,VecMap<T>(&data[i*channels], channels, 1));
 			}
 		}
 	};
-	template<class T, ImageType I> void Transform(Tensor<T, I>& im1,
-		Tensor<T, I>& im2,
+	template<class T, ImageType I> void Transform(Tensor2<T, I>& im1,
+		Tensor2<T, I>& im2,
 		const std::function<void(T&, T&)>& func) {
 		if (im1.dimensions() != im2.dimensions())
 			throw std::runtime_error(
-				MakeString() << "Tensor dimensions do not match. "
+				MakeString() << "Tensor2 dimensions do not match. "
 				<< im1.dimensions() << "!=" << im2.dimensions());
 		size_t sz = im1.size();
 #pragma omp parallel for
@@ -219,15 +273,15 @@ template<class T, ImageType I> struct Tensor {
 			func(im1.data[offset], im2.data[offset]);
 		}
 	}
-	template<class T, ImageType I> void Transform(Tensor<T, I>& im1,
-		const Tensor<T, I>& im2, const Tensor<T, I>& im3,
-		const Tensor<T, I>& im4,
+	template<class T, ImageType I> void Transform(Tensor2<T, I>& im1,
+		const Tensor2<T, I>& im2, const Tensor2<T, I>& im3,
+		const Tensor2<T, I>& im4,
 		const std::function<
 		void(T&, const T&, const T&,
 			const T&)>& func) {
 		if (im1.dimensions() != im2.dimensions())
 			throw std::runtime_error(
-				MakeString() << "Tensor dimensions do not match. "
+				MakeString() << "Tensor2 dimensions do not match. "
 				<< im1.dimensions() << "!=" << im2.dimensions());
 		size_t sz = im1.size();
 #pragma omp parallel for
@@ -236,7 +290,7 @@ template<class T, ImageType I> struct Tensor {
 				im4.data[offset]);
 		}
 	}
-	template<class T, ImageType I> void Transform(Tensor<T, I>& im1,
+	template<class T, ImageType I> void Transform(Tensor2<T, I>& im1,
 		const std::function<void(T&)>& func) {
 		size_t sz = im1.size();
 #pragma omp parallel for
@@ -244,12 +298,12 @@ template<class T, ImageType I> struct Tensor {
 			func(im1.data[offset]);
 		}
 	}
-	template<class T, ImageType I> void Transform(Tensor<T, I>& im1,
-		const Tensor<T, I>& im2,
+	template<class T, ImageType I> void Transform(Tensor2<T, I>& im1,
+		const Tensor2<T, I>& im2,
 		const std::function<void(T&, const T&)>& func) {
 		if (im1.dimensions() != im2.dimensions())
 			throw std::runtime_error(
-				MakeString() << "Tensor dimensions do not match. "
+				MakeString() << "Tensor2 dimensions do not match. "
 				<< im1.dimensions() << "!=" << im2.dimensions());
 		size_t sz = im1.size();
 #pragma omp parallel for
@@ -257,12 +311,12 @@ template<class T, ImageType I> struct Tensor {
 			func(im1.data[offset], im2.data[offset]);
 		}
 	}
-	template<class T, ImageType I> void Transform(Tensor<T, I>& im1,
-		const Tensor<T, I>& im2, const Tensor<T, I>& im3,
+	template<class T, ImageType I> void Transform(Tensor2<T, I>& im1,
+		const Tensor2<T, I>& im2, const Tensor2<T, I>& im3,
 		const std::function<void(T&, const T&, const T&)>& func) {
 		if (im1.dimensions() != im2.dimensions())
 			throw std::runtime_error(
-				MakeString() << "Tensor dimensions do not match. "
+				MakeString() << "Tensor2 dimensions do not match. "
 				<< im1.dimensions() << "!=" << im2.dimensions());
 		size_t sz = im1.size();
 #pragma omp parallel for
@@ -270,13 +324,13 @@ template<class T, ImageType I> struct Tensor {
 			func(im1.data[offset], im2.data[offset], im3.data[offset]);
 		}
 	}
-	template<class T, ImageType I> void Transform(Tensor<T, I>& im1,
-		Tensor<T, I>& im2,
+	template<class T, ImageType I> void Transform(Tensor2<T, I>& im1,
+		Tensor2<T, I>& im2,
 		const std::function<
 		void(int i, int j, int k, T& val1, T& val2)>& func) {
 		if (im1.dimensions() != im2.dimensions())
 			throw std::runtime_error(
-				MakeString() << "Tensor dimensions do not match. "
+				MakeString() << "Tensor2 dimensions do not match. "
 				<< im1.dimensions() << "!=" << im2.dimensions());
 #pragma omp parallel for
 		for (int k = 0; k < im1.slices; k++) {
@@ -288,13 +342,13 @@ template<class T, ImageType I> struct Tensor {
 			}
 		}
 	}
-	template<class T, ImageType I> void Transform(Tensor<T, I>& im1,
-		Tensor<T, I>& im2,
+	template<class T, ImageType I> void Transform(Tensor2<T, I>& im1,
+		Tensor2<T, I>& im2,
 		const std::function<
 		void(size_t offset, T& val1, T& val2)>& func) {
 		if (im1.dimensions() != im2.dimensions())
 			throw std::runtime_error(
-				MakeString() << "Tensor dimensions do not match. "
+				MakeString() << "Tensor2 dimensions do not match. "
 				<< im1.dimensions() << "!=" << im2.dimensions());
 		size_t sz = im1.size();
 #pragma omp parallel for
@@ -303,173 +357,173 @@ template<class T, ImageType I> struct Tensor {
 		}
 	}
 	template<class VecT, class T, class L, class R, int C, ImageType I> std::basic_ostream<L, R> & operator <<(
-		std::basic_ostream<L, R> & ss, const Tensor<T, I> & A) {
-		ss << "Tensor (" << A.getTypeName() << "): " << A.id << " Position: ("
+		std::basic_ostream<L, R> & ss, const Tensor2<T, I> & A) {
+		ss << "Tensor2 (" << A.getTypeName() << "): " << A.id << " Position: ("
 			<< A.x << "," << A.y << ") Dimensions: [" << A.rows << "," << A.cols
 			<< "]\n";
 		return ss;
 	}
-	template<class T, ImageType I> Tensor<T, I> operator+(
-		const T& scalar, const Tensor<T, I>& img) {
-		Tensor<T, I> out(img.rows, img.cols, img.slices, img.position());
+	template<class T, ImageType I> Tensor2<T, I> operator+(
+		const T& scalar, const Tensor2<T, I>& img) {
+		Tensor2<T, I> out(img.rows, img.cols, img.slices, img.position());
 		std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 = scalar + val2;};
 		Transform(out, img, f);
 		return out;
 	}
 
-	template<class T, ImageType I> Tensor<T, I> operator-(
-		const T& scalar, const Tensor<T, I>& img) {
-		Tensor<T, I> out(img.rows, img.cols, img.slices, img.position());
+	template<class T, ImageType I> Tensor2<T, I> operator-(
+		const T& scalar, const Tensor2<T, I>& img) {
+		Tensor2<T, I> out(img.rows, img.cols, img.slices, img.position());
 		std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 = scalar - val2;};
 		Transform(out, img, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor<T, I> operator*(
-		const T& scalar, const Tensor<T, I>& img) {
-		Tensor<T, I> out(img.rows, img.cols, img.slices, img.position());
+	template<class T, ImageType I> Tensor2<T, I> operator*(
+		const T& scalar, const Tensor2<T, I>& img) {
+		Tensor2<T, I> out(img.rows, img.cols, img.slices, img.position());
 		std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 = scalar*val2;};
 		Transform(out, img, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor<T, I> operator/(
-		const T& scalar, const Tensor<T, I>& img) {
-		Tensor<T, I> out(img.rows, img.cols, img.slices, img.position());
+	template<class T, ImageType I> Tensor2<T, I> operator/(
+		const T& scalar, const Tensor2<T, I>& img) {
+		Tensor2<T, I> out(img.rows, img.cols, img.slices, img.position());
 		std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 = scalar / val2;};
 		Transform(out, img, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor<T, I> operator+(
-		const Tensor<T, I>& img, const T& scalar) {
-		Tensor<T, I> out(img.rows, img.cols, img.slices, img.position());
+	template<class T, ImageType I> Tensor2<T, I> operator+(
+		const Tensor2<T, I>& img, const T& scalar) {
+		Tensor2<T, I> out(img.rows, img.cols, img.slices, img.position());
 		std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 = val2 + scalar;};
 		Transform(out, img, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor<T, I> operator-(
-		const Tensor<T, I>& img, const T& scalar) {
-		Tensor<T, I> out(img.rows, img.cols, img.slices, img.position());
+	template<class T, ImageType I> Tensor2<T, I> operator-(
+		const Tensor2<T, I>& img, const T& scalar) {
+		Tensor2<T, I> out(img.rows, img.cols, img.slices, img.position());
 		std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 = val2 - scalar;};
 		Transform(out, img, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor<T, I> operator*(
-		const Tensor<T, I>& img, const T& scalar) {
-		Tensor<T, I> out(img.rows, img.cols, img.slices, img.position());
+	template<class T, ImageType I> Tensor2<T, I> operator*(
+		const Tensor2<T, I>& img, const T& scalar) {
+		Tensor2<T, I> out(img.rows, img.cols, img.slices, img.position());
 		std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 = val2*scalar;};
 		Transform(out, img, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor<T, I> operator/(
-		const Tensor<T, I>& img, const T& scalar) {
-		Tensor<T, I> out(img.rows, img.cols, img.slices, img.position());
+	template<class T, ImageType I> Tensor2<T, I> operator/(
+		const Tensor2<T, I>& img, const T& scalar) {
+		Tensor2<T, I> out(img.rows, img.cols, img.slices, img.position());
 		std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 = val2 / scalar;};
 		Transform(out, img, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor<T, I> operator-(
-		const Tensor<T, I>& img) {
-		Tensor<T, I> out(img.rows, img.cols, img.slices, img.position());
+	template<class T, ImageType I> Tensor2<T, I> operator-(
+		const Tensor2<T, I>& img) {
+		Tensor2<T, I> out(img.rows, img.cols, img.slices, img.position());
 		std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 = -val2;};
 		Transform(out, img, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor<T, I> operator+=(
-		Tensor<T, I>& out, const Tensor<T, I>& img) {
+	template<class T, ImageType I> Tensor2<T, I> operator+=(
+		Tensor2<T, I>& out, const Tensor2<T, I>& img) {
 		std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 += val2;};
 		Transform(out, img, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor<T, I> operator-=(
-		Tensor<T, I>& out, const Tensor<T, I>& img) {
+	template<class T, ImageType I> Tensor2<T, I> operator-=(
+		Tensor2<T, I>& out, const Tensor2<T, I>& img) {
 		std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 -= val2;};
 		Transform(out, img, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor<T, I> operator*=(
-		Tensor<T, I>& out, const Tensor<T, I>& img) {
+	template<class T, ImageType I> Tensor2<T, I> operator*=(
+		Tensor2<T, I>& out, const Tensor2<T, I>& img) {
 		std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 *= val2;};
 		Transform(out, img, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor<T, I> operator/=(
-		Tensor<T, I>& out, const Tensor<T, I>& img) {
+	template<class T, ImageType I> Tensor2<T, I> operator/=(
+		Tensor2<T, I>& out, const Tensor2<T, I>& img) {
 		std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 /= val2;};
 		Transform(out, img, f);
 		return out;
 	}
 
-	template<class T, ImageType I> Tensor<T, I> operator+=(
-		Tensor<T, I>& out, const T& scalar) {
+	template<class T, ImageType I> Tensor2<T, I> operator+=(
+		Tensor2<T, I>& out, const T& scalar) {
 		std::function<void(T&)> f = [=](T& val1) {val1 += scalar;};
 		Transform(out, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor<T, I> operator-=(
-		Tensor<T, I>& out, const T& scalar) {
+	template<class T, ImageType I> Tensor2<T, I> operator-=(
+		Tensor2<T, I>& out, const T& scalar) {
 		std::function<void(T&)> f = [=](T& val1) {val1 -= scalar;};
 		Transform(out, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor<T, I> operator*=(
-		Tensor<T, I>& out, const T& scalar) {
+	template<class T, ImageType I> Tensor2<T, I> operator*=(
+		Tensor2<T, I>& out, const T& scalar) {
 		std::function<void(T&)> f = [=](T& val1) {val1 *= scalar;};
 		Transform(out, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor<T, I> operator/=(
-		Tensor<T, I>& out, const T& scalar) {
+	template<class T, ImageType I> Tensor2<T, I> operator/=(
+		Tensor2<T, I>& out, const T& scalar) {
 		std::function<void(T&)> f = [=](T& val1) {val1 /= scalar;};
 		Transform(out, f);
 		return out;
 	}
 
-	template<class T, ImageType I> Tensor<T, I> operator+(
-		const Tensor<T, I>& img1, const Tensor<T, I>& img2) {
-		Tensor<T, I> out(img1.rows, img1.cols, img1.slices);
+	template<class T, ImageType I> Tensor2<T, I> operator+(
+		const Tensor2<T, I>& img1, const Tensor2<T, I>& img2) {
+		Tensor2<T, I> out(img1.rows, img1.cols, img1.slices);
 		std::function<void(T&, const T&, const T&)> f =
 			[=](T& val1, const T& val2, const T& val3) {val1 = val2 + val3;};
 		Transform(out, img1, img2, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor<T, I> operator-(
-		const Tensor<T, I>& img1, const Tensor<T, I>& img2) {
-		Tensor<T, I> out(img1.rows, img1.cols, img1.slices);
+	template<class T, ImageType I> Tensor2<T, I> operator-(
+		const Tensor2<T, I>& img1, const Tensor2<T, I>& img2) {
+		Tensor2<T, I> out(img1.rows, img1.cols, img1.slices);
 		std::function<void(T&, const T&, const T&)> f =
 			[=](T& val1, const T& val2, const T& val3) {val1 = val2 - val3;};
 		Transform(out, img1, img2, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor<T, I> operator*(
-		const Tensor<T, I>& img1, const Tensor<T, I>& img2) {
-		Tensor<T, I> out(img1.rows, img1.cols, img1.slices);
+	template<class T, ImageType I> Tensor2<T, I> operator*(
+		const Tensor2<T, I>& img1, const Tensor2<T, I>& img2) {
+		Tensor2<T, I> out(img1.rows, img1.cols, img1.slices);
 		std::function<void(T&, const T&, const T&)> f =
 			[=](T& val1, const T& val2, const T& val3) {val1 = val2*val3;};
 		Transform(out, img1, img2, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor<T, I> operator/(
-		const Tensor<T, I>& img1, const Tensor<T, I>& img2) {
-		Tensor<T, I> out(img1.rows, img1.cols, img1.slices);
+	template<class T, ImageType I> Tensor2<T, I> operator/(
+		const Tensor2<T, I>& img1, const Tensor2<T, I>& img2) {
+		Tensor2<T, I> out(img1.rows, img1.cols, img1.slices);
 		std::function<void(T&, const T&, const T&)> f =
 			[=](T& val1, const T& val2, const T& val3) {val1 = val2 / val3;};
 		Transform(out, img1, img2, f);
 		return out;
 	}
 	template<class T, ImageType I> bool ReadImageFromRawFile(
-				const std::string& file, Tensor<T, I>& img) {
+				const std::string& file, Tensor2<T, I>& img) {
 			std::string xmlFile = GetFileWithoutExtension(file)+".xml";
 			std::string rawFile = GetFileWithoutExtension(file)+".raw";
 			MipavHeader header;
@@ -528,7 +582,7 @@ template<class T, ImageType I> struct Tensor {
 			fclose(f);
 		}
 		template<class T, ImageType I> void WriteImageToRawFile(
-			const std::string& file, const Tensor<T, I>& img) {
+			const std::string& file, const Tensor2<T, I>& img) {
 			std::ostringstream vstr;
 			std::string fileName = GetFileWithoutExtension(file);
 			vstr << fileName << ".raw";
@@ -633,22 +687,21 @@ template<class T, ImageType I> struct Tensor {
 			myfile.close();
 		}
 	template<class T, ImageType I> void WriteTensorToFile(
-		const std::string& file, const Tensor<T, I>& img) {
+		const std::string& file, const Tensor2<T, I>& img) {
 		WriteImageToRawFile(file,img);
 	}
 	template<class T, ImageType I> bool ReadTensorFromFile(
-		const std::string& file, Tensor<T, I>& img) {
+		const std::string& file, Tensor2<T, I>& img) {
 		return ReadImageFromRawFile(file,img);
 	}
-	typedef Tensor<float,ImageType::FLOAT> TensorFloat;
-	typedef Tensor<double,ImageType::DOUBLE> TensorDouble;
-	typedef Tensor<int32_t,ImageType::INT> TensorInt;
-	typedef Tensor<uint32_t,ImageType::UINT> TensorUInt;
-	typedef Tensor<uint16_t,ImageType::USHORT> TensorUShort;
-	typedef Tensor<int16_t,ImageType::SHORT> TensorShort;
-	typedef Tensor<uint8_t,ImageType::UBYTE> TensorUByte;
-	typedef Tensor<int8_t,ImageType::BYTE> TensorByte;
-
+	typedef Tensor2<float,ImageType::FLOAT> Tensor2f;
+	typedef Tensor2<double,ImageType::DOUBLE> Tensor2d;
+	typedef Tensor2<int32_t,ImageType::INT> Tensor2i;
+	typedef Tensor2<uint32_t,ImageType::UINT> Tensor2ui;
+	typedef Tensor2<uint16_t,ImageType::USHORT> Tensor2us;
+	typedef Tensor2<int16_t,ImageType::SHORT> Tensor2s;
+	typedef Tensor2<uint8_t,ImageType::UBYTE> Tensor2ub;
+	typedef Tensor2<int8_t,ImageType::BYTE> Tensor2b;
 }
 ;
 
