@@ -42,7 +42,7 @@ template<class T> struct VecType {
 template<class T> class Vec;
 template<class T> class VecMap:public VecType<T> {
 private:
-	const T* ptr;
+	T* ptr;
 	const size_t sz;
 	const size_t stride;
 public:
