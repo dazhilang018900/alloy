@@ -7,6 +7,7 @@
       http://mozilla.org/MPL/2.0/.
  */
 #include <AlloyMemMappedFile.h>
+
 #ifdef ALY_WINDOWS
 	#include <windows.h>
 #else
@@ -15,6 +16,8 @@
 	#include <sys/mman.h>
 	#include <sys/stat.h>
 #endif
+#include <AlloyFileUtil.h>
+
 namespace aly
 {
     unsigned int mmf_granularity()
