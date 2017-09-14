@@ -185,9 +185,9 @@ template<class T, ImageType I> struct Tensor3 {
 				}
 			} else {
 				resize(img.width,img.height,1,C);
-				for(size_t idx=0;idx<a;idx+=C){
+				for(size_t idx=0;idx<a;idx++){
 					for(int c=0;c<C;c++){
-						data[idx+c]=img[idx][c];
+						data[idx*C+c]=img[idx][c];
 					}
 				}
 			}

@@ -1610,10 +1610,47 @@ bool ListBox::onMouseDown(ListEntry* entry, AlloyContext* context,
 							break;
 						}
 					}
+				} else if(e.isShiftDown()){
+					int startIndex=-1;
+					int endIndex=-1;
+					if(lastSelected.size()>0){
+						auto lastEntry=lastSelected.back();
+						int index=0;
+						for(auto le:listEntries){
+							if(le.get()==lastEntry){
+								startIndex=index;
+							}
+							if(le.get()==entry){
+								endIndex=index;
+							}
+							index++;
+						}
+						if(startIndex>endIndex){
+							std::swap(startIndex,endIndex);
+						}
+						for(int i=startIndex;i<=endIndex;i++){
+							if(!listEntries[i]->isSelected()){
+								listEntries[i]->setSelected(true);
+								lastSelected.push_back(listEntries[i].get());
+								if(listEntries[i].get()!=entry){
+									if (onSelect)
+										onSelect(entry, e);
+								}
+							}
+						}
+					} else {
+						if (!entry->isSelected()) {
+							entry->setSelected(true);
+							lastSelected.push_back(entry);
+						}
+					}
 				} else {
-					entry->setSelected(true);
-					lastSelected.push_back(entry);
+					if (!entry->isSelected()) {
+						entry->setSelected(true);
+						lastSelected.push_back(entry);
+					}
 				}
+
 			} else {
 				if (!entry->isSelected()) {
 					for (ListEntry* child : lastSelected) {
@@ -2001,6 +2038,17 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			}
 		}
 	}
+	if(e.type ==InputType::Key){
+		if(e.isControlDown()&&e.key==GLFW_KEY_A&&enableMultiSelection){
+			for(auto entry:listEntries){
+				if (!entry->isSelected()) {
+					entry->setSelected(true);
+					lastSelected.push_back(entry.get());
+					if (onSelect)onSelect(entry.get(), e);
+				}
+			}
+		}
+	}
 	if (e.type == InputType::Cursor || e.type == InputType::MouseButton) {
 		if (context->isMouseDrag() && e.button == GLFW_MOUSE_BUTTON_LEFT) {
 			if (enableMultiSelection) {
@@ -2028,8 +2076,7 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 				}
 
 			}
-		} else if (!context->isMouseDown()
-				&& e.type == InputType::MouseButton) {
+		} else if(!context->isMouseDown() && e.type == InputType::MouseButton) {
 			if (enableMultiSelection) {
 				int index = 0;
 				for (std::shared_ptr<ListEntry> entry : listEntries) {
@@ -2046,8 +2093,9 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 					for (int i = startItem; i <= endItem; i++) {
 						std::shared_ptr<ListEntry> entry = listEntries[i];
 						if (!entry->isSelected()) {
-							lastSelected.push_back(entry.get());
 							entry->setSelected(true);
+							lastSelected.push_back(entry.get());
+							if (onSelect)onSelect(entry.get(), e);
 						}
 					}
 				}

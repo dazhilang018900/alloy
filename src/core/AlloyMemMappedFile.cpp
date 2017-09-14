@@ -103,7 +103,7 @@ namespace aly
     void ReadableMemMapFile::open(char const* pathname, bool map_all)
     {
         if (! pathname) return;
-        if (is_open()) close();
+        if (isOpen()) close();
 	#ifdef ALY_WINDOWS
         file_handle_ = ::CreateFile(pathname, GENERIC_READ,
             FILE_SHARE_READ | FILE_SHARE_WRITE, 0,
@@ -147,34 +147,34 @@ namespace aly
     }
 
     WriteableMemMapFile::WriteableMemMapFile(char const* pathname,
-        aly::ExistsPolicyMMF exists_mode,
-        aly::DoesNotExistPolicyMMF doesnt_exist_mode)
+        aly::FileExistsPolicy exists_mode,
+        aly::FileDoesNotExistPolicy doesnt_exist_mode)
     {
         open(pathname, exists_mode, doesnt_exist_mode);
     }
 
     void WriteableMemMapFile::open(char const* pathname,
-        aly::ExistsPolicyMMF exists_mode,
-        aly::DoesNotExistPolicyMMF doesnt_exist_mode)
+        aly::FileExistsPolicy exists_mode,
+        aly::FileDoesNotExistPolicy doesnt_exist_mode)
     {
         if (! pathname) return;
-        if (is_open()) close();
+        if (isOpen()) close();
 	#ifdef ALY_WINDOWS
         int win_open_mode;
         
         switch (exists_mode)
         {
-        case ExistsPolicyMMF::if_exists_just_open:
-        case ExistsPolicyMMF::if_exists_map_all:
-            win_open_mode = doesnt_exist_mode == DoesNotExistPolicyMMF::if_doesnt_exist_create ?
+        case FileExistsPolicy::if_exists_just_open:
+        case FileExistsPolicy::if_exists_map_all:
+            win_open_mode = doesnt_exist_mode == FileDoesNotExistPolicy::if_doesnt_exist_create ?
                 OPEN_ALWAYS : OPEN_EXISTING;
             break;
-        case ExistsPolicyMMF::if_exists_truncate:
-            win_open_mode = doesnt_exist_mode == DoesNotExistPolicyMMF::if_doesnt_exist_create ?
+        case FileExistsPolicy::if_exists_truncate:
+            win_open_mode = doesnt_exist_mode == FileDoesNotExistPolicy::if_doesnt_exist_create ?
                 CREATE_ALWAYS : TRUNCATE_EXISTING;
             break;
         default:
-            if (doesnt_exist_mode == DoesNotExistPolicyMMF::if_doesnt_exist_create)
+            if (doesnt_exist_mode == FileDoesNotExistPolicy::if_doesnt_exist_create)
             {
                 win_open_mode = CREATE_NEW;
             }
@@ -189,17 +189,17 @@ namespace aly
         int posix_open_mode = O_RDWR;
         switch (exists_mode)
         {
-        case ExistsPolicyMMF::if_exists_just_open:
-        case ExistsPolicyMMF::if_exists_map_all:
-            posix_open_mode |= doesnt_exist_mode == DoesNotExistPolicyMMF::if_doesnt_exist_create ?
+        case FileExistsPolicy::if_exists_just_open:
+        case FileExistsPolicy::if_exists_map_all:
+            posix_open_mode |= doesnt_exist_mode == FileDoesNotExistPolicy::if_doesnt_exist_create ?
                 O_CREAT : 0;
             break;
-        case ExistsPolicyMMF::if_exists_truncate:
-            posix_open_mode |= doesnt_exist_mode == DoesNotExistPolicyMMF::if_doesnt_exist_create ?
+        case FileExistsPolicy::if_exists_truncate:
+            posix_open_mode |= doesnt_exist_mode == FileDoesNotExistPolicy::if_doesnt_exist_create ?
                 O_TRUNC | O_CREAT : O_TRUNC;
             break;
         default:
-            if (doesnt_exist_mode == DoesNotExistPolicyMMF::if_doesnt_exist_create)
+            if (doesnt_exist_mode == FileDoesNotExistPolicy::if_doesnt_exist_create)
                 posix_open_mode |= O_EXCL | O_CREAT;
             else return;
         }
@@ -208,7 +208,7 @@ namespace aly
         if (file_handle_ == -1) return;
     #endif
         file_size_ = query_file_size_();
-        if (exists_mode == ExistsPolicyMMF::if_exists_map_all && file_size_ > 0) map();
+        if (exists_mode == FileExistsPolicy::if_exists_map_all && file_size_ > 0) map();
     }
 
     void WriteableMemMapFile::map(size_t offset, size_t requested_size)

@@ -20,12 +20,12 @@ namespace aly
     public:
         explicit BaseMemMapFile();
         ~BaseMemMapFile();
-        size_t offset() const { return offset_; }
-        size_t mapped_size() const { return mapped_size_; }
-        size_t file_size() const { return file_size_; }
+        size_t getOffset() const { return offset_; }
+        size_t getMappedSize() const { return mapped_size_; }
+        size_t getFileSize() const { return file_size_; }
         void unmap();
         void close();
-        bool is_open() const
+        bool isOpen() const
         {
             return file_handle_ !=
     #ifdef ALY_WINDOWS
@@ -38,7 +38,7 @@ namespace aly
     #else
         typedef int HANDLE;
     #endif
-        HANDLE file_handle() const
+        HANDLE getFileHandle() const
         {
             return file_handle_;
         }
@@ -70,7 +70,7 @@ namespace aly
         void map(size_t offset = 0, size_t size = 0);
     };
 
-    enum class ExistsPolicyMMF
+    enum class FileExistsPolicy
     {
         if_exists_fail=0,
         if_exists_just_open=1,
@@ -78,7 +78,7 @@ namespace aly
         if_exists_truncate=3
     };
 
-    enum class DoesNotExistPolicyMMF
+    enum class FileDoesNotExistPolicy
     {
         if_doesnt_exist_fail=0,
         if_doesnt_exist_create=1
@@ -87,18 +87,18 @@ namespace aly
     {
     public:
         explicit WriteableMemMapFile(char const* pathname = 0,
-            ExistsPolicyMMF exists_mode = ExistsPolicyMMF::if_exists_fail,
-            DoesNotExistPolicyMMF doesnt_exist_mode = DoesNotExistPolicyMMF::if_doesnt_exist_create);
+            FileExistsPolicy exists_mode = FileExistsPolicy::if_exists_fail,
+            FileDoesNotExistPolicy doesnt_exist_mode = FileDoesNotExistPolicy::if_doesnt_exist_create);
         WriteableMemMapFile(const std::string& path,
-                ExistsPolicyMMF exists_mode = ExistsPolicyMMF::if_exists_fail,
-                DoesNotExistPolicyMMF doesnt_exist_mode = DoesNotExistPolicyMMF::if_doesnt_exist_create):WriteableMemMapFile(path.c_str(),exists_mode,doesnt_exist_mode){
+                FileExistsPolicy exists_mode = FileExistsPolicy::if_exists_fail,
+                FileDoesNotExistPolicy doesnt_exist_mode = FileDoesNotExistPolicy::if_doesnt_exist_create):WriteableMemMapFile(path.c_str(),exists_mode,doesnt_exist_mode){
         }
         void open(char const* pathname,
-            ExistsPolicyMMF exists_mode = ExistsPolicyMMF::if_exists_fail,
-            DoesNotExistPolicyMMF doesnt_exist_mode = DoesNotExistPolicyMMF::if_doesnt_exist_create);
+            FileExistsPolicy exists_mode = FileExistsPolicy::if_exists_fail,
+            FileDoesNotExistPolicy doesnt_exist_mode = FileDoesNotExistPolicy::if_doesnt_exist_create);
         inline void open(const std::string& path,
-            ExistsPolicyMMF exists_mode = ExistsPolicyMMF::if_exists_fail,
-            DoesNotExistPolicyMMF doesnt_exist_mode = DoesNotExistPolicyMMF::if_doesnt_exist_create){
+            FileExistsPolicy exists_mode = FileExistsPolicy::if_exists_fail,
+            FileDoesNotExistPolicy doesnt_exist_mode = FileDoesNotExistPolicy::if_doesnt_exist_create){
         	open(path.c_str(), exists_mode, doesnt_exist_mode);
         }
         char* data() { return data_; }
