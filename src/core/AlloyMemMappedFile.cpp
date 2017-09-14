@@ -16,10 +16,26 @@
 	#include <sys/mman.h>
 	#include <sys/stat.h>
 #endif
-#include <AlloyFileUtil.h>
-
 namespace aly
 {
+	#ifdef ALY_WINDOWS
+	void ToWideString(const std::string& in, std::wstring& out) {
+		if (in.empty()) {
+			out.clear();
+			return;
+		}
+
+		size_t bufferSize = mbstowcs(NULL, in.c_str(), 0) + 1; // including null terminator
+		if (bufferSize == 0) {
+			GENERARE_STRING_CONVERSION_ERROR(
+					"Could not convert narrow string to wide string");
+		}
+
+		std::vector<wchar_t> buffer(bufferSize);
+		mbstowcs(&buffer[0], in.c_str(), buffer.size());
+		out.assign(&buffer[0]);
+	}
+	#endif
     unsigned int mmf_granularity()
     {
 	#ifdef ALY_WINDOWS
@@ -108,7 +124,7 @@ namespace aly
         if (isOpen()) close();
 	#ifdef ALY_WINDOWS
 		std::wstring wlink;
-		aly::filesystem::internal::to_wide_string(std::string(pathname), wlink);
+		ToWideString(std::string(pathname), wlink);
         file_handle_ = ::CreateFile(wlink.c_str(), GENERIC_READ,
             FILE_SHARE_READ | FILE_SHARE_WRITE, 0,
             OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
@@ -185,7 +201,7 @@ namespace aly
             else return;
         }
 		std::wstring wlink;
-		aly::filesystem::internal::to_wide_string(std::string(pathname), wlink);
+		ToWideString(std::string(pathname), wlink);
         file_handle_ = ::CreateFile(wlink.c_str(), GENERIC_READ | GENERIC_WRITE,
             FILE_SHARE_READ | FILE_SHARE_WRITE, 0,
             win_open_mode, FILE_ATTRIBUTE_NORMAL, 0);

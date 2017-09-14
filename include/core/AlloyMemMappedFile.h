@@ -9,15 +9,12 @@
 #ifndef MEMORY_MAPPED_FILE_HPP
 #define MEMORY_MAPPED_FILE_HPP
 #include <cstddef> // for size_t
-#if defined(WIN32) || defined(_WIN32)
-#define ALY_PATH_SEPARATOR std::string("\\")
-	#define ALY_WINDOWS
-#endif
 #include <string>
 #include <sstream>
 #include <vector>
 #include <cstring>
 #include <iostream>
+#include "AlloyFileUtil.h"
 namespace aly
 {
     unsigned int mmf_granularity();
