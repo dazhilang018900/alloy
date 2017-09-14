@@ -519,6 +519,12 @@
     <ClCompile Include="..\..\src\segmentation\SpringlsSecondOrder.cpp">
       <Filter>src\segmentation</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\core\AlloyLBFGS.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\AlloyMemMappedFile.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\core\nanovg.h">
@@ -1174,6 +1180,18 @@
     </ClInclude>
     <ClInclude Include="..\..\include\segmentation\SpringlsSecondOrder.h">
       <Filter>include\segmentation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\core\AlloyLBFGS.h">
+      <Filter>include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\core\AlloyMemMappedFile.h">
+      <Filter>include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\core\AlloyTensor2.h">
+      <Filter>include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\core\AlloyTensor3.h">
+      <Filter>include\core</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

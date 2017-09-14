@@ -39,8 +39,8 @@ template<class T> struct VecType {
 	virtual const T& operator[](const size_t i) const =0;
 	virtual ~VecType(){}
 };
-template<class T> class Vec;
-template<class T> class VecMap:public VecType<T> {
+template<class T> struct Vec;
+template<class T> struct VecMap:public VecType<T> {
 private:
 	T* ptr;
 	const size_t sz;

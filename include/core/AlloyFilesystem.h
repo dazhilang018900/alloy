@@ -2224,5 +2224,6 @@ typedef basic_path<char> path;
 typedef basic_path<wchar_t> wpath;
 
 } //namespace filesystem
+
 }
 #endif //#ifndef _FILESYSTEM_H__

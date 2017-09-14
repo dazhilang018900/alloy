@@ -32,8 +32,8 @@ private:
 				Vector& x, Vector& grad, Scalar& step, const Vector& drt,
 				const Vector& xp, const LBFGSParam<Scalar>& param) {
 			// Decreasing and increasing factors
-			const Scalar dec = 0.5;
-			const Scalar inc = 2.1;
+			const Scalar dec = Scalar(0.5);
+			const Scalar inc = Scalar(2.1);
 
 			// Check the value of step
 			if (step <= Scalar(0))
@@ -42,7 +42,7 @@ private:
 			// Save the function value at the current x
 			const Scalar fx_init = fx;
 			// Projection of gradient on the search direction
-			const Scalar dg_init = dot(grad,drt);
+			const Scalar dg_init = Scalar(dot(grad,drt));
 			// Make sure d points to a descent direction
 			if (dg_init > 0)
 				std::logic_error(
@@ -65,7 +65,7 @@ private:
 					if (param.linesearch ==LineSearchType::BACKTRACKING_ARMIJO)
 						break;
 
-					const Scalar dg = dot(grad,drt);
+					const Scalar dg = Scalar(dot(grad,drt));
 					if (dg < param.wolfe * dg_init) {
 						width = inc;
 					} else {
@@ -97,7 +97,7 @@ private:
 				step *= width;
 			}
 		}
-	inline void reset(int n) {
+	void reset(int n) {
 		const int m = m_param.m;
 		m_s.resize(n, m);
 		m_y.resize(n, m);
@@ -136,15 +136,15 @@ public:
 	///
 	/// \return Number of iterations used.
 	///
-	inline int minimize(const std::function<Scalar(Vector& x, Vector& grad)>& f,
+	int minimize(const std::function<Scalar(Vector& x, Vector& grad)>& f,
 			Vector& x, Scalar& fx) {
-		const int n = x.size();
+		const int n = (int)x.size();
 		const int fpast = m_param.past;
 		reset(n);
 		// Evaluate function and compute gradient
 		fx = f(x, m_grad);
-		Scalar xnorm = length(x);
-		Scalar gnorm = length(m_grad);
+		Scalar xnorm = Scalar(length(x));
+		Scalar gnorm = Scalar(length(m_grad));
 		if (fpast > 0)
 			m_fx[0] = fx;
 
@@ -156,7 +156,7 @@ public:
 		// Initial direction
 		m_drt = -m_grad;
 		// Initial step
-		Scalar step = Scalar(1.0) / length(m_drt);
+		Scalar step = Scalar(1.0) / Scalar(length(m_drt));
 
 		int k = 1;
 		int end = 0;
@@ -169,8 +169,8 @@ public:
 			Backtracking(f, fx, x, m_grad, step, m_drt,m_xp, m_param);
 
 			// New x norm and gradient norm
-			xnorm = length(x);
-			gnorm = length(m_grad);
+			xnorm = Scalar(length(x));
+			gnorm = Scalar(length(m_grad));
 
 			// Convergence test -- gradient
 			if (gnorm <= m_param.epsilon * std::max(xnorm, Scalar(1.0))) {
@@ -197,8 +197,8 @@ public:
 			yvec=m_grad - m_gradp;
 			// ys = y's = 1/rho
 			// yy = y'y
-			Scalar ys = dot(yvec,svec);
-			Scalar yy = lengthSqr(yvec);
+			Scalar ys = Scalar(dot(yvec,svec));
+			Scalar yy = Scalar(lengthSqr(yvec));
 			m_ys[end] = ys;
 
 			// Recursive formula to compute d = -H * g
@@ -210,7 +210,7 @@ public:
 				j = (j + m_param.m - 1) % m_param.m;
 				VectorM sj=m_s.getColumn(j);
 				VectorM yj=m_y.getColumn(j);
-				m_alpha[j] = dot(sj,m_drt) / m_ys[j];
+				m_alpha[j] = Scalar(dot(sj,m_drt)) / m_ys[j];
 				m_drt -= m_alpha[j] * yj;
 			}
 
@@ -219,7 +219,7 @@ public:
 			for (int i = 0; i < bound; i++) {
 				VectorM sj=m_s.getColumn(j);
 				VectorM yj=m_y.getColumn(j);
-				Scalar beta = dot(yj,m_drt) / m_ys[j];
+				Scalar beta = Scalar(dot(yj,m_drt)) / m_ys[j];
 				m_drt += (m_alpha[j] - beta) * sj;
 				j = (j + 1) % m_param.m;
 			}

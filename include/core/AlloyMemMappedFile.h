@@ -10,6 +10,8 @@
 #define MEMORY_MAPPED_FILE_HPP
 
 #include <cstddef> // for size_t
+
+#include <AlloyFilesystem.h>
 #include <AlloyFileUtil.h>
 namespace aly
 {
@@ -18,7 +20,7 @@ namespace aly
     class BaseMemMapFile
     {
     public:
-        explicit BaseMemMapFile();
+		explicit BaseMemMapFile();
         ~BaseMemMapFile();
         size_t getOffset() const { return offset_; }
         size_t getMappedSize() const { return mapped_size_; }

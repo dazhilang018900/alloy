@@ -44,7 +44,9 @@
     <ClCompile Include="..\..\src\core\AlloyImageProcessing.cpp" />
     <ClCompile Include="..\..\src\core\AlloyIntersector.cpp" />
     <ClCompile Include="..\..\src\core\AlloyIsoContour.cpp" />
+    <ClCompile Include="..\..\src\core\AlloyLBFGS.cpp" />
     <ClCompile Include="..\..\src\core\AlloyMath.cpp" />
+    <ClCompile Include="..\..\src\core\AlloyMemMappedFile.cpp" />
     <ClCompile Include="..\..\src\core\AlloyMesh.cpp" />
     <ClCompile Include="..\..\src\core\AlloyMeshPrimitives.cpp" />
     <ClCompile Include="..\..\src\core\AlloyMeshTextureMap.cpp" />
@@ -211,8 +213,10 @@
     <ClInclude Include="..\..\include\core\AlloyImageProcessing.h" />
     <ClInclude Include="..\..\include\core\AlloyIntersector.h" />
     <ClInclude Include="..\..\include\core\AlloyIsoContour.h" />
+    <ClInclude Include="..\..\include\core\AlloyLBFGS.h" />
     <ClInclude Include="..\..\include\core\AlloyLocator.h" />
     <ClInclude Include="..\..\include\core\AlloyMath.h" />
+    <ClInclude Include="..\..\include\core\AlloyMemMappedFile.h" />
     <ClInclude Include="..\..\include\core\AlloyMesh.h" />
     <ClInclude Include="..\..\include\core\AlloyMeshPrimitives.h" />
     <ClInclude Include="..\..\include\core\AlloyMeshTextureMap.h" />
@@ -230,6 +234,8 @@
     <ClInclude Include="..\..\include\core\AlloyTablePane.h" />
     <ClInclude Include="..\..\include\core\AlloyTabPane.h" />
     <ClInclude Include="..\..\include\core\AlloyTensor.h" />
+    <ClInclude Include="..\..\include\core\AlloyTensor2.h" />
+    <ClInclude Include="..\..\include\core\AlloyTensor3.h" />
     <ClInclude Include="..\..\include\core\AlloyTimeline.h" />
     <ClInclude Include="..\..\include\core\AlloyUI.h" />
     <ClInclude Include="..\..\include\core\AlloyUndoRedo.h" />
