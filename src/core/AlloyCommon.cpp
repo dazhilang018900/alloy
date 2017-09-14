@@ -63,7 +63,7 @@ std::vector<std::string> Tokenize(const std::string& str) {
 	 return tokens;
 	 */
 }
-std::vector<std::string> Split(const std::string &str, char delim) {
+std::vector<std::string> Split(const std::string &str, char delim,bool keepDelim) {
 	std::stringstream ss;
 	std::vector<std::string> elems;
 	std::string delimString = "";
@@ -76,7 +76,7 @@ std::vector<std::string> Split(const std::string &str, char delim) {
 				elems.push_back(comp);
 				ss.str("");
 			}
-			elems.push_back(delimString);
+			if(keepDelim)elems.push_back(delimString);
 		} else {
 			ss << c;
 		}

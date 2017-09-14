@@ -150,6 +150,25 @@ void CameraShader::draw(const std::vector<std::shared_ptr<Frustum>>& cameras,Cam
 	glEnable(GL_BLEND);
 	frameBuffer.end();
 }
+void CameraShader::draw(const std::vector<std::shared_ptr<Frustum>>& cameras, CameraParameters& camera, GLFrameBuffer& frameBuffer, const std::set<int>& selected) {
+	frameBuffer.begin(float4(0.0f, 0.0f, 0.0f, 1.0f));
+	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+	begin().set("MIN_DEPTH", camera.getNearPlane()).set("MAX_DEPTH", camera.getFarPlane())
+		.set(camera, frameBuffer.getViewport()).set("lightDirection", lightDirection)
+		.set("ambientColor", ambientColor)
+		.set("PoseMat", float4x4::identity());
+	int index = 0;
+	for (std::shared_ptr<Frustum> frust : cameras) {
+		set("diffuseColor", (selected.find(index) != selected.end()) ? selectedCameraColor : diffuseColor);
+		GLShader::draw({ frust.get() }, GLMesh::PrimitiveType::QUADS);
+		index++;
+	}
+	end();
+
+	glEnable(GL_BLEND);
+	frameBuffer.end();
+}
 void CameraShader::draw(const std::vector<std::shared_ptr<Frustum>>& cameras,CameraParameters& camera, const box2px& bounds,int selected) {
 	begin().set("MIN_DEPTH", camera.getNearPlane()).set("MAX_DEPTH", camera.getFarPlane())
 				.set(camera, bounds).set("lightDirection",lightDirection)
@@ -163,7 +182,19 @@ void CameraShader::draw(const std::vector<std::shared_ptr<Frustum>>& cameras,Cam
 		}
 	end();
 }
-
+void CameraShader::draw(const std::vector<std::shared_ptr<Frustum>>& cameras, CameraParameters& camera, const box2px& bounds,const std::set<int>& selected) {
+	begin().set("MIN_DEPTH", camera.getNearPlane()).set("MAX_DEPTH", camera.getFarPlane())
+		.set(camera, bounds).set("lightDirection", lightDirection)
+		.set("ambientColor", ambientColor)
+		.set("PoseMat", float4x4::identity());
+	int index = 0;
+	for (std::shared_ptr<Frustum> frust : cameras) {
+		set("diffuseColor", (selected.find(index)!=selected.end()) ? selectedCameraColor : diffuseColor);
+		GLShader::draw({ frust.get() }, GLMesh::PrimitiveType::QUADS);
+		index++;
+	}
+	end();
+}
 }
 
 

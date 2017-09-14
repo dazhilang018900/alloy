@@ -6,6 +6,7 @@
 #include "AlloyCamera.h"
 #include "AlloyMeshPrimitives.h"
 #include <initializer_list>
+#include <set>
 namespace aly{
 
 class CameraShader: public GLShader {
@@ -29,7 +30,9 @@ public:
 	}
 	CameraShader(bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
 	void draw(const std::vector<std::shared_ptr<Frustum>>& cameras,CameraParameters& camera,GLFrameBuffer& frameBuffer,int selected=-1);
+	void draw(const std::vector<std::shared_ptr<Frustum>>& cameras, CameraParameters& camera, GLFrameBuffer& frameBuffer, const std::set<int>& selected);
 	void draw(const std::vector<std::shared_ptr<Frustum>>& cameras,CameraParameters& camera, const box2px& bounds,int selected=-1);
+	void draw(const std::vector<std::shared_ptr<Frustum>>& cameras, CameraParameters& camera, const box2px& bounds, const std::set<int>& selected);
 };
 
 }

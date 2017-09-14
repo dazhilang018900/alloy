@@ -302,7 +302,9 @@ void Sift::keypointLocalization(void) {
 }
 
 /* ---------------------------------------------------------------- */
-
+const Descriptors& Sift::getDescriptors() const {
+	return descriptors;
+}
 void Sift::descriptorGeneration(void) {
 	if (this->octaves.empty())
 		throw std::runtime_error("Octaves not available!");
@@ -633,7 +635,6 @@ float Sift::keypointAbsoluteScale(SiftKeypoint const& kp) {
 }
 
 /* ---------------------------------------------------------------- */
-
 void Sift::loadLoweDescriptors(std::string const& filename,
 		Descriptors* result) {
 	std::ifstream in(filename.c_str());

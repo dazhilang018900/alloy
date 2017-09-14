@@ -63,7 +63,7 @@ namespace aly {
 	std::string ToLower(const std::string& str);
 	std::string ToUpper(const std::string& str);
 	bool ContainsIgnoreCase(const std::string& str, const std::string& pattern);
-	std::vector<std::string> Split(const std::string& str, char delim);
+	std::vector<std::string> Split(const std::string& str, char delim,bool keepDelim=true);
 	std::vector<std::string> Split(const std::string& str);
 	void Trim(std::string& str);
 	std::vector<std::string> Tokenize(const std::string& str);
