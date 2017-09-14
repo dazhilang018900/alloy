@@ -27,7 +27,7 @@ namespace aly
 
 		size_t bufferSize = mbstowcs(NULL, in.c_str(), 0) + 1; // including null terminator
 		if (bufferSize == 0) {
-			GENERARE_STRING_CONVERSION_ERROR(
+			throw std::runtime_error(
 					"Could not convert narrow string to wide string");
 		}
 
