@@ -35,7 +35,7 @@ std::vector<std::string> Tokenize(const std::string& str) {
 	std::string delimString = "";
 	std::string comp;
 	for (char c : str) {
-		if (c == ' ' || c == '\t' || c == ',' || c == ']' || c == '['
+		if (std::isspace(c) || c == ',' || c == ']' || c == '['
 				|| c == ')' || c == '(' || c == '>' || c == '<' || c == '{'
 				|| c == '}') {
 			comp = ss.str();

@@ -48,6 +48,9 @@ template<class T, ImageType I> struct Tensor3 {
 		typedef typename std::vector<ValueType>::iterator iterator;
 		typedef typename std::vector<ValueType>::const_iterator const_iterator;
 		typedef typename std::vector<ValueType>::reverse_iterator reverse_iterator;
+		bool empty() const {
+			return data.empty();
+		}
 		iterator begin() {
 			return data.begin();
 		}
@@ -90,12 +93,15 @@ template<class T, ImageType I> struct Tensor3 {
 		}
 
 		Tensor3(int r, int c, int s,int ch, uint64_t id = 0) :rows(r), cols(c), slices(s),channels(ch), id(id){
-		data.resize((size_t)r *(size_t) c * (size_t)s);
+		data.resize((size_t)r *(size_t) c * (size_t)s*(size_t)ch);
 		}
 		Tensor3(const std::vector<T>& ref, int r, int c, int s, int ch, int x = 0, int y =
 			0, int z = 0, uint64_t id = 0) : data(ref) , rows(r), cols(c), slices(s),channels(ch), id(id){
 		}
 		Tensor3() : rows(0), cols(0), slices(0),channels(0), id(0) {
+		}
+		Tensor3(const int4& dims, uint64_t id = 0):rows(dims.x),cols(dims.y),slices(dims.z),channels(dims.w),id(id){
+			data.resize((size_t)rows *(size_t) cols * (size_t)slices*(size_t)channels);
 		}
 		Tensor3<T, I>& operator=(const Tensor3<T, I>& rhs) {
 			if (this == &rhs)return *this;
@@ -104,8 +110,8 @@ template<class T, ImageType I> struct Tensor3 {
 			this->data=rhs.data;
 			return *this;
 		}
-		int4 dimensions() const {
-			return int4(rows, cols, slices, channels);
+		dim4 dimensions() const {
+			return dim4(rows, cols, slices, channels);
 		}
 		size_t size() const {
 			return data.size();
@@ -127,7 +133,13 @@ template<class T, ImageType I> struct Tensor3 {
 			slices=dims.z;
 			channels=ch;
 		}
-
+		void resize(int4 dims) {
+			data.resize((size_t)dims.x * (size_t)dims.y * (size_t)dims.z*(size_t)dims.w);
+			rows = dims.x;
+			cols = dims.y;
+			slices=dims.z;
+			channels=dims.w;
+		}
 		inline void clear() {
 			data.clear();
 			data.shrink_to_fit();
@@ -192,16 +204,23 @@ template<class T, ImageType I> struct Tensor3 {
 				}
 			}
 		}
-		void set(const Tensor2<T,I>& in,int slice) {
+		void set(const Tensor2<T,I>& in,int slice = 0) {
 			if(in.rows!=rows||in.cols!=cols||in.channels!=channels||slice>=slices||slice<0){
 				throw std::runtime_error(MakeString()<<"Tensor dimensions not compatible "<<dimensions()<<" :: "<<in.dimensions());
 			}
-			size_t a=in.size();
-			size_t offset=channels*rows*cols*slice;
-			for(size_t idx=0;idx<a;idx++){
-				data[idx+offset]=in.data[idx];
+			size_t offset=channels*(size_t)rows*(size_t)cols*(size_t)slice;
+			std::memcpy(&data[offset],&in.data[0],in.size());
+		}
+		void set(const std::vector<Tensor2<T,I>*>& in) {
+			if(in.rows!=rows||in.cols!=cols||in.channels!=channels||in.size()!=slices){
+				throw std::runtime_error(MakeString()<<"Tensor dimensions not compatible "<<dimensions());
+			}
+			for(size_t slice=0;slice<in.size();slice++){
+				size_t offset=channels*(size_t)rows*(size_t)cols*slice;
+				std::memcpy(&data[offset],&in[slice]->data[0],in.size());
 			}
 		}
+
 		template<int C> void set(const aly::Vector<T,C>& in) {
 			resize(in.size(),1,1,1);
 			size_t a=in.size();

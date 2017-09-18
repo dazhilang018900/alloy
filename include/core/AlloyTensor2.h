@@ -46,6 +46,9 @@ template<class T, ImageType I> struct Tensor2 {
 		typedef typename std::vector<ValueType>::iterator iterator;
 		typedef typename std::vector<ValueType>::const_iterator const_iterator;
 		typedef typename std::vector<ValueType>::reverse_iterator reverse_iterator;
+		bool empty() const {
+			return data.empty();
+		}
 		iterator begin() {
 			return data.begin();
 		}
@@ -87,11 +90,14 @@ template<class T, ImageType I> struct Tensor2 {
 			archive(CEREAL_NVP(id),CEREAL_NVP(rows), CEREAL_NVP(cols),CEREAL_NVP(channels),CEREAL_NVP(data));
 		}
 
-		Tensor2(int r, int c, int s,int ch, uint64_t id = 0) :rows(r), cols(c), channels(ch), id(id){
-		data.resize((size_t)r *(size_t) c * (size_t)s);
+		Tensor2(int r, int c, int ch, uint64_t id = 0) :rows(r), cols(c), channels(ch), id(id){
+			data.resize((size_t)r *(size_t) c * (size_t)ch);
 		}
 		Tensor2(const std::vector<T>& ref, int r, int c, int s, int ch, int x = 0, int y =
 			0, int z = 0, uint64_t id = 0) : data(ref) , rows(r), cols(c), channels(ch), id(id){
+		}
+		Tensor2(const int3& dims, uint64_t id = 0) :rows(dims.x), cols(dims.y), channels(dims.z), id(id){
+			data.resize((size_t)dims.x *(size_t) dims.y * (size_t)dims.z);
 		}
 		Tensor2() : rows(0), cols(0), channels(0), id(0) {
 		}
@@ -122,6 +128,12 @@ template<class T, ImageType I> struct Tensor2 {
 			rows = dims.x;
 			cols = dims.y;
 			channels=ch;
+		}
+		void resize(int3 dims) {
+			data.resize((size_t)dims.x * (size_t)dims.y *(size_t)dims.z);
+			rows = dims.x;
+			cols = dims.y;
+			channels=dims.z;
 		}
 		inline void clear() {
 			data.clear();
