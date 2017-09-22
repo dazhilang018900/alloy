@@ -10,8 +10,10 @@
 
 #include <AlloyOptimizationMath.h>
 #include <stdexcept>
-namespace aly {
 
+
+namespace aly {
+void SANITY_CHECK_LBFGS();
 ///
 /// \defgroup Enumerations
 ///
@@ -209,8 +211,8 @@ public:
 typedef LBFGSParam<float> LBFGSParamFloat;
 typedef LBFGSParam<double> LBFGSParamDouble;
 
-int SolveLBFGS(const std::function<float(Vec<float>& x, Vec<float>& grad)>& f,aly::Vec<float>& x, float& fx,const LBFGSParam<float>& param=LBFGSParamFloat());
-int SolveLBFGS(const std::function<double(Vec<double>& x, Vec<double>& grad)>& f,aly::Vec<double>& x, double& fx,const LBFGSParam<double>& param=LBFGSParamDouble());
+int SolveLBFGS(const std::function<float(Vec<float>& x, Vec<float>& grad)>& f,aly::Vec<float>& x, float& fx,const LBFGSParam<float>& param=LBFGSParamFloat(),const std::function<bool(int, double)>& iterationMonitor = nullptr);
+int SolveLBFGS(const std::function<double(Vec<double>& x, Vec<double>& grad)>& f,aly::Vec<double>& x, double& fx,const LBFGSParam<double>& param=LBFGSParamDouble(),const std::function<bool(int, double)>& iterationMonitor = nullptr);
 
 } // namespace LBFGSpp
 #endif // LBFGS_H

@@ -8,6 +8,30 @@
 #include <AlloyOptimizationMath.h>
 #include <functional>
 namespace aly {
+void SANITY_CHECK_LBFGS(){
+	const int N=10;
+	const std::function<float(Vec<float>& x, Vec<float>& grad)> rosenbrock=[=](Vec<float>& x, Vec<float>& grad){
+        float fx = 0.0;
+        for(int i = 0; i < N; i += 2)
+        {
+            float t1 = 1.0 - x[i];
+            float t2 = 10 * (x[i + 1] - x[i] * x[i]);
+            grad[i + 1] = 20 * t2;
+            grad[i]     = -2.0 * (x[i] * grad[i + 1] + t1);
+            fx += t1 * t1 + t2 * t2;
+        }
+        return fx;
+	};
+
+    LBFGSParam<float> param;
+    Vec<float> x(N);
+    x.set(0.0f);
+    float fx;
+    SolveLBFGS(rosenbrock,x,fx,param,[=](int k, double err){
+    	std::cout<<"LBFGS "<<k<<") "<<err<<std::endl;
+    	return true;
+    });
+}
 ///
 /// LBFGS solver for unconstrained numerical optimization
 ///
@@ -137,7 +161,8 @@ public:
 	/// \return Number of iterations used.
 	///
 	int minimize(const std::function<Scalar(Vector& x, Vector& grad)>& f,
-			Vector& x, Scalar& fx) {
+			Vector& x, Scalar& fx,const std::function<bool(int, double)>& iterationMonitor = nullptr) {
+		const Scalar ZERO_TOLERANCE=1E-20f;
 		const int n = (int)x.size();
 		const int fpast = m_param.past;
 		reset(n);
@@ -161,6 +186,11 @@ public:
 		int k = 1;
 		int end = 0;
 		for (;;) {
+			if(iterationMonitor){
+				if(!iterationMonitor(k,fx)){
+					break;
+				}
+			}
 			// Save the curent x and gradient
 			m_xp = x;
 			m_gradp = m_grad;
@@ -213,7 +243,7 @@ public:
 				m_alpha[j] = Scalar(dot(sj,m_drt)) / m_ys[j];
 				m_drt -= m_alpha[j] * yj;
 			}
-
+			if(std::abs(yy)<ZERO_TOLERANCE)break;
 			m_drt *= (ys / yy);
 
 			for (int i = 0; i < bound; i++) {
@@ -227,19 +257,19 @@ public:
 			// step = 1.0 as initial guess
 			step = Scalar(1.0);
 			// step = Scalar(1e-1);
-			std::cout << "Itr: " << k << " Cost:" << fx << std::endl;
+
 			k++;
 		}
 
 		return k;
 	}
 };
-int SolveLBFGS(const std::function<float(Vec<float>& x, Vec<float>& grad)>& f,aly::Vec<float>& x, float& fx,const LBFGSParam<float>& param){
+int SolveLBFGS(const std::function<float(Vec<float>& x, Vec<float>& grad)>& f,aly::Vec<float>& x, float& fx,const LBFGSParam<float>& param,const std::function<bool(int, double)>& iterationMonitor){
 	LBFGSSolver<float> solver(param);
-	return solver.minimize(f,x,fx);
+	return solver.minimize(f,x,fx,iterationMonitor);
 }
-int SolveLBFGS(const std::function<double(Vec<double>& x, Vec<double>& grad)>& f,aly::Vec<double>& x, double& fx,const LBFGSParam<double>& param){
+int SolveLBFGS(const std::function<double(Vec<double>& x, Vec<double>& grad)>& f,aly::Vec<double>& x, double& fx,const LBFGSParam<double>& param,const std::function<bool(int, double)>& iterationMonitor){
 	LBFGSSolver<double> solver(param);
-	return solver.minimize(f,x,fx);
+	return solver.minimize(f,x,fx,iterationMonitor);
 }
 }

@@ -23,6 +23,7 @@
 #define INCLUDE_CORE_ALLOYOPTIMIZATION_H_
 #include <AlloyOptimizationMath.h>
 #include <AlloyEnum.h>
+#include <AlloyLBFGS.h>
 namespace aly {
 template<class T> struct SparseProblem {
 	virtual size_t getInputSize() const=0;

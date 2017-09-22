@@ -66,6 +66,7 @@
 #include "../../include/example/MeshReconstructionEx.h"
 #include "../../include/example/SoftBodyEx.h"
 #include "../../include/example/AnisotropicFilterEx.h"
+#include "AlloyOptimization.h"
 #include <cstring>
 
 /*
@@ -139,7 +140,8 @@ bool SANITY_CHECK() {
 	//SANITY_CHECK_IMAGE_IO();
 	//SANITY_CHECK_ROBUST_SOLVE();
 	//SANITY_CHECK_SUBDIVIDE();
-	SANITY_CHECK_XML();
+	//SANITY_CHECK_XML();
+	SANITY_CHECK_LBFGS();
 	return ret;
 }
 int main(int argc, char *argv[]) {
