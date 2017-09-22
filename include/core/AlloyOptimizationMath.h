@@ -596,7 +596,7 @@ inline VecMap<T> getRow(size_t i) const {
 	return VecMap<T>(&data[cols*i],cols,1);
 }
 inline VecMap<T> getColumn(size_t j) const {
-	return VecMap<T>(&data[0],rows, cols);
+	return VecMap<T>(&data[j],rows, cols);
 }
 inline void setRow(const Vec<T>& vec,size_t i) const {
 	if(vec.size()!=cols){

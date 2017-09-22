@@ -22,13 +22,28 @@ void SANITY_CHECK_LBFGS(){
         }
         return fx;
 	};
-
+	const std::function<float(Vec<float>& x, Vec<float>& grad)> quadratic=[=](Vec<float>& x, Vec<float>& grad){
+	    Vec<float> d(N);
+	    for(int i = 0; i < N; i++)
+	        d[i] = i;
+	    double f = lengthSqr(x - d);
+	    grad = 2.0f * (x - d);
+	    return f;
+	};
     LBFGSParam<float> param;
+    param.max_iterations=100;
     Vec<float> x(N);
     x.set(0.0f);
     float fx;
     SolveLBFGS(rosenbrock,x,fx,param,[=](int k, double err){
-    	std::cout<<"LBFGS "<<k<<") "<<err<<std::endl;
+    	std::cout<<"Rosenbrock "<<k<<") "<<err<<std::endl;
+    	return true;
+    });
+
+    x.set(0.0f);
+    param=LBFGSParam<float>();
+    SolveLBFGS(quadratic,x,fx,param,[=](int k, double err){
+    	std::cout<<"Quadratic "<<k<<") "<<err<<std::endl;
     	return true;
     });
 }
@@ -182,7 +197,6 @@ public:
 		m_drt = -m_grad;
 		// Initial step
 		Scalar step = Scalar(1.0) / Scalar(length(m_drt));
-
 		int k = 1;
 		int end = 0;
 		for (;;) {
@@ -201,23 +215,21 @@ public:
 			// New x norm and gradient norm
 			xnorm = Scalar(length(x));
 			gnorm = Scalar(length(m_grad));
-
 			// Convergence test -- gradient
 			if (gnorm <= m_param.epsilon * std::max(xnorm, Scalar(1.0))) {
-				return k;
+				break;
 			}
 			// Convergence test -- objective function value
 			if (fpast > 0) {
 				if (k >= fpast && (m_fx[k % fpast] - fx) / fx < m_param.delta)
-					return k;
+					break;
 
 				m_fx[k % fpast] = fx;
 			}
 			// Maximum number of iterations
 			if (m_param.max_iterations != 0 && k >= m_param.max_iterations) {
-				return k;
+				break;
 			}
-
 			// Update s and y
 			// s_{k+1} = x_{k+1} - x_k
 			// y_{k+1} = g_{k+1} - g_k
@@ -243,7 +255,9 @@ public:
 				m_alpha[j] = Scalar(dot(sj,m_drt)) / m_ys[j];
 				m_drt -= m_alpha[j] * yj;
 			}
-			if(std::abs(yy)<ZERO_TOLERANCE)break;
+			if(std::abs(yy)<ZERO_TOLERANCE){
+				break;
+			}
 			m_drt *= (ys / yy);
 
 			for (int i = 0; i < bound; i++) {
@@ -253,14 +267,14 @@ public:
 				m_drt += (m_alpha[j] - beta) * sj;
 				j = (j + 1) % m_param.m;
 			}
-
 			// step = 1.0 as initial guess
 			step = Scalar(1.0);
 			// step = Scalar(1e-1);
-
 			k++;
 		}
-
+		if(iterationMonitor){
+			iterationMonitor(k,fx);
+		}
 		return k;
 	}
 };

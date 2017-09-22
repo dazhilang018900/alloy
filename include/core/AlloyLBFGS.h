@@ -1,16 +1,10 @@
 // Copyright (C) 2016 Yixuan Qiu <yixuan.qiu@cos.name>
 // Under MIT license
 
-#ifndef LBFGS_H
-#define LBFGS_H
-
-#ifdef Success
-#undef Success
-#endif
+#ifndef ALLOYLBFGS_H
+#define ALLOYLBFGS_H
 
 #include <AlloyOptimizationMath.h>
-#include <stdexcept>
-
 
 namespace aly {
 void SANITY_CHECK_LBFGS();
