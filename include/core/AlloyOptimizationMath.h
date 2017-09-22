@@ -1378,8 +1378,501 @@ template<class T> T lengthInf(const VecType<T>& a) {
 	}
 	return ans;
 }
+template<class T> struct DenseVol {
+	public:
+		Vec<T> vector;//Treat whole DenseVol as vector. Useful!
+		std::vector<T>& data;
+		typedef T ValueType;
+		typedef typename std::vector<ValueType>::iterator iterator;
+		typedef typename std::vector<ValueType>::const_iterator const_iterator;
+		typedef typename std::vector<ValueType>::reverse_iterator reverse_iterator;
+		iterator begin() {
+			return data.begin();
+		}
+		iterator end() {
+			return data.end();
+		}
+		const_iterator cbegin() const {
+			return data.cbegin();
+		}
+		const_iterator cend() const {
+			return data.cend();
+		}
+		reverse_iterator rbegin() {
+			return data.rbegin();
+		}
+		reverse_iterator rend() {
+			return data.rend();
+		}
+		reverse_iterator rbegin() const {
+			return data.rbegin();
+		}
+		reverse_iterator rend() const {
+			return data.rend();
+		}
+		int rows;
+		int cols;
+		int slices;
+		inline bool contains(const float3& pt){
+			return (pt.x>=0&&pt.y>=0&&pt.z>=0&&pt.x<rows&&pt.y<cols&&pt.z<slices);
+		}
+		inline bool contains(const int3& pt){
+			return (pt.x>=0&&pt.y>=0&&pt.z>=0&&pt.x<rows&&pt.y<cols&&pt.z<slices);
+		}
+		inline bool contains(int x,int y,int z){
+			return (x>=0&&y>=0&&z>=0&&x<rows&&y<cols&&z<slices);
+		}
+		inline bool contains(float x,float y,float z){
+			return (x>=0&&y>=0&&z>=0&&x<rows&&y<cols&&z<slices);
+		}
+		void set(const T& val) {
+			data.assign(data.size(), T(val));
+		}
+		void set(const std::vector<T>& val) {
+			data = val;
+		}
+		void set(T* val) {
+			if (val == nullptr)
+				return;
+			size_t offset = 0;
+			for (T& x : data) {
+				x = val[offset++];
+			}
+		}
+		void set(const T* val) {
+			if (val == nullptr)
+				return;
+			size_t offset = 0;
+			for (T& x : data) {
+				x = val[offset++];
+			}
+		}
+		void set(const DenseVol<T>& other) {
+			resize(other.rows, other.cols, other.slices);
+			set(other.data);
+		}
+		DenseVol(int r, int c, int s) :data(vector.data),rows(r), cols(c), slices(s){
+			data.resize(r * c * s);
+		}
+		DenseVol(T* ptr, int r, int c, int s) :data(vector.data),rows(r), cols(c), slices(s){
+			set(ptr);
+		}
+		DenseVol(const T* ptr, int r, int c, int s) :data(vector.data),rows(r), cols(c), slices(s) {
+			set(ptr);
+		}
+
+		DenseVol(const std::vector<T>& ref, int r, int c, int s) : data(vector.data),  rows(r), cols(c), slices(s){
+			data=ref;
+		}
+		DenseVol() : data(vector.data),rows(0), cols(0), slices(0) {
+		}
+		DenseVol(const DenseVol<T>& img) :DenseVol(img.rows, img.cols, img.slices) {
+			set(img.data);
+		}
+		DenseVol<T>& operator=(const DenseVol<T>& rhs) {
+			if (this == &rhs)return *this;
+			this->resize(rhs.rows, rhs.cols, rhs.slices);
+			this->set(rhs.data);
+			return *this;
+		}
+		dim3 dimensions() const {
+			return dim3(rows, cols, slices);
+		}
+		size_t size() const {
+			return data.size();
+		}
+		void resize(int r, int c, int s) {
+			data.resize(r * c * s);
+			data.shrink_to_fit();
+			rows = r;
+			cols = c;
+			slices = s;
+		}
+		void resize(int3 dims){
+			resize(dims.x,dims.y,dims.z);
+		}
+		inline void clear() {
+			data.clear();
+			data.shrink_to_fit();
+			rows = 0;
+			cols = 0;
+			slices = 0;
+		}
+		T* ptr() {
+			if (data.size() == 0)
+				return nullptr;
+			return &(data[0]);
+		}
+		const T* ptr() const {
+			if (data.size() == 0)
+				return nullptr;
+			return &(data[0]);
+		}
+		void setZero() {
+			data.assign(data.size(), T(0));
+		}
+		const T& operator[](const size_t i) const {
+			return data[i];
+		}
+		T& operator[](const size_t i) {
+			return data[i];
+		}
+		T& operator()(const int i, const int j, const int k) {
+			return data[clamp(i, 0, rows - 1) + clamp(j, 0, cols - 1) * (size_t)rows
+				+ clamp(k, 0, slices - 1) * (size_t)rows * (size_t)cols];
+		}
+		T& operator()(const size_t i, const size_t j, const size_t k) {
+			return data[clamp((int)i, 0, rows - 1) + clamp((int)j, 0, cols - 1) * (size_t)rows
+				+ clamp((int)k, 0, slices - 1) * (size_t)rows * (size_t)cols];
+		}
+		T& operator()(const int3 ijk) {
+			return data[clamp(ijk.x, 0, rows - 1) + clamp(ijk.y, 0, cols - 1) *(size_t) rows
+				+ clamp(ijk.z, 0, slices - 1) * (size_t)rows * (size_t)cols];
+		}
+		const T& operator()(const int i, const int j, const int k) const {
+			return data[clamp(i, 0, rows - 1) + clamp(j, 0, cols - 1) * (size_t)rows
+				+ clamp(k, 0, slices - 1) * (size_t)rows * (size_t)cols];
+		}
+		const T& operator()(const size_t i, const size_t j, const size_t k) const {
+			return data[clamp((int)i, 0, rows - 1) + clamp((int)j, 0, cols - 1) * (size_t)rows
+				+ clamp((int)k, 0, slices - 1) * (size_t)rows * (size_t)cols];
+		}
+		const T& operator()(const int3 ijk) const {
+			return data[clamp(ijk.x, 0, rows - 1) + clamp(ijk.y, 0, cols - 1) *(size_t) rows
+				+ clamp(ijk.z, 0, slices - 1) *(size_t) rows * (size_t)cols];
+		}
+		inline float operator()(float x,float y,float z) {
+			int i = static_cast<int>(std::floor(x));
+			int j = static_cast<int>(std::floor(y));
+			int k = static_cast<int>(std::floor(z));
+			float rgb000 = float(operator()(i, j, k));
+			float rgb100 = float(operator()(i + 1, j, k));
+			float rgb110 = float(operator()(i + 1, j + 1, k));
+			float rgb010 = float(operator()(i, j + 1, k));
+			float rgb001 = float(operator()(i, j, k + 1));
+			float rgb101 = float(operator()(i + 1, j, k + 1));
+			float rgb111 = float(operator()(i + 1, j + 1, k + 1));
+			float rgb011 = float(operator()(i, j + 1, k + 1));
+			float dx = x - i;
+			float dy = y - j;
+			float dz = z - k;
+			float lower = ((rgb000 * (1.0f - dx) + rgb100 * dx) * (1.0f - dy)
+				+ (rgb010 * (1.0f - dx) + rgb110 * dx) * dy);
+			float upper = ((rgb001 * (1.0f - dx) + rgb101 * dx) * (1.0f - dy)
+				+ (rgb011 * (1.0f - dx) + rgb111 * dx) * dy);
+			return (1.0f - dz) * lower + dz * upper;
+		}
+		inline float operator()(float x,float y,float z) const {
+			int i = static_cast<int>(std::floor(x));
+			int j = static_cast<int>(std::floor(y));
+			int k = static_cast<int>(std::floor(z));
+			float rgb000 = float(operator()(i, j, k));
+			float rgb100 = float(operator()(i + 1, j, k));
+			float rgb110 = float(operator()(i + 1, j + 1, k));
+			float rgb010 = float(operator()(i, j + 1, k));
+			float rgb001 = float(operator()(i, j, k + 1));
+			float rgb101 = float(operator()(i + 1, j, k + 1));
+			float rgb111 = float(operator()(i + 1, j + 1, k + 1));
+			float rgb011 = float(operator()(i, j + 1, k + 1));
+			float dx = x - i;
+			float dy = y - j;
+			float dz = z - k;
+			float lower = ((rgb000 * (1.0f - dx) + rgb100 * dx) * (1.0f - dy)
+				+ (rgb010 * (1.0f - dx) + rgb110 * dx) * dy);
+			float upper = ((rgb001 * (1.0f - dx) + rgb101 * dx) * (1.0f - dy)
+				+ (rgb011 * (1.0f - dx) + rgb111 * dx) * dy);
+			return (1.0f - dz) * lower + dz * upper;
+
+		}
+		T& operator()(int i, int j,int k, int c) {
+			return data[clamp((int)i, 0, rows - 1) + clamp((int)j, 0, cols - 1) * rows
+					+ clamp((int)k, 0, slices - 1) * rows * cols][c];
+				}
+		const T& operator()(int i, int j,int k, int c) const {
+			return data[clamp((int)i, 0, rows - 1) + clamp((int)j, 0, cols - 1) * rows
+					+ clamp((int)k, 0, slices - 1) * rows * cols][c];
+		}
+		template<class F> void apply(F f) {
+			size_t sz = size();
+#pragma omp parallel for
+			for (int offset = 0; offset < (int)sz; offset++) {
+				f(offset, data[offset]);
+			}
+		}
+		T min(T valt=std::numeric_limits<T>::max()) const {
+			T minVal(valt);
+			for (T& val : data) {
+				minVal = aly::minVec(val, minVal);
+			}
+			return minVal;
+		}
+		T max(T valt=std::numeric_limits<T>::min()) const {
+			T maxVal(valt);
+			for (T& val : data) {
+				maxVal = aly::maxVec(val, maxVal);
+			}
+			return maxVal;
+		}
+	};
+	template<class T> void Transform(DenseVol<T>& im1,
+		DenseVol<T>& im2,
+		const std::function<void(T&, T&)>& func) {
+		if (im1.dimensions() != im2.dimensions())
+			throw std::runtime_error(
+				MakeString() << "DenseVol dimensions do not match. "
+				<< im1.dimensions() << "!=" << im2.dimensions());
+		size_t sz = im1.size();
+#pragma omp parallel for
+		for (int offset = 0; offset < (int)sz; offset++) {
+			func(im1.data[offset], im2.data[offset]);
+		}
+	}
+	template<class T> void Transform(DenseVol<T>& im1,
+		const DenseVol<T>& im2, const DenseVol<T>& im3,
+		const DenseVol<T>& im4,
+		const std::function<
+		void(T&, const T&, const T&,
+			const T&)>& func) {
+		if (im1.dimensions() != im2.dimensions())
+			throw std::runtime_error(
+				MakeString() << "DenseVol dimensions do not match. "
+				<< im1.dimensions() << "!=" << im2.dimensions());
+		size_t sz = im1.size();
+#pragma omp parallel for
+		for (int offset = 0; offset < (int)sz; offset++) {
+			func(im1.data[offset], im2.data[offset], im3.data[offset],
+				im4.data[offset]);
+		}
+	}
+	template<class T> void Transform(DenseVol<T>& im1,
+		const std::function<void(T&)>& func) {
+		size_t sz = im1.size();
+#pragma omp parallel for
+		for (int offset = 0; offset < (int)sz; offset++) {
+			func(im1.data[offset]);
+		}
+	}
+	template<class T> void Transform(DenseVol<T>& im1,
+		const DenseVol<T>& im2,
+		const std::function<void(T&, const T&)>& func) {
+		if (im1.dimensions() != im2.dimensions())
+			throw std::runtime_error(
+				MakeString() << "DenseVol dimensions do not match. "
+				<< im1.dimensions() << "!=" << im2.dimensions());
+		size_t sz = im1.size();
+#pragma omp parallel for
+		for (int offset = 0; offset < (int)sz; offset++) {
+			func(im1.data[offset], im2.data[offset]);
+		}
+	}
+	template<class T> void Transform(DenseVol<T>& im1,
+		const DenseVol<T>& im2, const DenseVol<T>& im3,
+		const std::function<void(T&, const T&, const T&)>& func) {
+		if (im1.dimensions() != im2.dimensions())
+			throw std::runtime_error(
+				MakeString() << "DenseVol dimensions do not match. "
+				<< im1.dimensions() << "!=" << im2.dimensions());
+		size_t sz = im1.size();
+#pragma omp parallel for
+		for (int offset = 0; offset < (int)sz; offset++) {
+			func(im1.data[offset], im2.data[offset], im3.data[offset]);
+		}
+	}
+	template<class T> void Transform(DenseVol<T>& im1,
+		DenseVol<T>& im2,
+		const std::function<
+		void(int i, int j, int k, T& val1, T& val2)>& func) {
+		if (im1.dimensions() != im2.dimensions())
+			throw std::runtime_error(
+				MakeString() << "DenseVol dimensions do not match. "
+				<< im1.dimensions() << "!=" << im2.dimensions());
+#pragma omp parallel for
+		for (int k = 0; k < im1.slices; k++) {
+			for (int j = 0; j < im1.cols; j++) {
+				for (int i = 0; i < im1.rows; i++) {
+					size_t offset = i + j * im1.rows + k * im1.rows * im1.cols;
+					func(i, j, k, im1.data[offset], im2.data[offset]);
+				}
+			}
+		}
+	}
+	template<class T> void Transform(DenseVol<T>& im1,
+		DenseVol<T>& im2,
+		const std::function<
+		void(size_t offset, T& val1, T& val2)>& func) {
+		if (im1.dimensions() != im2.dimensions())
+			throw std::runtime_error(
+				MakeString() << "DenseVol dimensions do not match. "
+				<< im1.dimensions() << "!=" << im2.dimensions());
+		size_t sz = im1.size();
+#pragma omp parallel for
+		for (int offset = 0; offset < (int)sz; offset++) {
+			func(offset, im1.data[offset], im2.data[offset]);
+		}
+	}
+	template<class T> DenseVol<T> operator+(
+		const T& scalar, const DenseVol<T>& img) {
+		DenseVol<T> out(img.rows, img.cols, img.slices, img.position());
+		std::function<void(T&, const T&)> f =
+			[=](T& val1, const T& val2) {val1 = scalar + val2;};
+		Transform(out, img, f);
+		return out;
+	}
+
+	template<class T> DenseVol<T> operator-(
+		const T& scalar, const DenseVol<T>& img) {
+		DenseVol<T> out(img.rows, img.cols, img.slices, img.position());
+		std::function<void(T&, const T&)> f =
+			[=](T& val1, const T& val2) {val1 = scalar - val2;};
+		Transform(out, img, f);
+		return out;
+	}
+	template<class T> DenseVol<T> operator*(
+		const T& scalar, const DenseVol<T>& img) {
+		DenseVol<T> out(img.rows, img.cols, img.slices, img.position());
+		std::function<void(T&, const T&)> f =
+			[=](T& val1, const T& val2) {val1 = scalar*val2;};
+		Transform(out, img, f);
+		return out;
+	}
+	template<class T> DenseVol<T> operator/(
+		const T& scalar, const DenseVol<T>& img) {
+		DenseVol<T> out(img.rows, img.cols, img.slices, img.position());
+		std::function<void(T&, const T&)> f =
+			[=](T& val1, const T& val2) {val1 = scalar / val2;};
+		Transform(out, img, f);
+		return out;
+	}
+	template<class T> DenseVol<T> operator+(
+		const DenseVol<T>& img, const T& scalar) {
+		DenseVol<T> out(img.rows, img.cols, img.slices, img.position());
+		std::function<void(T&, const T&)> f =
+			[=](T& val1, const T& val2) {val1 = val2 + scalar;};
+		Transform(out, img, f);
+		return out;
+	}
+	template<class T> DenseVol<T> operator-(
+		const DenseVol<T>& img, const T& scalar) {
+		DenseVol<T> out(img.rows, img.cols, img.slices, img.position());
+		std::function<void(T&, const T&)> f =
+			[=](T& val1, const T& val2) {val1 = val2 - scalar;};
+		Transform(out, img, f);
+		return out;
+	}
+	template<class T> DenseVol<T> operator*(
+		const DenseVol<T>& img, const T& scalar) {
+		DenseVol<T> out(img.rows, img.cols, img.slices, img.position());
+		std::function<void(T&, const T&)> f =
+			[=](T& val1, const T& val2) {val1 = val2*scalar;};
+		Transform(out, img, f);
+		return out;
+	}
+	template<class T> DenseVol<T> operator/(
+		const DenseVol<T>& img, const T& scalar) {
+		DenseVol<T> out(img.rows, img.cols, img.slices, img.position());
+		std::function<void(T&, const T&)> f =
+			[=](T& val1, const T& val2) {val1 = val2 / scalar;};
+		Transform(out, img, f);
+		return out;
+	}
+	template<class T> DenseVol<T> operator-(
+		const DenseVol<T>& img) {
+		DenseVol<T> out(img.rows, img.cols, img.slices, img.position());
+		std::function<void(T&, const T&)> f =
+			[=](T& val1, const T& val2) {val1 = -val2;};
+		Transform(out, img, f);
+		return out;
+	}
+	template<class T> DenseVol<T> operator+=(
+		DenseVol<T>& out, const DenseVol<T>& img) {
+		std::function<void(T&, const T&)> f =
+			[=](T& val1, const T& val2) {val1 += val2;};
+		Transform(out, img, f);
+		return out;
+	}
+	template<class T> DenseVol<T> operator-=(
+		DenseVol<T>& out, const DenseVol<T>& img) {
+		std::function<void(T&, const T&)> f =
+			[=](T& val1, const T& val2) {val1 -= val2;};
+		Transform(out, img, f);
+		return out;
+	}
+	template<class T> DenseVol<T> operator*=(
+		DenseVol<T>& out, const DenseVol<T>& img) {
+		std::function<void(T&, const T&)> f =
+			[=](T& val1, const T& val2) {val1 *= val2;};
+		Transform(out, img, f);
+		return out;
+	}
+	template<class T> DenseVol<T> operator/=(
+		DenseVol<T>& out, const DenseVol<T>& img) {
+		std::function<void(T&, const T&)> f =
+			[=](T& val1, const T& val2) {val1 /= val2;};
+		Transform(out, img, f);
+		return out;
+	}
+
+	template<class T> DenseVol<T> operator+=(
+		DenseVol<T>& out, const T& scalar) {
+		std::function<void(T&)> f = [=](T& val1) {val1 += scalar;};
+		Transform(out, f);
+		return out;
+	}
+	template<class T> DenseVol<T> operator-=(
+		DenseVol<T>& out, const T& scalar) {
+		std::function<void(T&)> f = [=](T& val1) {val1 -= scalar;};
+		Transform(out, f);
+		return out;
+	}
+	template<class T> DenseVol<T> operator*=(
+		DenseVol<T>& out, const T& scalar) {
+		std::function<void(T&)> f = [=](T& val1) {val1 *= scalar;};
+		Transform(out, f);
+		return out;
+	}
+	template<class T> DenseVol<T> operator/=(
+		DenseVol<T>& out, const T& scalar) {
+		std::function<void(T&)> f = [=](T& val1) {val1 /= scalar;};
+		Transform(out, f);
+		return out;
+	}
+
+	template<class T> DenseVol<T> operator+(
+		const DenseVol<T>& img1, const DenseVol<T>& img2) {
+		DenseVol<T> out(img1.rows, img1.cols, img1.slices);
+		std::function<void(T&, const T&, const T&)> f =
+			[=](T& val1, const T& val2, const T& val3) {val1 = val2 + val3;};
+		Transform(out, img1, img2, f);
+		return out;
+	}
+	template<class T> DenseVol<T> operator-(
+		const DenseVol<T>& img1, const DenseVol<T>& img2) {
+		DenseVol<T> out(img1.rows, img1.cols, img1.slices);
+		std::function<void(T&, const T&, const T&)> f =
+			[=](T& val1, const T& val2, const T& val3) {val1 = val2 - val3;};
+		Transform(out, img1, img2, f);
+		return out;
+	}
+	template<class T> DenseVol<T> operator*(
+		const DenseVol<T>& img1, const DenseVol<T>& img2) {
+		DenseVol<T> out(img1.rows, img1.cols, img1.slices);
+		std::function<void(T&, const T&, const T&)> f =
+			[=](T& val1, const T& val2, const T& val3) {val1 = val2*val3;};
+		Transform(out, img1, img2, f);
+		return out;
+	}
+	template<class T> DenseVol<T> operator/(
+		const DenseVol<T>& img1, const DenseVol<T>& img2) {
+		DenseVol<T> out(img1.rows, img1.cols, img1.slices);
+		std::function<void(T&, const T&, const T&)> f =
+			[=](T& val1, const T& val2, const T& val3) {val1 = val2 / val3;};
+		Transform(out, img1, img2, f);
+		return out;
+	}
 typedef DenseMat<double> DenseMatrixDouble;
 typedef SparseMat<double> SparseMatrixDouble;
+typedef DenseVol<double> DenseVolDouble;
+
 typedef Vec<double> VecDouble;
 typedef Vec<double> Vec1d;
 typedef Vec<double2> Vec2d;
@@ -1394,6 +1887,8 @@ typedef VecMap<double3> VecMap4d;
 
 typedef DenseMat<float> DenseMatrixFloat;
 typedef SparseMat<float> SparseMatrixFloat;
+typedef DenseVol<float> DenseVolFloat;
+
 typedef Vec<float> VecFloat;
 typedef Vec<float> Vec1f;
 typedef Vec<float2> Vec2f;
