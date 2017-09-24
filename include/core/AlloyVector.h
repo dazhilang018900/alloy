@@ -611,28 +611,28 @@ template<class T, int C> Vector<T, C> operator-(const Vector<T, C>& img) {
 	Transform(out, img, f);
 	return out;
 }
-template<class T, int C> Vector<T, C> operator+=(Vector<T, C>& out,
+template<class T, int C> Vector<T, C>& operator+=(Vector<T, C>& out,
 		const Vector<T, C>& img) {
 	std::function<void(vec<T, C>&, const vec<T, C>&)> f =
 			[=](vec<T, C>& val1, const vec<T, C>& val2) {val1 += val2;};
 	Transform(out, img, f);
 	return out;
 }
-template<class T, int C> Vector<T, C> operator-=(Vector<T, C>& out,
+template<class T, int C> Vector<T, C>& operator-=(Vector<T, C>& out,
 		const Vector<T, C>& img) {
 	std::function<void(vec<T, C>&, const vec<T, C>&)> f =
 			[=](vec<T, C>& val1, const vec<T, C>& val2) {val1 -= val2;};
 	Transform(out, img, f);
 	return out;
 }
-template<class T, int C> Vector<T, C> operator*=(Vector<T, C>& out,
+template<class T, int C> Vector<T, C>& operator*=(Vector<T, C>& out,
 		const Vector<T, C>& img) {
 	std::function<void(vec<T, C>&, const vec<T, C>&)> f =
 			[=](vec<T, C>& val1, const vec<T, C>& val2) {val1 *= val2;};
 	Transform(out, img, f);
 	return out;
 }
-template<class T, int C> Vector<T, C> operator/=(Vector<T, C>& out,
+template<class T, int C> Vector<T, C>& operator/=(Vector<T, C>& out,
 		const Vector<T, C>& img) {
 	std::function<void(vec<T, C>&, const vec<T, C>&)> f =
 			[=](vec<T, C>& val1, const vec<T, C>& val2) {val1 /= val2;};
@@ -640,25 +640,25 @@ template<class T, int C> Vector<T, C> operator/=(Vector<T, C>& out,
 	return out;
 }
 
-template<class T, int C> Vector<T, C> operator+=(Vector<T, C>& out,
+template<class T, int C> Vector<T, C>& operator+=(Vector<T, C>& out,
 		const vec<T, C>& scalar) {
 	std::function<void(vec<T, C>&)> f = [=](vec<T, C>& val1) {val1 += scalar;};
 	Transform(out, f);
 	return out;
 }
-template<class T, int C> Vector<T, C> operator-=(Vector<T, C>& out,
+template<class T, int C> Vector<T, C>& operator-=(Vector<T, C>& out,
 		const vec<T, C>& scalar) {
 	std::function<void(vec<T, C>&)> f = [=](vec<T, C>& val1) {val1 -= scalar;};
 	Transform(out, f);
 	return out;
 }
-template<class T, int C> Vector<T, C> operator*=(Vector<T, C>& out,
+template<class T, int C> Vector<T, C>& operator*=(Vector<T, C>& out,
 		const vec<T, C>& scalar) {
 	std::function<void(vec<T, C>&)> f = [=](vec<T, C>& val1) {val1 *= scalar;};
 	Transform(out, f);
 	return out;
 }
-template<class T, int C> Vector<T, C> operator/=(Vector<T, C>& out,
+template<class T, int C> Vector<T, C>& operator/=(Vector<T, C>& out,
 		const vec<T, C>& scalar) {
 	std::function<void(vec<T, C>&)> f = [=](vec<T, C>& val1) {val1 /= scalar;};
 	Transform(out, f);

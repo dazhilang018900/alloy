@@ -67,6 +67,7 @@
 #include "../../include/example/SoftBodyEx.h"
 #include "../../include/example/AnisotropicFilterEx.h"
 #include "AlloyOptimization.h"
+#include "AlloyGaussianMixture.h"
 #include <cstring>
 
 /*
@@ -101,6 +102,7 @@ struct Example {
 	virtual ~Example() {
 	}
 };
+
 template<class T> struct ExampleT: public Example {
 	std::string getName() const {
 		return name;
@@ -141,7 +143,8 @@ bool SANITY_CHECK() {
 	//SANITY_CHECK_ROBUST_SOLVE();
 	//SANITY_CHECK_SUBDIVIDE();
 	//SANITY_CHECK_XML();
-	SANITY_CHECK_LBFGS();
+	//SANITY_CHECK_LBFGS();
+	SANITY_CHECK_GMM();
 	return ret;
 }
 int main(int argc, char *argv[]) {

@@ -492,28 +492,28 @@ template<class T, ImageType I> struct Tensor3 {
 		Transform(out, img, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor3<T, I> operator+=(
+	template<class T, ImageType I> Tensor3<T, I>& operator+=(
 		Tensor3<T, I>& out, const Tensor3<T, I>& img) {
 		std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 += val2;};
 		Transform(out, img, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor3<T, I> operator-=(
+	template<class T, ImageType I> Tensor3<T, I>& operator-=(
 		Tensor3<T, I>& out, const Tensor3<T, I>& img) {
 		std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 -= val2;};
 		Transform(out, img, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor3<T, I> operator*=(
+	template<class T, ImageType I> Tensor3<T, I>& operator*=(
 		Tensor3<T, I>& out, const Tensor3<T, I>& img) {
 		std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 *= val2;};
 		Transform(out, img, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor3<T, I> operator/=(
+	template<class T, ImageType I> Tensor3<T, I>& operator/=(
 		Tensor3<T, I>& out, const Tensor3<T, I>& img) {
 		std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 /= val2;};
@@ -521,25 +521,25 @@ template<class T, ImageType I> struct Tensor3 {
 		return out;
 	}
 
-	template<class T, ImageType I> Tensor3<T, I> operator+=(
+	template<class T, ImageType I> Tensor3<T, I>& operator+=(
 		Tensor3<T, I>& out, const T& scalar) {
 		std::function<void(T&)> f = [=](T& val1) {val1 += scalar;};
 		Transform(out, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor3<T, I> operator-=(
+	template<class T, ImageType I> Tensor3<T, I>& operator-=(
 		Tensor3<T, I>& out, const T& scalar) {
 		std::function<void(T&)> f = [=](T& val1) {val1 -= scalar;};
 		Transform(out, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor3<T, I> operator*=(
+	template<class T, ImageType I> Tensor3<T, I>& operator*=(
 		Tensor3<T, I>& out, const T& scalar) {
 		std::function<void(T&)> f = [=](T& val1) {val1 *= scalar;};
 		Transform(out, f);
 		return out;
 	}
-	template<class T, ImageType I> Tensor3<T, I> operator/=(
+	template<class T, ImageType I> Tensor3<T, I>& operator/=(
 		Tensor3<T, I>& out, const T& scalar) {
 		std::function<void(T&)> f = [=](T& val1) {val1 /= scalar;};
 		Transform(out, f);
