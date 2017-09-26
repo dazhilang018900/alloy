@@ -28,18 +28,17 @@ namespace aly {
 void SANITY_CHECK_GMM();
 class GaussianMixture {
 protected:
-	std::vector<Vec<float>> means;
+	DenseMat<float> means;
 	std::vector<DenseMat<float>> sigmas;
 	std::vector<DenseMat<float>> invSigmas;
 	Vec<float> priors;
 	void initializeMeans(const DenseMat<float>& X);
 	void initializeParameters(const DenseMat<float>&X, float var_floor);
 	bool iterateKMeans(const DenseMat<float>& X, int max_iter);
-	//void em_fix_params(float var_floor);
 public:
 
 	GaussianMixture();
-	bool learn(const DenseMat<float>& data, int N_gaus, int km_iter,
+	bool solve(const DenseMat<float>& data, int N_gaus, int km_iter,
 			int em_iter, float var_floor = 1E-16f);
 	//
 	virtual ~GaussianMixture() {

@@ -44,9 +44,9 @@ void SANITY_CHECK_GMM() {
 
 	//centers[3].data= {9,1};
 
-	priors[0] = 0.3333f;
-	priors[1] = 0.3333f;
-	priors[2] = 0.3333f;
+	priors[0] = 0.5f;
+	priors[1] = 0.3f;
+	priors[2] = 0.2f;
 	//priors[3] = 0.25f;
 
 	DenseMat<float> samples(D, S);
@@ -77,15 +77,15 @@ void SANITY_CHECK_GMM() {
 	}
 	GaussianMixture gmm;
 	std::cout << "Start Learning " << samples.dimensions() << std::endl;
-	gmm.learn(samples, G, 20, 20, 0.0001f);
+	gmm.solve(samples, G, 20, 20, 0.0001f);
 }
 GaussianMixture::GaussianMixture() {
 
 }
 void GaussianMixture::initializeParameters(const DenseMat<float>& X,
 		float var_floor) {
-	const int D = means.front().size();
-	const int G = means.size();
+	const int D = means.rows;
+	const int G = means.cols;
 	const int N = X.cols;
 	if (N == 0) {
 		return;
@@ -100,7 +100,7 @@ void GaussianMixture::initializeParameters(const DenseMat<float>& X,
 		double min_dist = 1E30;
 		int best_g = 0;
 		for (int g = 0; g < G; ++g) {
-			VecMap<float> mean = means[g];
+			VecMap<float> mean = means.getColumn(g);
 			double dist = distanceSqr(sample, mean);
 
 			if (dist < min_dist) {
@@ -122,7 +122,7 @@ void GaussianMixture::initializeParameters(const DenseMat<float>& X,
 		VecMap<float> acc_mean = acc_means.getColumn(g);
 		VecMap<float> acc_dcov = acc_dcovs.getColumn(g);
 		int sumMember = sumMembers[g];
-		Vec<float>& mean = means[g];
+		VecMap<float> mean = means.getColumn(g);
 		DenseMat<float>& fcov = sigmas[g];
 		fcov.setZero();
 		for (int d = 0; d < D; ++d) {
@@ -141,8 +141,8 @@ void GaussianMixture::initializeParameters(const DenseMat<float>& X,
 }
 
 void GaussianMixture::initializeMeans(const DenseMat<float>& X) {
-	const int G = means.size();
-	const int D = means.front().size();
+	const int G = means.cols;
+	const int D = means.rows;
 	int N = X.cols;
 // going through all of the samples can be extremely time consuming;
 // instead, if there are enough samples, randomly choose samples with probability 0.1
@@ -150,7 +150,7 @@ void GaussianMixture::initializeMeans(const DenseMat<float>& X) {
 	const bool use_sampling = ((N / int(stride * stride)) > G);
 	const int step = (use_sampling) ? int(stride) : int(1);
 	int start_index = RandomUniform(0, N - 1);
-	means[0] = X.getColumn(start_index);
+	means.setColumn(X.getColumn(start_index), 0);
 	double max_dist = 0.0;
 	for (int g = 1; g < G; ++g) {
 		int best_i = int(0);
@@ -163,7 +163,7 @@ void GaussianMixture::initializeMeans(const DenseMat<float>& X) {
 			VecMap<float> sample = X.getColumn(idx);
 			double sum = 0.0;
 			for (int h = 0; h < g; ++h) {
-				double dist = distanceSqr(means[h], sample);
+				double dist = distanceSqr(means.getColumn(h), sample);
 				if (dist == 0.0) {
 					ignore_i = true;
 					break;
@@ -177,18 +177,18 @@ void GaussianMixture::initializeMeans(const DenseMat<float>& X) {
 			}
 		}
 		// set the mean to the sample that is the furthest away from the means so far
-		means[g] = X.getColumn(best_i);
+		means.setColumn(X.getColumn(best_i), g);
 	}
 }
 bool GaussianMixture::iterateKMeans(const DenseMat<float>& X, int max_iter) {
 	const double ZERO_TOLERANCE = 1E-16;
 	const int N = X.cols;
-	const int D = means.front().size();
-	const int G = means.size();
+	const int D = means.rows;
+	const int G = means.cols;
 	std::vector<Vec<float>> acc_means(G, Vec<float>(D));
 	std::vector<int> acc_hefts(G, 0);
 	std::vector<int> last_indx(G, 0);
-	std::vector<Vec<float>> new_means = means;
+	DenseMat<float> new_means = means;
 	for (int iter = 1; iter <= max_iter; ++iter) {
 		acc_hefts.assign(acc_hefts.size(), 0);
 		acc_means.assign(acc_means.size(), Vec<float>::zero(D));
@@ -198,7 +198,7 @@ bool GaussianMixture::iterateKMeans(const DenseMat<float>& X, int max_iter) {
 			double min_dist = 1E30;
 			int best_g = 0;
 			for (int g = 0; g < G; ++g) {
-				double dist = distanceSqr(means[g], sample);
+				double dist = distanceSqr(means.getColumn(g), sample);
 				if (dist < min_dist) {
 					min_dist = dist;
 					best_g = g;
@@ -212,7 +212,7 @@ bool GaussianMixture::iterateKMeans(const DenseMat<float>& X, int max_iter) {
 		for (int g = 0; g < G; ++g) {
 			Vec<float>& acc_mean = acc_means[g];
 			int acc_heft = acc_hefts[g];
-			Vec<float>& new_mean = new_means[g];
+			VecMap<float> new_mean = new_means.getColumn(g);
 			for (int d = 0; d < D; ++d) {
 				new_mean[d] =
 						(acc_heft >= 1) ?
@@ -258,12 +258,13 @@ bool GaussianMixture::iterateKMeans(const DenseMat<float>& X, int max_iter) {
 					if (proposed_i >= N) {
 						return false;
 					}
-					new_means[dead_g_id] = X.getColumn(proposed_i);
+					new_means.setColumn(X.getColumn(proposed_i), dead_g_id);
 				}
 			}
 			double rs_delta = 0;
 			for (int g = 0; g < G; ++g) {
-				rs_delta += distance(means[g], new_means[g]);
+				rs_delta += distance(means.getColumn(g),
+						new_means.getColumn(g));
 			}
 			rs_delta /= G;
 			if (rs_delta <= ZERO_TOLERANCE) {
@@ -275,9 +276,8 @@ bool GaussianMixture::iterateKMeans(const DenseMat<float>& X, int max_iter) {
 	return true;
 }
 
-bool GaussianMixture::learn(const DenseMat<float>& data, int G, int km_iter,
+bool GaussianMixture::solve(const DenseMat<float>& data, int G, int km_iter,
 		int em_iter, float var_floor) {
-	const float ZERO_TOLERANCE = 1E-16f;
 	const float CONV_TOLERANCE = 1E-6f;
 	int D = data.rows;
 	int N = data.cols;
@@ -285,7 +285,7 @@ bool GaussianMixture::learn(const DenseMat<float>& data, int G, int km_iter,
 	DenseMat<float> U(D, D);
 	DenseMat<float> Diag(D, D);
 	DenseMat<float> Vt(D, D);
-	means.resize(G, Vec<float>(D));
+	means.resize(D, G);
 	priors.resize(G);
 	sigmas.resize(G, DenseMat<float>(D, D));
 	invSigmas.resize(G, DenseMat<float>(D, D));
@@ -308,17 +308,17 @@ bool GaussianMixture::learn(const DenseMat<float>& data, int G, int km_iter,
 			DenseMat<float>& M = sigmas[k];
 			SVD(M, U, Diag, Vt);
 			double det = 1;
-			std::cout << k << ") " << means[k] << " ::" << priors[k];
+			std::cout << k << ") " << means.getColumn(k) << " ::" << priors[k];
 			for (int k = 0; k < D; k++) {
 				double d = Diag[k][k];
-				std::cout<<" sigma["<<k<<"]="<<std::sqrt(d);
-				if (std::abs(d) > ZERO_TOLERANCE) {
+				std::cout << " sigma[" << k << "]=" << std::sqrt(d);
+				if (std::abs(d) > var_floor) {
 					det *= d;
 					d = 1.0 / d;
 				}
 				Diag[k][k] = d;
 			}
-			std::cout<<std::endl;
+			std::cout << std::endl;
 			scaleFactors[k] = 1.0 / (CORRECTION * std::sqrt(det));
 			invSigmas[k] = (U * Diag * Vt).transpose();
 
@@ -328,7 +328,7 @@ bool GaussianMixture::learn(const DenseMat<float>& data, int G, int km_iter,
 			VecMap<float> sample = data.getColumn(n);
 			double sum = 0;
 			for (int k = 0; k < G; k++) {
-				Vec<float>& mean = means[k];
+				VecMap<float> mean = means.getColumn(k);
 				DenseMat<float> isig = invSigmas[k];
 				double dgaus = std::exp(
 						-0.5 * dot((sample - mean), isig * (sample - mean)))
@@ -344,7 +344,7 @@ bool GaussianMixture::learn(const DenseMat<float>& data, int G, int km_iter,
 		logl /= N;
 		std::cout << "Log Likelihood= " << logl << std::endl;
 		for (int k = 0; k < G; k++) {
-			Vec<float>& mean = means[k];
+			VecMap<float> mean = means.getColumn(k);
 			mean.setZero();
 			double alpha = 0;
 			for (int n = 0; n < N; n++) {
