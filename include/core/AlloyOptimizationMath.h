@@ -78,11 +78,17 @@ public:
 	size_t size() const override {
 		return sz;
 	}
+	inline void setZero(){
+		for(size_t i=0;i<sz;i++){
+			ptr[i * stride]=T(0);
+		}
+	}
 	VecMap<T>& operator=(const Vec<T>& rhs);
 
 };
 template<class T> struct Vec: VecType<T> {
 public:
+
 	std::vector<T> data; //, aligned_allocator<T, 64>
 	typedef T ValueType;
 	typedef typename std::vector<ValueType>::iterator iterator;
@@ -187,6 +193,11 @@ public:
 					MakeString() << "Vector index out of bounds " << i << "/"
 							<< data.size());
 		return data[i];
+	}
+	inline static Vec<float> zero(int d) {
+		Vec<float> v(d);
+		v.data.assign(v.size(),0);
+		return v;
 	}
 	inline void clear() {
 		data.clear();
@@ -612,9 +623,11 @@ public:
 		return data[cols * i + j];
 	}
 	inline VecMap<T> getRow(size_t i) const {
+		if(i>=rows)throw std::runtime_error(MakeString()<<"Row index "<<i<<"/"<<rows<<" out of bounds.");
 		return VecMap<T>((T*)(&data[cols * i]), cols, 1);//forces const ptr to regular ptr
 	}
 	inline VecMap<T> getColumn(size_t j) const {
+		if(j>=cols)throw std::runtime_error(MakeString()<<"Column index "<<j<<"/"<<cols<<" out of bounds.");
 		return VecMap<T>((T*)(&data[j]), rows, cols);//forces const ptr to regular ptr
 	}
 

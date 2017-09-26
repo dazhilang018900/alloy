@@ -28,33 +28,22 @@ namespace aly {
 void SANITY_CHECK_GMM();
 class GaussianMixture {
 protected:
-	DenseMat<float> means;
-	std::vector<DenseMat<float>> fcovs;
-	std::vector<DenseMat<float>> inv_fcovs;
-	Vec<float> memberships;
-	std::vector<float> log_det_etc;
-	void generate_initial_means(const DenseMat<float>& X);
-	void generate_initial_params(const DenseMat<float>&X, float var_floor);
-	bool km_iterate(const DenseMat<float>& X, int max_iter);
+	std::vector<Vec<float>> means;
+	std::vector<DenseMat<float>> sigmas;
+	std::vector<DenseMat<float>> invSigmas;
+	Vec<float> priors;
+	void initializeMeans(const DenseMat<float>& X);
+	void initializeParameters(const DenseMat<float>&X, float var_floor);
+	bool iterateKMeans(const DenseMat<float>& X, int max_iter);
 	//void em_fix_params(float var_floor);
-	void init_constants();
-	double internal_scalar_log_p(const double* x, const int g) const;
-	double em_generate_acc(const DenseMat<float>& X, int start_index,
-			int end_index, DenseMat<float>& acc_means,
-			DenseVol<float>& acc_fcovs, Vec<float>& acc_norm_lhoods,
-			Vec<float>& gaus_log_lhoods) const;
-	bool gmm_em_iterate(const DenseMat<float>& X, int max_iter,
-			float var_floor);
-	bool em_update_params(const DenseMat<float>& X,
-			DenseMat<float>& t_acc_means, DenseVol<float>& t_acc_fcovs,
-			DenseVol<float>& t_acc_norm_lhoods,
-			DenseVol<float>& t_gaus_log_lhoods, float var_floor);
 public:
 
 	GaussianMixture();
-	bool learn(const DenseMat<float>& data, int N_gaus, int km_iter,int em_iter, float var_floor=1E-16f);
+	bool learn(const DenseMat<float>& data, int N_gaus, int km_iter,
+			int em_iter, float var_floor = 1E-16f);
 	//
-	virtual ~GaussianMixture(){}
+	virtual ~GaussianMixture() {
+	}
 };
 }
 
