@@ -32,16 +32,44 @@ protected:
 	std::vector<DenseMat<float>> sigmas;
 	std::vector<DenseMat<float>> invSigmas;
 	Vec<float> priors;
+	std::vector<double> scaleFactors;
 	void initializeMeans(const DenseMat<float>& X);
 	void initializeParameters(const DenseMat<float>&X, float var_floor);
 	bool iterateKMeans(const DenseMat<float>& X, int max_iter);
 public:
-
+	double distanceMahalanobis(const Vec<float>& pt, int g) const;
+	double distanceEuclidean(const Vec<float>& pt, int g) const;
+	double distanceMahalanobis(const Vec<float>& pt) const;
+	double distanceEuclidean(const Vec<float>& pt) const;
+	double likelihood(const Vec<float>& pt) const;
 	GaussianMixture();
 	bool solve(const DenseMat<float>& data, int N_gaus, int km_iter,
 			int em_iter, float var_floor = 1E-16f);
 	//
 	virtual ~GaussianMixture() {
+	}
+};
+class GaussianMixtureRGB {
+protected:
+	std::vector<float3> means;
+	std::vector<float3x3> sigmas;
+	std::vector<float3x3> invSigmas;
+	std::vector<float> priors;
+	std::vector<double> scaleFactors;
+	void initializeMeans(const std::vector<float3>& X);
+	void initializeParameters(const std::vector<float3>& X, float var_floor);
+	bool iterateKMeans(const std::vector<float3>& X, int max_iter);
+public:
+	GaussianMixtureRGB();
+	double distanceMahalanobis(float3 pt, int g) const;
+	double distanceEuclidean(float3 pt, int g) const;
+
+	double distanceMahalanobis(float3 pt) const;
+	double distanceEuclidean(float3 pt) const;
+	double likelihood(float3 pt) const;
+	bool solve(const std::vector<float3>& data, int N_gaus, int km_iter,
+			int em_iter, float var_floor = 1E-16f);
+	virtual ~GaussianMixtureRGB() {
 	}
 };
 }

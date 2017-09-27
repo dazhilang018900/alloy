@@ -20,6 +20,7 @@
  */
 
 #include "AlloyMath.h"
+#include "svd3.h"
 #include <random>
 using namespace std;
 namespace aly {
@@ -324,11 +325,40 @@ template<class T, int m, int n> void SVD_INTERNAL(const matrix<T, m, n>& M,
 }
 void SVD(const matrix<float, 2, 2> &A, matrix<float, 2, 2>& U,
 		matrix<float, 2, 2>& D, matrix<float, 2, 2>& Vt) {
-	SVD_INTERNAL(A, U, D, Vt);
+	D(0,1)=0;
+	D(1,0)=0;
+	svd2(
+			// input A
+			A(0,0),A(0,1),
+			A(1,0),A(1,1),
+			// output U
+			U(0,0),U(0,1),
+			U(1,0),U(1,1),
+			// output S
+			D(0,0),D(1,1),
+			// output V
+			Vt(0,0),Vt(1,0),
+			Vt(0,1),Vt(1,1));
 }
 void SVD(const matrix<float, 3, 3> &A, matrix<float, 3, 3>& U,
 		matrix<float, 3, 3>& D, matrix<float, 3, 3>& Vt) {
-	SVD_INTERNAL(A, U, D, Vt);
+	svd3(
+			// input A
+			A(0,0),A(0,1),A(0,2),
+			A(1,0),A(1,1),A(1,2),
+			A(2,0),A(2,1),A(2,2),
+			// output U
+			U(0,0),U(0,1),U(0,2),
+			U(1,0),U(1,1),U(1,2),
+			U(2,0),U(2,1),U(2,2),
+			// output S
+			D(0,0),D(0,1),D(0,2),
+			D(1,0),D(1,1),D(1,2),
+			D(2,0),D(2,1),D(2,2),
+			// output V
+			Vt(0,0),Vt(1,0),Vt(2,0),
+			Vt(0,1),Vt(1,1),Vt(2,1),
+			Vt(0,2),Vt(1,2),Vt(2,2));
 }
 void SVD(const matrix<float, 4, 4> &A, matrix<float, 4, 4>& U,
 		matrix<float, 4, 4>& D, matrix<float, 4, 4>& Vt) {

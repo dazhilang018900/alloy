@@ -23,6 +23,7 @@
 //! @{
 #include <AlloyGaussianMixture.h>
 #include <AlloyOptimization.h>
+#include <chrono>
 namespace aly {
 void SANITY_CHECK_GMM() {
 	int G = 3;
@@ -36,7 +37,7 @@ void SANITY_CHECK_GMM() {
 	std::cout << "Start Allocation" << std::endl;
 	centers[0]= {1,2};
 	centers[1]= {3,8};
-	centers[2]= {6,6};
+	centers[2]= {6,3};
 
 	sigmas[0] = float2(0.1f, 0.2f);
 	sigmas[1] = float2(0.3f, 0.1f);
@@ -50,6 +51,7 @@ void SANITY_CHECK_GMM() {
 	//priors[3] = 0.25f;
 
 	DenseMat<float> samples(D, S);
+	std::vector<float3> colorSamples(S);
 	std::cout << "Generate samples" << std::endl;
 	std::vector<int> order(S);
 	for (int i = 0; i < order.size(); i++) {
@@ -70,17 +72,37 @@ void SANITY_CHECK_GMM() {
 				sample[0] = samp.x;
 				sample[1] = samp.y;
 				samples.setColumn(sample, i);
+				colorSamples[i] = float3(samp.x, 0.4, samp.y);
 				break;
 			}
 			last = curr;
 		}
 	}
+	auto startTime = std::chrono::high_resolution_clock::now();
 	GaussianMixture gmm;
-	std::cout << "Start Learning " << samples.dimensions() << std::endl;
+	std::cout << "Start Learning " << samples.cols << std::endl;
 	gmm.solve(samples, G, 20, 20, 0.0001f);
+	auto endTime = std::chrono::high_resolution_clock::now();
+	double elapsed = std::chrono::duration<double>(endTime - startTime).count();
+	std::cout << "Elapsed " << elapsed << std::endl;
+
+	GaussianMixtureRGB gmmRGB;
+	std::cout << "Start Learning " << std::endl;
+	gmmRGB.solve(colorSamples, G, 20, 20, 0.0001f);
+	auto currentTime = std::chrono::high_resolution_clock::now();
+	elapsed = std::chrono::duration<double>(currentTime - endTime).count();
+	std::cout << "Elapsed " << elapsed << std::endl;
+
+}
+double GaussianMixture::distanceMahalanobis(const Vec<float>& pt, int g) const {
+	return std::sqrt(
+			dot(pt - means.getColumn(g),
+					invSigmas[g] * (pt - means.getColumn(g))));
+}
+double GaussianMixture::distanceEuclidean(const Vec<float>& pt, int g) const {
+	return length(pt - means.getColumn(g));
 }
 GaussianMixture::GaussianMixture() {
-
 }
 void GaussianMixture::initializeParameters(const DenseMat<float>& X,
 		float var_floor) {
@@ -275,7 +297,36 @@ bool GaussianMixture::iterateKMeans(const DenseMat<float>& X, int max_iter) {
 	}
 	return true;
 }
-
+double GaussianMixture::distanceMahalanobis(const Vec<float>& pt) const {
+	float minDist = 1E30;
+	for (int i = 0; i < (int) means.size(); i++) {
+		float d = distanceMahalanobis(pt, i);
+		if (d < minDist) {
+			minDist = d;
+		}
+	}
+	return minDist;
+}
+double GaussianMixture::distanceEuclidean(const Vec<float>& pt) const {
+	float minDist = 1E30;
+	for (int i = 0; i < (int) means.size(); i++) {
+		float d = distanceEuclidean(pt, i);
+		if (d < minDist) {
+			minDist = d;
+		}
+	}
+	return minDist;
+}
+double GaussianMixture::likelihood(const Vec<float>& pt) const {
+	double sum = 0;
+	for (int k = 0; k < means.size(); k++) {
+		VecMap<float> mean = means.getColumn(k);
+		DenseMat<float> isig = invSigmas[k];
+		double dgaus = std::exp(-0.5 * dot((pt - mean), isig * (pt - mean)))* scaleFactors[k] * priors[k];
+		sum += dgaus;
+	}
+	return std::log(sum);
+}
 bool GaussianMixture::solve(const DenseMat<float>& data, int G, int km_iter,
 		int em_iter, float var_floor) {
 	const float CONV_TOLERANCE = 1E-6f;
@@ -297,8 +348,7 @@ bool GaussianMixture::solve(const DenseMat<float>& data, int G, int km_iter,
 	}
 // initial fcovs
 	initializeParameters(data, var_floor);
-
-	std::vector<double> scaleFactors(G);
+	scaleFactors.resize(G);
 	double CORRECTION = std::pow(ALY_2_PI, data.rows * 0.5);
 	double logl = 0;
 	double lastlogl = 0;
@@ -374,4 +424,325 @@ bool GaussianMixture::solve(const DenseMat<float>& data, int G, int km_iter,
 	}
 	return true;
 }
+
+GaussianMixtureRGB::GaussianMixtureRGB() {
+}
+
+void GaussianMixtureRGB::initializeParameters(const std::vector<float3>& X,
+		float var_floor) {
+	const int G = (int) means.size();
+	const int N = (int) X.size();
+	if (N == 0) {
+		return;
+	}
+	std::vector<float3> acc_means(G, float3(0.0f));
+	std::vector<float3> acc_dcovs(G, float3(0.0f));
+	std::vector<int> sumMembers(G, 0);
+	for (int i = 0; i < N; ++i) {
+		float3 sample = X[i];
+		double min_dist = 1E30;
+		int best_g = 0;
+		for (int g = 0; g < G; ++g) {
+			float3 mean = means[g];
+			double dist = distanceSqr(sample, mean);
+			if (dist < min_dist) {
+				min_dist = dist;
+				best_g = g;
+			}
+		}
+		sumMembers[best_g]++;
+		float3& acc_mean = acc_means[best_g];
+		float3& acc_dcov = acc_dcovs[best_g];
+		acc_mean += sample;
+		acc_dcov += sample * sample;
+	}
+	for (int g = 0; g < G; ++g) {
+		float3& acc_mean = acc_means[g];
+		float3& acc_dcov = acc_dcovs[g];
+		int sumMember = sumMembers[g];
+		float3& mean = means[g];
+		float3x3& fcov = sigmas[g];
+		fcov = float3x3::zero();
+		for (int d = 0; d < 3; ++d) {
+			double tmp = acc_mean[d] / double(sumMember);
+			mean[d] = (sumMember >= 1) ? tmp : (0);
+			fcov[d][d] =
+					(sumMember >= 2) ?
+							float(
+									(acc_dcov[d] / float(sumMember))
+											- (tmp * tmp)) :
+							float(var_floor);
+		}
+		priors[g] = sumMember / (float) N;
+	}
+}
+
+void GaussianMixtureRGB::initializeMeans(const std::vector<float3>& X) {
+	const int G = means.size();
+	int N = X.size();
+// going through all of the samples can be extremely time consuming;
+// instead, if there are enough samples, randomly choose samples with probability 0.1
+	const int stride = 10;
+	const bool use_sampling = ((N / int(stride * stride)) > G);
+	const int step = (use_sampling) ? int(stride) : int(1);
+	int start_index = RandomUniform(0, N - 1);
+	means[0] = X[start_index];
+	double max_dist = 0.0;
+	for (int g = 1; g < G; ++g) {
+		int best_i = int(0);
+		int start_i = int(0);
+		max_dist = 0.0;
+		for (int i = 0; i < N; i += step) {
+			bool ignore_i = false;
+			// find the average distance between sample i and the means so far
+			size_t idx = i + RandomUniform(0, step - 1);
+			float3 sample = X[idx];
+			double sum = 0.0;
+			for (int h = 0; h < g; ++h) {
+				double dist = distanceSqr(means[h], sample);
+				if (dist == 0.0) {
+					ignore_i = true;
+					break;
+				} else {
+					sum += dist;
+				}
+			}
+			if (!ignore_i && sum >= max_dist) {
+				max_dist = sum;
+				best_i = idx;
+			}
+		}
+		// set the mean to the sample that is the furthest away from the means so far
+		means[g] = X[best_i];
+	}
+}
+bool GaussianMixtureRGB::iterateKMeans(const std::vector<float3>& X,
+		int max_iter) {
+	const double ZERO_TOLERANCE = 1E-16;
+	const int N = X.size();
+	const int G = means.size();
+	std::vector<float3> acc_means(G, float3(0.0f));
+	std::vector<int> acc_hefts(G, 0);
+	std::vector<int> last_indx(G, 0);
+	std::vector<float3> new_means = means;
+	for (int iter = 1; iter <= max_iter; ++iter) {
+		acc_hefts.assign(acc_hefts.size(), 0);
+		acc_means.assign(acc_means.size(), float3(0.0f));
+		//Find closest cluster
+		for (int i = 0; i < N; ++i) {
+			float3 sample = X[i];
+			double min_dist = 1E30;
+			int best_g = 0;
+			for (int g = 0; g < G; ++g) {
+				double dist = distanceSqr(means[g], sample);
+				if (dist < min_dist) {
+					min_dist = dist;
+					best_g = g;
+				}
+			}
+			acc_means[best_g] += sample;
+			acc_hefts[best_g]++;
+			last_indx[best_g] = i;
+		}
+		// generate new means
+		for (int g = 0; g < G; ++g) {
+			float3& acc_mean = acc_means[g];
+			int acc_heft = acc_hefts[g];
+			float3& new_mean = new_means[g];
+			for (int d = 0; d < 2; ++d) {
+				new_mean[d] =
+						(acc_heft >= 1) ?
+								(acc_mean[d] / float(acc_heft)) : float(0);
+			}
+		}
+		// heuristics to resurrect dead means in the even cluster centers collapse
+		std::vector<int> dead_gs;
+		for (int i = 0; i < acc_hefts.size(); i++) {
+			if (acc_hefts[i] == 0) {
+				dead_gs.push_back(i);
+			}
+			if (dead_gs.size() > 0) {
+				std::vector<int> live_gs;
+				for (int i = 0; i < acc_hefts.size(); i++) {
+					if (acc_hefts[i] >= 2) {
+						live_gs.push_back(i);
+					}
+				}
+				std::sort(live_gs.begin(), live_gs.end(),
+						[=](const int& a,const int& b) {return a>b;});
+
+				if (live_gs.size() == 0) {
+					return false;
+				}
+				int live_gs_count = 0;
+				for (int dead_gs_count = 0;
+						dead_gs_count < (int) dead_gs.size(); ++dead_gs_count) {
+					const int dead_g_id = dead_gs[dead_gs_count];
+					int proposed_i = 0;
+					if (live_gs_count < live_gs.size()) {
+						const int live_g_id = live_gs[live_gs_count];
+						++live_gs_count;
+						if (live_g_id == dead_g_id) {
+							return false;
+						}
+						// recover by using a sample from a known good mean
+						proposed_i = last_indx[live_g_id];
+					} else {
+						// recover by using a randomly selected sample (last resort)
+						proposed_i = RandomUniform(0, N - 1);
+					}
+					if (proposed_i >= N) {
+						return false;
+					}
+					new_means[dead_g_id] = X[proposed_i];
+				}
+			}
+			double rs_delta = 0;
+			for (int g = 0; g < G; ++g) {
+				rs_delta += distance(means[g], new_means[g]);
+			}
+			rs_delta /= G;
+			if (rs_delta <= ZERO_TOLERANCE) {
+				break;
+			}
+		}
+		means = new_means;
+	}
+	return true;
+}
+
+double GaussianMixtureRGB::distanceMahalanobis(float3 pt, int g) const {
+	return std::sqrt(dot(pt - means[g], invSigmas[g] * (pt - means[g])));
+}
+double GaussianMixtureRGB::distanceEuclidean(float3 pt, int g) const {
+	return distance(pt, means[g]);
+}
+double GaussianMixtureRGB::distanceMahalanobis(float3 pt) const {
+	float minDist = 1E30;
+	for (int i = 0; i < (int) means.size(); i++) {
+		float d = distanceMahalanobis(pt, i);
+		if (d < minDist) {
+			minDist = d;
+		}
+	}
+	return minDist;
+}
+double GaussianMixtureRGB::distanceEuclidean(float3 pt) const {
+	float minDist = 1E30;
+	for (int i = 0; i < (int) means.size(); i++) {
+		float d = distanceEuclidean(pt, i);
+		if (d < minDist) {
+			minDist = d;
+		}
+	}
+	return minDist;
+}
+double GaussianMixtureRGB::likelihood(float3 pt) const {
+	double sum = 0;
+	for (int k = 0; k < means.size(); k++) {
+		float3 mean = means[k];
+		float3x3 isig = invSigmas[k];
+		double dgaus = std::exp(-0.5 * dot((pt - mean), isig * (pt - mean))) * scaleFactors[k] * priors[k];
+		sum += dgaus;
+	}
+	return std::log(sum);
+}
+bool GaussianMixtureRGB::solve(const std::vector<float3>& data, int G,
+		int km_iter, int em_iter, float var_floor) {
+	const float CONV_TOLERANCE = 1E-6f;
+	int N = (int) data.size();
+	DenseMat<float> W(N, G);
+	float3x3 U;
+	float3x3 Diag;
+	float3x3 Vt;
+
+	means.resize(G);
+	priors.resize(G);
+	scaleFactors.resize(G);
+	sigmas.resize(G, float3x3::zero());
+	invSigmas.resize(G, float3x3::zero());
+
+	initializeMeans(data);
+	if (km_iter > 0) {
+		if (!iterateKMeans(data, km_iter)) {
+			return false;
+		}
+	}
+	initializeParameters(data, var_floor);
+	double CORRECTION = std::pow(ALY_2_PI, 3 * 0.5);
+	double logl = 0;
+	double lastlogl = 0;
+	for (int iter = 0; iter < em_iter; iter++) {
+		std::cout << "Iteration " << iter << std::endl;
+		for (int k = 0; k < G; k++) {
+			float3x3& M = sigmas[k];
+			SVD(M, U, Diag, Vt);
+			double det = 1;
+			std::cout << k << ") " << means[k] << " ::" << priors[k];
+			for (int k = 0; k < 3; k++) {
+				double d = Diag[k][k];
+				std::cout << " sigma[" << k << "]=" << std::sqrt(d);
+				if (std::abs(d) > var_floor) {
+					det *= d;
+					d = 1.0 / d;
+				}
+				Diag[k][k] = d;
+			}
+			std::cout << std::endl;
+			scaleFactors[k] = 1.0 / (CORRECTION * std::sqrt(det));
+			invSigmas[k] = transpose(U * Diag * Vt);
+
+		}
+		logl = 0;
+		for (int n = 0; n < N; n++) {
+			float3 sample = data[n];
+			double sum = 0;
+			for (int k = 0; k < G; k++) {
+				float3& mean = means[k];
+				float3x3 isig = invSigmas[k];
+				double dgaus = std::exp(
+						-0.5 * dot((sample - mean), isig * (sample - mean)))
+						* scaleFactors[k] * priors[k];
+				sum += dgaus;
+				W[n][k] = dgaus;
+			}
+			logl += std::log(sum);
+			for (int k = 0; k < G; k++) {
+				W[n][k] /= sum;
+			}
+		}
+		logl /= N;
+		std::cout << "Log Likelihood= " << logl << std::endl;
+		for (int k = 0; k < G; k++) {
+			float3& mean = means[k];
+			mean = float3(0.0f);
+			double alpha = 0;
+			for (int n = 0; n < N; n++) {
+				float3 sample = data[n];
+				alpha += W[n][k];
+				mean += W[n][k] * sample;
+			}
+			mean /= (float) alpha;
+			float3x3& cov = sigmas[k];
+			cov = float3x3::zero();
+			for (int n = 0; n < N; n++) {
+				float3 sample = data[n];
+				float3 diff = (sample - mean);
+				float w = W(n, k) / alpha;
+				for (int ii = 0; ii < 3; ii++) {
+					for (int jj = 0; jj < 3; jj++) {
+						cov[ii][jj] += w * diff[ii] * diff[jj];
+					}
+				}
+			}
+			priors[k] = alpha / N;
+		}
+		if (std::abs(logl - lastlogl) < CONV_TOLERANCE) {
+			break;
+		}
+		lastlogl = logl;
+	}
+	return true;
+}
+
 }
