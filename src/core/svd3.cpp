@@ -27,8 +27,8 @@ void svd2(
 		float& u11,float& u12,float& u21,float& u22,
 		float& s1,float& s2,
 		float& v11,float& v12,float& v21,float& v22) {
-    s1 = (std::sqrt(pow(a11 - a22, 2) + pow(a12 + a21, 2)) + std::sqrt(pow(a11 + a22, 2) + pow(a12 - a21, 2))) / 2;
-    s2 = std::abs(s1 - std::sqrt(std::pow(a11 - a22, 2) + pow(a12 + a21, 2)));
+    s1 = (std::sqrt(std::pow(a11 - a22, 2) + std::pow(a12 + a21, 2)) + std::sqrt(std::pow(a11 + a22, 2) + std::pow(a12 - a21, 2))) / 2;
+    s2 = std::abs(s1 - std::sqrt(std::pow(a11 - a22, 2) + std::pow(a12 + a21, 2)));
     v21 = (s1 > s2) ? std::sin((std::atan2(2 * (a11 * a12 + a21 * a22), a11 * a11 - a12 * a12 + a21 * a21 - a22 * a22)) / 2) : 0;
     v11 = std::sqrt(1 - v21 * v21);
     v12 = -v21;

@@ -610,32 +610,74 @@ bool GaussianMixtureRGB::iterateKMeans(const std::vector<float3>& X,
 	}
 	return true;
 }
-
+float3 GaussianMixtureRGB::getMean(int g) const {
+	return means[g];
+}
+float3x3 GaussianMixtureRGB::getCovariance(int g) const {
+	return sigmas[g];
+}
+float3x3 GaussianMixtureRGB::getInverseCovariance(int g) const {
+	return invSigmas[g];
+}
 double GaussianMixtureRGB::distanceMahalanobis(float3 pt, int g) const {
 	return std::sqrt(dot(pt - means[g], invSigmas[g] * (pt - means[g])));
 }
 double GaussianMixtureRGB::distanceEuclidean(float3 pt, int g) const {
 	return distance(pt, means[g]);
 }
-double GaussianMixtureRGB::distanceMahalanobis(float3 pt) const {
+
+float3 GaussianMixtureRGB::deltaMahalanobis(float3 pt, int g) const {
+	return aly::abs(invSigmas[g] * (pt - means[g]));
+}
+float3 GaussianMixtureRGB::deltaEuclidean(float3 pt, int g) const {
+	return aly::abs(pt- means[g]);
+}
+
+int GaussianMixtureRGB::closestMahalanobis(float3 pt) const{
 	float minDist = 1E30;
+	int index=-1;
 	for (int i = 0; i < (int) means.size(); i++) {
 		float d = distanceMahalanobis(pt, i);
 		if (d < minDist) {
 			minDist = d;
+			index=i;
 		}
 	}
-	return minDist;
+	return index;
 }
-double GaussianMixtureRGB::distanceEuclidean(float3 pt) const {
+float GaussianMixtureRGB::getPrior(int g) const{
+	return priors[g];
+}
+int GaussianMixtureRGB::maxPrior() const{
+	float maxDist = 0;
+	int index=-1;
+	for (int i = 0; i < (int) means.size(); i++) {
+		float d=priors[i];
+		if (d > maxDist) {
+			maxDist = d;
+			index=i;
+		}
+	}
+	return index;
+}
+int GaussianMixtureRGB::closestEuclidean(float3 pt) const{
 	float minDist = 1E30;
+	int index=-1;
 	for (int i = 0; i < (int) means.size(); i++) {
 		float d = distanceEuclidean(pt, i);
 		if (d < minDist) {
 			minDist = d;
+			index=i;
 		}
 	}
-	return minDist;
+	return index;
+}
+
+float3 GaussianMixtureRGB::deltaMahalanobis(float3 pt) const {
+	return deltaMahalanobis(pt,closestMahalanobis(pt));
+}
+float3 GaussianMixtureRGB::deltaEuclidean(float3 pt) const {
+	return deltaEuclidean(pt,closestEuclidean(pt));
 }
 double GaussianMixtureRGB::likelihood(float3 pt) const {
 	double sum = 0;

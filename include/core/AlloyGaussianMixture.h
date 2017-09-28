@@ -64,8 +64,24 @@ public:
 	double distanceMahalanobis(float3 pt, int g) const;
 	double distanceEuclidean(float3 pt, int g) const;
 
+	float3 deltaMahalanobis(float3 pt, int g) const;
+	float3 deltaEuclidean(float3 pt, int g) const;
+
+	float3 deltaMahalanobis(float3 pt) const;
+	float3 deltaEuclidean(float3 pt) const;
+
+	float3 getMean(int g) const;
+	float3x3 getCovariance(int g) const;
+	float3x3 getInverseCovariance(int g) const;
+	float getPrior(int g) const;
+	int maxPrior() const;
 	double distanceMahalanobis(float3 pt) const;
 	double distanceEuclidean(float3 pt) const;
+
+
+
+	int closestMahalanobis(float3 pt) const;
+	int closestEuclidean(float3 pt) const;
 	double likelihood(float3 pt) const;
 	bool solve(const std::vector<float3>& data, int N_gaus, int km_iter,
 			int em_iter, float var_floor = 1E-16f);
