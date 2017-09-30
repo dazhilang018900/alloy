@@ -23,6 +23,11 @@
 //! @{
 #include <AlloyGaussianMixture.h>
 #include <AlloyOptimization.h>
+#include <cereal/archives/xml.hpp>
+#include <cereal/archives/json.hpp>
+#include <cereal/archives/portable_binary.hpp>
+#include <AlloyFileUtil.h>
+#include <fstream>
 #include <chrono>
 namespace aly {
 void SANITY_CHECK_GMM() {
@@ -34,7 +39,6 @@ void SANITY_CHECK_GMM() {
 
 	std::vector<float2> centers(G);
 
-	std::cout << "Start Allocation" << std::endl;
 	centers[0]= {1,2};
 	centers[1]= {3,8};
 	centers[2]= {6,3};
@@ -52,7 +56,6 @@ void SANITY_CHECK_GMM() {
 
 	DenseMat<float> samples(D, S);
 	std::vector<float3> colorSamples(S);
-	std::cout << "Generate samples" << std::endl;
 	std::vector<int> order(S);
 	for (int i = 0; i < order.size(); i++) {
 		order[i] = i;
@@ -94,6 +97,41 @@ void SANITY_CHECK_GMM() {
 	std::cout << "Elapsed " << elapsed << std::endl;
 
 }
+
+void WriteGaussianMixtureToFile(const std::string& file, const GaussianMixtureRGB& params) {
+	std::string ext = GetFileExtension(file);
+	if (ext == "json") {
+		std::ofstream os(file);
+		cereal::JSONOutputArchive archive(os);
+		archive(cereal::make_nvp("camera", params));
+	} else if (ext == "xml") {
+		std::ofstream os(file);
+		cereal::XMLOutputArchive archive(os);
+		archive(cereal::make_nvp("camera", params));
+	} else {
+		std::ofstream os(file, std::ios::binary);
+		cereal::PortableBinaryOutputArchive archive(os);
+		archive(cereal::make_nvp("camera", params));
+	}
+}
+void ReadGaussianMixtureFromFile(const std::string& file, GaussianMixtureRGB& params) {
+	std::string ext = GetFileExtension(file);
+	if (ext == "json") {
+		std::ifstream os(file);
+		cereal::JSONInputArchive archive(os);
+		archive(cereal::make_nvp("camera", params));
+	} else if (ext == "xml") {
+		std::ifstream os(file);
+		cereal::XMLInputArchive archive(os);
+		archive(cereal::make_nvp("camera", params));
+	} else {
+		std::ifstream os(file, std::ios::binary);
+		cereal::PortableBinaryInputArchive archive(os);
+		archive(cereal::make_nvp("camera", params));
+	}
+}
+
+
 double GaussianMixture::distanceMahalanobis(const Vec<float>& pt, int g) const {
 	return std::sqrt(
 			dot(pt - means.getColumn(g),
@@ -353,22 +391,22 @@ bool GaussianMixture::solve(const DenseMat<float>& data, int G, int km_iter,
 	double logl = 0;
 	double lastlogl = 0;
 	for (int iter = 0; iter < em_iter; iter++) {
-		std::cout << "Iteration " << iter << std::endl;
+		//std::cout << "Iteration " << iter << std::endl;
 		for (int k = 0; k < G; k++) {
 			DenseMat<float>& M = sigmas[k];
 			SVD(M, U, Diag, Vt);
 			double det = 1;
-			std::cout << k << ") " << means.getColumn(k) << " ::" << priors[k];
+			//std::cout << k << ") " << means.getColumn(k) << " ::" << priors[k];
 			for (int k = 0; k < D; k++) {
 				double d = Diag[k][k];
-				std::cout << " sigma[" << k << "]=" << std::sqrt(d);
+				//std::cout << " sigma[" << k << "]=" << std::sqrt(d);
 				if (std::abs(d) > var_floor) {
 					det *= d;
 					d = 1.0 / d;
 				}
 				Diag[k][k] = d;
 			}
-			std::cout << std::endl;
+			//std::cout << std::endl;
 			scaleFactors[k] = 1.0 / (CORRECTION * std::sqrt(det));
 			invSigmas[k] = (U * Diag * Vt).transpose();
 
@@ -392,7 +430,7 @@ bool GaussianMixture::solve(const DenseMat<float>& data, int G, int km_iter,
 			}
 		}
 		logl /= N;
-		std::cout << "Log Likelihood= " << logl << std::endl;
+		//std::cout << "Log Likelihood= " << logl << std::endl;
 		for (int k = 0; k < G; k++) {
 			VecMap<float> mean = means.getColumn(k);
 			mean.setZero();
@@ -715,22 +753,22 @@ bool GaussianMixtureRGB::solve(const std::vector<float3>& data, int G,
 	double logl = 0;
 	double lastlogl = 0;
 	for (int iter = 0; iter < em_iter; iter++) {
-		std::cout << "Iteration " << iter << std::endl;
+		//std::cout << "Iteration " << iter << std::endl;
 		for (int k = 0; k < G; k++) {
 			float3x3& M = sigmas[k];
 			SVD(M, U, Diag, Vt);
 			double det = 1;
-			std::cout << k << ") " << means[k] << " ::" << priors[k];
+			//std::cout << k << ") " << means[k] << " ::" << priors[k];
 			for (int k = 0; k < 3; k++) {
 				double d = Diag[k][k];
-				std::cout << " sigma[" << k << "]=" << std::sqrt(d);
+				//std::cout << " sigma[" << k << "]=" << std::sqrt(d);
 				if (std::abs(d) > var_floor) {
 					det *= d;
 					d = 1.0 / d;
 				}
 				Diag[k][k] = d;
 			}
-			std::cout << std::endl;
+			//std::cout << std::endl;
 			scaleFactors[k] = 1.0 / (CORRECTION * std::sqrt(det));
 			invSigmas[k] = transpose(U * Diag * Vt);
 
@@ -754,7 +792,7 @@ bool GaussianMixtureRGB::solve(const std::vector<float3>& data, int G,
 			}
 		}
 		logl /= N;
-		std::cout << "Log Likelihood= " << logl << std::endl;
+		//std::cout << "Log Likelihood= " << logl << std::endl;
 		for (int k = 0; k < G; k++) {
 			float3& mean = means[k];
 			mean = float3(0.0f);

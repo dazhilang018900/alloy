@@ -37,6 +37,11 @@ protected:
 	void initializeParameters(const DenseMat<float>&X, float var_floor);
 	bool iterateKMeans(const DenseMat<float>& X, int max_iter);
 public:
+	template<class Archive> void serialize(Archive & archive) {
+		archive(
+			CEREAL_NVP(means), CEREAL_NVP(sigmas), CEREAL_NVP(invSigmas),
+			CEREAL_NVP(priors), CEREAL_NVP(scaleFactors));
+	}
 	double distanceMahalanobis(const Vec<float>& pt, int g) const;
 	double distanceEuclidean(const Vec<float>& pt, int g) const;
 	double distanceMahalanobis(const Vec<float>& pt) const;
@@ -60,6 +65,14 @@ protected:
 	void initializeParameters(const std::vector<float3>& X, float var_floor);
 	bool iterateKMeans(const std::vector<float3>& X, int max_iter);
 public:
+	template<class Archive> void serialize(Archive & archive) {
+		archive(
+			CEREAL_NVP(means),
+			CEREAL_NVP(sigmas),
+			cereal::make_nvp("inverse_sigmas",invSigmas),
+			CEREAL_NVP(priors),
+			CEREAL_NVP(scaleFactors));
+	}
 	GaussianMixtureRGB();
 	double distanceMahalanobis(float3 pt, int g) const;
 	double distanceEuclidean(float3 pt, int g) const;
@@ -88,6 +101,9 @@ public:
 	virtual ~GaussianMixtureRGB() {
 	}
 };
+void WriteGaussianMixtureToFile(const std::string& file, const GaussianMixtureRGB& params);
+void ReadGaussianMixtureFromFile(const std::string& file, GaussianMixtureRGB& params);
+
 }
 
 #endif /* INCLUDE_CORE_ALLOYGAUSSIANMIXTURE_H_ */
