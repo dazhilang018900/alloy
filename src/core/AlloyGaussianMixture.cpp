@@ -23,6 +23,7 @@
 //! @{
 #include <AlloyGaussianMixture.h>
 #include <AlloyOptimization.h>
+#include <cereal/types/vector.hpp>
 #include <cereal/archives/xml.hpp>
 #include <cereal/archives/json.hpp>
 #include <cereal/archives/portable_binary.hpp>
@@ -98,39 +99,74 @@ void SANITY_CHECK_GMM() {
 
 }
 
-void WriteGaussianMixtureToFile(const std::string& file, const GaussianMixtureRGB& params) {
+void WriteGaussianMixtureToFile(const std::string& file,
+		const GaussianMixtureRGB& params) {
 	std::string ext = GetFileExtension(file);
 	if (ext == "json") {
 		std::ofstream os(file);
 		cereal::JSONOutputArchive archive(os);
-		archive(cereal::make_nvp("camera", params));
+		archive(cereal::make_nvp("gmm", params));
 	} else if (ext == "xml") {
 		std::ofstream os(file);
 		cereal::XMLOutputArchive archive(os);
-		archive(cereal::make_nvp("camera", params));
+		archive(cereal::make_nvp("gmm", params));
 	} else {
 		std::ofstream os(file, std::ios::binary);
 		cereal::PortableBinaryOutputArchive archive(os);
-		archive(cereal::make_nvp("camera", params));
+		archive(cereal::make_nvp("gmm", params));
 	}
 }
-void ReadGaussianMixtureFromFile(const std::string& file, GaussianMixtureRGB& params) {
+void ReadGaussianMixtureFromFile(const std::string& file,
+		GaussianMixtureRGB& params) {
 	std::string ext = GetFileExtension(file);
 	if (ext == "json") {
 		std::ifstream os(file);
 		cereal::JSONInputArchive archive(os);
-		archive(cereal::make_nvp("camera", params));
+		archive(cereal::make_nvp("gmm", params));
 	} else if (ext == "xml") {
 		std::ifstream os(file);
 		cereal::XMLInputArchive archive(os);
-		archive(cereal::make_nvp("camera", params));
+		archive(cereal::make_nvp("gmm", params));
 	} else {
 		std::ifstream os(file, std::ios::binary);
 		cereal::PortableBinaryInputArchive archive(os);
-		archive(cereal::make_nvp("camera", params));
+		archive(cereal::make_nvp("gmm", params));
 	}
 }
-
+void WriteGaussianMixtureToFile(const std::string& file,
+		const std::vector<GaussianMixtureRGB>& params) {
+	std::string ext = GetFileExtension(file);
+	if (ext == "json") {
+		std::ofstream os(file);
+		cereal::JSONOutputArchive archive(os);
+		archive(cereal::make_nvp("gmm_array", params));
+	} else if (ext == "xml") {
+		std::ofstream os(file);
+		cereal::XMLOutputArchive archive(os);
+		archive(cereal::make_nvp("gmm_array", params));
+	} else {
+		std::ofstream os(file, std::ios::binary);
+		cereal::PortableBinaryOutputArchive archive(os);
+		archive(cereal::make_nvp("gmm_array", params));
+	}
+}
+void ReadGaussianMixtureFromFile(const std::string& file,
+		std::vector<GaussianMixtureRGB>& params) {
+	std::string ext = GetFileExtension(file);
+	if (ext == "json") {
+		std::ifstream os(file);
+		cereal::JSONInputArchive archive(os);
+		archive(cereal::make_nvp("gmm_array", params));
+	} else if (ext == "xml") {
+		std::ifstream os(file);
+		cereal::XMLInputArchive archive(os);
+		archive(cereal::make_nvp("gmm_array", params));
+	} else {
+		std::ifstream os(file, std::ios::binary);
+		cereal::PortableBinaryInputArchive archive(os);
+		archive(cereal::make_nvp("gmm_array", params));
+	}
+}
 
 double GaussianMixture::distanceMahalanobis(const Vec<float>& pt, int g) const {
 	return std::sqrt(
@@ -360,7 +396,8 @@ double GaussianMixture::likelihood(const Vec<float>& pt) const {
 	for (int k = 0; k < means.size(); k++) {
 		VecMap<float> mean = means.getColumn(k);
 		DenseMat<float> isig = invSigmas[k];
-		double dgaus = std::exp(-0.5 * dot((pt - mean), isig * (pt - mean)))* scaleFactors[k] * priors[k];
+		double dgaus = std::exp(-0.5 * dot((pt - mean), isig * (pt - mean)))
+				* scaleFactors[k] * priors[k];
 		sum += dgaus;
 	}
 	return std::log(sum);
@@ -668,61 +705,86 @@ float3 GaussianMixtureRGB::deltaMahalanobis(float3 pt, int g) const {
 	return aly::abs(invSigmas[g] * (pt - means[g]));
 }
 float3 GaussianMixtureRGB::deltaEuclidean(float3 pt, int g) const {
-	return aly::abs(pt- means[g]);
+	return aly::abs(pt - means[g]);
 }
 
-int GaussianMixtureRGB::closestMahalanobis(float3 pt) const{
+int GaussianMixtureRGB::closestMahalanobis(float3 pt) const {
 	float minDist = 1E30;
-	int index=-1;
+	int index = -1;
 	for (int i = 0; i < (int) means.size(); i++) {
 		float d = distanceMahalanobis(pt, i);
 		if (d < minDist) {
 			minDist = d;
-			index=i;
+			index = i;
 		}
 	}
 	return index;
 }
-float GaussianMixtureRGB::getPrior(int g) const{
-	return priors[g];
-}
-int GaussianMixtureRGB::maxPrior() const{
-	float maxDist = 0;
-	int index=-1;
-	for (int i = 0; i < (int) means.size(); i++) {
-		float d=priors[i];
-		if (d > maxDist) {
-			maxDist = d;
-			index=i;
-		}
-	}
-	return index;
-}
-int GaussianMixtureRGB::closestEuclidean(float3 pt) const{
+double GaussianMixtureRGB::distanceMahalanobis(float3 pt) const {
 	float minDist = 1E30;
-	int index=-1;
+	int index = -1;
+	for (int i = 0; i < (int) means.size(); i++) {
+		float d = distanceMahalanobis(pt, i);
+		if (d < minDist) {
+			minDist = d;
+
+		}
+	}
+	return minDist;
+}
+double GaussianMixtureRGB::distanceEuclidean(float3 pt) const {
+	float minDist = 1E30;
+	int index = -1;
 	for (int i = 0; i < (int) means.size(); i++) {
 		float d = distanceEuclidean(pt, i);
 		if (d < minDist) {
 			minDist = d;
-			index=i;
+
+		}
+	}
+	return minDist;
+}
+float GaussianMixtureRGB::getPrior(int g) const {
+	return priors[g];
+}
+int GaussianMixtureRGB::maxPrior() const {
+	float maxDist = 0;
+	int index = -1;
+	for (int i = 0; i < (int) means.size(); i++) {
+		float d = priors[i];
+		if (d > maxDist) {
+			maxDist = d;
+			index = i;
+		}
+	}
+	return index;
+}
+int GaussianMixtureRGB::closestEuclidean(float3 pt) const {
+	float minDist = 1E30;
+	int index = -1;
+	for (int i = 0; i < (int) means.size(); i++) {
+		float d = distanceEuclidean(pt, i);
+		if (d < minDist) {
+			minDist = d;
+			index = i;
 		}
 	}
 	return index;
 }
 
 float3 GaussianMixtureRGB::deltaMahalanobis(float3 pt) const {
-	return deltaMahalanobis(pt,closestMahalanobis(pt));
+	return deltaMahalanobis(pt, closestMahalanobis(pt));
 }
 float3 GaussianMixtureRGB::deltaEuclidean(float3 pt) const {
-	return deltaEuclidean(pt,closestEuclidean(pt));
+	return deltaEuclidean(pt, closestEuclidean(pt));
 }
 double GaussianMixtureRGB::likelihood(float3 pt) const {
 	double sum = 0;
 	for (int k = 0; k < means.size(); k++) {
 		float3 mean = means[k];
 		float3x3 isig = invSigmas[k];
-		double dgaus = std::exp(-0.5 * dot((pt - mean), isig * (pt - mean))) * scaleFactors[k] * priors[k];
+		double dgaus = std::exp(-0.5 * dot((pt - mean), isig * (pt - mean)))
+				* scaleFactors[k] * priors[k];
 		sum += dgaus;
 	}
 	return std::log(sum);

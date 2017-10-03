@@ -254,10 +254,10 @@ namespace aly
             if (-1 == ftruncate(file_handle_, offset + mapping_size)) return;
             file_size_ = offset + mapping_size;
         }
-        char* real_data = static_cast<char*>(::mmap(
-            0, offset - real_offset + mapping_size, PROT_READ | PROT_WRITE, MAP_SHARED,
-            file_handle_, real_offset));
-        if (data_ == MAP_FAILED) return;
+        char* real_data = static_cast<char*>(::mmap(0, offset - real_offset + mapping_size, PROT_READ | PROT_WRITE, MAP_SHARED,file_handle_, real_offset));
+        if (real_data == MAP_FAILED) {
+        	return;
+        }
     #endif
         if (offset + mapping_size > file_size_)
         {

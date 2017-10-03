@@ -104,6 +104,9 @@ public:
 void WriteGaussianMixtureToFile(const std::string& file, const GaussianMixtureRGB& params);
 void ReadGaussianMixtureFromFile(const std::string& file, GaussianMixtureRGB& params);
 
+void WriteGaussianMixtureToFile(const std::string& file, const std::vector<GaussianMixtureRGB>& params);
+void ReadGaussianMixtureFromFile(const std::string& file, std::vector<GaussianMixtureRGB>& params);
+
 }
 
 #endif /* INCLUDE_CORE_ALLOYGAUSSIANMIXTURE_H_ */
