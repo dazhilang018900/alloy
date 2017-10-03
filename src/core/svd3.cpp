@@ -17,10 +17,10 @@
 #include "svd3.h"
 #include <AlloyMath.h>
 namespace aly {
-#define _gamma 5.828427124 // FOUR_GAMMA_SQUARED = sqrt(8)+3;
-#define _cstar 0.923879532 // cos(pi/8)
-#define _sstar 0.3826834323 // sin(p/8)
-#define EPSILON 1e-6
+#define _gamma 5.828427124f // FOUR_GAMMA_SQUARED = sqrt(8)+3;
+#define _cstar 0.923879532f // cos(pi/8)
+#define _sstar 0.3826834323f // sin(p/8)
+#define EPSILON 1e-6f
 
 void svd2(
 		float a11,float a12,float a21,float a22,
@@ -133,7 +133,7 @@ void approximateGivensQuaternion(float a11, float a12, float a22, float &ch,
 	ch = 2 * (a11 - a22);
 	sh = a12;
 	bool b = _gamma * sh * sh < ch * ch;
-	float w = 1.0f / std::sqrt(ch * ch + sh * sh);
+	float w = 1.0f / (float)std::sqrt(ch * ch + sh * sh);
 	ch = b ? w * ch : _cstar;
 	sh = b ? w * sh : _sstar;
 }
