@@ -144,7 +144,8 @@ bool SANITY_CHECK() {
 	//SANITY_CHECK_SUBDIVIDE();
 	//SANITY_CHECK_XML();
 	//SANITY_CHECK_LBFGS();
-	SANITY_CHECK_GMM();
+	//SANITY_CHECK_GMM();
+	SANITY_CHECK_SVD();
 	return ret;
 }
 int main(int argc, char *argv[]) {

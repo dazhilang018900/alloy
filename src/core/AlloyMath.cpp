@@ -340,8 +340,7 @@ void SVD(const matrix<float, 2, 2> &A, matrix<float, 2, 2>& U,
 			Vt(0,0),Vt(1,0),
 			Vt(0,1),Vt(1,1));
 }
-void SVD(const matrix<float, 3, 3> &A, matrix<float, 3, 3>& U,
-		matrix<float, 3, 3>& D, matrix<float, 3, 3>& Vt) {
+void SVD(const matrix<float, 3, 3> &A, matrix<float, 3, 3>& U,matrix<float, 3, 3>& D, matrix<float, 3, 3>& Vt) {
 	svd3(
 			// input A
 			A(0,0),A(0,1),A(0,2),
@@ -644,4 +643,78 @@ float InvSqrt(float x) {
 	x = x * (1.5f - xhalf * x * x);
 	return x;
 }
+
+bool SANITY_CHECK_SVD() {
+		std::cout<<"Sanity Check SVD"<<std::endl;
+		int N = 100;
+		std::uniform_real_distribution<float> r(-1.0f, 1.0f);
+		std::random_device rd;
+		std::mt19937 gen(rd());
+		float3x3 M = float3x3::identity();
+		float3x3 R = SubMatrix(
+			MakeRotation(normalize(float3(r(gen), r(gen), r(gen))),
+				(float)(r(gen) * ALY_PI * 2)));
+		float3x3 S = SubMatrix(MakeScale(float3(r(gen), r(gen), r(gen))));
+		std::vector<float3> in(N);
+		float3 avgIn;
+		float3 avgOut;
+		for (int n = 0; n < N; n++) {
+			float x = 10 * r(gen);
+			float y = 10 * r(gen);
+			float z = 10 * r(gen);
+			float3 pt(x, y, z);
+			float3 qt = R * pt - pt;
+			for (int i = 0; i < 3; i++) {
+				for (int j = 0; j < 3; j++) {
+					M(i, j) += qt[i] * qt[j];
+				}
+			}
+		}
+		float2x2 M2=SubMatrix(M);
+		std::cout << "M=\n" << M << std::endl;
+		float3x3 Q, D;
+		Eigen(M, Q, D);
+		std::cout << "Q=\n" << Q << std::endl;
+		std::cout << "R=\n" << R << std::endl;
+		std::cout << "D=\n" << D << std::endl;
+		float3x3 QDQt = Q * D * transpose(Q);
+		std::cout << "QDQt=\n" << QDQt * inverse(M) << std::endl;
+		float3x3 U, Vt;
+
+		float2x2 U2,Vt2,D2;
+
+		SVD(M, U, D, Vt);
+		std::cout << "SVD3: U=\n" << U << std::endl;
+		std::cout << "SVD3: D=\n" << D << std::endl;
+		std::cout << "SVD3: Vt=\n" << Vt << std::endl;
+		std::cout << "SVD3: UDVt=\n" << U * D * Vt * inverse(M) << std::endl;
+
+		SVD_INTERNAL(M, U, D, Vt);
+		std::cout << "U=\n" << U << std::endl;
+		std::cout << "D=\n" << D << std::endl;
+		std::cout << "Vt=\n" << Vt << std::endl;
+		std::cout << "UDVt=\n" << U * D * Vt * inverse(M) << std::endl;
+
+
+		SVD(M2, U2, D2, Vt2);
+		std::cout << "SVD3: U=\n" << U2 << std::endl;
+		std::cout << "SVD3: D=\n" << D2 << std::endl;
+		std::cout << "SVD3: Vt=\n" << Vt2 << std::endl;
+		std::cout << "SVD3: UDVt=\n" << U2 * D2 * Vt2 * inverse(M2) << std::endl;
+
+		SVD_INTERNAL(M2, U2, D2, Vt2);
+		std::cout << "U=\n" << U2 << std::endl;
+		std::cout << "D=\n" << D2 << std::endl;
+		std::cout << "Vt=\n" << Vt2 << std::endl;
+		std::cout << "UDVt=\n" << U2 * D2 * Vt2 * inverse(M2) << std::endl;
+
+		float3x3 Rest = FactorRotation(M);
+		float3x3 A1 = U * D * Vt;
+		float3x3 A2 = U * MakeDiagonal(float3(1, 1, -1)) * D * Vt;
+		std::cout << "Determinant " << determinant(A1) << " " << determinant(A2)
+			<< std::endl;
+		std::cout << "Rotation " << Rest << std::endl;
+		return true;
+	}
+
 }
