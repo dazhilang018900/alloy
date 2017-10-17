@@ -52,6 +52,9 @@
     <Filter Include="src\segmentation">
       <UniqueIdentifier>{684c4845-3e47-4a78-9dd6-ccda12e54224}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\cereal\types">
+      <UniqueIdentifier>{a4698d45-450f-4c95-a92a-981b27baecad}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\core\nanovg.cpp">
@@ -1210,6 +1213,78 @@
     </ClInclude>
     <ClInclude Include="..\..\include\core\svd3.h">
       <Filter>include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\array.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\base_class.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\bitset.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\boost_variant.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\chrono.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\common.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\complex.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\deque.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\forward_list.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\functional.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\list.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\map.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\memory.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\polymorphic.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\queue.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\set.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\stack.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\string.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\tuple.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\unordered_map.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\unordered_set.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\utility.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\valarray.hpp">
+      <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\types\vector.hpp">
+      <Filter>include\cereal\types</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
