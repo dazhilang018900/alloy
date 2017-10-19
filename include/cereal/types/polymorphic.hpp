@@ -213,7 +213,10 @@ namespace cereal
         name = ar.getPolymorphicName(nameid);
 
       auto & bindingMap = detail::StaticObject<detail::InputBindingMap<Archive>>::getInstance().map;
-
+	  std::cout << "BINDING MAP " <<bindingMap.size()<<":: "<< &detail::StaticObject<detail::InputBindingMap<Archive>>::getInstance().map << std::endl;
+	  for (auto pr : bindingMap) {
+		  std::cout << "BIND [" << pr.first << "]" << std::endl;
+	  }
       auto binding = bindingMap.find(name);
       if(binding == bindingMap.end())
         UNREGISTERED_POLYMORPHIC_EXCEPTION(load, name)
@@ -318,6 +321,7 @@ namespace cereal
     auto & bindingMap = detail::StaticObject<detail::OutputBindingMap<Archive>>::getInstance().map;
 
     auto binding = bindingMap.find(std::type_index(ptrinfo));
+
     if(binding == bindingMap.end())
       UNREGISTERED_POLYMORPHIC_EXCEPTION(save, cereal::util::demangle(ptrinfo.name()))
 

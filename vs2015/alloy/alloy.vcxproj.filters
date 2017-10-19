@@ -55,6 +55,12 @@
     <Filter Include="include\cereal\types">
       <UniqueIdentifier>{a4698d45-450f-4c95-a92a-981b27baecad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\cereal\details">
+      <UniqueIdentifier>{8db7f101-5742-4cc7-b5d9-f7179b75b971}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\cereal\archives">
+      <UniqueIdentifier>{0bff333c-53f6-4a58-98ee-3b5a2dc86fb5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\core\nanovg.cpp">
@@ -1285,6 +1291,39 @@
     </ClInclude>
     <ClInclude Include="..\..\include\cereal\types\vector.hpp">
       <Filter>include\cereal\types</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\details\helpers.hpp">
+      <Filter>include\cereal\details</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\details\polymorphic_impl.hpp">
+      <Filter>include\cereal\details</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\details\polymorphic_impl_fwd.hpp">
+      <Filter>include\cereal\details</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\details\static_object.hpp">
+      <Filter>include\cereal\details</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\details\traits.hpp">
+      <Filter>include\cereal\details</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\details\util.hpp">
+      <Filter>include\cereal\details</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\archives\adapters.hpp">
+      <Filter>include\cereal\archives</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\archives\binary.hpp">
+      <Filter>include\cereal\archives</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\archives\json.hpp">
+      <Filter>include\cereal\archives</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\archives\portable_binary.hpp">
+      <Filter>include\cereal\archives</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\cereal\archives\xml.hpp">
+      <Filter>include\cereal\archives</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
