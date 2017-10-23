@@ -547,7 +547,6 @@ namespace cereal
         serializers.unique_ptr =
           [&](void * arptr, void const * dptr, std::type_info const & baseInfo)
           {
-			std::cout << "Output serializer for " << baseInfo.name() << " uses map " << &PolymorphicCasters::map << std::endl;
             Archive & ar = *static_cast<Archive*>(arptr);
             writeMetadata(ar);
             std::unique_ptr<T const, EmptyDeleter<T const>> const ptr( PolymorphicCasters::template downcast<T>( dptr, baseInfo ) );
