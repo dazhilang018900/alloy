@@ -220,7 +220,6 @@ namespace cereal
       {
         auto & baseMap = StaticObject<PolymorphicCasters>::getInstance().map;
         auto baseKey = std::type_index(typeid(Base));
-		std::cout << "Polymorphic Virtual Caster: " <<baseKey.name()<<" :: "<< &StaticObject<PolymorphicCasters>::getInstance().map << std::endl;
 		auto lb = baseMap.lower_bound(baseKey);
         {
           auto & derivedMap = baseMap.insert( lb, {baseKey, {}} )->second;
@@ -416,24 +415,18 @@ namespace cereal
           return;
 
         typename InputBindingMap<Archive>::Serializers serializers;
-		std::cout << "Create Input Serializer " << &PolymorphicCasters::map << std::endl;
-
         serializers.shared_ptr =
           [](void * arptr, std::shared_ptr<void> & dptr, std::type_info const & baseInfo)
           {
-			std::cout << "Input serializer for " << baseInfo.name() << " uses map " << &PolymorphicCasters::map << std::endl;
             Archive & ar = *static_cast<Archive*>(arptr);
             std::shared_ptr<T> ptr;
-
             ar( CEREAL_NVP_("ptr_wrapper", ::cereal::memory_detail::make_ptr_wrapper(ptr)) );
-
             dptr = PolymorphicCasters::template upcast<T>( ptr, baseInfo );
           };
 
         serializers.unique_ptr =
           [](void * arptr, std::unique_ptr<void, EmptyDeleter<void>> & dptr, std::type_info const & baseInfo)
           {
-			std::cout << "Input serializer for " << baseInfo.name() << " uses map " << &PolymorphicCasters::map << std::endl;
             Archive & ar = *static_cast<Archive*>(arptr);
             std::unique_ptr<T> ptr;
 
@@ -538,14 +531,12 @@ namespace cereal
           return;
 
         typename OutputBindingMap<Archive>::Serializers serializers;
-		std::cout << "Create Output Serializer " << &PolymorphicCasters::map << std::endl;
         serializers.shared_ptr =
           [&](void * arptr, void const * dptr, std::type_info const & baseInfo)
           {
             Archive & ar = *static_cast<Archive*>(arptr);
             writeMetadata(ar);
             auto ptr = PolymorphicCasters::template downcast<T>( dptr, baseInfo );
-			std::cout << "Output serializer for "<<baseInfo.name() <<" uses map "<< &PolymorphicCasters::map << std::endl;
             #ifdef _MSC_VER
             savePolymorphicSharedPtr( ar, ptr, ::cereal::traits::has_shared_from_this<T>::type() ); // MSVC doesn't like typename here
             #else // not _MSC_VER

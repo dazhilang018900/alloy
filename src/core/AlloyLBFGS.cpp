@@ -14,10 +14,10 @@ void SANITY_CHECK_LBFGS(){
         float fx = 0.0;
         for(int i = 0; i < N; i += 2)
         {
-            float t1 = 1.0 - x[i];
+            float t1 = 1.0f - x[i];
             float t2 = 10 * (x[i + 1] - x[i] * x[i]);
             grad[i + 1] = 20 * t2;
-            grad[i]     = -2.0 * (x[i] * grad[i + 1] + t1);
+            grad[i]     = -2.0f * (x[i] * grad[i + 1] + t1);
             fx += t1 * t1 + t2 * t2;
         }
         return fx;
@@ -25,8 +25,8 @@ void SANITY_CHECK_LBFGS(){
 	const std::function<float(Vec<float>& x, Vec<float>& grad)> quadratic=[=](Vec<float>& x, Vec<float>& grad){
 	    Vec<float> d(N);
 	    for(int i = 0; i < N; i++)
-	        d[i] = i;
-	    double f = lengthSqr(x - d);
+	        d[i] = (float)i;
+	    float f = (float)lengthSqr(x - d);
 	    grad = 2.0f * (x - d);
 	    return f;
 	};
