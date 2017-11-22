@@ -52,11 +52,19 @@ template<typename T> class EndlessNode {
 		children.push_back(node);
 		return node;
 	}
-	std::shared_ptr<EndlessNode<T>> getChild(int i, int j, int k) const {
+	std::shared_ptr<EndlessNode<T>> getChild(int i, int j, int k, int d) {
 		int idx = getIndex(i, j, k);
 		if (idx < 0 || idx >= children.size())
-			return NULL_NODE;
+			return addChild(i, j, k, d);
 		return children[idx];
+	}
+	bool getChild(int i, int j, int k,
+			std::shared_ptr<EndlessNode<T>>& result) const {
+		int idx = getIndex(i, j, k);
+		if (idx < 0 || idx >= children.size())
+			return false;
+		result = children[idx];
+		return true;
 	}
 };
 }

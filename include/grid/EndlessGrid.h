@@ -58,6 +58,7 @@ template<typename T> class EndlessGrid {
 			std::vector<int3>& location) {
 		location.resize(levels.size());
 		int dim = levels[0];
+		int cdim;
 		int ti = roundDown(i, dim);
 		int tj = roundDown(j, dim);
 		int tk = roundDown(k, dim);
@@ -68,14 +69,37 @@ template<typename T> class EndlessGrid {
 		int kkk = ((k + stride * dim) % dim);
 		std::shared_ptr<EndlessNode<T>> node = getNode(ti, tj, tk, true);
 		for (int c = 0; c < levels; c++) {
-			int dim = levels[c];
-			int cdim = cellSizes[c];
+			dim = levels[c];
+			cdim = cellSizes[c];
 			location[c] = int3(iii / dim, jjj / dim, kkk / dim);
 			iii = iii % cdim;
 			jjj = jjj % cdim;
 			kkk = kkk % cdim;
 		}
 		return node;
+	}
+	T& getValue(int i, int j, int k) {
+		int dim = levels[0];
+		int cdim;
+		int ti = roundDown(i, dim);
+		int tj = roundDown(j, dim);
+		int tk = roundDown(k, dim);
+		int stride = std::max(std::max(std::abs(ti), std::abs(tj)),
+				std::abs(tk)) + 1;
+		int iii = ((i + stride * dim) % dim);
+		int jjj = ((j + stride * dim) % dim);
+		int kkk = ((k + stride * dim) % dim);
+		std::shared_ptr<EndlessNode<T>> node = getNode(ti, tj, tk, true);
+		for (int c = 0; c < levels - 1; c++) {
+			dim = levels[c];
+			cdim = cellSizes[c];
+			int3 pos = int3(iii / dim, jjj / dim, kkk / dim);
+			node = node->getChild(pos.x, pos.y, pos.z, levels[c + 1]);
+			iii = iii % cdim;
+			jjj = jjj % cdim;
+			kkk = kkk % cdim;
+		}
+		return (*node)(iii, jjj, kkk);
 	}
 	std::shared_ptr<EndlessNode<T>> getNode(int i, int j, int k,
 			bool AddIfNull = true) {
