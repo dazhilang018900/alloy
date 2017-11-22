@@ -66,6 +66,7 @@
 #include "../../include/example/MeshReconstructionEx.h"
 #include "../../include/example/SoftBodyEx.h"
 #include "../../include/example/AnisotropicFilterEx.h"
+#include "../../include/example/LevelSetGridEx.h"
 #include "AlloyOptimization.h"
 #include "AlloyGaussianMixture.h"
 #include <cstring>
@@ -149,7 +150,7 @@ bool SANITY_CHECK() {
 	return ret;
 }
 int main(int argc, char *argv[]) {
-	const int N = 46;
+	const int N = 47;
 	std::array<ExamplePtr,N> apps = { 
 		MAKE_EXAMPLE(UnitsEx), MAKE_EXAMPLE(CompositeEx),MAKE_EXAMPLE(EventsEx), 
 		MAKE_EXAMPLE(DragEx), MAKE_EXAMPLE(TweenEx),MAKE_EXAMPLE(ImageEx), 
@@ -166,7 +167,7 @@ int main(int argc, char *argv[]) {
 		MAKE_EXAMPLE(TabPaneEx),MAKE_EXAMPLE(ParameterPaneEx),MAKE_EXAMPLE(TablePaneEx),
 		MAKE_EXAMPLE(TimelineEx),MAKE_EXAMPLE(MeshOptimizationEx),MAKE_EXAMPLE(ImageFeaturesEx),
 		MAKE_EXAMPLE(MeshTextureMapEx),MAKE_EXAMPLE(MeshReconstructionEx),MAKE_EXAMPLE(SoftBodyEx),
-		MAKE_EXAMPLE(AnisotropicFilterEx)
+		MAKE_EXAMPLE(AnisotropicFilterEx),MAKE_EXAMPLE(LevelSetGridEx)
 	};
 	std::sort(apps.begin(),apps.end(),[=](const ExamplePtr& a,const ExamplePtr& b){
 		return std::lexicographical_compare(a->name.begin(), a->name.end(), b->name.begin(), b->name.end());
