@@ -21,6 +21,7 @@
 
 #include "Alloy.h"
 #include "AlloyReconstruction.h"
+#include "grid/EndlessGrid.h"
 #include "../../include/example/LevelSetGridEx.h"
 using namespace aly;
 LevelSetGridEx::LevelSetGridEx() :
@@ -30,6 +31,8 @@ LevelSetGridEx::LevelSetGridEx() :
 bool LevelSetGridEx::init(Composite& rootNode) {
 	srand((unsigned int) time(nullptr));
 	mesh.load(getFullPath("models/horse.ply"));
+	EndlessGrid<float> grid({16,16,8,2});
+	MeshToLevelSet(mesh, grid);
 	objectBBox = mesh.getBoundingBox();
 	displayIndex = 0;
 	colorReconstruction = false;

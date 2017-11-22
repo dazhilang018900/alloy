@@ -2584,6 +2584,14 @@ struct dim4: public int4 {
 		return int4(i,j,(int)k,(int)l);
 	}
 };
+float DistanceToEdgeSqr(const float3& pt, const float3& pt1, const float3& pt2,
+		float3* lastClosestSegmentPoint);
+float DistanceToEdgeSqr(const float3& pt, const float3& pt1, const float3& pt2);
+float DistanceToTriangleSqr(const float3& p, const float3& v0, const float3& v1,
+		const float3& v2, float3* closestPoint);
+float DistanceToQuadSqr(const float3& p, const float3& v0, const float3& v1,
+		const float3& v2, const float3& v3, const float3& normal,
+		float3* closestPoint);
 
 }
 #endif

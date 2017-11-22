@@ -5,6 +5,6 @@
  *      Author: blake
  */
 
-#include "EndlessNode.h"
+#include "grid/EndlessNode.h"
 namespace aly {
 }

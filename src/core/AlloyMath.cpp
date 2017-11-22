@@ -325,39 +325,33 @@ template<class T, int m, int n> void SVD_INTERNAL(const matrix<T, m, n>& M,
 }
 void SVD(const matrix<float, 2, 2> &A, matrix<float, 2, 2>& U,
 		matrix<float, 2, 2>& D, matrix<float, 2, 2>& Vt) {
-	D(0,1)=0;
-	D(1,0)=0;
+	D(0, 1) = 0;
+	D(1, 0) = 0;
 	svd2(
-			// input A
-			A(0,0),A(0,1),
-			A(1,0),A(1,1),
+	// input A
+			A(0, 0), A(0, 1), A(1, 0), A(1, 1),
 			// output U
-			U(0,0),U(0,1),
-			U(1,0),U(1,1),
+			U(0, 0), U(0, 1), U(1, 0), U(1, 1),
 			// output S
-			D(0,0),D(1,1),
+			D(0, 0), D(1, 1),
 			// output V
-			Vt(0,0),Vt(1,0),
-			Vt(0,1),Vt(1,1));
+			Vt(0, 0), Vt(1, 0), Vt(0, 1), Vt(1, 1));
 }
-void SVD(const matrix<float, 3, 3> &A, matrix<float, 3, 3>& U,matrix<float, 3, 3>& D, matrix<float, 3, 3>& Vt) {
+void SVD(const matrix<float, 3, 3> &A, matrix<float, 3, 3>& U,
+		matrix<float, 3, 3>& D, matrix<float, 3, 3>& Vt) {
 	svd3(
 			// input A
-			A(0,0),A(0,1),A(0,2),
-			A(1,0),A(1,1),A(1,2),
-			A(2,0),A(2,1),A(2,2),
+			A(0, 0), A(0, 1), A(0, 2), A(1, 0), A(1, 1), A(1, 2), A(2, 0),
+			A(2, 1), A(2, 2),
 			// output U
-			U(0,0),U(0,1),U(0,2),
-			U(1,0),U(1,1),U(1,2),
-			U(2,0),U(2,1),U(2,2),
+			U(0, 0), U(0, 1), U(0, 2), U(1, 0), U(1, 1), U(1, 2), U(2, 0),
+			U(2, 1), U(2, 2),
 			// output S
-			D(0,0),D(0,1),D(0,2),
-			D(1,0),D(1,1),D(1,2),
-			D(2,0),D(2,1),D(2,2),
+			D(0, 0), D(0, 1), D(0, 2), D(1, 0), D(1, 1), D(1, 2), D(2, 0),
+			D(2, 1), D(2, 2),
 			// output V
-			Vt(0,0),Vt(1,0),Vt(2,0),
-			Vt(0,1),Vt(1,1),Vt(2,1),
-			Vt(0,2),Vt(1,2),Vt(2,2));
+			Vt(0, 0), Vt(1, 0), Vt(2, 0), Vt(0, 1), Vt(1, 1), Vt(2, 1),
+			Vt(0, 2), Vt(1, 2), Vt(2, 2));
 }
 void SVD(const matrix<float, 4, 4> &A, matrix<float, 4, 4>& U,
 		matrix<float, 4, 4>& D, matrix<float, 4, 4>& Vt) {
@@ -518,74 +512,75 @@ bool ClipLine(double2& pt1, double2& pt2, const double2& minPt,
 	}
 	return accept;
 }
-float3 MakeOrthogonalComplement(const float3& v){
-	if (std::abs(v.x) > std::abs(v.y)){
-		return normalize(float3(-v.z,0.0f,v.x));
-    } else {
-        return normalize(float3(0.0f,v.z,v.y));
-    }
+float3 MakeOrthogonalComplement(const float3& v) {
+	if (std::abs(v.x) > std::abs(v.y)) {
+		return normalize(float3(-v.z, 0.0f, v.x));
+	} else {
+		return normalize(float3(0.0f, v.z, v.y));
+	}
 }
-float2 MakeOrthogonalComplement(const float2& v){
-	return normalize(float2(-v.y,v.x));
+float2 MakeOrthogonalComplement(const float2& v) {
+	return normalize(float2(-v.y, v.x));
 }
-float IntersectCylinder(aly::float3 pt,aly::float3 ray, float3 start, float3 end, float radius) {
-		float t0, t1;
-		float3 yaxis = normalize(end - start);
-		float3 xaxis=MakeOrthogonalComplement(yaxis);
-		float3 zaxis=cross(xaxis,yaxis);
-		float3x3 Rt=transpose(float3x3(xaxis,yaxis,zaxis));
-		float3 T=start;
-		pt=Rt*(pt-T);
-		start=Rt*(start-T);
-		end=Rt*(end-T);
-		ray=Rt*ray;
-		float minY=start.y;
-		float maxY=end.y;
-		// a=xD2+yD2, b=2xExD+2yEyD, and c=xE2+yE2-1.
-		float a = ray.x * ray.x + ray.z * ray.z;
-		float b = 2 * pt.x * ray.x + 2 * pt.z * ray.z;
-		float c = pt.x * pt.x + pt.z * pt.z - radius*radius;
-		float b24ac = b * b - 4 * a * c;
-		if (b24ac < 0)
-			return -1.0f;
-		float sqb24ac = std::sqrt(b24ac);
-		t0 = (-b + sqb24ac) / (2 * a);
-		t1 = (-b - sqb24ac) / (2 * a);
-		if (t0 > t1) {
-			std::swap(t0, t1);
-		}
-		float y0 = pt.y + t0 * ray.y;
-		float y1 = pt.y + t1 * ray.y;
-		if (y0 < start.y) {
-			if (y1 < start.y)
-				return -1.0f;
-			else {
-				// hit the cap
-				float th = t0 + (t1 - t0) * (y0 - start.y) / (y0 - y1);
-				if (th <= 0){
-					return -1.0f;
-				}
-				return th;
-			}
-		} else if (y0 >= start.y && y0 <= end.y) {
-			// hit the cylinder bit
-			if (t0 <= 0){
-				return -1.0f;
-			}
-			return t0;
-		} else if (y0 > end.y) {
-			if (y1 > end.y){
-				return -1.0f;
-			} else {
-				// hit the cap
-				float th = t0 + (t1 - t0) * (y0 - end.y) / (y0 - y1);
-				if (th <= 0){
-					return -1.0f;
-				}
-				return th;
-			}
-		}
+float IntersectCylinder(aly::float3 pt, aly::float3 ray, float3 start,
+		float3 end, float radius) {
+	float t0, t1;
+	float3 yaxis = normalize(end - start);
+	float3 xaxis = MakeOrthogonalComplement(yaxis);
+	float3 zaxis = cross(xaxis, yaxis);
+	float3x3 Rt = transpose(float3x3(xaxis, yaxis, zaxis));
+	float3 T = start;
+	pt = Rt * (pt - T);
+	start = Rt * (start - T);
+	end = Rt * (end - T);
+	ray = Rt * ray;
+	float minY = start.y;
+	float maxY = end.y;
+	// a=xD2+yD2, b=2xExD+2yEyD, and c=xE2+yE2-1.
+	float a = ray.x * ray.x + ray.z * ray.z;
+	float b = 2 * pt.x * ray.x + 2 * pt.z * ray.z;
+	float c = pt.x * pt.x + pt.z * pt.z - radius * radius;
+	float b24ac = b * b - 4 * a * c;
+	if (b24ac < 0)
 		return -1.0f;
+	float sqb24ac = std::sqrt(b24ac);
+	t0 = (-b + sqb24ac) / (2 * a);
+	t1 = (-b - sqb24ac) / (2 * a);
+	if (t0 > t1) {
+		std::swap(t0, t1);
+	}
+	float y0 = pt.y + t0 * ray.y;
+	float y1 = pt.y + t1 * ray.y;
+	if (y0 < start.y) {
+		if (y1 < start.y)
+			return -1.0f;
+		else {
+			// hit the cap
+			float th = t0 + (t1 - t0) * (y0 - start.y) / (y0 - y1);
+			if (th <= 0) {
+				return -1.0f;
+			}
+			return th;
+		}
+	} else if (y0 >= start.y && y0 <= end.y) {
+		// hit the cylinder bit
+		if (t0 <= 0) {
+			return -1.0f;
+		}
+		return t0;
+	} else if (y0 > end.y) {
+		if (y1 > end.y) {
+			return -1.0f;
+		} else {
+			// hit the cap
+			float th = t0 + (t1 - t0) * (y0 - end.y) / (y0 - y1);
+			if (th <= 0) {
+				return -1.0f;
+			}
+			return th;
+		}
+	}
+	return -1.0f;
 }
 float IntersectPlane(const float3& pt, const float3& ray, const float4& plane) {
 	const float3 n = plane.xyz();
@@ -645,76 +640,284 @@ float InvSqrt(float x) {
 }
 
 bool SANITY_CHECK_SVD() {
-		std::cout<<"Sanity Check SVD"<<std::endl;
-		int N = 100;
-		std::uniform_real_distribution<float> r(-1.0f, 1.0f);
-		std::random_device rd;
-		std::mt19937 gen(rd());
-		float3x3 M = float3x3::identity();
-		float3x3 R = SubMatrix(
+	std::cout << "Sanity Check SVD" << std::endl;
+	int N = 100;
+	std::uniform_real_distribution<float> r(-1.0f, 1.0f);
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	float3x3 M = float3x3::identity();
+	float3x3 R = SubMatrix(
 			MakeRotation(normalize(float3(r(gen), r(gen), r(gen))),
-				(float)(r(gen) * ALY_PI * 2)));
-		float3x3 S = SubMatrix(MakeScale(float3(r(gen), r(gen), r(gen))));
-		std::vector<float3> in(N);
-		float3 avgIn;
-		float3 avgOut;
-		for (int n = 0; n < N; n++) {
-			float x = 10 * r(gen);
-			float y = 10 * r(gen);
-			float z = 10 * r(gen);
-			float3 pt(x, y, z);
-			float3 qt = R * pt - pt;
-			for (int i = 0; i < 3; i++) {
-				for (int j = 0; j < 3; j++) {
-					M(i, j) += qt[i] * qt[j];
-				}
+					(float) (r(gen) * ALY_PI * 2)));
+	float3x3 S = SubMatrix(MakeScale(float3(r(gen), r(gen), r(gen))));
+	std::vector<float3> in(N);
+	float3 avgIn;
+	float3 avgOut;
+	for (int n = 0; n < N; n++) {
+		float x = 10 * r(gen);
+		float y = 10 * r(gen);
+		float z = 10 * r(gen);
+		float3 pt(x, y, z);
+		float3 qt = R * pt - pt;
+		for (int i = 0; i < 3; i++) {
+			for (int j = 0; j < 3; j++) {
+				M(i, j) += qt[i] * qt[j];
 			}
 		}
-		float2x2 M2=SubMatrix(M);
-		std::cout << "M=\n" << M << std::endl;
-		float3x3 Q, D;
-		Eigen(M, Q, D);
-		std::cout << "Q=\n" << Q << std::endl;
-		std::cout << "R=\n" << R << std::endl;
-		std::cout << "D=\n" << D << std::endl;
-		float3x3 QDQt = Q * D * transpose(Q);
-		std::cout << "QDQt=\n" << QDQt * inverse(M) << std::endl;
-		float3x3 U, Vt;
+	}
+	float2x2 M2 = SubMatrix(M);
+	std::cout << "M=\n" << M << std::endl;
+	float3x3 Q, D;
+	Eigen(M, Q, D);
+	std::cout << "Q=\n" << Q << std::endl;
+	std::cout << "R=\n" << R << std::endl;
+	std::cout << "D=\n" << D << std::endl;
+	float3x3 QDQt = Q * D * transpose(Q);
+	std::cout << "QDQt=\n" << QDQt * inverse(M) << std::endl;
+	float3x3 U, Vt;
 
-		float2x2 U2,Vt2,D2;
+	float2x2 U2, Vt2, D2;
 
-		SVD(M, U, D, Vt);
-		std::cout << "SVD3: U=\n" << U << std::endl;
-		std::cout << "SVD3: D=\n" << D << std::endl;
-		std::cout << "SVD3: Vt=\n" << Vt << std::endl;
-		std::cout << "SVD3: UDVt=\n" << U * D * Vt * inverse(M) << std::endl;
+	SVD(M, U, D, Vt);
+	std::cout << "SVD3: U=\n" << U << std::endl;
+	std::cout << "SVD3: D=\n" << D << std::endl;
+	std::cout << "SVD3: Vt=\n" << Vt << std::endl;
+	std::cout << "SVD3: UDVt=\n" << U * D * Vt * inverse(M) << std::endl;
 
-		SVD_INTERNAL(M, U, D, Vt);
-		std::cout << "U=\n" << U << std::endl;
-		std::cout << "D=\n" << D << std::endl;
-		std::cout << "Vt=\n" << Vt << std::endl;
-		std::cout << "UDVt=\n" << U * D * Vt * inverse(M) << std::endl;
+	SVD_INTERNAL(M, U, D, Vt);
+	std::cout << "U=\n" << U << std::endl;
+	std::cout << "D=\n" << D << std::endl;
+	std::cout << "Vt=\n" << Vt << std::endl;
+	std::cout << "UDVt=\n" << U * D * Vt * inverse(M) << std::endl;
 
+	SVD(M2, U2, D2, Vt2);
+	std::cout << "SVD3: U=\n" << U2 << std::endl;
+	std::cout << "SVD3: D=\n" << D2 << std::endl;
+	std::cout << "SVD3: Vt=\n" << Vt2 << std::endl;
+	std::cout << "SVD3: UDVt=\n" << U2 * D2 * Vt2 * inverse(M2) << std::endl;
 
-		SVD(M2, U2, D2, Vt2);
-		std::cout << "SVD3: U=\n" << U2 << std::endl;
-		std::cout << "SVD3: D=\n" << D2 << std::endl;
-		std::cout << "SVD3: Vt=\n" << Vt2 << std::endl;
-		std::cout << "SVD3: UDVt=\n" << U2 * D2 * Vt2 * inverse(M2) << std::endl;
+	SVD_INTERNAL(M2, U2, D2, Vt2);
+	std::cout << "U=\n" << U2 << std::endl;
+	std::cout << "D=\n" << D2 << std::endl;
+	std::cout << "Vt=\n" << Vt2 << std::endl;
+	std::cout << "UDVt=\n" << U2 * D2 * Vt2 * inverse(M2) << std::endl;
 
-		SVD_INTERNAL(M2, U2, D2, Vt2);
-		std::cout << "U=\n" << U2 << std::endl;
-		std::cout << "D=\n" << D2 << std::endl;
-		std::cout << "Vt=\n" << Vt2 << std::endl;
-		std::cout << "UDVt=\n" << U2 * D2 * Vt2 * inverse(M2) << std::endl;
-
-		float3x3 Rest = FactorRotation(M);
-		float3x3 A1 = U * D * Vt;
-		float3x3 A2 = U * MakeDiagonal(float3(1, 1, -1)) * D * Vt;
-		std::cout << "Determinant " << determinant(A1) << " " << determinant(A2)
+	float3x3 Rest = FactorRotation(M);
+	float3x3 A1 = U * D * Vt;
+	float3x3 A2 = U * MakeDiagonal(float3(1, 1, -1)) * D * Vt;
+	std::cout << "Determinant " << determinant(A1) << " " << determinant(A2)
 			<< std::endl;
-		std::cout << "Rotation " << Rest << std::endl;
-		return true;
+	std::cout << "Rotation " << Rest << std::endl;
+	return true;
+}
+float DistanceToEdgeSqr(const float3& pt, const float3& pt1, const float3& pt2,
+		float3* lastClosestSegmentPoint) {
+	float3 dir = pt2 - pt1;
+	float len = length(dir);
+	dir = normalize(dir);
+	float3 diff = pt - pt1;
+	float mSegmentParameter = dot(dir, diff);
+	if (0 < mSegmentParameter) {
+		if (mSegmentParameter < len) {
+			*lastClosestSegmentPoint = dir * mSegmentParameter + pt1;
+		} else {
+			*lastClosestSegmentPoint = pt2;
+		}
+	} else {
+		*lastClosestSegmentPoint = pt1;
+	}
+	return lengthSqr(pt - (*lastClosestSegmentPoint));
+}
+float DistanceToEdgeSqr(const float3& pt, const float3& pt1,
+		const float3& pt2) {
+	float3 tmp;
+	return DistanceToEdgeSqr(pt, pt1, pt2, &tmp);
+}
+//Implementation from geometric tools (http://www.geometrictools.com)
+inline float3 parametricTriangle(float3 e0, float3 e1, float s, float t,
+		float3 B) {
+	float3 Bsum = B + s * e0 + t * e1;
+	return Bsum;
+}
+float Angle(const float3& v0, const float3& v1, const float3& v2) {
+	float3 v = v0 - v1;
+	float3 w = v2 - v1;
+	float len1 = length(v);
+	float len2 = length(w);
+	return std::acos(dot(v, w) / std::max(1E-8f, len1 * len2));
+}
+float DistanceToTriangleSqr(const float3& p, const float3& v0, const float3& v1,
+		const float3& v2, float3* closestPoint) {
+	float distanceSquared = 0;
+	int region_id = 0;
+
+	float3 P = p;
+	float3 B = v0;
+	float3 e0 = v1 - v0;
+	float3 e1 = v2 - v0;
+	float a = dot(e0, e0);
+	float b = dot(e0, e1);
+	float c = dot(e1, e1);
+	float3 dv = B - P;
+	float d = dot(e0, dv);
+	float e = dot(e1, dv);
+	// Determine which region_id contains s, t
+
+	float det = a * c - b * b;
+	float s = b * e - c * d;
+	float t = b * d - a * e;
+
+	if (s + t <= det) {
+		if (s < 0) {
+			if (t < 0) {
+				region_id = 4;
+			} else {
+				region_id = 3;
+			}
+		} else if (t < 0) {
+			region_id = 5;
+		} else {
+			region_id = 0;
+		}
+	} else {
+		if (s < 0) {
+			region_id = 2;
+		} else if (t < 0) {
+			region_id = 6;
+		} else {
+			region_id = 1;
+		}
 	}
 
+	// Parametric Triangle Point
+	float3 T(0.0f);
+
+	if (region_id == 0) { // Region 0
+		float invDet = (float) 1 / (float) det;
+		s *= invDet;
+		t *= invDet;
+
+		// Find point on parametric triangle based on s and t
+		T = parametricTriangle(e0, e1, s, t, B);
+		// Find distance from P to T
+		float3 tmp = P - T;
+		distanceSquared = lengthSqr(tmp);
+	} else if (region_id == 1) { // Region 1
+		float numer = c + e - b - d;
+
+		if (numer < +0) {
+			s = 0;
+		} else {
+			float denom = a - 2 * b + c;
+			s = (numer >= denom ? 1 : numer / denom);
+		}
+		t = 1 - s;
+
+		// Find point on parametric triangle based on s and t
+		T = parametricTriangle(e0, e1, s, t, B);
+		// Find distance from P to T
+		float3 tmp = P - T;
+		distanceSquared = lengthSqr(tmp);
+	} else if (region_id == 2) { // Region 2
+		float tmp0 = b + d;
+		float tmp1 = c + e;
+
+		if (tmp1 > tmp0) {
+			float numer = tmp1 - tmp0;
+			float denom = a - 2 * b + c;
+			s = (numer >= denom ? 1 : numer / denom);
+			t = 1 - s;
+		} else {
+			s = 0;
+			t = (tmp1 <= 0 ? 1 : (e >= 0 ? 0 : -e / c));
+		}
+
+		// Find point on parametric triangle based on s and t
+		T = parametricTriangle(e0, e1, s, t, B);
+		// Find distance from P to T
+		float3 tmp = P - T;
+		distanceSquared = lengthSqr(tmp);
+	} else if (region_id == 3) { // Region 3
+		s = 0;
+		t = (e >= 0 ? 0 : (-e >= c ? 1 : -e / c));
+
+		// Find point on parametric triangle based on s and t
+		T = parametricTriangle(e0, e1, s, t, B);
+		// Find distance from P to T
+		float3 tmp = P - T;
+		distanceSquared = lengthSqr(tmp);
+
+	} else if (region_id == 4) { // Region 4
+		float tmp0 = c + e;
+		float tmp1 = a + d;
+
+		if (tmp0 > tmp1) {
+			s = 0;
+			t = (tmp1 <= 0 ? 1 : (e >= 0 ? 0 : -e / c));
+		} else {
+			t = 0;
+			s = (tmp1 <= 0 ? 1 : (d >= 0 ? 0 : -d / a));
+		}
+
+		// Find point on parametric triangle based on s and t
+		T = parametricTriangle(e0, e1, s, t, B);
+		// Find distance from P to T
+		float3 tmp = P - T;
+		distanceSquared = lengthSqr(tmp);
+	} else if (region_id == 5) { // Region 5
+		t = 0;
+		s = (d >= 0 ? 0 : (-d >= a ? 1 : -d / a));
+
+		// Find point on parametric triangle based on s and t
+		T = parametricTriangle(e0, e1, s, t, B);
+		// Find distance from P to T
+		float3 tmp = P - T;
+		distanceSquared = lengthSqr(tmp);
+	} else { // Region 6
+		float tmp0 = b + e;
+		float tmp1 = a + d;
+
+		if (tmp1 > tmp0) {
+			float numer = tmp1 - tmp0;
+			float denom = c - 2 * b + a;
+			t = (numer >= denom ? 1 : numer / denom);
+			s = 1 - t;
+		} else {
+			t = 0;
+			s = (tmp1 <= 0 ? 1 : (d >= 0 ? 0 : -d / a));
+		}
+
+		// Find point on parametric triangle based on s and t
+		T = parametricTriangle(e0, e1, s, t, B);
+		// Find distance from P to T
+		float3 tmp = P - T;
+		distanceSquared = lengthSqr(tmp);
+	}
+	(*closestPoint) = T;
+	return distanceSquared;
+}
+
+//What if quad is non-convex? Does this hold?
+float DistanceToQuadSqr(const float3& p, const float3& v0, const float3& v1,
+		const float3& v2, const float3& v3, const float3& norm,
+		float3* closestPoint) {
+	float3 cp1;
+	float3 cp2;
+	float d1, d2;
+	if (dot(cross((v2 - v0), (v1 - v0)), norm) > 0) {
+		d1 = DistanceToTriangleSqr(p, v0, v1, v2, &cp1);
+		d2 = DistanceToTriangleSqr(p, v2, v3, v0, &cp2);
+	} else {
+		d1 = DistanceToTriangleSqr(p, v1, v2, v3, &cp1);
+		d2 = DistanceToTriangleSqr(p, v3, v0, v1, &cp2);
+	}
+
+	if (d1 < d2) {
+		*closestPoint = cp1;
+		return d1;
+	} else {
+		*closestPoint = cp2;
+		return d2;
+	}
+}
 }

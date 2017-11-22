@@ -9,12 +9,10 @@
 #define INCLUDE_GRID_ENDLESSGRID_H_
 #include "EndlessNode.h"
 #include "AlloyMath.h"
+#include "AlloyMesh.h"
 #include <map>
 namespace aly {
 template<typename T> struct NodeNeighbor {
-	static const int nbrsX[6] = { 1, -1, 0, 0, 0, 0 };
-	static const int nbrsY[6] = { 0, 0, 1, -1, 0, 0 };
-	static const int nbrsZ[6] = { 0, 0, 0, 0, 1, -1 };
 	EndlessNode<T>* left, right, up, down, top, bottom;
 	EndlessNode<T>* operator[](size_t idx) const {
 		return (&left)[idx];
@@ -25,17 +23,33 @@ template<typename T> struct NodeNeighbor {
 	}
 };
 template<typename T> class EndlessGrid {
-	std::vector<int> levels;
-	std::vector<int> gridSizes;
-	std::vector<int> cellSizes;
+	std::vector<int> levels; //in local units
+	std::vector<int> gridSizes; //in world grid units
+	std::vector<int> cellSizes; //in world grid units
 	std::vector<std::shared_ptr<EndlessNode<T>>> nodes;
 	std::map<int3, int> indexes;
 	std::vector<NodeNeighbor<T>> neighbors;
+	int roundDown(int val, int size) const {
+		int ret;
+		if (val < 0) {
+			ret = (val + 1) / size - 1;
+		} else {
+			ret = val / size;
+		}
+		return ret;
+	}
+public:
+	void clear() {
+		nodes.clear();
+		indexes.clear();
+		neighbors.clear();
+	}
 	EndlessGrid(const std::initializer_list<int>& l = { 16, 16, 4 }) {
 		levels.assign(l.begin(), l.end());
-		gridSizes.resize(levels.size());
+		gridSizes.resize(levels.size(), 0);
+		cellSizes.resize(levels.size(), 0);
 		gridSizes[levels.size() - 1] = levels.back();
-		cellSizes[levels.size() - 11] = 1;
+		cellSizes[levels.size() - 1] = 1;
 		for (int c = levels.size() - 2; c >= 0; c--) {
 			gridSizes[c] = gridSizes[c + 1] * levels[c];
 			cellSizes[c] = gridSizes[c + 1];
@@ -45,14 +59,14 @@ template<typename T> class EndlessGrid {
 					<< cellSizes[c] << std::endl;
 		}
 	}
-	int roundDown(int val, int size) const {
-		int ret;
-		if (val < 0) {
-			ret = (val + 1) / size - 1;
-		} else {
-			ret = val / size;
-		}
-		return ret;
+	int getNodeSize() const {
+		return gridSizes[0];
+	}
+	int getNodeCount() const {
+		return nodes.size();
+	}
+	int getTreeDepth() const {
+		return levels.size();
 	}
 	std::shared_ptr<EndlessNode<T>> getLocation(int i, int j, int k,
 			std::vector<int3>& location) {
@@ -68,7 +82,7 @@ template<typename T> class EndlessGrid {
 		int jjj = ((j + stride * dim) % dim);
 		int kkk = ((k + stride * dim) % dim);
 		std::shared_ptr<EndlessNode<T>> node = getNode(ti, tj, tk, true);
-		for (int c = 0; c < levels; c++) {
+		for (int c = 0; c < (int) levels.size(); c++) {
 			dim = levels[c];
 			cdim = cellSizes[c];
 			location[c] = int3(iii / dim, jjj / dim, kkk / dim);
@@ -79,6 +93,9 @@ template<typename T> class EndlessGrid {
 		return node;
 	}
 	T& getValue(int i, int j, int k) {
+		const int nbrsX[6] = { 1, -1, 0, 0, 0, 0 };
+		const int nbrsY[6] = { 0, 0, 1, -1, 0, 0 };
+		const int nbrsZ[6] = { 0, 0, 0, 0, 1, -1 };
 		int dim = levels[0];
 		int cdim;
 		int ti = roundDown(i, dim);
@@ -90,7 +107,7 @@ template<typename T> class EndlessGrid {
 		int jjj = ((j + stride * dim) % dim);
 		int kkk = ((k + stride * dim) % dim);
 		std::shared_ptr<EndlessNode<T>> node = getNode(ti, tj, tk, true);
-		for (int c = 0; c < levels - 1; c++) {
+		for (int c = 0; c < levels.size() - 1; c++) {
 			dim = levels[c];
 			cdim = cellSizes[c];
 			int3 pos = int3(iii / dim, jjj / dim, kkk / dim);
@@ -107,7 +124,7 @@ template<typename T> class EndlessGrid {
 		int ti = roundDown(i, dim);
 		int tj = roundDown(j, dim);
 		int tk = roundDown(k, dim);
-		auto idx = indexes.at(int3(ti, tj, tk));
+		auto idx = indexes.find(int3(ti, tj, tk));
 		if (idx != indexes.end()) {
 			return nodes[*idx];
 		} else {
@@ -122,7 +139,7 @@ template<typename T> class EndlessGrid {
 				int3 nbr(i + NodeNeighbor<T>::nbrsX[n],
 						j + NodeNeighbor<T>::nbrsY[n],
 						k + NodeNeighbor<T>::nbrsZ[n]);
-				auto nbri = indexes.at(nbr);
+				auto nbri = indexes.find(nbr);
 				if (nbri != indexes.end()) {
 					neighbors.back()[n] = &nodes[*nbri];
 				}
@@ -131,6 +148,7 @@ template<typename T> class EndlessGrid {
 		}
 	}
 };
+void MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid);
 
 typedef EndlessGrid<float> EndlessGridFloat;
 typedef EndlessGrid<float2> EndlessGridFloat2;
