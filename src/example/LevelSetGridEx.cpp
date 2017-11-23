@@ -31,8 +31,9 @@ LevelSetGridEx::LevelSetGridEx() :
 bool LevelSetGridEx::init(Composite& rootNode) {
 	srand((unsigned int) time(nullptr));
 	mesh.load(getFullPath("models/horse.ply"));
-	EndlessGrid<float> grid({16,8,4,2});
+	EndlessGrid<float> grid({10,6,4,2},0.0f);
 	MeshToLevelSet(mesh, grid);
+	WriteGridToFile(GetDesktopDirectory(),grid);
 	objectBBox = mesh.getBoundingBox();
 	displayIndex = 0;
 	colorReconstruction = false;
@@ -119,14 +120,12 @@ bool LevelSetGridEx::init(Composite& rootNode) {
 	buttons->borderColor = MakeColor(getContext()->theme.DARK);
 	buttons->backgroundColor = MakeColor(getContext()->theme.DARKER);
 	rootNode.add(layout);
-
 	matcapShader->setTextureImage(getFullPath("images/JG_Silver.png"));
 	particleMatcapShader->setTextureImage(getFullPath("images/JG_Silver.png"));
 	camera.setNearFarPlanes(-2.0f, 2.0f);
 	camera.setZoom(0.75f);
 	camera.setCameraType(CameraType::Orthographic);
 	controls->addGroup("Visualization", true);
-
 	displayIndexField =
 			controls->addSelectionField("Display", displayIndex,
 					std::vector<std::string> { "Solid", "Solid & Wireframe",
