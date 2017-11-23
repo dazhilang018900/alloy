@@ -31,7 +31,7 @@ LevelSetGridEx::LevelSetGridEx() :
 bool LevelSetGridEx::init(Composite& rootNode) {
 	srand((unsigned int) time(nullptr));
 	mesh.load(getFullPath("models/horse.ply"));
-	EndlessGrid<float> grid({16,16,8,2});
+	EndlessGrid<float> grid({16,8,4,2});
 	MeshToLevelSet(mesh, grid);
 	objectBBox = mesh.getBoundingBox();
 	displayIndex = 0;
