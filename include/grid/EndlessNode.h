@@ -43,7 +43,26 @@ public:
 	std::vector<std::shared_ptr<EndlessNode<T>>> children;
 	static const std::shared_ptr<EndlessNode<T>> NULL_NODE;
 	bool isLeaf() const {
-		return (data.size() > 0);
+		return (indexes.size() == 0);
+	}
+	bool hasData() const {
+		return (data.size()>0);
+	}
+	void allocate(T backgroundValue) {
+		data.resize(dim*dim*dim,backgroundValue);
+		for(auto child:children){
+			if(!child->isLeaf())child->allocate(backgroundValue);
+		}
+	}
+	void getNodesAtDepth(std::vector<std::shared_ptr<EndlessNode<T>>>& result,int target,int parent=0) const {
+		parent++;
+		if(parent==target){
+			result.insert(result.end(),children.begin(),children.end());
+		} else {
+			for (std::shared_ptr<EndlessNode<T>> child : children) {
+				child->getNodesAtDepth(result,target,parent);
+			}
+		}
 	}
 	void getLeafNodes(std::vector<EndlessLocation>& positions,
 			std::vector<std::shared_ptr<EndlessNode<T>>>& result,
@@ -57,6 +76,15 @@ public:
 				result.push_back(child);
 			} else {
 				child->getLeafNodes(positions, result, offset);
+			}
+		}
+	}
+	void getLeafNodes(std::vector<std::shared_ptr<EndlessNode<T>>>& result) const {
+		for (std::shared_ptr<EndlessNode<T>> child : children) {
+			if (child->isLeaf()) {
+				result.push_back(child);
+			} else {
+				child->getLeafNodes(result);
 			}
 		}
 	}
@@ -150,6 +178,17 @@ public:
 		}
 		return children[idx];
 	}
+	std::shared_ptr<EndlessNode<T>> getChild(int i, int j, int k) const {
+		assert(i >= 0 && i < dim);
+		assert(j >= 0 && j < dim);
+		assert(k >= 0 && k < dim);
+		int idx = indexes[i + (j + k * dim) * dim];
+		if (idx < 0||idx>=children.size()) {
+			return std::shared_ptr<EndlessNode<T>>();
+		}
+		return children[idx];
+	}
+
 };
 }
 

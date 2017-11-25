@@ -31,7 +31,7 @@ LevelSetGridEx::LevelSetGridEx() :
 bool LevelSetGridEx::init(Composite& rootNode) {
 	srand((unsigned int) time(nullptr));
 	mesh.load(getFullPath("models/horse.ply"));
-	EndlessGrid<float> grid({10,6,4,2},0.0f);
+	EndlessGrid<float> grid({5,4,6,4},0.0f);
 	MeshToLevelSet(mesh, grid);
 	WriteGridToFile(GetDesktopDirectory(),grid);
 	objectBBox = mesh.getBoundingBox();
