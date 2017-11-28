@@ -88,6 +88,7 @@ public:
 			}
 		}
 	}
+	/*
 	void getLeafNodes(std::vector<int3>& positions,
 			std::vector<std::shared_ptr<EndlessNode<T>>>& result,
 			const std::vector<int>& cellSizes) const {
@@ -114,7 +115,7 @@ public:
 			//std::cout<<"Location "<<pos<<" "<<std::endl;
 			positions.push_back(loc);
 		}
-	}
+	}*/
 	EndlessNode(int dim,T bgValue, bool isLeaf) :
 			location(0, 0, 0), parent(nullptr), dim(dim) {
 		if (isLeaf) {
@@ -129,6 +130,35 @@ public:
 			data.resize(dim * dim * dim, bgValue);
 		} else {
 			indexes.resize(dim * dim * dim, -1);
+		}
+	}
+	float getSideValue(int s) const {
+		int3 nbr;
+		const int nbr6X[6] = { 1, -1, 0, 0, 0, 0 };
+		const int nbr6Y[6] = { 0, 0, 1, -1, 0, 0 };
+		const int nbr6Z[6] = { 0, 0, 0, 0, 1, -1 };
+		nbr.x = clamp(dim / 2 + dim * nbr6X[s], 0, dim - 1);
+		nbr.y = clamp(dim / 2 + dim * nbr6Y[s], 0, dim - 1);
+		nbr.z = clamp(dim / 2 + dim * nbr6Z[s], 0, dim - 1);
+		/*
+		const int nbr26X[26] = { 1, 0, -1, 1, 0, -1, 1, 0, -1, 1, 0, -1, 1, -1, 1,
+				0, -1, 1, 0, -1, 1, 0, -1, 1, 0, -1 };
+		const int nbr26Y[26] = { 1, 1, 1, 0, 0, 0, -1, -1, -1, 1, 1, 1, 0, 0, -1,
+				-1, -1, 1, 1, 1, 0, 0, 0, -1, -1, -1 };
+		const int nbr26Z[26] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+				-1, -1, -1, -1, -1, -1, -1, -1, -1 };
+
+		nbr.x = clamp(dim / 2 + dim * nbr26X[s], 0, dim - 1);
+		nbr.y = clamp(dim / 2 + dim * nbr26Y[s], 0, dim - 1);
+		nbr.z = clamp(dim / 2 + dim * nbr26Z[s], 0, dim - 1);
+		*/return data[nbr.x+(nbr.y+nbr.z*dim)*dim];
+	}
+	float getChildSideValue(int3 pos,int s) const {
+		int idx=indexes[pos.x+(pos.y+pos.z*dim)*dim];
+		if(idx>=0){
+			return children[idx]->getSideValue(s);
+		} else {
+			return data[pos.x+(pos.y+pos.z*dim)*dim];
 		}
 	}
 	T& operator()(int i, int j, int k) {
@@ -161,7 +191,7 @@ public:
 		int& idx = indexes[i + (j + k * dim) * dim];
 		idx = (int) children.size();
 		std::shared_ptr<EndlessNode<T>> node = std::shared_ptr<EndlessNode<T>>(
-				new EndlessNode<T>(d,bgValue, isLeaf, this, int3(i, j, k)));
+				new EndlessNode<T>(d,bgValue, isLeaf, this,location+int3(d*i, d*j, d*k)));
 		children.push_back(node);
 		return node;
 	}
@@ -170,9 +200,7 @@ public:
 		int& idx = indexes[i + (j + k * dim) * dim];
 		if (idx < 0) {
 			idx = (int) children.size();
-			std::shared_ptr<EndlessNode<T>> node = std::shared_ptr<
-					EndlessNode<T>>(
-					new EndlessNode<T>(d,bgValue, isLeaf, this, int3(i, j, k)));
+			std::shared_ptr<EndlessNode<T>> node = std::shared_ptr<EndlessNode<T>>(new EndlessNode<T>(d,bgValue, isLeaf, this, location+int3(d*i, d*j, d*k)));
 			children.push_back(node);
 			return node;
 		}
