@@ -393,6 +393,7 @@ void IsoSurface::solve(const Volume1f& data, Mesh& mesh,
 						break;
 				}
 				mesh.vertexLocations[i] = pt;
+				mesh.vertexNormals[i]=normalize(norm);
 			}
 		}
 	}
