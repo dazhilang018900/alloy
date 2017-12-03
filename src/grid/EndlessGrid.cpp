@@ -1,12 +1,28 @@
 /*
- * EndlessGrid.cpp
+ * Copyright(C) 2017, Blake C. Lucas, Ph.D. (img.science@gmail.com)
  *
- *  Created on: Nov 21, 2017
- *      Author: blake
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 
 #include "grid/EndlessGrid.h"
 #include "AlloyVolume.h"
+
+#include "AlloyIsoSurface.h"
 #include <queue>
 namespace aly {
 void WriteGridToFile(const std::string& root, const EndlessGrid<float>& grid) {
@@ -20,18 +36,32 @@ void WriteGridToFile(const std::string& root, const EndlessGrid<float>& grid) {
 		int3 pos = pr.first;
 		//if (pos != int3(0, 0, 0))continue;
 		EndlessNodeFloatPtr node = pr.second;
-		std::string file = MakeString() << dir << ALY_PATH_SEPARATOR<<name<<"_"<<pos.x<<"_"<<pos.y<<"_"<<pos.z<<".xml";
+		std::string volFile = MakeString() << dir << ALY_PATH_SEPARATOR<<name<<"_"<<pos.x<<"_"<<pos.y<<"_"<<pos.z<<".xml";
+		std::string meshFile = MakeString() << dir << ALY_PATH_SEPARATOR<<name<<"_"<<pos.x<<"_"<<pos.y<<"_"<<pos.z<<".ply";
+
 		data.set(grid.getBackgroundValue());
+		std::vector<int3> narrowBandList;
 		for (int z = 0; z < dim; z++) {
 			for (int y = 0; y < dim; y++) {
 				for (int x = 0; x < dim; x++) {
-					data(x, y, z).x = grid.getMultiResolutionValue(node, x, y,
-							z);
+					float val = grid.getMultiResolutionValue(node, x, y, z);
+					data(x, y, z).x = val;
+					if(std::abs(val)<1.75){
+						narrowBandList.push_back(int3(x,y,z));
+					}
 				}
 			}
 		}
-		std::cout << "Write " << file << std::endl;
-		WriteVolumeToFile(file, data);
+		IsoSurface isosurf;
+		Mesh mesh;
+		isosurf.solve(data,mesh,narrowBandList);
+
+		std::cout << "Write " << volFile << std::endl;
+		WriteVolumeToFile(volFile, data);
+
+		std::cout << "Write " << meshFile << std::endl;
+		WriteMeshToFile(meshFile, mesh);
+
 		/*
 
 		 file = MakeString() << dir << ALY_PATH_SEPARATOR<<"tree_"<<pos.x<<"_"<<pos.y<<"_"<<pos.z<<".xml";
@@ -351,15 +381,30 @@ float MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 		for (int k = 0; k <= dims.z; k++) {
 			for (int j = 0; j <= dims.y; j++) {
 				for (int i = 0; i <= dims.x; i++) {
-					float3 pt = float3(res * (i + pos.x), res * (j + pos.y),res * (k + pos.z));
-					float d = std::sqrt(DistanceToTriangleSqr(pt, v1, v2, v3,&closestPoint)) / res;
+					float3 pt = float3(res * (i + pos.x), res * (j + pos.y),
+							res * (k + pos.z));
+					float d = std::sqrt(
+							DistanceToTriangleSqr(pt, v1, v2, v3,
+									&closestPoint)) / res;
 					if (d <= narrowBand) {
-						int3 loc = int3(i + pos.x - minIndex.x,j + pos.y - minIndex.y, k + pos.z - minIndex.z);
+						int3 loc = int3(i + pos.x - minIndex.x,
+								j + pos.y - minIndex.y, k + pos.z - minIndex.z);
 						float& value = grid.getLeafValue(loc.x, loc.y, loc.z);
 						if (d < std::abs(value)) {
 							if (d <= trustDistance) {
 								//Interpolate normal to compute sign. Addresses cusp issue.
-								value = d * sgn* (int) aly::sign(dot(pt - closestPoint,FromBary(ToBary(closestPoint,v1,v2,v3),n1, n2,n3)));
+								value =
+										d * sgn
+												* (int) aly::sign(
+														dot(pt - closestPoint,
+																FromBary(
+																		ToBary(
+																				closestPoint,
+																				v1,
+																				v2,
+																				v3),
+																		n1, n2,
+																		n3)));
 							} else {
 								value = d * sgn;
 							}

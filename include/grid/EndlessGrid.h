@@ -1,8 +1,22 @@
 /*
- * EndlessGrid.h
+ * Copyright(C) 2017, Blake C. Lucas, Ph.D. (img.science@gmail.com)
  *
- *  Created on: Nov 21, 2017
- *      Author: blake
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 
 #ifndef INCLUDE_GRID_ENDLESSGRID_H_
@@ -13,26 +27,6 @@
 #include <map>
 #include <iostream>
 namespace aly {
-/*
- template<typename T> struct NodeNeighbor {
- EndlessNode<T>* left;
- EndlessNode<T>* right;
- EndlessNode<T>* up;
- EndlessNode<T>* down;
- EndlessNode<T>* top;
- EndlessNode<T>* bottom;
- EndlessNode<T>*& operator[](size_t idx) {
- return (&left)[idx];
- }
- const EndlessNode<T>*& operator[](size_t idx) const {
- return (&left)[idx];
- }
- NodeNeighbor() :
- left(nullptr), right(nullptr), up(nullptr), down(nullptr), top(
- nullptr), bottom(nullptr) {
- }
- };
- */
 template<typename T> class EndlessGrid {
 	std::vector<int> levels; //in local units
 	std::vector<int> gridSizes; //in world grid units

@@ -1,5 +1,5 @@
 /*
- * Copyright(C) 2016, Blake C. Lucas, Ph.D. (img.science@gmail.com)
+ * Copyright(C) 2017, Blake C. Lucas, Ph.D. (img.science@gmail.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -30,10 +30,11 @@ LevelSetGridEx::LevelSetGridEx() :
 }
 bool LevelSetGridEx::init(Composite& rootNode) {
 	srand((unsigned int) time(nullptr));
-	mesh.load(getFullPath("models/horse.ply"));
+	mesh.load(getFullPath("models/armadillo.ply"));
 	EndlessGrid<float> grid({5,4,6,4},0.0f);
 	std::cout<<"Converting mesh to level set ..."<<std::endl;
 	MeshToLevelSet(mesh, grid,2.5f, true, 0.8f);
+
 	std::cout<<"Done conversion"<<std::endl;
 	WriteGridToFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"signed.xml",grid);
 	std::cout<<"Exit Here"<<std::endl;
