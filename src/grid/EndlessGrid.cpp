@@ -299,8 +299,8 @@ void FloodFill(EndlessGrid<float>& grid, float narrowBand) {
 	}
 
 }
-void MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
-		float narrowBand,bool flipSign, float voxelScale) {
+float MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
+		float narrowBand, bool flipSign, float voxelScale) {
 	const int nbr6X[6] = { 1, -1, 0, 0, 0, 0 };
 	const int nbr6Y[6] = { 0, 0, 1, -1, 0, 0 };
 	const int nbr6Z[6] = { 0, 0, 0, 0, 1, -1 };
@@ -313,9 +313,7 @@ void MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 	std::set<EndlessNodeFloat*> parents;
 	const float trustDistance = 1.25f;
 	narrowBand = std::max(trustDistance + 1.0f, narrowBand);
-
 	float sgn = ((flipSign) ? -1.0f : 1.0f);
-	EndlessGrid<int> labels(grid.getLevelSizes(), 2);
 	grid.clear();
 	float backgroundValue = (narrowBand + 0.5f) * sgn;
 	grid.setBackgroundValue(backgroundValue);
@@ -323,6 +321,7 @@ void MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 	std::vector<box3f> splats;
 	splats.reserve(mesh.triIndexes.size());
 	double averageSize = 0;
+	//Calculate average size of triangle to scale mesh to grid accordingly.
 	for (uint3 tri : mesh.triIndexes.data) {
 		float3 v1 = mesh.vertexLocations[tri.x];
 		float3 v2 = mesh.vertexLocations[tri.y];
@@ -335,6 +334,7 @@ void MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 	averageSize /= mesh.triIndexes.size();
 	float res = voxelScale * std::sqrt(averageSize);
 	int3 minIndex = int3(bbox.position / res - narrowBand * 3.0f);
+	//Splat regions around triangles
 	for (int n = 0; n < (int) splats.size(); n++) {
 		box3f box = splats[n];
 		int3 dims = int3(
@@ -351,29 +351,15 @@ void MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 		for (int k = 0; k <= dims.z; k++) {
 			for (int j = 0; j <= dims.y; j++) {
 				for (int i = 0; i <= dims.x; i++) {
-					float3 pt = float3(res * (i + pos.x), res * (j + pos.y),
-							res * (k + pos.z));
-					float d = std::sqrt(
-							DistanceToTriangleSqr(pt, v1, v2, v3,
-									&closestPoint)) / res;
+					float3 pt = float3(res * (i + pos.x), res * (j + pos.y),res * (k + pos.z));
+					float d = std::sqrt(DistanceToTriangleSqr(pt, v1, v2, v3,&closestPoint)) / res;
 					if (d <= narrowBand) {
-						int3 loc = int3(i + pos.x - minIndex.x,
-								j + pos.y - minIndex.y, k + pos.z - minIndex.z);
+						int3 loc = int3(i + pos.x - minIndex.x,j + pos.y - minIndex.y, k + pos.z - minIndex.z);
 						float& value = grid.getLeafValue(loc.x, loc.y, loc.z);
 						if (d < std::abs(value)) {
 							if (d <= trustDistance) {
-								value =
-										d * sgn
-												* (int) aly::sign(
-														dot(pt - closestPoint,
-																FromBary(
-																		ToBary(
-																				closestPoint,
-																				v1,
-																				v2,
-																				v3),
-																		n1, n2,
-																		n3)));
+								//Interpolate normal to compute sign. Addresses cusp issue.
+								value = d * sgn* (int) aly::sign(dot(pt - closestPoint,FromBary(ToBary(closestPoint,v1,v2,v3),n1, n2,n3)));
 							} else {
 								value = d * sgn;
 							}
@@ -383,8 +369,10 @@ void MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 			}
 		}
 	}
+	splats.clear();
 	std::vector<EndlessNodeFloatPtr> leafs = grid.getLeafNodes();
 	grid.allocateInternalNodes();
+	//Flood fill leaf nodes with narrowband value.
 	for (int i = 0; i < (int) leafs.size(); i++) {
 		EndlessNodeFloatPtr leaf = leafs[i];
 		leaf->parent->data[leaf->parent->getIndex(leaf.get())] = 0;
@@ -433,6 +421,7 @@ void MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 		}
 
 	}
+	//Find extremety leaf nodes.
 	EndlessNodeFloatPtr minX, minY, minZ, maxX, maxZ, maxY;
 	std::queue<std::pair<int3, float>> queue;
 	int3 maxPt = int3(-100000000, -100000000, -100000000);
@@ -542,6 +531,7 @@ void MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 	}
 	EndlessNodeFloatPtr result;
 	float* nval;
+	//Flood extremity leaf nodes with sign value.
 	while (queue.size() > 0) {
 		std::pair<int3, float> pr = queue.front();
 		float value = pr.second;
@@ -558,7 +548,9 @@ void MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 			}
 		}
 	}
+	//Flood fill rest of space using signed level set values, propagating the proper sign in the process.
 	FloodFill(grid, narrowBand);
+	return res;
 }
 
 }

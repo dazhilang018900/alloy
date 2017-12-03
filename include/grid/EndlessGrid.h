@@ -362,7 +362,7 @@ public:
 	}
 };
 void FloodFill(EndlessGrid<float>& grid,float narrowBand);
-void MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,float narrowBand,bool flipSign=true,float voxelScale=0.75f);
+float MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,float narrowBand,bool flipSign=true,float voxelScale=0.75f);
 
 typedef EndlessGrid<float> EndlessGridFloat;
 typedef EndlessGrid<int> EndlessGridInt;
