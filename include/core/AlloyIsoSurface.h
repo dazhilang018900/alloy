@@ -161,12 +161,12 @@ private:
 	bool skipHidden;
 	size_t triangleCount;
 	aly::float4 getImageColor(const float4* image, int i, int j, int k);
-	int getSafeIndex(int i, int j, int k);
-	int getIndex(int i, int j, int k);
+	size_t getSafeIndex(int i, int j, int k);
+	size_t getIndex(int i, int j, int k);
 	aly::float4 interpolateColor(const float4 *pRGB, float x, float y, float z);
 	aly::float3 interpolateNormal(const float *pVolMat, float x, float y,
 			float z);
-	float interpolate(float *data, float x, float y, float z);
+	float interpolate(const float *data, float x, float y, float z);
 	float getImageValue(const float* image, int i, int j, int k);
 public:
 	IsoSurface();
@@ -182,7 +182,7 @@ public:
 				 points, normals, indexes,isoLevel);
 	}
 	void solve(const Volume1f& data, Mesh& mesh,
-			const std::vector<int3>& indexList, const float& isoLevel=0);
+			const std::vector<int3>& indexList,bool regularize=true, const float& isoLevel=0);
 	int triangulateUsingMarchingCubes(const float* pVolMat,
 			std::map<int64_t, EdgeSplit>& splits,
 			std::vector<IsoTriangle>& triangles, int x, int y, int z,

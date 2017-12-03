@@ -54,7 +54,7 @@ void WriteGridToFile(const std::string& root, const EndlessGrid<float>& grid) {
 		}
 		IsoSurface isosurf;
 		Mesh mesh;
-		isosurf.solve(data,mesh,narrowBandList);
+		isosurf.solve(data,mesh,narrowBandList,true);
 
 		std::cout << "Write " << volFile << std::endl;
 		WriteVolumeToFile(volFile, data);

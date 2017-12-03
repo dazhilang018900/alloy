@@ -351,7 +351,11 @@ IsoSurface::~IsoSurface() {
 
 }
 void IsoSurface::solve(const Volume1f& data, Mesh& mesh,
-		const std::vector<int3>& indexList, const float& isoLevel) {
+		const std::vector<int3>& indexList, bool regularize,
+		const float& isoLevel) {
+	const int TRACE_ITERATIONS = 16;
+	const int REGULARIZE_ITERATIONS=3;
+	const float TRACE_THRESHOLD = 1E-5f;
 	mesh.clear();
 	std::vector<int> indexes;
 	solve(data.ptr(), data.rows, data.cols, data.slices, indexList,
@@ -361,6 +365,36 @@ void IsoSurface::solve(const Volume1f& data, Mesh& mesh,
 	triangles.resize(indexes.size() / 3);
 	for (size_t i = 0, n = 0; i < indexes.size(); i += 3, n++) {
 		triangles[n] = uint3(indexes[i], indexes[i + 1], indexes[i + 2]);
+	}
+	if (regularize) {
+		std::vector<float3> tmpPoints(mesh.vertexLocations.size());
+		std::vector<std::set<uint32_t>> vertNbrs;
+		CreateVertexNeighborTable(mesh, vertNbrs);
+		for (int c = 0; c < REGULARIZE_ITERATIONS; c++) {
+#pragma omp parralel for;
+			for (int i = 0; i < (int) vertNbrs.size(); i++) {
+				float3 pt(0.0f);
+				for (uint32_t nbr : vertNbrs[i]) {
+					pt += mesh.vertexLocations[nbr];
+				}
+				pt /= (float) vertNbrs[i].size();
+				tmpPoints[i] = pt;
+				mesh.vertexNormals[i] = interpolateNormal(data.ptr(), pt.x,
+						pt.y, pt.z);
+			}
+#pragma omp parralel for;
+			for (int i = 0; i < (int) mesh.vertexLocations.size(); i++) {
+				float3 norm = mesh.vertexNormals[i];
+				float3 pt = tmpPoints[i];
+				for (int n = 0; n < TRACE_ITERATIONS; n++) {
+					float val = interpolate(data.ptr(), pt.x, pt.y, pt.z);
+					pt -= 0.75f * aly::clamp(val, -1.0f, 1.0f) * norm;
+					if (std::abs(val) < TRACE_THRESHOLD)
+						break;
+				}
+				mesh.vertexLocations[i] = pt;
+			}
+		}
 	}
 }
 // debugged, no problem
@@ -381,11 +415,8 @@ void IsoSurface::solve(const float* vol, const int& rows, const int& cols,
 	triangleCount = 0;
 	for (int nn = 0; nn < elements; nn++) {
 		int3 index = indexList[nn];
-		if (index.x > 0 && index.y > 0 &&
-			index.z > 0 &&
-			index.x < rows - 1&&
-			index.y < cols - 1 &&
-			index.z < slices - 1)
+		if (index.x > 0 && index.y > 0 && index.z > 0 && index.x < rows - 1
+				&& index.y < cols - 1 && index.z < slices - 1)
 			vertexCount = triangulateUsingMarchingCubes(vol, splits, triangles,
 					index.x, index.y, index.z, vertexCount);
 	}
@@ -419,23 +450,20 @@ void IsoSurface::solve(const float* vol, const int& rows, const int& cols,
 		aly::float3 norm = interpolateNormal(vol, pt.x, pt.y, pt.z);
 		norm = norm / length(norm);
 		normals[index] = norm;
-		pt.x /= rows;
-		pt.y /= cols;
-		pt.z /= slices;
 		points[index] = pt;
 	}
 }
 
 // done
-int IsoSurface::getIndex(int i, int j, int k) {
+size_t IsoSurface::getIndex(int i, int j, int k) {
 
 	//return (clamp(k,0,m_slices-1)*(m_rows* m_cols)) + (clamp(j,0,m_cols-1) * m_rows) + clamp(i,0,m_rows-1);
-	return k * (rows * cols) + j * rows + i;
+	return k * (rows * (size_t) cols) + j * (size_t) rows + (size_t) i;
 }
 
 // done
 float IsoSurface::getValue(const float* vol, int i, int j, int k) {
-	int in1 = getIndex(i, j, k);
+	size_t in1 = getIndex(i, j, k);
 	float val = vol[in1];
 	return val;
 }
@@ -443,7 +471,7 @@ float IsoSurface::getValue(const float* vol, int i, int j, int k) {
 // done
 aly::float4 IsoSurface::getImageColor(const float4* image, int i, int j,
 		int k) {
-	int off = getSafeIndex(i, j, k);
+	size_t off = getSafeIndex(i, j, k);
 	return image[off];
 }
 // debugged, no problem need optimization, i.e. vector->stack
@@ -789,8 +817,7 @@ aly::float4 IsoSurface::interpolateColor(const float4 *data, float x, float y,
 }
 
 // done
-float IsoSurface::getOffset(const float* vol, const int3& v1,
-		const int3& v2) {
+float IsoSurface::getOffset(const float* vol, const int3& v1, const int3& v2) {
 	float fValue1 = getValue(vol, v1.x, v1.y, v1.z);
 	float fValue2 = getValue(vol, v2.x, v2.y, v2.z);
 	double fDelta = fValue2 - fValue1;
@@ -799,8 +826,8 @@ float IsoSurface::getOffset(const float* vol, const int3& v1,
 	return (float) ((isoLevel - fValue1) / fDelta);
 }
 
-aly::float3 IsoSurface::interpolateNormal(const float *vol, float x,
-		float y, float z) {
+aly::float3 IsoSurface::interpolateNormal(const float *vol, float x, float y,
+		float z) {
 	int x1 = (int) std::ceil(x);
 	int y1 = (int) std::ceil(y);
 	int z1 = (int) std::ceil(z);
@@ -816,8 +843,8 @@ aly::float3 IsoSurface::interpolateNormal(const float *vol, float x,
 	float hz = 1.0f - dz;
 
 	return aly::float3(
-			(((getNormal(vol, x0, y0, z0) * hx
-					+ getNormal(vol, x1, y0, z0) * dx) * hy
+			(((getNormal(vol, x0, y0, z0) * hx + getNormal(vol, x1, y0, z0) * dx)
+					* hy
 					+ (getNormal(vol, x0, y1, z0) * hx
 							+ getNormal(vol, x1, y1, z0) * dx) * dy) * hz
 					+ ((getNormal(vol, x0, y0, z1) * hx
@@ -826,9 +853,10 @@ aly::float3 IsoSurface::interpolateNormal(const float *vol, float x,
 									+ getNormal(vol, x1, y1, z1) * dx) * dy)
 							* dz));
 }
-int IsoSurface::getSafeIndex(int i, int j, int k) {
-	return clamp(k, 0, slices - 1) * rows * cols + clamp(j, 0, cols - 1) * rows
-			+ clamp(i, 0, rows - 1);
+size_t IsoSurface::getSafeIndex(int i, int j, int k) {
+	return clamp(k, 0, slices - 1) * (size_t) rows * (size_t) cols
+			+ clamp(j, 0, cols - 1) * (size_t) rows
+			+ (size_t) clamp(i, 0, rows - 1);
 }
 aly::float3 IsoSurface::getNormal(const float *vol, int i, int j, int k) {
 	float gx = getImageValue(vol, i + 1, j, k)
@@ -912,7 +940,7 @@ void IsoSurface::project(aly::float3* points, const int& numPoints,
 		points[i] = pt;
 	}
 }
-float IsoSurface::interpolate(float *data, float x, float y, float z) {
+float IsoSurface::interpolate(const float *data, float x, float y, float z) {
 	int x1 = (int) std::ceil(x);
 	int y1 = (int) std::ceil(y);
 	int z1 = (int) std::ceil(z);
@@ -941,7 +969,6 @@ float IsoSurface::getImageValue(const float* image, int i, int j, int k) {
 	int off = getSafeIndex(i, j, k);
 	return image[off];
 }
-
 
 void IsoSurface::computeNormals(const std::vector<aly::float3>& points,
 		const std::vector<int>& indexes, std::vector<aly::float3>& normals) {

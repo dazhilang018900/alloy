@@ -30,7 +30,7 @@ LevelSetGridEx::LevelSetGridEx() :
 }
 bool LevelSetGridEx::init(Composite& rootNode) {
 	srand((unsigned int) time(nullptr));
-	mesh.load(getFullPath("models/armadillo.ply"));
+	mesh.load(getFullPath("models/horse.ply"));
 	EndlessGrid<float> grid({5,4,6,4},0.0f);
 	std::cout<<"Converting mesh to level set ..."<<std::endl;
 	MeshToLevelSet(mesh, grid,2.5f, true, 0.8f);
