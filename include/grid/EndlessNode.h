@@ -132,6 +132,16 @@ public:
 			indexes.resize(dim * dim * dim, -1);
 		}
 	}
+	int getIndex(EndlessNode<T>* node){
+		for(int i=0;i<children.size();i++){
+			if(children[i].get()==node){
+				for(int n=0;n<indexes.size();n++){
+					if(indexes[n]==i)return n;
+				}
+			}
+		}
+		return -1;
+	}
 	float getSideValue(int s) const {
 		int3 nbr;
 		const int nbr6X[6] = { 1, -1, 0, 0, 0, 0 };
@@ -163,10 +173,16 @@ public:
 	}
 	T& operator()(int i, int j, int k) {
 		assert(data.size() > 0);
+		assert(i >= 0 && i < dim);
+		assert(j >= 0 && j < dim);
+		assert(k >= 0 && k < dim);
 		return data[i + (j + k * dim) * dim];
 	}
 	const T& operator()(int i, int j, int k) const {
 		assert(data.size() > 0);
+		assert(i >= 0 && i < dim);
+		assert(j >= 0 && j < dim);
+		assert(k >= 0 && k < dim);
 		return data[i + (j + k * dim) * dim];
 	}
 	const int& getIndex(int i, int j, int k) const {
@@ -195,12 +211,16 @@ public:
 		children.push_back(node);
 		return node;
 	}
-	std::shared_ptr<EndlessNode<T>> getChild(int i, int j, int k, int d,T bgValue,
-			bool isLeaf) {
+	std::shared_ptr<EndlessNode<T>> getChild(int i, int j, int k, int c, int d,T bgValue,bool isLeaf) {
+
+		assert(i>=0&&i<dim);
+		assert(j>=0&&j<dim);
+		assert(k>=0&&k<dim);
+
 		int& idx = indexes[i + (j + k * dim) * dim];
 		if (idx < 0) {
 			idx = (int) children.size();
-			std::shared_ptr<EndlessNode<T>> node = std::shared_ptr<EndlessNode<T>>(new EndlessNode<T>(d,bgValue, isLeaf, this, location+int3(d*i, d*j, d*k)));
+			std::shared_ptr<EndlessNode<T>> node = std::shared_ptr<EndlessNode<T>>(new EndlessNode<T>(d,bgValue, isLeaf, this, location+int3(c*i, c*j, c*k)));
 			children.push_back(node);
 			return node;
 		}

@@ -30,10 +30,13 @@ LevelSetGridEx::LevelSetGridEx() :
 }
 bool LevelSetGridEx::init(Composite& rootNode) {
 	srand((unsigned int) time(nullptr));
-	mesh.load(getFullPath("models/armadillo.ply"));
+	mesh.load(getFullPath("models/horse.ply"));
 	EndlessGrid<float> grid({5,4,6,4},0.0f);
-	MeshToLevelSet(mesh, grid);
-	WriteGridToFile(GetDesktopDirectory(),grid);
+	std::cout<<"Converting mesh to level set ..."<<std::endl;
+	MeshToLevelSet(mesh, grid,2.5f, true, 0.8f);
+	std::cout<<"Done conversion"<<std::endl;
+	WriteGridToFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"signed.xml",grid);
+	std::cout<<"Exit Here"<<std::endl;
 	std::exit(0);
 	objectBBox = mesh.getBoundingBox();
 	displayIndex = 0;
