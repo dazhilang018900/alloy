@@ -35,7 +35,9 @@ bool LevelSetGridEx::init(Composite& rootNode) {
 	mesh.load(getFullPath("models/horse.ply"));
 	EndlessGrid<float> grid( { 5, 4, 6, 4 }, 0.0f);
 	std::string voxelFile=MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"signed.xml";
+	std::cout<<"Convert to level set"<<std::endl;
 	MeshToLevelSet(mesh, grid, 2.5f, true, 0.8f);
+	std::cout<<"Convert grid to dense block"<<std::endl;
 	WriteGridToFile(voxelFile,grid);
 	Volume1f data;
 	voxelFile=MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"signed_0_0_0.xml";
@@ -74,6 +76,7 @@ bool LevelSetGridEx::init(Composite& rootNode) {
 	std::cout<<"Write "<<meshFile<<std::endl;
 	WriteMeshToFile(meshFile, mesh);
 
+	std::cout<<"Done"<<std::endl;
 	objectBBox = mesh.getBoundingBox();
 	displayIndex = 0;
 	colorReconstruction = false;

@@ -426,6 +426,8 @@ void IsoSurface::solve(const Volume1f& data, const std::vector<int3>& indexList,
 	}
 	if (regularizeTest) {
 		regularize(data.ptr(), mesh);
+		//mesh.updateVertexNormals();
+		//mesh.vertexNormals*=float3(-1.0f);
 	}
 	mesh.updateBoundingBox();
 }
@@ -440,6 +442,8 @@ void IsoSurface::solve(const EndlessGridFloat& grid, Mesh& mesh,
 	}
 	if (regularizeTest) {
 		regularize(grid, mesh);
+		//mesh.updateVertexNormals();
+		//mesh.vertexNormals*=float3(-1.0f);
 	}
 	mesh.updateBoundingBox();
 }
