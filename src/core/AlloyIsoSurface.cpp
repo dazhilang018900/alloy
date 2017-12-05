@@ -21,158 +21,179 @@
 #include <AlloyIsoSurface.h>
 #include <stdint.h>
 #include <iostream>
-#include <unordered_map>
+#include <set>
 #include <map>
 #include <algorithm>
 using namespace std;
 namespace aly {
-float IsoSurface::edgeDirection[12][3] = { { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f,
-		0.0f }, { -1.0f, 0.0f, 0.0f }, { 0.0f, -1.0f, 0.0f },
-		{ 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { -1.0f, 0.0f, 0.0f }, {
-				0.0f, -1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f },
-		{ 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f } };
+const int3 IsoSurface::AXIS_OFFSET[3] = { int3(1, 0, 0), int3(0, 1, 0), int3(0,
+		0, 1.f) };
+
+// ----------------------------------------------------------------------------
+
+const int3 IsoSurface::EDGE_NODE_OFFSETS[3][4] = { { int3(0), int3(0, 0, 1),
+		int3(0, 1, 0), int3(0, 1, 1) }, { int3(0), int3(1, 0, 0), int3(0, 0, 1),
+		int3(1, 0, 1) },
+		{ int3(0), int3(0, 1, 0), int3(1, 0, 0), int3(1, 1, 0) }, };
+
+const uint32_t IsoSurface::ENCODED_EDGE_NODE_OFFSETS[12] = { 0x00000000,
+		0x00100000, 0x00000400, 0x00100400, 0x00000000, 0x00000001, 0x00100000,
+		0x00100001, 0x00000000, 0x00000400, 0x00000001, 0x00000401, };
+
+const uint32_t IsoSurface::ENCODED_EDGE_OFFSETS[12] = { 0x00000000, 0x00100000,
+		0x00000400, 0x00100400, 0x40000000, 0x40100000, 0x40000001, 0x40100001,
+		0x80000000, 0x80000400, 0x80000001, 0x80000401, };
+
+const float IsoSurface::edgeDirection[12][3] = { { 1.0f, 0.0f, 0.0f }, { 0.0f,
+		1.0f, 0.0f }, { -1.0f, 0.0f, 0.0f }, { 0.0f, -1.0f, 0.0f }, { 1.0f,
+		0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { -1.0f, 0.0f, 0.0f }, { 0.0f,
+		-1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f,
+		1.0f }, { 0.0f, 0.0f, 1.0f } };
 
 /* Lists the positions, relative to vertex 0, of each of the 8 vertices of a cube. */
-int IsoSurface::vertexOffset[8][3] = { { 0, 0, 0 }, { 1, 0, 0 }, { 1, 1, 0 }, {
-		0, 1, 0 }, { 0, 0, 1 }, { 1, 0, 1 }, { 1, 1, 1 }, { 0, 1, 1 } };
+const int IsoSurface::vertexOffset[8][3] = { { 0, 0, 0 }, { 1, 0, 0 },
+		{ 1, 1, 0 }, { 0, 1, 0 }, { 0, 0, 1 }, { 1, 0, 1 }, { 1, 1, 1 }, { 0, 1,
+				1 } };
 
 /* Lists the index of the endpoint vertices for each of the 12 edges of the cube. */
-int IsoSurface::edgeConnection[12][2] = { { 0, 1 }, { 1, 2 }, { 2, 3 },
-		{ 3, 0 }, { 4, 5 }, { 5, 6 }, { 6, 7 }, { 7, 4 }, { 0, 4 }, { 1, 5 }, {
-				2, 6 }, { 3, 7 } };
+const int IsoSurface::edgeConnection[12][2] = { { 0, 1 }, { 1, 2 }, { 2, 3 }, {
+		3, 0 }, { 4, 5 }, { 5, 6 }, { 6, 7 }, { 7, 4 }, { 0, 4 }, { 1, 5 }, { 2,
+		6 }, { 3, 7 } };
 
 /* Lists the index of the endpoint vertices for each of the 6 edges of the tetrahedron. */
-int IsoSurface::tetrahedronEdgeConnection[6][2] = { { 0, 1 }, { 1, 2 },
-		{ 2, 0 }, { 0, 3 }, { 1, 3 }, { 2, 3 } };
+const int IsoSurface::tetrahedronEdgeConnection[6][2] = { { 0, 1 }, { 1, 2 }, {
+		2, 0 }, { 0, 3 }, { 1, 3 }, { 2, 3 } };
 
 /* Lists the index of verticies from a cube that made up each of the six tetrahedrons within the cube. */
-int IsoSurface::tetrahedronsInACube[6][4] = { { 0, 5, 1, 6 }, { 0, 1, 2, 6 }, {
-		0, 2, 3, 6 }, { 0, 3, 7, 6 }, { 0, 7, 4, 6 }, { 0, 4, 5, 6 } };
+const int IsoSurface::tetrahedronsInACube[6][4] = { { 0, 5, 1, 6 },
+		{ 0, 1, 2, 6 }, { 0, 2, 3, 6 }, { 0, 3, 7, 6 }, { 0, 7, 4, 6 }, { 0, 4,
+				5, 6 } };
 
-int IsoSurface::tetrahedronTriangles[16][7] = { { -1, -1, -1, -1, -1, -1, -1 },
-		{ 0, 3, 2, -1, -1, -1, -1 }, { 0, 1, 4, -1, -1, -1, -1 }, { 1, 4, 2, 2,
-				4, 3, -1 }, { 1, 2, 5, -1, -1, -1, -1 },
-		{ 0, 3, 5, 0, 5, 1, -1 }, { 0, 2, 5, 0, 5, 4, -1 }, { 5, 4, 3, -1, -1,
-				-1, -1 }, { 3, 4, 5, -1, -1, -1, -1 }, { 4, 5, 0, 5, 2, 0, -1 },
+const int IsoSurface::tetrahedronTriangles[16][7] = { { -1, -1, -1, -1, -1, -1,
+		-1 }, { 0, 3, 2, -1, -1, -1, -1 }, { 0, 1, 4, -1, -1, -1, -1 }, { 1, 4,
+		2, 2, 4, 3, -1 }, { 1, 2, 5, -1, -1, -1, -1 }, { 0, 3, 5, 0, 5, 1, -1 },
+		{ 0, 2, 5, 0, 5, 4, -1 }, { 5, 4, 3, -1, -1, -1, -1 }, { 3, 4, 5, -1,
+				-1, -1, -1 }, { 4, 5, 0, 5, 2, 0, -1 },
 		{ 1, 5, 0, 5, 3, 0, -1 }, { 5, 2, 1, -1, -1, -1, -1 }, { 3, 4, 2, 2, 4,
 				1, -1 }, { 4, 1, 0, -1, -1, -1, -1 },
 		{ 2, 3, 0, -1, -1, -1, -1 }, { -1, -1, -1, -1, -1, -1, -1 } };
 
-int IsoSurface::cubeEdgeFlags[256] = { 0x000, 0x109, 0x203, 0x30a, 0x406, 0x50f,
-		0x605, 0x70c, 0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09, 0xf00,
-		0x190, 0x099, 0x393, 0x29a, 0x596, 0x49f, 0x795, 0x69c, 0x99c, 0x895,
-		0xb9f, 0xa96, 0xd9a, 0xc93, 0xf99, 0xe90, 0x230, 0x339, 0x033, 0x13a,
-		0x636, 0x73f, 0x435, 0x53c, 0xa3c, 0xb35, 0x83f, 0x936, 0xe3a, 0xf33,
-		0xc39, 0xd30, 0x3a0, 0x2a9, 0x1a3, 0x0aa, 0x7a6, 0x6af, 0x5a5, 0x4ac,
-		0xbac, 0xaa5, 0x9af, 0x8a6, 0xfaa, 0xea3, 0xda9, 0xca0, 0x460, 0x569,
-		0x663, 0x76a, 0x066, 0x16f, 0x265, 0x36c, 0xc6c, 0xd65, 0xe6f, 0xf66,
-		0x86a, 0x963, 0xa69, 0xb60, 0x5f0, 0x4f9, 0x7f3, 0x6fa, 0x1f6, 0x0ff,
-		0x3f5, 0x2fc, 0xdfc, 0xcf5, 0xfff, 0xef6, 0x9fa, 0x8f3, 0xbf9, 0xaf0,
-		0x650, 0x759, 0x453, 0x55a, 0x256, 0x35f, 0x055, 0x15c, 0xe5c, 0xf55,
-		0xc5f, 0xd56, 0xa5a, 0xb53, 0x859, 0x950, 0x7c0, 0x6c9, 0x5c3, 0x4ca,
-		0x3c6, 0x2cf, 0x1c5, 0x0cc, 0xfcc, 0xec5, 0xdcf, 0xcc6, 0xbca, 0xac3,
-		0x9c9, 0x8c0, 0x8c0, 0x9c9, 0xac3, 0xbca, 0xcc6, 0xdcf, 0xec5, 0xfcc,
-		0x0cc, 0x1c5, 0x2cf, 0x3c6, 0x4ca, 0x5c3, 0x6c9, 0x7c0, 0x950, 0x859,
-		0xb53, 0xa5a, 0xd56, 0xc5f, 0xf55, 0xe5c, 0x15c, 0x055, 0x35f, 0x256,
-		0x55a, 0x453, 0x759, 0x650, 0xaf0, 0xbf9, 0x8f3, 0x9fa, 0xef6, 0xfff,
-		0xcf5, 0xdfc, 0x2fc, 0x3f5, 0x0ff, 0x1f6, 0x6fa, 0x7f3, 0x4f9, 0x5f0,
-		0xb60, 0xa69, 0x963, 0x86a, 0xf66, 0xe6f, 0xd65, 0xc6c, 0x36c, 0x265,
-		0x16f, 0x066, 0x76a, 0x663, 0x569, 0x460, 0xca0, 0xda9, 0xea3, 0xfaa,
-		0x8a6, 0x9af, 0xaa5, 0xbac, 0x4ac, 0x5a5, 0x6af, 0x7a6, 0x0aa, 0x1a3,
-		0x2a9, 0x3a0, 0xd30, 0xc39, 0xf33, 0xe3a, 0x936, 0x83f, 0xb35, 0xa3c,
-		0x53c, 0x435, 0x73f, 0x636, 0x13a, 0x033, 0x339, 0x230, 0xe90, 0xf99,
-		0xc93, 0xd9a, 0xa96, 0xb9f, 0x895, 0x99c, 0x69c, 0x795, 0x49f, 0x596,
-		0x29a, 0x393, 0x099, 0x190, 0xf00, 0xe09, 0xd03, 0xc0a, 0xb06, 0xa0f,
-		0x905, 0x80c, 0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203, 0x109, 0x000 };
-
-int IsoSurface::cubeEdgeFlagsCC618[256] = { 0x0, 0x109, 0x203, 0x30a, 0x406,
+const int IsoSurface::cubeEdgeFlags[256] = { 0x000, 0x109, 0x203, 0x30a, 0x406,
 		0x50f, 0x605, 0x70c, 0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09,
-		0xf00, 0x190, 0x99, 0x393, 0x29a, 0x596, 0x49f, 0x795, 0x69c, 0x99c,
-		0x895, 0xb9f, 0xa96, 0xd9a, 0xc93, 0xf99, 0xe90, 0x230, 0x339, 0x33,
+		0xf00, 0x190, 0x099, 0x393, 0x29a, 0x596, 0x49f, 0x795, 0x69c, 0x99c,
+		0x895, 0xb9f, 0xa96, 0xd9a, 0xc93, 0xf99, 0xe90, 0x230, 0x339, 0x033,
 		0x13a, 0x636, 0x73f, 0x435, 0x53c, 0xa3c, 0xb35, 0x83f, 0x936, 0xe3a,
-		0xf33, 0xc39, 0xd30, 0x3a0, 0x2a9, 0x1a3, 0xaa, 0x7a6, 0x6af, 0x5a5,
+		0xf33, 0xc39, 0xd30, 0x3a0, 0x2a9, 0x1a3, 0x0aa, 0x7a6, 0x6af, 0x5a5,
 		0x4ac, 0xbac, 0xaa5, 0x9af, 0x8a6, 0xfaa, 0xea3, 0xda9, 0xca0, 0x460,
-		0x569, 0x663, 0x76a, 0x66, 0x16f, 0x265, 0x36c, 0xc6c, 0xd65, 0xe6f,
+		0x569, 0x663, 0x76a, 0x066, 0x16f, 0x265, 0x36c, 0xc6c, 0xd65, 0xe6f,
 		0xf66, 0x86a, 0x963, 0xa69, 0xb60, 0x5f0, 0x4f9, 0x7f3, 0x6fa, 0x1f6,
-		0xff, 0x3f5, 0x2fc, 0xdfc, 0xcf5, 0xfff, 0xef6, 0x9fa, 0x8f3, 0xbf9,
-		0xaf0, 0x650, 0x759, 0x453, 0x55a, 0x256, 0x35f, 0x55, 0x15c, 0xe5c,
+		0x0ff, 0x3f5, 0x2fc, 0xdfc, 0xcf5, 0xfff, 0xef6, 0x9fa, 0x8f3, 0xbf9,
+		0xaf0, 0x650, 0x759, 0x453, 0x55a, 0x256, 0x35f, 0x055, 0x15c, 0xe5c,
 		0xf55, 0xc5f, 0xd56, 0xa5a, 0xb53, 0x859, 0x950, 0x7c0, 0x6c9, 0x5c3,
-		0x4ca, 0x3c6, 0x2cf, 0x1c5, 0xcc, 0xfcc, 0xec5, 0xdcf, 0xcc6, 0xbca,
+		0x4ca, 0x3c6, 0x2cf, 0x1c5, 0x0cc, 0xfcc, 0xec5, 0xdcf, 0xcc6, 0xbca,
 		0xac3, 0x9c9, 0x8c0, 0x8c0, 0x9c9, 0xac3, 0xbca, 0xcc6, 0xdcf, 0xec5,
-		0xfcc, 0xcc, 0x1c5, 0x2cf, 0x3c6, 0x4ca, 0x5c3, 0x6c9, 0x7c0, 0x950,
-		0x859, 0xb53, 0xa5a, 0xd56, 0xc5f, 0xf55, 0xe5c, 0x15c, 0x55, 0x35f,
+		0xfcc, 0x0cc, 0x1c5, 0x2cf, 0x3c6, 0x4ca, 0x5c3, 0x6c9, 0x7c0, 0x950,
+		0x859, 0xb53, 0xa5a, 0xd56, 0xc5f, 0xf55, 0xe5c, 0x15c, 0x055, 0x35f,
 		0x256, 0x55a, 0x453, 0x759, 0x650, 0xaf0, 0xbf9, 0x8f3, 0x9fa, 0xef6,
-		0xfff, 0xcf5, 0xdfc, 0x2fc, 0x3f5, 0xff, 0x1f6, 0x6fa, 0x7f3, 0x4f9,
+		0xfff, 0xcf5, 0xdfc, 0x2fc, 0x3f5, 0x0ff, 0x1f6, 0x6fa, 0x7f3, 0x4f9,
 		0x5f0, 0xb60, 0xa69, 0x963, 0x86a, 0xf66, 0xe6f, 0xd65, 0xc6c, 0x36c,
-		0x265, 0x16f, 0x66, 0x76a, 0x663, 0x569, 0x460, 0xca0, 0xda9, 0xea3,
-		0xfaa, 0x8a6, 0x9af, 0xaa5, 0xbac, 0x4ac, 0x5a5, 0x6af, 0x7a6, 0xaa,
+		0x265, 0x16f, 0x066, 0x76a, 0x663, 0x569, 0x460, 0xca0, 0xda9, 0xea3,
+		0xfaa, 0x8a6, 0x9af, 0xaa5, 0xbac, 0x4ac, 0x5a5, 0x6af, 0x7a6, 0x0aa,
 		0x1a3, 0x2a9, 0x3a0, 0xd30, 0xc39, 0xf33, 0xe3a, 0x936, 0x83f, 0xb35,
-		0xa3c, 0x53c, 0x435, 0x73f, 0x636, 0x13a, 0x33, 0x339, 0x230, 0xe90,
+		0xa3c, 0x53c, 0x435, 0x73f, 0x636, 0x13a, 0x033, 0x339, 0x230, 0xe90,
 		0xf99, 0xc93, 0xd9a, 0xa96, 0xb9f, 0x895, 0x99c, 0x69c, 0x795, 0x49f,
-		0x596, 0x29a, 0x393, 0x99, 0x190, 0xf00, 0xe09, 0xd03, 0xc0a, 0xb06,
+		0x596, 0x29a, 0x393, 0x099, 0x190, 0xf00, 0xe09, 0xd03, 0xc0a, 0xb06,
 		0xa0f, 0x905, 0x80c, 0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203, 0x109,
-		0x0 };
+		0x000 };
 
-int IsoSurface::cubeEdgeFlagsCC626[256] = { 0x0, 0x109, 0x203, 0x30a, 0x406,
-		0x50f, 0x605, 0x70c, 0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09,
-		0xf00, 0x190, 0x99, 0x393, 0x29a, 0x596, 0x49f, 0x795, 0x69c, 0x99c,
-		0x895, 0xb9f, 0xa96, 0xd9a, 0xc93, 0xf99, 0xe90, 0x230, 0x339, 0x33,
-		0x13a, 0x636, 0x73f, 0x435, 0x53c, 0xa3c, 0xb35, 0x83f, 0x936, 0xe3a,
-		0xf33, 0xc39, 0xd30, 0x3a0, 0x2a9, 0x1a3, 0xaa, 0x7a6, 0x6af, 0x5a5,
-		0x4ac, 0xbac, 0xaa5, 0x9af, 0x8a6, 0xfaa, 0xea3, 0xda9, 0xca0, 0x460,
-		0x569, 0x663, 0x76a, 0x66, 0x16f, 0x265, 0x36c, 0xc6c, 0xd65, 0xe6f,
-		0xf66, 0x86a, 0x963, 0xa69, 0xb60, 0x5f0, 0x4f9, 0x7f3, 0x6fa, 0x1f6,
-		0xff, 0x3f5, 0x2fc, 0xdfc, 0xcf5, 0xfff, 0xef6, 0x9fa, 0x8f3, 0xbf9,
-		0xaf0, 0x650, 0x759, 0x453, 0x55a, 0x256, 0x35f, 0x55, 0x15c, 0xe5c,
-		0xf55, 0xc5f, 0xd56, 0xa5a, 0xb53, 0x859, 0x950, 0x7c0, 0x6c9, 0x5c3,
-		0x4ca, 0x3c6, 0x2cf, 0x1c5, 0xcc, 0xfcc, 0xec5, 0xdcf, 0xcc6, 0xbca,
-		0xac3, 0x9c9, 0x8c0, 0x8c0, 0x9c9, 0xac3, 0xbca, 0xcc6, 0xdcf, 0xec5,
-		0xfcc, 0xcc, 0x1c5, 0x2cf, 0x3c6, 0x4ca, 0x5c3, 0x6c9, 0x7c0, 0x950,
-		0x859, 0xb53, 0xa5a, 0xd56, 0xc5f, 0xf55, 0xe5c, 0x15c, 0x55, 0x35f,
-		0x256, 0x55a, 0x453, 0x759, 0x650, 0xaf0, 0xbf9, 0x8f3, 0x9fa, 0xef6,
-		0xfff, 0xcf5, 0xdfc, 0x2fc, 0x3f5, 0xff, 0x1f6, 0x6fa, 0x7f3, 0x4f9,
-		0x5f0, 0xb60, 0xa69, 0x963, 0x86a, 0xf66, 0xe6f, 0xd65, 0xc6c, 0x36c,
-		0x265, 0x16f, 0x66, 0x76a, 0x663, 0x569, 0x460, 0xca0, 0xda9, 0xea3,
-		0xfaa, 0x8a6, 0x9af, 0xaa5, 0xbac, 0x4ac, 0x5a5, 0x6af, 0x7a6, 0xaa,
-		0x1a3, 0x2a9, 0x3a0, 0xd30, 0xc39, 0xf33, 0xe3a, 0x936, 0x83f, 0xb35,
-		0xa3c, 0x53c, 0x435, 0x73f, 0x636, 0x13a, 0x33, 0x339, 0x230, 0xe90,
-		0xf99, 0xc93, 0xd9a, 0xa96, 0xb9f, 0x895, 0x99c, 0x69c, 0x795, 0x49f,
-		0x596, 0x29a, 0x393, 0x99, 0x190, 0xf00, 0xe09, 0xd03, 0xc0a, 0xb06,
-		0xa0f, 0x905, 0x80c, 0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203, 0x109,
-		0x0 };
-int IsoSurface::triangleConnectionTable[4096] = { -1, -1, -1, -1, -1, -1, -1,
-		-1, -1, -1, -1, -1, -1, -1, -1, -1, 8, 0, 3, -1, -1, -1, -1, -1, -1, -1,
-		-1, -1, -1, -1, -1, -1, 9, 1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-		-1, -1, -1, 3, 8, 9, 9, 1, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-		10, 2, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1, 10,
-		10, 8, 0, 10, 2, 3, 3, 8, 10, -1, -1, -1, -1, 0, 9, 10, 10, 2, 0, -1,
-		-1, -1, -1, -1, -1, -1, -1, -1, -1, 8, 9, 10, 10, 2, 8, 2, 3, 8, -1, -1,
-		-1, -1, -1, -1, -1, 11, 3, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-		-1, -1, -1, 2, 11, 8, 8, 0, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-		3, 0, 9, 9, 11, 3, 9, 1, 2, 2, 11, 9, -1, -1, -1, -1, 11, 8, 9, 9, 1,
-		11, 1, 2, 11, -1, -1, -1, -1, -1, -1, -1, 1, 10, 11, 11, 3, 1, -1, -1,
-		-1, -1, -1, -1, -1, -1, -1, -1, 10, 11, 8, 8, 0, 10, 0, 1, 10, -1, -1,
-		-1, -1, -1, -1, -1, 9, 10, 11, 11, 3, 9, 3, 0, 9, -1, -1, -1, -1, -1,
-		-1, -1, 11, 8, 9, 9, 10, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 7,
-		4, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 3, 7, 7, 4,
-		0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 4, 9, 1, 1, 7, 4, 1, 0, 8, 8,
-		7, 1, -1, -1, -1, -1, 1, 3, 7, 7, 4, 1, 4, 9, 1, -1, -1, -1, -1, -1, -1,
-		-1, 10, 7, 4, 10, 4, 1, 1, 4, 8, 1, 8, 2, 2, 8, 7, 2, 4, 0, 1, 4, 1, 10,
-		4, 10, 7, 7, 10, 2, 7, 2, 3, -1, 2, 0, 8, 2, 8, 7, 2, 7, 10, 10, 7, 4,
-		10, 4, 9, -1, 10, 2, 3, 4, 9, 10, 3, 7, 4, 4, 10, 3, -1, -1, -1, -1, 8,
-		3, 2, 2, 4, 8, 2, 11, 7, 7, 4, 2, -1, -1, -1, -1, 4, 0, 2, 2, 11, 4, 11,
-		7, 4, -1, -1, -1, -1, -1, -1, -1, 3, 0, 8, 11, 7, 4, 11, 4, 9, 11, 9, 2,
-		1, 2, 9, -1, 11, 1, 2, 7, 9, 1, 7, 4, 9, 1, 11, 7, -1, -1, -1, -1, 10,
-		11, 7, 10, 7, 4, 10, 4, 1, 1, 4, 8, 1, 8, 3, -1, 7, 4, 0, 10, 11, 7, 0,
-		1, 10, 7, 0, 10, -1, -1, -1, -1, 8, 3, 0, 10, 11, 7, 4, 9, 10, 10, 7, 4,
-		-1, -1, -1, -1, 9, 10, 11, 11, 4, 9, 11, 7, 4, -1, -1, -1, -1, -1, -1,
-		-1, 9, 4, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 8, 4,
-		5, 5, 3, 8, 5, 9, 0, 0, 3, 5, -1, -1, -1, -1, 4, 5, 1, 1, 0, 4, -1, -1,
-		-1, -1, -1, -1, -1, -1, -1, -1, 5, 1, 3, 3, 8, 5, 8, 4, 5, -1, -1, -1,
-		-1, -1, -1, -1, 1, 9, 4, 4, 2, 1, 4, 5, 10, 10, 2, 4, -1, -1, -1, -1, 0,
-		1, 9, 8, 4, 5, 8, 5, 10, 8, 10, 3, 2, 3, 10, -1, 2, 0, 4, 4, 5, 2, 5,
-		10, 2, -1, -1, -1, -1, -1, -1, -1, 5, 8, 4, 10, 3, 8, 10, 2, 3, 8, 5,
-		10, -1, -1, -1, -1, 11, 4, 5, 11, 5, 2, 2, 5, 9, 2, 9, 3, 3, 9, 4, 3,
+const int IsoSurface::cubeEdgeFlagsCC618[256] = { 0x0, 0x109, 0x203, 0x30a,
+		0x406, 0x50f, 0x605, 0x70c, 0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03,
+		0xe09, 0xf00, 0x190, 0x99, 0x393, 0x29a, 0x596, 0x49f, 0x795, 0x69c,
+		0x99c, 0x895, 0xb9f, 0xa96, 0xd9a, 0xc93, 0xf99, 0xe90, 0x230, 0x339,
+		0x33, 0x13a, 0x636, 0x73f, 0x435, 0x53c, 0xa3c, 0xb35, 0x83f, 0x936,
+		0xe3a, 0xf33, 0xc39, 0xd30, 0x3a0, 0x2a9, 0x1a3, 0xaa, 0x7a6, 0x6af,
+		0x5a5, 0x4ac, 0xbac, 0xaa5, 0x9af, 0x8a6, 0xfaa, 0xea3, 0xda9, 0xca0,
+		0x460, 0x569, 0x663, 0x76a, 0x66, 0x16f, 0x265, 0x36c, 0xc6c, 0xd65,
+		0xe6f, 0xf66, 0x86a, 0x963, 0xa69, 0xb60, 0x5f0, 0x4f9, 0x7f3, 0x6fa,
+		0x1f6, 0xff, 0x3f5, 0x2fc, 0xdfc, 0xcf5, 0xfff, 0xef6, 0x9fa, 0x8f3,
+		0xbf9, 0xaf0, 0x650, 0x759, 0x453, 0x55a, 0x256, 0x35f, 0x55, 0x15c,
+		0xe5c, 0xf55, 0xc5f, 0xd56, 0xa5a, 0xb53, 0x859, 0x950, 0x7c0, 0x6c9,
+		0x5c3, 0x4ca, 0x3c6, 0x2cf, 0x1c5, 0xcc, 0xfcc, 0xec5, 0xdcf, 0xcc6,
+		0xbca, 0xac3, 0x9c9, 0x8c0, 0x8c0, 0x9c9, 0xac3, 0xbca, 0xcc6, 0xdcf,
+		0xec5, 0xfcc, 0xcc, 0x1c5, 0x2cf, 0x3c6, 0x4ca, 0x5c3, 0x6c9, 0x7c0,
+		0x950, 0x859, 0xb53, 0xa5a, 0xd56, 0xc5f, 0xf55, 0xe5c, 0x15c, 0x55,
+		0x35f, 0x256, 0x55a, 0x453, 0x759, 0x650, 0xaf0, 0xbf9, 0x8f3, 0x9fa,
+		0xef6, 0xfff, 0xcf5, 0xdfc, 0x2fc, 0x3f5, 0xff, 0x1f6, 0x6fa, 0x7f3,
+		0x4f9, 0x5f0, 0xb60, 0xa69, 0x963, 0x86a, 0xf66, 0xe6f, 0xd65, 0xc6c,
+		0x36c, 0x265, 0x16f, 0x66, 0x76a, 0x663, 0x569, 0x460, 0xca0, 0xda9,
+		0xea3, 0xfaa, 0x8a6, 0x9af, 0xaa5, 0xbac, 0x4ac, 0x5a5, 0x6af, 0x7a6,
+		0xaa, 0x1a3, 0x2a9, 0x3a0, 0xd30, 0xc39, 0xf33, 0xe3a, 0x936, 0x83f,
+		0xb35, 0xa3c, 0x53c, 0x435, 0x73f, 0x636, 0x13a, 0x33, 0x339, 0x230,
+		0xe90, 0xf99, 0xc93, 0xd9a, 0xa96, 0xb9f, 0x895, 0x99c, 0x69c, 0x795,
+		0x49f, 0x596, 0x29a, 0x393, 0x99, 0x190, 0xf00, 0xe09, 0xd03, 0xc0a,
+		0xb06, 0xa0f, 0x905, 0x80c, 0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203,
+		0x109, 0x0 };
+
+const int IsoSurface::cubeEdgeFlagsCC626[256] = { 0x0, 0x109, 0x203, 0x30a,
+		0x406, 0x50f, 0x605, 0x70c, 0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03,
+		0xe09, 0xf00, 0x190, 0x99, 0x393, 0x29a, 0x596, 0x49f, 0x795, 0x69c,
+		0x99c, 0x895, 0xb9f, 0xa96, 0xd9a, 0xc93, 0xf99, 0xe90, 0x230, 0x339,
+		0x33, 0x13a, 0x636, 0x73f, 0x435, 0x53c, 0xa3c, 0xb35, 0x83f, 0x936,
+		0xe3a, 0xf33, 0xc39, 0xd30, 0x3a0, 0x2a9, 0x1a3, 0xaa, 0x7a6, 0x6af,
+		0x5a5, 0x4ac, 0xbac, 0xaa5, 0x9af, 0x8a6, 0xfaa, 0xea3, 0xda9, 0xca0,
+		0x460, 0x569, 0x663, 0x76a, 0x66, 0x16f, 0x265, 0x36c, 0xc6c, 0xd65,
+		0xe6f, 0xf66, 0x86a, 0x963, 0xa69, 0xb60, 0x5f0, 0x4f9, 0x7f3, 0x6fa,
+		0x1f6, 0xff, 0x3f5, 0x2fc, 0xdfc, 0xcf5, 0xfff, 0xef6, 0x9fa, 0x8f3,
+		0xbf9, 0xaf0, 0x650, 0x759, 0x453, 0x55a, 0x256, 0x35f, 0x55, 0x15c,
+		0xe5c, 0xf55, 0xc5f, 0xd56, 0xa5a, 0xb53, 0x859, 0x950, 0x7c0, 0x6c9,
+		0x5c3, 0x4ca, 0x3c6, 0x2cf, 0x1c5, 0xcc, 0xfcc, 0xec5, 0xdcf, 0xcc6,
+		0xbca, 0xac3, 0x9c9, 0x8c0, 0x8c0, 0x9c9, 0xac3, 0xbca, 0xcc6, 0xdcf,
+		0xec5, 0xfcc, 0xcc, 0x1c5, 0x2cf, 0x3c6, 0x4ca, 0x5c3, 0x6c9, 0x7c0,
+		0x950, 0x859, 0xb53, 0xa5a, 0xd56, 0xc5f, 0xf55, 0xe5c, 0x15c, 0x55,
+		0x35f, 0x256, 0x55a, 0x453, 0x759, 0x650, 0xaf0, 0xbf9, 0x8f3, 0x9fa,
+		0xef6, 0xfff, 0xcf5, 0xdfc, 0x2fc, 0x3f5, 0xff, 0x1f6, 0x6fa, 0x7f3,
+		0x4f9, 0x5f0, 0xb60, 0xa69, 0x963, 0x86a, 0xf66, 0xe6f, 0xd65, 0xc6c,
+		0x36c, 0x265, 0x16f, 0x66, 0x76a, 0x663, 0x569, 0x460, 0xca0, 0xda9,
+		0xea3, 0xfaa, 0x8a6, 0x9af, 0xaa5, 0xbac, 0x4ac, 0x5a5, 0x6af, 0x7a6,
+		0xaa, 0x1a3, 0x2a9, 0x3a0, 0xd30, 0xc39, 0xf33, 0xe3a, 0x936, 0x83f,
+		0xb35, 0xa3c, 0x53c, 0x435, 0x73f, 0x636, 0x13a, 0x33, 0x339, 0x230,
+		0xe90, 0xf99, 0xc93, 0xd9a, 0xa96, 0xb9f, 0x895, 0x99c, 0x69c, 0x795,
+		0x49f, 0x596, 0x29a, 0x393, 0x99, 0x190, 0xf00, 0xe09, 0xd03, 0xc0a,
+		0xb06, 0xa0f, 0x905, 0x80c, 0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203,
+		0x109, 0x0 };
+const int IsoSurface::triangleConnectionTable[4096] = { -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 8, 0, 3, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, 9, 1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, 3, 8, 9, 9, 1, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, 10, 2, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1,
+		10, 10, 8, 0, 10, 2, 3, 3, 8, 10, -1, -1, -1, -1, 0, 9, 10, 10, 2, 0,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 8, 9, 10, 10, 2, 8, 2, 3, 8, -1,
+		-1, -1, -1, -1, -1, -1, 11, 3, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, 2, 11, 8, 8, 0, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, 3, 0, 9, 9, 11, 3, 9, 1, 2, 2, 11, 9, -1, -1, -1, -1, 11, 8, 9, 9,
+		1, 11, 1, 2, 11, -1, -1, -1, -1, -1, -1, -1, 1, 10, 11, 11, 3, 1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, 10, 11, 8, 8, 0, 10, 0, 1, 10, -1,
+		-1, -1, -1, -1, -1, -1, 9, 10, 11, 11, 3, 9, 3, 0, 9, -1, -1, -1, -1,
+		-1, -1, -1, 11, 8, 9, 9, 10, 11, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		7, 4, 8, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 3, 7, 7,
+		4, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 4, 9, 1, 1, 7, 4, 1, 0, 8,
+		8, 7, 1, -1, -1, -1, -1, 1, 3, 7, 7, 4, 1, 4, 9, 1, -1, -1, -1, -1, -1,
+		-1, -1, 10, 7, 4, 10, 4, 1, 1, 4, 8, 1, 8, 2, 2, 8, 7, 2, 4, 0, 1, 4, 1,
+		10, 4, 10, 7, 7, 10, 2, 7, 2, 3, -1, 2, 0, 8, 2, 8, 7, 2, 7, 10, 10, 7,
+		4, 10, 4, 9, -1, 10, 2, 3, 4, 9, 10, 3, 7, 4, 4, 10, 3, -1, -1, -1, -1,
+		8, 3, 2, 2, 4, 8, 2, 11, 7, 7, 4, 2, -1, -1, -1, -1, 4, 0, 2, 2, 11, 4,
+		11, 7, 4, -1, -1, -1, -1, -1, -1, -1, 3, 0, 8, 11, 7, 4, 11, 4, 9, 11,
+		9, 2, 1, 2, 9, -1, 11, 1, 2, 7, 9, 1, 7, 4, 9, 1, 11, 7, -1, -1, -1, -1,
+		10, 11, 7, 10, 7, 4, 10, 4, 1, 1, 4, 8, 1, 8, 3, -1, 7, 4, 0, 10, 11, 7,
+		0, 1, 10, 7, 0, 10, -1, -1, -1, -1, 8, 3, 0, 10, 11, 7, 4, 9, 10, 10, 7,
+		4, -1, -1, -1, -1, 9, 10, 11, 11, 4, 9, 11, 7, 4, -1, -1, -1, -1, -1,
+		-1, -1, 9, 4, 5, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 8,
+		4, 5, 5, 3, 8, 5, 9, 0, 0, 3, 5, -1, -1, -1, -1, 4, 5, 1, 1, 0, 4, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, 5, 1, 3, 3, 8, 5, 8, 4, 5, -1, -1,
+		-1, -1, -1, -1, -1, 1, 9, 4, 4, 2, 1, 4, 5, 10, 10, 2, 4, -1, -1, -1,
+		-1, 0, 1, 9, 8, 4, 5, 8, 5, 10, 8, 10, 3, 2, 3, 10, -1, 2, 0, 4, 4, 5,
+		2, 5, 10, 2, -1, -1, -1, -1, -1, -1, -1, 5, 8, 4, 10, 3, 8, 10, 2, 3, 8,
+		5, 10, -1, -1, -1, -1, 11, 4, 5, 11, 5, 2, 2, 5, 9, 2, 9, 3, 3, 9, 4, 3,
 		11, 8, 4, 11, 4, 5, 11, 5, 2, 2, 5, 9, 2, 9, 0, -1, 5, 1, 2, 5, 2, 11,
 		5, 11, 4, 4, 11, 3, 4, 3, 0, -1, 4, 5, 1, 11, 8, 4, 1, 2, 11, 4, 1, 11,
 		-1, -1, -1, -1, 3, 1, 9, 3, 9, 4, 3, 4, 11, 11, 4, 5, 11, 5, 10, -1, 9,
@@ -343,75 +364,112 @@ int IsoSurface::triangleConnectionTable[4096] = { -1, -1, -1, -1, -1, -1, -1,
 		-1 };
 
 IsoSurface::IsoSurface() :
-		isoLevel(0), rows(0), cols(0), slices(0), winding(CLOCKWISE), skipHidden(
+		isoLevel(0), rows(0), cols(0), slices(0), winding(Winding::CLOCKWISE), skipHidden(
 				true), triangleCount(0) {
 }
 
 IsoSurface::~IsoSurface() {
-
 }
-void IsoSurface::solve(const Volume1f& data, Mesh& mesh,
-		const std::vector<int3>& indexList, bool regularize,
-		const float& isoLevel) {
-	const int TRACE_ITERATIONS = 16;
-	const int REGULARIZE_ITERATIONS=3;
-	const float TRACE_THRESHOLD = 1E-5f;
-	mesh.clear();
-	std::vector<int> indexes;
-	solve(data.ptr(), data.rows, data.cols, data.slices, indexList,
-			mesh.vertexLocations.data, mesh.vertexNormals.data, indexes,
-			isoLevel);
-	Vector3ui& triangles = mesh.triIndexes;
-	triangles.resize(indexes.size() / 3);
-	for (size_t i = 0, n = 0; i < indexes.size(); i += 3, n++) {
-		triangles[n] = uint3(indexes[i], indexes[i + 1], indexes[i + 2]);
+
+void IsoSurface::solveQuad(const float* data, const int& rows, const int& cols,
+		const int& slices, const std::vector<int3>& indexList, Mesh& mesh,
+		bool regularizeTest, const float& isoLevel) {
+	this->rows = rows;
+	this->cols = cols;
+	this->slices = slices;
+	this->isoLevel = isoLevel;
+	std::set<int3> activeVoxels;
+	std::map<int4, EdgeInfo> activeEdges;
+	std::map<int3, uint32_t> vertexIndices;
+	findActiveVoxels(data, indexList, activeVoxels, activeEdges);
+	generateVertexData(data, activeVoxels, activeEdges, vertexIndices, mesh);
+	generateTriangles(activeEdges, vertexIndices, mesh);
+	if (regularizeTest) {
+		regularize(data, mesh);
 	}
-	if (regularize) {
-		std::vector<float3> tmpPoints(mesh.vertexLocations.size());
-		std::vector<std::set<uint32_t>> vertNbrs;
-		CreateVertexNeighborTable(mesh, vertNbrs);
-		for (int c = 0; c < REGULARIZE_ITERATIONS; c++) {
+}
+void IsoSurface::solve(const float* data, const int& rows, const int& cols,
+		const int& slices, const std::vector<int3>& indexList, Mesh& mesh,
+		const MeshType& type, bool regularizeTest, const float& isoLevel) {
+	mesh.clear();
+	if (type == MeshType::TRIANGLE) {
+		solveTri(data, rows, cols, slices, indexList, mesh.vertexLocations.data,
+				mesh.vertexNormals.data, mesh.triIndexes.data, isoLevel);
+	} else {
+		solveQuad(data, rows, cols, slices, indexList, mesh, isoLevel);
+	}
+	if (regularizeTest) {
+		regularize(data, mesh);
+	}
+	mesh.updateBoundingBox();
+}
+void IsoSurface::solve(const Volume1f& data, const std::vector<int3>& indexList,
+		Mesh& mesh, const MeshType& type, bool regularizeTest,
+		const float& isoLevel) {
+	mesh.clear();
+	if (type == MeshType::TRIANGLE) {
+		solveTri(data.ptr(), data.rows, data.cols, data.slices, indexList,
+				mesh.vertexLocations.data, mesh.vertexNormals.data,
+				mesh.triIndexes.data, isoLevel);
+	} else {
+		solveQuad(data.ptr(), data.rows, data.cols, data.slices, indexList,
+				mesh, isoLevel);
+	}
+	if (regularizeTest) {
+		regularize(data.ptr(), mesh);
+	}
+	mesh.updateBoundingBox();
+}
+void IsoSurface::regularize(const float* data, Mesh& mesh) {
+	const int TRACE_ITERATIONS = 16;
+	const int REGULARIZE_ITERATIONS = 3;
+	const float TRACE_THRESHOLD = 1E-5f;
+	std::vector<float3> tmpPoints(mesh.vertexLocations.size());
+	std::vector<std::set<uint32_t>> vertNbrs;
+	CreateVertexNeighborTable(mesh, vertNbrs);
+	for (int c = 0; c < REGULARIZE_ITERATIONS; c++) {
 #pragma omp parralel for;
-			for (int i = 0; i < (int) vertNbrs.size(); i++) {
-				float3 pt(0.0f);
-				for (uint32_t nbr : vertNbrs[i]) {
-					pt += mesh.vertexLocations[nbr];
-				}
-				pt /= (float) vertNbrs[i].size();
-				tmpPoints[i] = pt;
-				mesh.vertexNormals[i] = interpolateNormal(data.ptr(), pt.x,
-						pt.y, pt.z);
+		for (int i = 0; i < (int) vertNbrs.size(); i++) {
+			float3 pt(0.0f);
+			for (uint32_t nbr : vertNbrs[i]) {
+				pt += mesh.vertexLocations[nbr];
 			}
+			pt /= (float) vertNbrs[i].size();
+			tmpPoints[i] = pt;
+			mesh.vertexNormals[i] = interpolateNormal(data, pt.x, pt.y, pt.z);
+		}
 #pragma omp parralel for;
-			for (int i = 0; i < (int) mesh.vertexLocations.size(); i++) {
-				float3 norm = mesh.vertexNormals[i];
-				float3 pt = tmpPoints[i];
-				for (int n = 0; n < TRACE_ITERATIONS; n++) {
-					float val = interpolate(data.ptr(), pt.x, pt.y, pt.z);
-					pt -= 0.75f * aly::clamp(val, -1.0f, 1.0f) * norm;
-					if (std::abs(val) < TRACE_THRESHOLD)
-						break;
-				}
-				mesh.vertexLocations[i] = pt;
-				mesh.vertexNormals[i]=normalize(norm);
+		for (int i = 0; i < (int) mesh.vertexLocations.size(); i++) {
+			float3 norm = mesh.vertexNormals[i];
+			float3 pt = tmpPoints[i];
+			for (int n = 0; n < TRACE_ITERATIONS; n++) {
+				float val = interpolate(data, pt.x, pt.y, pt.z);
+				pt -= 0.75f * aly::clamp(val, -1.0f, 1.0f) * norm;
+				if (std::abs(val) < TRACE_THRESHOLD)
+					break;
 			}
+			mesh.vertexLocations[i] = pt;
+			mesh.vertexNormals[i] = normalize(norm);
 		}
 	}
+	//mesh.updateVertexNormals(0,0);
+	//for(float3& val:mesh.vertexNormals.data){
+	//	val=-val;
+	//}
+
 }
 // debugged, no problem
-void IsoSurface::solve(const float* vol, const int& rows, const int& cols,
+void IsoSurface::solveTri(const float* vol, const int& rows, const int& cols,
 		const int& slices, const std::vector<int3>& indexList,
 		std::vector<aly::float3>& points, std::vector<aly::float3>& normals,
-		std::vector<int>& indexes, const float& isoLevel) {
-
+		std::vector<uint3>& indexes, const float& isoLevel) {
 	this->rows = rows;
 	this->cols = cols;
 	this->slices = slices;
 	this->isoLevel = isoLevel;
 	int elements = indexList.size();
-	//std::map<int64_t, EdgeSplit> splits;
 	std::map<int64_t, EdgeSplit> splits;
-	std::vector<IsoTriangle> triangles(elements * 2); //cannot exceed elements * 5
+	std::vector<IsoTriangle> triangles(elements * 2);
 	int vertexCount = 0;
 	triangleCount = 0;
 	for (int nn = 0; nn < elements; nn++) {
@@ -422,22 +480,18 @@ void IsoSurface::solve(const float* vol, const int& rows, const int& cols,
 					index.x, index.y, index.z, vertexCount);
 	}
 	indexes.clear();
-	indexes.resize(triangleCount * 3);
-	if (winding == CLOCKWISE) {
-		int index = 0;
+	indexes.resize(triangleCount);
+	if (winding == Winding::CLOCKWISE) {
 		for (int k = 0; k < triangleCount; k++) {
 			IsoTriangle* triPtr = &triangles[k];
-			indexes[index++] = triPtr->vertexIds[0];
-			indexes[index++] = triPtr->vertexIds[1];
-			indexes[index++] = triPtr->vertexIds[2];
+			indexes[k] = uint3(triPtr->vertexIds[0], triPtr->vertexIds[1],
+					triPtr->vertexIds[2]);
 		}
-	} else if (winding == COUNTER_CLOCKWISE) {
-		int index = 0;
+	} else if (winding == Winding::COUNTER_CLOCKWISE) {
 		for (int k = 0; k < triangleCount; k++) {
 			IsoTriangle* triPtr = &triangles[k];
-			indexes[index++] = triPtr->vertexIds[2];
-			indexes[index++] = triPtr->vertexIds[1];
-			indexes[index++] = triPtr->vertexIds[0];
+			indexes[k] = uint3(triPtr->vertexIds[0], triPtr->vertexIds[1],
+					triPtr->vertexIds[2]);
 		}
 	}
 	points.clear();
@@ -559,7 +613,7 @@ vector<vector<int>> IsoSurface::buildVertexNeighborTable(const int vertexCount,
 	vector<vector<int>> neighborTable(vertexCount);
 	vector<vector<int>> tmpTable(vertexCount);
 
-	if (direction == CLOCKWISE) {
+	if (direction == Winding::CLOCKWISE) {
 		for (int i = 0; i < indexCount; i += 3) {
 			v1 = indexes[i];
 			v2 = indexes[i + 1];
@@ -571,7 +625,7 @@ vector<vector<int>> IsoSurface::buildVertexNeighborTable(const int vertexCount,
 			tmpTable[v3].push_back(v1);
 			tmpTable[v3].push_back(v2);
 		}
-	} else if (direction == COUNTER_CLOCKWISE) {
+	} else if (direction == Winding::COUNTER_CLOCKWISE) {
 		for (int i = 0; i < indexCount; i += 3) {
 			v1 = indexes[i];
 			v2 = indexes[i + 1];
@@ -645,6 +699,119 @@ vector<vector<int>> IsoSurface::buildVertexNeighborTable(const int vertexCount,
 		}
 	}
 	return neighborTable;
+}
+void IsoSurface::generateVertexData(const float*data,
+		const std::set<int3>& voxels, const std::map<int4, EdgeInfo>& edges,
+		std::map<int3, uint32_t>& vertexIndices, Mesh& buffer) {
+	Vector3f& vert = buffer.vertexLocations;
+	Vector3f& norm = buffer.vertexNormals;
+	float3 p[12];
+	uint32_t idxCounter = 0;
+	for (const auto& voxelID : voxels) {
+		int idx = 0;
+		for (int a = 0; a < 3; a++) {
+			for (int i = 0; i < 4; i++) {
+				int4 edgeID = int4(voxelID + EDGE_NODE_OFFSETS[a][i], a);
+				const auto iter = edges.find(edgeID);
+				if (iter != end(edges)) {
+					const auto& info = iter->second;
+					p[idx++] = info.point;
+				}
+			}
+		}
+		float3 nodePos(0.0f);
+		for (int i = 0; i < idx; i++) {
+			nodePos += p[i];
+		}
+		nodePos /= (float) idx;
+		vertexIndices[voxelID] = idxCounter++;
+		vert.push_back(nodePos);
+		norm.push_back(
+				interpolateNormal(data, nodePos.x, nodePos.y, nodePos.z));
+	}
+}
+void IsoSurface::generateTriangles(const std::map<int4, EdgeInfo>& edges,
+		const std::map<int3, uint32_t>& vertexIndices, Mesh& mesh) {
+	Vector4ui& quads = mesh.quadIndexes;
+	for (const auto& pair : edges) {
+		const int4& edge = pair.first;
+		const EdgeInfo& info = pair.second;
+		const int axis = edge.w;
+		int3 pivot = edge.xyz();
+		const int3 voxelIDs[4] =
+				{ pivot - EDGE_NODE_OFFSETS[axis][0], pivot
+						- EDGE_NODE_OFFSETS[axis][1], pivot
+						- EDGE_NODE_OFFSETS[axis][2], pivot
+						- EDGE_NODE_OFFSETS[axis][3] };
+		// attempt to find the 4 voxels which share this edge
+		int edgeVoxels[4];
+		int numFoundVoxels = 0;
+		for (int i = 0; i < 4; i++) {
+			const auto iter = vertexIndices.find(voxelIDs[i]);
+			if (iter != end(vertexIndices)) {
+				edgeVoxels[numFoundVoxels++] = iter->second;
+			}
+		}
+		// we can only generate a quad (or two triangles) if all 4 are found
+		if (numFoundVoxels < 4) {
+			continue;
+		}
+		uint4 quad;
+		if (info.winding) {
+			quad[0] = edgeVoxels[0];
+			quad[1] = edgeVoxels[2];
+			quad[2] = edgeVoxels[3];
+			quad[3] = edgeVoxels[1];
+
+		} else {
+
+			quad[0] = edgeVoxels[0];
+			quad[1] = edgeVoxels[1];
+			quad[2] = edgeVoxels[3];
+			quad[3] = edgeVoxels[2];
+		}
+		quads.push_back(quad);
+	}
+}
+
+void IsoSurface::findActiveVoxels(const float* vol,
+		const std::vector<int3>& indexList, std::set<int3>& activeVoxels,
+		std::map<int4, EdgeInfo>& activeEdges) {
+	for (int3 pivot : indexList) {
+		float fValue1 = getValue(vol, pivot.x, pivot.y, pivot.z);
+		for (int a = 0; a < 3; a++) {
+			int3 axis = AXIS_OFFSET[a];
+			int3 nbr = pivot + axis;
+			if (nbr.x >= 0 && nbr.y >= 0 && nbr.z >= 0 && nbr.x < rows
+					&& nbr.y < cols && nbr.z < slices) {
+				float fValue2 = getValue(vol, nbr.x, nbr.y, nbr.z);
+				if (fValue1 * fValue2 < 0) {
+					float3 crossing(pivot);
+					double fDelta = fValue2 - fValue1;
+					if (std::abs(fDelta) < 1E-3f) {
+						crossing += float3(axis) * 0.5f;
+					} else {
+						crossing += float3(axis)
+								* (float) ((isoLevel - fValue1) / fDelta);
+					}
+					EdgeInfo info;
+					info.point = crossing;
+					if (winding == Winding::CLOCKWISE) {
+						info.winding = (fValue1 < 0.f);
+					} else {
+						info.winding = (fValue1 > 0.f);
+					}
+					activeEdges[int4(pivot, a)] = info;
+					auto edgeNodes = EDGE_NODE_OFFSETS[a];
+					for (int i = 0; i < 4; i++) {
+						int3 id = pivot - edgeNodes[i];
+						activeVoxels.insert(id);
+					}
+				}
+			}
+		}
+	}
+
 }
 int IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 		std::map<int64_t, EdgeSplit>& splits,

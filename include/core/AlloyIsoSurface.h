@@ -19,6 +19,10 @@
 #include <math.h>
 #include <stdint.h>
 namespace aly {
+struct EdgeInfo {
+	float3 point;
+	bool winding = false;
+};
 struct EdgeSplit {
 private:
 	int row, col, slice;
@@ -151,15 +155,19 @@ public:
 };
 
 /*** The winding order for triangle vertices.*/
-enum Winding { /** The CLOCKWISE. */
+enum class Winding { /** The CLOCKWISE. */
 	CLOCKWISE,
 	/** The COUNTE r_ clockwise. */
 	COUNTER_CLOCKWISE
+};
+enum class MeshType {
+	TRIANGLE, QUAD
 };
 class IsoSurface {
 private:
 	bool skipHidden;
 	size_t triangleCount;
+	void regularize(const float* data, Mesh& mesh);
 	aly::float4 getImageColor(const float4* image, int i, int j, int k);
 	size_t getSafeIndex(int i, int j, int k);
 	size_t getIndex(int i, int j, int k);
@@ -168,22 +176,11 @@ private:
 			float z);
 	float interpolate(const float *data, float x, float y, float z);
 	float getImageValue(const float* image, int i, int j, int k);
-public:
-	IsoSurface();
-	~IsoSurface();
-	void solve(const float* data, const int& rows, const int& cols,
-			const int& slices, const std::vector<int3>& indexList,
-			std::vector<aly::float3>& points, std::vector<aly::float3>& normals,
-			std::vector<int>& indexes, const float& isoLevel = 0);
-	void solve(const Volume1f& data, const std::vector<int3>& indexList,
-			std::vector<aly::float3>& points, std::vector<aly::float3>& normals,
-			std::vector<int>& indexes, const float& isoLevel = 0) {
-		solve(data.ptr(), data.rows, data.cols, data.slices, indexList,
-				 points, normals, indexes,isoLevel);
-	}
-	void solve(const Volume1f& data, Mesh& mesh,
-			const std::vector<int3>& indexList,bool regularize=true, const float& isoLevel=0);
 	int triangulateUsingMarchingCubes(const float* pVolMat,
+			std::map<int64_t, EdgeSplit>& splits,
+			std::vector<IsoTriangle>& triangles, int x, int y, int z,
+			int vertexCount);
+	int triangulateDualQuads(const float* pVolMat,
 			std::map<int64_t, EdgeSplit>& splits,
 			std::vector<IsoTriangle>& triangles, int x, int y, int z,
 			int vertexCount);
@@ -201,7 +198,32 @@ public:
 
 	static std::vector<int> buildFaceNeighborTable(int vertexCount,
 			const int* indexes, const int indexCount);
-
+	void findActiveVoxels(const float* vol, const std::vector<int3>& indexList,
+			std::set<int3>& activeVoxels,
+			std::map<int4, EdgeInfo>& activeEdges);
+	void generateVertexData(const float* data, const std::set<int3>& voxels,
+			const std::map<int4, EdgeInfo>& edges,
+			std::map<int3, uint32_t>& vertexIndices, Mesh& buffer);
+	void generateTriangles(const std::map<int4, EdgeInfo>& edges,
+			const std::map<int3, uint32_t>& vertexIndices, Mesh& buffer);
+	void solveQuad(const float* data, const int& rows, const int& cols,
+			const int& slices, const std::vector<int3>& indexList, Mesh& mesh,
+			bool regularize = true, const float& isoLevel = 0.0f);
+	void solveTri(const float* data, const int& rows, const int& cols,
+			const int& slices, const std::vector<int3>& indexList,
+			std::vector<aly::float3>& points, std::vector<aly::float3>& normals,
+			std::vector<uint3>& indexes, const float& isoLevel = 0);
+public:
+	IsoSurface();
+	~IsoSurface();
+	void solve(const Volume1f& data,const std::vector<int3>& indexList,
+			Mesh& mesh, const MeshType& type =MeshType::TRIANGLE,
+			bool regularize = true,const float& isoLevel = 0);
+	void solve(const float* data,
+			const int& rows,const int& cols,const int& slices,
+			const std::vector<int3>& indexList,
+			Mesh& mesh, const MeshType& type =MeshType::TRIANGLE,
+			bool regularize = true,const float& isoLevel = 0);
 	void project(aly::float3* points, const int& numPoints,
 			aly::float3* normals, float* levelset, const aly::box3f& bbox,
 			const int& rows, const int& cols, const int& slices, int maxIters,
@@ -220,7 +242,7 @@ public:
 	 static void Regularize(char (&statusMessage)[STATUS_MESSAGE_LENGTH], std::vector<aly::float4>& vPoints,
 	 const std::vector<std::vector<int>>& nbrs, const float lambda, const int iters);
 	 */
-	inline static int* getTriangleConnectionTable() {
+	inline static const int* getTriangleConnectionTable() {
 		return triangleConnectionTable;
 	}
 	inline static int getConnectionTableRows() {
@@ -231,19 +253,19 @@ public:
 	}
 
 	/* a2fEdgeDirection lists the direction vector (vertex1-vertex0) for each edge in the cube. */
-	static float edgeDirection[12][3];
+	static const float edgeDirection[12][3];
 
 	/* Lists the positions, relative to vertex 0, of each of the 8 vertices of a cube. */
-	static int vertexOffset[8][3];
+	static const int vertexOffset[8][3];
 
 	/* Lists the index of the endpoint vertices for each of the 12 edges of the cube. */
-	static int edgeConnection[12][2];
+	static const int edgeConnection[12][2];
 
 	/* Lists the index of the endpoint vertices for each of the 6 edges of the tetrahedron. */
-	static int tetrahedronEdgeConnection[6][2];
+	static const int tetrahedronEdgeConnection[6][2];
 
 	/* Lists the index of verticies from a cube that made up each of the six tetrahedrons within the cube. */
-	static int tetrahedronsInACube[6][4];
+	static const int tetrahedronsInACube[6][4];
 
 	/**
 	 * For each of the possible vertex states listed in aiTetrahedronEdgeFlags
@@ -251,7 +273,7 @@ public:
 	 * a2iTetrahedronTriangles lists all of them in the form of 0-2 edge triples
 	 * with the list terminated by the invalid value -1.
 	 */
-	static int tetrahedronTriangles[16][7];
+	static const int tetrahedronTriangles[16][7];
 
 	/**
 	 * For any edge, if one vertex is inside of the surface and the other is
@@ -262,17 +284,21 @@ public:
 	 * all 256 possible vertex states There are 12 edges. For each entry in the
 	 * table, if edge #n is intersected, then bit #n is set to 1
 	 */
-	static int cubeEdgeFlags[256];
+	static const int cubeEdgeFlags[256];
 
 	/** The Constant aiCubeEdgeFlagsCC618. */
-	static int cubeEdgeFlagsCC618[256];
+	static const int cubeEdgeFlagsCC618[256];
 
 	/** The Constant aiCubeEdgeFlagsCC626. */
-	static int cubeEdgeFlagsCC626[256];
+	static const int cubeEdgeFlagsCC626[256];
 
 	/** Look-up table for marching cubes. */
-	static int triangleConnectionTable[4096];
+	static const int triangleConnectionTable[4096];
 
+	static const int3 AXIS_OFFSET[3];
+	static const int3 EDGE_NODE_OFFSETS[3][4];
+	static const uint32_t ENCODED_EDGE_NODE_OFFSETS[12];
+	static const uint32_t ENCODED_EDGE_OFFSETS[12];
 protected:
 	Winding winding;			// = Winding.CLOCKWISE;
 	float isoLevel;			// = 0;

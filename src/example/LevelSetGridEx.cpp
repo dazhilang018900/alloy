@@ -21,6 +21,8 @@
 
 #include "Alloy.h"
 #include "AlloyReconstruction.h"
+#include "AlloyVolume.h"
+#include "AlloyIsoSurface.h"
 #include "grid/EndlessGrid.h"
 #include "../../include/example/LevelSetGridEx.h"
 using namespace aly;
@@ -31,14 +33,38 @@ LevelSetGridEx::LevelSetGridEx() :
 bool LevelSetGridEx::init(Composite& rootNode) {
 	srand((unsigned int) time(nullptr));
 	mesh.load(getFullPath("models/horse.ply"));
-	EndlessGrid<float> grid({5,4,6,4},0.0f);
-	std::cout<<"Converting mesh to level set ..."<<std::endl;
-	MeshToLevelSet(mesh, grid,2.5f, true, 0.8f);
+	EndlessGrid<float> grid( { 5, 4, 6, 4 }, 0.0f);
+	std::cout << "Converting mesh to level set ..." << std::endl;
+	std::string voxelfile = MakeString() << GetDesktopDirectory()
+			<< ALY_PATH_SEPARATOR<<"signed_0_0_0.xml";
+	if (!FileExists(voxelfile)) {
+		MeshToLevelSet(mesh, grid, 2.5f, true, 0.8f);
+		WriteGridToFile(
+				MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"signed.xml",grid);
+	}
+	Volume1f data;
+	std::cout << "Read From File" << std::endl;
+	ReadVolumeFromFile(voxelfile, data);
+	std::vector<int3> narrowBandList;
+	for (int z = 0; z < data.slices; z++) {
+		for (int y = 0; y < data.cols; y++) {
+			for (int x = 0; x < data.rows; x++) {
+				float val = data(x, y, z) / x;
+				data(x, y, z).x = val;
+				if (std::abs(val) < 1.75) {
+					narrowBandList.push_back(int3(x, y, z));
+				}
+			}
+		}
+	}
+	IsoSurface isosurf;
+	isosurf.solve(data, narrowBandList, mesh, MeshType::QUAD);
+	std::string meshFile = MakeString() << GetDesktopDirectory()
+			<< ALY_PATH_SEPARATOR<<"signed.ply";
 
-	std::cout<<"Done conversion"<<std::endl;
-	WriteGridToFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"signed.xml",grid);
-	std::cout<<"Exit Here"<<std::endl;
-	std::exit(0);
+	std::cout << "Write " << meshFile << std::endl;
+	WriteMeshToFile(meshFile, mesh);
+
 	objectBBox = mesh.getBoundingBox();
 	displayIndex = 0;
 	colorReconstruction = false;
@@ -101,8 +127,8 @@ bool LevelSetGridEx::init(Composite& rootNode) {
 			};
 	float aspect = 6.0f;
 
-	lineColor = Color(32,32,32,128);
-	faceColor = Color(255,255,255);
+	lineColor = Color(32, 32, 32, 128);
+	faceColor = Color(255, 255, 255);
 
 	displayIndex = 0;
 	lineWidth = Float(1.0f);
@@ -295,7 +321,8 @@ void LevelSetGridEx::draw(AlloyContext* context) {
 		break;
 	}
 	renderFrameBuffer->end();
-	imageShader->draw(renderFrameBuffer->getTexture(),context->pixelRatio * rbbox, 1.0f, false);
+	imageShader->draw(renderFrameBuffer->getTexture(),
+			context->pixelRatio * rbbox, 1.0f, false);
 	camera.setDirty(false);
 	parametersDirty = false;
 }
