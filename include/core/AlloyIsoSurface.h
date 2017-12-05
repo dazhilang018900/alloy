@@ -218,16 +218,22 @@ private:
 	void generateTriangles(const std::map<int4, EdgeInfo>& edges,
 			const std::map<int3, uint32_t>& vertexIndices, Mesh& buffer);
 	void solveQuad(const float* data, const int& rows, const int& cols,
-			const int& slices, const std::vector<int3>& indexList, Mesh& mesh,
-			bool regularize = true, const float& isoLevel = 0.0f);
+			const int& slices, const std::vector<int3>& indexList, Mesh& mesh, const float& isoLevel = 0.0f);
+	void solveQuad(const EndlessGridFloat& grid,Mesh& mesh,const float& isoLevel);
+	void generateVertexData(const EndlessGridFloat& grid,
+			const std::set<int3>& voxels, const std::map<int4, EdgeInfo>& edges,
+			std::map<int3, uint32_t>& vertexIndices, Mesh& buffer);
 	void solveTri(const float* data, const int& rows, const int& cols,
 			const int& slices, const std::vector<int3>& indexList,
-			std::vector<aly::float3>& points, std::vector<aly::float3>& normals,
-			std::vector<uint3>& indexes, const float& isoLevel = 0);
+			Mesh& mesh, const float& isoLevel = 0);
 	void solveTri(const EndlessGridFloat& grid,
-			std::vector<aly::float3>& points,
-			std::vector<uint3>& indexes,
+			Mesh& mesh,
 			const float& isoLevel = 0);
+	void findActiveVoxels(
+			const EndlessGridFloat& grid,
+			const std::vector<EndlessNodeFloatPtr>& leafs,
+			std::set<int3>& activeVoxels,
+			std::map<int4, EdgeInfo>& activeEdges);
 public:
 	IsoSurface();
 	~IsoSurface();
@@ -241,6 +247,10 @@ public:
 	void solve(const Volume1f& data, const std::vector<int3>& indexList,
 			Mesh& mesh, const MeshType& type = MeshType::TRIANGLE,
 			bool regularize = true, const float& isoLevel = 0);
+	void solve(const Volume1f& data,
+			Mesh& mesh, const MeshType& type = MeshType::TRIANGLE,
+			bool regularize = true, const float& isoLevel = 0);
+
 	void solve(const float* data, const int& rows, const int& cols,
 			const int& slices, const std::vector<int3>& indexList, Mesh& mesh,
 			const MeshType& type = MeshType::TRIANGLE, bool regularize = true,

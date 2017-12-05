@@ -34,43 +34,44 @@ bool LevelSetGridEx::init(Composite& rootNode) {
 	srand((unsigned int) time(nullptr));
 	mesh.load(getFullPath("models/horse.ply"));
 	EndlessGrid<float> grid( { 5, 4, 6, 4 }, 0.0f);
-	/*
-	std::cout << "Converting mesh to level set ..." << std::endl;
-	std::string voxelfile = MakeString() << GetDesktopDirectory()
-			<< ALY_PATH_SEPARATOR<<"signed_0_0_0.xml";
-	if (!FileExists(voxelfile)) {
-		MeshToLevelSet(mesh, grid, 2.5f, true, 0.8f);
-		WriteGridToFile(
-				MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"signed.xml",grid);
-	}
+	std::string voxelFile=MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"signed.xml";
+	MeshToLevelSet(mesh, grid, 2.5f, true, 0.8f);
+	WriteGridToFile(voxelFile,grid);
 	Volume1f data;
-	std::cout << "Read From File" << std::endl;
-	ReadVolumeFromFile(voxelfile, data);
+	voxelFile=MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"signed_0_0_0.xml";
+	ReadVolumeFromFile(voxelFile, data);
 	std::vector<int3> narrowBandList;
 	for (int z = 0; z < data.slices; z++) {
 		for (int y = 0; y < data.cols; y++) {
 			for (int x = 0; x < data.rows; x++) {
-				float val = data(x, y, z) / x;
-				data(x, y, z).x = val;
-				if (std::abs(val) < 1.75) {
+				float val = data(x, y, z).x;
+				if (std::abs(val) < 1.75f) {
 					narrowBandList.push_back(int3(x, y, z));
 				}
 			}
 		}
 	}
 	IsoSurface isosurf;
-	isosurf.solve(data, narrowBandList, mesh, MeshType::QUAD);
-	std::string meshFile = MakeString() << GetDesktopDirectory()
-			<< ALY_PATH_SEPARATOR<<"signed.ply";
-
-	std::cout << "Write " << meshFile << std::endl;
+	std::string meshFile;
+	isosurf.solve(data,narrowBandList,mesh,MeshType::QUAD,true,0.0f);
+	meshFile = MakeString() << GetDesktopDirectory()<< ALY_PATH_SEPARATOR<<"quad.ply";
+	std::cout<<"Write "<<meshFile<<std::endl;
 	WriteMeshToFile(meshFile, mesh);
-*/
-	MeshToLevelSet(mesh, grid, 2.5f, true, 0.8f);
-	WriteGridToFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"signed.xml",grid);
-	IsoSurface isosurf;
+
+	isosurf.solve(data,narrowBandList,mesh,MeshType::TRIANGLE,true,0.0f);
+	meshFile = MakeString() << GetDesktopDirectory()<< ALY_PATH_SEPARATOR<<"tri.ply";
+	std::cout<<"Write "<<meshFile<<std::endl;
+	WriteMeshToFile(meshFile, mesh);
+
+
+	isosurf.solve(grid,mesh,MeshType::QUAD,true,0.0f);
+	meshFile = MakeString() << GetDesktopDirectory()<< ALY_PATH_SEPARATOR<<"endless_quad.ply";
+	std::cout<<"Write "<<meshFile<<std::endl;
+	WriteMeshToFile(meshFile, mesh);
+
 	isosurf.solve(grid,mesh,MeshType::TRIANGLE,true,0.0f);
-	std::string meshFile = MakeString() << GetDesktopDirectory()<< ALY_PATH_SEPARATOR<<"signed.ply";
+	meshFile = MakeString() << GetDesktopDirectory()<< ALY_PATH_SEPARATOR<<"endless_tri.ply";
+	std::cout<<"Write "<<meshFile<<std::endl;
 	WriteMeshToFile(meshFile, mesh);
 
 	objectBBox = mesh.getBoundingBox();

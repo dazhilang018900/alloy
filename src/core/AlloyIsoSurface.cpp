@@ -370,10 +370,9 @@ IsoSurface::IsoSurface() :
 
 IsoSurface::~IsoSurface() {
 }
-
 void IsoSurface::solveQuad(const float* data, const int& rows, const int& cols,
 		const int& slices, const std::vector<int3>& indexList, Mesh& mesh,
-		bool regularizeTest, const float& isoLevel) {
+		const float& isoLevel) {
 	this->rows = rows;
 	this->cols = cols;
 	this->slices = slices;
@@ -384,17 +383,13 @@ void IsoSurface::solveQuad(const float* data, const int& rows, const int& cols,
 	findActiveVoxels(data, indexList, activeVoxels, activeEdges);
 	generateVertexData(data, activeVoxels, activeEdges, vertexIndices, mesh);
 	generateTriangles(activeEdges, vertexIndices, mesh);
-	if (regularizeTest) {
-		regularize(data, mesh);
-	}
 }
 void IsoSurface::solve(const float* data, const int& rows, const int& cols,
 		const int& slices, const std::vector<int3>& indexList, Mesh& mesh,
 		const MeshType& type, bool regularizeTest, const float& isoLevel) {
 	mesh.clear();
 	if (type == MeshType::TRIANGLE) {
-		solveTri(data, rows, cols, slices, indexList, mesh.vertexLocations.data,
-				mesh.vertexNormals.data, mesh.triIndexes.data, isoLevel);
+		solveTri(data, rows, cols, slices, indexList, mesh, isoLevel);
 	} else {
 		solveQuad(data, rows, cols, slices, indexList, mesh, isoLevel);
 	}
@@ -403,14 +398,28 @@ void IsoSurface::solve(const float* data, const int& rows, const int& cols,
 	}
 	mesh.updateBoundingBox();
 }
+void IsoSurface::solve(const Volume1f& data, Mesh& mesh, const MeshType& type,
+		bool regularize, const float& isoLevel) {
+	std::vector<int3> narrowBandList;
+	for (int z = 0; z < data.slices; z++) {
+		for (int y = 0; y < data.cols; y++) {
+			for (int x = 0; x < data.rows; x++) {
+				float val = data(x, y, z).x;
+				if (std::abs(val) < 1.75f) {
+					narrowBandList.push_back(int3(x, y, z));
+				}
+			}
+		}
+	}
+	solve(data, narrowBandList, mesh, type, regularize, isoLevel);
+}
 void IsoSurface::solve(const Volume1f& data, const std::vector<int3>& indexList,
 		Mesh& mesh, const MeshType& type, bool regularizeTest,
 		const float& isoLevel) {
 	mesh.clear();
 	if (type == MeshType::TRIANGLE) {
-		solveTri(data.ptr(), data.rows, data.cols, data.slices, indexList,
-				mesh.vertexLocations.data, mesh.vertexNormals.data,
-				mesh.triIndexes.data, isoLevel);
+		solveTri(data.ptr(), data.rows, data.cols, data.slices, indexList, mesh,
+				isoLevel);
 	} else {
 		solveQuad(data.ptr(), data.rows, data.cols, data.slices, indexList,
 				mesh, isoLevel);
@@ -423,24 +432,16 @@ void IsoSurface::solve(const Volume1f& data, const std::vector<int3>& indexList,
 void IsoSurface::solve(const EndlessGridFloat& grid, Mesh& mesh,
 		const MeshType& type, bool regularizeTest, const float& isoLevel) {
 	mesh.clear();
-	solveTri(grid, mesh.vertexLocations.data, mesh.triIndexes.data, isoLevel);
-	mesh.updateVertexNormals();
-	mesh.vertexNormals *= float3(-1.0f);
+	if (type == MeshType::TRIANGLE) {
+		solveTri(grid, mesh, isoLevel);
+
+	} else {
+		solveQuad(grid, mesh, isoLevel);
+	}
 	if (regularizeTest) {
 		regularize(grid, mesh);
 	}
 	mesh.updateBoundingBox();
-	/*
-	 if (type == MeshType::TRIANGLE) {
-	 solveTri(data.ptr(), data.rows, data.cols, data.slices, indexList,
-	 mesh.vertexLocations.data, mesh.vertexNormals.data,
-	 mesh.triIndexes.data, isoLevel);
-	 } else {
-	 solveQuad(data.ptr(), data.rows, data.cols, data.slices, indexList,
-	 mesh, isoLevel);
-	 }
-
-	 */
 }
 void IsoSurface::regularize(const EndlessGridFloat& grid, Mesh& mesh) {
 	const int TRACE_ITERATIONS = 16;
@@ -458,19 +459,25 @@ void IsoSurface::regularize(const EndlessGridFloat& grid, Mesh& mesh) {
 			}
 			pt /= (float) vertNbrs[i].size();
 			tmpPoints[i] = pt;
-			mesh.vertexNormals[i] = GetInterpolatedNormal(grid, pt.x, pt.y,pt.z);
+			mesh.vertexNormals[i] = GetInterpolatedNormal(grid, pt.x, pt.y,
+					pt.z);
 		}
 #pragma omp parralel for;
 		for (int i = 0; i < (int) mesh.vertexLocations.size(); i++) {
 			float3 norm = mesh.vertexNormals[i];
 			float3 pt = tmpPoints[i];
+			bool converged = false;
 			for (int n = 0; n < TRACE_ITERATIONS; n++) {
 				float val = GetInterpolatedValue(grid, pt.x, pt.y, pt.z);
 				pt -= 0.75f * clamp(val, -1.0f, 1.0f) * norm;
-				if (std::abs(val) < TRACE_THRESHOLD)
+				if (std::abs(val) < TRACE_THRESHOLD) {
+					converged = true;
 					break;
+				}
 			}
-			mesh.vertexLocations[i] = pt;
+			if (converged) {
+				mesh.vertexLocations[i] = pt;
+			}
 			mesh.vertexNormals[i] = normalize(norm);
 		}
 	}
@@ -496,37 +503,40 @@ void IsoSurface::regularize(const float* data, Mesh& mesh) {
 			}
 			pt /= (float) vertNbrs[i].size();
 			tmpPoints[i] = pt;
-			mesh.vertexNormals[i] = interpolateNormal(data, pt.x, pt.y, pt.z);
+			mesh.vertexNormals[i] = normalize(
+					interpolateNormal(data, pt.x, pt.y, pt.z));
 		}
 #pragma omp parralel for;
 		for (int i = 0; i < (int) mesh.vertexLocations.size(); i++) {
 			float3 norm = mesh.vertexNormals[i];
 			float3 pt = tmpPoints[i];
+			bool converged = false;
 			for (int n = 0; n < TRACE_ITERATIONS; n++) {
 				float val = interpolate(data, pt.x, pt.y, pt.z);
 				pt -= 0.75f * aly::clamp(val, -1.0f, 1.0f) * norm;
-				if (std::abs(val) < TRACE_THRESHOLD)
+				if (std::abs(val) < TRACE_THRESHOLD) {
+					converged = true;
 					break;
+				}
 			}
-			mesh.vertexLocations[i] = pt;
+			if (converged) {
+				mesh.vertexLocations[i] = pt;
+			}
 			mesh.vertexNormals[i] = normalize(norm);
 		}
 	}
-//mesh.updateVertexNormals(0,0);
-//for(float3& val:mesh.vertexNormals.data){
-//	val=-val;
-//}
-
 }
 void IsoSurface::solveTri(const float* vol, const int& rows, const int& cols,
-		const int& slices, const std::vector<int3>& indexList,
-		std::vector<aly::float3>& points, std::vector<aly::float3>& normals,
-		std::vector<uint3>& indexes, const float& isoLevel) {
+		const int& slices, const std::vector<int3>& indexList, Mesh& mesh,
+		const float& isoLevel) {
 	this->rows = rows;
 	this->cols = cols;
 	this->slices = slices;
 	this->isoLevel = isoLevel;
 	int elements = indexList.size();
+	std::vector<uint3> &indexes = mesh.triIndexes.data;
+	std::vector<float3> &points = mesh.vertexLocations.data;
+	std::vector<float3> &normals = mesh.vertexNormals.data;
 	std::map<int64_t, EdgeSplit> splits;
 	std::vector<IsoTriangle> triangles;
 	triangles.reserve(indexList.size() * 2);
@@ -553,8 +563,6 @@ void IsoSurface::solveTri(const float* vol, const int& rows, const int& cols,
 					triPtr->vertexIds[2]);
 		}
 	}
-	points.clear();
-	normals.clear();
 	const size_t splitCount = splits.size();
 	points.resize(splitCount);
 	normals.resize(splitCount);
@@ -567,11 +575,32 @@ void IsoSurface::solveTri(const float* vol, const int& rows, const int& cols,
 		points[index] = pt;
 	}
 }
+void IsoSurface::solveQuad(const EndlessGridFloat& grid, Mesh& mesh,
+		const float& isoLevel) {
+	auto leafs = grid.getLeafNodes();
+	int dim = leafs.front()->dim;
+	int bdim = dim + 1;
+	this->rows = bdim;
+	this->cols = bdim;
+	this->slices = bdim;
 
-void IsoSurface::solveTri(const EndlessGridFloat& grid,
-		std::vector<aly::float3>& points, std::vector<uint3>& indexes,
+	this->rows = rows;
+	this->cols = cols;
+	this->slices = slices;
+	this->isoLevel = isoLevel;
+
+	std::set<int3> activeVoxels;
+	std::map<int4, EdgeInfo> activeEdges;
+	std::map<int3, uint32_t> vertexIndices;
+	findActiveVoxels(grid, leafs, activeVoxels, activeEdges);
+	generateVertexData(grid, activeVoxels, activeEdges, vertexIndices, mesh);
+	generateTriangles(activeEdges, vertexIndices, mesh);
+}
+void IsoSurface::solveTri(const EndlessGridFloat& grid, Mesh& mesh,
 		const float& isoLevel) {
 	this->isoLevel = isoLevel;
+	std::vector<aly::float3> &points = mesh.vertexLocations.data;
+	std::vector<uint3> &indexes = mesh.triIndexes.data;
 	std::map<int4, EdgeSplit> splits;
 	std::vector<IsoTriangle> triangles;
 	size_t vertexCount = 0;
@@ -632,6 +661,8 @@ void IsoSurface::solveTri(const EndlessGridFloat& grid,
 		aly::float3 pt = (splitPtr->second).point;
 		points[index] = pt;
 	}
+	mesh.updateVertexNormals();
+	mesh.vertexNormals *= float3(-1.0f);
 }
 
 // done
@@ -849,6 +880,36 @@ void IsoSurface::generateVertexData(const float*data,
 				interpolateNormal(data, nodePos.x, nodePos.y, nodePos.z));
 	}
 }
+void IsoSurface::generateVertexData(const EndlessGridFloat& grid,
+		const std::set<int3>& voxels, const std::map<int4, EdgeInfo>& edges,
+		std::map<int3, uint32_t>& vertexIndices, Mesh& buffer) {
+	Vector3f& vert = buffer.vertexLocations;
+	Vector3f& norm = buffer.vertexNormals;
+	float3 p[12];
+	uint32_t idxCounter = 0;
+	for (const auto& voxelID : voxels) {
+		int idx = 0;
+		for (int a = 0; a < 3; a++) {
+			for (int i = 0; i < 4; i++) {
+				int4 edgeID = int4(voxelID + EDGE_NODE_OFFSETS[a][i], a);
+				const auto iter = edges.find(edgeID);
+				if (iter != end(edges)) {
+					const auto& info = iter->second;
+					p[idx++] = info.point;
+				}
+			}
+		}
+		float3 nodePos(0.0f);
+		for (int i = 0; i < idx; i++) {
+			nodePos += p[i];
+		}
+		nodePos /= (float) idx;
+		vertexIndices[voxelID] = idxCounter++;
+		vert.push_back(nodePos);
+		norm.push_back(
+				GetInterpolatedNormal(grid, nodePos.x, nodePos.y, nodePos.z));
+	}
+}
 void IsoSurface::generateTriangles(const std::map<int4, EdgeInfo>& edges,
 		const std::map<int3, uint32_t>& vertexIndices, Mesh& mesh) {
 	Vector4ui& quads = mesh.quadIndexes;
@@ -892,7 +953,73 @@ void IsoSurface::generateTriangles(const std::map<int4, EdgeInfo>& edges,
 		quads.push_back(quad);
 	}
 }
-
+void IsoSurface::findActiveVoxels(const EndlessGridFloat& grid,
+		const std::vector<EndlessNodeFloatPtr>& leafs,
+		std::set<int3>& activeVoxels, std::map<int4, EdgeInfo>& activeEdges) {
+	int bdim = rows;
+	std::vector<float> data(rows * cols * slices);
+	for (EndlessNodeFloatPtr leaf : leafs) {
+		int dim = leaf->dim;
+		int3 loc = leaf->location;
+		for (int z = 0; z < bdim; z++) {
+			for (int y = 0; y < bdim; y++) {
+				for (int x = 0; x < bdim; x++) {
+					float val;
+					if (x >= dim || y >= dim || z >= dim) {
+						val = grid.getMultiResolutionValue(loc.x + x, loc.y + y,
+								loc.z + z);
+					} else {
+						val = leaf->data[x + y * dim + z * dim * dim];
+					}
+					data[x + y * bdim + z * bdim * bdim] = val;
+				}
+			}
+		}
+		for (int z = 0; z < dim; z++) {
+			for (int y = 0; y < dim; y++) {
+				for (int x = 0; x < dim; x++) {
+					float fValue1 = getValue(data.data(), x, y, z);
+					int3 pivot = int3(x + loc.x, y + loc.y, z + loc.z);
+					for (int a = 0; a < 3; a++) {
+						int3 axis = AXIS_OFFSET[a];
+						int3 nbr = int3(x, y, z) + axis;
+						if (nbr.x >= 0 && nbr.y >= 0 && nbr.z >= 0
+								&& nbr.x < rows && nbr.y < cols
+								&& nbr.z < slices) {
+							float fValue2 = getValue(data.data(), nbr.x, nbr.y,
+									nbr.z);
+							if (fValue1 * fValue2 < 0) {
+								float3 crossing(pivot.x, pivot.y, pivot.z);
+								double fDelta = fValue2 - fValue1;
+								if (std::abs(fDelta) < 1E-3f) {
+									crossing += float3(axis) * 0.5f;
+								} else {
+									crossing += float3(axis)
+											* (float) ((isoLevel - fValue1)
+													/ fDelta);
+								}
+								EdgeInfo info;
+								info.point = crossing;
+								if (winding == Winding::CLOCKWISE) {
+									info.winding = (fValue1 < 0.f);
+								} else {
+									info.winding = (fValue1 > 0.f);
+								}
+								activeEdges[int4(pivot.x, pivot.y, pivot.z, a)] =
+										info;
+								auto edgeNodes = EDGE_NODE_OFFSETS[a];
+								for (int i = 0; i < 4; i++) {
+									int3 id = pivot - edgeNodes[i];
+									activeVoxels.insert(id);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+}
 void IsoSurface::findActiveVoxels(const float* vol,
 		const std::vector<int3>& indexList, std::set<int3>& activeVoxels,
 		std::map<int4, EdgeInfo>& activeEdges) {
