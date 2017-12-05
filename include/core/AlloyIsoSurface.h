@@ -18,6 +18,7 @@
 #include <vector>
 #include <math.h>
 #include <stdint.h>
+#include <grid/EndlessGrid.h>
 namespace aly {
 struct EdgeInfo {
 	float3 point;
@@ -39,7 +40,7 @@ public:
 	aly::float3 point;
 	aly::float4 color;
 	/** The vertex id for the interpolated point. */
-	int vertexId;
+	size_t vertexId;
 
 	EdgeSplit() :
 			index(0), row(0), col(0), slice(0), vertexId(0), point(), voxelIndex1(
@@ -120,6 +121,15 @@ public:
 			return h2 + index * h1;
 		}
 	}
+	inline int4 bigHashValue() {
+		if (voxelIndex1 < voxelIndex2) {
+			int3 diff=(voxelIndex2-voxelIndex1)+1;
+			return int4(voxelIndex1,diff.x+diff.y*3+diff.z*9);
+		} else {
+			int3 diff=(voxelIndex1-voxelIndex2)+1;
+			return int4(voxelIndex2,diff.x+diff.y*3+diff.z*9);
+		}
+	}
 };
 
 /**
@@ -168,6 +178,7 @@ private:
 	bool skipHidden;
 	size_t triangleCount;
 	void regularize(const float* data, Mesh& mesh);
+	void regularize(const EndlessGridFloat& grid, Mesh& mesh);
 	aly::float4 getImageColor(const float4* image, int i, int j, int k);
 	size_t getSafeIndex(int i, int j, int k);
 	size_t getIndex(int i, int j, int k);
@@ -176,18 +187,18 @@ private:
 			float z);
 	float interpolate(const float *data, float x, float y, float z);
 	float getImageValue(const float* image, int i, int j, int k);
-	int triangulateUsingMarchingCubes(const float* pVolMat,
+	void triangulateUsingMarchingCubes(const float* pVolMat,
 			std::map<int64_t, EdgeSplit>& splits,
 			std::vector<IsoTriangle>& triangles, int x, int y, int z,
-			int vertexCount);
-	int triangulateDualQuads(const float* pVolMat,
-			std::map<int64_t, EdgeSplit>& splits,
-			std::vector<IsoTriangle>& triangles, int x, int y, int z,
-			int vertexCount);
-
-	int triangulateUsingMarchingCubes(const float* pVolMat,
+			size_t& vertexCount);
+	void triangulateUsingMarchingCubes(const float* pVolMat,
+			std::map<int4, EdgeSplit>& splits,
+			std::vector<IsoTriangle>& triangles,
+			int x, int y, int z,
+			int ox, int oy, int oz, size_t& vertexCount);
+	void triangulateUsingMarchingCubes(const float* pVolMat,
 			std::vector<EdgeSplit>& splits, std::vector<IsoTriangle>& triangles,
-			int x, int y, int z, int vertexCount);
+			int x, int y, int z, size_t& vertexCount);
 
 	static std::vector<std::vector<int>> buildVertexNeighborTable(
 			const int vertexCount, const int* indexes, const int indexCount,
@@ -213,17 +224,27 @@ private:
 			const int& slices, const std::vector<int3>& indexList,
 			std::vector<aly::float3>& points, std::vector<aly::float3>& normals,
 			std::vector<uint3>& indexes, const float& isoLevel = 0);
+	void solveTri(const EndlessGridFloat& grid,
+			std::vector<aly::float3>& points,
+			std::vector<uint3>& indexes,
+			const float& isoLevel = 0);
 public:
 	IsoSurface();
 	~IsoSurface();
-	void solve(const Volume1f& data,const std::vector<int3>& indexList,
-			Mesh& mesh, const MeshType& type =MeshType::TRIANGLE,
-			bool regularize = true,const float& isoLevel = 0);
-	void solve(const float* data,
-			const int& rows,const int& cols,const int& slices,
-			const std::vector<int3>& indexList,
-			Mesh& mesh, const MeshType& type =MeshType::TRIANGLE,
-			bool regularize = true,const float& isoLevel = 0);
+
+	void solve(
+			const EndlessGridFloat& grid,
+			Mesh& mesh,
+			const MeshType& type,
+			bool regularizeTest,
+			const float& isoLevel);
+	void solve(const Volume1f& data, const std::vector<int3>& indexList,
+			Mesh& mesh, const MeshType& type = MeshType::TRIANGLE,
+			bool regularize = true, const float& isoLevel = 0);
+	void solve(const float* data, const int& rows, const int& cols,
+			const int& slices, const std::vector<int3>& indexList, Mesh& mesh,
+			const MeshType& type = MeshType::TRIANGLE, bool regularize = true,
+			const float& isoLevel = 0);
 	void project(aly::float3* points, const int& numPoints,
 			aly::float3* normals, float* levelset, const aly::box3f& bbox,
 			const int& rows, const int& cols, const int& slices, int maxIters,

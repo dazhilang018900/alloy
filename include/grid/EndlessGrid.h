@@ -261,6 +261,35 @@ public:
 		result = node;
 		value=&(*node)(iii, jjj, kkk);
 	}
+	T getMultiResolutionValue(int i,int j,int k) const {
+		int sz = gridSizes[0];
+		int cdim, dim;
+		int ti = roundDown(i, sz);
+		int tj = roundDown(j, sz);
+		int tk = roundDown(k, sz);
+		int stride = std::max(std::max(std::abs(ti), std::abs(tj)),std::abs(tk)) + 1;
+		int iii = ((i + stride * sz) % sz);
+		int jjj = ((j + stride * sz) % sz);
+		int kkk = ((k + stride * sz) % sz);
+		std::shared_ptr<EndlessNode<T>> node = getNodeIfExists(ti, tj, tk);
+		if(node.get()==nullptr) return backgroundValue;
+		for (int c = 0; c < levels.size() - 1; c++) {
+			cdim = cellSizes[c];
+			int3 pos = int3(iii / cdim, jjj / cdim, kkk / cdim);
+			iii = iii % cdim;
+			jjj = jjj % cdim;
+			kkk = kkk % cdim;
+			auto child = node->getChild(pos.x, pos.y, pos.z);
+			if (child.get() != nullptr) {
+				node = child;
+			} else {
+				if(node->hasData()){
+					return (*node)(pos.x,pos.y,pos.z);
+				}
+			}
+		}
+		return (*node)(iii, jjj, kkk);
+	}
 
 	T getMultiResolutionValue(std::shared_ptr<EndlessNode<T>> node, int iii,
 			int jjj, int kkk) const {
@@ -356,6 +385,9 @@ public:
 	}
 };
 void FloodFill(EndlessGrid<float>& grid,float narrowBand);
+float3 GetNormal(const EndlessGrid<float>& grid,int i,int j,int k);
+float GetInterpolatedValue(const EndlessGrid<float>& grid,float x,float y,float z);
+float3 GetInterpolatedNormal(const EndlessGrid<float>& grid,float x,float y,float z);
 float MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,float narrowBand,bool flipSign=true,float voxelScale=0.75f);
 
 typedef EndlessGrid<float> EndlessGridFloat;

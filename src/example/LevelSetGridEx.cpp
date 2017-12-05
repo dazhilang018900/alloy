@@ -34,6 +34,7 @@ bool LevelSetGridEx::init(Composite& rootNode) {
 	srand((unsigned int) time(nullptr));
 	mesh.load(getFullPath("models/horse.ply"));
 	EndlessGrid<float> grid( { 5, 4, 6, 4 }, 0.0f);
+	/*
 	std::cout << "Converting mesh to level set ..." << std::endl;
 	std::string voxelfile = MakeString() << GetDesktopDirectory()
 			<< ALY_PATH_SEPARATOR<<"signed_0_0_0.xml";
@@ -63,6 +64,13 @@ bool LevelSetGridEx::init(Composite& rootNode) {
 			<< ALY_PATH_SEPARATOR<<"signed.ply";
 
 	std::cout << "Write " << meshFile << std::endl;
+	WriteMeshToFile(meshFile, mesh);
+*/
+	MeshToLevelSet(mesh, grid, 2.5f, true, 0.8f);
+	WriteGridToFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"signed.xml",grid);
+	IsoSurface isosurf;
+	isosurf.solve(grid,mesh,MeshType::TRIANGLE,true,0.0f);
+	std::string meshFile = MakeString() << GetDesktopDirectory()<< ALY_PATH_SEPARATOR<<"signed.ply";
 	WriteMeshToFile(meshFile, mesh);
 
 	objectBBox = mesh.getBoundingBox();

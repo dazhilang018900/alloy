@@ -420,6 +420,66 @@ void IsoSurface::solve(const Volume1f& data, const std::vector<int3>& indexList,
 	}
 	mesh.updateBoundingBox();
 }
+void IsoSurface::solve(const EndlessGridFloat& grid, Mesh& mesh,
+		const MeshType& type, bool regularizeTest, const float& isoLevel) {
+	mesh.clear();
+	solveTri(grid, mesh.vertexLocations.data, mesh.triIndexes.data, isoLevel);
+	mesh.updateVertexNormals();
+	mesh.vertexNormals *= float3(-1.0f);
+	if (regularizeTest) {
+		regularize(grid, mesh);
+	}
+	mesh.updateBoundingBox();
+	/*
+	 if (type == MeshType::TRIANGLE) {
+	 solveTri(data.ptr(), data.rows, data.cols, data.slices, indexList,
+	 mesh.vertexLocations.data, mesh.vertexNormals.data,
+	 mesh.triIndexes.data, isoLevel);
+	 } else {
+	 solveQuad(data.ptr(), data.rows, data.cols, data.slices, indexList,
+	 mesh, isoLevel);
+	 }
+
+	 */
+}
+void IsoSurface::regularize(const EndlessGridFloat& grid, Mesh& mesh) {
+	const int TRACE_ITERATIONS = 16;
+	const int REGULARIZE_ITERATIONS = 3;
+	const float TRACE_THRESHOLD = 1E-5f;
+	std::vector<float3> tmpPoints(mesh.vertexLocations.size());
+	std::vector<std::set<uint32_t>> vertNbrs;
+	CreateVertexNeighborTable(mesh, vertNbrs);
+	for (int c = 0; c < REGULARIZE_ITERATIONS; c++) {
+#pragma omp parralel for;
+		for (int i = 0; i < (int) vertNbrs.size(); i++) {
+			float3 pt(0.0f);
+			for (uint32_t nbr : vertNbrs[i]) {
+				pt += mesh.vertexLocations[nbr];
+			}
+			pt /= (float) vertNbrs[i].size();
+			tmpPoints[i] = pt;
+			mesh.vertexNormals[i] = GetInterpolatedNormal(grid, pt.x, pt.y,pt.z);
+		}
+#pragma omp parralel for;
+		for (int i = 0; i < (int) mesh.vertexLocations.size(); i++) {
+			float3 norm = mesh.vertexNormals[i];
+			float3 pt = tmpPoints[i];
+			for (int n = 0; n < TRACE_ITERATIONS; n++) {
+				float val = GetInterpolatedValue(grid, pt.x, pt.y, pt.z);
+				pt -= 0.75f * clamp(val, -1.0f, 1.0f) * norm;
+				if (std::abs(val) < TRACE_THRESHOLD)
+					break;
+			}
+			mesh.vertexLocations[i] = pt;
+			mesh.vertexNormals[i] = normalize(norm);
+		}
+	}
+//mesh.updateVertexNormals(0,0);
+//for(float3& val:mesh.vertexNormals.data){
+//	val=-val;
+//}
+
+}
 void IsoSurface::regularize(const float* data, Mesh& mesh) {
 	const int TRACE_ITERATIONS = 16;
 	const int REGULARIZE_ITERATIONS = 3;
@@ -452,13 +512,12 @@ void IsoSurface::regularize(const float* data, Mesh& mesh) {
 			mesh.vertexNormals[i] = normalize(norm);
 		}
 	}
-	//mesh.updateVertexNormals(0,0);
-	//for(float3& val:mesh.vertexNormals.data){
-	//	val=-val;
-	//}
+//mesh.updateVertexNormals(0,0);
+//for(float3& val:mesh.vertexNormals.data){
+//	val=-val;
+//}
 
 }
-// debugged, no problem
 void IsoSurface::solveTri(const float* vol, const int& rows, const int& cols,
 		const int& slices, const std::vector<int3>& indexList,
 		std::vector<aly::float3>& points, std::vector<aly::float3>& normals,
@@ -469,17 +528,17 @@ void IsoSurface::solveTri(const float* vol, const int& rows, const int& cols,
 	this->isoLevel = isoLevel;
 	int elements = indexList.size();
 	std::map<int64_t, EdgeSplit> splits;
-	std::vector<IsoTriangle> triangles(elements * 2);
-	int vertexCount = 0;
+	std::vector<IsoTriangle> triangles;
+	triangles.reserve(indexList.size() * 2);
+	size_t vertexCount = 0;
 	triangleCount = 0;
 	for (int nn = 0; nn < elements; nn++) {
 		int3 index = indexList[nn];
 		if (index.x > 0 && index.y > 0 && index.z > 0 && index.x < rows - 1
 				&& index.y < cols - 1 && index.z < slices - 1)
-			vertexCount = triangulateUsingMarchingCubes(vol, splits, triangles,
-					index.x, index.y, index.z, vertexCount);
+			triangulateUsingMarchingCubes(vol, splits, triangles, index.x,
+					index.y, index.z, vertexCount);
 	}
-	indexes.clear();
 	indexes.resize(triangleCount);
 	if (winding == Winding::CLOCKWISE) {
 		for (int k = 0; k < triangleCount; k++) {
@@ -509,10 +568,76 @@ void IsoSurface::solveTri(const float* vol, const int& rows, const int& cols,
 	}
 }
 
+void IsoSurface::solveTri(const EndlessGridFloat& grid,
+		std::vector<aly::float3>& points, std::vector<uint3>& indexes,
+		const float& isoLevel) {
+	this->isoLevel = isoLevel;
+	std::map<int4, EdgeSplit> splits;
+	std::vector<IsoTriangle> triangles;
+	size_t vertexCount = 0;
+	triangleCount = 0;
+	auto leafs = grid.getLeafNodes();
+	int dim = leafs.front()->dim;
+	int bdim = dim + 1;
+	this->rows = bdim;
+	this->cols = bdim;
+	this->slices = bdim;
+	std::vector<float> data(bdim * bdim * bdim);
+	for (EndlessNodeFloatPtr leaf : leafs) {
+		int dim = leaf->dim;
+		int3 loc = leaf->location;
+		for (int z = 0; z < bdim; z++) {
+			for (int y = 0; y < bdim; y++) {
+				for (int x = 0; x < bdim; x++) {
+					float val;
+					if (x >= dim || y >= dim || z >= dim) {
+						val = grid.getMultiResolutionValue(loc.x + x, loc.y + y,
+								loc.z + z);
+					} else {
+						val = leaf->data[x + y * dim + z * dim * dim];
+					}
+					data[x + y * bdim + z * bdim * bdim] = val;
+				}
+			}
+		}
+		for (int z = 0; z < dim; z++) {
+			for (int y = 0; y < dim; y++) {
+				for (int x = 0; x < dim; x++) {
+					triangulateUsingMarchingCubes(data.data(), splits,
+							triangles, x, y, z, loc.x, loc.y, loc.z,
+							vertexCount);
+				}
+			}
+		}
+	}
+	indexes.resize(triangleCount);
+	if (winding == Winding::CLOCKWISE) {
+		for (int k = 0; k < triangleCount; k++) {
+			IsoTriangle* triPtr = &triangles[k];
+			indexes[k] = uint3(triPtr->vertexIds[0], triPtr->vertexIds[1],
+					triPtr->vertexIds[2]);
+		}
+	} else if (winding == Winding::COUNTER_CLOCKWISE) {
+		for (int k = 0; k < triangleCount; k++) {
+			IsoTriangle* triPtr = &triangles[k];
+			indexes[k] = uint3(triPtr->vertexIds[0], triPtr->vertexIds[1],
+					triPtr->vertexIds[2]);
+		}
+	}
+	points.clear();
+	const size_t splitCount = splits.size();
+	points.resize(splitCount);
+	for (auto splitPtr = splits.begin(); splitPtr != splits.end(); ++splitPtr) {
+		int index = (splitPtr->second).vertexId;
+		aly::float3 pt = (splitPtr->second).point;
+		points[index] = pt;
+	}
+}
+
 // done
 size_t IsoSurface::getIndex(int i, int j, int k) {
 
-	//return (clamp(k,0,m_slices-1)*(m_rows* m_cols)) + (clamp(j,0,m_cols-1) * m_rows) + clamp(i,0,m_rows-1);
+//return (clamp(k,0,m_slices-1)*(m_rows* m_cols)) + (clamp(j,0,m_cols-1) * m_rows) + clamp(i,0,m_rows-1);
 	return k * (rows * (size_t) cols) + j * (size_t) rows + (size_t) i;
 }
 
@@ -532,7 +657,7 @@ aly::float4 IsoSurface::getImageColor(const float4* image, int i, int j,
 // debugged, no problem need optimization, i.e. vector->stack
 vector<int> IsoSurface::buildFaceNeighborTable(int vertexCount,
 		const int* indexes, const int indexCount) {
-	//int faceCount=indexCount/3;
+//int faceCount=indexCount/3;
 	vector<int> faceTable(indexCount);
 	int v1, v2, v3;
 	int n1, n2, n3;
@@ -597,12 +722,6 @@ vector<int> IsoSurface::buildFaceNeighborTable(int vertexCount,
 				break;
 			}
 		}
-		//sanity check
-		/*
-		 if(fnbrs[0]<0||fnbrs[1]<0||fnbrs[2]<0||fnbrs[0]==fnbrs[1]||fnbrs[1]==fnbrs[2]||fnbrs[2]==fnbrs[0]){
-		 std::cout<<"NERIGHBOR TABLE SCREWED UP!"<<std::endl;
-		 }
-		 */
 	}
 	return faceTable;
 }
@@ -813,10 +932,10 @@ void IsoSurface::findActiveVoxels(const float* vol,
 	}
 
 }
-int IsoSurface::triangulateUsingMarchingCubes(const float* vol,
+void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 		std::map<int64_t, EdgeSplit>& splits,
 		std::vector<IsoTriangle>& triangles, int x, int y, int z,
-		int vertexCount) {
+		size_t& vertexCount) {
 	int3 afCubeValue[8];
 	int iFlagIndex = 0;
 	for (int iVertex = 0; iVertex < 8; ++iVertex) {
@@ -828,7 +947,7 @@ int IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 	}
 	int iEdgeFlags = cubeEdgeFlagsCC626[iFlagIndex];
 	if (iEdgeFlags == 0)
-		return vertexCount;
+		return;
 	EdgeSplit split;
 	EdgeSplit asEdgeVertex[12];
 	for (int iEdge = 0; iEdge < 12; ++iEdge) {
@@ -884,14 +1003,89 @@ int IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 			split = asEdgeVertex[iVertexIndex];
 			tri.vertexIds[iCorner] = split.vertexId;
 		}
-		triangles[triangleCount++] = tri;
+		triangles.push_back(tri);
+		triangleCount++;
 	}
 
-	return vertexCount;
 }
-int IsoSurface::triangulateUsingMarchingCubes(const float* vol,
+
+void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
+		std::map<int4, EdgeSplit>& splits, std::vector<IsoTriangle>& triangles,
+		int x, int y, int z, int ox, int oy, int oz, size_t& vertexCount) {
+	int3 afCubeValue[8];
+	int3 off = int3(ox, oy, oz);
+	int iFlagIndex = 0;
+	for (int iVertex = 0; iVertex < 8; ++iVertex) {
+		int3 v((x + vertexOffset[iVertex][0]), (y + vertexOffset[iVertex][1]),
+				((z + vertexOffset[iVertex][2])));
+		afCubeValue[iVertex] = v + off;
+		if (getValue(vol, v.x, v.y, v.z) < isoLevel)
+			iFlagIndex |= 1 << iVertex;
+	}
+	int iEdgeFlags = cubeEdgeFlagsCC626[iFlagIndex];
+	if (iEdgeFlags == 0)
+		return;
+	EdgeSplit split;
+	EdgeSplit asEdgeVertex[12];
+	for (int iEdge = 0; iEdge < 12; ++iEdge) {
+		if ((iEdgeFlags & (1 << iEdge)) != 0) {
+			int3 v = afCubeValue[edgeConnection[iEdge][0]];
+			if (getValue(vol, v.x, v.y, v.z) < isoLevel) {
+				split = EdgeSplit(afCubeValue[edgeConnection[iEdge][0]],
+						afCubeValue[edgeConnection[iEdge][1]], rows, cols,
+						slices);
+			} else {
+				split = EdgeSplit(afCubeValue[edgeConnection[iEdge][1]],
+						afCubeValue[edgeConnection[iEdge][0]], rows, cols,
+						slices);
+			}
+
+			int4 lHashValue = split.bigHashValue();
+			std::map<int4, EdgeSplit>::const_iterator itr;
+			itr = splits.find(lHashValue);
+			if (itr == splits.end()) {
+				split.vertexId = vertexCount++;
+				aly::float3 pt3d;
+				float fOffset = getOffset(vol,
+						afCubeValue[edgeConnection[iEdge][0]] - off,
+						afCubeValue[edgeConnection[iEdge][1]] - off);
+				pt3d.x = (ox + x
+						+ (vertexOffset[edgeConnection[iEdge][0]][0]
+								+ fOffset * edgeDirection[iEdge][0]));
+				pt3d.y = (oy + y
+						+ (vertexOffset[edgeConnection[iEdge][0]][1]
+								+ fOffset * edgeDirection[iEdge][1]));
+				pt3d.z = (oz + z
+						+ (vertexOffset[edgeConnection[iEdge][0]][2]
+								+ fOffset * edgeDirection[iEdge][2]));
+				split.point = pt3d;
+				splits.insert(std::pair<int4, EdgeSplit>(lHashValue, split));
+			} else {
+				split = itr->second;
+			}
+
+			asEdgeVertex[iEdge] = split;
+		}
+	}
+
+	for (int iTriangle = 0; iTriangle < 5; iTriangle++) {
+		if (triangleConnectionTable[16 * iFlagIndex + 3 * iTriangle] < 0)
+			break;
+		IsoTriangle tri;
+		for (int iCorner = 0; iCorner < 3; ++iCorner) {
+			int iVertexIndex = triangleConnectionTable[16 * iFlagIndex
+					+ 3 * iTriangle + iCorner];
+			split = asEdgeVertex[iVertexIndex];
+			tri.vertexIds[iCorner] = split.vertexId;
+		}
+		triangles.push_back(tri);
+		triangleCount++;
+	}
+}
+
+void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 		std::vector<EdgeSplit>& splits, std::vector<IsoTriangle>& triangles,
-		int x, int y, int z, int vertexCount) {
+		int x, int y, int z, size_t& vertexCount) {
 	int3 afCubeValue[8];
 	int iFlagIndex = 0;
 	for (int iVertex = 0; iVertex < 8; ++iVertex) {
@@ -903,7 +1097,7 @@ int IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 	}
 	int iEdgeFlags = cubeEdgeFlagsCC626[iFlagIndex];
 	if (iEdgeFlags == 0)
-		return vertexCount;
+		return;
 	EdgeSplit split;
 	EdgeSplit asEdgeVertex[12];
 	for (int iEdge = 0; iEdge < 12; ++iEdge) {
@@ -950,10 +1144,9 @@ int IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 			split = asEdgeVertex[iVertexIndex];
 			tri.vertexIds[iCorner] = split.vertexId;
 		}
-		triangles[triangleCount++] = tri;
+		triangles.push_back(tri);
+		triangleCount++;
 	}
-
-	return vertexCount;
 }
 aly::float4 IsoSurface::interpolateColor(const float4 *data, float x, float y,
 		float z) {

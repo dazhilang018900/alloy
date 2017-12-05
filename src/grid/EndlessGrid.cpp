@@ -324,6 +324,62 @@ void FloodFill(EndlessGrid<float>& grid, float narrowBand) {
 	}
 
 }
+
+float3 GetNormal(const EndlessGrid<float>& grid,int i,int j,int k){
+	float gx = grid.getMultiResolutionValue( i + 1, j, k)
+			- grid.getMultiResolutionValue( i - 1, j, k);
+	float gy = grid.getMultiResolutionValue( i, j + 1, k)
+			- grid.getMultiResolutionValue( i, j - 1, k);
+	float gz = grid.getMultiResolutionValue( i, j, k + 1)
+			- grid.getMultiResolutionValue( i, j, k - 1);
+	return float3(gx,gy,gz);
+}
+float GetInterpolatedValue(const EndlessGrid<float>& grid, float x, float y, float z) {
+	int x1 = (int) std::ceil(x);
+	int y1 = (int) std::ceil(y);
+	int z1 = (int) std::ceil(z);
+	int x0 = (int) std::floor(x);
+	int y0 = (int) std::floor(y);
+	int z0 = (int) std::floor(z);
+	float dx = x - x0;
+	float dy = y - y0;
+	float dz = z - z0;
+	float hx = 1.0f - dx;
+	float hy = 1.0f - dy;
+	float hz = 1.0f - dz;
+	return ((((grid.getMultiResolutionValue( x0, y0, z0) * hx
+			+ grid.getMultiResolutionValue( x1, y0, z0) * dx) * hy
+			+ (grid.getMultiResolutionValue( x0, y1, z0) * hx
+					+ grid.getMultiResolutionValue( x1, y1, z0) * dx) * dy) * hz
+			+ ((grid.getMultiResolutionValue( x0, y0, z1) * hx
+					+ grid.getMultiResolutionValue( x1, y0, z1) * dx) * hy
+					+ (grid.getMultiResolutionValue( x0, y1, z1) * hx
+							+ grid.getMultiResolutionValue( x1, y1, z1) * dx) * dy) * dz));
+}
+float3 GetInterpolatedNormal(const EndlessGrid<float>& grid,float x,float y,float z){
+	int x1 = (int) std::ceil(x);
+	int y1 = (int) std::ceil(y);
+	int z1 = (int) std::ceil(z);
+	int x0 = (int) std::floor(x);
+	int y0 = (int) std::floor(y);
+	int z0 = (int) std::floor(z);
+	float dx = x - x0;
+	float dy = y - y0;
+	float dz = z - z0;
+	float hx = 1.0f - dx;
+	float hy = 1.0f - dy;
+	float hz = 1.0f - dz;
+	return aly::float3(
+			(((GetNormal(grid, x0, y0, z0) * hx + GetNormal(grid, x1, y0, z0) * dx)
+					* hy
+					+ (GetNormal(grid, x0, y1, z0) * hx
+							+ GetNormal(grid, x1, y1, z0) * dx) * dy) * hz
+					+ ((GetNormal(grid, x0, y0, z1) * hx
+							+ GetNormal(grid, x1, y0, z1) * dx) * hy
+							+ (GetNormal(grid, x0, y1, z1) * hx
+									+ GetNormal(grid, x1, y1, z1) * dx) * dy)
+							* dz));
+}
 float MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 		float narrowBand, bool flipSign, float voxelScale) {
 	const int nbr6X[6] = { 1, -1, 0, 0, 0, 0 };
