@@ -341,20 +341,20 @@ float3 GetNormal(const EndlessGrid<float>& grid,int i,int j,int k){
 	std::shared_ptr<EndlessNodeFloat> node;
 	float gx,gy,gz,centerVal;
 	if(grid.getLeafValue(i, j, k, node, centerVal)){
-		gx = grid.getMultiResolutionValue( i + 1, j, k,node)
-				- grid.getMultiResolutionValue( i - 1, j, k,node);
-		gy = grid.getMultiResolutionValue( i, j + 1, k,node)
-				- grid.getMultiResolutionValue( i, j - 1, k,node);
-		gz = grid.getMultiResolutionValue( i, j, k + 1,node)
-				- grid.getMultiResolutionValue( i, j, k - 1,node);
+		gx = grid.getLeafValue( i + 1, j, k,node)
+				- grid.getLeafValue( i - 1, j, k,node);
+		gy = grid.getLeafValue( i, j + 1, k,node)
+				- grid.getLeafValue( i, j - 1, k,node);
+		gz = grid.getLeafValue( i, j, k + 1,node)
+				- grid.getLeafValue( i, j, k - 1,node);
 		return float3(gx, gy, gz);
 	} else {
-		gx = grid.getMultiResolutionValue( i + 1, j, k)
-				- grid.getMultiResolutionValue( i - 1, j, k);
-		gy = grid.getMultiResolutionValue( i, j + 1, k)
-				- grid.getMultiResolutionValue( i, j - 1, k);
-		gz = grid.getMultiResolutionValue( i, j, k + 1)
-				- grid.getMultiResolutionValue( i, j, k - 1);
+		gx = grid.getLeafValue( i + 1, j, k)
+				- grid.getLeafValue( i - 1, j, k);
+		gy = grid.getLeafValue( i, j + 1, k)
+				- grid.getLeafValue( i, j - 1, k);
+		gz = grid.getLeafValue( i, j, k + 1)
+				- grid.getLeafValue( i, j, k - 1);
 		return float3(gx, gy, gz);
 	}
 }
@@ -362,21 +362,21 @@ float4 GetNormalAndValue(const EndlessGrid<float>& grid,int i,int j,int k){
 	std::shared_ptr<EndlessNodeFloat> node;
 	float gx,gy,gz,centerVal;
 	if(grid.getLeafValue(i, j, k, node, centerVal)){
-		gx = grid.getMultiResolutionValue( i + 1, j, k,node)
-				- grid.getMultiResolutionValue( i - 1, j, k,node);
-		gy = grid.getMultiResolutionValue( i, j + 1, k,node)
-				- grid.getMultiResolutionValue( i, j - 1, k,node);
-		gz = grid.getMultiResolutionValue( i, j, k + 1,node)
-				- grid.getMultiResolutionValue( i, j, k - 1,node);
+		gx = grid.getLeafValue( i + 1, j, k,node)
+				- grid.getLeafValue( i - 1, j, k,node);
+		gy = grid.getLeafValue( i, j + 1, k,node)
+				- grid.getLeafValue( i, j - 1, k,node);
+		gz = grid.getLeafValue( i, j, k + 1,node)
+				- grid.getLeafValue( i, j, k - 1,node);
 		return float4(gx, gy, gz, centerVal);
 	} else {
-		gx = grid.getMultiResolutionValue( i + 1, j, k)
-				- grid.getMultiResolutionValue( i - 1, j, k);
-		gy = grid.getMultiResolutionValue( i, j + 1, k)
-				- grid.getMultiResolutionValue( i, j - 1, k);
-		gz = grid.getMultiResolutionValue( i, j, k + 1)
-				- grid.getMultiResolutionValue( i, j, k - 1);
-		centerVal=grid.getMultiResolutionValue( i, j, k );
+		gx = grid.getLeafValue( i + 1, j, k)
+				- grid.getLeafValue( i - 1, j, k);
+		gy = grid.getLeafValue( i, j + 1, k)
+				- grid.getLeafValue( i, j - 1, k);
+		gz = grid.getLeafValue( i, j, k + 1)
+				- grid.getLeafValue( i, j, k - 1);
+		centerVal=grid.getLeafValue( i, j, k );
 		return float4(gx, gy, gz, centerVal);
 	}
 }
@@ -396,23 +396,23 @@ float GetInterpolatedValue(const EndlessGrid<float>& grid, float x, float y, flo
 	std::shared_ptr<EndlessNodeFloat> node;
 	float centerVal;
 	if(!grid.getLeafValue( x0, y0, z0, node, centerVal)){
-		return ((((grid.getMultiResolutionValue( x0, y0, z0) * hx
-				+ grid.getMultiResolutionValue( x1, y0, z0) * dx) * hy
-				+ (grid.getMultiResolutionValue( x0, y1, z0) * hx
-						+ grid.getMultiResolutionValue( x1, y1, z0) * dx) * dy) * hz
-				+ ((grid.getMultiResolutionValue( x0, y0, z1) * hx
-						+ grid.getMultiResolutionValue( x1, y0, z1) * dx) * hy
-						+ (grid.getMultiResolutionValue( x0, y1, z1) * hx
-								+ grid.getMultiResolutionValue( x1, y1, z1) * dx) * dy) * dz));
+		return ((((grid.getLeafValue( x0, y0, z0) * hx
+				+ grid.getLeafValue( x1, y0, z0) * dx) * hy
+				+ (grid.getLeafValue( x0, y1, z0) * hx
+						+ grid.getLeafValue( x1, y1, z0) * dx) * dy) * hz
+				+ ((grid.getLeafValue( x0, y0, z1) * hx
+						+ grid.getLeafValue( x1, y0, z1) * dx) * hy
+						+ (grid.getLeafValue( x0, y1, z1) * hx
+								+ grid.getLeafValue( x1, y1, z1) * dx) * dy) * dz));
 	} else {
 		return ((((centerVal * hx
-				+ grid.getMultiResolutionValue( x1, y0, z0,node) * dx) * hy
-				+ (grid.getMultiResolutionValue( x0, y1, z0,node) * hx
-						+ grid.getMultiResolutionValue( x1, y1, z0,node) * dx) * dy) * hz
-				+ ((grid.getMultiResolutionValue( x0, y0, z1,node) * hx
-						+ grid.getMultiResolutionValue( x1, y0, z1,node) * dx) * hy
-						+ (grid.getMultiResolutionValue( x0, y1, z1,node) * hx
-								+ grid.getMultiResolutionValue( x1, y1, z1,node) * dx) * dy) * dz));
+				+ grid.getLeafValue( x1, y0, z0,node) * dx) * hy
+				+ (grid.getLeafValue( x0, y1, z0,node) * hx
+						+ grid.getLeafValue( x1, y1, z0,node) * dx) * dy) * hz
+				+ ((grid.getLeafValue( x0, y0, z1,node) * hx
+						+ grid.getLeafValue( x1, y0, z1,node) * dx) * hy
+						+ (grid.getLeafValue( x0, y1, z1,node) * hx
+								+ grid.getLeafValue( x1, y1, z1,node) * dx) * dy) * dz));
 	}
 
 }
@@ -448,7 +448,6 @@ float4x4 PointsToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid, float voxe
 	size_t N=mesh.vertexLocations.size();
 	int dim=std::max(std::ceil(2.0f*surfelSize/voxelResolution+1),2*narrowBand);
 	int3 minIndex = int3(bbox.position / voxelResolution - (float)dim - 1.0f);
-	std::cout<<"Block Size "<<dim<<std::endl;
 	float4x4 T=MakeScale(voxelResolution)*MakeTranslation(float3(minIndex));
 	for (size_t idx=0;idx<N;idx++) {
 		float3 vert=mesh.vertexLocations[idx];

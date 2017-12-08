@@ -362,8 +362,7 @@ public:
 		}
 		return (*node)(iii, jjj, kkk);
 	}
-	//Get multi-resolution value using leaf for quick detection
-	T getMultiResolutionValue(int i, int j, int k,std::shared_ptr<EndlessNode<T>> node) const {
+	T getLeafValue(int i, int j, int k,std::shared_ptr<EndlessNode<T>> node) const {
 		int3 delta = int3(i, j, k)-node->location;
 		int dim = node->dim;
 		int xoff = roundDown(delta.x, dim);
@@ -409,9 +408,7 @@ public:
 			if (child.get() != nullptr) {
 				node = child;
 			} else {
-				if (node->hasData()) {
-					return (*node)(pos.x, pos.y, pos.z);
-				}
+				return backgroundValue;
 			}
 		}
 		return (*node)(iii, jjj, kkk);

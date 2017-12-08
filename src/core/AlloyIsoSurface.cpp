@@ -445,8 +445,6 @@ void IsoSurface::solve(const EndlessGridFloat& grid, Mesh& mesh,
 	}
 	if (regularizeTest) {
 		regularize(grid, mesh);
-		//mesh.updateVertexNormals();
-		//mesh.vertexNormals*=float3(-1.0f);
 	}
 	mesh.updateBoundingBox();
 	backgroundValue = oldBg;
@@ -462,13 +460,17 @@ void IsoSurface::regularize(const EndlessGridFloat& grid, Mesh& mesh) {
 #pragma omp parralel for;
 		for (int i = 0; i < (int) vertNbrs.size(); i++) {
 			float3 pt(0.0f);
-			for (uint32_t nbr : vertNbrs[i]) {
-				pt += mesh.vertexLocations[nbr];
+			int K=vertNbrs[i].size();
+			if(K>3){
+				for (uint32_t nbr : vertNbrs[i]) {
+					pt += mesh.vertexLocations[nbr];
+				}
+				pt /= (float) K;
+			} else {
+				pt = mesh.vertexLocations[i];
 			}
-			pt /= (float) vertNbrs[i].size();
 			tmpPoints[i] = pt;
-			mesh.vertexNormals[i] = GetNormal(grid, (int) round(pt.x),
-					(int) round(pt.y), (int) round(pt.z));
+			mesh.vertexNormals[i] = GetNormal(grid, (int) round(pt.x),(int) round(pt.y), (int) round(pt.z));
 		}
 #pragma omp parralel for;
 		for (int i = 0; i < (int) mesh.vertexLocations.size(); i++) {
@@ -503,13 +505,17 @@ void IsoSurface::regularize(const float* data, Mesh& mesh) {
 #pragma omp parralel for;
 		for (int i = 0; i < (int) vertNbrs.size(); i++) {
 			float3 pt(0.0f);
-			for (uint32_t nbr : vertNbrs[i]) {
-				pt += mesh.vertexLocations[nbr];
+			int K = vertNbrs[i].size();
+			if (K > 3) {
+				for (uint32_t nbr : vertNbrs[i]) {
+					pt += mesh.vertexLocations[nbr];
+				}
+				pt /= (float) K;
+			} else {
+				pt = mesh.vertexLocations[i];
 			}
-			pt /= (float) vertNbrs[i].size();
 			tmpPoints[i] = pt;
-			mesh.vertexNormals[i] = normalize(
-					interpolateNormal(data, pt.x, pt.y, pt.z));
+			mesh.vertexNormals[i] = normalize(interpolateNormal(data, pt.x, pt.y, pt.z));
 		}
 #pragma omp parralel for;
 		for (int i = 0; i < (int) mesh.vertexLocations.size(); i++) {
@@ -662,8 +668,7 @@ void IsoSurface::solveTri(const EndlessGridFloat& grid, Mesh& mesh,
 		aly::float3 pt = (splitPtr->second).point;
 		points[index] = pt;
 	}
-	mesh.updateVertexNormals();
-	mesh.vertexNormals *= float3(-1.0f);
+	mesh.updateVertexNormals(true);
 }
 
 size_t IsoSurface::getIndex(int i, int j, int k) {
