@@ -156,6 +156,20 @@ public:
 		}
 		return -1;
 	}
+	int3 getIndexLocation(EndlessNode<T>* node){
+		for(int i=0;i<children.size();i++){
+			if(children[i].get()==node){
+				size_t n=0;
+				for(int z=0;z<dim;z++){
+					for(int y=0;y<dim;y++){
+						for(int x=0;x<dim;x++){
+							if(indexes[n++]==i)return int3(x,y,z);						}
+					}
+				}
+			}
+		}
+		return int3(-1);
+	}
 	float getSideValue(int s) const {
 		int3 nbr;
 		const int nbr6X[6] = { 1, -1, 0, 0, 0, 0 };
@@ -241,9 +255,11 @@ public:
 		return children[idx];
 	}
 	std::shared_ptr<EndlessNode<T>> getChild(int i, int j, int k) const {
-		assert(i >= 0 && i < dim);
-		assert(j >= 0 && j < dim);
-		assert(k >= 0 && k < dim);
+		if(		i<0||i>=dim||
+				j<0||j>=dim||
+				k<0||k>=dim){
+			return std::shared_ptr<EndlessNode<T>>();
+		}
 		int idx = indexes[i + (j + k * dim) * dim];
 		if (idx < 0||idx>=children.size()) {
 			return std::shared_ptr<EndlessNode<T>>();

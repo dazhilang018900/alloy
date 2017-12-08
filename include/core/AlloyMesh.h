@@ -159,7 +159,7 @@ public:
 		return (onScreen)?dirtyOnScreen:dirtyOffScreen;
 	}
 	bool load(const std::string& file);
-	void updateVertexNormals(int SMOOTH_ITERATIONS = 0, float DOT_TOLERANCE =
+	void updateVertexNormals(bool flipSign=false,int SMOOTH_ITERATIONS = 0, float DOT_TOLERANCE =
 			0.75f);
 	bool convertQuadsToTriangles();
 	void mapIntoBoundingBox(float voxelSize);

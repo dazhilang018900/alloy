@@ -364,8 +364,9 @@ const int IsoSurface::triangleConnectionTable[4096] = { -1, -1, -1, -1, -1, -1,
 		-1 };
 
 IsoSurface::IsoSurface() :
-		isoLevel(0), rows(0), cols(0), slices(0), winding(Winding::CLOCKWISE), skipHidden(
-				true), triangleCount(0) {
+		isoLevel(0), rows(0), cols(0), slices(0), winding(Winding::CLOCKWISE), backgroundValue(
+				std::numeric_limits<float>::infinity()), skipHidden(true), triangleCount(
+				0) {
 }
 
 IsoSurface::~IsoSurface() {
@@ -434,6 +435,8 @@ void IsoSurface::solve(const Volume1f& data, const std::vector<int3>& indexList,
 void IsoSurface::solve(const EndlessGridFloat& grid, Mesh& mesh,
 		const MeshType& type, bool regularizeTest, const float& isoLevel) {
 	mesh.clear();
+	float oldBg = backgroundValue;
+	backgroundValue = grid.getBackgroundValue();
 	if (type == MeshType::TRIANGLE) {
 		solveTri(grid, mesh, isoLevel);
 
@@ -446,6 +449,7 @@ void IsoSurface::solve(const EndlessGridFloat& grid, Mesh& mesh,
 		//mesh.vertexNormals*=float3(-1.0f);
 	}
 	mesh.updateBoundingBox();
+	backgroundValue = oldBg;
 }
 void IsoSurface::regularize(const EndlessGridFloat& grid, Mesh& mesh) {
 	const int TRACE_ITERATIONS = 16;
@@ -463,8 +467,8 @@ void IsoSurface::regularize(const EndlessGridFloat& grid, Mesh& mesh) {
 			}
 			pt /= (float) vertNbrs[i].size();
 			tmpPoints[i] = pt;
-			mesh.vertexNormals[i] = GetInterpolatedNormal(grid, pt.x, pt.y,
-					pt.z);
+			mesh.vertexNormals[i] = GetNormal(grid, (int) round(pt.x),
+					(int) round(pt.y), (int) round(pt.z));
 		}
 #pragma omp parralel for;
 		for (int i = 0; i < (int) mesh.vertexLocations.size(); i++) {
@@ -485,11 +489,8 @@ void IsoSurface::regularize(const EndlessGridFloat& grid, Mesh& mesh) {
 			mesh.vertexNormals[i] = normalize(norm);
 		}
 	}
-//mesh.updateVertexNormals(0,0);
-//for(float3& val:mesh.vertexNormals.data){
-//	val=-val;
-//}
-
+	const static float ANGLE_THRESH = std::acos(20.0f * ALY_PI / 180.0f);
+	mesh.updateVertexNormals(true);
 }
 void IsoSurface::regularize(const float* data, Mesh& mesh) {
 	const int TRACE_ITERATIONS = 16;
@@ -587,10 +588,6 @@ void IsoSurface::solveQuad(const EndlessGridFloat& grid, Mesh& mesh,
 	this->rows = bdim;
 	this->cols = bdim;
 	this->slices = bdim;
-
-	this->rows = rows;
-	this->cols = cols;
-	this->slices = slices;
 	this->isoLevel = isoLevel;
 
 	std::set<int3> activeVoxels;
@@ -624,7 +621,7 @@ void IsoSurface::solveTri(const EndlessGridFloat& grid, Mesh& mesh,
 				for (int x = 0; x < bdim; x++) {
 					float val;
 					if (x >= dim || y >= dim || z >= dim) {
-						val = grid.getMultiResolutionValue(loc.x + x, loc.y + y,
+						val = grid.getLeafValue(loc.x + x, loc.y + y,
 								loc.z + z);
 					} else {
 						val = leaf->data[x + y * dim + z * dim * dim];
@@ -669,30 +666,23 @@ void IsoSurface::solveTri(const EndlessGridFloat& grid, Mesh& mesh,
 	mesh.vertexNormals *= float3(-1.0f);
 }
 
-// done
 size_t IsoSurface::getIndex(int i, int j, int k) {
-
-//return (clamp(k,0,m_slices-1)*(m_rows* m_cols)) + (clamp(j,0,m_cols-1) * m_rows) + clamp(i,0,m_rows-1);
 	return k * (rows * (size_t) cols) + j * (size_t) rows + (size_t) i;
 }
 
-// done
 float IsoSurface::getValue(const float* vol, int i, int j, int k) {
 	size_t in1 = getIndex(i, j, k);
 	float val = vol[in1];
 	return val;
 }
 
-// done
 aly::float4 IsoSurface::getImageColor(const float4* image, int i, int j,
 		int k) {
 	size_t off = getSafeIndex(i, j, k);
 	return image[off];
 }
-// debugged, no problem need optimization, i.e. vector->stack
 vector<int> IsoSurface::buildFaceNeighborTable(int vertexCount,
 		const int* indexes, const int indexCount) {
-//int faceCount=indexCount/3;
 	vector<int> faceTable(indexCount);
 	int v1, v2, v3;
 	int n1, n2, n3;
@@ -811,7 +801,6 @@ vector<vector<int>> IsoSurface::buildVertexNeighborTable(const int vertexCount,
 			neighbors.erase(neighbors.begin());
 			while (neighbors.size() > 0) {
 				bool found = false;
-				//TODO: Remove_if idiom
 				for (unsigned int k = 0; k < neighbors.size(); k += 2) {
 					if (neighbors[k] == pivot) {
 						neighbors.erase(neighbors.begin() + k);
@@ -970,7 +959,7 @@ void IsoSurface::findActiveVoxels(const EndlessGridFloat& grid,
 				for (int x = 0; x < bdim; x++) {
 					float val;
 					if (x >= dim || y >= dim || z >= dim) {
-						val = grid.getMultiResolutionValue(loc.x + x, loc.y + y,
+						val = grid.getLeafValue(loc.x + x, loc.y + y,
 								loc.z + z);
 					} else {
 						val = leaf->data[x + y * dim + z * dim * dim];
@@ -983,38 +972,41 @@ void IsoSurface::findActiveVoxels(const EndlessGridFloat& grid,
 			for (int y = 0; y < dim; y++) {
 				for (int x = 0; x < dim; x++) {
 					float fValue1 = getValue(data.data(), x, y, z);
-					int3 pivot = int3(x + loc.x, y + loc.y, z + loc.z);
-					for (int a = 0; a < 3; a++) {
-						int3 axis = AXIS_OFFSET[a];
-						int3 nbr = int3(x, y, z) + axis;
-						if (nbr.x >= 0 && nbr.y >= 0 && nbr.z >= 0
-								&& nbr.x < rows && nbr.y < cols
-								&& nbr.z < slices) {
-							float fValue2 = getValue(data.data(), nbr.x, nbr.y,
-									nbr.z);
-							if (fValue1 * fValue2 < 0) {
-								float3 crossing(pivot.x, pivot.y, pivot.z);
-								double fDelta = fValue2 - fValue1;
-								if (std::abs(fDelta) < 1E-3f) {
-									crossing += float3(axis) * 0.5f;
-								} else {
-									crossing += float3(axis)
-											* (float) ((isoLevel - fValue1)
-													/ fDelta);
-								}
-								EdgeInfo info;
-								info.point = crossing;
-								if (winding == Winding::CLOCKWISE) {
-									info.winding = (fValue1 < 0.f);
-								} else {
-									info.winding = (fValue1 > 0.f);
-								}
-								activeEdges[int4(pivot.x, pivot.y, pivot.z, a)] =
-										info;
-								auto edgeNodes = EDGE_NODE_OFFSETS[a];
-								for (int i = 0; i < 4; i++) {
-									int3 id = pivot - edgeNodes[i];
-									activeVoxels.insert(id);
+					if (fValue1 != backgroundValue) {
+						int3 pivot = int3(x + loc.x, y + loc.y, z + loc.z);
+						for (int a = 0; a < 3; a++) {
+							int3 axis = AXIS_OFFSET[a];
+							int3 nbr = int3(x, y, z) + axis;
+							if (nbr.x >= 0 && nbr.y >= 0 && nbr.z >= 0
+									&& nbr.x < rows && nbr.y < cols
+									&& nbr.z < slices) {
+								float fValue2 = getValue(data.data(), nbr.x,
+										nbr.y, nbr.z);
+								if (fValue2 != backgroundValue
+										&& fValue1 * fValue2 < 0) {
+									float3 crossing(pivot.x, pivot.y, pivot.z);
+									double fDelta = fValue2 - fValue1;
+									if (std::abs(fDelta) < 1E-3f) {
+										crossing += float3(axis) * 0.5f;
+									} else {
+										crossing += float3(axis)
+												* (float) ((isoLevel - fValue1)
+														/ fDelta);
+									}
+									EdgeInfo info;
+									info.point = crossing;
+									if (winding == Winding::CLOCKWISE) {
+										info.winding = (fValue1 < 0.f);
+									} else {
+										info.winding = (fValue1 > 0.f);
+									}
+									activeEdges[int4(pivot.x, pivot.y, pivot.z,
+											a)] = info;
+									auto edgeNodes = EDGE_NODE_OFFSETS[a];
+									for (int i = 0; i < 4; i++) {
+										int3 id = pivot - edgeNodes[i];
+										activeVoxels.insert(id);
+									}
 								}
 							}
 						}
@@ -1029,33 +1021,35 @@ void IsoSurface::findActiveVoxels(const float* vol,
 		std::map<int4, EdgeInfo>& activeEdges) {
 	for (int3 pivot : indexList) {
 		float fValue1 = getValue(vol, pivot.x, pivot.y, pivot.z);
-		for (int a = 0; a < 3; a++) {
-			int3 axis = AXIS_OFFSET[a];
-			int3 nbr = pivot + axis;
-			if (nbr.x >= 0 && nbr.y >= 0 && nbr.z >= 0 && nbr.x < rows
-					&& nbr.y < cols && nbr.z < slices) {
-				float fValue2 = getValue(vol, nbr.x, nbr.y, nbr.z);
-				if (fValue1 * fValue2 < 0) {
-					float3 crossing(pivot);
-					double fDelta = fValue2 - fValue1;
-					if (std::abs(fDelta) < 1E-3f) {
-						crossing += float3(axis) * 0.5f;
-					} else {
-						crossing += float3(axis)
-								* (float) ((isoLevel - fValue1) / fDelta);
-					}
-					EdgeInfo info;
-					info.point = crossing;
-					if (winding == Winding::CLOCKWISE) {
-						info.winding = (fValue1 < 0.f);
-					} else {
-						info.winding = (fValue1 > 0.f);
-					}
-					activeEdges[int4(pivot, a)] = info;
-					auto edgeNodes = EDGE_NODE_OFFSETS[a];
-					for (int i = 0; i < 4; i++) {
-						int3 id = pivot - edgeNodes[i];
-						activeVoxels.insert(id);
+		if (fValue1 != backgroundValue) {
+			for (int a = 0; a < 3; a++) {
+				int3 axis = AXIS_OFFSET[a];
+				int3 nbr = pivot + axis;
+				if (nbr.x >= 0 && nbr.y >= 0 && nbr.z >= 0 && nbr.x < rows
+						&& nbr.y < cols && nbr.z < slices) {
+					float fValue2 = getValue(vol, nbr.x, nbr.y, nbr.z);
+					if (fValue2 != backgroundValue && fValue1 * fValue2 < 0) {
+						float3 crossing(pivot);
+						double fDelta = fValue2 - fValue1;
+						if (std::abs(fDelta) < 1E-3f) {
+							crossing += float3(axis) * 0.5f;
+						} else {
+							crossing += float3(axis)
+									* (float) ((isoLevel - fValue1) / fDelta);
+						}
+						EdgeInfo info;
+						info.point = crossing;
+						if (winding == Winding::CLOCKWISE) {
+							info.winding = (fValue1 < 0.f);
+						} else {
+							info.winding = (fValue1 > 0.f);
+						}
+						activeEdges[int4(pivot, a)] = info;
+						auto edgeNodes = EDGE_NODE_OFFSETS[a];
+						for (int i = 0; i < 4; i++) {
+							int3 id = pivot - edgeNodes[i];
+							activeVoxels.insert(id);
+						}
 					}
 				}
 			}
@@ -1073,7 +1067,10 @@ void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 		int3 v((x + vertexOffset[iVertex][0]), (y + vertexOffset[iVertex][1]),
 				((z + vertexOffset[iVertex][2])));
 		afCubeValue[iVertex] = v;
-		if (getValue(vol, v.x, v.y, v.z) < isoLevel)
+		float val = getValue(vol, v.x, v.y, v.z);
+		if (val == backgroundValue)
+			return;
+		if (val < isoLevel)
 			iFlagIndex |= 1 << iVertex;
 	}
 	int iEdgeFlags = cubeEdgeFlagsCC626[iFlagIndex];
@@ -1150,7 +1147,10 @@ void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 		int3 v((x + vertexOffset[iVertex][0]), (y + vertexOffset[iVertex][1]),
 				((z + vertexOffset[iVertex][2])));
 		afCubeValue[iVertex] = v + off;
-		if (getValue(vol, v.x, v.y, v.z) < isoLevel)
+		float val = getValue(vol, v.x, v.y, v.z);
+		if (val == backgroundValue)
+			return;
+		if (val < isoLevel)
 			iFlagIndex |= 1 << iVertex;
 	}
 	int iEdgeFlags = cubeEdgeFlagsCC626[iFlagIndex];
@@ -1223,7 +1223,10 @@ void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 		int3 v((x + vertexOffset[iVertex][0]), (y + vertexOffset[iVertex][1]),
 				((z + vertexOffset[iVertex][2])));
 		afCubeValue[iVertex] = v;
-		if (getValue(vol, v.x, v.y, v.z) < isoLevel)
+		float val = getValue(vol, v.x, v.y, v.z);
+		if (val == backgroundValue)
+			return;
+		if (val < isoLevel)
 			iFlagIndex |= 1 << iVertex;
 	}
 	int iEdgeFlags = cubeEdgeFlagsCC626[iFlagIndex];
@@ -1308,7 +1311,6 @@ aly::float4 IsoSurface::interpolateColor(const float4 *data, float x, float y,
 
 }
 
-// done
 float IsoSurface::getOffset(const float* vol, const int3& v1, const int3& v2) {
 	float fValue1 = getValue(vol, v1.x, v1.y, v1.z);
 	float fValue2 = getValue(vol, v2.x, v2.y, v2.z);
@@ -1462,62 +1464,4 @@ float IsoSurface::getImageValue(const float* image, int i, int j, int k) {
 	return image[off];
 }
 
-void IsoSurface::computeNormals(const std::vector<aly::float3>& points,
-		const std::vector<int>& indexes, std::vector<aly::float3>& normals) {
-
-	normals.resize(points.size());
-	for (unsigned int i = 0; i < points.size(); ++i) {
-		normals[i] = float3(0, 0, 0);
-	}
-
-	for (unsigned int i = 0; i < indexes.size();) {
-		int iV0 = indexes[i++];
-		int iV1 = indexes[i++];
-		int iV2 = indexes[i++];
-		float3 m_kV0 = points[iV0];
-		float3 m_kV1 = points[iV1];
-		float3 m_kV2 = points[iV2];
-		float3 m_kE0 = m_kV1 - m_kV0;
-		float3 m_kE1 = m_kV2 - m_kV0;
-		float3 m_kN = cross(m_kE0, m_kE1);
-		float fLength = length(m_kN);
-		if (fLength > 1.0E-006)
-			m_kN = m_kN / fLength;		////todo: replace with Normalize
-		else
-			m_kN.x = m_kN.y = m_kN.z = 0.0f;
-
-		normals[iV0] += m_kN;
-		normals[iV1] += m_kN;
-		normals[iV2] += m_kN;
-	}
-
-	for (unsigned int i = 0; i < points.size(); ++i) {
-		//todo: replace with Normalize
-		normals[i] = normals[i] / length(normals[i]);
-	}
-}
-
-void IsoSurface::computeColors(const std::vector<aly::float3>& points,
-		std::vector<aly::float4>& colors, const float4* pfRgb, aly::box3f& bbox,
-		const int& rows, const int& cols, const int& slices) {
-	this->rows = rows;
-	this->cols = cols;
-	this->slices = slices;
-	const int numPoints = static_cast<int>(points.size());
-	isoLevel = 0;
-	const int parallelism = 8;
-	int stride = numPoints / parallelism + 1;
-	colors.resize(numPoints);
-	for (int n = 0; n < parallelism; ++n) {
-		int K = std::min((n + 1) * stride, numPoints);
-		for (int i = n * stride; i < K; i++) {
-			aly::float3 pt = points[i];
-			pt = (pt - bbox.position) / bbox.dimensions;
-			pt.x *= rows;
-			pt.y *= cols;
-			pt.z *= slices;
-			colors[i] = interpolateColor(pfRgb, pt.x, pt.y, pt.z);
-		}
-	}
-}
 }

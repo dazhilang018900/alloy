@@ -29,7 +29,7 @@ void WriteGridToFile(const std::string& root, const EndlessGrid<float>& grid) {
 	std::vector<std::pair<int3, EndlessNodeFloatPtr>> nodes = grid.getNodes();
 	int dim = grid.getNodeSize();
 	Volume1f data(dim, dim, dim);
-	Volume1ub depth(dim, dim, dim);
+	//Volume1ub depth(dim, dim, dim);
 	std::string name = GetFileNameWithoutExtension(root);
 	std::string dir = GetFileDirectoryPath(root);
 	for (auto pr : nodes) {
@@ -37,8 +37,6 @@ void WriteGridToFile(const std::string& root, const EndlessGrid<float>& grid) {
 		//if (pos != int3(0, 0, 0))continue;
 		EndlessNodeFloatPtr node = pr.second;
 		std::string volFile = MakeString() << dir << ALY_PATH_SEPARATOR<<name<<"_"<<pos.x<<"_"<<pos.y<<"_"<<pos.z<<".xml";
-		std::string meshFile = MakeString() << dir << ALY_PATH_SEPARATOR<<name<<"_"<<pos.x<<"_"<<pos.y<<"_"<<pos.z<<".ply";
-
 		data.set(grid.getBackgroundValue());
 		std::vector<int3> narrowBandList;
 		for (int z = 0; z < dim; z++) {
@@ -46,17 +44,10 @@ void WriteGridToFile(const std::string& root, const EndlessGrid<float>& grid) {
 				for (int x = 0; x < dim; x++) {
 					float val = grid.getMultiResolutionValue(node, x, y, z);
 					data(x, y, z).x = val;
-					if(std::abs(val)<1.75){
-						narrowBandList.push_back(int3(x,y,z));
-					}
 				}
 			}
 		}
-		IsoSurface isosurf;
-		std::cout << "Write " << volFile << std::endl;
 		WriteVolumeToFile(volFile, data);
-
-
 		/*
 
 		 file = MakeString() << dir << ALY_PATH_SEPARATOR<<"tree_"<<pos.x<<"_"<<pos.y<<"_"<<pos.z<<".xml";
@@ -85,9 +76,30 @@ void WriteGridToFile(const std::string& root, const EndlessGrid<float>& grid) {
 		 }
 		 */
 	}
-
 }
-
+void WriteGridToFile(const std::string& root, const EndlessGrid<float2>& grid) {
+	std::vector<std::pair<int3, EndlessNodeFloat2Ptr>> nodes = grid.getNodes();
+	int dim = grid.getNodeSize();
+	Volume2f data(dim, dim, dim);
+	std::string name = GetFileNameWithoutExtension(root);
+	std::string dir = GetFileDirectoryPath(root);
+	for (auto pr : nodes) {
+		int3 pos = pr.first;
+		EndlessNodeFloat2Ptr node = pr.second;
+		std::string volFile = MakeString() << dir << ALY_PATH_SEPARATOR<<name<<"_"<<pos.x<<"_"<<pos.y<<"_"<<pos.z<<".xml";
+		data.set(grid.getBackgroundValue());
+		std::vector<int3> narrowBandList;
+		for (int z = 0; z < dim; z++) {
+			for (int y = 0; y < dim; y++) {
+				for (int x = 0; x < dim; x++) {
+					float2 val = grid.getMultiResolutionValue(node, x, y, z);
+					data(x, y, z) = val;
+				}
+			}
+		}
+		WriteVolumeToFile(volFile, data);
+	}
+}
 void WriteGridToFile(const std::string& root, const EndlessGrid<int>& grid) {
 	std::vector<std::pair<int3, EndlessNodeIntPtr>> nodes = grid.getNodes();
 	int dim = grid.getNodeSize();
@@ -326,13 +338,47 @@ void FloodFill(EndlessGrid<float>& grid, float narrowBand) {
 }
 
 float3 GetNormal(const EndlessGrid<float>& grid,int i,int j,int k){
-	float gx = grid.getMultiResolutionValue( i + 1, j, k)
-			- grid.getMultiResolutionValue( i - 1, j, k);
-	float gy = grid.getMultiResolutionValue( i, j + 1, k)
-			- grid.getMultiResolutionValue( i, j - 1, k);
-	float gz = grid.getMultiResolutionValue( i, j, k + 1)
-			- grid.getMultiResolutionValue( i, j, k - 1);
-	return float3(gx,gy,gz);
+	std::shared_ptr<EndlessNodeFloat> node;
+	float gx,gy,gz,centerVal;
+	if(grid.getLeafValue(i, j, k, node, centerVal)){
+		gx = grid.getMultiResolutionValue( i + 1, j, k,node)
+				- grid.getMultiResolutionValue( i - 1, j, k,node);
+		gy = grid.getMultiResolutionValue( i, j + 1, k,node)
+				- grid.getMultiResolutionValue( i, j - 1, k,node);
+		gz = grid.getMultiResolutionValue( i, j, k + 1,node)
+				- grid.getMultiResolutionValue( i, j, k - 1,node);
+		return float3(gx, gy, gz);
+	} else {
+		gx = grid.getMultiResolutionValue( i + 1, j, k)
+				- grid.getMultiResolutionValue( i - 1, j, k);
+		gy = grid.getMultiResolutionValue( i, j + 1, k)
+				- grid.getMultiResolutionValue( i, j - 1, k);
+		gz = grid.getMultiResolutionValue( i, j, k + 1)
+				- grid.getMultiResolutionValue( i, j, k - 1);
+		return float3(gx, gy, gz);
+	}
+}
+float4 GetNormalAndValue(const EndlessGrid<float>& grid,int i,int j,int k){
+	std::shared_ptr<EndlessNodeFloat> node;
+	float gx,gy,gz,centerVal;
+	if(grid.getLeafValue(i, j, k, node, centerVal)){
+		gx = grid.getMultiResolutionValue( i + 1, j, k,node)
+				- grid.getMultiResolutionValue( i - 1, j, k,node);
+		gy = grid.getMultiResolutionValue( i, j + 1, k,node)
+				- grid.getMultiResolutionValue( i, j - 1, k,node);
+		gz = grid.getMultiResolutionValue( i, j, k + 1,node)
+				- grid.getMultiResolutionValue( i, j, k - 1,node);
+		return float4(gx, gy, gz, centerVal);
+	} else {
+		gx = grid.getMultiResolutionValue( i + 1, j, k)
+				- grid.getMultiResolutionValue( i - 1, j, k);
+		gy = grid.getMultiResolutionValue( i, j + 1, k)
+				- grid.getMultiResolutionValue( i, j - 1, k);
+		gz = grid.getMultiResolutionValue( i, j, k + 1)
+				- grid.getMultiResolutionValue( i, j, k - 1);
+		centerVal=grid.getMultiResolutionValue( i, j, k );
+		return float4(gx, gy, gz, centerVal);
+	}
 }
 float GetInterpolatedValue(const EndlessGrid<float>& grid, float x, float y, float z) {
 	int x1 = (int) std::ceil(x);
@@ -347,14 +393,28 @@ float GetInterpolatedValue(const EndlessGrid<float>& grid, float x, float y, flo
 	float hx = 1.0f - dx;
 	float hy = 1.0f - dy;
 	float hz = 1.0f - dz;
-	return ((((grid.getMultiResolutionValue( x0, y0, z0) * hx
-			+ grid.getMultiResolutionValue( x1, y0, z0) * dx) * hy
-			+ (grid.getMultiResolutionValue( x0, y1, z0) * hx
-					+ grid.getMultiResolutionValue( x1, y1, z0) * dx) * dy) * hz
-			+ ((grid.getMultiResolutionValue( x0, y0, z1) * hx
-					+ grid.getMultiResolutionValue( x1, y0, z1) * dx) * hy
-					+ (grid.getMultiResolutionValue( x0, y1, z1) * hx
-							+ grid.getMultiResolutionValue( x1, y1, z1) * dx) * dy) * dz));
+	std::shared_ptr<EndlessNodeFloat> node;
+	float centerVal;
+	if(!grid.getLeafValue( x0, y0, z0, node, centerVal)){
+		return ((((grid.getMultiResolutionValue( x0, y0, z0) * hx
+				+ grid.getMultiResolutionValue( x1, y0, z0) * dx) * hy
+				+ (grid.getMultiResolutionValue( x0, y1, z0) * hx
+						+ grid.getMultiResolutionValue( x1, y1, z0) * dx) * dy) * hz
+				+ ((grid.getMultiResolutionValue( x0, y0, z1) * hx
+						+ grid.getMultiResolutionValue( x1, y0, z1) * dx) * hy
+						+ (grid.getMultiResolutionValue( x0, y1, z1) * hx
+								+ grid.getMultiResolutionValue( x1, y1, z1) * dx) * dy) * dz));
+	} else {
+		return ((((centerVal * hx
+				+ grid.getMultiResolutionValue( x1, y0, z0,node) * dx) * hy
+				+ (grid.getMultiResolutionValue( x0, y1, z0,node) * hx
+						+ grid.getMultiResolutionValue( x1, y1, z0,node) * dx) * dy) * hz
+				+ ((grid.getMultiResolutionValue( x0, y0, z1,node) * hx
+						+ grid.getMultiResolutionValue( x1, y0, z1,node) * dx) * hy
+						+ (grid.getMultiResolutionValue( x0, y1, z1,node) * hx
+								+ grid.getMultiResolutionValue( x1, y1, z1,node) * dx) * dy) * dz));
+	}
+
 }
 float3 GetInterpolatedNormal(const EndlessGrid<float>& grid,float x,float y,float z){
 	int x1 = (int) std::ceil(x);
@@ -380,7 +440,40 @@ float3 GetInterpolatedNormal(const EndlessGrid<float>& grid,float x,float y,floa
 									+ GetNormal(grid, x1, y1, z1) * dx) * dy)
 							* dz));
 }
-float MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
+float4x4 PointsToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid, float voxelResolution, float surfelSize){
+	const float narrowBand=2.5f;
+	EndlessGrid<float> weights(grid.getLevelSizes(),0.0f);
+	grid.setBackgroundValue(narrowBand+0.5f);
+	box3f bbox = mesh.getBoundingBox();
+	size_t N=mesh.vertexLocations.size();
+	int dim=std::max(std::ceil(2.0f*surfelSize/voxelResolution+1),2*narrowBand);
+	int3 minIndex = int3(bbox.position / voxelResolution - (float)dim - 1.0f);
+	std::cout<<"Block Size "<<dim<<std::endl;
+	float4x4 T=MakeScale(voxelResolution)*MakeTranslation(float3(minIndex));
+	for (size_t idx=0;idx<N;idx++) {
+		float3 vert=mesh.vertexLocations[idx];
+		float3 norm=mesh.vertexNormals[idx];
+		int3 pos = int3(aly::floor((vert-surfelSize) / voxelResolution));
+		for (int k = 0; k <= dim; k++) {
+			for (int j = 0; j <= dim; j++) {
+				for (int i = 0; i <= dim; i++) {
+					float3 pt = float3(voxelResolution * (i + pos.x), voxelResolution * (j + pos.y),voxelResolution * (k + pos.z));
+					int3 loc = int3(i + pos.x - minIndex.x,j + pos.y - minIndex.y, k + pos.z - minIndex.z);
+					float d=distance(pt, vert);
+					if(d<surfelSize){
+						float sd=aly::clamp(dot(pt-vert,norm)/voxelResolution,-narrowBand,narrowBand);
+						float& value  = grid.getLeafValue(loc.x, loc.y, loc.z);
+						float& weight = weights.getLeafValue(loc.x, loc.y, loc.z);
+						value=(value*weight+sd)/(weight+1.0f);
+						weight=weight+1.0f;
+					}
+				}
+			}
+		}
+	}
+	return T;
+}
+float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 		float narrowBand, bool flipSign, float voxelScale) {
 	const int nbr6X[6] = { 1, -1, 0, 0, 0, 0 };
 	const int nbr6Y[6] = { 0, 0, 1, -1, 0, 0 };
@@ -402,6 +495,7 @@ float MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 	std::vector<box3f> splats;
 	splats.reserve(mesh.triIndexes.size());
 	double averageSize = 0;
+
 	//Calculate average size of triangle to scale mesh to grid accordingly.
 	for (uint3 tri : mesh.triIndexes.data) {
 		float3 v1 = mesh.vertexLocations[tri.x];
@@ -415,6 +509,7 @@ float MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 	averageSize /= mesh.triIndexes.size();
 	float res = voxelScale * std::sqrt(averageSize);
 	int3 minIndex = int3(bbox.position / res - narrowBand * 3.0f);
+	float4x4 T=MakeScale(res)*MakeTranslation(float3(minIndex));
 	//Splat regions around triangles
 	for (int n = 0; n < (int) splats.size(); n++) {
 		box3f box = splats[n];
@@ -526,7 +621,6 @@ float MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 		if (leaf->location.x > maxPt.x) {
 			maxX = leaf;
 			maxPt.x = leaf->location.x;
-
 		}
 		if (leaf->location.y > maxPt.y) {
 			maxY = leaf;
@@ -646,7 +740,7 @@ float MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 	}
 	//Flood fill rest of space using signed level set values, propagating the proper sign in the process.
 	FloodFill(grid, narrowBand);
-	return res;
+	return T;
 }
 
 }

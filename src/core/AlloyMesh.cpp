@@ -50,7 +50,8 @@ void GLMesh::draw(const PrimitiveType& type, bool forceVertexColor) const {
 	context->begin(onScreen);
 	if (vao > 0)
 		glBindVertexArray(vao);
-	if ((type == GLMesh::PrimitiveType::ALL || type == GLMesh::PrimitiveType::POINTS) && vertexCount > 0) {
+	if ((type == GLMesh::PrimitiveType::ALL
+			|| type == GLMesh::PrimitiveType::POINTS) && vertexCount > 0) {
 		if (vertexBuffer > 0) {
 			glEnableVertexAttribArray(0);
 			glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
@@ -69,7 +70,8 @@ void GLMesh::draw(const PrimitiveType& type, bool forceVertexColor) const {
 		glDrawArrays(GL_POINTS, 0, vertexCount);
 	}
 	CHECK_GL_ERROR();
-	if ((type == GLMesh::PrimitiveType::ALL || type == GLMesh::PrimitiveType::QUADS) && quadIndexCount > 0) {
+	if ((type == GLMesh::PrimitiveType::ALL
+			|| type == GLMesh::PrimitiveType::QUADS) && quadIndexCount > 0) {
 		for (int n = 0; n < 4; n++) {
 			if (quadVertexBuffer[n] > 0) {
 				glEnableVertexAttribArray(3 + n);
@@ -106,7 +108,8 @@ void GLMesh::draw(const PrimitiveType& type, bool forceVertexColor) const {
 		glDrawArrays(GL_POINTS, 0, quadIndexCount);
 	}
 	CHECK_GL_ERROR();
-	if ((type == GLMesh::PrimitiveType::ALL || type == GLMesh::PrimitiveType::TRIANGLES) && triIndexCount > 0) {
+	if ((type == GLMesh::PrimitiveType::ALL
+			|| type == GLMesh::PrimitiveType::TRIANGLES) && triIndexCount > 0) {
 		for (int n = 0; n < 3; n++) {
 			if (triVertexBuffer[n] > 0) {
 				glEnableVertexAttribArray(3 + n);
@@ -142,7 +145,8 @@ void GLMesh::draw(const PrimitiveType& type, bool forceVertexColor) const {
 		glDrawArrays(GL_POINTS, 0, triIndexCount);
 	}
 	CHECK_GL_ERROR();
-	if ((type == GLMesh::PrimitiveType::ALL || type == GLMesh::PrimitiveType::LINES) && lineIndexCount > 0) {
+	if ((type == GLMesh::PrimitiveType::ALL
+			|| type == GLMesh::PrimitiveType::LINES) && lineIndexCount > 0) {
 		for (int n = 0; n < 2; n++) {
 			if (lineVertexBuffer[n] > 0) {
 				glEnableVertexAttribArray(3 + n);
@@ -168,9 +172,12 @@ void GLMesh::draw(const PrimitiveType& type, bool forceVertexColor) const {
 	CHECK_GL_ERROR();
 	context->end();
 }
-GLMesh::GLMesh(Mesh& mesh, bool onScreen, const std::shared_ptr<AlloyContext>& context) :
-		GLComponent(onScreen, context), mesh(mesh), vao(0), vertexBuffer(0), normalBuffer(0), colorBuffer(0),lineIndexBuffer(0), triIndexBuffer(0), quadIndexBuffer(0), lineCount(0),  triCount(
-				0), quadCount(0), vertexCount(0),lineIndexCount(0), triIndexCount(0), quadIndexCount(0) {
+GLMesh::GLMesh(Mesh& mesh, bool onScreen,
+		const std::shared_ptr<AlloyContext>& context) :
+		GLComponent(onScreen, context), mesh(mesh), vao(0), vertexBuffer(0), normalBuffer(
+				0), colorBuffer(0), lineIndexBuffer(0), triIndexBuffer(0), quadIndexBuffer(
+				0), lineCount(0), triCount(0), quadCount(0), vertexCount(0), lineIndexCount(
+				0), triIndexCount(0), quadIndexCount(0) {
 
 	for (int n = 0; n < 4; n++)
 		quadColorBuffer[n] = 0;
@@ -259,14 +266,14 @@ void GLMesh::update() {
 	context->begin(onScreen);
 	quadCount = 0;
 	triCount = 0;
-	lineCount=0;
+	lineCount = 0;
 	vertexCount = 0;
 
 	triIndexCount = 0;
 	quadIndexCount = 0;
 	lineIndexCount = 0;
 	CHECK_GL_ERROR();
-	if (vao == 0){
+	if (vao == 0) {
 		glGenVertexArrays(1, &vao);
 		CHECK_GL_ERROR();
 	}
@@ -277,7 +284,9 @@ void GLMesh::update() {
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 		if (glIsBuffer(vertexBuffer) == GL_FALSE)
 			throw std::runtime_error("Error: Unable to create vertex buffer");
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * mesh.vertexLocations.size(), mesh.vertexLocations.ptr(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER,
+				sizeof(GLfloat) * 3 * mesh.vertexLocations.size(),
+				mesh.vertexLocations.ptr(), GL_STATIC_DRAW);
 		vertexCount = (uint32_t) mesh.vertexLocations.size();
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		CHECK_GL_ERROR();
@@ -289,7 +298,9 @@ void GLMesh::update() {
 		glBindBuffer(GL_ARRAY_BUFFER, normalBuffer);
 		if (glIsBuffer(normalBuffer) == GL_FALSE)
 			throw std::runtime_error("Error: Unable to create normal buffer");
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * mesh.vertexNormals.size(), mesh.vertexNormals.ptr(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER,
+				sizeof(GLfloat) * 3 * mesh.vertexNormals.size(),
+				mesh.vertexNormals.ptr(), GL_STATIC_DRAW);
 
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		CHECK_GL_ERROR();
@@ -301,7 +312,9 @@ void GLMesh::update() {
 		glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
 		if (glIsBuffer(colorBuffer) == GL_FALSE)
 			throw std::runtime_error("Error: Unable to create color buffer");
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * mesh.vertexColors.size(), mesh.vertexColors.ptr(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER,
+				sizeof(GLfloat) * 4 * mesh.vertexColors.size(),
+				mesh.vertexColors.ptr(), GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 		CHECK_GL_ERROR();
 	}
@@ -325,7 +338,8 @@ void GLMesh::update() {
 				glDeleteBuffers(1, &lineVertexBuffer[n]);
 			glGenBuffers(1, &lineVertexBuffer[n]);
 			glBindBuffer(GL_ARRAY_BUFFER, lineVertexBuffer[n]);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * lines[n].size(), lines[n].data(), GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * lines[n].size(),
+					lines[n].data(), GL_STATIC_DRAW);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 		CHECK_GL_ERROR();
@@ -351,7 +365,8 @@ void GLMesh::update() {
 				glDeleteBuffers(1, &triVertexBuffer[n]);
 			glGenBuffers(1, &triVertexBuffer[n]);
 			glBindBuffer(GL_ARRAY_BUFFER, triVertexBuffer[n]);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * tris[n].size(), tris[n].data(), GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * tris[n].size(),
+					tris[n].data(), GL_STATIC_DRAW);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 		CHECK_GL_ERROR();
@@ -379,7 +394,8 @@ void GLMesh::update() {
 				glDeleteBuffers(1, &quadVertexBuffer[n]);
 			glGenBuffers(1, &quadVertexBuffer[n]);
 			glBindBuffer(GL_ARRAY_BUFFER, quadVertexBuffer[n]);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * quads[n].size(), quads[n].data(), GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * quads[n].size(),
+					quads[n].data(), GL_STATIC_DRAW);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 		CHECK_GL_ERROR();
@@ -407,8 +423,9 @@ void GLMesh::update() {
 					glDeleteBuffers(1, &quadNormalBuffer[n]);
 				glGenBuffers(1, &quadNormalBuffer[n]);
 				glBindBuffer(GL_ARRAY_BUFFER, quadNormalBuffer[n]);
-				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * quads[n].size(), quads[n].data(),
-				GL_STATIC_DRAW);
+				glBufferData(GL_ARRAY_BUFFER,
+						sizeof(GLfloat) * 3 * quads[n].size(), quads[n].data(),
+						GL_STATIC_DRAW);
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 			}
 			CHECK_GL_ERROR();
@@ -433,8 +450,9 @@ void GLMesh::update() {
 					glDeleteBuffers(1, &triNormalBuffer[n]);
 				glGenBuffers(1, &triNormalBuffer[n]);
 				glBindBuffer(GL_ARRAY_BUFFER, triNormalBuffer[n]);
-				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * tris[n].size(), tris[n].data(),
-				GL_STATIC_DRAW);
+				glBufferData(GL_ARRAY_BUFFER,
+						sizeof(GLfloat) * 3 * tris[n].size(), tris[n].data(),
+						GL_STATIC_DRAW);
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 			}
 			CHECK_GL_ERROR();
@@ -461,8 +479,9 @@ void GLMesh::update() {
 					glDeleteBuffers(1, &quadTextureBuffer[n]);
 				glGenBuffers(1, &quadTextureBuffer[n]);
 				glBindBuffer(GL_ARRAY_BUFFER, quadTextureBuffer[n]);
-				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 2 * quads[n].size(), quads[n].data(),
-				GL_STATIC_DRAW);
+				glBufferData(GL_ARRAY_BUFFER,
+						sizeof(GLfloat) * 2 * quads[n].size(), quads[n].data(),
+						GL_STATIC_DRAW);
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 			}
 			CHECK_GL_ERROR();
@@ -487,8 +506,9 @@ void GLMesh::update() {
 					glDeleteBuffers(1, &triTextureBuffer[n]);
 				glGenBuffers(1, &triTextureBuffer[n]);
 				glBindBuffer(GL_ARRAY_BUFFER, triTextureBuffer[n]);
-				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 2 * tris[n].size(), tris[n].data(),
-				GL_STATIC_DRAW);
+				glBufferData(GL_ARRAY_BUFFER,
+						sizeof(GLfloat) * 2 * tris[n].size(), tris[n].data(),
+						GL_STATIC_DRAW);
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 			}
 			CHECK_GL_ERROR();
@@ -516,8 +536,9 @@ void GLMesh::update() {
 					glDeleteBuffers(1, &quadColorBuffer[n]);
 				glGenBuffers(1, &quadColorBuffer[n]);
 				glBindBuffer(GL_ARRAY_BUFFER, quadColorBuffer[n]);
-				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * quads[n].size(), quads[n].data(),
-				GL_STATIC_DRAW);
+				glBufferData(GL_ARRAY_BUFFER,
+						sizeof(GLfloat) * 4 * quads[n].size(), quads[n].data(),
+						GL_STATIC_DRAW);
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 			}
 			CHECK_GL_ERROR();
@@ -538,11 +559,11 @@ void GLMesh::update() {
 					}
 					offset++;
 				}
-			}
-			else {
-				for(offset=0;offset<(int)mesh.triIndexes.size();offset++) {
+			} else {
+				for (offset = 0; offset < (int) mesh.triIndexes.size();
+						offset++) {
 					for (int n = 0; n < 3; n++) {
-						tris[n][offset] = mesh.vertexColors[offset*3+n];
+						tris[n][offset] = mesh.vertexColors[offset * 3 + n];
 					}
 				}
 			}
@@ -551,8 +572,9 @@ void GLMesh::update() {
 					glDeleteBuffers(1, &triColorBuffer[n]);
 				glGenBuffers(1, &triColorBuffer[n]);
 				glBindBuffer(GL_ARRAY_BUFFER, triColorBuffer[n]);
-				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * tris[n].size(), tris[n].data(),
-				GL_STATIC_DRAW);
+				glBufferData(GL_ARRAY_BUFFER,
+						sizeof(GLfloat) * 4 * tris[n].size(), tris[n].data(),
+						GL_STATIC_DRAW);
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 			}
 			CHECK_GL_ERROR();
@@ -573,11 +595,11 @@ void GLMesh::update() {
 					}
 					offset++;
 				}
-			}
-			else {
-				for(offset=0;offset<(int)mesh.lineIndexes.size();offset++) {
+			} else {
+				for (offset = 0; offset < (int) mesh.lineIndexes.size();
+						offset++) {
 					for (int n = 0; n < 2; n++) {
-						lines[n][offset] = mesh.vertexColors[offset*2+n];
+						lines[n][offset] = mesh.vertexColors[offset * 2 + n];
 					}
 				}
 			}
@@ -586,8 +608,9 @@ void GLMesh::update() {
 					glDeleteBuffers(1, &lineColorBuffer[n]);
 				glGenBuffers(1, &lineColorBuffer[n]);
 				glBindBuffer(GL_ARRAY_BUFFER, lineColorBuffer[n]);
-				glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 4 * lines[n].size(), lines[n].data(),
-				GL_STATIC_DRAW);
+				glBufferData(GL_ARRAY_BUFFER,
+						sizeof(GLfloat) * 4 * lines[n].size(), lines[n].data(),
+						GL_STATIC_DRAW);
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 			}
 			CHECK_GL_ERROR();
@@ -600,7 +623,8 @@ void Mesh::setContext(const std::shared_ptr<AlloyContext>& context) {
 	glOffScreen.reset(new GLMesh(*this, false, context));
 }
 Mesh::Mesh(const std::shared_ptr<AlloyContext>& context) :
-		glOnScreen(new GLMesh(*this, true, context)), glOffScreen(new GLMesh(*this, false, context)), pose(float4x4::identity()) {
+		glOnScreen(new GLMesh(*this, true, context)), glOffScreen(
+				new GLMesh(*this, false, context)), pose(float4x4::identity()) {
 }
 Mesh::Mesh() :
 		pose(float4x4::identity()) {
@@ -615,7 +639,8 @@ bool Mesh::load(const std::string& file) {
 		return false;
 	}
 }
-void Mesh::draw(const GLMesh::PrimitiveType& type, bool onScreen, bool forceVertexColor) {
+void Mesh::draw(const GLMesh::PrimitiveType& type, bool onScreen,
+		bool forceVertexColor) {
 	if (onScreen) {
 		if (glOnScreen.get() == nullptr) {
 			glOnScreen.reset(new GLMesh(*this, true, AlloyDefaultContext()));
@@ -654,7 +679,8 @@ void WriteMeshToFile(const std::string& file, const Mesh& mesh) {
 	} else if (ext == "obj") {
 		WriteObjMeshToFile(file, mesh);
 	} else
-		throw std::runtime_error(MakeString() << "Could not write mesh file " << file);
+		throw std::runtime_error(
+				MakeString() << "Could not write mesh file " << file);
 }
 void WriteObjMeshToFile(const std::string& file, const Mesh& mesh) {
 	uint32_t i;
@@ -665,7 +691,8 @@ void WriteObjMeshToFile(const std::string& file, const Mesh& mesh) {
 	out << "# OBJ File Created by Alloy\n";
 	out << "#								 \n";
 	out << "# Vertices: " << mesh.vertexLocations.size() << "			 \n";
-	out << "# Faces : " << mesh.triIndexes.size() + mesh.quadIndexes.size() << "				 \n";
+	out << "# Faces : " << mesh.triIndexes.size() + mesh.quadIndexes.size()
+			<< "				 \n";
 	out << "#								 \n";
 	out << "####							 \n";
 	string mtlFile = GetFileNameWithoutExtension(file) + ".mtl";
@@ -699,7 +726,8 @@ void WriteObjMeshToFile(const std::string& file, const Mesh& mesh) {
 			float3 p = mesh.vertexLocations[i];
 			if (mesh.vertexColors.size() > 0) {
 				RGBAf c = mesh.vertexColors[i];
-				out << "v " << p.x << " " << p.y << " " << p.z << " " << c.x << " " << c.y << " " << c.z << "\n";
+				out << "v " << p.x << " " << p.y << " " << p.z << " " << c.x
+						<< " " << c.y << " " << c.z << "\n";
 			} else {
 				out << "v " << p.x << " " << p.y << " " << p.z << "\n";
 			}
@@ -709,7 +737,8 @@ void WriteObjMeshToFile(const std::string& file, const Mesh& mesh) {
 			float3 p = mesh.vertexLocations[i];
 			if (mesh.vertexColors.size() > 0) {
 				RGBAf c = mesh.vertexColors[i];
-				out << "v " << p.x << " " << p.y << " " << p.z << " " << c.x << " " << c.y << " " << c.z << "\n";
+				out << "v " << p.x << " " << p.y << " " << p.z << " " << c.x
+						<< " " << c.y << " " << c.z << "\n";
 			} else {
 				out << "v " << p.x << " " << p.y << " " << p.z << "\n";
 			}
@@ -735,11 +764,13 @@ void WriteObjMeshToFile(const std::string& file, const Mesh& mesh) {
 			out << (tri.x + 1) << "/" << (tri.x + 1) << " ";
 			out << (tri.y + 1) << "/" << (tri.y + 1) << " ";
 			out << (tri.z + 1) << "/" << (tri.z + 1) << "\n";
-		} else if (mesh.vertexNormals.size() == 0 && mesh.textureMap.size() > 0) {
+		} else if (mesh.vertexNormals.size() == 0
+				&& mesh.textureMap.size() > 0) {
 			out << (tri.x + 1) << "/" << (i + 1) << " ";
 			out << (tri.y + 1) << "/" << (i + 2) << " ";
 			out << (tri.z + 1) << "/" << (i + 3) << "\n";
-		} else if (mesh.vertexNormals.size() > 0 && mesh.textureMap.size() > 0) {
+		} else if (mesh.vertexNormals.size() > 0
+				&& mesh.textureMap.size() > 0) {
 			out << (tri.x + 1) << "/" << (i + 1) << "/" << (tri.x + 1) << " ";
 			out << (tri.y + 1) << "/" << (i + 2) << "/" << (tri.y + 1) << " ";
 			out << (tri.z + 1) << "/" << (i + 3) << "/" << (tri.z + 1) << "\n";
@@ -758,16 +789,19 @@ void WriteObjMeshToFile(const std::string& file, const Mesh& mesh) {
 			out << (quad.y + 1) << "/" << (quad.y + 1) << " ";
 			out << (quad.z + 1) << "/" << (quad.z + 1) << " ";
 			out << (quad.w + 1) << "/" << (quad.w + 1) << "\n";
-		} else if (mesh.vertexNormals.size() == 0 && mesh.textureMap.size() > 0) {
+		} else if (mesh.vertexNormals.size() == 0
+				&& mesh.textureMap.size() > 0) {
 			out << (quad.x + 1) << "/" << (i + 1) << " ";
 			out << (quad.y + 1) << "/" << (i + 2) << " ";
 			out << (quad.z + 1) << "/" << (i + 3) << " ";
 			out << (quad.w + 1) << "/" << (i + 4) << "\n";
-		} else if (mesh.vertexNormals.size() > 0 && mesh.textureMap.size() > 0) {
+		} else if (mesh.vertexNormals.size() > 0
+				&& mesh.textureMap.size() > 0) {
 			out << (quad.x + 1) << "/" << (i + 1) << "/" << (quad.x + 1) << " ";
 			out << (quad.y + 1) << "/" << (i + 2) << "/" << (quad.y + 1) << " ";
 			out << (quad.z + 1) << "/" << (i + 3) << "/" << (quad.z + 1) << " ";
-			out << (quad.w + 1) << "/" << (i + 4) << "/" << (quad.w + 1) << "\n";
+			out << (quad.w + 1) << "/" << (i + 4) << "/" << (quad.w + 1)
+					<< "\n";
 		} else {
 			out << (quad.x + 1) << " ";
 			out << (quad.y + 1) << " ";
@@ -778,18 +812,21 @@ void WriteObjMeshToFile(const std::string& file, const Mesh& mesh) {
 	}
 	out.close();
 }
-void WritePlyMeshToFile(const std::string& file, const Mesh& mesh, bool binary) {
+void WritePlyMeshToFile(const std::string& file, const Mesh& mesh,
+		bool binary) {
 	std::vector<std::string> elemNames = { "vertex", "face" };
 	int i, j, idx;
 	bool hasTexture = (mesh.textureMap.size() > 0);
 	// Get input and check data
 	PLYReaderWriter ply;
-	ply.openForWriting(file, elemNames, (binary) ? FileFormat::BINARY_LE : FileFormat::ASCII); //
+	ply.openForWriting(file, elemNames,
+			(binary) ? FileFormat::BINARY_LE : FileFormat::ASCII); //
 
 // compute colors, if any
 	int numPts = (int) (mesh.vertexLocations.size());
 
-	int numPolys = (int) (mesh.quadIndexes.size() + mesh.triIndexes.size()+mesh.lineIndexes.size());
+	int numPolys = (int) (mesh.quadIndexes.size() + mesh.triIndexes.size()
+			+ mesh.lineIndexes.size());
 	std::vector<unsigned char> pointColors;
 
 	if (mesh.vertexColors.size() > 0) {
@@ -797,9 +834,12 @@ void WritePlyMeshToFile(const std::string& file, const Mesh& mesh, bool binary) 
 		pointColors.resize(3 * mesh.vertexColors.size());
 		for (i = 0; i < numPts; i++) {
 			float4 d = mesh.vertexColors[i];
-			pointColors[inc++] = (unsigned char) clamp(d[0] * 255.0f, 0.0f, 255.0f);
-			pointColors[inc++] = (unsigned char) clamp(d[1] * 255.0f, 0.0f, 255.0f);
-			pointColors[inc++] = (unsigned char) clamp(d[2] * 255.0f, 0.0f, 255.0f);
+			pointColors[inc++] = (unsigned char) clamp(d[0] * 255.0f, 0.0f,
+					255.0f);
+			pointColors[inc++] = (unsigned char) clamp(d[1] * 255.0f, 0.0f,
+					255.0f);
+			pointColors[inc++] = (unsigned char) clamp(d[2] * 255.0f, 0.0f,
+					255.0f);
 		}
 	}
 	// describe what properties go into the vertex and face elements
@@ -936,9 +976,11 @@ void WritePlyMeshToFile(const std::string& file, const Mesh& mesh, bool binary) 
 		}
 	}
 }
-void Mesh::updateVertexNormals(int SMOOTH_ITERATIONS, float DOT_TOLERANCE) {
+void Mesh::updateVertexNormals(bool flipSign, int SMOOTH_ITERATIONS,
+		float DOT_TOLERANCE) {
 	uint32_t sz = (uint32_t) triIndexes.size();
-	if(triIndexes.size()==0&&quadIndexes.size()==0)return;
+	if (triIndexes.size() == 0 && quadIndexes.size() == 0)
+		return;
 	float3 pt;
 	vertexNormals.clear();
 	vertexNormals.resize(vertexLocations.size(), float3(0.0f));
@@ -965,9 +1007,10 @@ void Mesh::updateVertexNormals(int SMOOTH_ITERATIONS, float DOT_TOLERANCE) {
 		vertexNormals[verts.z] += cross((v2 - v3), (v4 - v3));
 		vertexNormals[verts.w] += cross((v3 - v4), (v1 - v4));
 	}
+	float sgn = (flipSign) ? -1.0f : 1.0f;
 #pragma omp parallel for
 	for (int n = 0; n < (int) vertexNormals.size(); n++) {
-		vertexNormals[n] = normalize(vertexNormals[n]);
+		vertexNormals[n] = sgn*normalize(vertexNormals[n]);
 	}
 	if (SMOOTH_ITERATIONS > 0) {
 		int vertCount = (int) vertexLocations.size();
@@ -1000,7 +1043,7 @@ void Mesh::updateVertexNormals(int SMOOTH_ITERATIONS, float DOT_TOLERANCE) {
 			vertNbrs[v3].push_back(v1);
 		}
 		for (int iter = 0; iter < SMOOTH_ITERATIONS; iter++) {
-#pragma omp for
+#pragma omp parallel for
 			for (int i = 0; i < vertCount; i++) {
 				float3 norm = vertexNormals[i];
 				float3 avg = float3(0.0f);
@@ -1013,7 +1056,7 @@ void Mesh::updateVertexNormals(int SMOOTH_ITERATIONS, float DOT_TOLERANCE) {
 						avg += norm;
 					}
 				}
-				tmp[i] = normalize(avg);
+				tmp[i] = sgn*normalize(avg);
 			}
 			vertexNormals = tmp;
 		}
@@ -1057,10 +1100,20 @@ float Mesh::estimateVoxelSize(int stride) {
 }
 box3f Mesh::updateBoundingBox() {
 	const int BATCHES = 32;
-	float3 minPt(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max());
-	std::vector<float3> minPtBatch(BATCHES, float3(std::numeric_limits<float>::max(), std::numeric_limits<float>::max(), std::numeric_limits<float>::max()));
-	float3 maxPt(std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min());
-	std::vector<float3> maxPtBatch(BATCHES, float3(std::numeric_limits<float>::min(), std::numeric_limits<float>::min(), std::numeric_limits<float>::min()));
+	float3 minPt(std::numeric_limits<float>::max(),
+			std::numeric_limits<float>::max(),
+			std::numeric_limits<float>::max());
+	std::vector<float3> minPtBatch(BATCHES,
+			float3(std::numeric_limits<float>::max(),
+					std::numeric_limits<float>::max(),
+					std::numeric_limits<float>::max()));
+	float3 maxPt(std::numeric_limits<float>::min(),
+			std::numeric_limits<float>::min(),
+			std::numeric_limits<float>::min());
+	std::vector<float3> maxPtBatch(BATCHES,
+			float3(std::numeric_limits<float>::min(),
+					std::numeric_limits<float>::min(),
+					std::numeric_limits<float>::min()));
 	int SZ = (int) vertexLocations.size();
 	int batchSize = (SZ % BATCHES == 0) ? SZ / BATCHES : SZ / BATCHES + 1;
 #pragma omp for
@@ -1155,7 +1208,8 @@ void ReadObjMeshFromFile(const std::string& file, std::vector<Mesh>& meshList) {
 	using namespace tinyobj;
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
-	std::string err = tinyobj::LoadObj(shapes, materials, file.c_str(), GetParentDirectory(file).c_str());
+	std::string err = tinyobj::LoadObj(shapes, materials, file.c_str(),
+			GetParentDirectory(file).c_str());
 	if (err.size() > 0)
 		throw std::runtime_error(err);
 	meshList.resize(shapes.size());
@@ -1184,9 +1238,15 @@ void ReadObjMeshFromFile(const std::string& file, std::vector<Mesh>& meshList) {
 			uint32_t vid2 = shape.mesh.triIndices[i + 1];
 			uint32_t vid3 = shape.mesh.triIndices[i + 2];
 			if (shape.mesh.texcoords.size() > 0) {
-				mesh.textureMap.push_back(float2(shape.mesh.texcoords[2 * vid1], shape.mesh.texcoords[2 * vid1 + 1]));
-				mesh.textureMap.push_back(float2(shape.mesh.texcoords[2 * vid2], shape.mesh.texcoords[2 * vid2 + 1]));
-				mesh.textureMap.push_back(float2(shape.mesh.texcoords[2 * vid3], shape.mesh.texcoords[2 * vid3 + 1]));
+				mesh.textureMap.push_back(
+						float2(shape.mesh.texcoords[2 * vid1],
+								shape.mesh.texcoords[2 * vid1 + 1]));
+				mesh.textureMap.push_back(
+						float2(shape.mesh.texcoords[2 * vid2],
+								shape.mesh.texcoords[2 * vid2 + 1]));
+				mesh.textureMap.push_back(
+						float2(shape.mesh.texcoords[2 * vid3],
+								shape.mesh.texcoords[2 * vid3 + 1]));
 			}
 		}
 		for (size_t i = 0; i < shape.mesh.quadIndices.size(); i += 4) {
@@ -1195,10 +1255,18 @@ void ReadObjMeshFromFile(const std::string& file, std::vector<Mesh>& meshList) {
 			uint32_t vid3 = shape.mesh.quadIndices[i + 2];
 			uint32_t vid4 = shape.mesh.quadIndices[i + 3];
 			if (shape.mesh.texcoords.size() > 0) {
-				mesh.textureMap.push_back(float2(shape.mesh.texcoords[2 * vid1], shape.mesh.texcoords[2 * vid1 + 1]));
-				mesh.textureMap.push_back(float2(shape.mesh.texcoords[2 * vid2], shape.mesh.texcoords[2 * vid2 + 1]));
-				mesh.textureMap.push_back(float2(shape.mesh.texcoords[2 * vid3], shape.mesh.texcoords[2 * vid3 + 1]));
-				mesh.textureMap.push_back(float2(shape.mesh.texcoords[2 * vid4], shape.mesh.texcoords[2 * vid4 + 1]));
+				mesh.textureMap.push_back(
+						float2(shape.mesh.texcoords[2 * vid1],
+								shape.mesh.texcoords[2 * vid1 + 1]));
+				mesh.textureMap.push_back(
+						float2(shape.mesh.texcoords[2 * vid2],
+								shape.mesh.texcoords[2 * vid2 + 1]));
+				mesh.textureMap.push_back(
+						float2(shape.mesh.texcoords[2 * vid3],
+								shape.mesh.texcoords[2 * vid3 + 1]));
+				mesh.textureMap.push_back(
+						float2(shape.mesh.texcoords[2 * vid4],
+								shape.mesh.texcoords[2 * vid4 + 1]));
 			}
 		}
 		std::string texName = materials[n].diffuse_texname;
@@ -1213,7 +1281,8 @@ void ReadObjMeshFromFile(const std::string& file, Mesh& mesh) {
 	using namespace tinyobj;
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
-	std::string err = tinyobj::LoadObj(shapes, materials, file.c_str(), GetParentDirectory(file).c_str());
+	std::string err = tinyobj::LoadObj(shapes, materials, file.c_str(),
+			GetParentDirectory(file).c_str());
 	if (err.size() > 0)
 		throw std::runtime_error(err);
 
@@ -1230,7 +1299,7 @@ void ReadObjMeshFromFile(const std::string& file, Mesh& mesh) {
 		colorCount += (uint32_t) shape.mesh.colors.size();
 		normalCount += (uint32_t) shape.mesh.normals.size();
 		texCount += (uint32_t) shape.mesh.texcoords.size();
-		lineIndexCount += (uint32_t)shape.mesh.lineIndices.size();
+		lineIndexCount += (uint32_t) shape.mesh.lineIndices.size();
 		triIndexCount += (uint32_t) shape.mesh.triIndices.size();
 		quadIndexCount += (uint32_t) shape.mesh.quadIndices.size();
 	}
@@ -1242,7 +1311,7 @@ void ReadObjMeshFromFile(const std::string& file, Mesh& mesh) {
 	mesh.triIndexes.resize(triIndexCount / 3);
 	mesh.quadIndexes.resize(quadIndexCount / 4);
 	positionCount = 0;
-	colorCount=0;
+	colorCount = 0;
 	normalCount = 0;
 	texCount = 0;
 	lineIndexCount = 0;
@@ -1252,33 +1321,50 @@ void ReadObjMeshFromFile(const std::string& file, Mesh& mesh) {
 	for (int n = 0; n < (int) shapes.size(); n++) {
 		shape_t& shape = shapes[n];
 		for (size_t i = 0; i < shape.mesh.lineIndices.size(); i += 2) {
-			mesh.lineIndexes[lineIndexCount++] = uint2(positionCount + shape.mesh.lineIndices[i], positionCount + shape.mesh.lineIndices[i + 1]);
+			mesh.lineIndexes[lineIndexCount++] = uint2(
+					positionCount + shape.mesh.lineIndices[i],
+					positionCount + shape.mesh.lineIndices[i + 1]);
 		}
 		for (size_t i = 0; i < shape.mesh.triIndices.size(); i += 3) {
-			mesh.triIndexes[triIndexCount++] = uint3(positionCount + shape.mesh.triIndices[i], positionCount + shape.mesh.triIndices[i + 1],
+			mesh.triIndexes[triIndexCount++] = uint3(
+					positionCount + shape.mesh.triIndices[i],
+					positionCount + shape.mesh.triIndices[i + 1],
 					positionCount + shape.mesh.triIndices[i + 2]);
 		}
 		for (size_t i = 0; i < shape.mesh.quadIndices.size(); i += 4) {
-			mesh.quadIndexes[quadIndexCount++] = uint4(positionCount + shape.mesh.quadIndices[i], positionCount + shape.mesh.quadIndices[i + 1],
-					positionCount + shape.mesh.quadIndices[i + 2], positionCount + shape.mesh.quadIndices[i + 3]);
+			mesh.quadIndexes[quadIndexCount++] = uint4(
+					positionCount + shape.mesh.quadIndices[i],
+					positionCount + shape.mesh.quadIndices[i + 1],
+					positionCount + shape.mesh.quadIndices[i + 2],
+					positionCount + shape.mesh.quadIndices[i + 3]);
 		}
 		for (size_t i = 0; i < shape.mesh.positions.size(); i += 3) {
-			mesh.vertexLocations[positionCount++] = float3(shape.mesh.positions[i], shape.mesh.positions[i + 1], shape.mesh.positions[i + 2]);
+			mesh.vertexLocations[positionCount++] = float3(
+					shape.mesh.positions[i], shape.mesh.positions[i + 1],
+					shape.mesh.positions[i + 2]);
 		}
 		for (size_t i = 0; i < shape.mesh.colors.size(); i += 3) {
-			mesh.vertexColors[colorCount++] = float4(shape.mesh.colors[i], shape.mesh.colors[i + 1], shape.mesh.colors[i + 2],1.0f);
+			mesh.vertexColors[colorCount++] = float4(shape.mesh.colors[i],
+					shape.mesh.colors[i + 1], shape.mesh.colors[i + 2], 1.0f);
 		}
 		for (size_t i = 0; i < shape.mesh.normals.size(); i += 3) {
-			mesh.vertexNormals[normalCount++] = float3(shape.mesh.normals[i], shape.mesh.normals[i + 1], shape.mesh.normals[i + 2]);
+			mesh.vertexNormals[normalCount++] = float3(shape.mesh.normals[i],
+					shape.mesh.normals[i + 1], shape.mesh.normals[i + 2]);
 		}
 		for (size_t i = 0; i < shape.mesh.triIndices.size(); i += 3) {
 			uint32_t vid1 = shape.mesh.triIndices[i];
 			uint32_t vid2 = shape.mesh.triIndices[i + 1];
 			uint32_t vid3 = shape.mesh.triIndices[i + 2];
 			if (shape.mesh.texcoords.size() > 0) {
-				mesh.textureMap.push_back(float2(shape.mesh.texcoords[2 * vid1], shape.mesh.texcoords[2 * vid1 + 1]));
-				mesh.textureMap.push_back(float2(shape.mesh.texcoords[2 * vid2], shape.mesh.texcoords[2 * vid2 + 1]));
-				mesh.textureMap.push_back(float2(shape.mesh.texcoords[2 * vid3], shape.mesh.texcoords[2 * vid3 + 1]));
+				mesh.textureMap.push_back(
+						float2(shape.mesh.texcoords[2 * vid1],
+								shape.mesh.texcoords[2 * vid1 + 1]));
+				mesh.textureMap.push_back(
+						float2(shape.mesh.texcoords[2 * vid2],
+								shape.mesh.texcoords[2 * vid2 + 1]));
+				mesh.textureMap.push_back(
+						float2(shape.mesh.texcoords[2 * vid3],
+								shape.mesh.texcoords[2 * vid3 + 1]));
 			}
 		}
 		for (size_t i = 0; i < shape.mesh.quadIndices.size(); i += 4) {
@@ -1287,16 +1373,25 @@ void ReadObjMeshFromFile(const std::string& file, Mesh& mesh) {
 			uint32_t vid3 = shape.mesh.quadIndices[i + 2];
 			uint32_t vid4 = shape.mesh.quadIndices[i + 3];
 			if (shape.mesh.texcoords.size() > 0) {
-				mesh.textureMap.push_back(float2(shape.mesh.texcoords[2 * vid1], shape.mesh.texcoords[2 * vid1 + 1]));
-				mesh.textureMap.push_back(float2(shape.mesh.texcoords[2 * vid2], shape.mesh.texcoords[2 * vid2 + 1]));
-				mesh.textureMap.push_back(float2(shape.mesh.texcoords[2 * vid3], shape.mesh.texcoords[2 * vid3 + 1]));
-				mesh.textureMap.push_back(float2(shape.mesh.texcoords[2 * vid4], shape.mesh.texcoords[2 * vid4 + 1]));
+				mesh.textureMap.push_back(
+						float2(shape.mesh.texcoords[2 * vid1],
+								shape.mesh.texcoords[2 * vid1 + 1]));
+				mesh.textureMap.push_back(
+						float2(shape.mesh.texcoords[2 * vid2],
+								shape.mesh.texcoords[2 * vid2 + 1]));
+				mesh.textureMap.push_back(
+						float2(shape.mesh.texcoords[2 * vid3],
+								shape.mesh.texcoords[2 * vid3 + 1]));
+				mesh.textureMap.push_back(
+						float2(shape.mesh.texcoords[2 * vid4],
+								shape.mesh.texcoords[2 * vid4 + 1]));
 			}
 		}
-		if(n<(int)materials.size()){
+		if (n < (int) materials.size()) {
 			std::string texName = materials[n].diffuse_texname;
 			if (texName.size() > 0) {
-				aly::ReadImageFromFile(GetParentDirectory(file) + ALY_PATH_SEPARATOR+ texName, mesh.textureImage);
+				aly::ReadImageFromFile(
+						GetParentDirectory(file) + ALY_PATH_SEPARATOR+ texName, mesh.textureImage);
 			}
 		}
 	}
@@ -1312,7 +1407,8 @@ void ReadMeshFromFile(const std::string& file, Mesh &mesh) {
 	} else if (ext == "obj") {
 		ReadObjMeshFromFile(file, mesh);
 	} else
-		throw std::runtime_error(MakeString() << "Could not read file " << file);
+		throw std::runtime_error(
+				MakeString() << "Could not read file " << file);
 }
 void ReadPlyMeshFromFile(const std::string& file, Mesh &mesh) {
 	int i, j;
@@ -1322,10 +1418,14 @@ void ReadPlyMeshFromFile(const std::string& file, Mesh &mesh) {
 	// Check to make sure that we can read geometry
 	PlyElement *elem;
 	int index;
-	if ((elem = ply.findElement("vertex")) == nullptr || ply.findProperty(elem, "x", &index) == nullptr || ply.findProperty(elem, "y", &index) == nullptr
-			|| ply.findProperty(elem, "z", &index) == nullptr || (elem = ply.findElement("face")) == nullptr
+	if ((elem = ply.findElement("vertex")) == nullptr
+			|| ply.findProperty(elem, "x", &index) == nullptr
+			|| ply.findProperty(elem, "y", &index) == nullptr
+			|| ply.findProperty(elem, "z", &index) == nullptr
+			|| (elem = ply.findElement("face")) == nullptr
 			|| ply.findProperty(elem, "vertex_indices", &index) == nullptr) {
-		throw std::runtime_error(MakeString() << "Could not read geometry [" << file << "]");
+		throw std::runtime_error(
+				MakeString() << "Could not read geometry [" << file << "]");
 	}
 
 	// Check for optional attribute data. We can handle intensity; and the
@@ -1340,17 +1440,22 @@ void ReadPlyMeshFromFile(const std::string& file, Mesh &mesh) {
 	mesh.vertexColors.clear();
 	mesh.textureMap.clear();
 	mesh.textureImage.clear();
-	if ((elem = ply.findElement("vertex")) != nullptr && ply.findProperty(elem, "red", &index) != nullptr && ply.findProperty(elem, "green", &index) != nullptr
+	if ((elem = ply.findElement("vertex")) != nullptr
+			&& ply.findProperty(elem, "red", &index) != nullptr
+			&& ply.findProperty(elem, "green", &index) != nullptr
 			&& ply.findProperty(elem, "blue", &index) != nullptr) {
 		RGBPointsAvailable = true;
 	}
-	if ((elem = ply.findElement("vertex")) != nullptr && ply.findProperty(elem, "nx", &index) != nullptr && ply.findProperty(elem, "ny", &index) != nullptr
+	if ((elem = ply.findElement("vertex")) != nullptr
+			&& ply.findProperty(elem, "nx", &index) != nullptr
+			&& ply.findProperty(elem, "ny", &index) != nullptr
 			&& ply.findProperty(elem, "nz", &index) != nullptr) {
 		hasNormals = true;
 	}
 	bool hasTexture = false;
 
-	if ((elem = ply.findElement("face")) != nullptr && ply.findProperty(elem, "texcoord", &index) != nullptr) {
+	if ((elem = ply.findElement("face")) != nullptr
+			&& ply.findProperty(elem, "texcoord", &index) != nullptr) {
 		hasTexture = true;
 		std::string textureFile;
 		for (string comment : ply.getComments()) {
@@ -1362,7 +1467,8 @@ void ReadPlyMeshFromFile(const std::string& file, Mesh &mesh) {
 			}
 
 		}
-		std::string texturePath = RemoveTrailingSlash(GetParentDirectory(file)) + ALY_PATH_SEPARATOR+ GetFileName(textureFile);
+		std::string texturePath = RemoveTrailingSlash(GetParentDirectory(file))
+				+ ALY_PATH_SEPARATOR+ GetFileName(textureFile);
 		if (textureFile.size() > 0 && FileExists(texturePath)) {
 			ReadImageFromFile(texturePath, mesh.textureImage);
 		}
@@ -1414,13 +1520,16 @@ void ReadPlyMeshFromFile(const std::string& file, Mesh &mesh) {
 			}
 			for (j = 0; j < numPts; j++) {
 				ply.getElement(&vertex);
-				mesh.vertexLocations[j] = float3(vertex.x[0], vertex.x[1], vertex.x[2]);
+				mesh.vertexLocations[j] = float3(vertex.x[0], vertex.x[1],
+						vertex.x[2]);
 
 				if (RGBPointsAvailable) {
-					mesh.vertexColors[j] = float4(vertex.red / 255.0f, vertex.green / 255.0f, vertex.blue / 255.0f, 1.0f);
+					mesh.vertexColors[j] = float4(vertex.red / 255.0f,
+							vertex.green / 255.0f, vertex.blue / 255.0f, 1.0f);
 				}
 				if (hasNormals) {
-					mesh.vertexNormals[j] = float3(vertex.n[0], vertex.n[1], vertex.n[2]);
+					mesh.vertexNormals[j] = float3(vertex.n[0], vertex.n[1],
+							vertex.n[2]);
 				}
 			}
 		}			//if vertex
@@ -1434,17 +1543,26 @@ void ReadPlyMeshFromFile(const std::string& file, Mesh &mesh) {
 				for (j = 0; j < numPolys; j++) {
 					ply.getElement(&faceTex);
 					if (faceTex.nverts == 4) {
-						mesh.quadIndexes.append(uint4(faceTex.verts[0], faceTex.verts[1], faceTex.verts[2], faceTex.verts[3]));
+						mesh.quadIndexes.append(
+								uint4(faceTex.verts[0], faceTex.verts[1],
+										faceTex.verts[2], faceTex.verts[3]));
 						for (int i = 0; i < faceTex.nverts; i++) {
-							mesh.textureMap.append(float2(faceTex.uvs[2 * i], faceTex.uvs[2 * i + 1]));
+							mesh.textureMap.append(
+									float2(faceTex.uvs[2 * i],
+											faceTex.uvs[2 * i + 1]));
 						}
 					} else if (faceTex.nverts == 3) {
-						mesh.triIndexes.append(uint3(faceTex.verts[0], faceTex.verts[1], faceTex.verts[2]));
+						mesh.triIndexes.append(
+								uint3(faceTex.verts[0], faceTex.verts[1],
+										faceTex.verts[2]));
 						for (int i = 0; i < faceTex.nverts; i++) {
-							mesh.textureMap.append(float2(faceTex.uvs[2 * i], faceTex.uvs[2 * i + 1]));
+							mesh.textureMap.append(
+									float2(faceTex.uvs[2 * i],
+											faceTex.uvs[2 * i + 1]));
 						}
-					} else if(faceTex.nverts == 2) {
-						mesh.lineIndexes.append(uint2(faceTex.verts[0], faceTex.verts[1]));
+					} else if (faceTex.nverts == 2) {
+						mesh.lineIndexes.append(
+								uint2(faceTex.verts[0], faceTex.verts[1]));
 					}
 				}
 			} else {
@@ -1452,11 +1570,16 @@ void ReadPlyMeshFromFile(const std::string& file, Mesh &mesh) {
 				for (j = 0; j < numPolys; j++) {
 					ply.getElement(&face);
 					if (face.nverts == 4) {
-						mesh.quadIndexes.append(uint4(face.verts[0], face.verts[1], face.verts[2], face.verts[3]));
+						mesh.quadIndexes.append(
+								uint4(face.verts[0], face.verts[1],
+										face.verts[2], face.verts[3]));
 					} else if (face.nverts == 3) {
-						mesh.triIndexes.append(uint3(face.verts[0], face.verts[1], face.verts[2]));
+						mesh.triIndexes.append(
+								uint3(face.verts[0], face.verts[1],
+										face.verts[2]));
 					} else if (face.nverts == 2) {
-						mesh.lineIndexes.append(uint2(face.verts[0], face.verts[1]));
+						mesh.lineIndexes.append(
+								uint2(face.verts[0], face.verts[1]));
 					}
 				}
 			}
@@ -1465,13 +1588,15 @@ void ReadPlyMeshFromFile(const std::string& file, Mesh &mesh) {
 	if (mesh.vertexLocations.size() > 0) {
 		mesh.updateBoundingBox();
 	}
-	if (mesh.vertexNormals.size() == 0&&(mesh.triIndexes.size()>0||mesh.quadIndexes.size()>0)) {
+	if (mesh.vertexNormals.size() == 0
+			&& (mesh.triIndexes.size() > 0 || mesh.quadIndexes.size() > 0)) {
 		mesh.updateVertexNormals();
 	}
 	mesh.setDirty(true);
 }
 
-void CreateVertexNeighborTable(const Mesh& mesh, std::vector<std::set<uint32_t>>& vertNbrs) {
+void CreateVertexNeighborTable(const Mesh& mesh,
+		std::vector<std::set<uint32_t>>& vertNbrs) {
 	vertNbrs.resize(mesh.vertexLocations.size());
 	for (const uint3& face : mesh.triIndexes.data) {
 		vertNbrs[face.x].insert(face.y);
@@ -1495,7 +1620,8 @@ void CreateVertexNeighborTable(const Mesh& mesh, std::vector<std::set<uint32_t>>
 inline uint64_t faceHashCode(const uint2& val) {
 	return ((uint64_t) val.y) << 32 | ((uint64_t) val.x);
 }
-void CreateOrderedVertexNeighborTable(const Mesh& mesh, std::vector<std::list<uint32_t>>& vertNbrsOut, bool leaveTail) {
+void CreateOrderedVertexNeighborTable(const Mesh& mesh,
+		std::vector<std::list<uint32_t>>& vertNbrsOut, bool leaveTail) {
 	//Leave tail means to not remove the duplicate vertex neighbor at the end of the neighbor list.
 	//Non-manifold vertexes will not have a tail, so the tail can be used to detect them in simple (common) cases.
 	vertNbrsOut.resize(mesh.vertexLocations.size());
@@ -1560,11 +1686,13 @@ void CreateOrderedVertexNeighborTable(const Mesh& mesh, std::vector<std::list<ui
 					if (chain.size() > 0) {
 						if (!leaveTail && chain.front() == chain.back())
 							chain.pop_back();
-						vertNbrsOut[n].insert(vertNbrsOut[n].end(), chain.begin(), chain.end());
+						vertNbrsOut[n].insert(vertNbrsOut[n].end(),
+								chain.begin(), chain.end());
 						chain.clear();
 					}
 					for (int i = 0; i < (int) nbrs.size(); i += 2) {
-						if (nbrs[i] != (uint32_t) -1 && nbrs[i + 1] != (uint32_t) -1) {
+						if (nbrs[i] != (uint32_t) -1
+								&& nbrs[i + 1] != (uint32_t) -1) {
 							chain.push_back(nbrs[i]);
 							chain.push_back(nbrs[i + 1]);
 							found = true;
@@ -1577,7 +1705,8 @@ void CreateOrderedVertexNeighborTable(const Mesh& mesh, std::vector<std::list<ui
 			if (chain.size() > 0) {
 				if (!leaveTail && chain.front() == chain.back())
 					chain.pop_back();
-				vertNbrsOut[n].insert(vertNbrsOut[n].end(), chain.begin(), chain.end());
+				vertNbrsOut[n].insert(vertNbrsOut[n].end(), chain.begin(),
+						chain.end());
 				/*
 				 nbrs=vertNbrs[n];
 				 std::cout << "in " << n << ": ";
@@ -1600,7 +1729,7 @@ void CreateOrderedVertexNeighborTable(const Mesh& mesh, std::vector<std::list<ui
 }
 
 bool Mesh::convertQuadsToTriangles() {
-	bool ret=(quadIndexes.size()>0);
+	bool ret = (quadIndexes.size() > 0);
 	if (textureMap.size() > 0 && quadIndexes.size() > 0) {
 		Vector2f newTextureMap;
 		uint32_t index = 0;
@@ -1667,28 +1796,36 @@ bool Mesh::convertQuadsToTriangles() {
 	}
 	return ret;
 }
-void CreateFaceNeighborTable(const Mesh& mesh, std::vector<std::list<uint32_t>>& faceNbrs) {
+void CreateFaceNeighborTable(const Mesh& mesh,
+		std::vector<std::list<uint32_t>>& faceNbrs) {
 	faceNbrs.resize(mesh.triIndexes.size() + mesh.quadIndexes.size());
 	std::map<uint64_t, std::list<uint>> edgeTable;
 	uint2 edge;
 	uint fid = 0;
 	for (const uint3& face : mesh.triIndexes.data) {
-		edge = (face.x < face.y) ? uint2(face.x, face.y) : uint2(face.y, face.x);
+		edge = (face.x < face.y) ?
+				uint2(face.x, face.y) : uint2(face.y, face.x);
 		edgeTable[faceHashCode(edge)].push_back(fid);
-		edge = (face.y < face.z) ? uint2(face.y, face.z) : uint2(face.z, face.y);
+		edge = (face.y < face.z) ?
+				uint2(face.y, face.z) : uint2(face.z, face.y);
 		edgeTable[faceHashCode(edge)].push_back(fid);
-		edge = (face.z < face.x) ? uint2(face.z, face.x) : uint2(face.x, face.z);
+		edge = (face.z < face.x) ?
+				uint2(face.z, face.x) : uint2(face.x, face.z);
 		edgeTable[faceHashCode(edge)].push_back(fid);
 		fid++;
 	}
 	for (const uint4& face : mesh.quadIndexes.data) {
-		edge = (face.x < face.y) ? uint2(face.x, face.y) : uint2(face.y, face.x);
+		edge = (face.x < face.y) ?
+				uint2(face.x, face.y) : uint2(face.y, face.x);
 		edgeTable[faceHashCode(edge)].push_back(fid);
-		edge = (face.y < face.z) ? uint2(face.y, face.z) : uint2(face.z, face.y);
+		edge = (face.y < face.z) ?
+				uint2(face.y, face.z) : uint2(face.z, face.y);
 		edgeTable[faceHashCode(edge)].push_back(fid);
-		edge = (face.z < face.w) ? uint2(face.z, face.w) : uint2(face.w, face.z);
+		edge = (face.z < face.w) ?
+				uint2(face.z, face.w) : uint2(face.w, face.z);
 		edgeTable[faceHashCode(edge)].push_back(fid);
-		edge = (face.w < face.x) ? uint2(face.w, face.x) : uint2(face.x, face.w);
+		edge = (face.w < face.x) ?
+				uint2(face.w, face.x) : uint2(face.x, face.w);
 		edgeTable[faceHashCode(edge)].push_back(fid);
 		fid++;
 	}
@@ -1714,38 +1851,47 @@ void SubdivideCatmullClark(Mesh& mesh) {
 	std::set<uint2> edges;
 	bool hasUVs = mesh.textureMap.size() > 0;
 	bool hasColor = mesh.vertexColors.size() > 0;
-	std::vector<std::pair<int, float3>> faceVerts(mesh.vertexLocations.size(), std::pair<int, float3>(0, float3(0.0f)));
-	std::vector<std::pair<int, float3>> edgeVerts(mesh.vertexLocations.size(), std::pair<int, float3>(0, float3(0.0f)));
+	std::vector<std::pair<int, float3>> faceVerts(mesh.vertexLocations.size(),
+			std::pair<int, float3>(0, float3(0.0f)));
+	std::vector<std::pair<int, float3>> edgeVerts(mesh.vertexLocations.size(),
+			std::pair<int, float3>(0, float3(0.0f)));
 	uint2 edge;
 	uint fid = 0;
 	for (const uint3& face : mesh.triIndexes.data) {
-		edge = (face.x < face.y) ? uint2(face.x, face.y) : uint2(face.y, face.x);
+		edge = (face.x < face.y) ?
+				uint2(face.x, face.y) : uint2(face.y, face.x);
 		edges.insert(edge);
 		edgeTable[faceHashCode(edge)].faces.push_back(fid);
 
-		edge = (face.y < face.z) ? uint2(face.y, face.z) : uint2(face.z, face.y);
+		edge = (face.y < face.z) ?
+				uint2(face.y, face.z) : uint2(face.z, face.y);
 		edges.insert(edge);
 		edgeTable[faceHashCode(edge)].faces.push_back(fid);
 
-		edge = (face.z < face.x) ? uint2(face.z, face.x) : uint2(face.x, face.z);
+		edge = (face.z < face.x) ?
+				uint2(face.z, face.x) : uint2(face.x, face.z);
 		edges.insert(edge);
 		edgeTable[faceHashCode(edge)].faces.push_back(fid);
 		fid++;
 	}
 	for (const uint4& face : mesh.quadIndexes.data) {
-		edge = (face.x < face.y) ? uint2(face.x, face.y) : uint2(face.y, face.x);
+		edge = (face.x < face.y) ?
+				uint2(face.x, face.y) : uint2(face.y, face.x);
 		edges.insert(edge);
 		edgeTable[faceHashCode(edge)].faces.push_back(fid);
 
-		edge = (face.y < face.z) ? uint2(face.y, face.z) : uint2(face.z, face.y);
+		edge = (face.y < face.z) ?
+				uint2(face.y, face.z) : uint2(face.z, face.y);
 		edges.insert(edge);
 		edgeTable[faceHashCode(edge)].faces.push_back(fid);
 
-		edge = (face.z < face.w) ? uint2(face.z, face.w) : uint2(face.w, face.z);
+		edge = (face.z < face.w) ?
+				uint2(face.z, face.w) : uint2(face.w, face.z);
 		edges.insert(edge);
 		edgeTable[faceHashCode(edge)].faces.push_back(fid);
 
-		edge = (face.w < face.x) ? uint2(face.w, face.x) : uint2(face.x, face.w);
+		edge = (face.w < face.x) ?
+				uint2(face.w, face.x) : uint2(face.x, face.w);
 		edges.insert(edge);
 		edgeTable[faceHashCode(edge)].faces.push_back(fid);
 		fid++;
@@ -1762,9 +1908,13 @@ void SubdivideCatmullClark(Mesh& mesh) {
 	}
 	size_t backIndex = mesh.vertexLocations.size();
 	size_t endIndex = backIndex;
-	mesh.vertexLocations.resize(endIndex + mesh.quadIndexes.size() + mesh.triIndexes.size() + edges.size());
+	mesh.vertexLocations.resize(
+			endIndex + mesh.quadIndexes.size() + mesh.triIndexes.size()
+					+ edges.size());
 	if (hasColor) {
-		mesh.vertexColors.resize(endIndex + mesh.quadIndexes.size() + mesh.triIndexes.size() + edges.size());
+		mesh.vertexColors.resize(
+				endIndex + mesh.quadIndexes.size() + mesh.triIndexes.size()
+						+ edges.size());
 	}
 	for (const uint3& face : mesh.triIndexes.data) {
 		float3 pt1 = mesh.vertexLocations[face.x];
@@ -1777,7 +1927,9 @@ void SubdivideCatmullClark(Mesh& mesh) {
 			pr.second += avg;
 		}
 		if (hasColor) {
-			mesh.vertexColors[endIndex] = 0.3333333f * (mesh.vertexColors[face.x] + mesh.vertexColors[face.y] + mesh.vertexColors[face.z]);
+			mesh.vertexColors[endIndex] = 0.3333333f
+					* (mesh.vertexColors[face.x] + mesh.vertexColors[face.y]
+							+ mesh.vertexColors[face.z]);
 		}
 		mesh.vertexLocations[endIndex++] = avg;
 	}
@@ -1794,7 +1946,9 @@ void SubdivideCatmullClark(Mesh& mesh) {
 		}
 		if (hasColor) {
 			mesh.vertexColors[endIndex] = 0.25f
-					* (mesh.vertexColors[face.x] + mesh.vertexColors[face.y] + mesh.vertexColors[face.z] + mesh.vertexColors[face.w]);
+					* (mesh.vertexColors[face.x] + mesh.vertexColors[face.y]
+							+ mesh.vertexColors[face.z]
+							+ mesh.vertexColors[face.w]);
 		}
 		mesh.vertexLocations[endIndex++] = avg;
 	}
@@ -1807,7 +1961,13 @@ void SubdivideCatmullClark(Mesh& mesh) {
 		if (fe.faces.size() < 2) {
 			avg = 0.5f * (pt1 + pt2);
 		} else {
-			avg = 0.25f * (pt1 + pt2 + mesh.vertexLocations[fe.faces.front() + backIndex] + mesh.vertexLocations[fe.faces.back() + backIndex]);
+			avg =
+					0.25f
+							* (pt1 + pt2
+									+ mesh.vertexLocations[fe.faces.front()
+											+ backIndex]
+									+ mesh.vertexLocations[fe.faces.back()
+											+ backIndex]);
 		}
 		for (int k = 0; k < 2; k++) {
 			std::pair<int, float3>& pr = edgeVerts[edge[k]];
@@ -1815,23 +1975,28 @@ void SubdivideCatmullClark(Mesh& mesh) {
 			pr.second += avg;
 		}
 		if (hasColor) {
-			mesh.vertexColors[endIndex] = 0.5f * (mesh.vertexColors[edge.x] + mesh.vertexColors[edge.y]);
+			mesh.vertexColors[endIndex] = 0.5f
+					* (mesh.vertexColors[edge.x] + mesh.vertexColors[edge.y]);
 		}
 		mesh.vertexLocations[endIndex++] = avg;
 
 	}
-	std::vector<uint4> newQuads(4 * mesh.quadIndexes.size() + 3 * mesh.triIndexes.size());
+	std::vector<uint4> newQuads(
+			4 * mesh.quadIndexes.size() + 3 * mesh.triIndexes.size());
 	std::vector<float2> uvs(newQuads.size() * 4);
 	size_t faceIndex = 0;
 	size_t uvIndex = 0;
 	fid = 0;
 	endIndex = backIndex;
 	for (const uint3& face : mesh.triIndexes.data) {
-		edge = (face.x < face.y) ? uint2(face.x, face.y) : uint2(face.y, face.x);
+		edge = (face.x < face.y) ?
+				uint2(face.x, face.y) : uint2(face.y, face.x);
 		size_t ept1 = edgeTable[faceHashCode(edge)].edgePointIndex;
-		edge = (face.y < face.z) ? uint2(face.y, face.z) : uint2(face.z, face.y);
+		edge = (face.y < face.z) ?
+				uint2(face.y, face.z) : uint2(face.z, face.y);
 		size_t ept2 = edgeTable[faceHashCode(edge)].edgePointIndex;
-		edge = (face.z < face.x) ? uint2(face.z, face.x) : uint2(face.x, face.z);
+		edge = (face.z < face.x) ?
+				uint2(face.z, face.x) : uint2(face.x, face.z);
 		size_t ept3 = edgeTable[faceHashCode(edge)].edgePointIndex;
 
 		if (hasUVs) {
@@ -1859,19 +2024,26 @@ void SubdivideCatmullClark(Mesh& mesh) {
 			uvs[uvIndex++] = upt2;
 			fid += 3;
 		}
-		newQuads[faceIndex++] = uint4(face.x, (uint32_t) ept1, (uint32_t) endIndex, (uint32_t) ept3);
-		newQuads[faceIndex++] = uint4(face.y, (uint32_t) ept2, (uint32_t) endIndex, (uint32_t) ept1);
-		newQuads[faceIndex++] = uint4(face.z, (uint32_t) ept3, (uint32_t) endIndex, (uint32_t) ept2);
+		newQuads[faceIndex++] = uint4(face.x, (uint32_t) ept1,
+				(uint32_t) endIndex, (uint32_t) ept3);
+		newQuads[faceIndex++] = uint4(face.y, (uint32_t) ept2,
+				(uint32_t) endIndex, (uint32_t) ept1);
+		newQuads[faceIndex++] = uint4(face.z, (uint32_t) ept3,
+				(uint32_t) endIndex, (uint32_t) ept2);
 		endIndex++;
 	}
 	for (const uint4& face : mesh.quadIndexes.data) {
-		edge = (face.x < face.y) ? uint2(face.x, face.y) : uint2(face.y, face.x);
+		edge = (face.x < face.y) ?
+				uint2(face.x, face.y) : uint2(face.y, face.x);
 		size_t ept1 = edgeTable[faceHashCode(edge)].edgePointIndex;
-		edge = (face.y < face.z) ? uint2(face.y, face.z) : uint2(face.z, face.y);
+		edge = (face.y < face.z) ?
+				uint2(face.y, face.z) : uint2(face.z, face.y);
 		size_t ept2 = edgeTable[faceHashCode(edge)].edgePointIndex;
-		edge = (face.z < face.w) ? uint2(face.z, face.w) : uint2(face.w, face.z);
+		edge = (face.z < face.w) ?
+				uint2(face.z, face.w) : uint2(face.w, face.z);
 		size_t ept3 = edgeTable[faceHashCode(edge)].edgePointIndex;
-		edge = (face.w < face.x) ? uint2(face.w, face.x) : uint2(face.x, face.w);
+		edge = (face.w < face.x) ?
+				uint2(face.w, face.x) : uint2(face.x, face.w);
 		size_t ept4 = edgeTable[faceHashCode(edge)].edgePointIndex;
 		if (hasUVs) {
 			float2 uv1 = mesh.textureMap[fid];
@@ -1905,10 +2077,14 @@ void SubdivideCatmullClark(Mesh& mesh) {
 			uvs[uvIndex++] = upt3;
 			fid += 4;
 		}
-		newQuads[faceIndex++] = uint4(face.x, (uint32_t) ept1, (uint32_t) endIndex, (uint32_t) ept4);
-		newQuads[faceIndex++] = uint4(face.y, (uint32_t) ept2, (uint32_t) endIndex, (uint32_t) ept1);
-		newQuads[faceIndex++] = uint4(face.z, (uint32_t) ept3, (uint32_t) endIndex, (uint32_t) ept2);
-		newQuads[faceIndex++] = uint4(face.w, (uint32_t) ept4, (uint32_t) endIndex, (uint32_t) ept3);
+		newQuads[faceIndex++] = uint4(face.x, (uint32_t) ept1,
+				(uint32_t) endIndex, (uint32_t) ept4);
+		newQuads[faceIndex++] = uint4(face.y, (uint32_t) ept2,
+				(uint32_t) endIndex, (uint32_t) ept1);
+		newQuads[faceIndex++] = uint4(face.z, (uint32_t) ept3,
+				(uint32_t) endIndex, (uint32_t) ept2);
+		newQuads[faceIndex++] = uint4(face.w, (uint32_t) ept4,
+				(uint32_t) endIndex, (uint32_t) ept3);
 
 		endIndex++;
 	}
@@ -1920,7 +2096,8 @@ void SubdivideCatmullClark(Mesh& mesh) {
 		float3 F = faceVerts[n].second / (float) fcount;
 		float3 R = edgeVerts[n].second / (float) ecount;
 
-		mesh.vertexLocations[n] = (F + 2.0f * R + (ecount - 3.0f) * P) / (float) ecount;
+		mesh.vertexLocations[n] = (F + 2.0f * R + (ecount - 3.0f) * P)
+				/ (float) ecount;
 	}
 	if (hasUVs)
 		mesh.textureMap = uvs;
@@ -1939,15 +2116,18 @@ void SubdivideLoop(Mesh& mesh) {
 	bool hasUVs = mesh.textureMap.size() > 0;
 	bool hasColor = mesh.vertexColors.size() > 0;
 	for (const uint3& face : mesh.triIndexes.data) {
-		edge = (face.x < face.y) ? uint2(face.x, face.y) : uint2(face.y, face.x);
+		edge = (face.x < face.y) ?
+				uint2(face.x, face.y) : uint2(face.y, face.x);
 		edges.insert(edge);
 		edgeTable[faceHashCode(edge)].faces.push_back(fid);
 
-		edge = (face.y < face.z) ? uint2(face.y, face.z) : uint2(face.z, face.y);
+		edge = (face.y < face.z) ?
+				uint2(face.y, face.z) : uint2(face.z, face.y);
 		edges.insert(edge);
 		edgeTable[faceHashCode(edge)].faces.push_back(fid);
 
-		edge = (face.z < face.x) ? uint2(face.z, face.x) : uint2(face.x, face.z);
+		edge = (face.z < face.x) ?
+				uint2(face.z, face.x) : uint2(face.x, face.z);
 		edges.insert(edge);
 		edgeTable[faceHashCode(edge)].faces.push_back(fid);
 		fid++;
@@ -1969,29 +2149,39 @@ void SubdivideLoop(Mesh& mesh) {
 		} else {
 			uint3 face = mesh.triIndexes[fe.faces.front()];
 			int other1 = -1, other2 = -1;
-			if ((face.x == edge.x && face.y == edge.y) || (face.y == edge.x && face.x == edge.y)) {
+			if ((face.x == edge.x && face.y == edge.y)
+					|| (face.y == edge.x && face.x == edge.y)) {
 				other1 = face.z;
-			} else if ((face.y == edge.x && face.z == edge.y) || (face.z == edge.x && face.y == edge.y)) {
+			} else if ((face.y == edge.x && face.z == edge.y)
+					|| (face.z == edge.x && face.y == edge.y)) {
 				other1 = face.x;
-			} else if ((face.x == edge.x && face.z == edge.y) || (face.z == edge.x && face.x == edge.y)) {
+			} else if ((face.x == edge.x && face.z == edge.y)
+					|| (face.z == edge.x && face.x == edge.y)) {
 				other1 = face.y;
 			}
 			face = mesh.triIndexes[fe.faces.back()];
-			if ((face.x == edge.x && face.y == edge.y) || (face.y == edge.x && face.x == edge.y)) {
+			if ((face.x == edge.x && face.y == edge.y)
+					|| (face.y == edge.x && face.x == edge.y)) {
 				other2 = face.z;
-			} else if ((face.y == edge.x && face.z == edge.y) || (face.z == edge.x && face.y == edge.y)) {
+			} else if ((face.y == edge.x && face.z == edge.y)
+					|| (face.z == edge.x && face.y == edge.y)) {
 				other2 = face.x;
-			} else if ((face.x == edge.x && face.z == edge.y) || (face.z == edge.x && face.x == edge.y)) {
+			} else if ((face.x == edge.x && face.z == edge.y)
+					|| (face.z == edge.x && face.x == edge.y)) {
 				other2 = face.y;
 			}
 			if (other1 >= 0 && other2 >= 0) {
-				avg = 0.125f * (3.0f * pt1 + 3.0f * pt2 + mesh.vertexLocations[other1] + mesh.vertexLocations[other2]);
+				avg = 0.125f
+						* (3.0f * pt1 + 3.0f * pt2
+								+ mesh.vertexLocations[other1]
+								+ mesh.vertexLocations[other2]);
 			} else {
 				avg = 0.5f * (pt1 + pt2);
 			}
 		}
 		if (hasColor) {
-			mesh.vertexColors[endIndex] = 0.5f * (mesh.vertexColors[edge.x] + mesh.vertexColors[edge.y]);
+			mesh.vertexColors[endIndex] = 0.5f
+					* (mesh.vertexColors[edge.x] + mesh.vertexColors[edge.y]);
 		}
 		mesh.vertexLocations[endIndex++] = avg;
 	}
@@ -2002,11 +2192,14 @@ void SubdivideLoop(Mesh& mesh) {
 	std::vector<float2> uvs(newTris.size() * 3);
 	size_t uvIndex = 0;
 	for (const uint3& face : mesh.triIndexes.data) {
-		edge = (face.x < face.y) ? uint2(face.x, face.y) : uint2(face.y, face.x);
+		edge = (face.x < face.y) ?
+				uint2(face.x, face.y) : uint2(face.y, face.x);
 		size_t ept1 = edgeTable[faceHashCode(edge)].edgePointIndex;
-		edge = (face.y < face.z) ? uint2(face.y, face.z) : uint2(face.z, face.y);
+		edge = (face.y < face.z) ?
+				uint2(face.y, face.z) : uint2(face.z, face.y);
 		size_t ept2 = edgeTable[faceHashCode(edge)].edgePointIndex;
-		edge = (face.z < face.x) ? uint2(face.z, face.x) : uint2(face.x, face.z);
+		edge = (face.z < face.x) ?
+				uint2(face.z, face.x) : uint2(face.x, face.z);
 		size_t ept3 = edgeTable[faceHashCode(edge)].edgePointIndex;
 		if (hasUVs) {
 			float2 uv1 = mesh.textureMap[fid];
@@ -2036,7 +2229,8 @@ void SubdivideLoop(Mesh& mesh) {
 		newTris[faceIndex++] = uint3(face.x, (uint32_t) ept1, (uint32_t) ept3);
 		newTris[faceIndex++] = uint3(face.y, (uint32_t) ept2, (uint32_t) ept1);
 		newTris[faceIndex++] = uint3(face.z, (uint32_t) ept3, (uint32_t) ept2);
-		newTris[faceIndex++] = uint3((uint32_t) ept1, (uint32_t) ept2, (uint32_t) ept3);
+		newTris[faceIndex++] = uint3((uint32_t) ept1, (uint32_t) ept2,
+				(uint32_t) ept3);
 	}
 	std::vector<std::set<uint32_t>> vertNbrs(mesh.vertexLocations.size());
 	for (const uint3& face : mesh.triIndexes.data) {

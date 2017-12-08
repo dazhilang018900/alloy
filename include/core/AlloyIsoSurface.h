@@ -175,6 +175,7 @@ enum class MeshType {
 };
 class IsoSurface {
 private:
+	float backgroundValue;
 	bool skipHidden;
 	size_t triangleCount;
 	void regularize(const float* data, Mesh& mesh);
@@ -237,7 +238,6 @@ private:
 public:
 	IsoSurface();
 	~IsoSurface();
-
 	void solve(
 			const EndlessGridFloat& grid,
 			Mesh& mesh,
@@ -263,16 +263,6 @@ public:
 			aly::float3* normals, float* levelset, const int& rows,
 			const int& cols, const int& slices, int maxIters,
 			float errorThresh);
-	void computeNormals(const std::vector<aly::float3>& points,
-			const std::vector<int>& indexes, std::vector<aly::float3>& normals);
-	void computeColors(const std::vector<aly::float3>& points,
-			std::vector<aly::float4>& colors, const float4* pfRgb,
-			aly::box3f& bbox, const int& rows, const int& cols,
-			const int& slices);
-	/*
-	 static void Regularize(char (&statusMessage)[STATUS_MESSAGE_LENGTH], std::vector<aly::float4>& vPoints,
-	 const std::vector<std::vector<int>>& nbrs, const float lambda, const int iters);
-	 */
 	inline static const int* getTriangleConnectionTable() {
 		return triangleConnectionTable;
 	}

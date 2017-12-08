@@ -73,7 +73,7 @@ void SoftBodyEx::addBody() {
 		mesh.quadIndexes.push_back(offset + uint4(5, 4, 6, 7));
 		offset += uint4(8,8,8,8);
 	}
-	mesh.updateVertexNormals();
+	mesh.updateVertexNormals(false);
 	mesh.updateBoundingBox();
 	float theta = RandomUniform(0.0f, 2*ALY_PI);
 	float3 randomVelocity = float3(std::cos(theta),std::sin(theta), 1.0f);

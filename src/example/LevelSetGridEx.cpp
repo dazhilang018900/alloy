@@ -32,11 +32,32 @@ LevelSetGridEx::LevelSetGridEx() :
 }
 bool LevelSetGridEx::init(Composite& rootNode) {
 	srand((unsigned int) time(nullptr));
-	mesh.load(getFullPath("models/horse.ply"));
+	mesh.load(getFullPath("models/eagle.ply"));
+	EndlessGrid<float> grid( { 16, 4, 4 }, 0.0f);
+	std::string voxelFile=MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"points.xml";
+	std::cout<<"Convert to level set"<<std::endl;
+	box3f bbox=mesh.getBoundingBox();
+	float res=std::max(std::max(bbox.dimensions.x,bbox.dimensions.y),bbox.dimensions.z)/256;
+	std::cout<<"Points to level set ..."<<std::endl;
+	float4x4 T=PointsToLevelSet(mesh, grid, res,1.5f*res);
+	std::cout<<"Write grid to file ..."<<std::endl;
+	WriteGridToFile(voxelFile,grid);
+	IsoSurface isosurf;
+	std::cout<<"Solve Iso-Surface .."<<std::endl;
+	isosurf.solve(grid,mesh,MeshType::TRIANGLE,true,0.0f);
+	std::string meshFile = MakeString() << GetDesktopDirectory()<< ALY_PATH_SEPARATOR<<"points_tri.ply";
+	WriteMeshToFile(meshFile,mesh);
+	/*
+
+	std::chrono::steady_clock::time_point lastTime;
+	std::chrono::steady_clock::time_point currentTime;
+	double elapsed;
 	EndlessGrid<float> grid( { 5, 4, 6, 4 }, 0.0f);
 	std::string voxelFile=MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"signed.xml";
 	std::cout<<"Convert to level set"<<std::endl;
-	MeshToLevelSet(mesh, grid, 2.5f, true, 0.8f);
+	float4x4 T=MeshToLevelSet(mesh, grid, 2.5f, true, 0.8f);
+*/
+	/*
 	std::cout<<"Convert grid to dense block"<<std::endl;
 	WriteGridToFile(voxelFile,grid);
 	Volume1f data;
@@ -53,29 +74,54 @@ bool LevelSetGridEx::init(Composite& rootNode) {
 			}
 		}
 	}
-	IsoSurface isosurf;
+	*/
+
+
+
+	/*
+	 * 	IsoSurface isosurf;
 	std::string meshFile;
+	lastTime =std::chrono::steady_clock::now();
 	isosurf.solve(data,narrowBandList,mesh,MeshType::QUAD,true,0.0f);
 	meshFile = MakeString() << GetDesktopDirectory()<< ALY_PATH_SEPARATOR<<"quad.ply";
 	std::cout<<"Write "<<meshFile<<std::endl;
 	WriteMeshToFile(meshFile, mesh);
+	currentTime=std::chrono::steady_clock::now();
+	elapsed = std::chrono::duration<double>(currentTime - lastTime).count();
+	std::cout << "Elapsed Time: " << elapsed << " sec" << std::endl;
 
+	lastTime =std::chrono::steady_clock::now();
 	isosurf.solve(data,narrowBandList,mesh,MeshType::TRIANGLE,true,0.0f);
 	meshFile = MakeString() << GetDesktopDirectory()<< ALY_PATH_SEPARATOR<<"tri.ply";
 	std::cout<<"Write "<<meshFile<<std::endl;
 	WriteMeshToFile(meshFile, mesh);
+	currentTime=std::chrono::steady_clock::now();
+	elapsed = std::chrono::duration<double>(currentTime - lastTime).count();
+	std::cout << "Elapsed Time: " << elapsed << " sec" << std::endl;
 
 
+
+	lastTime =std::chrono::steady_clock::now();
 	isosurf.solve(grid,mesh,MeshType::QUAD,true,0.0f);
+	currentTime=std::chrono::steady_clock::now();
+	elapsed = std::chrono::duration<double>(currentTime - lastTime).count();
+	std::cout << "Elapsed Time: " << elapsed << " sec" << std::endl;
 	meshFile = MakeString() << GetDesktopDirectory()<< ALY_PATH_SEPARATOR<<"endless_quad.ply";
 	std::cout<<"Write "<<meshFile<<std::endl;
+	mesh.transform(T);
 	WriteMeshToFile(meshFile, mesh);
 
+	std::cout<<"Iso-surf gen ..."<<std::endl;
+	lastTime =std::chrono::steady_clock::now();
 	isosurf.solve(grid,mesh,MeshType::TRIANGLE,true,0.0f);
+	currentTime=std::chrono::steady_clock::now();
+	elapsed = std::chrono::duration<double>(currentTime - lastTime).count();
+	std::cout << "Elapsed Time: " << elapsed << " sec" << std::endl;
 	meshFile = MakeString() << GetDesktopDirectory()<< ALY_PATH_SEPARATOR<<"endless_tri.ply";
 	std::cout<<"Write "<<meshFile<<std::endl;
+	mesh.transform(T);
 	WriteMeshToFile(meshFile, mesh);
-
+*/
 	std::cout<<"Done"<<std::endl;
 	objectBBox = mesh.getBoundingBox();
 	displayIndex = 0;
@@ -331,6 +377,7 @@ void LevelSetGridEx::draw(AlloyContext* context) {
 		break;
 	default:
 		break;
+
 	}
 	renderFrameBuffer->end();
 	imageShader->draw(renderFrameBuffer->getTexture(),
