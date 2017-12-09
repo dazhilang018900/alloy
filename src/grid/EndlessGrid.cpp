@@ -440,7 +440,7 @@ float3 GetInterpolatedNormal(const EndlessGrid<float>& grid,float x,float y,floa
 									+ GetNormal(grid, x1, y1, z1) * dx) * dy)
 							* dz));
 }
-float4x4 PointsToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid, float voxelResolution, float surfelSize){
+float4x4 PointsToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid, float voxelResolution, float surfelSize,const std::function<bool(const std::string& message, float progress)>& monitor){
 	const float narrowBand=2.5f;
 	EndlessGrid<float> weights(grid.getLevelSizes(),0.0f);
 	grid.setBackgroundValue(narrowBand+0.5f);
@@ -450,6 +450,11 @@ float4x4 PointsToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid, float voxe
 	int3 minIndex = int3(bbox.position / voxelResolution - (float)dim - 1.0f);
 	float4x4 T=MakeScale(voxelResolution)*MakeTranslation(float3(minIndex));
 	for (size_t idx=0;idx<N;idx++) {
+		if(monitor){
+			if(idx%1000==0){
+				if(!monitor("Converting points to level set",idx/(float)N))break;
+			}
+		}
 		float3 vert=mesh.vertexLocations[idx];
 		float3 norm=mesh.vertexNormals[idx];
 		int3 pos = int3(aly::floor((vert-surfelSize) / voxelResolution));
@@ -473,7 +478,7 @@ float4x4 PointsToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid, float voxe
 	return T;
 }
 float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
-		float narrowBand, bool flipSign, float voxelScale) {
+		float narrowBand, bool flipSign, float voxelScale,const std::function<bool(const std::string& message, float progress)>& monitor) {
 	const int nbr6X[6] = { 1, -1, 0, 0, 0, 0 };
 	const int nbr6Y[6] = { 0, 0, 1, -1, 0, 0 };
 	const int nbr6Z[6] = { 0, 0, 0, 0, 1, -1 };
@@ -510,7 +515,14 @@ float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 	int3 minIndex = int3(bbox.position / res - narrowBand * 3.0f);
 	float4x4 T=MakeScale(res)*MakeTranslation(float3(minIndex));
 	//Splat regions around triangles
-	for (int n = 0; n < (int) splats.size(); n++) {
+	size_t N=splats.size();
+	for (size_t n = 0; n < N; n++) {
+		if(monitor){
+			if(n%200==0){
+				if(!monitor("Converting mesh to level set",n/(float)N))break;
+			}
+		}
+
 		box3f box = splats[n];
 		int3 dims = int3(
 				aly::round(box.dimensions / res) + 0.5f + 2 * narrowBand);
@@ -561,6 +573,7 @@ float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 	}
 	splats.clear();
 	std::vector<EndlessNodeFloatPtr> leafs = grid.getLeafNodes();
+	assert(leafs.size()>0);
 	grid.allocateInternalNodes();
 	//Flood fill leaf nodes with narrowband value.
 	for (int i = 0; i < (int) leafs.size(); i++) {
@@ -610,6 +623,9 @@ float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 			}
 		}
 
+	}
+	if(monitor){
+		if(!monitor("Flood Fill",0.25f))return T;
 	}
 	//Find extremety leaf nodes.
 	EndlessNodeFloatPtr minX, minY, minZ, maxX, maxZ, maxY;
@@ -736,6 +752,9 @@ float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 				}
 			}
 		}
+	}
+	if(monitor){
+		if(!monitor("Flood Fill",0.5f))return T;
 	}
 	//Flood fill rest of space using signed level set values, propagating the proper sign in the process.
 	FloodFill(grid, narrowBand);

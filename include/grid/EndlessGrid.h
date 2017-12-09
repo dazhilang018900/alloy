@@ -141,28 +141,36 @@ public:
 		}
 		return node;
 	}
-	void allocateInternalNodes() {
+	inline void allocateInternalNodes() {
 		for (auto node : nodes) {
 			if (!node->isLeaf())
 				node->allocate(backgroundValue);
 		}
 	}
-	void getLeafNodes(std::vector<int3>& positions,
+	inline void getLeafNodes(std::vector<int3>& positions,
 			std::vector<std::shared_ptr<EndlessNode<T>>>& result) {
 		positions.clear();
 		result.clear();
 		for (auto node : nodes) {
-			node->getLeafNodes(positions, result, cellSizes);
+			if(node->isLeaf()){
+				result.push_back(node);
+			} else {
+				node->getLeafNodes(positions, result, cellSizes);
+			}
 		}
 	}
-	std::vector<std::shared_ptr<EndlessNode<T>>> getLeafNodes() const {
+	inline std::vector<std::shared_ptr<EndlessNode<T>>> getLeafNodes() const {
 		std::vector<std::shared_ptr<EndlessNode<T>>> result;
 		for (auto node : nodes) {
-			node->getLeafNodes(result);
+			if(node->isLeaf()){
+				result.push_back(node);
+			} else {
+				node->getLeafNodes(result);
+			}
 		}
 		return result;
 	}
-	std::vector<std::shared_ptr<EndlessNode<T>>> getNodesAtDepth(int d) const {
+	inline std::vector<std::shared_ptr<EndlessNode<T>>> getNodesAtDepth(int d) const {
 		std::vector<std::shared_ptr<EndlessNode<T>>> result;
 		for (auto node : nodes) {
 			if (d == 0) {
@@ -516,8 +524,8 @@ float GetInterpolatedValue(const EndlessGrid<float>& grid, float x, float y,
 float3 GetInterpolatedNormal(const EndlessGrid<float>& grid, float x, float y,
 		float z);
 float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
-		float narrowBand, bool flipSign = true, float voxelScale = 0.75f);
-float4x4 PointsToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid, float voxelSize, float surfelSize);
+		float narrowBand, bool flipSign = true, float voxelScale = 0.75f,const std::function<bool(const std::string& message, float progress)>& monitor=nullptr);
+float4x4 PointsToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid, float voxelSize, float surfelSize,const std::function<bool(const std::string& message, float progress)>& monitor=nullptr);
 typedef EndlessGrid<float> EndlessGridFloat;
 typedef EndlessGrid<int> EndlessGridInt;
 typedef EndlessGrid<float2> EndlessGridFloat2;

@@ -32,12 +32,15 @@ LevelSetGridEx::LevelSetGridEx() :
 }
 bool LevelSetGridEx::init(Composite& rootNode) {
 	srand((unsigned int) time(nullptr));
-	mesh.load(getFullPath("models/eagle.ply"));
+	//mesh.load(getFullPath("models/eagle.ply"));
+
+	mesh.load(getFullPath("models/horse.ply"));
+
+	/*
 	std::chrono::steady_clock::time_point lastTime;
 	std::chrono::steady_clock::time_point currentTime;
 	IsoSurface isosurf;
 	double elapsed;
-	EndlessGrid<float> grid( { 32, 4, 4 }, 0.0f);
 	std::string voxelFile=MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"points.xml";
 	box3f bbox=mesh.getBoundingBox();
 	float res=std::max(std::max(bbox.dimensions.x,bbox.dimensions.y),bbox.dimensions.z)/512;
@@ -56,11 +59,10 @@ bool LevelSetGridEx::init(Composite& rootNode) {
 	meshFile = MakeString() << GetDesktopDirectory()<< ALY_PATH_SEPARATOR<<"points_quad.ply";
 	WriteMeshToFile(meshFile,mesh);
 
-	mesh.load(getFullPath("models/horse.ply"));
 	voxelFile=MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"signed.xml";
 	std::cout<<"Convert to level set"<<std::endl;
 	T=MeshToLevelSet(mesh, grid, 2.5f, true, 0.8f);
-
+*/
 	/*
 	std::cout<<"Convert grid to dense block"<<std::endl;
 	WriteGridToFile(voxelFile,grid);
@@ -79,28 +81,6 @@ bool LevelSetGridEx::init(Composite& rootNode) {
 		}
 	}
 	*/
-
-	lastTime =std::chrono::steady_clock::now();
-	isosurf.solve(grid,mesh,MeshType::QUAD,true,0.0f);
-	currentTime=std::chrono::steady_clock::now();
-	elapsed = std::chrono::duration<double>(currentTime - lastTime).count();
-	std::cout << "Elapsed Time: " << elapsed << " sec" << std::endl;
-	meshFile = MakeString() << GetDesktopDirectory()<< ALY_PATH_SEPARATOR<<"endless_quad.ply";
-	std::cout<<"Write "<<meshFile<<std::endl;
-	mesh.transform(T);
-	WriteMeshToFile(meshFile, mesh);
-
-	std::cout<<"Iso-surf gen ..."<<std::endl;
-	lastTime =std::chrono::steady_clock::now();
-	isosurf.solve(grid,mesh,MeshType::TRIANGLE,true,0.0f);
-	currentTime=std::chrono::steady_clock::now();
-	elapsed = std::chrono::duration<double>(currentTime - lastTime).count();
-	std::cout << "Elapsed Time: " << elapsed << " sec" << std::endl;
-	meshFile = MakeString() << GetDesktopDirectory()<< ALY_PATH_SEPARATOR<<"endless_tri.ply";
-	std::cout<<"Write "<<meshFile<<std::endl;
-	mesh.transform(T);
-	WriteMeshToFile(meshFile, mesh);
-	std::cout<<"Done"<<std::endl;
 
 	objectBBox = mesh.getBoundingBox();
 	displayIndex = 0;
@@ -204,6 +184,17 @@ bool LevelSetGridEx::init(Composite& rootNode) {
 			Float(0.5f), Float(5.0f), 5.5f);
 	faceColorField = controls->addColorField("Face", faceColor);
 	lineColorField = controls->addColorField("Line", lineColor);
+
+	meshType=0;
+	topoConfig=1;
+	regularize=true;
+	voxelScale=Float(0.75f);
+	controls->addGroup("Endless Grid", true);
+	controls->addSelectionField("Topology",topoConfig,std::vector<std::string>{"256","32/4/4","5/4/6/4"});
+	controls->addSelectionField("Type",meshType,std::vector<std::string>{"Triangle","Quad"});
+	controls->addNumberField("Voxel Scale",voxelScale,Float(0.25f),Float(2.0f));
+	controls->addCheckBox("Regularize",regularize);
+
 	ReconstructionParameters params;
 	float4x4 MT = MakeTransform(objectBBox, renderBBox);
 	camera.setPose(MT);
@@ -219,50 +210,47 @@ bool LevelSetGridEx::init(Composite& rootNode) {
 	return true;
 }
 void LevelSetGridEx::solve() {
-	mesh.clear();
 	parametersDirty = true;
-	/*
+	mesh.load(getFullPath("models/horse.ply"));
 	 if (worker.get() != nullptr) {
 	 worker->cancel();
 	 } else {
 	 worker.reset(
 	 new WorkerTask(
 	 [this]() {
-	 ReconstructionParameters params;
-	 params.BType.value = boundaryType;
-	 params.Smooth.value = smoothingIterations.toInteger();
-	 params.Depth.value = treeDepth.toInteger();
-	 params.FullDepth.value = treeFullDepth.toInteger();
-	 params.MaxSolveDepth.value = treeMaxSolveDepth.toInteger();
-	 params.Trim.value = trimPercent.toFloat();
-	 params.Degree.value = bsplineDegree.toInteger();
-	 params.PointWeight.value = pointWeight.toFloat();
-	 params.SamplesPerNode.value = samplesPerNode.toFloat();
-	 params.IslandAreaRatio.value = islandRatio.toFloat();
-	 params.Iters.value = solverIterations.toInteger();
-	 params.LinearFit.set = linearFitSurface;
-	 params.NonManifold.set = nonManifoldSurface;
-	 SurfaceReconstruct(params, pointCloud, mesh, [this](const std::string& status, float progress) {
-	 textLabel->setLabel(MakeString()<<status<<" ...");
-	 AlloyApplicationContext()->requestPack();
-	 return !worker->isCanceled();
-	 });
+		 	IsoSurface isosurf;
+		 	std::vector<int> config;
+		 	if(topoConfig==0){
+		 		config={256};
+		 	} else if(topoConfig==1){
+		 		config={32,4,4};
+		 	} else if(topoConfig==2){
+		 		config={5,4,6,4};
+		 	}
+			EndlessGrid<float> grid(config, 0.0f);
+			textLabel->setLabel("Converting mesh to level set...");
+			float4x4 T=MeshToLevelSet(mesh,grid,2.5f,true,voxelScale.toFloat(),[this](const std::string& label,float progress){
+				textLabel->setLabel(MakeString()<<label<<" ["<<(int)(progress*100)<<"%]");
+				AlloyApplicationContext()->requestPack();
+				return true;
+			});
+			mesh.clear();
+			Mesh tmp;
+			textLabel->setLabel("Solving for iso-surface...");
+			AlloyApplicationContext()->requestPack();
+			isosurf.solve(grid,tmp,(this->meshType==0)?MeshType::TRIANGLE:MeshType::QUAD,regularize,0.0f);
+			tmp.transform(T);
+			tmp.updateBoundingBox();
+			tmp.clone(mesh);
+			textLabel->setLabel("Done.");
+			AlloyApplicationContext()->requestPack();
 	 },
 	 [this]() {
-	 colorReconstructionField->setValue(mesh.vertexColors.size() > 0);
-	 showReconstructionField->setValue(true);
-	 showPointCloudField->setValue(false);
-	 showReconstruction = showReconstructionField->getValue();
-	 showPointCloud = showPointCloudField->getValue();
-	 colorReconstruction = colorReconstructionField->getValue();
-	 textLabel->setLabel("");
-	 mesh.setDirty(true);
-	 parametersDirty = true;
-	 AlloyApplicationContext()->requestPack();
+		 mesh.setDirty(true);
 	 }));
 	 }
 	 worker->execute();
-	 */
+
 }
 void LevelSetGridEx::initializeFrameBuffers(aly::AlloyContext* context) {
 	float2 dims = renderRegion->getBounds().dimensions;

@@ -29,6 +29,10 @@ protected:
 	aly::Mesh mesh;
 	int displayIndex;
 	int cameraType;
+	int meshType;
+	int topoConfig;
+	aly::Number voxelScale;
+	bool regularize;
 	bool colorReconstruction;
 	aly::ImageGlyphPtr imageGlyph;
 	aly::CompositePtr resizeableRegion;
