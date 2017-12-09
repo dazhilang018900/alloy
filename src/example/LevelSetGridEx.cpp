@@ -189,7 +189,7 @@ bool LevelSetGridEx::init(Composite& rootNode) {
 	topoConfig=1;
 	regularize=true;
 	voxelScale=Float(0.75f);
-	controls->addGroup("Endless Grid", true);
+	controls->addGroup("Grid Settings", true);
 	controls->addSelectionField("Topology",topoConfig,std::vector<std::string>{"256","32/4/4","5/4/6/4"});
 	controls->addSelectionField("Type",meshType,std::vector<std::string>{"Triangle","Quad"});
 	controls->addNumberField("Voxel Scale",voxelScale,Float(0.25f),Float(2.0f));
@@ -220,6 +220,8 @@ void LevelSetGridEx::solve() {
 	 [this]() {
 		 	IsoSurface isosurf;
 		 	std::vector<int> config;
+			std::chrono::steady_clock::time_point lastTime=std::chrono::steady_clock::now();
+			double elapsed;
 		 	if(topoConfig==0){
 		 		config={256};
 		 	} else if(topoConfig==1){
@@ -239,10 +241,12 @@ void LevelSetGridEx::solve() {
 			textLabel->setLabel("Solving for iso-surface...");
 			AlloyApplicationContext()->requestPack();
 			isosurf.solve(grid,tmp,(this->meshType==0)?MeshType::TRIANGLE:MeshType::QUAD,regularize,0.0f);
+			std::chrono::steady_clock::time_point currentTime=std::chrono::steady_clock::now();
+			elapsed = std::chrono::duration<double>(currentTime - lastTime).count();
 			tmp.transform(T);
 			tmp.updateBoundingBox();
 			tmp.clone(mesh);
-			textLabel->setLabel("Done.");
+			textLabel->setLabel(MakeString()<<"Elapsed Time: "<<elapsed<<" sec");
 			AlloyApplicationContext()->requestPack();
 	 },
 	 [this]() {

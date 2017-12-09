@@ -138,7 +138,7 @@ void FloodFill(EndlessGrid<float>& grid, float narrowBand) {
 	std::vector<EndlessNodeFloatPtr> leafs = grid.getLeafNodes();
 	for (int i = 0; i < (int) leafs.size(); i++) {
 		EndlessNodeFloatPtr leaf = leafs[i];
-		leaf->parent->data[leaf->parent->getIndex(leaf.get())] = 0;
+		if(leaf->parent!=nullptr)leaf->parent->data[leaf->parent->getIndex(leaf.get())] = 0;
 		int3 location = leaf->location;
 		std::vector<float>& data = leaf->data;
 		int dim = leaf->dim;
@@ -229,7 +229,7 @@ void FloodFill(EndlessGrid<float>& grid, float narrowBand) {
 			}
 		}
 
-		parents.insert(leaf->parent);
+		if(leaf->parent!=nullptr)parents.insert(leaf->parent);
 	}
 
 	int treeDepth = grid.getTreeDepth() - 2;
@@ -578,7 +578,7 @@ float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 	//Flood fill leaf nodes with narrowband value.
 	for (int i = 0; i < (int) leafs.size(); i++) {
 		EndlessNodeFloatPtr leaf = leafs[i];
-		leaf->parent->data[leaf->parent->getIndex(leaf.get())] = 0;
+		if(leaf->parent!=nullptr)leaf->parent->data[leaf->parent->getIndex(leaf.get())] = 0;
 		int3 location = leaf->location;
 		std::vector<float>& data = leaf->data;
 		int dim = leaf->dim;
