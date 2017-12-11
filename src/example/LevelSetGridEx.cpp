@@ -255,6 +255,7 @@ void LevelSetGridEx::solve() {
 	 }
 	 worker->execute();
 
+
 }
 void LevelSetGridEx::initializeFrameBuffers(aly::AlloyContext* context) {
 	float2 dims = renderRegion->getBounds().dimensions;

@@ -382,15 +382,15 @@ public:
 			//Cheack parent of leaf
 			EndlessNode<T>* parent = node->parent;
 			if(parent!=nullptr){
-				int3 pos = parent->getIndexLocation(node.get());
-				if(pos.x>=0){
-					assert(parent->getChild(pos.x, pos.y, pos.z).get()==node.get());
-					delta = pos + int3(xoff, yoff, zoff);
-					node = parent->getChild(pos.x+xoff, pos.y+yoff, pos.z+zoff);
-					if(node.get()!=nullptr){
-						delta = int3(i, j, k)-node->location;
-						return (*node)(delta.x, delta.y, delta.z);
-					}
+				int3 pos =node->getId();
+				//if(parent->getChild(pos.x, pos.y, pos.z).get()!=node.get()){
+				//	std::cout<<"Could not find location "<<pos<<" "<<node->id<<std::endl;
+				//}
+				delta = pos + int3(xoff, yoff, zoff);
+				node = parent->getChild(pos.x+xoff, pos.y+yoff, pos.z+zoff);
+				if(node.get()!=nullptr){
+					delta = int3(i, j, k)-node->location;
+					return (*node)(delta.x, delta.y, delta.z);
 				}
 			}
 		}

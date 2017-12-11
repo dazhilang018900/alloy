@@ -440,6 +440,7 @@ float3 GetInterpolatedNormal(const EndlessGrid<float>& grid,float x,float y,floa
 									+ GetNormal(grid, x1, y1, z1) * dx) * dy)
 							* dz));
 }
+
 float4x4 PointsToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid, float voxelResolution, float surfelSize,const std::function<bool(const std::string& message, float progress)>& monitor){
 	const float narrowBand=2.5f;
 	EndlessGrid<float> weights(grid.getLevelSizes(),0.0f);
@@ -482,12 +483,10 @@ float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 	const int nbr6X[6] = { 1, -1, 0, 0, 0, 0 };
 	const int nbr6Y[6] = { 0, 0, 1, -1, 0, 0 };
 	const int nbr6Z[6] = { 0, 0, 0, 0, 1, -1 };
-	const int nbr26X[26] = { 1, 0, -1, 1, 0, -1, 1, 0, -1, 1, 0, -1, 1, -1, 1,
-			0, -1, 1, 0, -1, 1, 0, -1, 1, 0, -1 };
-	const int nbr26Y[26] = { 1, 1, 1, 0, 0, 0, -1, -1, -1, 1, 1, 1, 0, 0, -1,
-			-1, -1, 1, 1, 1, 0, 0, 0, -1, -1, -1 };
-	const int nbr26Z[26] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-			-1, -1, -1, -1, -1, -1, -1, -1, -1 };
+
+	const int nbr26X[26] = { 1, 0, -1, 1, 0, -1, 1, 0, -1, 1, 0, -1, 1, -1, 1,0, -1, 1, 0, -1, 1, 0, -1, 1, 0, -1 };
+	const int nbr26Y[26] = { 1, 1, 1, 0, 0, 0, -1, -1, -1, 1, 1, 1, 0, 0, -1,-1, -1, 1, 1, 1, 0, 0, 0, -1, -1, -1 };
+	const int nbr26Z[26] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,-1, -1, -1, -1, -1, -1, -1, -1, -1 };
 	std::set<EndlessNodeFloat*> parents;
 	const float trustDistance = 1.25f;
 	narrowBand = std::max(trustDistance + 1.0f, narrowBand);
