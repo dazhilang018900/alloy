@@ -13,8 +13,9 @@
 #define INCLUDE_ALLOYISOSURFACE_H_
 #include <AlloyMesh.h>
 #include <AlloyVolume.h>
-#include <map>
+#include <AlloyMath.h>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 #include <math.h>
 #include <stdint.h>
@@ -104,7 +105,7 @@ public:
 	 *
 	 * @param pt the grid point
 	 * @return the hash value ** */
-	inline int64_t hashValue(const int3& pt) {
+	inline uint64_t hashValue(const int3& pt) {
 		return (pt.z + 1) * (row + 2) * (col + 2) + (row + 2) * (pt.y + 1)
 				+ (pt.x + 1);
 	}
@@ -112,9 +113,9 @@ public:
 	/**	* Hash value that uniquely identifies edge split.
 	 *
 	 * @return the hash value ** */
-	inline int64_t hashValue() {
-		int64_t h1 = hashValue(voxelIndex1);
-		int64_t h2 = hashValue(voxelIndex2);
+	inline uint64_t hashValue() {
+		uint64_t h1 = hashValue(voxelIndex1);
+		uint64_t h2 = hashValue(voxelIndex2);
 		if (h1 < h2) {
 			return h1 + index * h2;
 		} else {
@@ -189,16 +190,17 @@ private:
 	float interpolate(const float *data, float x, float y, float z);
 	float getImageValue(const float* image, int i, int j, int k);
 	void triangulateUsingMarchingCubes(const float* pVolMat,
-			std::map<int64_t, EdgeSplit>& splits,
+			std::unordered_map<uint64_t, EdgeSplit>& splits,
 			std::vector<IsoTriangle>& triangles, int x, int y, int z,
 			size_t& vertexCount);
 	void triangulateUsingMarchingCubes(const float* pVolMat,
-			std::map<int4, EdgeSplit>& splits,
+			std::unordered_map<int4, EdgeSplit>& splits,
 			std::vector<IsoTriangle>& triangles,
 			int x, int y, int z,
 			int ox, int oy, int oz, size_t& vertexCount);
 	void triangulateUsingMarchingCubes(const float* pVolMat,
-			std::vector<EdgeSplit>& splits, std::vector<IsoTriangle>& triangles,
+			std::vector<EdgeSplit>& splits,
+			std::vector<IsoTriangle>& triangles,
 			int x, int y, int z, size_t& vertexCount);
 
 	static std::vector<std::vector<int>> buildVertexNeighborTable(
@@ -211,19 +213,25 @@ private:
 	static std::vector<int> buildFaceNeighborTable(int vertexCount,
 			const int* indexes, const int indexCount);
 	void findActiveVoxels(const float* vol, const std::vector<int3>& indexList,
-			std::set<int3>& activeVoxels,
-			std::map<int4, EdgeInfo>& activeEdges);
-	void generateVertexData(const float* data, const std::set<int3>& voxels,
-			const std::map<int4, EdgeInfo>& edges,
-			std::map<int3, uint32_t>& vertexIndices, Mesh& buffer);
-	void generateTriangles(const std::map<int4, EdgeInfo>& edges,
-			const std::map<int3, uint32_t>& vertexIndices, Mesh& buffer);
+			std::unordered_set<int3>& activeVoxels,
+			std::unordered_map<int4, EdgeInfo>& activeEdges);
+	void generateVertexData(
+			const float* data,
+			const std::unordered_set<int3>& voxels,
+			const std::unordered_map<int4, EdgeInfo>& edges,
+			std::unordered_map<int3, uint32_t>& vertexIndices,
+			Mesh& buffer);
+	void generateTriangles(const std::unordered_map<int4, EdgeInfo>& edges,
+			const std::unordered_map<int3, uint32_t>& vertexIndices, Mesh& buffer);
 	void solveQuad(const float* data, const int& rows, const int& cols,
 			const int& slices, const std::vector<int3>& indexList, Mesh& mesh, const float& isoLevel = 0.0f);
 	void solveQuad(const EndlessGridFloat& grid,Mesh& mesh,const float& isoLevel);
-	void generateVertexData(const EndlessGridFloat& grid,
-			const std::set<int3>& voxels, const std::map<int4, EdgeInfo>& edges,
-			std::map<int3, uint32_t>& vertexIndices, Mesh& buffer);
+	void generateVertexData(
+			const EndlessGridFloat& grid,
+			const std::unordered_set<int3>& voxels,
+			const std::unordered_map<int4, EdgeInfo>& edges,
+			std::unordered_map<int3, uint32_t>& vertexIndices,
+			Mesh& buffer);
 	void solveTri(const float* data, const int& rows, const int& cols,
 			const int& slices, const std::vector<int3>& indexList,
 			Mesh& mesh, const float& isoLevel = 0);
@@ -233,8 +241,8 @@ private:
 	void findActiveVoxels(
 			const EndlessGridFloat& grid,
 			const std::vector<EndlessNodeFloatPtr>& leafs,
-			std::set<int3>& activeVoxels,
-			std::map<int4, EdgeInfo>& activeEdges);
+			std::unordered_set<int3>& activeVoxels,
+			std::unordered_map<int4, EdgeInfo>& activeEdges);
 public:
 	IsoSurface();
 	~IsoSurface();

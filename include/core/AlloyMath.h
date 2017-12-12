@@ -2481,8 +2481,9 @@ struct dim2: public int2 {
 		return (size_t) clamp(i, 0, x - 1) + clamp(j, 0, y - 1) * (size_t) x;
 	}
 	inline size_t operator()(const int2& pos) const {
-			return (size_t) clamp(pos.x, 0, x - 1) + clamp(pos.y, 0, y - 1) * (size_t) x;
-		}
+		return (size_t) clamp(pos.x, 0, x - 1)
+				+ clamp(pos.y, 0, y - 1) * (size_t) x;
+	}
 	inline size_t size() const {
 		return x * (size_t) y;
 	}
@@ -2490,9 +2491,9 @@ struct dim2: public int2 {
 		return x * (size_t) y;
 	}
 	inline int2 operator()(const size_t index) const {
-		int i = (int)(index % (size_t)x);
-		int j = (int)(index / (size_t)x);
-		return int2(i,j);
+		int i = (int) (index % (size_t) x);
+		int j = (int) (index / (size_t) x);
+		return int2(i, j);
 	}
 	inline dim2 operator =(const int2& dim) {
 		return dim2(dim);
@@ -2514,7 +2515,8 @@ struct dim3: public int3 {
 				+ clamp(k, 0, z - 1) * (size_t) x * (size_t) y;
 	}
 	inline size_t operator()(const int3& pos) const {
-		return (size_t) clamp(pos.x, 0, x - 1) + (size_t) clamp(pos.y, 0, y - 1) * x
+		return (size_t) clamp(pos.x, 0, x - 1)
+				+ (size_t) clamp(pos.y, 0, y - 1) * x
 				+ clamp(pos.z, 0, z - 1) * (size_t) x * (size_t) y;
 	}
 	inline size_t size() const {
@@ -2524,12 +2526,12 @@ struct dim3: public int3 {
 		return x * (size_t) y;
 	}
 	inline int3 operator()(const size_t index) const {
-		size_t a=area();
+		size_t a = area();
 		size_t k = index / a;
 		size_t ij = index % a;
-		int i = (int)(ij % (size_t)x);
-		int j = (int)(ij / (size_t)x);
-		return int3(i,j,(int)k);
+		int i = (int) (ij % (size_t) x);
+		int j = (int) (ij / (size_t) x);
+		return int3(i, j, (int) k);
 	}
 	inline size_t volume() const {
 		return x * (size_t) y * (size_t) z;
@@ -2556,10 +2558,11 @@ struct dim4: public int4 {
 				+ clamp(l, 0, w - 1) * (size_t) x * (size_t) y * (size_t) z;
 	}
 	inline size_t operator()(const int4& pos) const {
-			return (size_t) clamp(pos.x, 0, x - 1) + (size_t) clamp(pos.y, 0, y - 1) * x
-					+ clamp(pos.z, 0, z - 1) * (size_t) x * (size_t) y
-					+ clamp(pos.w, 0, w - 1) * (size_t) x * (size_t) y * (size_t) z;
-		}
+		return (size_t) clamp(pos.x, 0, x - 1)
+				+ (size_t) clamp(pos.y, 0, y - 1) * x
+				+ clamp(pos.z, 0, z - 1) * (size_t) x * (size_t) y
+				+ clamp(pos.w, 0, w - 1) * (size_t) x * (size_t) y * (size_t) z;
+	}
 	inline size_t size() const {
 		return x * (size_t) y * (size_t) z * (size_t) w;
 	}
@@ -2573,26 +2576,66 @@ struct dim4: public int4 {
 		return dim4(dim);
 	}
 	inline int4 operator()(const size_t index) const {
-		size_t v=volume();
+		size_t v = volume();
 		size_t l = index / v;
 		size_t ijk = index % v;
-		size_t a=area();
+		size_t a = area();
 		size_t k = ijk / a;
 		size_t ij = ijk % a;
-		int i = (int)(ij % (size_t)x);
-		int j = (int)(ij / (size_t)x);
-		return int4(i,j,(int)k,(int)l);
+		int i = (int) (ij % (size_t) x);
+		int j = (int) (ij / (size_t) x);
+		return int4(i, j, (int) k, (int) l);
 	}
 };
 float3 ToBary(float3 p, float3 pt1, float3 pt2, float3 pt3);
-float3 FromBary(float3 b, float3 p1,float3 p2, float3 p3);
+float3 FromBary(float3 b, float3 p1, float3 p2, float3 p3);
 float DistanceToEdgeSqr(const float3& pt, const float3& pt1, const float3& pt2,
 		float3* lastClosestSegmentPoint);
 float DistanceToEdgeSqr(const float3& pt, const float3& pt1, const float3& pt2);
-float DistanceToTriangleSqr(const float3& p, const float3& v0, const float3& v1,const float3& v2, float3* closestPoint);
+float DistanceToTriangleSqr(const float3& p, const float3& v0, const float3& v1,
+		const float3& v2, float3* closestPoint);
 float DistanceToQuadSqr(const float3& p, const float3& v0, const float3& v1,
 		const float3& v2, const float3& v3, const float3& normal,
 		float3* closestPoint);
-
+}
+namespace std {
+	template<> struct hash<aly::int4> {
+	typedef aly::int3 argument_type;
+		typedef std::size_t result_type;
+		std::size_t operator()(const aly::int4& val) const {
+			return ((size_t) val.x) * 73856093L ^ ((size_t) val.y) * 19349663L
+					^ ((size_t) val.z) * 83492791L ^ ((size_t) val.w) * 58291031L;
+		}
+	};
+	template<> struct hash<aly::int3> {
+	typedef aly::int3 argument_type;
+		typedef std::size_t result_type;
+		std::size_t operator()(const aly::int3& val) const {
+			return ((size_t) val.x) * 73856093L ^ ((size_t) val.y) * 19349663L
+					^ ((size_t) val.z) * 83492791L;
+		}
+	};
+	template<> struct hash<aly::int2> {
+		typedef aly::int2 argument_type;
+		typedef std::size_t result_type;
+		std::size_t operator()(const aly::int2& val) const {
+			return ((size_t) val.x) | (((size_t) val.y) << 32);;
+		}
+	};
+	template<> struct equal_to<aly::int4> {
+		constexpr bool operator()(const aly::int4& a, const aly::int4 &b) const {
+			return (a.x == b.x && a.y == b.y && a.z == b.z&& a.w == b.w);
+		}
+	};
+	template<> struct equal_to<aly::int3> {
+		constexpr bool operator()(const aly::int3& a, const aly::int3 &b) const {
+			return (a.x == b.x && a.y == b.y && a.z == b.z);
+		}
+	};
+	template<> struct equal_to<aly::int2> {
+		constexpr bool operator()(const aly::int2& a, const aly::int2 &b) const {
+			return (a.x == b.x && a.y == b.y);
+		}
+	};
 }
 #endif

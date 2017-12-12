@@ -24,6 +24,7 @@
 #include "EndlessNode.h"
 #include "AlloyMath.h"
 #include "AlloyMesh.h"
+#include <unordered_map>
 #include <map>
 #include <iostream>
 namespace aly {
@@ -32,7 +33,7 @@ template<typename T> class EndlessGrid {
 	std::vector<int> gridSizes; //in world grid units
 	std::vector<int> cellSizes; //in world grid units
 	std::vector<std::shared_ptr<EndlessNode<T>>> nodes;
-	std::map<int3, int> indexes;
+	std::unordered_map<int3,int> indexes;
 	T backgroundValue;
 	//std::vector<NodeNeighbor<T>> neighbors;
 	int roundDown(int val, int size) const {

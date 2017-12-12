@@ -378,9 +378,9 @@ void IsoSurface::solveQuad(const float* data, const int& rows, const int& cols,
 	this->cols = cols;
 	this->slices = slices;
 	this->isoLevel = isoLevel;
-	std::set<int3> activeVoxels;
-	std::map<int4, EdgeInfo> activeEdges;
-	std::map<int3, uint32_t> vertexIndices;
+	std::unordered_set<int3> activeVoxels;
+	std::unordered_map<int4, EdgeInfo> activeEdges;
+	std::unordered_map<int3, uint32_t> vertexIndices;
 	findActiveVoxels(data, indexList, activeVoxels, activeEdges);
 	generateVertexData(data, activeVoxels, activeEdges, vertexIndices, mesh);
 	generateTriangles(activeEdges, vertexIndices, mesh);
@@ -548,7 +548,7 @@ void IsoSurface::solveTri(const float* vol, const int& rows, const int& cols,
 	std::vector<uint3> &indexes = mesh.triIndexes.data;
 	std::vector<float3> &points = mesh.vertexLocations.data;
 	std::vector<float3> &normals = mesh.vertexNormals.data;
-	std::map<int64_t, EdgeSplit> splits;
+	std::unordered_map<uint64_t, EdgeSplit> splits;
 	std::vector<IsoTriangle> triangles;
 	triangles.reserve(indexList.size() * 2);
 	size_t vertexCount = 0;
@@ -596,9 +596,9 @@ void IsoSurface::solveQuad(const EndlessGridFloat& grid, Mesh& mesh,
 	this->slices = bdim;
 	this->isoLevel = isoLevel;
 
-	std::set<int3> activeVoxels;
-	std::map<int4, EdgeInfo> activeEdges;
-	std::map<int3, uint32_t> vertexIndices;
+	std::unordered_set<int3> activeVoxels;
+	std::unordered_map<int4, EdgeInfo> activeEdges;
+	std::unordered_map<int3, uint32_t> vertexIndices;
 	findActiveVoxels(grid, leafs, activeVoxels, activeEdges);
 	generateVertexData(grid, activeVoxels, activeEdges, vertexIndices, mesh);
 	generateTriangles(activeEdges, vertexIndices, mesh);
@@ -608,7 +608,7 @@ void IsoSurface::solveTri(const EndlessGridFloat& grid, Mesh& mesh,
 	this->isoLevel = isoLevel;
 	std::vector<aly::float3> &points = mesh.vertexLocations.data;
 	std::vector<uint3> &indexes = mesh.triIndexes.data;
-	std::map<int4, EdgeSplit> splits;
+	std::unordered_map<int4, EdgeSplit> splits;
 	std::vector<IsoTriangle> triangles;
 	size_t vertexCount = 0;
 	triangleCount = 0;
@@ -849,8 +849,8 @@ vector<vector<int>> IsoSurface::buildVertexNeighborTable(const int vertexCount,
 	return neighborTable;
 }
 void IsoSurface::generateVertexData(const float*data,
-		const std::set<int3>& voxels, const std::map<int4, EdgeInfo>& edges,
-		std::map<int3, uint32_t>& vertexIndices, Mesh& buffer) {
+		const std::unordered_set<int3>& voxels, const std::unordered_map<int4, EdgeInfo>& edges,
+		std::unordered_map<int3, uint32_t>& vertexIndices, Mesh& buffer) {
 	Vector3f& vert = buffer.vertexLocations;
 	Vector3f& norm = buffer.vertexNormals;
 	float3 p[12];
@@ -878,9 +878,12 @@ void IsoSurface::generateVertexData(const float*data,
 				interpolateNormal(data, nodePos.x, nodePos.y, nodePos.z));
 	}
 }
-void IsoSurface::generateVertexData(const EndlessGridFloat& grid,
-		const std::set<int3>& voxels, const std::map<int4, EdgeInfo>& edges,
-		std::map<int3, uint32_t>& vertexIndices, Mesh& buffer) {
+void IsoSurface::generateVertexData(
+		const EndlessGridFloat& grid,
+		const std::unordered_set<int3>& voxels,
+		const std::unordered_map<int4, EdgeInfo>& edges,
+		std::unordered_map<int3, uint32_t>& vertexIndices,
+		Mesh& buffer) {
 	Vector3f& vert = buffer.vertexLocations;
 	Vector3f& norm = buffer.vertexNormals;
 	float3 p[12];
@@ -908,8 +911,8 @@ void IsoSurface::generateVertexData(const EndlessGridFloat& grid,
 				GetInterpolatedNormal(grid, nodePos.x, nodePos.y, nodePos.z));
 	}
 }
-void IsoSurface::generateTriangles(const std::map<int4, EdgeInfo>& edges,
-		const std::map<int3, uint32_t>& vertexIndices, Mesh& mesh) {
+void IsoSurface::generateTriangles(const std::unordered_map<int4, EdgeInfo>& edges,
+		const std::unordered_map<int3, uint32_t>& vertexIndices, Mesh& mesh) {
 	Vector4ui& quads = mesh.quadIndexes;
 	for (const auto& pair : edges) {
 		const int4& edge = pair.first;
@@ -953,7 +956,7 @@ void IsoSurface::generateTriangles(const std::map<int4, EdgeInfo>& edges,
 }
 void IsoSurface::findActiveVoxels(const EndlessGridFloat& grid,
 		const std::vector<EndlessNodeFloatPtr>& leafs,
-		std::set<int3>& activeVoxels, std::map<int4, EdgeInfo>& activeEdges) {
+		std::unordered_set<int3>& activeVoxels, std::unordered_map<int4, EdgeInfo>& activeEdges) {
 	int bdim = rows;
 	std::vector<float> data(rows * cols * slices);
 	for (EndlessNodeFloatPtr leaf : leafs) {
@@ -1022,8 +1025,8 @@ void IsoSurface::findActiveVoxels(const EndlessGridFloat& grid,
 	}
 }
 void IsoSurface::findActiveVoxels(const float* vol,
-		const std::vector<int3>& indexList, std::set<int3>& activeVoxels,
-		std::map<int4, EdgeInfo>& activeEdges) {
+		const std::vector<int3>& indexList, std::unordered_set<int3>& activeVoxels,
+		std::unordered_map<int4, EdgeInfo>& activeEdges) {
 	for (int3 pivot : indexList) {
 		float fValue1 = getValue(vol, pivot.x, pivot.y, pivot.z);
 		if (fValue1 != backgroundValue) {
@@ -1063,7 +1066,7 @@ void IsoSurface::findActiveVoxels(const float* vol,
 
 }
 void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
-		std::map<int64_t, EdgeSplit>& splits,
+		std::unordered_map<uint64_t, EdgeSplit>& splits,
 		std::vector<IsoTriangle>& triangles, int x, int y, int z,
 		size_t& vertexCount) {
 	int3 afCubeValue[8];
@@ -1096,9 +1099,9 @@ void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 						slices);
 			}
 
-			int64_t lHashValue = split.hashValue();
+			uint64_t lHashValue = split.hashValue();
 
-			std::map<int64_t, EdgeSplit>::const_iterator itr;
+			std::unordered_map<uint64_t, EdgeSplit>::const_iterator itr;
 			itr = splits.find(lHashValue);
 
 			if (itr == splits.end()) {
@@ -1117,7 +1120,7 @@ void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 						+ (vertexOffset[edgeConnection[iEdge][0]][2]
 								+ fOffset * edgeDirection[iEdge][2]));
 				split.point = pt3d;
-				splits.insert(std::pair<int64_t, EdgeSplit>(lHashValue, split));
+				splits.insert(std::pair<uint64_t, EdgeSplit>(lHashValue, split));
 			} else {
 				split = itr->second;
 			}
@@ -1143,7 +1146,7 @@ void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 }
 
 void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
-		std::map<int4, EdgeSplit>& splits, std::vector<IsoTriangle>& triangles,
+		std::unordered_map<int4, EdgeSplit>& splits, std::vector<IsoTriangle>& triangles,
 		int x, int y, int z, int ox, int oy, int oz, size_t& vertexCount) {
 	int3 afCubeValue[8];
 	int3 off = int3(ox, oy, oz);
@@ -1177,7 +1180,7 @@ void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 			}
 
 			int4 lHashValue = split.bigHashValue();
-			std::map<int4, EdgeSplit>::const_iterator itr;
+			std::unordered_map<int4, EdgeSplit>::const_iterator itr;
 			itr = splits.find(lHashValue);
 			if (itr == splits.end()) {
 				split.vertexId = vertexCount++;
