@@ -30,6 +30,18 @@
 #include <initializer_list>
 namespace aly {
 struct CameraParameters;
+class MeshPositionShader: public GLShader {
+public:
+	MeshPositionShader( bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
+	void draw(const std::initializer_list<Mesh*>& meshes,
+			CameraParameters& camera, GLFrameBuffer& frameBuffer,
+			bool flatShading=false,bool twoSided=true);
+	void draw(Mesh& mesh,
+			CameraParameters& camera, GLFrameBuffer& frameBuffer,
+			bool flatShading=false,bool twoSided=true){
+		draw({&mesh},camera,frameBuffer,flatShading,twoSided);
+	}
+};
 class DepthAndNormalShader: public GLShader {
 public:
 	DepthAndNormalShader(bool onScreen = true,

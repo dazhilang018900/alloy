@@ -444,7 +444,9 @@ float3 GetInterpolatedNormal(const EndlessGrid<float>& grid,float x,float y,floa
 float4x4 PointsToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid, float voxelResolution, float surfelSize,const std::function<bool(const std::string& message, float progress)>& monitor){
 	const float narrowBand=2.5f;
 	EndlessGrid<float> weights(grid.getLevelSizes(),0.0f);
+	grid.clear();
 	grid.setBackgroundValue(narrowBand+0.5f);
+
 	box3f bbox = mesh.getBoundingBox();
 	size_t N=mesh.vertexLocations.size();
 	int dim=std::max(std::ceil(2.0f*surfelSize/voxelResolution+1),2*narrowBand);
