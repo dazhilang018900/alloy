@@ -240,7 +240,7 @@ private:
 			const float& isoLevel = 0);
 	void findActiveVoxels(
 			const EndlessGridFloat& grid,
-			const std::vector<EndlessNodeFloatPtr>& leafs,
+			const std::vector<EndlessNodeFloat*>& leafs,
 			std::unordered_set<int3>& activeVoxels,
 			std::unordered_map<int4, EdgeInfo>& activeEdges);
 public:

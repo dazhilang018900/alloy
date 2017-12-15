@@ -26,7 +26,7 @@
 #include <queue>
 namespace aly {
 void WriteGridToFile(const std::string& root, const EndlessGrid<float>& grid) {
-	std::vector<std::pair<int3, EndlessNodeFloatPtr>> nodes = grid.getNodes();
+	std::vector<std::pair<int3, EndlessNodeFloat*>> nodes = grid.getNodes();
 	int dim = grid.getNodeSize();
 	Volume1f data(dim, dim, dim);
 	//Volume1ub depth(dim, dim, dim);
@@ -35,7 +35,7 @@ void WriteGridToFile(const std::string& root, const EndlessGrid<float>& grid) {
 	for (auto pr : nodes) {
 		int3 pos = pr.first;
 		//if (pos != int3(0, 0, 0))continue;
-		EndlessNodeFloatPtr node = pr.second;
+		EndlessNodeFloat* node = pr.second;
 		std::string volFile = MakeString() << dir << ALY_PATH_SEPARATOR<<name<<"_"<<pos.x<<"_"<<pos.y<<"_"<<pos.z<<".xml";
 		data.set(grid.getBackgroundValue());
 		std::vector<int3> narrowBandList;
@@ -78,14 +78,14 @@ void WriteGridToFile(const std::string& root, const EndlessGrid<float>& grid) {
 	}
 }
 void WriteGridToFile(const std::string& root, const EndlessGrid<float2>& grid) {
-	std::vector<std::pair<int3, EndlessNodeFloat2Ptr>> nodes = grid.getNodes();
+	std::vector<std::pair<int3, EndlessNodeFloat2*>> nodes = grid.getNodes();
 	int dim = grid.getNodeSize();
 	Volume2f data(dim, dim, dim);
 	std::string name = GetFileNameWithoutExtension(root);
 	std::string dir = GetFileDirectoryPath(root);
 	for (auto pr : nodes) {
 		int3 pos = pr.first;
-		EndlessNodeFloat2Ptr node = pr.second;
+		EndlessNodeFloat2* node = pr.second;
 		std::string volFile = MakeString() << dir << ALY_PATH_SEPARATOR<<name<<"_"<<pos.x<<"_"<<pos.y<<"_"<<pos.z<<".xml";
 		data.set(grid.getBackgroundValue());
 		std::vector<int3> narrowBandList;
@@ -101,14 +101,14 @@ void WriteGridToFile(const std::string& root, const EndlessGrid<float2>& grid) {
 	}
 }
 void WriteGridToFile(const std::string& root, const EndlessGrid<int>& grid) {
-	std::vector<std::pair<int3, EndlessNodeIntPtr>> nodes = grid.getNodes();
+	std::vector<std::pair<int3, EndlessNodeInt*>> nodes = grid.getNodes();
 	int dim = grid.getNodeSize();
 	Volume1i data(dim, dim, dim);
 	std::string name = GetFileNameWithoutExtension(root);
 	std::string dir = GetFileDirectoryPath(root);
 	for (auto pr : nodes) {
 		int3 pos = pr.first;
-		EndlessNodeIntPtr node = pr.second;
+		EndlessNodeInt* node = pr.second;
 		std::string file = MakeString() << dir << ALY_PATH_SEPARATOR<<name<<"_"<<pos.x<<"_"<<pos.y<<"_"<<pos.z<<".xml";
 		data.set(grid.getBackgroundValue());
 		for (int z = 0; z < dim; z++) {
@@ -135,10 +135,10 @@ void FloodFill(EndlessGrid<float>& grid, float narrowBand) {
 			-1, -1, -1, -1, -1, -1, -1, -1, -1 };
 	float backgroundValue = grid.getBackgroundValue();
 	std::set<EndlessNodeFloat*> parents;
-	std::vector<EndlessNodeFloatPtr> leafs = grid.getLeafNodes();
+	std::vector<EndlessNodeFloat*> leafs = grid.getLeafNodes();
 	for (int i = 0; i < (int) leafs.size(); i++) {
-		EndlessNodeFloatPtr leaf = leafs[i];
-		if(leaf->parent!=nullptr)leaf->parent->data[leaf->parent->getIndex(leaf.get())] = 0;
+		EndlessNodeFloat* leaf = leafs[i];
+		if(leaf->parent!=nullptr)leaf->parent->data[leaf->parent->getIndex(leaf)] = 0;
 		int3 location = leaf->location;
 		std::vector<float>& data = leaf->data;
 		int dim = leaf->dim;
@@ -213,7 +213,7 @@ void FloodFill(EndlessGrid<float>& grid, float narrowBand) {
 		}
 
 		for (int3 nbr : posO) {
-			EndlessNodeFloatPtr result;
+			EndlessNodeFloat* result;
 			float* nval = nullptr;
 			grid.getMultiResolutionValue(nbr.x, nbr.y, nbr.z, result, nval);
 			if (nval != nullptr && *nval == backgroundValue) {
@@ -221,7 +221,7 @@ void FloodFill(EndlessGrid<float>& grid, float narrowBand) {
 			}
 		}
 		for (int3 nbr : negO) {
-			EndlessNodeFloatPtr result;
+			EndlessNodeFloat* result;
 			float* nval = nullptr;
 			grid.getMultiResolutionValue(nbr.x, nbr.y, nbr.z, result, nval);
 			if (nval != nullptr && *nval == backgroundValue) {
@@ -313,7 +313,7 @@ void FloodFill(EndlessGrid<float>& grid, float narrowBand) {
 				}
 			}
 			for (int3 nbr : posO) {
-				EndlessNodeFloatPtr result;
+				EndlessNodeFloat* result;
 				float* nval = nullptr;
 				grid.getMultiResolutionValue(nbr.x, nbr.y, nbr.z, result, nval);
 				if (nval != nullptr && *nval == backgroundValue) {
@@ -321,7 +321,7 @@ void FloodFill(EndlessGrid<float>& grid, float narrowBand) {
 				}
 			}
 			for (int3 nbr : negO) {
-				EndlessNodeFloatPtr result;
+				EndlessNodeFloat* result;
 				float* nval = nullptr;
 				grid.getMultiResolutionValue(nbr.x, nbr.y, nbr.z, result, nval);
 				if (nval != nullptr && *nval == backgroundValue) {
@@ -338,7 +338,7 @@ void FloodFill(EndlessGrid<float>& grid, float narrowBand) {
 }
 
 float3 GetNormal(const EndlessGrid<float>& grid,int i,int j,int k){
-	std::shared_ptr<EndlessNodeFloat> node;
+	EndlessNodeFloat* node=nullptr;
 	float gx,gy,gz,centerVal;
 	if(grid.getLeafValue(i, j, k, node, centerVal)){
 		gx = grid.getLeafValue( i + 1, j, k,node)
@@ -359,7 +359,7 @@ float3 GetNormal(const EndlessGrid<float>& grid,int i,int j,int k){
 	}
 }
 float4 GetNormalAndValue(const EndlessGrid<float>& grid,int i,int j,int k){
-	std::shared_ptr<EndlessNodeFloat> node;
+	EndlessNodeFloat* node=nullptr;
 	float gx,gy,gz,centerVal;
 	if(grid.getLeafValue(i, j, k, node, centerVal)){
 		gx = grid.getLeafValue( i + 1, j, k,node)
@@ -393,7 +393,7 @@ float GetInterpolatedValue(const EndlessGrid<float>& grid, float x, float y, flo
 	float hx = 1.0f - dx;
 	float hy = 1.0f - dy;
 	float hz = 1.0f - dz;
-	std::shared_ptr<EndlessNodeFloat> node;
+	EndlessNodeFloat* node=nullptr;
 	float centerVal;
 	if(!grid.getLeafValue( x0, y0, z0, node, centerVal)){
 		return ((((grid.getLeafValue( x0, y0, z0) * hx
@@ -573,13 +573,13 @@ float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 		}
 	}
 	splats.clear();
-	std::vector<EndlessNodeFloatPtr> leafs = grid.getLeafNodes();
+	std::vector<EndlessNodeFloat*> leafs = grid.getLeafNodes();
 	assert(leafs.size()>0);
 	grid.allocateInternalNodes();
 	//Flood fill leaf nodes with narrowband value.
 	for (int i = 0; i < (int) leafs.size(); i++) {
-		EndlessNodeFloatPtr leaf = leafs[i];
-		if(leaf->parent!=nullptr)leaf->parent->data[leaf->parent->getIndex(leaf.get())] = 0;
+		EndlessNodeFloat* leaf = leafs[i];
+		if(leaf->parent!=nullptr)leaf->parent->data[leaf->parent->getIndex(leaf)] = 0;
 		int3 location = leaf->location;
 		std::vector<float>& data = leaf->data;
 		int dim = leaf->dim;
@@ -629,11 +629,17 @@ float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 		if(!monitor("Flood Fill",0.25f))return T;
 	}
 	//Find extremety leaf nodes.
-	EndlessNodeFloatPtr minX, minY, minZ, maxX, maxZ, maxY;
+	EndlessNodeFloat* minX;
+	EndlessNodeFloat* minY;
+	EndlessNodeFloat* minZ;
+	EndlessNodeFloat* maxX;
+	EndlessNodeFloat* maxY;
+	EndlessNodeFloat* maxZ;
+
 	std::queue<std::pair<int3, float>> queue;
 	int3 maxPt = int3(-100000000, -100000000, -100000000);
 	int3 minPt = int3(100000000, 100000000, 100000000);
-	for (EndlessNodeFloatPtr leaf : leafs) {
+	for (EndlessNodeFloat* leaf : leafs) {
 		if (leaf->location.x > maxPt.x) {
 			maxX = leaf;
 			maxPt.x = leaf->location.x;
@@ -735,7 +741,7 @@ float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 			}
 		}
 	}
-	EndlessNodeFloatPtr result;
+	EndlessNodeFloat* result;
 	float* nval;
 	//Flood extremity leaf nodes with sign value.
 	while (queue.size() > 0) {

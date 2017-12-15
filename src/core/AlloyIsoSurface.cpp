@@ -619,7 +619,7 @@ void IsoSurface::solveTri(const EndlessGridFloat& grid, Mesh& mesh,
 	this->cols = bdim;
 	this->slices = bdim;
 	std::vector<float> data(bdim * bdim * bdim);
-	for (EndlessNodeFloatPtr leaf : leafs) {
+	for (EndlessNodeFloat* leaf : leafs) {
 		int dim = leaf->dim;
 		int3 loc = leaf->location;
 		for (int z = 0; z < bdim; z++) {
@@ -955,11 +955,11 @@ void IsoSurface::generateTriangles(const std::unordered_map<int4, EdgeInfo>& edg
 	}
 }
 void IsoSurface::findActiveVoxels(const EndlessGridFloat& grid,
-		const std::vector<EndlessNodeFloatPtr>& leafs,
+		const std::vector<EndlessNodeFloat*>& leafs,
 		std::unordered_set<int3>& activeVoxels, std::unordered_map<int4, EdgeInfo>& activeEdges) {
 	int bdim = rows;
 	std::vector<float> data(rows * cols * slices);
-	for (EndlessNodeFloatPtr leaf : leafs) {
+	for (EndlessNodeFloat* leaf : leafs) {
 		int dim = leaf->dim;
 		int3 loc = leaf->location;
 		for (int z = 0; z < bdim; z++) {

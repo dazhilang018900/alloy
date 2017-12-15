@@ -32,7 +32,7 @@ template<typename T> class EndlessGrid {
 	std::vector<int> levels; //in local units
 	std::vector<int> gridSizes; //in world grid units
 	std::vector<int> cellSizes; //in world grid units
-	std::vector<std::shared_ptr<EndlessNode<T>>> nodes;
+	std::vector<std::unique_ptr<EndlessNode<T>>> nodes;
 	std::unordered_map<int3,int> indexes;
 	T backgroundValue;
 	//std::vector<NodeNeighbor<T>> neighbors;
@@ -58,6 +58,8 @@ public:
 	T getBackgroundValue() const {
 		return backgroundValue;
 	}
+	virtual ~EndlessGrid(){
+	}
 	EndlessGrid(const std::initializer_list<int>& l, T bgValue) {
 		backgroundValue = bgValue;
 		levels.assign(l.begin(), l.end());
@@ -82,10 +84,10 @@ public:
 			cellSizes[c] = gridSizes[c + 1];
 		}
 	}
-	std::vector<std::pair<int3, std::shared_ptr<EndlessNode<T>>>> getNodes() const {
-		std::vector<std::pair<int3, std::shared_ptr<EndlessNode<T>>>> result;
+	std::vector<std::pair<int3, EndlessNode<T>*>> getNodes() const {
+		std::vector<std::pair<int3, EndlessNode<T>*>> result;
 		for (auto pr : indexes) {
-			result.push_back( { pr.first, nodes[pr.second] });
+			result.push_back( { pr.first, nodes[pr.second].get() });
 		}
 		return result;
 	}
@@ -116,7 +118,7 @@ public:
 	int getTreeDepth() const {
 		return levels.size();
 	}
-	std::shared_ptr<EndlessNode<T>> getLocation(int i, int j, int k,
+	EndlessNode<T>* getLocation(int i, int j, int k,
 			EndlessLocation& location) {
 		location.resize(levels.size());
 		int sz = gridSizes[0];
@@ -132,7 +134,7 @@ public:
 		location.nodePosition = int3(ti, tj, tk);
 		location.localPosition = int3(iii, jjj, kkk);
 		location.worldPosition = int3(i, j, k);
-		std::shared_ptr<EndlessNode<T>> node = getNode(ti, tj, tk);
+		EndlessNode<T>* node = getNode(ti, tj, tk);
 		for (int c = 0; c < (int) levels.size(); c++) {
 			cdim = cellSizes[c];
 			location[c] = int3(iii / cdim, jjj / cdim, kkk / cdim);
@@ -143,13 +145,13 @@ public:
 		return node;
 	}
 	inline void allocateInternalNodes() {
-		for (auto node : nodes) {
+		for (const std::unique_ptr<EndlessNode<T>>& node : nodes) {
 			if (!node->isLeaf())
 				node->allocate(backgroundValue);
 		}
 	}
 	inline void getLeafNodes(std::vector<int3>& positions,
-			std::vector<std::shared_ptr<EndlessNode<T>>>& result) {
+			std::vector<EndlessNode<T>*>& result) {
 		positions.clear();
 		result.clear();
 		for (auto node : nodes) {
@@ -160,19 +162,19 @@ public:
 			}
 		}
 	}
-	inline std::vector<std::shared_ptr<EndlessNode<T>>> getLeafNodes() const {
-		std::vector<std::shared_ptr<EndlessNode<T>>> result;
-		for (auto node : nodes) {
+	inline std::vector<EndlessNode<T>*> getLeafNodes() const {
+		std::vector<EndlessNode<T>*> result;
+		for (const std::unique_ptr<EndlessNode<T>>& node : nodes) {
 			if(node->isLeaf()){
-				result.push_back(node);
+				result.push_back(node.get());
 			} else {
 				node->getLeafNodes(result);
 			}
 		}
 		return result;
 	}
-	inline std::vector<std::shared_ptr<EndlessNode<T>>> getNodesAtDepth(int d) const {
-		std::vector<std::shared_ptr<EndlessNode<T>>> result;
+	inline std::vector<EndlessNode<T>*> getNodesAtDepth(int d) const {
+		std::vector<EndlessNode<T>*> result;
 		for (auto node : nodes) {
 			if (d == 0) {
 				result.push_back(node);
@@ -197,7 +199,7 @@ public:
 		 std::cout << "(" << ti << "," << tj << "," << tk << ") (" << i << ","
 		 << j << "," << k << ") " << "(" << iii << "," << jjj << ","
 		 << kkk << ") " << std::endl;*/
-		std::shared_ptr<EndlessNode<T>> node = getNode(ti, tj, tk);
+		EndlessNode<T>* node = getNode(ti, tj, tk);
 		for (int c = 0; c < levels.size() - 1; c++) {
 			cdim = cellSizes[c];
 			int3 pos = int3(iii / cdim, jjj / cdim, kkk / cdim);
@@ -210,7 +212,7 @@ public:
 		return (*node)(iii, jjj, kkk);
 	}
 	T& getMultiResolutionValue(int i, int j, int k,
-			std::shared_ptr<EndlessNode<T>>& result) {
+			EndlessNode<T>*& result) {
 		int sz = gridSizes[0];
 		int cdim, dim;
 		int ti = roundDown(i, sz);
@@ -221,7 +223,7 @@ public:
 		int iii = ((i + stride * sz) % sz);
 		int jjj = ((j + stride * sz) % sz);
 		int kkk = ((k + stride * sz) % sz);
-		std::shared_ptr<EndlessNode<T>> node = getNode(ti, tj, tk);
+		EndlessNode<T>* node = getNode(ti, tj, tk);
 		for (int c = 0; c < levels.size() - 1; c++) {
 			cdim = cellSizes[c];
 			int3 pos = int3(iii / cdim, jjj / cdim, kkk / cdim);
@@ -241,7 +243,7 @@ public:
 		result = node;
 		return (*node)(iii, jjj, kkk);
 	}
-	void getMultiResolutionValue(int i, int j, int k,std::shared_ptr<EndlessNode<T>>& result, T*& value) const {
+	void getMultiResolutionValue(int i, int j, int k,EndlessNode<T>*& result, T*& value) const {
 		int sz = gridSizes[0];
 		int cdim, dim;
 		int ti = roundDown(i, sz);
@@ -253,8 +255,8 @@ public:
 		int jjj = ((j + stride * sz) % sz);
 		int kkk = ((k + stride * sz) % sz);
 		value = nullptr;
-		std::shared_ptr<EndlessNode<T>> node = getNodeIfExists(ti, tj, tk);
-		if (node.get() == nullptr)
+		EndlessNode<T>* node = getNodeIfExists(ti, tj, tk);
+		if (node == nullptr)
 			return;
 		for (int c = 0; c < levels.size() - 1; c++) {
 			cdim = cellSizes[c];
@@ -263,7 +265,7 @@ public:
 			jjj = jjj % cdim;
 			kkk = kkk % cdim;
 			auto child = node->getChild(pos.x, pos.y, pos.z);
-			if (child.get() != nullptr) {
+			if (child != nullptr) {
 				node = child;
 			} else {
 				if (!node->hasData()) {
@@ -278,7 +280,7 @@ public:
 		value = &(*node)(iii, jjj, kkk);
 	}
 
-	bool getLeafValue(int i, int j, int k,std::shared_ptr<EndlessNode<T>>& result, T& value) const {
+	bool getLeafValue(int i, int j, int k,EndlessNode<T>*& result, T& value) const {
 		int sz = gridSizes[0];
 		int cdim, dim;
 		int ti = roundDown(i, sz);
@@ -289,8 +291,8 @@ public:
 		int iii = ((i + stride * sz) % sz);
 		int jjj = ((j + stride * sz) % sz);
 		int kkk = ((k + stride * sz) % sz);
-		std::shared_ptr<EndlessNode<T>> node = getNodeIfExists(ti, tj, tk);
-		if (node.get() == nullptr)
+		EndlessNode<T>* node = getNodeIfExists(ti, tj, tk);
+		if (node == nullptr)
 			return false;
 		for (int c = 0; c < levels.size() - 1; c++) {
 			cdim = cellSizes[c];
@@ -299,7 +301,7 @@ public:
 			jjj = jjj % cdim;
 			kkk = kkk % cdim;
 			auto child = node->getChild(pos.x, pos.y, pos.z);
-			if (child.get() != nullptr) {
+			if (child != nullptr) {
 				node = child;
 			} else {
 				return false;
@@ -320,8 +322,8 @@ public:
 		int iii = ((i + stride * sz) % sz);
 		int jjj = ((j + stride * sz) % sz);
 		int kkk = ((k + stride * sz) % sz);
-		std::shared_ptr<EndlessNode<T>> node = getNodeIfExists(ti, tj, tk);
-		if (node.get() == nullptr)
+		EndlessNode<T>* node = getNodeIfExists(ti, tj, tk);
+		if (node == nullptr)
 			return backgroundValue;
 		for (int c = 0; c < levels.size() - 1; c++) {
 			cdim = cellSizes[c];
@@ -330,7 +332,7 @@ public:
 			jjj = jjj % cdim;
 			kkk = kkk % cdim;
 			auto child = node->getChild(pos.x, pos.y, pos.z);
-			if (child.get() != nullptr) {
+			if (child!= nullptr) {
 				node = child;
 			} else {
 				return backgroundValue;
@@ -349,8 +351,8 @@ public:
 		int iii = ((i + stride * sz) % sz);
 		int jjj = ((j + stride * sz) % sz);
 		int kkk = ((k + stride * sz) % sz);
-		std::shared_ptr<EndlessNode<T>> node = getNodeIfExists(ti, tj, tk);
-		if (node.get() == nullptr)
+		EndlessNode<T>* node = getNodeIfExists(ti, tj, tk);
+		if (node == nullptr)
 			return backgroundValue;
 		for (int c = 0; c < levels.size() - 1; c++) {
 			cdim = cellSizes[c];
@@ -371,7 +373,7 @@ public:
 		}
 		return (*node)(iii, jjj, kkk);
 	}
-	T getLeafValue(int i, int j, int k,std::shared_ptr<EndlessNode<T>> node) const {
+	T getLeafValue(int i, int j, int k,EndlessNode<T>* node) const {
 		int3 delta = int3(i, j, k)-node->location;
 		int dim = node->dim;
 		int xoff = roundDown(delta.x, dim);
@@ -389,7 +391,7 @@ public:
 				//}
 				delta = pos + int3(xoff, yoff, zoff);
 				node = parent->getChild(pos.x+xoff, pos.y+yoff, pos.z+zoff);
-				if(node.get()!=nullptr){
+				if(node!=nullptr){
 					delta = int3(i, j, k)-node->location;
 					return (*node)(delta.x, delta.y, delta.z);
 				}
@@ -407,7 +409,7 @@ public:
 		int jjj = ((j + stride * sz) % sz);
 		int kkk = ((k + stride * sz) % sz);
 		node = getNodeIfExists(ti, tj, tk);
-		if (node.get() == nullptr)
+		if (node == nullptr)
 			return backgroundValue;
 		for (int c = 0; c < levels.size() - 1; c++) {
 			cdim = cellSizes[c];
@@ -416,7 +418,7 @@ public:
 			jjj = jjj % cdim;
 			kkk = kkk % cdim;
 			auto child = node->getChild(pos.x, pos.y, pos.z);
-			if (child.get() != nullptr) {
+			if (child!= nullptr) {
 				node = child;
 			} else {
 				return backgroundValue;
@@ -425,7 +427,7 @@ public:
 		return (*node)(iii, jjj, kkk);
 
 	}
-	T getMultiResolutionValue(std::shared_ptr<EndlessNode<T>> node, int iii,
+	T getMultiResolutionValue(EndlessNode<T>* node, int iii,
 			int jjj, int kkk) const {
 		int cdim;
 		for (int c = 0; c < levels.size() - 1; c++) {
@@ -435,7 +437,7 @@ public:
 			jjj = jjj % cdim;
 			kkk = kkk % cdim;
 			auto child = node->getChild(pos.x, pos.y, pos.z);
-			if (child.get() != nullptr) {
+			if (child != nullptr) {
 				node = child;
 			} else {
 				if (node->hasData()) {
@@ -447,7 +449,7 @@ public:
 		}
 		return (*node)(iii, jjj, kkk);
 	}
-	int getTreeDepth(std::shared_ptr<EndlessNode<T>> node, int iii, int jjj,
+	int getTreeDepth(EndlessNode<T>* node, int iii, int jjj,
 			int kkk) const {
 		int cdim;
 		int d = 0;
@@ -467,7 +469,7 @@ public:
 		}
 		return d;
 	}
-	float getDepthValue(std::shared_ptr<EndlessNode<T>> node, int iii, int jjj,
+	float getDepthValue(EndlessNode<T>* node, int iii, int jjj,
 			int kkk, int D) const {
 		int cdim;
 		int d = 0;
@@ -494,28 +496,25 @@ public:
 			return backgroundValue;
 		}
 	}
-	std::shared_ptr<EndlessNode<T>> getNodeIfExists(int ti, int tj,
+	EndlessNode<T>* getNodeIfExists(int ti, int tj,
 			int tk) const {
 		auto idx = indexes.find(int3(ti, tj, tk));
 		if (idx != indexes.end()) {
-			return nodes[idx->second];
+			return nodes[idx->second].get();
 		} else {
-			return std::shared_ptr<EndlessNode<T>>();
+			return nullptr;
 		}
 	}
-	std::shared_ptr<EndlessNode<T>> getNode(int ti, int tj, int tk) {
+	EndlessNode<T>* getNode(int ti, int tj, int tk) {
 		auto idx = indexes.find(int3(ti, tj, tk));
 		if (idx != indexes.end()) {
-			return nodes[idx->second];
+			return nodes[idx->second].get();
 		} else {
-			std::shared_ptr<EndlessNode<T>> node = std::shared_ptr<
-					EndlessNode<T>>(
-					new EndlessNode<T>(levels[0], backgroundValue,
-							levels.size() <= 1));
+			EndlessNode<T>* node = new EndlessNode<T>(levels[0], backgroundValue,levels.size() <= 1);
 			indexes[int3(ti, tj, tk)] = (int) nodes.size();
 			node->location = int3(ti * gridSizes[0], tj * gridSizes[0],
 					tk * gridSizes[0]);
-			nodes.push_back(node);
+			nodes.push_back(std::unique_ptr<EndlessNode<T>>(node));
 			return node;
 		}
 	}
@@ -547,14 +546,6 @@ typedef EndlessNode<std::pair<float, int>> EndlessNodeFloatIndex;
 typedef EndlessNode<RGBf> EndlessNodeRGBf;
 typedef EndlessNode<RGBAf> EndlessNodeRGBAf;
 
-typedef std::shared_ptr<EndlessNode<float>> EndlessNodeFloatPtr;
-typedef std::shared_ptr<EndlessNode<int>> EndlessNodeIntPtr;
-typedef std::shared_ptr<EndlessNode<float2>> EndlessNodeFloat2Ptr;
-typedef std::shared_ptr<EndlessNode<float3>> EndlessNodeFloat3Ptr;
-typedef std::shared_ptr<EndlessNode<float4>> EndlessNodeFloat4Ptr;
-typedef std::shared_ptr<EndlessNode<std::pair<float, int>>> EndlessNodeFloatIndexPtr;
-typedef std::shared_ptr<EndlessNode<RGBf>> EndlessNodeRGBfPtr;
-typedef std::shared_ptr<EndlessNode<RGBAf>> EndlessNodeRGBAfPtr;
 
 void WriteGridToFile(const std::string& dir, const EndlessGrid<float>& grid);
 void WriteGridToFile(const std::string& dir, const EndlessGrid<float2>& grid);
