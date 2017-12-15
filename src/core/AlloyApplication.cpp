@@ -409,6 +409,7 @@ void Application::onCursorPos(double xpos, double ypos) {
 	context->hasFocus = true;
 	context->cursorPosition = pixel2((pixel) (xpos), (pixel) (ypos));
 	InputEvent& e = inputEvent;
+	e=InputEvent();
 	e.type = InputType::Cursor;
 	e.cursor = pixel2((pixel) (xpos), (pixel) (ypos));
 	fireEvent(e);
@@ -418,6 +419,7 @@ void Application::onWindowFocus(int focused) {
 	if (focused) {
 		context->hasFocus = true;
 		InputEvent& e = inputEvent;
+		e=InputEvent();
 		e.type = InputType::Cursor;
 		e.cursor = context->cursorPosition;
 		fireEvent(e);
@@ -456,6 +458,7 @@ void Application::onCursorEnter(int enter) {
 		context->hasFocus = false;
 		context->mouseOverRegion = nullptr;
 		InputEvent& e = inputEvent;
+		e=InputEvent();
 		e.type = InputType::Cursor;
 		e.cursor = context->cursorPosition;
 		fireEvent(e);
@@ -465,6 +468,7 @@ void Application::onCursorEnter(int enter) {
 }
 void Application::onScroll(double xoffset, double yoffset) {
 	InputEvent& e = inputEvent;
+	e=InputEvent();
 	e.cursor = context->cursorPosition;
 	e.type = InputType::Scroll;
 	e.scroll = pixel2((pixel) xoffset, (pixel) yoffset);
@@ -487,6 +491,7 @@ void Application::onScroll(double xoffset, double yoffset) {
 }
 void Application::onMouseButton(int button, int action, int mods) {
 	InputEvent& e = inputEvent;
+	e=InputEvent();
 	e.type = InputType::MouseButton;
 	e.cursor = context->cursorPosition;
 	std::chrono::steady_clock::time_point currentTime =
@@ -533,6 +538,7 @@ void Application::onKey(int key, int scancode, int action, int mods) {
 	} else {
 		*/
 		InputEvent& e = inputEvent;
+		e=InputEvent();
 		e.type = InputType::Key;
 		e.action = action;
 		e.key = key;
@@ -558,11 +564,12 @@ void Application::onKey(int key, int scancode, int action, int mods) {
 }
 void Application::onChar(unsigned int codepoint) {
 	InputEvent& e = inputEvent;
+	e=InputEvent();
 	e.type = InputType::Character;
 	e.codepoint = codepoint;
+	e.clicks=0;
 	e.cursor = context->cursorPosition;
 	GLFWwindow* window = context->window;
-	e.mods = 0;
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)
 			| glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT))
 		e.mods |= GLFW_MOD_SHIFT;
