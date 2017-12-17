@@ -23,6 +23,7 @@
 #include "AlloyVolume.h"
 
 #include "AlloyIsoSurface.h"
+#include "AlloyDistanceField.h"
 #include <queue>
 namespace aly {
 void WriteGridToFile(const std::string& root, const EndlessGrid<float>& grid) {
@@ -135,10 +136,10 @@ void FloodFill(EndlessGrid<float>& grid, float narrowBand) {
 			-1, -1, -1, -1, -1, -1, -1, -1, -1 };
 	float backgroundValue = grid.getBackgroundValue();
 	std::set<EndlessNodeFloat*> parents;
-	std::vector<EndlessNodeFloat*> leafs = grid.getLeafNodes();
-	for (int i = 0; i < (int) leafs.size(); i++) {
-		EndlessNodeFloat* leaf = leafs[i];
-		if(leaf->parent!=nullptr)leaf->parent->data[leaf->parent->getIndex(leaf)] = 0;
+	std::list<EndlessNodeFloat*> leafs = grid.getLeafNodes();
+	for (EndlessNodeFloat* leaf : leafs) {
+		if (leaf->parent != nullptr)
+			leaf->parent->data[leaf->parent->getIndex(leaf)] = 0;
 		int3 location = leaf->location;
 		std::vector<float>& data = leaf->data;
 		int dim = leaf->dim;
@@ -229,7 +230,8 @@ void FloodFill(EndlessGrid<float>& grid, float narrowBand) {
 			}
 		}
 
-		if(leaf->parent!=nullptr)parents.insert(leaf->parent);
+		if (leaf->parent != nullptr)
+			parents.insert(leaf->parent);
 	}
 
 	int treeDepth = grid.getTreeDepth() - 2;
@@ -337,50 +339,144 @@ void FloodFill(EndlessGrid<float>& grid, float narrowBand) {
 
 }
 
-float3 GetNormal(const EndlessGrid<float>& grid,int i,int j,int k){
-	EndlessNodeFloat* node=nullptr;
-	float gx,gy,gz,centerVal;
-	if(grid.getLeafValue(i, j, k, node, centerVal)){
-		gx = grid.getLeafValue( i + 1, j, k,node)
-				- grid.getLeafValue( i - 1, j, k,node);
-		gy = grid.getLeafValue( i, j + 1, k,node)
-				- grid.getLeafValue( i, j - 1, k,node);
-		gz = grid.getLeafValue( i, j, k + 1,node)
-				- grid.getLeafValue( i, j, k - 1,node);
+float3 GetNormal(const EndlessGrid<float>& grid, int i, int j, int k) {
+	EndlessNodeFloat* node = nullptr;
+	float gx, gy, gz, centerVal;
+	if (grid.getLeafValue(i, j, k, node, centerVal)) {
+		gx = grid.getLeafValue(i + 1, j, k, node)
+				- grid.getLeafValue(i - 1, j, k, node);
+		gy = grid.getLeafValue(i, j + 1, k, node)
+				- grid.getLeafValue(i, j - 1, k, node);
+		gz = grid.getLeafValue(i, j, k + 1, node)
+				- grid.getLeafValue(i, j, k - 1, node);
 		return float3(gx, gy, gz);
 	} else {
-		gx = grid.getLeafValue( i + 1, j, k)
-				- grid.getLeafValue( i - 1, j, k);
-		gy = grid.getLeafValue( i, j + 1, k)
-				- grid.getLeafValue( i, j - 1, k);
-		gz = grid.getLeafValue( i, j, k + 1)
-				- grid.getLeafValue( i, j, k - 1);
+		gx = grid.getLeafValue(i + 1, j, k) - grid.getLeafValue(i - 1, j, k);
+		gy = grid.getLeafValue(i, j + 1, k) - grid.getLeafValue(i, j - 1, k);
+		gz = grid.getLeafValue(i, j, k + 1) - grid.getLeafValue(i, j, k - 1);
 		return float3(gx, gy, gz);
 	}
 }
-float4 GetNormalAndValue(const EndlessGrid<float>& grid,int i,int j,int k){
-	EndlessNodeFloat* node=nullptr;
-	float gx,gy,gz,centerVal;
-	if(grid.getLeafValue(i, j, k, node, centerVal)){
-		gx = grid.getLeafValue( i + 1, j, k,node)
-				- grid.getLeafValue( i - 1, j, k,node);
-		gy = grid.getLeafValue( i, j + 1, k,node)
-				- grid.getLeafValue( i, j - 1, k,node);
-		gz = grid.getLeafValue( i, j, k + 1,node)
-				- grid.getLeafValue( i, j, k - 1,node);
+float4 GetNormalAndValue(const EndlessGrid<float>& grid, int i, int j, int k) {
+	EndlessNodeFloat* node = nullptr;
+	float gx, gy, gz, centerVal;
+	if (grid.getLeafValue(i, j, k, node, centerVal)) {
+		gx = grid.getLeafValue(i + 1, j, k, node)
+				- grid.getLeafValue(i - 1, j, k, node);
+		gy = grid.getLeafValue(i, j + 1, k, node)
+				- grid.getLeafValue(i, j - 1, k, node);
+		gz = grid.getLeafValue(i, j, k + 1, node)
+				- grid.getLeafValue(i, j, k - 1, node);
 		return float4(gx, gy, gz, centerVal);
 	} else {
-		gx = grid.getLeafValue( i + 1, j, k)
-				- grid.getLeafValue( i - 1, j, k);
-		gy = grid.getLeafValue( i, j + 1, k)
-				- grid.getLeafValue( i, j - 1, k);
-		gz = grid.getLeafValue( i, j, k + 1)
-				- grid.getLeafValue( i, j, k - 1);
-		centerVal=grid.getLeafValue( i, j, k );
+		gx = grid.getLeafValue(i + 1, j, k) - grid.getLeafValue(i - 1, j, k);
+		gy = grid.getLeafValue(i, j + 1, k) - grid.getLeafValue(i, j - 1, k);
+		gz = grid.getLeafValue(i, j, k + 1) - grid.getLeafValue(i, j, k - 1);
+		centerVal = grid.getLeafValue(i, j, k);
 		return float4(gx, gy, gz, centerVal);
 	}
 }
-float GetInterpolatedValue(const EndlessGrid<float>& grid, float x, float y, float z) {
+template<class T> void GetStencilCrossInternal(const EndlessGrid<T>& grid,
+		int3 pos, Stencil<T, 3>& result) {
+	T centerVal;
+	result.leaf = nullptr;
+	if (!grid.getLeafValue(pos.x, pos.y, pos.z, result.leaf, centerVal)) {
+		result.data[1][1][1] = grid.getLeafValue(pos.x, pos.y, pos.z);
+
+		result.data[0][1][1] = grid.getLeafValue(pos.x - 1, pos.y, pos.z);
+		result.data[2][1][1] = grid.getLeafValue(pos.x + 1, pos.y, pos.z);
+
+		result.data[1][0][1] = grid.getLeafValue(pos.x, pos.y - 1, pos.z);
+		result.data[1][2][1] = grid.getLeafValue(pos.x, pos.y + 1, pos.z);
+
+		result.data[1][1][0] = grid.getLeafValue(pos.x, pos.y, pos.z - 1);
+		result.data[1][1][2] = grid.getLeafValue(pos.x, pos.y, pos.z + 1);
+
+	} else {
+		result.data[1][1][1] = centerVal;
+
+		result.data[0][1][1] = grid.getLeafValue(pos.x - 1, pos.y, pos.z,
+				result.leaf);
+		result.data[2][1][1] = grid.getLeafValue(pos.x + 1, pos.y, pos.z,
+				result.leaf);
+
+		result.data[1][0][1] = grid.getLeafValue(pos.x, pos.y - 1, pos.z,
+				result.leaf);
+		result.data[1][2][1] = grid.getLeafValue(pos.x, pos.y + 1, pos.z,
+				result.leaf);
+
+		result.data[1][1][0] = grid.getLeafValue(pos.x, pos.y, pos.z - 1,
+				result.leaf);
+		result.data[1][1][2] = grid.getLeafValue(pos.x, pos.y, pos.z + 1,
+				result.leaf);
+	}
+}
+void GetStencilCross(const EndlessGrid<float>& grid, int3 pos,
+		Stencil<float, 3>& result) {
+	GetStencilCrossInternal(grid, pos, result);
+}
+void GetStencilCross(const EndlessGrid<int>& grid, int3 pos,
+		Stencil<int, 3>& result) {
+	GetStencilCrossInternal(grid, pos, result);
+}
+template<class T, int N> void GetStencilBlockInternal(
+		const EndlessGrid<T>& grid, int3 pos, Stencil<T, N>& result) {
+	T centerVal;
+	result.leaf = nullptr;
+	const int M = N / 2;
+	if (!grid.getLeafValue(pos.x, pos.y, pos.z, result.leaf, centerVal)) {
+		for (int k = 0; k < N; k++) {
+			for (int j = 0; j < N; j++) {
+				for (int i = 0; i < N; i++) {
+					result.data[i][j][k] = grid.getLeafValue(pos.x - M,
+							pos.y - M, pos.z - M);
+				}
+			}
+		}
+	} else {
+		for (int k = 0; k < N; k++) {
+			for (int j = 0; j < N; j++) {
+				for (int i = 0; i < N; i++) {
+					if (i == M && j == M && k == M) {
+						result.data[i][j][k] = centerVal;
+					} else {
+						result.data[i][j][k] = grid.getLeafValue(pos.x - M,
+								pos.y - M, pos.z - M, result.leaf);
+					}
+				}
+			}
+		}
+	}
+}
+
+void GetStencilBlock(const EndlessGrid<float>& grid, int3 pos,
+		Stencil<float, 3>& result) {
+	GetStencilBlockInternal(grid, pos, result);
+}
+void GetStencilBlock(const EndlessGrid<float>& grid, int3 pos,
+		Stencil<float, 5>& result) {
+	GetStencilBlockInternal(grid, pos, result);
+}
+void GetStencilBlock(const EndlessGrid<float>& grid, int3 pos,
+		Stencil<float, 7>& result) {
+	GetStencilBlockInternal(grid, pos, result);
+}
+
+void GetStencilBlock(const EndlessGrid<int>& grid, int3 pos,
+		Stencil<int, 3>& result) {
+	GetStencilBlockInternal(grid, pos, result);
+}
+void GetStencilBlock(const EndlessGrid<int>& grid, int3 pos,
+		Stencil<int, 5>& result) {
+	GetStencilBlockInternal(grid, pos, result);
+}
+void GetStencilBlock(const EndlessGrid<int>& grid, int3 pos,
+		Stencil<int, 7>& result) {
+	GetStencilBlockInternal(grid, pos, result);
+}
+
+float GetInterpolatedValue(const EndlessGrid<float>& grid, float x, float y,
+		float z) {
 	int x1 = (int) std::ceil(x);
 	int y1 = (int) std::ceil(y);
 	int z1 = (int) std::ceil(z);
@@ -393,30 +489,32 @@ float GetInterpolatedValue(const EndlessGrid<float>& grid, float x, float y, flo
 	float hx = 1.0f - dx;
 	float hy = 1.0f - dy;
 	float hz = 1.0f - dz;
-	EndlessNodeFloat* node=nullptr;
+	EndlessNodeFloat* node = nullptr;
 	float centerVal;
-	if(!grid.getLeafValue( x0, y0, z0, node, centerVal)){
-		return ((((grid.getLeafValue( x0, y0, z0) * hx
-				+ grid.getLeafValue( x1, y0, z0) * dx) * hy
-				+ (grid.getLeafValue( x0, y1, z0) * hx
-						+ grid.getLeafValue( x1, y1, z0) * dx) * dy) * hz
-				+ ((grid.getLeafValue( x0, y0, z1) * hx
-						+ grid.getLeafValue( x1, y0, z1) * dx) * hy
-						+ (grid.getLeafValue( x0, y1, z1) * hx
-								+ grid.getLeafValue( x1, y1, z1) * dx) * dy) * dz));
+	if (!grid.getLeafValue(x0, y0, z0, node, centerVal)) {
+		return ((((grid.getLeafValue(x0, y0, z0) * hx
+				+ grid.getLeafValue(x1, y0, z0) * dx) * hy
+				+ (grid.getLeafValue(x0, y1, z0) * hx
+						+ grid.getLeafValue(x1, y1, z0) * dx) * dy) * hz
+				+ ((grid.getLeafValue(x0, y0, z1) * hx
+						+ grid.getLeafValue(x1, y0, z1) * dx) * hy
+						+ (grid.getLeafValue(x0, y1, z1) * hx
+								+ grid.getLeafValue(x1, y1, z1) * dx) * dy) * dz));
 	} else {
-		return ((((centerVal * hx
-				+ grid.getLeafValue( x1, y0, z0,node) * dx) * hy
-				+ (grid.getLeafValue( x0, y1, z0,node) * hx
-						+ grid.getLeafValue( x1, y1, z0,node) * dx) * dy) * hz
-				+ ((grid.getLeafValue( x0, y0, z1,node) * hx
-						+ grid.getLeafValue( x1, y0, z1,node) * dx) * hy
-						+ (grid.getLeafValue( x0, y1, z1,node) * hx
-								+ grid.getLeafValue( x1, y1, z1,node) * dx) * dy) * dz));
+		return ((((centerVal * hx + grid.getLeafValue(x1, y0, z0, node) * dx)
+				* hy
+				+ (grid.getLeafValue(x0, y1, z0, node) * hx
+						+ grid.getLeafValue(x1, y1, z0, node) * dx) * dy) * hz
+				+ ((grid.getLeafValue(x0, y0, z1, node) * hx
+						+ grid.getLeafValue(x1, y0, z1, node) * dx) * hy
+						+ (grid.getLeafValue(x0, y1, z1, node) * hx
+								+ grid.getLeafValue(x1, y1, z1, node) * dx) * dy)
+						* dz));
 	}
 
 }
-float3 GetInterpolatedNormal(const EndlessGrid<float>& grid,float x,float y,float z){
+float3 GetInterpolatedNormal(const EndlessGrid<float>& grid, float x, float y,
+		float z) {
 	int x1 = (int) std::ceil(x);
 	int y1 = (int) std::ceil(y);
 	int z1 = (int) std::ceil(z);
@@ -430,8 +528,8 @@ float3 GetInterpolatedNormal(const EndlessGrid<float>& grid,float x,float y,floa
 	float hy = 1.0f - dy;
 	float hz = 1.0f - dz;
 	return aly::float3(
-			(((GetNormal(grid, x0, y0, z0) * hx + GetNormal(grid, x1, y0, z0) * dx)
-					* hy
+			(((GetNormal(grid, x0, y0, z0) * hx
+					+ GetNormal(grid, x1, y0, z0) * dx) * hy
 					+ (GetNormal(grid, x0, y1, z0) * hx
 							+ GetNormal(grid, x1, y1, z0) * dx) * dy) * hz
 					+ ((GetNormal(grid, x0, y0, z1) * hx
@@ -441,38 +539,48 @@ float3 GetInterpolatedNormal(const EndlessGrid<float>& grid,float x,float y,floa
 							* dz));
 }
 
-float4x4 PointsToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid, float voxelResolution, float surfelSize,const std::function<bool(const std::string& message, float progress)>& monitor){
-	const float narrowBand=2.5f;
-	EndlessGrid<float> weights(grid.getLevelSizes(),0.0f);
+float4x4 PointsToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
+		float voxelResolution, float surfelSize,
+		const std::function<bool(const std::string& message, float progress)>& monitor) {
+	const float narrowBand = 2.5f;
+	EndlessGrid<float> weights(grid.getLevelSizes(), 0.0f);
 	grid.clear();
-	grid.setBackgroundValue(narrowBand+0.5f);
+	grid.setBackgroundValue(narrowBand + 0.5f);
 
 	box3f bbox = mesh.getBoundingBox();
-	size_t N=mesh.vertexLocations.size();
-	int dim=std::max(std::ceil(2.0f*surfelSize/voxelResolution+1),2*narrowBand);
-	int3 minIndex = int3(bbox.position / voxelResolution - (float)dim - 1.0f);
-	float4x4 T=MakeScale(voxelResolution)*MakeTranslation(float3(minIndex));
-	for (size_t idx=0;idx<N;idx++) {
-		if(monitor){
-			if(idx%1000==0){
-				if(!monitor("Converting points to level set",idx/(float)N))break;
+	size_t N = mesh.vertexLocations.size();
+	int dim = std::max(std::ceil(2.0f * surfelSize / voxelResolution + 1),
+			2 * narrowBand);
+	int3 minIndex = int3(bbox.position / voxelResolution - (float) dim - 1.0f);
+	float4x4 T = MakeScale(voxelResolution) * MakeTranslation(float3(minIndex));
+	for (size_t idx = 0; idx < N; idx++) {
+		if (monitor) {
+			if (idx % 1000 == 0) {
+				if (!monitor("Converting points to level set", idx / (float) N))
+					break;
 			}
 		}
-		float3 vert=mesh.vertexLocations[idx];
-		float3 norm=mesh.vertexNormals[idx];
-		int3 pos = int3(aly::floor((vert-surfelSize) / voxelResolution));
+		float3 vert = mesh.vertexLocations[idx];
+		float3 norm = mesh.vertexNormals[idx];
+		int3 pos = int3(aly::floor((vert - surfelSize) / voxelResolution));
 		for (int k = 0; k <= dim; k++) {
 			for (int j = 0; j <= dim; j++) {
 				for (int i = 0; i <= dim; i++) {
-					float3 pt = float3(voxelResolution * (i + pos.x), voxelResolution * (j + pos.y),voxelResolution * (k + pos.z));
-					int3 loc = int3(i + pos.x - minIndex.x,j + pos.y - minIndex.y, k + pos.z - minIndex.z);
-					float d=distance(pt, vert);
-					if(d<surfelSize){
-						float sd=aly::clamp(dot(pt-vert,norm)/voxelResolution,-narrowBand,narrowBand);
-						float& value  = grid.getLeafValue(loc.x, loc.y, loc.z);
-						float& weight = weights.getLeafValue(loc.x, loc.y, loc.z);
-						value=(value*weight+sd)/(weight+1.0f);
-						weight=weight+1.0f;
+					float3 pt = float3(voxelResolution * (i + pos.x),
+							voxelResolution * (j + pos.y),
+							voxelResolution * (k + pos.z));
+					int3 loc = int3(i + pos.x - minIndex.x,
+							j + pos.y - minIndex.y, k + pos.z - minIndex.z);
+					float d = distance(pt, vert);
+					if (d < surfelSize) {
+						float sd = aly::clamp(
+								dot(pt - vert, norm) / voxelResolution,
+								-narrowBand, narrowBand);
+						float& value = grid.getLeafValue(loc.x, loc.y, loc.z);
+						float& weight = weights.getLeafValue(loc.x, loc.y,
+								loc.z);
+						value = (value * weight + sd) / (weight + 1.0f);
+						weight = weight + 1.0f;
 					}
 				}
 			}
@@ -480,15 +588,139 @@ float4x4 PointsToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid, float voxe
 	}
 	return T;
 }
+void RebuildDistanceField(EndlessGrid<float>& grid,float maxDistance) {
+	DistanceField3f df;
+	df.solve(grid, maxDistance);
+}
+void RebuildDistanceFieldFast(EndlessGrid<float>& grid, float maxDistance) {
+	float nbrs[6];
+	float dist = 0.0f;
+	int i, j, k;
+	int dim;
+	int3 pos;
+	float current, oldVal, extreme;
+	grid.setBackgroundValue(maxDistance + 0.5f);
+	EndlessGrid<float> storage(grid.getLevelSizes(), maxDistance + 0.5f);
+	EndlessGrid<float>* in = &grid;
+	EndlessGrid<float>* out = &storage;
+	for (EndlessNodeFloat* leaf : in->getLeafNodes()) {
+		dim = leaf->dim;
+		pos = leaf->location;
+		for (int kk = 0; kk < dim; kk++) {
+			for (int jj = 0; jj < dim; jj++) {
+				for (int ii = 0; ii < dim; ii++) {
+					i = pos.x + ii;
+					j = pos.y + jj;
+					k = pos.z + kk;
+					current = in->getLeafValue(i, j, k, leaf);
+					nbrs[0] = in->getLeafValue(i - 1, j, k, leaf);
+					nbrs[1] = in->getLeafValue(i, j + 1, k, leaf);
+					nbrs[2] = in->getLeafValue(i, j - 1, k, leaf);
+					nbrs[3] = in->getLeafValue(i + 1, j, k, leaf);
+					nbrs[4] = in->getLeafValue(i, j, k - 1, leaf);
+					nbrs[5] = in->getLeafValue(i, j, k + 1, leaf);
+					extreme = current;
+					if (current > 0) {
+						for (int i = 0; i < 6; i++) {
+							extreme = std::min(extreme, nbrs[i]);
+						}
+						if (extreme <= 0) {
+							dist = current / (current - extreme);
+						} else {
+							dist = 1.5f;
+						}
+					} else {
+						for (int i = 0; i < 6; i++) {
+							extreme = std::max(extreme, nbrs[i]);
+						}
+						if (extreme > 0) {
+							dist = current / (extreme - current);
+						} else {
+							dist = -1.5f;
+						}
+					}
+					out->getLeafValue(i, j, k) = dist;
+				}
+			}
+		}
+	}
+	in->clear();
+	std::swap(in, out);
+	int N = std::ceil(maxDistance);
+	if (N % 2 == 0)
+		N++;
+	for (int b = 0; b < N; b++) {
+		for (EndlessNodeFloat* leaf : in->getLeafNodes()) {
+			dim = leaf->dim;
+			pos = leaf->location;
+			for (int kk = 0; kk < dim; kk++) {
+				for (int jj = 0; jj < dim; jj++) {
+					for (int ii = 0; ii < dim; ii++) {
+						i = pos.x + ii;
+						j = pos.y + jj;
+						k = pos.z + kk;
+						float v211 = in->getLeafValue(i + 1, j, k, leaf);
+						float v011 = in->getLeafValue(i - 1, j, k, leaf);
+						float v121 = in->getLeafValue(i, j + 1, k, leaf);
+						float v101 = in->getLeafValue(i, j - 1, k, leaf);
+						float v112 = in->getLeafValue(i, j, k + 1, leaf);
+						float v110 = in->getLeafValue(i, j, k - 1, leaf);
+						current = oldVal = in->getLeafValue(i, j, k);
+						if (current < -b + 0.5f) {
+							current = -(1E10);
+							if (v011 <= 1)
+								current = max(v011, current);
+							if (v121 <= 1)
+								current = max(v121, current);
+							if (v101 <= 1)
+								current = max(v101, current);
+							if (v211 <= 1)
+								current = max(v211, current);
+							if (v110 <= 1)
+								current = max(v110, current);
+							if (v112 <= 1)
+								current = max(v112, current);
+							current -= 1.0f;
+						} else if (current > b - 0.5f) {
+							current = (1E10);
+							if (v011 >= -1)
+								current = min(v011, current);
+							if (v121 >= -1)
+								current = min(v121, current);
+							if (v101 >= -1)
+								current = min(v101, current);
+							if (v211 >= -1)
+								current = min(v211, current);
+							if (v110 >= -1)
+								current = min(v110, current);
+							if (v112 >= -1)
+								current = min(v112, current);
+							current += 1.0f;
+						}
+						if (oldVal * current > 0) {
+							out->getLeafValue(i, j, k) = aly::clamp(current,
+									-maxDistance, maxDistance);
+						}
+					}
+				}
+			}
+		}
+		std::swap(in, out);
+	}
+}
 float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
-		float narrowBand, bool flipSign, float voxelScale,const std::function<bool(const std::string& message, float progress)>& monitor) {
+		float narrowBand, bool flipSign, float voxelScale,
+		const std::function<bool(const std::string& message, float progress)>& monitor) {
 	const int nbr6X[6] = { 1, -1, 0, 0, 0, 0 };
 	const int nbr6Y[6] = { 0, 0, 1, -1, 0, 0 };
 	const int nbr6Z[6] = { 0, 0, 0, 0, 1, -1 };
 
-	const int nbr26X[26] = { 1, 0, -1, 1, 0, -1, 1, 0, -1, 1, 0, -1, 1, -1, 1,0, -1, 1, 0, -1, 1, 0, -1, 1, 0, -1 };
-	const int nbr26Y[26] = { 1, 1, 1, 0, 0, 0, -1, -1, -1, 1, 1, 1, 0, 0, -1,-1, -1, 1, 1, 1, 0, 0, 0, -1, -1, -1 };
-	const int nbr26Z[26] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,-1, -1, -1, -1, -1, -1, -1, -1, -1 };
+	const int nbr26X[26] = { 1, 0, -1, 1, 0, -1, 1, 0, -1, 1, 0, -1, 1, -1, 1,
+			0, -1, 1, 0, -1, 1, 0, -1, 1, 0, -1 };
+	const int nbr26Y[26] = { 1, 1, 1, 0, 0, 0, -1, -1, -1, 1, 1, 1, 0, 0, -1,
+			-1, -1, 1, 1, 1, 0, 0, 0, -1, -1, -1 };
+	const int nbr26Z[26] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1 };
 	std::set<EndlessNodeFloat*> parents;
 	const float trustDistance = 1.25f;
 	narrowBand = std::max(trustDistance + 1.0f, narrowBand);
@@ -514,13 +746,14 @@ float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 	averageSize /= mesh.triIndexes.size();
 	float res = voxelScale * std::sqrt(averageSize);
 	int3 minIndex = int3(bbox.position / res - narrowBand * 3.0f);
-	float4x4 T=MakeScale(res)*MakeTranslation(float3(minIndex));
+	float4x4 T = MakeScale(res) * MakeTranslation(float3(minIndex));
 	//Splat regions around triangles
-	size_t N=splats.size();
+	size_t N = splats.size();
 	for (size_t n = 0; n < N; n++) {
-		if(monitor){
-			if(n%200==0){
-				if(!monitor("Converting mesh to level set",n/(float)N))break;
+		if (monitor) {
+			if (n % 200 == 0) {
+				if (!monitor("Converting mesh to level set", n / (float) N))
+					break;
 			}
 		}
 
@@ -573,13 +806,13 @@ float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 		}
 	}
 	splats.clear();
-	std::vector<EndlessNodeFloat*> leafs = grid.getLeafNodes();
-	assert(leafs.size()>0);
+	std::list<EndlessNodeFloat*> leafs = grid.getLeafNodes();
+	assert(leafs.size() > 0);
 	grid.allocateInternalNodes();
 	//Flood fill leaf nodes with narrowband value.
-	for (int i = 0; i < (int) leafs.size(); i++) {
-		EndlessNodeFloat* leaf = leafs[i];
-		if(leaf->parent!=nullptr)leaf->parent->data[leaf->parent->getIndex(leaf)] = 0;
+	for (EndlessNodeFloat* leaf : leafs) {
+		if (leaf->parent != nullptr)
+			leaf->parent->data[leaf->parent->getIndex(leaf)] = 0;
 		int3 location = leaf->location;
 		std::vector<float>& data = leaf->data;
 		int dim = leaf->dim;
@@ -625,8 +858,9 @@ float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 		}
 
 	}
-	if(monitor){
-		if(!monitor("Flood Fill",0.25f))return T;
+	if (monitor) {
+		if (!monitor("Flood Fill", 0.25f))
+			return T;
 	}
 	//Find extremety leaf nodes.
 	EndlessNodeFloat* minX;
@@ -760,8 +994,9 @@ float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 			}
 		}
 	}
-	if(monitor){
-		if(!monitor("Flood Fill",0.5f))return T;
+	if (monitor) {
+		if (!monitor("Flood Fill", 0.5f))
+			return T;
 	}
 	//Flood fill rest of space using signed level set values, propagating the proper sign in the process.
 	FloodFill(grid, narrowBand);

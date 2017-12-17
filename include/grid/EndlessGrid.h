@@ -28,12 +28,21 @@
 #include <map>
 #include <iostream>
 namespace aly {
+
+template<typename T, int N> struct Stencil {
+	T data[N][N][N];
+	EndlessNode<T>* leaf = nullptr;
+	inline T& operator()(int i, int j, int k) {
+		static const int M = N / 2;
+		return data[i - M][j - M][k - M];
+	}
+};
 template<typename T> class EndlessGrid {
 	std::vector<int> levels; //in local units
 	std::vector<int> gridSizes; //in world grid units
 	std::vector<int> cellSizes; //in world grid units
 	std::vector<std::unique_ptr<EndlessNode<T>>> nodes;
-	std::unordered_map<int3,int> indexes;
+	std::unordered_map<int3, int> indexes;
 	T backgroundValue;
 	//std::vector<NodeNeighbor<T>> neighbors;
 	int roundDown(int val, int size) const {
@@ -50,7 +59,34 @@ public:
 	void clear() {
 		nodes.clear();
 		indexes.clear();
-		//neighbors.clear();
+	}
+	void reset(const std::initializer_list<int>& l, T bgValue) {
+		indexes.clear();
+		nodes.clear();
+		backgroundValue = bgValue;
+		levels = l;
+		gridSizes.resize(levels.size(), 0);
+		cellSizes.resize(levels.size(), 0);
+		gridSizes[levels.size() - 1] = levels.back();
+		cellSizes[levels.size() - 1] = 1;
+		for (int c = levels.size() - 2; c >= 0; c--) {
+			gridSizes[c] = gridSizes[c + 1] * levels[c];
+			cellSizes[c] = gridSizes[c + 1];
+		}
+	}
+	void reset(const std::vector<int>& l, T bgValue) {
+		indexes.clear();
+		nodes.clear();
+		backgroundValue = bgValue;
+		levels = l;
+		gridSizes.resize(levels.size(), 0);
+		cellSizes.resize(levels.size(), 0);
+		gridSizes[levels.size() - 1] = levels.back();
+		cellSizes[levels.size() - 1] = 1;
+		for (int c = levels.size() - 2; c >= 0; c--) {
+			gridSizes[c] = gridSizes[c + 1] * levels[c];
+			cellSizes[c] = gridSizes[c + 1];
+		}
 	}
 	void setBackgroundValue(T val) {
 		backgroundValue = val;
@@ -58,7 +94,7 @@ public:
 	T getBackgroundValue() const {
 		return backgroundValue;
 	}
-	virtual ~EndlessGrid(){
+	virtual ~EndlessGrid() {
 	}
 	EndlessGrid(const std::initializer_list<int>& l, T bgValue) {
 		backgroundValue = bgValue;
@@ -84,6 +120,7 @@ public:
 			cellSizes[c] = gridSizes[c + 1];
 		}
 	}
+
 	std::vector<std::pair<int3, EndlessNode<T>*>> getNodes() const {
 		std::vector<std::pair<int3, EndlessNode<T>*>> result;
 		for (auto pr : indexes) {
@@ -150,22 +187,22 @@ public:
 				node->allocate(backgroundValue);
 		}
 	}
-	inline void getLeafNodes(std::vector<int3>& positions,
-			std::vector<EndlessNode<T>*>& result) {
+	inline void getLeafNodes(std::list<int3>& positions,
+			std::list<EndlessNode<T>*>& result) {
 		positions.clear();
 		result.clear();
 		for (auto node : nodes) {
-			if(node->isLeaf()){
+			if (node->isLeaf()) {
 				result.push_back(node);
 			} else {
 				node->getLeafNodes(positions, result, cellSizes);
 			}
 		}
 	}
-	inline std::vector<EndlessNode<T>*> getLeafNodes() const {
-		std::vector<EndlessNode<T>*> result;
+	inline std::list<EndlessNode<T>*> getLeafNodes() const {
+		std::list<EndlessNode<T>*> result;
 		for (const std::unique_ptr<EndlessNode<T>>& node : nodes) {
-			if(node->isLeaf()){
+			if (node->isLeaf()) {
 				result.push_back(node.get());
 			} else {
 				node->getLeafNodes(result);
@@ -173,8 +210,8 @@ public:
 		}
 		return result;
 	}
-	inline std::vector<EndlessNode<T>*> getNodesAtDepth(int d) const {
-		std::vector<EndlessNode<T>*> result;
+	inline std::list<EndlessNode<T>*> getNodesAtDepth(int d) const {
+		std::list<EndlessNode<T>*> result;
 		for (auto node : nodes) {
 			if (d == 0) {
 				result.push_back(node);
@@ -195,10 +232,6 @@ public:
 		int iii = ((i + stride * sz) % sz);
 		int jjj = ((j + stride * sz) % sz);
 		int kkk = ((k + stride * sz) % sz);
-		/*
-		 std::cout << "(" << ti << "," << tj << "," << tk << ") (" << i << ","
-		 << j << "," << k << ") " << "(" << iii << "," << jjj << ","
-		 << kkk << ") " << std::endl;*/
 		EndlessNode<T>* node = getNode(ti, tj, tk);
 		for (int c = 0; c < levels.size() - 1; c++) {
 			cdim = cellSizes[c];
@@ -211,8 +244,7 @@ public:
 		}
 		return (*node)(iii, jjj, kkk);
 	}
-	T& getMultiResolutionValue(int i, int j, int k,
-			EndlessNode<T>*& result) {
+	T& getMultiResolutionValue(int i, int j, int k, EndlessNode<T>*& result) {
 		int sz = gridSizes[0];
 		int cdim, dim;
 		int ti = roundDown(i, sz);
@@ -243,7 +275,8 @@ public:
 		result = node;
 		return (*node)(iii, jjj, kkk);
 	}
-	void getMultiResolutionValue(int i, int j, int k,EndlessNode<T>*& result, T*& value) const {
+	void getMultiResolutionValue(int i, int j, int k, EndlessNode<T>*& result,
+			T*& value) const {
 		int sz = gridSizes[0];
 		int cdim, dim;
 		int ti = roundDown(i, sz);
@@ -280,7 +313,8 @@ public:
 		value = &(*node)(iii, jjj, kkk);
 	}
 
-	bool getLeafValue(int i, int j, int k,EndlessNode<T>*& result, T& value) const {
+	bool getLeafValue(int i, int j, int k, EndlessNode<T>*& result,
+			T& value) const {
 		int sz = gridSizes[0];
 		int cdim, dim;
 		int ti = roundDown(i, sz);
@@ -332,7 +366,7 @@ public:
 			jjj = jjj % cdim;
 			kkk = kkk % cdim;
 			auto child = node->getChild(pos.x, pos.y, pos.z);
-			if (child!= nullptr) {
+			if (child != nullptr) {
 				node = child;
 			} else {
 				return backgroundValue;
@@ -366,15 +400,126 @@ public:
 			} else {
 				if (node->hasData()) {
 					return (*node)(pos.x, pos.y, pos.z);
-				}  else {
+				} else {
 					return backgroundValue;
 				}
 			}
 		}
 		return (*node)(iii, jjj, kkk);
 	}
-	T getLeafValue(int i, int j, int k,EndlessNode<T>* node) const {
-		int3 delta = int3(i, j, k)-node->location;
+	T* getLeafValuePtr(int i, int j, int k,
+			EndlessNode<T>* node = nullptr) const {
+		if (node != nullptr) {
+			int3 delta = int3(i, j, k) - node->location;
+			int dim = node->dim;
+			int xoff = roundDown(delta.x, dim);
+			int yoff = roundDown(delta.y, dim);
+			int zoff = roundDown(delta.z, dim);
+			if (xoff == 0 && yoff == 0 && zoff == 0) {
+				return &(*node)(delta.x, delta.y, delta.z);
+			} else {
+				//Cheack parent of leaf
+				EndlessNode<T>* parent = node->parent;
+				if (parent != nullptr) {
+					int3 pos = node->getId();
+					delta = pos + int3(xoff, yoff, zoff);
+					node = parent->getChild(pos.x + xoff, pos.y + yoff,
+							pos.z + zoff);
+					if (node != nullptr) {
+						delta = int3(i, j, k) - node->location;
+						return &(*node)(delta.x, delta.y, delta.z);
+					}
+				}
+			}
+		}
+		//Deep search
+		int sz = gridSizes[0];
+		int cdim;
+		int ti = roundDown(i, sz);
+		int tj = roundDown(j, sz);
+		int tk = roundDown(k, sz);
+		int stride = std::max(std::max(std::abs(ti), std::abs(tj)),
+				std::abs(tk)) + 1;
+		int iii = ((i + stride * sz) % sz);
+		int jjj = ((j + stride * sz) % sz);
+		int kkk = ((k + stride * sz) % sz);
+		node = getNodeIfExists(ti, tj, tk);
+		if (node == nullptr)
+			return nullptr;
+		for (int c = 0; c < levels.size() - 1; c++) {
+			cdim = cellSizes[c];
+			int3 pos = int3(iii / cdim, jjj / cdim, kkk / cdim);
+			iii = iii % cdim;
+			jjj = jjj % cdim;
+			kkk = kkk % cdim;
+			auto child = node->getChild(pos.x, pos.y, pos.z);
+			if (child != nullptr) {
+				node = child;
+			} else {
+				return nullptr;
+			}
+		}
+		return &(*node)(iii, jjj, kkk);
+	}
+	bool setLeafValue(int i, int j, int k, T writeValue, EndlessNode<T>* node =
+			nullptr) const {
+		if (node != nullptr) {
+			int3 delta = int3(i, j, k) - node->location;
+			int dim = node->dim;
+			int xoff = roundDown(delta.x, dim);
+			int yoff = roundDown(delta.y, dim);
+			int zoff = roundDown(delta.z, dim);
+			if (xoff == 0 && yoff == 0 && zoff == 0) {
+				(*node)(delta.x, delta.y, delta.z) = writeValue;
+				return true;
+			} else {
+				//Cheack parent of leaf
+				EndlessNode<T>* parent = node->parent;
+				if (parent != nullptr) {
+					int3 pos = node->getId();
+					delta = pos + int3(xoff, yoff, zoff);
+					node = parent->getChild(pos.x + xoff, pos.y + yoff,
+							pos.z + zoff);
+					if (node != nullptr) {
+						delta = int3(i, j, k) - node->location;
+						(*node)(delta.x, delta.y, delta.z) = writeValue;
+						return true;
+					}
+				}
+			}
+		}
+		//Deep search
+		int sz = gridSizes[0];
+		int cdim;
+		int ti = roundDown(i, sz);
+		int tj = roundDown(j, sz);
+		int tk = roundDown(k, sz);
+		int stride = std::max(std::max(std::abs(ti), std::abs(tj)),
+				std::abs(tk)) + 1;
+		int iii = ((i + stride * sz) % sz);
+		int jjj = ((j + stride * sz) % sz);
+		int kkk = ((k + stride * sz) % sz);
+		node = getNodeIfExists(ti, tj, tk);
+		if (node == nullptr)
+			return false;
+		for (int c = 0; c < levels.size() - 1; c++) {
+			cdim = cellSizes[c];
+			int3 pos = int3(iii / cdim, jjj / cdim, kkk / cdim);
+			iii = iii % cdim;
+			jjj = jjj % cdim;
+			kkk = kkk % cdim;
+			auto child = node->getChild(pos.x, pos.y, pos.z);
+			if (child != nullptr) {
+				node = child;
+			} else {
+				return false;
+			}
+		}
+		(*node)(iii, jjj, kkk) = writeValue;
+		return true;
+	}
+	T getLeafValue(int i, int j, int k, EndlessNode<T>* node) const {
+		int3 delta = int3(i, j, k) - node->location;
 		int dim = node->dim;
 		int xoff = roundDown(delta.x, dim);
 		int yoff = roundDown(delta.y, dim);
@@ -384,15 +529,16 @@ public:
 		} else {
 			//Cheack parent of leaf
 			EndlessNode<T>* parent = node->parent;
-			if(parent!=nullptr){
-				int3 pos =node->getId();
+			if (parent != nullptr) {
+				int3 pos = node->getId();
 				//if(parent->getChild(pos.x, pos.y, pos.z).get()!=node.get()){
 				//	std::cout<<"Could not find location "<<pos<<" "<<node->id<<std::endl;
 				//}
 				delta = pos + int3(xoff, yoff, zoff);
-				node = parent->getChild(pos.x+xoff, pos.y+yoff, pos.z+zoff);
-				if(node!=nullptr){
-					delta = int3(i, j, k)-node->location;
+				node = parent->getChild(pos.x + xoff, pos.y + yoff,
+						pos.z + zoff);
+				if (node != nullptr) {
+					delta = int3(i, j, k) - node->location;
 					return (*node)(delta.x, delta.y, delta.z);
 				}
 			}
@@ -418,17 +564,16 @@ public:
 			jjj = jjj % cdim;
 			kkk = kkk % cdim;
 			auto child = node->getChild(pos.x, pos.y, pos.z);
-			if (child!= nullptr) {
+			if (child != nullptr) {
 				node = child;
 			} else {
 				return backgroundValue;
 			}
 		}
 		return (*node)(iii, jjj, kkk);
-
 	}
-	T getMultiResolutionValue(EndlessNode<T>* node, int iii,
-			int jjj, int kkk) const {
+	T getMultiResolutionValue(EndlessNode<T>* node, int iii, int jjj,
+			int kkk) const {
 		int cdim;
 		for (int c = 0; c < levels.size() - 1; c++) {
 			cdim = cellSizes[c];
@@ -449,8 +594,7 @@ public:
 		}
 		return (*node)(iii, jjj, kkk);
 	}
-	int getTreeDepth(EndlessNode<T>* node, int iii, int jjj,
-			int kkk) const {
+	int getTreeDepth(EndlessNode<T>* node, int iii, int jjj, int kkk) const {
 		int cdim;
 		int d = 0;
 		for (int c = 0; c < levels.size() - 1; c++) {
@@ -469,8 +613,8 @@ public:
 		}
 		return d;
 	}
-	float getDepthValue(EndlessNode<T>* node, int iii, int jjj,
-			int kkk, int D) const {
+	float getDepthValue(EndlessNode<T>* node, int iii, int jjj, int kkk,
+			int D) const {
 		int cdim;
 		int d = 0;
 		for (int c = 0; c < levels.size() - 1; c++) {
@@ -496,8 +640,7 @@ public:
 			return backgroundValue;
 		}
 	}
-	EndlessNode<T>* getNodeIfExists(int ti, int tj,
-			int tk) const {
+	EndlessNode<T>* getNodeIfExists(int ti, int tj, int tk) const {
 		auto idx = indexes.find(int3(ti, tj, tk));
 		if (idx != indexes.end()) {
 			return nodes[idx->second].get();
@@ -510,7 +653,8 @@ public:
 		if (idx != indexes.end()) {
 			return nodes[idx->second].get();
 		} else {
-			EndlessNode<T>* node = new EndlessNode<T>(levels[0], backgroundValue,levels.size() <= 1);
+			EndlessNode<T>* node = new EndlessNode<T>(levels[0],
+					backgroundValue, levels.size() <= 1);
 			indexes[int3(ti, tj, tk)] = (int) nodes.size();
 			node->location = int3(ti * gridSizes[0], tj * gridSizes[0],
 					tk * gridSizes[0]);
@@ -519,6 +663,30 @@ public:
 		}
 	}
 };
+
+typedef Stencil<float, 3> StencilFloat3x3;
+typedef Stencil<float, 5> StencilFloat5x5;
+typedef Stencil<float, 5> StencilFloat7x7;
+
+void GetStencilBlock(const EndlessGrid<float>& grid, int3 pos,
+		Stencil<float, 3>& result);
+void GetStencilBlock(const EndlessGrid<float>& grid, int3 pos,
+		Stencil<float, 5>& result);
+void GetStencilBlock(const EndlessGrid<float>& grid, int3 pos,
+		Stencil<float, 7>& result);
+
+void GetStencilBlock(const EndlessGrid<int>& grid, int3 pos,
+		Stencil<int, 3>& result);
+void GetStencilBlock(const EndlessGrid<int>& grid, int3 pos,
+		Stencil<int, 5>& result);
+void GetStencilBlock(const EndlessGrid<int>& grid, int3 pos,
+		Stencil<int, 7>& result);
+
+void GetStencilCross(const EndlessGrid<float>& grid, int3 pos,
+		Stencil<float, 3>& result);
+void GetStencilCross(const EndlessGrid<int>& grid, int3 pos,
+		Stencil<int, 3>& result);
+
 void FloodFill(EndlessGrid<float>& grid, float narrowBand);
 float3 GetNormal(const EndlessGrid<float>& grid, int i, int j, int k);
 float GetInterpolatedValue(const EndlessGrid<float>& grid, float x, float y,
@@ -526,8 +694,16 @@ float GetInterpolatedValue(const EndlessGrid<float>& grid, float x, float y,
 float3 GetInterpolatedNormal(const EndlessGrid<float>& grid, float x, float y,
 		float z);
 float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
-		float narrowBand, bool flipSign = true, float voxelScale = 0.75f,const std::function<bool(const std::string& message, float progress)>& monitor=nullptr);
-float4x4 PointsToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid, float voxelSize, float surfelSize,const std::function<bool(const std::string& message, float progress)>& monitor=nullptr);
+		float narrowBand, bool flipSign = true, float voxelScale = 0.75f,
+		const std::function<bool(const std::string& message, float progress)>& monitor =
+				nullptr);
+float4x4 PointsToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
+		float voxelSize, float surfelSize,
+		const std::function<bool(const std::string& message, float progress)>& monitor =
+				nullptr);
+void RebuildDistanceFieldFast(EndlessGrid<float>& grid,
+		float maxDistance = 2.5f);
+void RebuildDistanceField(EndlessGrid<float>& grid,float maxDistance = 2.5f);
 typedef EndlessGrid<float> EndlessGridFloat;
 typedef EndlessGrid<int> EndlessGridInt;
 typedef EndlessGrid<float2> EndlessGridFloat2;
@@ -545,7 +721,6 @@ typedef EndlessNode<float4> EndlessNodeFloat4;
 typedef EndlessNode<std::pair<float, int>> EndlessNodeFloatIndex;
 typedef EndlessNode<RGBf> EndlessNodeRGBf;
 typedef EndlessNode<RGBAf> EndlessNodeRGBAf;
-
 
 void WriteGridToFile(const std::string& dir, const EndlessGrid<float>& grid);
 void WriteGridToFile(const std::string& dir, const EndlessGrid<float2>& grid);

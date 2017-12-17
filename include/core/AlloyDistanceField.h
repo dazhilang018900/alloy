@@ -23,6 +23,7 @@
 #include "BinaryMinHeap.h"
 #include "AlloyMath.h"
 #include "AlloyVolume.h"
+#include "grid/EndlessGrid.h"
 namespace aly {
 	bool SANITY_CHECK_DISTANCE_FIELD();
 	class DistanceField3f {
@@ -38,6 +39,7 @@ namespace aly {
 		static const float DISTANCE_UNDEFINED;
 		DistanceField3f()  {}
 		void solve(const Volume1f& vol, Volume1f& out,float maxDistance=2.5f);
+		void solve(EndlessGridFloat& vol,float maxDistance=2.5f);
 	};
 	class DistanceField2f {
 		typedef Indexable<float, 2> PixelIndex;

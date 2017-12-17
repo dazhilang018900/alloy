@@ -23,7 +23,7 @@
 #define INCLUDE_GRID_ENDLESSNODE_H_
 
 #include "AlloyMath.h"
-#include <array>
+#include <list>
 namespace aly {
 struct EndlessLocation: public std::vector<int3> {
 	aly::int3 nodePosition;
@@ -55,7 +55,6 @@ public:
 	std::vector<int> indexes;
 	std::vector<T> data;
 	std::vector<std::unique_ptr<EndlessNode<T>>> children;
-	//static const EndlessNode<T>* NULL_NODE;
 	bool isLeaf() const {
 		return (indexes.size() == 0);
 	}
@@ -68,7 +67,7 @@ public:
 			if(!child->isLeaf())child->allocate(backgroundValue);
 		}
 	}
-	void getNodesAtDepth(std::vector<EndlessNode<T>*>& result,int target,int parent=0) const {
+	void getNodesAtDepth(std::list<EndlessNode<T>*>& result,int target,int parent=0) const {
 		parent++;
 		if(parent==target){
 			result.insert(result.end(),children.begin(),children.end());
@@ -78,7 +77,7 @@ public:
 			}
 		}
 	}
-	void getLeafNodes(std::vector<EndlessLocation>& positions,
+	void getLeafNodes(std::list<EndlessLocation>& positions,
 			std::vector<EndlessNode<T>*>& result,
 			EndlessLocation offset) const {
 		offset.push_back(location);
@@ -93,7 +92,7 @@ public:
 			}
 		}
 	}
-	void getLeafNodes(std::vector<EndlessNode<T>*>& result) const {
+	void getLeafNodes(std::list<EndlessNode<T>*>& result) const {
 		for (const std::unique_ptr<EndlessNode<T>>& child : children) {
 			if (child->isLeaf()) {
 				result.push_back(child.get());
@@ -102,34 +101,6 @@ public:
 			}
 		}
 	}
-	/*
-	void getLeafNodes(std::vector<int3>& positions,
-			std::vector<EndlessNode<T>*>& result,
-			const std::vector<int>& cellSizes) const {
-		positions.clear();
-		result.clear();
-		EndlessLocation loc;
-		std::vector<EndlessLocation> locations;
-		for (EndlessNode<T>* child : children) {
-			if (child->isLeaf()) {
-				EndlessLocation pos = loc;
-				pos.push_back(child->location);
-				locations.push_back(pos);
-				result.push_back(child);
-			} else {
-				child->getLeafNodes(locations, result, loc);
-			}
-		}
-		for (EndlessLocation pos : locations) {
-			int3 loc(0, 0, 0);
-			for (int n = 0; n < pos.size(); n++) {
-				loc += pos[n] * cellSizes[n];
-			}
-			pos.worldPosition = loc;
-			//std::cout<<"Location "<<pos<<" "<<std::endl;
-			positions.push_back(loc);
-		}
-	}*/
 	virtual ~EndlessNode(){
 	}
 	EndlessNode(int dim,T bgValue, bool isLeaf) :

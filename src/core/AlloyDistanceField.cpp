@@ -91,15 +91,15 @@ float DistanceField3f::march(float IMv, float IPv, float JMv, float JPv,
 		s2 += KPv * KPv;
 		count++;
 	}
-	tmp = (s + std::sqrt(std::max(0.0,s * s - count * (s2 - 1.0f)))) / count;
-	return (float)tmp;
+	tmp = (s + std::sqrt(std::max(0.0, s * s - count * (s2 - 1.0f)))) / count;
+	return (float) tmp;
 }
 void DistanceField3f::solve(const Volume1f& vol, Volume1f& distVol,
 		float maxDistance) {
 	const int rows = vol.rows;
 	const int cols = vol.cols;
 	const int slices = vol.slices;
-	BinaryMinHeap<float, 3> heap(vol.dimensions());
+	BinaryMinHeap<float, 3> heap;
 	distVol.resize(rows, cols, slices);
 	distVol.set(float1(DISTANCE_UNDEFINED));
 
@@ -222,12 +222,12 @@ void DistanceField3f::solve(const Volume1f& vol, Volume1f& distVol,
 		float newvalue;
 		float JMv = 0, JPv = 0, KMv = 0, KPv = 0, IPv = 0, IMv = 0;
 		int8_t JMs = 0, JPs = 0, KMs = 0, KPs = 0, IPs = 0, IMs = 0;
-		ubyte1 JMl = ubyte1((uint8_t)0);
-		ubyte1 JPl = ubyte1((uint8_t)0);
-		ubyte1 KMl = ubyte1((uint8_t)0);
-		ubyte1 KPl = ubyte1((uint8_t)0);
-		ubyte1 IPl = ubyte1((uint8_t)0);
-		ubyte1 IMl = ubyte1((uint8_t)0);
+		ubyte1 JMl = ubyte1((uint8_t) 0);
+		ubyte1 JPl = ubyte1((uint8_t) 0);
+		ubyte1 KMl = ubyte1((uint8_t) 0);
+		ubyte1 KPl = ubyte1((uint8_t) 0);
+		ubyte1 IPl = ubyte1((uint8_t) 0);
+		ubyte1 IMl = ubyte1((uint8_t) 0);
 		for (int k = 0; k < slices; k++) {
 			for (int j = 0; j < cols; j++) {
 				for (int i = 0; i < rows; i++) {
@@ -326,7 +326,8 @@ void DistanceField3f::solve(const Volume1f& vol, Volume1f& distVol,
 						|| ni >= rows) {
 					continue;
 				}
-				if (labelVol(ni, nj, nk) == ALIVE) {
+				ubyte1& label = labelVol(ni, nj, nk);
+				if (label == ALIVE) {
 					continue;
 				}
 				if (nj > 0) {
@@ -389,11 +390,11 @@ void DistanceField3f::solve(const Volume1f& vol, Volume1f& distVol,
 				voxelList.push_back(
 						VoxelIndex(Coord(ni, nj, nk), (float) newvalue));
 				VoxelIndex* vox = &voxelList.back();
-				if (labelVol(ni, nj, nk) == NARROW_BAND) {
+				if (label == NARROW_BAND) {
 					heap.change(Coord(ni, nj, nk), vox);
 				} else {
 					heap.add(vox);
-					labelVol(ni, nj, nk) = NARROW_BAND;
+					label = NARROW_BAND;
 				}
 			}
 		}
@@ -416,6 +417,278 @@ void DistanceField3f::solve(const Volume1f& vol, Volume1f& distVol,
 	heap.clear();
 }
 
+void DistanceField3f::solve(EndlessGridFloat& vol,float maxDistance) {
+	BinaryMinHeap<float, 3> heap;
+	float BG_VALUE=maxDistance+0.5f;
+	EndlessGridFloat distVol(vol.getLevelSizes(),BG_VALUE);
+
+	static const int neighborsX[6] = { 1, 0, -1, 0, 0, 0 };
+	static const int neighborsY[6] = { 0, 1, 0, -1, 0, 0 };
+	static const int neighborsZ[6] = { 0, 0, 0, 0, 1, -1 };
+	std::list<VoxelIndex> voxelList;
+	VoxelIndex* he = nullptr;
+	EndlessGrid<ubyte> labelVol(vol.getLevelSizes(), FAR_AWAY);
+	EndlessGrid<byte> signVol(vol.getLevelSizes(), 0);
+	size_t countAlive = 0;
+	int dim;
+	int3 pos;
+
+	int LX, HX, LY, HY, LZ, HZ;
+	short NSFlag, WEFlag, FBFlag;
+	float s = 0, t = 0, w = 0;
+	float JMv = 0, JPv = 0, IMv = 0, IPv = 0, KPv = 0, KMv = 0, Cv = 0;
+	int i, j, k;
+	for (EndlessNodeFloat* leaf : vol.getLeafNodes()) {
+		dim = leaf->dim;
+		pos = leaf->location;
+		for (int kk = 0; kk < dim; kk++) {
+			for (int jj = 0; jj < dim; jj++) {
+				for (int ii = 0; ii < dim; ii++) {
+					i = pos.x + ii;
+					j = pos.y + jj;
+					k = pos.z + kk;
+					Cv = vol.getLeafValue(i, j, k, leaf);
+					if (Cv == 0) {
+						signVol.getLeafValue(i, j, k) = 0;
+						distVol.setLeafValue(i, j, k, 0.0f, leaf);
+						labelVol.getLeafValue(i, j, k) = ALIVE;
+						countAlive++;
+					} else {
+						if (Cv != BG_VALUE) {
+							signVol.getLeafValue(i, j, k) = (int8_t) aly::sign(
+									Cv);
+							NSFlag = 0;
+							WEFlag = 0;
+							FBFlag = 0;
+							JMv = vol.getLeafValue(i, j - 1, k, leaf);
+							JPv = vol.getLeafValue(i, j + 1, k, leaf);
+							IMv = vol.getLeafValue(i - 1, j, k, leaf);
+							IPv = vol.getLeafValue(i + 1, j, k, leaf);
+							KPv = vol.getLeafValue(i, j, k + 1, leaf);
+							KMv = vol.getLeafValue(i, j, k - 1, leaf);
+							if (JMv * Cv < 0 && JMv != BG_VALUE) {
+								NSFlag = 1;
+								s = JMv;
+							}
+							if (JPv * Cv < 0 && JPv != BG_VALUE) {
+								if (NSFlag == 0) {
+									NSFlag = 1;
+									s = JPv;
+								} else {
+									s = (std::abs(JMv) > std::abs(JPv)) ?
+											JMv : JPv;
+								}
+							}
+							if (IMv * Cv < 0 && IMv != BG_VALUE) {
+								WEFlag = 1;
+								t = IMv;
+							}
+							if (IPv * Cv < 0 && IPv != BG_VALUE) {
+								if (WEFlag == 0) {
+									WEFlag = 1;
+									t = IPv;
+								} else {
+									t = (std::abs(IPv) > std::abs(IMv)) ?
+											IPv : IMv;
+								}
+							}
+							if (KPv * Cv < 0 && KPv != BG_VALUE) {
+								FBFlag = 1;
+								w = KPv;
+							}
+							if (KMv * Cv < 0 && KMv != BG_VALUE) {
+								if (FBFlag == 0) {
+									FBFlag = 1;
+									w = KMv;
+								} else {
+									w = (std::abs(KPv) > std::abs(KMv)) ?
+											KPv : KMv;
+								}
+							}
+							float result = 0;
+							if (NSFlag != 0) {
+								s = Cv / (Cv - s);
+								result += 1.0f / (s * s);
+							}
+							if (WEFlag != 0) {
+								t = Cv / (Cv - t);
+								result += 1.0f / (t * t);
+							}
+							if (FBFlag != 0) {
+								w = Cv / (Cv - w);
+								result += 1.0f / (w * w);
+							}
+							if (result == 0) {
+								distVol.getLeafValue(i, j, k) = 0;
+							} else {
+								countAlive++;
+								labelVol.getLeafValue(i, j, k) = ALIVE;
+								result = std::sqrt(result);
+								distVol.getLeafValue(i, j, k) = (float) (1.0
+										/ result);
+							}
+						} else {
+							signVol.getLeafValue(i, j, k) = 0;
+						}
+					}
+				}
+			}
+		}
+	}
+	heap.reserve(countAlive);
+	int koff;
+	int nj, nk, ni;
+	float newvalue;
+	JMv = 0;
+	JPv = 0;
+	KMv = 0;
+	KPv = 0;
+	IPv = 0;
+	IMv = 0;
+	int8_t JMs = 0, JPs = 0, KMs = 0, KPs = 0, IPs = 0, IMs = 0;
+	ubyte JMl = 0;
+	ubyte JPl = 0;
+	ubyte KMl = 0;
+	ubyte KPl = 0;
+	ubyte IPl = 0;
+	ubyte IMl = 0;
+	for (EndlessNode<ubyte>* leaf : labelVol.getLeafNodes()) {
+		dim = leaf->dim;
+		pos = leaf->location;
+		for (int kk = 0; kk < dim; kk++) {
+			for (int jj = 0; jj < dim; jj++) {
+				for (int ii = 0; ii < dim; ii++) {
+					i = pos.x + ii;
+					j = pos.y + jj;
+					k = pos.z + kk;
+					if (labelVol.getLeafValue(i, j, k, leaf) != ALIVE) {
+						continue;
+					}
+					for (koff = 0; koff < 6; koff++) {
+						ni = i + neighborsX[koff];
+						nj = j + neighborsY[koff];
+						nk = k + neighborsZ[koff];
+						ubyte label = labelVol.getLeafValue(ni, nj, nk);
+						if (label != FAR_AWAY) {
+							continue;
+						}
+						labelVol.setLeafValue(ni, nj, nk, NARROW_BAND, leaf);
+						JMv = distVol.getLeafValue(ni, nj - 1, nk);
+						JMs = signVol.getLeafValue(ni, nj - 1, nk);
+						JMl = labelVol.getLeafValue(ni, nj - 1, nk, leaf);
+
+						JPv = distVol.getLeafValue(ni, nj + 1, nk);
+						JPs = signVol.getLeafValue(ni, nj + 1, nk);
+						JPl = labelVol.getLeafValue(ni, nj + 1, nk, leaf);
+
+						KPv = distVol.getLeafValue(ni, nj, nk + 1);
+						KPs = signVol.getLeafValue(ni, nj, nk + 1);
+						KPl = labelVol.getLeafValue(ni, nj, nk + 1, leaf);
+
+						KMv = distVol.getLeafValue(ni, nj, nk - 1);
+						KMs = signVol.getLeafValue(ni, nj, nk - 1);
+						KMl = labelVol.getLeafValue(ni, nj, nk - 1, leaf);
+
+						IPv = distVol.getLeafValue(ni + 1, nj, nk);
+						IPs = signVol.getLeafValue(ni + 1, nj, nk);
+						IPl = labelVol.getLeafValue(ni + 1, nj, nk, leaf);
+
+						IMv = distVol.getLeafValue(ni - 1, nj, nk);
+						IMs = signVol.getLeafValue(ni - 1, nj, nk);
+						IMl = labelVol.getLeafValue(ni - 1, nj, nk, leaf);
+
+						signVol.getLeafValue(ni, nj, nk) = aly::sign(
+								JMs + JPs + IMs + IPs + KPs + KMs);
+						newvalue = march(JMv, JPv, KPv, KMv, IPv, IMv, JMl, JPl,
+								KPl, KMl, IPl, IMl);
+						distVol.getLeafValue(ni, nj, nk) = (float) (newvalue);
+						voxelList.push_back(
+								VoxelIndex(Coord(ni, nj, nk),
+										(float) newvalue));
+						heap.add(&voxelList.back());
+					}
+				}
+			}
+		}
+	}
+	vol.clear();
+	vol.setBackgroundValue(BG_VALUE);
+	while (!heap.isEmpty()) {
+		int i, j, k;
+		he = heap.remove();
+		i = he->index[0];
+		j = he->index[1];
+		k = he->index[2];
+		if (he->value > maxDistance) {
+			break;
+		}
+		distVol.getLeafValue(i, j, k) = he->value;
+		labelVol.getLeafValue(i, j, k) = ALIVE;
+		for (koff = 0; koff < 6; koff++) {
+			ni = i + neighborsX[koff];
+			nj = j + neighborsY[koff];
+			nk = k + neighborsZ[koff];
+			ubyte& label = labelVol.getLeafValue(ni, nj, nk);
+			if (label == ALIVE) {
+				continue;
+			}
+			JMv = distVol.getLeafValue(ni, nj - 1, nk);
+			JMs = signVol.getLeafValue(ni, nj - 1, nk);
+			JMl = labelVol.getLeafValue(ni, nj - 1, nk);
+
+			JPv = distVol.getLeafValue(ni, nj + 1, nk);
+			JPs = signVol.getLeafValue(ni, nj + 1, nk);
+			JPl = labelVol.getLeafValue(ni, nj + 1, nk);
+
+			KPv = distVol.getLeafValue(ni, nj, nk + 1);
+			KPs = signVol.getLeafValue(ni, nj, nk + 1);
+			KPl = labelVol.getLeafValue(ni, nj, nk + 1);
+
+			KMv = distVol.getLeafValue(ni, nj, nk - 1);
+			KMs = signVol.getLeafValue(ni, nj, nk - 1);
+			KMl = labelVol.getLeafValue(ni, nj, nk - 1);
+
+			IPv = distVol.getLeafValue(ni + 1, nj, nk);
+			IPs = signVol.getLeafValue(ni + 1, nj, nk);
+			IPl = labelVol.getLeafValue(ni + 1, nj, nk);
+
+			IMv = distVol.getLeafValue(ni - 1, nj, nk);
+			IMs = signVol.getLeafValue(ni - 1, nj, nk);
+			IMl = labelVol.getLeafValue(ni - 1, nj, nk);
+
+			signVol.getLeafValue(ni, nj, nk) = aly::sign(
+					JMs + JPs + IMs + IPs + KPs + KMs);
+			newvalue = march(JMv, JPv, KPv, KMv, IPv, IMv, JMl, JPl, KPl, KMl,
+					IPl, IMl);
+			voxelList.push_back(
+					VoxelIndex(Coord(ni, nj, nk), (float) newvalue));
+			VoxelIndex* vox = &voxelList.back();
+			if (label == NARROW_BAND) {
+				heap.change(Coord(ni, nj, nk), vox);
+			} else {
+				heap.add(vox);
+				label = NARROW_BAND;
+			}
+		}
+	}
+	heap.clear();
+	for (EndlessNodeFloat* leaf : distVol.getLeafNodes()) {
+		dim = leaf->dim;
+		pos = leaf->location;
+		for (int kk = 0; kk < dim; kk++) {
+			for (int jj = 0; jj < dim; jj++) {
+				for (int ii = 0; ii < dim; ii++) {
+					i = pos.x + ii;
+					j = pos.y + jj;
+					k = pos.z + kk;
+					byte s = signVol.getLeafValue(i, j, k);
+					float* val = distVol.getLeafValuePtr(i, j, k,leaf);
+					vol.getLeafValue(i,j,k)=(*val)*s;
+				}
+			}
+		}
+	}
+}
 float DistanceField2f::march(float IMv, float IPv, float JMv, float JPv,
 		int IMl, int IPl, int JMl, int JPl) {
 	double s, s2;
@@ -453,13 +726,14 @@ float DistanceField2f::march(float IMv, float IPv, float JMv, float JPv,
 		count++;
 	}
 	tmp = (s + std::sqrt(std::max(0.0, s * s - count * (s2 - 1.0f)))) / count;
-	return (float)tmp;
+	return (float) tmp;
 }
+
 void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 		float maxDistance) {
 	const int width = vol.width;
 	const int height = vol.height;
-	BinaryMinHeap<float, 2> heap(vol.dimensions());
+	BinaryMinHeap<float, 2> heap;
 	distVol.resize(width, height);
 	distVol.set(float1(DISTANCE_UNDEFINED));
 
@@ -558,10 +832,10 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 		float newvalue;
 		float JMv = 0, JPv = 0, IMv = 0, IPv = 0;
 		int8_t JMs = 0, JPs = 0, IMs = 0, IPs = 0;
-		ubyte1 JMl = ubyte1((uint8_t)0);
-		ubyte1 JPl = ubyte1((uint8_t)0);
-		ubyte1 IMl = ubyte1((uint8_t)0);
-		ubyte1 IPl = ubyte1((uint8_t)0);
+		ubyte1 JMl = ubyte1((uint8_t) 0);
+		ubyte1 JPl = ubyte1((uint8_t) 0);
+		ubyte1 IMl = ubyte1((uint8_t) 0);
+		ubyte1 IPl = ubyte1((uint8_t) 0);
 		for (int j = 0; j < height; j++) {
 			for (int i = 0; i < width; i++) {
 				if (labelVol(i, j) != ALIVE) {
@@ -639,7 +913,8 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 				if (nj < 0 || nj >= height || ni < 0 || ni >= width) {
 					continue;
 				}
-				if (labelVol(ni, nj) == ALIVE) {
+				ubyte1& label = labelVol(ni, nj);
+				if (label == ALIVE) {
 					continue;
 				}
 				if (nj > 0) {
@@ -684,11 +959,11 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 				voxelList.push_back(
 						PixelIndex(Coord(ni, nj), (float) newvalue));
 				PixelIndex* vox = &voxelList.back();
-				if (labelVol(ni, nj) == NARROW_BAND) {
+				if (label == NARROW_BAND) {
 					heap.change(Coord(ni, nj), vox);
 				} else {
 					heap.add(vox);
-					labelVol(ni, nj) = NARROW_BAND;
+					label = NARROW_BAND;
 				}
 			}
 		}

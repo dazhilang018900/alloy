@@ -23,6 +23,7 @@
 #include "AlloyMath.h"
 #include "AlloyVolume.h"
 #include "AlloyLocator.h"
+#include <unordered_map>
 namespace aly {
 	template <class T,int C> struct Indexable {
 		vec<int, C> index;
@@ -38,24 +39,13 @@ template<class T, int C> class BinaryMinHeap {
 protected:
 	vec<int, C> dimensions;
 	std::vector<Indexable<T, C> *> heapArray;
-	std::vector<size_t> backPointers;
+	std::unordered_map<vec<int,C>,size_t> backPointers;
 	size_t currentSize;
 protected:
-	inline size_t& getPointer(const vec<int, C>& idx) {
-		switch (C) {
-			case 1: return backPointers[idx[0]];break;
-			case 2: return backPointers[idx[0]+ idx[1]*dimensions[0]];break;
-			case 3: return backPointers[idx[0] + dimensions[0] * ( idx[1] + dimensions[1] *idx[2])];break;
-			default: throw std::runtime_error(MakeString()<<"Heap dimension not supported [" << C << "]");
-		}
-	}
+
 public:
-	BinaryMinHeap(const vec<int,C>& dims):dimensions(dims),currentSize(0) {
-		size_t sz = 1;
-		for (int c = 0;c < C;c++) {
-			sz *= dims[c];
-		}
-		backPointers.resize(sz,0);
+	BinaryMinHeap():currentSize(0) {
+		heapArray.resize(4096,nullptr);
 	}
 	void reserve(size_t capacity){
 		heapArray.resize(capacity + 2,nullptr);
@@ -73,7 +63,7 @@ public:
 		return currentSize;
 	}
 	void change(const vec<int, C>& pos, Indexable<T,C>* x) {
-		size_t index = getPointer(pos);
+		size_t index = backPointers.at(pos);
 		Indexable<T,C>* v = heapArray[index];
 		if (x != v) {
 			heapArray[index] = x;
@@ -85,7 +75,7 @@ public:
 		}
 	}
 	void change(const vec<int,C>& pos,T value) {
-		size_t index = getPointer(pos);
+		size_t index = backPointers.at(pos);
 		Indexable<T,C>* v = heapArray[index];
 		if (value<v->value) {
 			v->value=value;
@@ -106,9 +96,9 @@ public:
 		heapArray[0] = x;
 		for (; x->value<heapArray[hole / 2]->value; hole /= 2) {
 			heapArray[hole] = heapArray[hole / 2];
-			getPointer(heapArray[hole]->index)=hole;
+			backPointers[heapArray[hole]->index]=hole;
 		}
-		getPointer(x->index) = hole;
+		backPointers[x->index] = hole;
 		heapArray[hole] = x;
 	}
 	Indexable<T,C>* remove() {
@@ -118,7 +108,7 @@ public:
 		return minItem;
 	}
 	void remove(Indexable<T,C>* item) {
-		size_t idx=getPointer(item->index);
+		size_t idx=backPointers[item->index];
 		heapArray[idx] = heapArray[currentSize--];
 		percolateDown(idx);
 	}
@@ -126,7 +116,6 @@ public:
 		currentSize = 0;
 		heapArray.clear();
 		heapArray.shrink_to_fit();
-		backPointers.assign(backPointers.size(), 0);
 	}
 protected:
 
@@ -157,13 +146,13 @@ protected:
 			}
 			if (heapArray[child]->value<tmp->value) {
 				heapArray[parent] = heapArray[child];
-				getPointer(heapArray[parent]->index) = parent;
+				backPointers[heapArray[parent]->index] = parent;
 			} else {
 				break;
 			}
 		}
 		heapArray[parent] = tmp;
-		getPointer(heapArray[parent]->index)=parent;
+		backPointers[heapArray[parent]->index]=parent;
 	}
 
 	void percolateUp(size_t k) {
@@ -173,12 +162,12 @@ protected:
 		while (k_father > 0
 				&& heapArray[k_father]->value>v->value) {
 			heapArray[k] = heapArray[k_father];
-			getPointer(heapArray[k]->index)=k;
+			backPointers[heapArray[k]->index]=k;
 			k = k_father;
 			k_father = k / 2;
 		}
 		heapArray[k] = v;
-		getPointer(heapArray[k]->index)=k;
+		backPointers[heapArray[k]->index]=k;
 	}
 	void resize() {
 		heapArray.resize(heapArray.size()*2,nullptr);

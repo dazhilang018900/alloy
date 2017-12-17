@@ -955,7 +955,7 @@ void IsoSurface::generateTriangles(const std::unordered_map<int4, EdgeInfo>& edg
 	}
 }
 void IsoSurface::findActiveVoxels(const EndlessGridFloat& grid,
-		const std::vector<EndlessNodeFloat*>& leafs,
+		const std::list<EndlessNodeFloat*>& leafs,
 		std::unordered_set<int3>& activeVoxels, std::unordered_map<int4, EdgeInfo>& activeEdges) {
 	int bdim = rows;
 	std::vector<float> data(rows * cols * slices);
