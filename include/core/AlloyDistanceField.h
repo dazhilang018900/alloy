@@ -30,12 +30,13 @@ namespace aly {
 		typedef Indexable<float, 3> VoxelIndex;
 		typedef vec<int, 3> Coord;
 	private:
-		static const ubyte1 ALIVE;
-		static const ubyte1 NARROW_BAND;
-		static const ubyte1 FAR_AWAY;
+
 
 		float march(float Nv, float Sv, float Ev, float Wv, float Fv, float Bv, int Nl, int Sl, int El, int Wl, int Fl, int Bl);
 	public:
+		static const ubyte1 ALIVE;
+		static const ubyte1 NARROW_BAND;
+		static const ubyte1 FAR_AWAY;
 		static const float DISTANCE_UNDEFINED;
 		DistanceField3f()  {}
 		void solve(const Volume1f& vol, Volume1f& out,float maxDistance=2.5f);
@@ -45,12 +46,13 @@ namespace aly {
 		typedef Indexable<float, 2> PixelIndex;
 		typedef vec<int, 2> Coord;
 	private:
-		static const ubyte1 ALIVE;
-		static const ubyte1 NARROW_BAND;
-		static const ubyte1 FAR_AWAY;
+
 
 		float march(float Nv, float Sv, float Fv, float Bv, int Nl, int Sl, int Fl, int Bl);
 	public:
+		static const ubyte1 ALIVE;
+		static const ubyte1 NARROW_BAND;
+		static const ubyte1 FAR_AWAY;
 		static const float DISTANCE_UNDEFINED;
 		DistanceField2f() {}
 		void solve(const Image1f& vol, Image1f& out, float maxDistance = 2.5f);

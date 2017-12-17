@@ -40,6 +40,16 @@ const float DistanceField2f::DISTANCE_UNDEFINED =
  in computational geometry, fluid mechanics, computer vision, and materials science (Vol. 3).
  Cambridge university press.
  */
+struct DfElem {
+	float dist;
+	ubyte label;
+	int8_t sign;
+	DfElem(float dist = DistanceField3f::DISTANCE_UNDEFINED, ubyte label =
+			DistanceField3f::FAR_AWAY.x, byte sign = 0) :
+			dist(dist), label(label), sign(sign) {
+
+	}
+};
 float DistanceField3f::march(float IMv, float IPv, float JMv, float JPv,
 		float KMv, float KPv, int IMl, int IPl, int JMl, int JPl, int KMl,
 		int KPl) {
@@ -417,18 +427,17 @@ void DistanceField3f::solve(const Volume1f& vol, Volume1f& distVol,
 	heap.clear();
 }
 
-void DistanceField3f::solve(EndlessGridFloat& vol,float maxDistance) {
+void DistanceField3f::solve(EndlessGridFloat& vol, float maxDistance) {
 	BinaryMinHeap<float, 3> heap;
-	float BG_VALUE=maxDistance+0.5f;
-	EndlessGridFloat distVol(vol.getLevelSizes(),BG_VALUE);
-
+	float BG_VALUE = maxDistance + 0.5f;
+	EndlessGrid<DfElem> distVol(vol.getLevelSizes(),
+			DfElem(BG_VALUE, FAR_AWAY, 0));
+	vol.setBackgroundValue(BG_VALUE);
 	static const int neighborsX[6] = { 1, 0, -1, 0, 0, 0 };
 	static const int neighborsY[6] = { 0, 1, 0, -1, 0, 0 };
 	static const int neighborsZ[6] = { 0, 0, 0, 0, 1, -1 };
 	std::list<VoxelIndex> voxelList;
 	VoxelIndex* he = nullptr;
-	EndlessGrid<ubyte> labelVol(vol.getLevelSizes(), FAR_AWAY);
-	EndlessGrid<byte> signVol(vol.getLevelSizes(), 0);
 	size_t countAlive = 0;
 	int dim;
 	int3 pos;
@@ -449,14 +458,15 @@ void DistanceField3f::solve(EndlessGridFloat& vol,float maxDistance) {
 					k = pos.z + kk;
 					Cv = vol.getLeafValue(i, j, k, leaf);
 					if (Cv == 0) {
-						signVol.getLeafValue(i, j, k) = 0;
-						distVol.setLeafValue(i, j, k, 0.0f, leaf);
-						labelVol.getLeafValue(i, j, k) = ALIVE;
+						DfElem& elem = distVol.getLeafValue(i, j, k);
+						elem.dist = 0;
+						elem.sign = 0;
+						elem.label = ALIVE;
 						countAlive++;
 					} else {
-						if (Cv != BG_VALUE) {
-							signVol.getLeafValue(i, j, k) = (int8_t) aly::sign(
-									Cv);
+						DfElem& elem = distVol.getLeafValue(i, j, k);
+						if (std::abs(Cv) < BG_VALUE) {
+							elem.sign = (int8_t) aly::sign(Cv);
 							NSFlag = 0;
 							WEFlag = 0;
 							FBFlag = 0;
@@ -519,16 +529,15 @@ void DistanceField3f::solve(EndlessGridFloat& vol,float maxDistance) {
 								result += 1.0f / (w * w);
 							}
 							if (result == 0) {
-								distVol.getLeafValue(i, j, k) = 0;
+								elem.dist = 0;
 							} else {
 								countAlive++;
-								labelVol.getLeafValue(i, j, k) = ALIVE;
+								elem.label = ALIVE;
 								result = std::sqrt(result);
-								distVol.getLeafValue(i, j, k) = (float) (1.0
-										/ result);
+								elem.dist = (float) (1.0f / result);
 							}
 						} else {
-							signVol.getLeafValue(i, j, k) = 0;
+							elem.sign = 0;
 						}
 					}
 				}
@@ -552,7 +561,7 @@ void DistanceField3f::solve(EndlessGridFloat& vol,float maxDistance) {
 	ubyte KPl = 0;
 	ubyte IPl = 0;
 	ubyte IMl = 0;
-	for (EndlessNode<ubyte>* leaf : labelVol.getLeafNodes()) {
+	for (EndlessNode<DfElem>* leaf : distVol.getLeafNodes()) {
 		dim = leaf->dim;
 		pos = leaf->location;
 		for (int kk = 0; kk < dim; kk++) {
@@ -561,47 +570,54 @@ void DistanceField3f::solve(EndlessGridFloat& vol,float maxDistance) {
 					i = pos.x + ii;
 					j = pos.y + jj;
 					k = pos.z + kk;
-					if (labelVol.getLeafValue(i, j, k, leaf) != ALIVE) {
+					DfElem& elem = distVol.getLeafValue(i, j, k);
+					if (elem.label != ALIVE) {
 						continue;
 					}
 					for (koff = 0; koff < 6; koff++) {
 						ni = i + neighborsX[koff];
 						nj = j + neighborsY[koff];
 						nk = k + neighborsZ[koff];
-						ubyte label = labelVol.getLeafValue(ni, nj, nk);
-						if (label != FAR_AWAY) {
+						DfElem& nelem = distVol.getLeafValue(ni, nj, nk);
+						if (nelem.label != FAR_AWAY) {
 							continue;
 						}
-						labelVol.setLeafValue(ni, nj, nk, NARROW_BAND, leaf);
-						JMv = distVol.getLeafValue(ni, nj - 1, nk);
-						JMs = signVol.getLeafValue(ni, nj - 1, nk);
-						JMl = labelVol.getLeafValue(ni, nj - 1, nk, leaf);
+						nelem.label = NARROW_BAND;
+						DfElem JM = distVol.getLeafValue(ni, nj - 1, nk, leaf);
+						JMv = JM.dist;
+						JMs = JM.sign;
+						JMl = JM.label;
 
-						JPv = distVol.getLeafValue(ni, nj + 1, nk);
-						JPs = signVol.getLeafValue(ni, nj + 1, nk);
-						JPl = labelVol.getLeafValue(ni, nj + 1, nk, leaf);
+						DfElem JP = distVol.getLeafValue(ni, nj + 1, nk, leaf);
+						JPv = JP.dist;
+						JPs = JP.sign;
+						JPl = JP.label;
 
-						KPv = distVol.getLeafValue(ni, nj, nk + 1);
-						KPs = signVol.getLeafValue(ni, nj, nk + 1);
-						KPl = labelVol.getLeafValue(ni, nj, nk + 1, leaf);
+						DfElem KP = distVol.getLeafValue(ni, nj, nk + 1, leaf);
+						KPv = KP.dist;
+						KPs = KP.sign;
+						KPl = KP.label;
 
-						KMv = distVol.getLeafValue(ni, nj, nk - 1);
-						KMs = signVol.getLeafValue(ni, nj, nk - 1);
-						KMl = labelVol.getLeafValue(ni, nj, nk - 1, leaf);
+						DfElem KM = distVol.getLeafValue(ni, nj, nk - 1, leaf);
+						KMv = KM.dist;
+						KMs = KM.sign;
+						KMl = KM.label;
 
-						IPv = distVol.getLeafValue(ni + 1, nj, nk);
-						IPs = signVol.getLeafValue(ni + 1, nj, nk);
-						IPl = labelVol.getLeafValue(ni + 1, nj, nk, leaf);
+						DfElem IP = distVol.getLeafValue(ni + 1, nj, nk, leaf);
+						IPv = IP.dist;
+						IPs = IP.sign;
+						IPl = IP.label;
 
-						IMv = distVol.getLeafValue(ni - 1, nj, nk);
-						IMs = signVol.getLeafValue(ni - 1, nj, nk);
-						IMl = labelVol.getLeafValue(ni - 1, nj, nk, leaf);
+						DfElem IM = distVol.getLeafValue(ni - 1, nj, nk, leaf);
+						IMv = IM.dist;
+						IMs = IM.sign;
+						IMl = IM.label;
 
-						signVol.getLeafValue(ni, nj, nk) = aly::sign(
+						nelem.sign = aly::sign(
 								JMs + JPs + IMs + IPs + KPs + KMs);
 						newvalue = march(JMv, JPv, KPv, KMv, IPv, IMv, JMl, JPl,
 								KPl, KMl, IPl, IMl);
-						distVol.getLeafValue(ni, nj, nk) = (float) (newvalue);
+						nelem.dist = newvalue;
 						voxelList.push_back(
 								VoxelIndex(Coord(ni, nj, nk),
 										(float) newvalue));
@@ -622,57 +638,66 @@ void DistanceField3f::solve(EndlessGridFloat& vol,float maxDistance) {
 		if (he->value > maxDistance) {
 			break;
 		}
-		distVol.getLeafValue(i, j, k) = he->value;
-		labelVol.getLeafValue(i, j, k) = ALIVE;
+		DfElem elem;
+		EndlessNode<DfElem>* leaf = nullptr;
+		distVol.getLeafValue(i, j, k, leaf, elem);
+		elem.dist = he->value;
+		elem.label = ALIVE;
+		distVol.setLeafValue(i, j, k, elem, leaf);
 		for (koff = 0; koff < 6; koff++) {
 			ni = i + neighborsX[koff];
 			nj = j + neighborsY[koff];
 			nk = k + neighborsZ[koff];
-			ubyte& label = labelVol.getLeafValue(ni, nj, nk);
-			if (label == ALIVE) {
+			DfElem& nelem = distVol.getLeafValue(ni, nj, nk);
+			if (nelem.label == ALIVE) {
 				continue;
 			}
-			JMv = distVol.getLeafValue(ni, nj - 1, nk);
-			JMs = signVol.getLeafValue(ni, nj - 1, nk);
-			JMl = labelVol.getLeafValue(ni, nj - 1, nk);
+			DfElem JM = distVol.getLeafValue(ni, nj - 1, nk, leaf);
+			JMv = JM.dist;
+			JMs = JM.sign;
+			JMl = JM.label;
 
-			JPv = distVol.getLeafValue(ni, nj + 1, nk);
-			JPs = signVol.getLeafValue(ni, nj + 1, nk);
-			JPl = labelVol.getLeafValue(ni, nj + 1, nk);
+			DfElem JP = distVol.getLeafValue(ni, nj + 1, nk, leaf);
+			JPv = JP.dist;
+			JPs = JP.sign;
+			JPl = JP.label;
 
-			KPv = distVol.getLeafValue(ni, nj, nk + 1);
-			KPs = signVol.getLeafValue(ni, nj, nk + 1);
-			KPl = labelVol.getLeafValue(ni, nj, nk + 1);
+			DfElem KP = distVol.getLeafValue(ni, nj, nk + 1, leaf);
+			KPv = KP.dist;
+			KPs = KP.sign;
+			KPl = KP.label;
 
-			KMv = distVol.getLeafValue(ni, nj, nk - 1);
-			KMs = signVol.getLeafValue(ni, nj, nk - 1);
-			KMl = labelVol.getLeafValue(ni, nj, nk - 1);
+			DfElem KM = distVol.getLeafValue(ni, nj, nk - 1, leaf);
+			KMv = KM.dist;
+			KMs = KM.sign;
+			KMl = KM.label;
 
-			IPv = distVol.getLeafValue(ni + 1, nj, nk);
-			IPs = signVol.getLeafValue(ni + 1, nj, nk);
-			IPl = labelVol.getLeafValue(ni + 1, nj, nk);
+			DfElem IP = distVol.getLeafValue(ni + 1, nj, nk, leaf);
+			IPv = IP.dist;
+			IPs = IP.sign;
+			IPl = IP.label;
 
-			IMv = distVol.getLeafValue(ni - 1, nj, nk);
-			IMs = signVol.getLeafValue(ni - 1, nj, nk);
-			IMl = labelVol.getLeafValue(ni - 1, nj, nk);
+			DfElem IM = distVol.getLeafValue(ni - 1, nj, nk, leaf);
+			IMv = IM.dist;
+			IMs = IM.sign;
+			IMl = IM.label;
 
-			signVol.getLeafValue(ni, nj, nk) = aly::sign(
-					JMs + JPs + IMs + IPs + KPs + KMs);
+			nelem.sign = aly::sign(JMs + JPs + IMs + IPs + KPs + KMs);
 			newvalue = march(JMv, JPv, KPv, KMv, IPv, IMv, JMl, JPl, KPl, KMl,
 					IPl, IMl);
 			voxelList.push_back(
 					VoxelIndex(Coord(ni, nj, nk), (float) newvalue));
 			VoxelIndex* vox = &voxelList.back();
-			if (label == NARROW_BAND) {
+			if (nelem.label == NARROW_BAND) {
 				heap.change(Coord(ni, nj, nk), vox);
 			} else {
 				heap.add(vox);
-				label = NARROW_BAND;
+				nelem.label = NARROW_BAND;
 			}
 		}
 	}
 	heap.clear();
-	for (EndlessNodeFloat* leaf : distVol.getLeafNodes()) {
+	for (EndlessNode<DfElem>* leaf : distVol.getLeafNodes()) {
 		dim = leaf->dim;
 		pos = leaf->location;
 		for (int kk = 0; kk < dim; kk++) {
@@ -681,9 +706,10 @@ void DistanceField3f::solve(EndlessGridFloat& vol,float maxDistance) {
 					i = pos.x + ii;
 					j = pos.y + jj;
 					k = pos.z + kk;
-					byte s = signVol.getLeafValue(i, j, k);
-					float* val = distVol.getLeafValuePtr(i, j, k,leaf);
-					vol.getLeafValue(i,j,k)=(*val)*s;
+					DfElem* elem = distVol.getLeafValuePtr(i, j, k, leaf);
+					if (elem->label == ALIVE) {
+						vol.getLeafValue(i, j, k) = elem->dist * elem->sign;
+					}
 				}
 			}
 		}

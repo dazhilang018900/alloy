@@ -639,6 +639,9 @@ void RebuildDistanceFieldFast(EndlessGrid<float>& grid, float maxDistance) {
 							dist = -1.5f;
 						}
 					}
+					if(std::abs(current)>=1.5f){
+						in->setLeafValue(i,j,k,aly::sign(current)*1.75f,leaf);
+					}
 					out->getLeafValue(i, j, k) = dist;
 				}
 			}
@@ -665,7 +668,7 @@ void RebuildDistanceFieldFast(EndlessGrid<float>& grid, float maxDistance) {
 						float v101 = in->getLeafValue(i, j - 1, k, leaf);
 						float v112 = in->getLeafValue(i, j, k + 1, leaf);
 						float v110 = in->getLeafValue(i, j, k - 1, leaf);
-						current = oldVal = in->getLeafValue(i, j, k);
+						current = oldVal = in->getLeafValue(i, j, k,leaf);
 						if (current < -b + 0.5f) {
 							current = -(1E10);
 							if (v011 <= 1)
@@ -698,8 +701,7 @@ void RebuildDistanceFieldFast(EndlessGrid<float>& grid, float maxDistance) {
 							current += 1.0f;
 						}
 						if (oldVal * current > 0) {
-							out->getLeafValue(i, j, k) = aly::clamp(current,
-									-maxDistance, maxDistance);
+							out->getLeafValue(i, j, k) = aly::clamp(current,-maxDistance, maxDistance);
 						}
 					}
 				}

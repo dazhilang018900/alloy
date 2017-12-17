@@ -34,16 +34,18 @@ bool LevelSetGridEx::init(Composite& rootNode) {
 	srand((unsigned int) time(nullptr));
 	//mesh.load(getFullPath("models/eagle.ply"));
 	mesh.load(getFullPath("models/horse.ply"));
+	/*
 	EndlessGrid<float> grid({16,8,2}, 0.0f);
 	MeshToLevelSet(mesh, grid, 2.5f, true,1.8f);
 	std::string voxelFile=MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"horse_df.xml";
 	EndlessGridFloat out({16,8,2}, 0.0f);
-	RebuildDistanceField(grid,4.0f);
+	RebuildDistanceField(grid,8.0f);
 	WriteGridToFile(voxelFile,grid);
-	//RebuildDistanceFieldFast(grid,4.0f);
-	//voxelFile=MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"horse_fast.xml";
-	//WriteGridToFile(voxelFile,grid);
+	RebuildDistanceFieldFast(grid,8.0f);
+	voxelFile=MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"horse_fast.xml";
+	WriteGridToFile(voxelFile,grid);
 	std::exit(0);
+	*/
 	/*
 	std::chrono::steady_clock::time_point lastTime;
 	std::chrono::steady_clock::time_point currentTime;
