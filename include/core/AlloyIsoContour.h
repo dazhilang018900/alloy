@@ -23,16 +23,12 @@
 #define ALLOYISOCONTOUR_H_
 #include "AlloyImage.h"
 #include "AlloyVector.h"
+#include "AlloyEnum.h"
 #include <memory>
 #include <list>
 #include <map>
 namespace aly {
-enum class TopologyRule2D {
-	Unconstrained, Connect4, Connect8
-};
-enum class Winding {
-	Clockwise, CounterClockwise
-};
+
 struct Edge: public uint2 {
 	Edge(uint32_t x, uint32_t y) :
 			uint2(x, y) {

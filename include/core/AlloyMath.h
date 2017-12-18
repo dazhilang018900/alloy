@@ -2588,7 +2588,15 @@ struct dim4: public int4 {
 	}
 };
 float3 ToBary(float3 p, float3 pt1, float3 pt2, float3 pt3);
+float3 ToBary(float2 p, float2 pt1, float2 pt2, float2 pt3);
+
+double3 ToBary(double3 p, float3 pt1, float3 pt2, float3 pt3);
+double3 ToBary(double2 p, float2 pt1, float2 pt2, float2 pt3);
+
 float3 FromBary(float3 b, float3 p1, float3 p2, float3 p3);
+float2 FromBary(float3 b, float2 p1, float2 p2, float2 p3);
+float3 FromBary(double3 b, float3 p1, float3 p2, float3 p3);
+float2 FromBary(double3 b, float2 p1, float2 p2, float2 p3);
 float DistanceToEdgeSqr(const float3& pt, const float3& pt1, const float3& pt2,
 		float3* lastClosestSegmentPoint);
 float DistanceToEdgeSqr(const float3& pt, const float3& pt1, const float3& pt2);

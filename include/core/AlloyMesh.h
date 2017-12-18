@@ -29,6 +29,7 @@
 #include "AlloyContext.h"
 #include <vector>
 #include <set>
+#include <unordered_set>
 #include <list>
 namespace aly {
 	bool SANITY_CHECK_SUBDIVIDE();
@@ -190,7 +191,7 @@ void WritePlyMeshToFile(const std::string& file, const Mesh& mesh, bool binary =
 		true);
 void WriteMeshToFile(const std::string& file, const Mesh& mesh);
 void WriteObjMeshToFile(const std::string& file,const Mesh& mesh);
-typedef std::vector<std::set<uint32_t>> MeshSetNeighborTable;
+typedef std::vector<std::unordered_set<uint32_t>> MeshSetNeighborTable;
 typedef std::vector<std::list<uint32_t>> MeshListNeighborTable;
 void CreateVertexNeighborTable(const Mesh& mesh, MeshSetNeighborTable& vertNbrs);
 void CreateOrderedVertexNeighborTable(const Mesh& mesh,

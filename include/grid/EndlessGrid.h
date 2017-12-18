@@ -45,7 +45,6 @@ template<typename T> class EndlessGrid {
 	std::vector<std::unique_ptr<EndlessNode<T>>> nodes;
 	std::unordered_map<int3, int> indexes;
 	T backgroundValue;
-	//std::vector<NodeNeighbor<T>> neighbors;
 	int roundDown(int val, int size) const {
 		int ret;
 		if (val < 0) {
@@ -57,7 +56,7 @@ template<typename T> class EndlessGrid {
 	}
 
 public:
-	void clear() {
+	inline void clear() {
 		nodes.clear();
 		indexes.clear();
 	}
@@ -89,10 +88,10 @@ public:
 			cellSizes[c] = gridSizes[c + 1];
 		}
 	}
-	void setBackgroundValue(T val) {
+	inline void setBackgroundValue(T val) {
 		backgroundValue = val;
 	}
-	T getBackgroundValue() const {
+	inline T getBackgroundValue() const {
 		return backgroundValue;
 	}
 	virtual ~EndlessGrid() {
@@ -129,31 +128,31 @@ public:
 		}
 		return result;
 	}
-	const std::vector<int>& getCellSizes() const {
+	inline const std::vector<int>& getCellSizes() const {
 		return cellSizes;
 	}
-	const std::vector<int>& getGridSizes() const {
+	inline const std::vector<int>& getGridSizes() const {
 		return gridSizes;
 	}
-	const std::vector<int>& getLevelSizes() const {
+	inline const std::vector<int>& getLevelSizes() const {
 		return levels;
 	}
-	int getCellSize(size_t i) const {
+	inline int getCellSize(size_t i) const {
 		return cellSizes[i];
 	}
-	int getGridSize(size_t i) const {
+	inline int getGridSize(size_t i) const {
 		return gridSizes[i];
 	}
-	int getLevelSize(size_t i) const {
+	inline int getLevelSize(size_t i) const {
 		return levels[i];
 	}
-	int getNodeSize() const {
+	inline int getNodeSize() const {
 		return gridSizes[0];
 	}
-	int getNodeCount() const {
+	inline int getNodeCount() const {
 		return nodes.size();
 	}
-	int getTreeDepth() const {
+	inline int getTreeDepth() const {
 		return levels.size();
 	}
 	EndlessNode<T>* getLocation(int i, int j, int k,

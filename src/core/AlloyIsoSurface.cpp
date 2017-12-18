@@ -454,7 +454,7 @@ void IsoSurface::regularize(const EndlessGridFloat& grid, Mesh& mesh) {
 	const int REGULARIZE_ITERATIONS = 3;
 	const float TRACE_THRESHOLD = 1E-5f;
 	std::vector<float3> tmpPoints(mesh.vertexLocations.size());
-	std::vector<std::set<uint32_t>> vertNbrs;
+	std::vector<std::unordered_set<uint32_t>> vertNbrs;
 	CreateVertexNeighborTable(mesh, vertNbrs);
 	for (int c = 0; c < REGULARIZE_ITERATIONS; c++) {
 #pragma omp parralel for;
@@ -499,7 +499,7 @@ void IsoSurface::regularize(const float* data, Mesh& mesh) {
 	const int REGULARIZE_ITERATIONS = 3;
 	const float TRACE_THRESHOLD = 1E-5f;
 	std::vector<float3> tmpPoints(mesh.vertexLocations.size());
-	std::vector<std::set<uint32_t>> vertNbrs;
+	std::vector<std::unordered_set<uint32_t>> vertNbrs;
 	CreateVertexNeighborTable(mesh, vertNbrs);
 	for (int c = 0; c < REGULARIZE_ITERATIONS; c++) {
 #pragma omp parralel for;

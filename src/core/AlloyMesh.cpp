@@ -1596,7 +1596,7 @@ void ReadPlyMeshFromFile(const std::string& file, Mesh &mesh) {
 }
 
 void CreateVertexNeighborTable(const Mesh& mesh,
-		std::vector<std::set<uint32_t>>& vertNbrs) {
+		std::vector<std::unordered_set<uint32_t>>& vertNbrs) {
 	vertNbrs.resize(mesh.vertexLocations.size());
 	for (const uint3& face : mesh.triIndexes.data) {
 		vertNbrs[face.x].insert(face.y);

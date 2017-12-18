@@ -55,6 +55,10 @@ enum class Winding {
 	Clockwise,
 	CounterClockwise
 };
+enum class TopologyRule2D {
+	Unconstrained, Connect4, Connect8
+};
+
 enum class MeshType {
 	Triangle, Quad
 };

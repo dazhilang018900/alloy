@@ -26,7 +26,7 @@
 #include <algorithm>
 #include <random>
 namespace aly {
-	int GetConnectedTextureComponents(const std::vector<int>& indexes, int N, std::vector<int>& cclist, std::vector<int>& labels) {
+	int GetConnectedTextureComponents(const std::vector<size_t>& indexes, int N, std::vector<int>& cclist, std::vector<int>& labels) {
 		std::vector<std::list<int>> vertNbrs(N);
 		int indexCount = (int)indexes.size();
 		for (int i = 0; i < indexCount; i += 3) {
@@ -147,7 +147,28 @@ namespace aly {
 		} while (pivot >= 0);
 		return (int)cclist.size();
 	}
-	int LabelTextureRegions(const aly::Mesh& mesh, std::vector<int>& indexes, std::vector<int>& cclist, std::vector<int>& labels, float distanceTolerance) {
+	int ColorizeMeshTextureRegions(Mesh& mesh){
+		std::vector<size_t> indexes;
+		std::vector<int> cc;
+		std::vector<int> labels;
+		int count=LabelTextureRegions(mesh, indexes, cc, labels);
+		std::vector<RGBAf> colorMap(cc.size());
+		for (int i = 0; i < (int)cc.size(); i++) {
+			colorMap[i] = HSVAtoRGBAf(HSVA(RandomUniform(0.0f, 1.0f), RandomUniform(0.3f, 1.0f), RandomUniform(0.5f, 1.0f), 0.5f));
+		}
+		size_t N=indexes.size();
+		mesh.vertexColors.resize(mesh.vertexLocations.size(),RGBAf(0.0f));
+		for (size_t i = 0; i <N; i++) {
+			int idx=indexes[i];
+			int l = labels[idx];
+			if (l >= 0 && l < (int)colorMap.size()) {
+				uint3 tri=mesh.triIndexes[i/3];
+				mesh.vertexColors[tri[i%3]] =colorMap[l];
+			}
+		}
+		return count;
+	}
+	int LabelTextureRegions(const aly::Mesh& mesh, std::vector<size_t>& indexes, std::vector<int>& cclist, std::vector<int>& labels, float distanceTolerance) {
 		const Vector2f& uvs = mesh.textureMap;
 		Locator2f locator(uvs);
 		std::vector<float2i> result;
@@ -1073,7 +1094,7 @@ namespace aly {
 		int N =  (int)mesh.vertexLocations.size();
 		SparseMatrix1f A(N, N);
 		Vector3f b(N);
-		for (std::set<uint32_t>& nbrs : nbrTable) {
+		for (std::unordered_set<uint32_t>& nbrs : nbrTable) {
 			int K = (int)nbrs.size() - 1;
 			float3 pt = mesh.vertexLocations[index];
 			{

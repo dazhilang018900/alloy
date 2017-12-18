@@ -78,6 +78,87 @@ namespace aly {
  ******************************************************************************
 
  */
+double3 ToBary(double2 p, float2 pt1, float2 pt2, float2 pt3) {
+	double a = (double)pt1.x - (double)pt3.x;
+	double b = (double)pt2.x - (double)pt3.x;
+	double c = (double)pt3.x - (double)p.x;
+	double d = (double)pt1.y - (double)pt3.y;
+	double e = (double)pt2.y - (double)pt3.y;
+	double f = (double)pt3.y - (double)p.y;
+	double l1 = (b * f - c * e) / (a * e - b * d);
+	double l2 = (a * f - c * d) / (b * d - a * e);
+	if (std::isnan(l1) || std::isinf(l1)) {
+		l1 = 0;
+	}
+	if (std::isnan(l2) || std::isinf(l2)) {
+		l2 = 0;
+	}
+	if (l1 > 1 || l2 > 1 || l1 + l2 > 1 || l1 < 0 || l2 < 0) {
+		l1 = std::max(std::min(l1, 1.0), 0.0);
+		l2 = std::max(std::min(l2, 1.0), 0.0);
+		if (l1 + l2 > 1) {
+			double diff = 0.5 * (1 - l1 - l2);
+			l1 += diff;
+			l2 += diff;
+		}
+	}
+	return double3(l1, l2, 1 - l1 - l2);
+}
+double3 ToBary(double3 p, float3 pt1, float3 pt2, float3 pt3) {
+	double a = (double)pt1.x - (double)pt3.x;
+	double b = (double)pt2.x - (double)pt3.x;
+	double c = (double)pt3.x - (double)p.x;
+	double d = (double)pt1.y - (double)pt3.y;
+	double e = (double)pt2.y - (double)pt3.y;
+	double f = (double)pt3.y - (double)p.y;
+	double g = (double)pt1.z - (double)pt3.z;
+	double h = (double)pt2.z - (double)pt3.z;
+	double i = (double)pt3.z - (double)p.z;
+	double l1 = (b * (f + i) - c * (e + h)) / (a * (e + h) - b * (d + g));
+	double l2 = (a * (f + i) - c * (d + g)) / (b * (d + g) - a * (e + h));
+	if (std::isnan(l1) || std::isinf(l1)) {
+		l1 = 0;
+	}
+	if (std::isnan(l2) || std::isinf(l2)) {
+		l2 = 0;
+	}
+	if (l1 > 1 || l2 > 1 || l1 + l2 > 1 || l1 < 0 || l2 < 0) {
+		l1 = std::max(std::min(l1, 1.0), 0.0);
+		l2 = std::max(std::min(l2, 1.0), 0.0);
+		if (l1 + l2 > 1) {
+			double diff = 0.5 * (1 - l1 - l2);
+			l1 += diff;
+			l2 += diff;
+		}
+	}
+	return double3(l1, l2, 1 - l1 - l2);
+}
+float3 ToBary(float2 p, float2 pt1, float2 pt2, float2 pt3) {
+	float a = pt1.x - pt3.x;
+	float b = pt2.x - pt3.x;
+	float c = pt3.x - p.x;
+	float d = pt1.y - pt3.y;
+	float e = pt2.y - pt3.y;
+	float f = pt3.y - p.y;
+	float l1 = (b * f - c * e) / (a * e - b * d);
+	float l2 = (a * f - c * d) / (b * d - a * e);
+	if (std::isnan(l1) || std::isinf(l1)) {
+		l1 = 0;
+	}
+	if (std::isnan(l2) || std::isinf(l2)) {
+		l2 = 0;
+	}
+	if (l1 > 1 || l2 > 1 || l1 + l2 > 1 || l1 < 0 || l2 < 0) {
+		l1 = std::max(std::min(l1, 1.0f), 0.0f);
+		l2 = std::max(std::min(l2, 1.0f), 0.0f);
+		if (l1 + l2 > 1) {
+			double diff = 0.5 * (1 - l1 - l2);
+			l1 += diff;
+			l2 += diff;
+		}
+	}
+	return float3(l1, l2, 1 - l1 - l2);
+}
 float3 ToBary(float3 p, float3 pt1, float3 pt2, float3 pt3) {
 	float a = pt1.x - pt3.x;
 	float b = pt2.x - pt3.x;
@@ -107,8 +188,23 @@ float3 ToBary(float3 p, float3 pt1, float3 pt2, float3 pt3) {
 	}
 	return float3(l1, l2, 1 - l1 - l2);
 }
-float3 FromBary(float3 b, float3 p1,float3 p2, float3 p3) {
-	return float3(p1.x * b.x + p2.x * b.y + p3.x * b.z,p1.y * b.x + p2.y * b.y + p3.y * b.z,p1.z* b.x + p2.z * b.y + p3.z * b.z);
+float3 FromBary(float3 b, float3 p1, float3 p2, float3 p3) {
+	return float3(p1.x * b.x + p2.x * b.y + p3.x * b.z,
+			p1.y * b.x + p2.y * b.y + p3.y * b.z,
+			p1.z * b.x + p2.z * b.y + p3.z * b.z);
+}
+float2 FromBary(float3 b, float2 p1, float2 p2, float2 p3) {
+	return float2(p1.x * b.x + p2.x * b.y + p3.x * b.z,
+			p1.y * b.x + p2.y * b.y + p3.y * b.z);
+}
+float3 FromBary(double3 b, float3 p1, float3 p2, float3 p3) {
+	return float3((double)p1.x * b.x + (double)p2.x * b.y + (double)p3.x * b.z,
+			(double)p1.y * b.x + p2.y * b.y + (double)p3.y * b.z,
+			(double)p1.z * b.x + p2.z * b.y + (double)p3.z * b.z);
+}
+float2 FromBary(double3 b, float2 p1, float2 p2, float2 p3) {
+	return float2((double)p1.x * b.x + (double)p2.x * b.y + (double)p3.x * b.z,
+			(double)p1.y * b.x + (double)p2.y * b.y + (double)p3.y * b.z);
 }
 template<class T, int m, int n> void SVD_INTERNAL(const matrix<T, m, n>& M,
 		matrix<T, m, m>& U, matrix<T, m, n>& D, matrix<T, n, n>& Vt) {
