@@ -21,7 +21,6 @@
 
 #include "grid/EndlessGrid.h"
 #include "AlloyVolume.h"
-
 #include "AlloyIsoSurface.h"
 #include "AlloyDistanceField.h"
 #include <queue>
@@ -588,9 +587,14 @@ float4x4 PointsToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 	}
 	return T;
 }
-void RebuildDistanceField(EndlessGrid<float>& grid,float maxDistance) {
+void RebuildDistanceField(EndlessGrid<float>& grid, float maxDistance) {
 	DistanceField3f df;
 	df.solve(grid, maxDistance);
+}
+void CreateIsoSurface(const EndlessGrid<float>& grid, Mesh& mesh,
+		const MeshType& type, bool regularizeTest, const float& isoLevel) {
+	IsoSurface isosurf;
+	isosurf.solve(grid, mesh, type, regularizeTest, isoLevel);
 }
 void RebuildDistanceFieldFast(EndlessGrid<float>& grid, float maxDistance) {
 	float nbrs[6];
@@ -639,8 +643,9 @@ void RebuildDistanceFieldFast(EndlessGrid<float>& grid, float maxDistance) {
 							dist = -1.5f;
 						}
 					}
-					if(std::abs(current)>=1.5f){
-						in->setLeafValue(i,j,k,aly::sign(current)*1.75f,leaf);
+					if (std::abs(current) >= 1.5f) {
+						in->setLeafValue(i, j, k, aly::sign(current) * 1.75f,
+								leaf);
 					}
 					out->getLeafValue(i, j, k) = dist;
 				}
@@ -668,7 +673,7 @@ void RebuildDistanceFieldFast(EndlessGrid<float>& grid, float maxDistance) {
 						float v101 = in->getLeafValue(i, j - 1, k, leaf);
 						float v112 = in->getLeafValue(i, j, k + 1, leaf);
 						float v110 = in->getLeafValue(i, j, k - 1, leaf);
-						current = oldVal = in->getLeafValue(i, j, k,leaf);
+						current = oldVal = in->getLeafValue(i, j, k, leaf);
 						if (current < -b + 0.5f) {
 							current = -(1E10);
 							if (v011 <= 1)
@@ -701,7 +706,8 @@ void RebuildDistanceFieldFast(EndlessGrid<float>& grid, float maxDistance) {
 							current += 1.0f;
 						}
 						if (oldVal * current > 0) {
-							out->getLeafValue(i, j, k) = aly::clamp(current,-maxDistance, maxDistance);
+							out->getLeafValue(i, j, k) = aly::clamp(current,
+									-maxDistance, maxDistance);
 						}
 					}
 				}

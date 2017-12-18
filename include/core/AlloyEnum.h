@@ -51,6 +51,13 @@ enum class MouseModifier {
 enum class MatrixFactorization {
 	SVD, QR, LU
 };
+enum class Winding {
+	Clockwise,
+	CounterClockwise
+};
+enum class MeshType {
+	Triangle, Quad
+};
 enum class MessageOption {
 	YesNo, OkayCancel, Okay
 };

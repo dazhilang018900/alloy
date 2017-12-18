@@ -14,6 +14,7 @@
 #include <AlloyMesh.h>
 #include <AlloyVolume.h>
 #include <AlloyMath.h>
+#include <AlloyEnum.h>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
@@ -165,15 +166,7 @@ public:
 	}
 };
 
-/*** The winding order for triangle vertices.*/
-enum class Winding { /** The CLOCKWISE. */
-	CLOCKWISE,
-	/** The COUNTE r_ clockwise. */
-	COUNTER_CLOCKWISE
-};
-enum class MeshType {
-	TRIANGLE, QUAD
-};
+
 class IsoSurface {
 private:
 	float backgroundValue;
@@ -253,15 +246,15 @@ public:
 			bool regularizeTest,
 			const float& isoLevel);
 	void solve(const Volume1f& data, const std::vector<int3>& indexList,
-			Mesh& mesh, const MeshType& type = MeshType::TRIANGLE,
+			Mesh& mesh, const MeshType& type = MeshType::Triangle,
 			bool regularize = true, const float& isoLevel = 0);
 	void solve(const Volume1f& data,
-			Mesh& mesh, const MeshType& type = MeshType::TRIANGLE,
+			Mesh& mesh, const MeshType& type = MeshType::Triangle,
 			bool regularize = true, const float& isoLevel = 0);
 
 	void solve(const float* data, const int& rows, const int& cols,
 			const int& slices, const std::vector<int3>& indexList, Mesh& mesh,
-			const MeshType& type = MeshType::TRIANGLE, bool regularize = true,
+			const MeshType& type = MeshType::Triangle, bool regularize = true,
 			const float& isoLevel = 0);
 	void project(aly::float3* points, const int& numPoints,
 			aly::float3* normals, float* levelset, const aly::box3f& bbox,

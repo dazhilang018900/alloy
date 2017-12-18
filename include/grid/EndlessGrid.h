@@ -24,6 +24,7 @@
 #include "EndlessNode.h"
 #include "AlloyMath.h"
 #include "AlloyMesh.h"
+#include "AlloyEnum.h"
 #include <unordered_map>
 #include <map>
 #include <iostream>
@@ -704,6 +705,12 @@ float4x4 PointsToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 void RebuildDistanceFieldFast(EndlessGrid<float>& grid,
 		float maxDistance = 2.5f);
 void RebuildDistanceField(EndlessGrid<float>& grid,float maxDistance = 2.5f);
+void CreateIsoSurface(
+		const EndlessGrid<float>& grid,
+		Mesh& mesh,
+		const MeshType& type,
+		bool regularizeTest,
+		const float& isoLevel);
 typedef EndlessGrid<float> EndlessGridFloat;
 typedef EndlessGrid<int> EndlessGridInt;
 typedef EndlessGrid<float2> EndlessGridFloat2;

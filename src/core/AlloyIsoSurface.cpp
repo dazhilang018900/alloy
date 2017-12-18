@@ -364,7 +364,7 @@ const int IsoSurface::triangleConnectionTable[4096] = { -1, -1, -1, -1, -1, -1,
 		-1 };
 
 IsoSurface::IsoSurface() :
-		isoLevel(0), rows(0), cols(0), slices(0), winding(Winding::CLOCKWISE), backgroundValue(
+		isoLevel(0), rows(0), cols(0), slices(0), winding(Winding::Clockwise), backgroundValue(
 				std::numeric_limits<float>::infinity()), skipHidden(true), triangleCount(
 				0) {
 }
@@ -389,7 +389,7 @@ void IsoSurface::solve(const float* data, const int& rows, const int& cols,
 		const int& slices, const std::vector<int3>& indexList, Mesh& mesh,
 		const MeshType& type, bool regularizeTest, const float& isoLevel) {
 	mesh.clear();
-	if (type == MeshType::TRIANGLE) {
+	if (type == MeshType::Triangle) {
 		solveTri(data, rows, cols, slices, indexList, mesh, isoLevel);
 	} else {
 		solveQuad(data, rows, cols, slices, indexList, mesh, isoLevel);
@@ -418,7 +418,7 @@ void IsoSurface::solve(const Volume1f& data, const std::vector<int3>& indexList,
 		Mesh& mesh, const MeshType& type, bool regularizeTest,
 		const float& isoLevel) {
 	mesh.clear();
-	if (type == MeshType::TRIANGLE) {
+	if (type == MeshType::Triangle) {
 		solveTri(data.ptr(), data.rows, data.cols, data.slices, indexList, mesh,
 				isoLevel);
 	} else {
@@ -437,7 +437,7 @@ void IsoSurface::solve(const EndlessGridFloat& grid, Mesh& mesh,
 	mesh.clear();
 	float oldBg = backgroundValue;
 	backgroundValue = grid.getBackgroundValue();
-	if (type == MeshType::TRIANGLE) {
+	if (type == MeshType::Triangle) {
 		solveTri(grid, mesh, isoLevel);
 
 	} else {
@@ -561,13 +561,13 @@ void IsoSurface::solveTri(const float* vol, const int& rows, const int& cols,
 					index.y, index.z, vertexCount);
 	}
 	indexes.resize(triangleCount);
-	if (winding == Winding::CLOCKWISE) {
+	if (winding == Winding::Clockwise) {
 		for (int k = 0; k < triangleCount; k++) {
 			IsoTriangle* triPtr = &triangles[k];
 			indexes[k] = uint3(triPtr->vertexIds[0], triPtr->vertexIds[1],
 					triPtr->vertexIds[2]);
 		}
-	} else if (winding == Winding::COUNTER_CLOCKWISE) {
+	} else if (winding == Winding::CounterClockwise) {
 		for (int k = 0; k < triangleCount; k++) {
 			IsoTriangle* triPtr = &triangles[k];
 			indexes[k] = uint3(triPtr->vertexIds[0], triPtr->vertexIds[1],
@@ -647,13 +647,13 @@ void IsoSurface::solveTri(const EndlessGridFloat& grid, Mesh& mesh,
 		}
 	}
 	indexes.resize(triangleCount);
-	if (winding == Winding::CLOCKWISE) {
+	if (winding == Winding::Clockwise) {
 		for (int k = 0; k < triangleCount; k++) {
 			IsoTriangle* triPtr = &triangles[k];
 			indexes[k] = uint3(triPtr->vertexIds[0], triPtr->vertexIds[1],
 					triPtr->vertexIds[2]);
 		}
-	} else if (winding == Winding::COUNTER_CLOCKWISE) {
+	} else if (winding == Winding::CounterClockwise) {
 		for (int k = 0; k < triangleCount; k++) {
 			IsoTriangle* triPtr = &triangles[k];
 			indexes[k] = uint3(triPtr->vertexIds[0], triPtr->vertexIds[1],
@@ -762,7 +762,7 @@ vector<vector<int>> IsoSurface::buildVertexNeighborTable(const int vertexCount,
 	vector<vector<int>> neighborTable(vertexCount);
 	vector<vector<int>> tmpTable(vertexCount);
 
-	if (direction == Winding::CLOCKWISE) {
+	if (direction == Winding::Clockwise) {
 		for (int i = 0; i < indexCount; i += 3) {
 			v1 = indexes[i];
 			v2 = indexes[i + 1];
@@ -774,7 +774,7 @@ vector<vector<int>> IsoSurface::buildVertexNeighborTable(const int vertexCount,
 			tmpTable[v3].push_back(v1);
 			tmpTable[v3].push_back(v2);
 		}
-	} else if (direction == Winding::COUNTER_CLOCKWISE) {
+	} else if (direction == Winding::CounterClockwise) {
 		for (int i = 0; i < indexCount; i += 3) {
 			v1 = indexes[i];
 			v2 = indexes[i + 1];
@@ -1003,7 +1003,7 @@ void IsoSurface::findActiveVoxels(const EndlessGridFloat& grid,
 									}
 									EdgeInfo info;
 									info.point = crossing;
-									if (winding == Winding::CLOCKWISE) {
+									if (winding == Winding::Clockwise) {
 										info.winding = (fValue1 < 0.f);
 									} else {
 										info.winding = (fValue1 > 0.f);
@@ -1047,7 +1047,7 @@ void IsoSurface::findActiveVoxels(const float* vol,
 						}
 						EdgeInfo info;
 						info.point = crossing;
-						if (winding == Winding::CLOCKWISE) {
+						if (winding == Winding::Clockwise) {
 							info.winding = (fValue1 < 0.f);
 						} else {
 							info.winding = (fValue1 > 0.f);

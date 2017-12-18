@@ -250,7 +250,7 @@ void LevelSetGridEx::solve() {
 			Mesh tmp;
 			textLabel->setLabel("Solving for iso-surface...");
 			AlloyApplicationContext()->requestPack();
-			isosurf.solve(grid,tmp,(this->meshType==0)?MeshType::TRIANGLE:MeshType::QUAD,regularize,0.0f);
+			isosurf.solve(grid,tmp,(this->meshType==0)?MeshType::Triangle:MeshType::Quad,regularize,0.0f);
 			std::chrono::steady_clock::time_point currentTime=std::chrono::steady_clock::now();
 			elapsed = std::chrono::duration<double>(currentTime - lastTime).count();
 			tmp.transform(T);
