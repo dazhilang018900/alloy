@@ -548,7 +548,7 @@ float4x4 PointsToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 
 	box3f bbox = mesh.getBoundingBox();
 	size_t N = mesh.vertexLocations.size();
-	int dim = std::max(std::ceil(2.0f * surfelSize / voxelResolution + 1),
+	int dim = (int)std::max(std::ceil(2.0f * surfelSize / voxelResolution + 1),
 			2 * narrowBand);
 	int3 minIndex = int3(bbox.position / voxelResolution - (float) dim - 1.0f);
 	float4x4 T = MakeScale(voxelResolution) * MakeTranslation(float3(minIndex));
@@ -654,7 +654,7 @@ void RebuildDistanceFieldFast(EndlessGrid<float>& grid, float maxDistance) {
 	}
 	in->clear();
 	std::swap(in, out);
-	int N = std::ceil(maxDistance);
+	int N = (int)std::ceil(maxDistance);
 	if (N % 2 == 0)
 		N++;
 	for (int b = 0; b < N; b++) {
@@ -752,7 +752,7 @@ float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 		splats.push_back(box3f(minPt, maxPt - minPt));
 	}
 	averageSize /= mesh.triIndexes.size();
-	float res = voxelScale * std::sqrt(averageSize);
+	float res = voxelScale * (float)std::sqrt(averageSize);
 	int3 minIndex = int3(bbox.position / res - narrowBand * 3.0f);
 	float4x4 T = MakeScale(res) * MakeTranslation(float3(minIndex));
 	//Splat regions around triangles

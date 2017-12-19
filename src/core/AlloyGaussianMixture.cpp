@@ -76,7 +76,7 @@ void SANITY_CHECK_GMM() {
 				sample[0] = samp.x;
 				sample[1] = samp.y;
 				samples.setColumn(sample, i);
-				colorSamples[i] = float3(samp.x, 0.4, samp.y);
+				colorSamples[i] = float3(samp.x, 0.4f, samp.y);
 				break;
 			}
 			last = curr;

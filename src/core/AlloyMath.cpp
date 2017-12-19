@@ -152,7 +152,7 @@ float3 ToBary(float2 p, float2 pt1, float2 pt2, float2 pt3) {
 		l1 = std::max(std::min(l1, 1.0f), 0.0f);
 		l2 = std::max(std::min(l2, 1.0f), 0.0f);
 		if (l1 + l2 > 1) {
-			double diff = 0.5 * (1 - l1 - l2);
+			float diff = 0.5f * (1 - l1 - l2);
 			l1 += diff;
 			l2 += diff;
 		}
@@ -181,7 +181,7 @@ float3 ToBary(float3 p, float3 pt1, float3 pt2, float3 pt3) {
 		l1 = std::max(std::min(l1, 1.0f), 0.0f);
 		l2 = std::max(std::min(l2, 1.0f), 0.0f);
 		if (l1 + l2 > 1) {
-			double diff = 0.5 * (1 - l1 - l2);
+			float diff = 0.5f * (1 - l1 - l2);
 			l1 += diff;
 			l2 += diff;
 		}
@@ -201,13 +201,13 @@ bool Contains(float2 p, float2 pt1, float2 pt2, float2 pt3){
 	return (crossMag(p-pt1,pt2-pt1)<=0.0f&&crossMag(p-pt2,pt3-pt2)<=0.0f&&crossMag(p-pt3,pt1-pt3)<=0.0f);
 }
 float3 FromBary(double3 b, float3 p1, float3 p2, float3 p3) {
-	return float3((double)p1.x * b.x + (double)p2.x * b.y + (double)p3.x * b.z,
-			(double)p1.y * b.x + p2.y * b.y + (double)p3.y * b.z,
-			(double)p1.z * b.x + p2.z * b.y + (double)p3.z * b.z);
+	return float3((float)(p1.x * b.x + p2.x * b.y + p3.x * b.z),
+			(float)(p1.y * b.x + p2.y * b.y + p3.y * b.z),
+			(float)(p1.z * b.x + p2.z * b.y +p3.z * b.z));
 }
 float2 FromBary(double3 b, float2 p1, float2 p2, float2 p3) {
-	return float2((double)p1.x * b.x + (double)p2.x * b.y + (double)p3.x * b.z,
-			(double)p1.y * b.x + (double)p2.y * b.y + (double)p3.y * b.z);
+	return float2((float)(p1.x * b.x + p2.x * b.y + p3.x * b.z),
+		(float)(p1.y * b.x + p2.y * b.y + p3.y * b.z));
 }
 template<class T, int m, int n> void SVD_INTERNAL(const matrix<T, m, n>& M,
 		matrix<T, m, m>& U, matrix<T, m, n>& D, matrix<T, n, n>& Vt) {

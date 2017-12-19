@@ -115,7 +115,7 @@ public:
 		cellSizes.resize(levels.size(), 0);
 		gridSizes[levels.size() - 1] = levels.back();
 		cellSizes[levels.size() - 1] = 1;
-		for (int c = levels.size() - 2; c >= 0; c--) {
+		for (int c = (int)levels.size() - 2; c >= 0; c--) {
 			gridSizes[c] = gridSizes[c + 1] * levels[c];
 			cellSizes[c] = gridSizes[c + 1];
 		}
@@ -149,11 +149,11 @@ public:
 	inline int getNodeSize() const {
 		return gridSizes[0];
 	}
-	inline int getNodeCount() const {
+	inline size_t getNodeCount() const {
 		return nodes.size();
 	}
 	inline int getTreeDepth() const {
-		return levels.size();
+		return (int)levels.size();
 	}
 	EndlessNode<T>* getLocation(int i, int j, int k,
 			EndlessLocation& location) {
@@ -223,7 +223,7 @@ public:
 	}
 	T& getLeafValue(int i, int j, int k) {
 		int sz = gridSizes[0];
-		int cdim, dim;
+		int cdim;
 		int ti = roundDown(i, sz);
 		int tj = roundDown(j, sz);
 		int tk = roundDown(k, sz);
@@ -278,7 +278,7 @@ public:
 	void getMultiResolutionValue(int i, int j, int k, EndlessNode<T>*& result,
 			T*& value) const {
 		int sz = gridSizes[0];
-		int cdim, dim;
+		int cdim;
 		int ti = roundDown(i, sz);
 		int tj = roundDown(j, sz);
 		int tk = roundDown(k, sz);
@@ -316,7 +316,7 @@ public:
 	bool getLeafValue(int i, int j, int k, EndlessNode<T>*& result,
 			T& value) const {
 		int sz = gridSizes[0];
-		int cdim, dim;
+		int cdim;
 		int ti = roundDown(i, sz);
 		int tj = roundDown(j, sz);
 		int tk = roundDown(k, sz);
@@ -347,7 +347,7 @@ public:
 	}
 	T getLeafValue(int i, int j, int k) const {
 		int sz = gridSizes[0];
-		int cdim, dim;
+		int cdim;
 		int ti = roundDown(i, sz);
 		int tj = roundDown(j, sz);
 		int tk = roundDown(k, sz);

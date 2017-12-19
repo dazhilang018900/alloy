@@ -45,6 +45,7 @@
     <ClCompile Include="..\..\src\core\AlloyImageProcessing.cpp" />
     <ClCompile Include="..\..\src\core\AlloyIntersector.cpp" />
     <ClCompile Include="..\..\src\core\AlloyIsoContour.cpp" />
+    <ClCompile Include="..\..\src\core\AlloyIsoSurface.cpp" />
     <ClCompile Include="..\..\src\core\AlloyLBFGS.cpp" />
     <ClCompile Include="..\..\src\core\AlloyMath.cpp" />
     <ClCompile Include="..\..\src\core\AlloyMemMappedFile.cpp" />
@@ -82,6 +83,7 @@
     <ClCompile Include="..\..\src\core\MipavHeaderReaderWriter.cpp" />
     <ClCompile Include="..\..\src\core\nanovg.cpp" />
     <ClCompile Include="..\..\src\core\PerlinNoise.cpp" />
+    <ClCompile Include="..\..\src\core\PointShader.cpp" />
     <ClCompile Include="..\..\src\core\process_unix.cpp" />
     <ClCompile Include="..\..\src\core\process_win.cpp" />
     <ClCompile Include="..\..\src\core\SanityChecks.cpp" />
@@ -90,6 +92,7 @@
     <ClCompile Include="..\..\src\core\Sift.cpp" />
     <ClCompile Include="..\..\src\core\stb_dxt.cpp" />
     <ClCompile Include="..\..\src\core\svd3.cpp" />
+    <ClCompile Include="..\..\src\core\TextureMapLocator.cpp" />
     <ClCompile Include="..\..\src\core\tinyexr.cpp" />
     <ClCompile Include="..\..\src\core\tinyprocess.cpp" />
     <ClCompile Include="..\..\src\core\tinyspline.c" />
@@ -115,6 +118,7 @@
     <ClCompile Include="..\..\src\example\ImageProcessingEx.cpp" />
     <ClCompile Include="..\..\src\example\IntersectorEx.cpp" />
     <ClCompile Include="..\..\src\example\LaplaceFillEx.cpp" />
+    <ClCompile Include="..\..\src\example\LevelSetGridEx.cpp" />
     <ClCompile Include="..\..\src\example\LocatorEx.cpp" />
     <ClCompile Include="..\..\src\example\main.cpp" />
     <ClCompile Include="..\..\src\example\MenuEx.cpp" />
@@ -144,6 +148,8 @@
     <ClCompile Include="..\..\src\example\TweenEx.cpp" />
     <ClCompile Include="..\..\src\example\UnitsEx.cpp" />
     <ClCompile Include="..\..\src\example\WindowPaneEx.cpp" />
+    <ClCompile Include="..\..\src\grid\EndlessGrid.cpp" />
+    <ClCompile Include="..\..\src\grid\EndlessNode.cpp" />
     <ClCompile Include="..\..\src\ocl\BufferCL.cpp" />
     <ClCompile Include="..\..\src\ocl\BufferCLGL.cpp" />
     <ClCompile Include="..\..\src\ocl\ComputeCL.cpp" />
@@ -252,6 +258,7 @@
     <ClInclude Include="..\..\include\core\AlloyImageProcessing.h" />
     <ClInclude Include="..\..\include\core\AlloyIntersector.h" />
     <ClInclude Include="..\..\include\core\AlloyIsoContour.h" />
+    <ClInclude Include="..\..\include\core\AlloyIsoSurface.h" />
     <ClInclude Include="..\..\include\core\AlloyLBFGS.h" />
     <ClInclude Include="..\..\include\core\AlloyLocator.h" />
     <ClInclude Include="..\..\include\core\AlloyMath.h" />
@@ -307,6 +314,7 @@
     <ClInclude Include="..\..\include\core\nanovg_gl_utils.h" />
     <ClInclude Include="..\..\include\core\OneEuroFilter.h" />
     <ClInclude Include="..\..\include\core\PerlinNoise.h" />
+    <ClInclude Include="..\..\include\core\PointShader.h" />
     <ClInclude Include="..\..\include\core\process_unix.h" />
     <ClInclude Include="..\..\include\core\process_win.h" />
     <ClInclude Include="..\..\include\core\sha1.h" />
@@ -317,6 +325,7 @@
     <ClInclude Include="..\..\include\core\stb_image_write.h" />
     <ClInclude Include="..\..\include\core\stb_truetype.h" />
     <ClInclude Include="..\..\include\core\svd3.h" />
+    <ClInclude Include="..\..\include\core\TextureMapLocator.h" />
     <ClInclude Include="..\..\include\core\tinyexr.h" />
     <ClInclude Include="..\..\include\core\tinyformat.h" />
     <ClInclude Include="..\..\include\core\tinyprocess.h" />
@@ -342,6 +351,7 @@
     <ClInclude Include="..\..\include\example\ImageProcessingEx.h" />
     <ClInclude Include="..\..\include\example\IntersectorEx.h" />
     <ClInclude Include="..\..\include\example\LaplaceFillEx.h" />
+    <ClInclude Include="..\..\include\example\LevelSetGridEx.h" />
     <ClInclude Include="..\..\include\example\LocatorEx.h" />
     <ClInclude Include="..\..\include\example\MenuEx.h" />
     <ClInclude Include="..\..\include\example\MeshDepthEx.h" />
@@ -370,6 +380,8 @@
     <ClInclude Include="..\..\include\example\TweenEx.h" />
     <ClInclude Include="..\..\include\example\UnitsEx.h" />
     <ClInclude Include="..\..\include\example\WindowPaneEx.h" />
+    <ClInclude Include="..\..\include\grid\EndlessGrid.h" />
+    <ClInclude Include="..\..\include\grid\EndlessNode.h" />
     <ClInclude Include="..\..\include\ocl\BufferCL.h" />
     <ClInclude Include="..\..\include\ocl\BufferCLGL.h" />
     <ClInclude Include="..\..\include\ocl\ComputeCL.h" />

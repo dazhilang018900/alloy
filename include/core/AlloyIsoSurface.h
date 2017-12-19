@@ -141,7 +141,7 @@ struct IsoTriangle {
 
 	/** The vertex ids. */
 public:
-	int vertexIds[3];
+	size_t vertexIds[3];
 	IsoTriangle() {
 		vertexIds[0] = 0;
 		vertexIds[1] = 0;

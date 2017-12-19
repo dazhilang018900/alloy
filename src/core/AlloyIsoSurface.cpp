@@ -27,7 +27,7 @@
 using namespace std;
 namespace aly {
 const int3 IsoSurface::AXIS_OFFSET[3] = { int3(1, 0, 0), int3(0, 1, 0), int3(0,
-		0, 1.f) };
+		0, 1) };
 
 // ----------------------------------------------------------------------------
 
@@ -457,10 +457,10 @@ void IsoSurface::regularize(const EndlessGridFloat& grid, Mesh& mesh) {
 	std::vector<std::unordered_set<uint32_t>> vertNbrs;
 	CreateVertexNeighborTable(mesh, vertNbrs);
 	for (int c = 0; c < REGULARIZE_ITERATIONS; c++) {
-#pragma omp parralel for;
+#pragma omp parallel for
 		for (int i = 0; i < (int) vertNbrs.size(); i++) {
 			float3 pt(0.0f);
-			int K=vertNbrs[i].size();
+			int K=(int)vertNbrs[i].size();
 			if(K>3){
 				for (uint32_t nbr : vertNbrs[i]) {
 					pt += mesh.vertexLocations[nbr];
@@ -472,7 +472,7 @@ void IsoSurface::regularize(const EndlessGridFloat& grid, Mesh& mesh) {
 			tmpPoints[i] = pt;
 			mesh.vertexNormals[i] = GetNormal(grid, (int) round(pt.x),(int) round(pt.y), (int) round(pt.z));
 		}
-#pragma omp parralel for;
+#pragma omp parallel for
 		for (int i = 0; i < (int) mesh.vertexLocations.size(); i++) {
 			float3 norm = mesh.vertexNormals[i];
 			float3 pt = tmpPoints[i];
@@ -502,10 +502,10 @@ void IsoSurface::regularize(const float* data, Mesh& mesh) {
 	std::vector<std::unordered_set<uint32_t>> vertNbrs;
 	CreateVertexNeighborTable(mesh, vertNbrs);
 	for (int c = 0; c < REGULARIZE_ITERATIONS; c++) {
-#pragma omp parralel for;
+#pragma omp parallel for
 		for (int i = 0; i < (int) vertNbrs.size(); i++) {
 			float3 pt(0.0f);
-			int K = vertNbrs[i].size();
+			int K = (int)vertNbrs[i].size();
 			if (K > 3) {
 				for (uint32_t nbr : vertNbrs[i]) {
 					pt += mesh.vertexLocations[nbr];
@@ -517,7 +517,7 @@ void IsoSurface::regularize(const float* data, Mesh& mesh) {
 			tmpPoints[i] = pt;
 			mesh.vertexNormals[i] = normalize(interpolateNormal(data, pt.x, pt.y, pt.z));
 		}
-#pragma omp parralel for;
+#pragma omp parallel for
 		for (int i = 0; i < (int) mesh.vertexLocations.size(); i++) {
 			float3 norm = mesh.vertexNormals[i];
 			float3 pt = tmpPoints[i];
@@ -544,7 +544,7 @@ void IsoSurface::solveTri(const float* vol, const int& rows, const int& cols,
 	this->cols = cols;
 	this->slices = slices;
 	this->isoLevel = isoLevel;
-	int elements = indexList.size();
+	size_t elements = indexList.size();
 	std::vector<uint3> &indexes = mesh.triIndexes.data;
 	std::vector<float3> &points = mesh.vertexLocations.data;
 	std::vector<float3> &normals = mesh.vertexNormals.data;
@@ -553,7 +553,7 @@ void IsoSurface::solveTri(const float* vol, const int& rows, const int& cols,
 	triangles.reserve(indexList.size() * 2);
 	size_t vertexCount = 0;
 	triangleCount = 0;
-	for (int nn = 0; nn < elements; nn++) {
+	for (size_t nn = 0; nn < elements; nn++) {
 		int3 index = indexList[nn];
 		if (index.x > 0 && index.y > 0 && index.z > 0 && index.x < rows - 1
 				&& index.y < cols - 1 && index.z < slices - 1)
@@ -564,21 +564,21 @@ void IsoSurface::solveTri(const float* vol, const int& rows, const int& cols,
 	if (winding == Winding::Clockwise) {
 		for (int k = 0; k < triangleCount; k++) {
 			IsoTriangle* triPtr = &triangles[k];
-			indexes[k] = uint3(triPtr->vertexIds[0], triPtr->vertexIds[1],
-					triPtr->vertexIds[2]);
+			indexes[k] = uint3((uint32_t)triPtr->vertexIds[0], (uint32_t)triPtr->vertexIds[1],
+				(uint32_t)triPtr->vertexIds[2]);
 		}
 	} else if (winding == Winding::CounterClockwise) {
 		for (int k = 0; k < triangleCount; k++) {
 			IsoTriangle* triPtr = &triangles[k];
-			indexes[k] = uint3(triPtr->vertexIds[0], triPtr->vertexIds[1],
-					triPtr->vertexIds[2]);
+			indexes[k] = uint3((uint32_t)triPtr->vertexIds[0], (uint32_t)triPtr->vertexIds[1],
+				(uint32_t)triPtr->vertexIds[2]);
 		}
 	}
 	const size_t splitCount = splits.size();
 	points.resize(splitCount);
 	normals.resize(splitCount);
 	for (auto splitPtr = splits.begin(); splitPtr != splits.end(); ++splitPtr) {
-		int index = (splitPtr->second).vertexId;
+		size_t index = (splitPtr->second).vertexId;
 		aly::float3 pt = (splitPtr->second).point;
 		aly::float3 norm = interpolateNormal(vol, pt.x, pt.y, pt.z);
 		norm = norm / length(norm);
@@ -650,21 +650,21 @@ void IsoSurface::solveTri(const EndlessGridFloat& grid, Mesh& mesh,
 	if (winding == Winding::Clockwise) {
 		for (int k = 0; k < triangleCount; k++) {
 			IsoTriangle* triPtr = &triangles[k];
-			indexes[k] = uint3(triPtr->vertexIds[0], triPtr->vertexIds[1],
-					triPtr->vertexIds[2]);
+			indexes[k] = uint3((uint32_t)triPtr->vertexIds[0], (uint32_t)triPtr->vertexIds[1],
+				(uint32_t)triPtr->vertexIds[2]);
 		}
 	} else if (winding == Winding::CounterClockwise) {
 		for (int k = 0; k < triangleCount; k++) {
 			IsoTriangle* triPtr = &triangles[k];
-			indexes[k] = uint3(triPtr->vertexIds[0], triPtr->vertexIds[1],
-					triPtr->vertexIds[2]);
+			indexes[k] = uint3((uint32_t)triPtr->vertexIds[0], (uint32_t)triPtr->vertexIds[1],
+				(uint32_t)triPtr->vertexIds[2]);
 		}
 	}
 	points.clear();
 	const size_t splitCount = splits.size();
 	points.resize(splitCount);
 	for (auto splitPtr = splits.begin(); splitPtr != splits.end(); ++splitPtr) {
-		int index = (splitPtr->second).vertexId;
+		size_t index = (splitPtr->second).vertexId;
 		aly::float3 pt = (splitPtr->second).point;
 		points[index] = pt;
 	}
@@ -992,7 +992,7 @@ void IsoSurface::findActiveVoxels(const EndlessGridFloat& grid,
 										nbr.y, nbr.z);
 								if (fValue2 != backgroundValue
 										&& fValue1 * fValue2 < 0) {
-									float3 crossing(pivot.x, pivot.y, pivot.z);
+									float3 crossing((float)pivot.x, (float)pivot.y, (float)pivot.z);
 									double fDelta = fValue2 - fValue1;
 									if (std::abs(fDelta) < 1E-3f) {
 										crossing += float3(axis) * 0.5f;
@@ -1468,8 +1468,7 @@ float IsoSurface::interpolate(const float *data, float x, float y, float z) {
 }
 
 float IsoSurface::getImageValue(const float* image, int i, int j, int k) {
-	int off = getSafeIndex(i, j, k);
-	return image[off];
+	return image[getSafeIndex(i, j, k)];
 }
 
 }

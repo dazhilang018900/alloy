@@ -442,7 +442,6 @@ void DistanceField3f::solve(EndlessGridFloat& vol, float maxDistance) {
 	int dim;
 	int3 pos;
 
-	int LX, HX, LY, HY, LZ, HZ;
 	short NSFlag, WEFlag, FBFlag;
 	float s = 0, t = 0, w = 0;
 	float JMv = 0, JPv = 0, IMv = 0, IPv = 0, KPv = 0, KMv = 0, Cv = 0;
