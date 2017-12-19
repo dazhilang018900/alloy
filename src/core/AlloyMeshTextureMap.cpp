@@ -244,14 +244,17 @@ namespace aly {
 	void MeshTextureMap::evaluate(aly::Mesh& mesh, const std::function<bool(const std::string& status, float progress)>& statusHandler){
 		mesh.convertQuadsToTriangles();
 		Vector3f vertexCopy;
+		Vector3f normalCopy;
 		if (smoothIterations > 0) {		
 			vertexCopy = mesh.vertexLocations;
+			normalCopy = mesh.vertexNormals;
 			smooth(mesh, smoothIterations, 1E-10f);
 		}
 		labelComponents(mesh, statusHandler);
 		computeMap(mesh, statusHandler);
 		if (smoothIterations > 0) {
 			mesh.vertexLocations = vertexCopy;
+			mesh.vertexNormals=normalCopy;
 		}
 	}
 	void MeshTextureMap::unfold(aly::Mesh& mesh, std::vector<int>& rectId,std::vector<bvec2f>& rects) {

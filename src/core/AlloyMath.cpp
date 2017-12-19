@@ -197,6 +197,9 @@ float2 FromBary(float3 b, float2 p1, float2 p2, float2 p3) {
 	return float2(p1.x * b.x + p2.x * b.y + p3.x * b.z,
 			p1.y * b.x + p2.y * b.y + p3.y * b.z);
 }
+bool Contains(float2 p, float2 pt1, float2 pt2, float2 pt3){
+	return (crossMag(p-pt1,pt2-pt1)<=0.0f&&crossMag(p-pt2,pt3-pt2)<=0.0f&&crossMag(p-pt3,pt1-pt3)<=0.0f);
+}
 float3 FromBary(double3 b, float3 p1, float3 p2, float3 p3) {
 	return float3((double)p1.x * b.x + (double)p2.x * b.y + (double)p3.x * b.z,
 			(double)p1.y * b.x + p2.y * b.y + (double)p3.y * b.z,
@@ -866,12 +869,165 @@ inline float3 parametricTriangle(float3 e0, float3 e1, float s, float t,
 	float3 Bsum = B + s * e0 + t * e1;
 	return Bsum;
 }
+inline float2 parametricTriangle(float2 e0, float2 e1, float s, float t,
+		float2 B) {
+	float2 Bsum = B + s * e0 + t * e1;
+	return Bsum;
+}
 float Angle(const float3& v0, const float3& v1, const float3& v2) {
 	float3 v = v0 - v1;
 	float3 w = v2 - v1;
 	float len1 = length(v);
 	float len2 = length(w);
 	return std::acos(dot(v, w) / std::max(1E-8f, len1 * len2));
+}
+float DistanceToTriangleSqr(const float2& p, const float2& v0, const float2& v1,const float2& v2, float2* closestPoint) {
+	float distanceSquared = 0;
+	int region_id = 0;
+
+	float2 P = p;
+	float2 B = v0;
+	float2 e0 = v1 - v0;
+	float2 e1 = v2 - v0;
+	float a = dot(e0, e0);
+	float b = dot(e0, e1);
+	float c = dot(e1, e1);
+	float2 dv = B - P;
+	float d = dot(e0, dv);
+	float e = dot(e1, dv);
+	// Determine which region_id contains s, t
+
+	float det = a * c - b * b;
+	float s = b * e - c * d;
+	float t = b * d - a * e;
+
+	if (s + t <= det) {
+		if (s < 0) {
+			if (t < 0) {
+				region_id = 4;
+			} else {
+				region_id = 3;
+			}
+		} else if (t < 0) {
+			region_id = 5;
+		} else {
+			region_id = 0;
+		}
+	} else {
+		if (s < 0) {
+			region_id = 2;
+		} else if (t < 0) {
+			region_id = 6;
+		} else {
+			region_id = 1;
+		}
+	}
+
+	// Parametric Triangle Point
+	float2 T(0.0f);
+
+	if (region_id == 0) { // Region 0
+		float invDet = (float) 1 / (float) det;
+		s *= invDet;
+		t *= invDet;
+
+		// Find point on parametric triangle based on s and t
+		T = parametricTriangle(e0, e1, s, t, B);
+		// Find distance from P to T
+		distanceSquared = 0;
+	} else if (region_id == 1) { // Region 1
+		float numer = c + e - b - d;
+
+		if (numer < +0) {
+			s = 0;
+		} else {
+			float denom = a - 2 * b + c;
+			s = (numer >= denom ? 1 : numer / denom);
+		}
+		t = 1 - s;
+
+		// Find point on parametric triangle based on s and t
+		T = parametricTriangle(e0, e1, s, t, B);
+		// Find distance from P to T
+		float2 tmp = P - T;
+		distanceSquared = lengthSqr(tmp);
+	} else if (region_id == 2) { // Region 2
+		float tmp0 = b + d;
+		float tmp1 = c + e;
+
+		if (tmp1 > tmp0) {
+			float numer = tmp1 - tmp0;
+			float denom = a - 2 * b + c;
+			s = (numer >= denom ? 1 : numer / denom);
+			t = 1 - s;
+		} else {
+			s = 0;
+			t = (tmp1 <= 0 ? 1 : (e >= 0 ? 0 : -e / c));
+		}
+
+		// Find point on parametric triangle based on s and t
+		T = parametricTriangle(e0, e1, s, t, B);
+		// Find distance from P to T
+		float2 tmp = P - T;
+		distanceSquared = lengthSqr(tmp);
+	} else if (region_id == 3) { // Region 3
+		s = 0;
+		t = (e >= 0 ? 0 : (-e >= c ? 1 : -e / c));
+
+		// Find point on parametric triangle based on s and t
+		T = parametricTriangle(e0, e1, s, t, B);
+		// Find distance from P to T
+		float2 tmp = P - T;
+		distanceSquared = lengthSqr(tmp);
+
+	} else if (region_id == 4) { // Region 4
+		float tmp0 = c + e;
+		float tmp1 = a + d;
+
+		if (tmp0 > tmp1) {
+			s = 0;
+			t = (tmp1 <= 0 ? 1 : (e >= 0 ? 0 : -e / c));
+		} else {
+			t = 0;
+			s = (tmp1 <= 0 ? 1 : (d >= 0 ? 0 : -d / a));
+		}
+
+		// Find point on parametric triangle based on s and t
+		T = parametricTriangle(e0, e1, s, t, B);
+		// Find distance from P to T
+		float2 tmp = P - T;
+		distanceSquared = lengthSqr(tmp);
+	} else if (region_id == 5) { // Region 5
+		t = 0;
+		s = (d >= 0 ? 0 : (-d >= a ? 1 : -d / a));
+
+		// Find point on parametric triangle based on s and t
+		T = parametricTriangle(e0, e1, s, t, B);
+		// Find distance from P to T
+		float2 tmp = P - T;
+		distanceSquared = lengthSqr(tmp);
+	} else { // Region 6
+		float tmp0 = b + e;
+		float tmp1 = a + d;
+
+		if (tmp1 > tmp0) {
+			float numer = tmp1 - tmp0;
+			float denom = c - 2 * b + a;
+			t = (numer >= denom ? 1 : numer / denom);
+			s = 1 - t;
+		} else {
+			t = 0;
+			s = (tmp1 <= 0 ? 1 : (d >= 0 ? 0 : -d / a));
+		}
+
+		// Find point on parametric triangle based on s and t
+		T = parametricTriangle(e0, e1, s, t, B);
+		// Find distance from P to T
+		float2 tmp = P - T;
+		distanceSquared = lengthSqr(tmp);
+	}
+	(*closestPoint) = T;
+	return distanceSquared;
 }
 float DistanceToTriangleSqr(const float3& p, const float3& v0, const float3& v1,
 		const float3& v2, float3* closestPoint) {

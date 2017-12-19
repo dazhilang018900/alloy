@@ -1791,7 +1791,7 @@ bool Mesh::convertQuadsToTriangles() {
 	if (quadIndexes.size() > 0)
 		setDirty(true);
 	quadIndexes.clear();
-	if (vertexNormals.size() > 0) {
+	if (ret&&vertexNormals.size() > 0) {
 		updateVertexNormals();
 	}
 	return ret;
