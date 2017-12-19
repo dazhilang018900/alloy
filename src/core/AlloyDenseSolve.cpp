@@ -20,9 +20,12 @@
  */
 #include "AlloyDenseSolve.h"
 #include "AlloyFileUtil.h"
+#include "AlloyDistanceField.h"
+#include <queue>
 namespace aly {
 void LaplaceFill(const Image4f& sourceImg, Image4f& targetImg, int iterations,
-		int levels, float lambda, const std::function<bool(int, int)>& iterationMonitor ) {
+		int levels, float lambda,
+		const std::function<bool(int, int)>& iterationMonitor) {
 	if (sourceImg.dimensions() != targetImg.dimensions())
 		throw std::runtime_error(
 				MakeString() << "Cannot solve. Image dimensions do not match "
@@ -48,16 +51,18 @@ void LaplaceFill(const Image4f& sourceImg, Image4f& targetImg, int iterations,
 		}
 		for (int l = levels - 1; l >= 1; l--) {
 			if (iterationMonitor) {
-				if (!iterationMonitor(l, 0))return;
+				if (!iterationMonitor(l, 0))
+					return;
 			}
-			LaplaceFill(srcPyramid[l], tarPyramid[l], iterations, lambda, [=](int iter) {
-				if (iterationMonitor) {
-					return iterationMonitor(l, iter);
-				}
-				else {
-					return true;
-				}
-			});
+			LaplaceFill(srcPyramid[l], tarPyramid[l], iterations, lambda,
+					[=](int iter) {
+						if (iterationMonitor) {
+							return iterationMonitor(l, iter);
+						}
+						else {
+							return true;
+						}
+					});
 			tarPyramid[l].upSample(tarPyramid[l - 1]);
 		}
 		targetImg = tarPyramid[0];
@@ -71,8 +76,72 @@ void LaplaceFill(const Image4f& sourceImg, Image4f& targetImg, int iterations,
 		});
 	}
 }
+namespace detail {
+struct ColorLocation: aly::int2 {
+	int value;
+	ColorLocation(int x, int y, int val) :
+			aly::int2(x, y), value(val) {
+	}
+};
+struct CompareColorLocations {
+	bool operator()(const ColorLocation& a, const ColorLocation& b) {
+		return a.value > b.value;
+	}
+};
+}
+void ColorPropagation(Image4f& image,int maxDistance) {
+	using namespace detail;
+	size_t N = image.size();
+	const int nbrX[] = { 0, 0, -1, 1, 1, -1, 1, -1 };
+	const int nbrY[] = { 1, -1, 0, 0, -1, 1, 1, -1 };
+	std::priority_queue<ColorLocation, std::vector<ColorLocation>,
+			CompareColorLocations> queue;
+	for (int j = 0; j < image.height; j++) {
+		for (int i = 0; i < image.width; i++) {
+			float val = image(i, j).w;
+			if (val < 0.5f) {
+				for (int c = 0; c < 4; c++) {
+					int ii = i + nbrX[c];
+					int jj = j + nbrY[c];
+					if (ii >= 0 && jj >= 0 && jj < image.height
+							&& ii < image.width) {
+						if (image(ii, jj).w >= 0.5) {
+							queue.push(ColorLocation(i, j, 0));
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+	while (!queue.empty()) {
+		ColorLocation elem = queue.top();
+		queue.pop();
+		RGBAf rgba(0.0f);
+		if(image(elem.x,elem.y).w>=0.5f)continue;
+		for (int c = 0; c < 4; c++) {
+			int ii = elem.x + nbrX[c];
+			int jj = elem.y + nbrY[c];
+			if (ii >= 0 && jj >= 0 && jj < image.height && ii < image.width) {
+				RGBAf nc = image(ii, jj);
+				if (nc.w >= 0.5f) {
+					nc.w=1.0f;
+					rgba += nc;
+				} else if (elem.value < maxDistance) {
+					queue.push(ColorLocation(ii, jj, elem.value + 1));
+				}
+			}
+		}
+		if (rgba.w > 0.0f) {
+			rgba /= rgba.w;
+			rgba.w = 1.0f;
+			image(elem.x, elem.y) = rgba;
+		}
+	}
+}
 void LaplaceFill(const Image2f& sourceImg, Image2f& targetImg, int iterations,
-		int levels, float lambda, const std::function<bool(int, int)>& iterationMonitor) {
+		int levels, float lambda,
+		const std::function<bool(int, int)>& iterationMonitor) {
 	if (sourceImg.dimensions() != targetImg.dimensions())
 		throw std::runtime_error(
 				MakeString() << "Cannot solve. Image dimensions do not match "
@@ -93,16 +162,18 @@ void LaplaceFill(const Image2f& sourceImg, Image2f& targetImg, int iterations,
 		}
 		for (int l = levels - 1; l >= 1; l--) {
 			if (iterationMonitor) {
-				if (!iterationMonitor(l, 0))return;
+				if (!iterationMonitor(l, 0))
+					return;
 			}
-			LaplaceFill(srcPyramid[l], tarPyramid[l], iterations, lambda, [=](int iter) {
-				if (iterationMonitor) {
-					return iterationMonitor(l, iter);
-				}
-				else {
-					return true;
-				}
-			});
+			LaplaceFill(srcPyramid[l], tarPyramid[l], iterations, lambda,
+					[=](int iter) {
+						if (iterationMonitor) {
+							return iterationMonitor(l, iter);
+						}
+						else {
+							return true;
+						}
+					});
 			tarPyramid[l].upSample(tarPyramid[l - 1]);
 		}
 		targetImg = tarPyramid[0];
@@ -117,7 +188,7 @@ void LaplaceFill(const Image2f& sourceImg, Image2f& targetImg, int iterations,
 	}
 }
 void LaplaceFill(const Image2f& sourceImg, Image2f& targetImg, int iterations,
-		float lambda,const std::function<bool(int)>& iterationMonitor) {
+		float lambda, const std::function<bool(int)>& iterationMonitor) {
 	if (sourceImg.dimensions() != targetImg.dimensions())
 		throw std::runtime_error(
 				MakeString() << "Cannot solve. Image dimensions do not match "
@@ -151,7 +222,8 @@ void LaplaceFill(const Image2f& sourceImg, Image2f& targetImg, int iterations,
 	const int yShift[] = { 0, 1, 0, 1 };
 	for (int iter = 0; iter < iterations; iter++) {
 		if (iterationMonitor) {
-			if (!iterationMonitor(iter))break;
+			if (!iterationMonitor(iter))
+				break;
 		}
 		for (int k = 0; k < 4; k++) {
 			//Assumes color at boundary of target image is fixed!
@@ -205,7 +277,8 @@ void LaplaceFill(const Image4f& sourceImg, Image4f& targetImg, int iterations,
 	const int yShift[] = { 0, 1, 0, 1 };
 	for (int iter = 0; iter < iterations; iter++) {
 		if (iterationMonitor) {
-			if (!iterationMonitor(iter))break;
+			if (!iterationMonitor(iter))
+				break;
 		}
 		for (int k = 0; k < 4; k++) {
 			//Assumes color at boundary of target image is fixed!
@@ -225,7 +298,8 @@ void LaplaceFill(const Image4f& sourceImg, Image4f& targetImg, int iterations,
 	}
 }
 void PoissonInpaint(const Image4f& sourceImg, const Image4f& targetImg,
-		Image4f& outImg, int iterations, int levels, float lambda, const std::function<bool(int,int)>& iterationMonitor) {
+		Image4f& outImg, int iterations, int levels, float lambda,
+		const std::function<bool(int, int)>& iterationMonitor) {
 	//Assumes mask is encoded in the W channel of the source image.
 	if (sourceImg.dimensions() != targetImg.dimensions()
 			|| sourceImg.dimensions() != outImg.dimensions())
@@ -234,14 +308,15 @@ void PoissonInpaint(const Image4f& sourceImg, const Image4f& targetImg,
 						<< sourceImg.dimensions() << " "
 						<< targetImg.dimensions());
 	if (levels <= 1) {
-		PoissonInpaint(sourceImg, targetImg, outImg, iterations, lambda, [=](int iter) {
-			if (iterationMonitor) {
-				return iterationMonitor(0, iter);
-			}
-			else {
-				return true;
-			}
-		});
+		PoissonInpaint(sourceImg, targetImg, outImg, iterations, lambda,
+				[=](int iter) {
+					if (iterationMonitor) {
+						return iterationMonitor(0, iter);
+					}
+					else {
+						return true;
+					}
+				});
 	} else {
 		std::vector<Image4f> srcPyramid(levels);
 		std::vector<Image4f> tarPyramid(levels);
@@ -256,32 +331,35 @@ void PoissonInpaint(const Image4f& sourceImg, const Image4f& targetImg,
 		}
 		for (int l = levels - 1; l >= 1; l--) {
 			if (iterationMonitor) {
-				if (!iterationMonitor(l, 0))return;
+				if (!iterationMonitor(l, 0))
+					return;
 			}
 			PoissonInpaint(srcPyramid[l], tarPyramid[l], outPyramid[l],
 					iterations, lambda, [=](int iter) {
-				if (iterationMonitor) {
-					return iterationMonitor(l, iter);
-				}
-				else {
-					return true;
-				}
-			});
+						if (iterationMonitor) {
+							return iterationMonitor(l, iter);
+						}
+						else {
+							return true;
+						}
+					});
 			outPyramid[l].upSample(outPyramid[l - 1]);
 		}
 		outImg = outPyramid[0];
-		PoissonInpaint(sourceImg, targetImg, outImg, iterations, lambda, [=](int iter) {
-			if (iterationMonitor) {
-				return iterationMonitor(0, iter);
-			}
-			else {
-				return true;
-			}
-		});
+		PoissonInpaint(sourceImg, targetImg, outImg, iterations, lambda,
+				[=](int iter) {
+					if (iterationMonitor) {
+						return iterationMonitor(0, iter);
+					}
+					else {
+						return true;
+					}
+				});
 	}
 }
 void PoissonInpaint(const Image4f& sourceImg, const Image4f& targetImg,
-		Image4f& outImg, int iterations, float lambda, const std::function<bool(int)>& iterationMonitor) {
+		Image4f& outImg, int iterations, float lambda,
+		const std::function<bool(int)>& iterationMonitor) {
 	//Assumes mask is encoded in the W channel of the source image.
 	if (sourceImg.dimensions() != targetImg.dimensions()
 			|| sourceImg.dimensions() != outImg.dimensions())
@@ -327,7 +405,8 @@ void PoissonInpaint(const Image4f& sourceImg, const Image4f& targetImg,
 	const int yShift[] = { 0, 1, 0, 1 };
 	for (int iter = 0; iter < iterations; iter++) {
 		if (iterationMonitor) {
-			if (!iterationMonitor(iter))break;
+			if (!iterationMonitor(iter))
+				break;
 		}
 		for (int k = 0; k < 4; k++) {
 			//Assumes color at boundary of target image is fixed!
@@ -347,7 +426,8 @@ void PoissonInpaint(const Image4f& sourceImg, const Image4f& targetImg,
 	}
 }
 void PoissonInpaint(const Image2f& sourceImg, const Image2f& targetImg,
-		Image2f& outImg, int iterations, int levels, float lambda, const std::function<bool(int, int)>& iterationMonitor) {
+		Image2f& outImg, int iterations, int levels, float lambda,
+		const std::function<bool(int, int)>& iterationMonitor) {
 	//Assumes mask is encoded in the W channel of the source image.
 	if (sourceImg.dimensions() != targetImg.dimensions()
 			|| sourceImg.dimensions() != outImg.dimensions())
@@ -356,14 +436,15 @@ void PoissonInpaint(const Image2f& sourceImg, const Image2f& targetImg,
 						<< sourceImg.dimensions() << " "
 						<< targetImg.dimensions());
 	if (levels <= 1) {
-		PoissonInpaint(sourceImg, targetImg, outImg, iterations, lambda, [=](int iter) {
-			if (iterationMonitor) {
-				return iterationMonitor(0, iter);
-			}
-			else {
-				return true;
-			}
-		});
+		PoissonInpaint(sourceImg, targetImg, outImg, iterations, lambda,
+				[=](int iter) {
+					if (iterationMonitor) {
+						return iterationMonitor(0, iter);
+					}
+					else {
+						return true;
+					}
+				});
 	} else {
 		std::vector<Image2f> srcPyramid(levels);
 		std::vector<Image2f> tarPyramid(levels);
@@ -378,32 +459,35 @@ void PoissonInpaint(const Image2f& sourceImg, const Image2f& targetImg,
 		}
 		for (int l = levels - 1; l >= 1; l--) {
 			if (iterationMonitor) {
-				if (!iterationMonitor(l, 0))return;
+				if (!iterationMonitor(l, 0))
+					return;
 			}
 			PoissonInpaint(srcPyramid[l], tarPyramid[l], outPyramid[l],
 					iterations, lambda, [=](int iter) {
-				if (iterationMonitor) {
-					return iterationMonitor(l, iter);
-				}
-				else {
-					return true;
-				}
-			});
+						if (iterationMonitor) {
+							return iterationMonitor(l, iter);
+						}
+						else {
+							return true;
+						}
+					});
 			outPyramid[l].upSample(outPyramid[l - 1]);
 		}
 		outImg = outPyramid[0];
-		PoissonInpaint(sourceImg, targetImg, outImg, iterations, lambda, [=](int iter) {
-			if (iterationMonitor) {
-				return iterationMonitor(0, iter);
-			}
-			else {
-				return true;
-			}
-		});
+		PoissonInpaint(sourceImg, targetImg, outImg, iterations, lambda,
+				[=](int iter) {
+					if (iterationMonitor) {
+						return iterationMonitor(0, iter);
+					}
+					else {
+						return true;
+					}
+				});
 	}
 }
 void PoissonInpaint(const Image2f& sourceImg, const Image2f& targetImg,
-		Image2f& outImg, int iterations, float lambda, const std::function<bool(int)>& iterationMonitor) {
+		Image2f& outImg, int iterations, float lambda,
+		const std::function<bool(int)>& iterationMonitor) {
 	//Assumes mask is encoded in the W channel of the source image.
 	if (sourceImg.dimensions() != targetImg.dimensions()
 			|| sourceImg.dimensions() != outImg.dimensions())
@@ -449,7 +533,8 @@ void PoissonInpaint(const Image2f& sourceImg, const Image2f& targetImg,
 	const int yShift[] = { 0, 1, 0, 1 };
 	for (int iter = 0; iter < iterations; iter++) {
 		if (iterationMonitor) {
-			if (!iterationMonitor(iter))break;
+			if (!iterationMonitor(iter))
+				break;
 		}
 		for (int k = 0; k < 4; k++) {
 			//Assumes color at boundary of target image is fixed!
@@ -469,7 +554,8 @@ void PoissonInpaint(const Image2f& sourceImg, const Image2f& targetImg,
 	}
 }
 void PoissonBlend(const Image4f& sourceImg, Image4f& targetImg, int iterations,
-		int levels, float lambda, const std::function<bool(int, int)>& iterationMonitor) {
+		int levels, float lambda,
+		const std::function<bool(int, int)>& iterationMonitor) {
 	if (sourceImg.dimensions() != targetImg.dimensions())
 		throw std::runtime_error(
 				MakeString() << "Cannot solve. Image dimensions do not match "
@@ -495,16 +581,18 @@ void PoissonBlend(const Image4f& sourceImg, Image4f& targetImg, int iterations,
 		}
 		for (int l = levels - 1; l >= 1; l--) {
 			if (iterationMonitor) {
-				if (!iterationMonitor(l, 0))return;
+				if (!iterationMonitor(l, 0))
+					return;
 			}
-			PoissonBlend(srcPyramid[l], tarPyramid[l], iterations, lambda, [=](int iter) {
-				if (iterationMonitor) {
-					return iterationMonitor(l, iter);
-				}
-				else {
-					return true;
-				}
-			});
+			PoissonBlend(srcPyramid[l], tarPyramid[l], iterations, lambda,
+					[=](int iter) {
+						if (iterationMonitor) {
+							return iterationMonitor(l, iter);
+						}
+						else {
+							return true;
+						}
+					});
 			tarPyramid[l].upSample(tarPyramid[l - 1]);
 		}
 		targetImg = tarPyramid[0];
@@ -519,7 +607,8 @@ void PoissonBlend(const Image4f& sourceImg, Image4f& targetImg, int iterations,
 	}
 }
 void PoissonBlend(const Image2f& sourceImg, Image2f& targetImg, int iterations,
-		int levels, float lambda, const std::function<bool(int, int)>& iterationMonitor) {
+		int levels, float lambda,
+		const std::function<bool(int, int)>& iterationMonitor) {
 	if (sourceImg.dimensions() != targetImg.dimensions())
 		throw std::runtime_error(
 				MakeString() << "Cannot solve. Image dimensions do not match "
@@ -545,16 +634,18 @@ void PoissonBlend(const Image2f& sourceImg, Image2f& targetImg, int iterations,
 		}
 		for (int l = levels - 1; l >= 1; l--) {
 			if (iterationMonitor) {
-				if (!iterationMonitor(l, 0))return;
+				if (!iterationMonitor(l, 0))
+					return;
 			}
-			PoissonBlend(srcPyramid[l], tarPyramid[l], iterations, lambda, [=](int iter) {
-				if (iterationMonitor) {
-					return iterationMonitor(l, iter);
-				}
-				else {
-					return true;
-				}
-			});
+			PoissonBlend(srcPyramid[l], tarPyramid[l], iterations, lambda,
+					[=](int iter) {
+						if (iterationMonitor) {
+							return iterationMonitor(l, iter);
+						}
+						else {
+							return true;
+						}
+					});
 			tarPyramid[l].upSample(tarPyramid[l - 1]);
 		}
 		targetImg = tarPyramid[0];
@@ -599,7 +690,8 @@ void PoissonBlend(const Image4f& sourceImg, Image4f& targetImg, int iterations,
 	const float THRESHOLD = 0.5;
 	for (int iter = 0; iter < iterations; iter++) {
 		if (iterationMonitor) {
-			if (!iterationMonitor(iter))break;
+			if (!iterationMonitor(iter))
+				break;
 		}
 		for (int k = 0; k < 4; k++) {
 			//Assumes color at boundary of target image is fixed!
@@ -657,7 +749,8 @@ void PoissonBlend(const Image2f& sourceImg, Image2f& targetImg, int iterations,
 	const float THRESHOLD = 0.5;
 	for (int iter = 0; iter < iterations; iter++) {
 		if (iterationMonitor) {
-			if (!iterationMonitor(iter))break;
+			if (!iterationMonitor(iter))
+				break;
 		}
 		for (int k = 0; k < 4; k++) {
 			//Assumes color at boundary of target image is fixed!
