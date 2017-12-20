@@ -19,12 +19,12 @@
  * THE SOFTWARE.
  */
 
+#include <MeshDecimation.h>
 #include "Alloy.h"
 #include "AlloyReconstruction.h"
 #include "AlloyVolume.h"
 #include "AlloyIsoSurface.h"
 #include "grid/EndlessGrid.h"
-#include "MeshProcessing.h"
 #include "../../include/example/LevelSetGridEx.h"
 using namespace aly;
 LevelSetGridEx::LevelSetGridEx() :
@@ -36,8 +36,7 @@ bool LevelSetGridEx::init(Composite& rootNode) {
 	//mesh.load(getFullPath("models/eagle.ply"));
 	mesh.load(getFullPath("models/armadillo.ply"));
 	MeshDecimation md;
-	md.solve(mesh,0.5f);
-
+	md.solve(mesh,0.75f,false);
 	WriteMeshToFile(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"armadillo_dec.ply",mesh);
 	std::exit(0);
 	/*

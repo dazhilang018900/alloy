@@ -5,9 +5,9 @@
  *      Author: blake
  */
 
-#include "MeshProcessing.h"
+#include <MeshDecimation.h>
 namespace aly {
-void DeadTriangle::set(DeadVertex *v0, DeadVertex *v1, DeadVertex *v2){
+void DeadTriangle::set(DeadVertex *v0, DeadVertex *v1, DeadVertex *v2) {
 	//assert(v0 != v1 && v1 != v2 && v2 != v0);
 	vertex[0] = v0;
 	vertex[1] = v1;
@@ -114,7 +114,6 @@ void DeadVertex::removeIfNonNeighbor(DeadVertex *n) {
 }
 void DeadVertex::remove() {
 	if (valid) {
-		std::cout << "Removed " << id << std::endl;
 		valid = false;
 		for (DeadVertex* v : neighbors) {
 			v->remove(this);
@@ -122,69 +121,54 @@ void DeadVertex::remove() {
 	}
 }
 
-void MeshDecimation::solve(Mesh& mesh, float threshold) {
-	size_t vertCount = mesh.vertexLocations.size();
-	int targetRemoveCount = static_cast<int>(threshold * vertCount);
-	size_t lastRemoveCount = -1;
-	size_t removeCount = 0;
-	while (vertCount - (int) mesh.vertexLocations.size() < targetRemoveCount) {
-		float amt = (targetRemoveCount
-				- (vertCount - mesh.vertexLocations.size()))
-				/ (float) mesh.vertexLocations.size();
-		decimateInternal(mesh, amt, vertCount, targetRemoveCount);
-		removeCount = vertCount - mesh.vertexLocations.size();
-		if (removeCount == lastRemoveCount)
-			break;
-		lastRemoveCount = removeCount;
+void MeshDecimation::solve(Mesh& mesh, float decimationAmount, bool flipNormals,const std::function<bool(const std::string& message, float progress)>& monitor) {
+	if(decimationAmount<=0.0f)return;
+	if (flipNormals) {
+		mesh.flipNormals();
 	}
-}
-
-void MeshDecimation::decimateInternal(Mesh& mesh, float threshold,
-		int totalCount, int targetCount) {
-
 	Vector3f& vertexLocations = mesh.vertexLocations;
 	Vector3f& vertexNormals = mesh.vertexNormals;
 	Vector4f& vertexColors = mesh.vertexColors;
 	Vector3ui& triIndexes = mesh.triIndexes;
-
 	size_t vertexCount = vertexLocations.size();
 	size_t triCount = triIndexes.size();
-
 	heap.reserve(vertexLocations.size());
 	vertexes.resize(vertexLocations.size());
 	triangles.resize(triIndexes.size());
-
 	for (size_t i = 0; i < vertexCount; i++) {
-		vertexes[i].id=i;
+		vertexes[i].id = i;
 	}
 	for (size_t i = 0; i < triCount; i++) {
 		uint3 tri = triIndexes[i];
-		triangles[i].set(&vertexes[tri.x], &vertexes[tri.y],&vertexes[tri.z]);
+		triangles[i].set(&vertexes[tri.x], &vertexes[tri.y], &vertexes[tri.z]);
 		triangles[i].updateNormal(mesh);
 	}
-	for (int i = 0; i < vertexCount; i++) {
-		computeEdgeCostAtVertex(mesh, &vertexes[i]);
-		heap.add(&vertexes[i]);
-	}
-	// reduce the object down to nothing:
-	int removeCount = 0;
-	int lastRemoved = 0;
-	while (vertexes.size() > 0 && !heap.isEmpty()) {
-		if (removeCount >= threshold * vertexCount)
-			break;
-		// get the next vertex to collapse
-		DeadVertex *mn = static_cast<DeadVertex*>(heap.remove());
-		int removed = static_cast<int>(100.0f * removeCount
-				/ (float) vertexCount);
-		std::cout << "Removed [" << removed << "%]" << std::endl;
-		if (collapseEdge(mesh, mn, mn->collapse)) {
-			lastRemoved = removed;
-			removeCount++;
-		} else {
-			lastRemoved = removed;
+
+	int targetRemoveCount = static_cast<int>(decimationAmount * vertexCount);
+	size_t lastRemoveCount = -1;
+	size_t removeCount = 0;
+
+	size_t validCount = vertexCount;
+	while (vertexCount - validCount < targetRemoveCount) {
+		float amt = (targetRemoveCount
+				- (vertexCount - mesh.vertexLocations.size()))
+				/ (float) mesh.vertexLocations.size();
+		if (monitor) {
+			monitor("Decimate",
+					(vertexCount - (int) mesh.vertexLocations.size())
+							/ (float) targetRemoveCount);
 		}
+		decimateInternal(mesh, amt, vertexCount, targetRemoveCount);
+		validCount = 0;
+		for (const DeadVertex& v : vertexes) {
+			if (v.isValid())
+				validCount++;
+		}
+		removeCount = vertexCount - validCount;
+		if (removeCount == lastRemoveCount)
+			break;
+		lastRemoveCount = removeCount;
 	}
-	vertexCount = vertexes.size();
 	if (vertexColors.size() > 0) {
 		Vector3f vertexLocationsCopy = vertexLocations;
 		Vector3f vertexNormalsCopy = vertexNormals;
@@ -192,6 +176,9 @@ void MeshDecimation::decimateInternal(Mesh& mesh, float threshold,
 		vertexLocations.clear();
 		vertexNormals.clear();
 		vertexColors.clear();
+		vertexColors.data.reserve(vertexCount);
+		vertexNormals.data.reserve(vertexCount);
+		vertexLocations.data.reserve(vertexCount);
 		for (size_t i = 0; i < vertexCount; i++) {
 			DeadVertex& vert = vertexes[i];
 			if (vert.isValid()) {
@@ -208,6 +195,8 @@ void MeshDecimation::decimateInternal(Mesh& mesh, float threshold,
 		Vector3f vertexNormalsCopy = vertexNormals;
 		vertexLocations.clear();
 		vertexNormals.clear();
+		vertexNormals.data.reserve(vertexCount);
+		vertexLocations.data.reserve(vertexCount);
 		for (size_t i = 0; i < vertexCount; i++) {
 			DeadVertex& vert = vertexes[i];
 			if (vert.isValid()) {
@@ -218,8 +207,6 @@ void MeshDecimation::decimateInternal(Mesh& mesh, float threshold,
 			}
 		}
 	}
-	std::cout << "Vertex Count " << vertexCount << "/" << vertexLocations.size()
-			<< std::endl;
 	size_t faceCount = triangles.size();
 	triIndexes.clear();
 	for (int n = 0; n < faceCount; n++) {
@@ -230,12 +217,35 @@ void MeshDecimation::decimateInternal(Mesh& mesh, float threshold,
 							tri.vertex[2]->index));
 		}
 	}
-	std::cout << "Face Count " << faceCount << "/" << triIndexes.size()
-			<< std::endl;
 
+	if (flipNormals) {
+		mesh.flipNormals();
+	}
+}
+
+size_t MeshDecimation::decimateInternal(Mesh& mesh, float threshold,
+		int totalCount, int targetCount) {
+	size_t vertexCount =vertexes.size();
+	heap.reserve(vertexCount);
+	for (size_t i = 0; i < vertexCount; i++) {
+		DeadVertex* vert=&vertexes[i];
+		computeEdgeCostAtVertex(mesh,vert);
+		heap.add(vert);
+	}
+	size_t removeCount = 0;
+	while (vertexes.size() > 0 && !heap.isEmpty()) {
+		if (removeCount >= threshold * vertexCount)
+			break;
+		// get the next vertex to collapse
+		DeadVertex *mn = static_cast<DeadVertex*>(heap.remove());
+		int removed = static_cast<int>(100.0f * removeCount
+				/ (float) vertexCount);
+		if (mn->isValid()&&collapseEdge(mesh, mn, mn->collapse)) {
+			removeCount++;
+		}
+	}
 	heap.clear();
-	triangles.clear();
-	vertexes.clear();
+	return removeCount;
 }
 bool MeshDecimation::collapseEdge(Mesh& mesh, DeadVertex *u, DeadVertex *v) {
 	// Collapse the edge uv by moving vertex u onto v
@@ -244,6 +254,7 @@ bool MeshDecimation::collapseEdge(Mesh& mesh, DeadVertex *u, DeadVertex *v) {
 	if (!v) {
 		// u is a vertex all by itself so just delete it
 		u->remove();
+		heap.remove(u);
 		return true;
 	}
 	float3& V = mesh.vertexLocations[v->id];
@@ -255,6 +266,7 @@ bool MeshDecimation::collapseEdge(Mesh& mesh, DeadVertex *u, DeadVertex *v) {
 	V = mid;
 	bool flip = false;
 	for (DeadTriangle* tri : v->faces) {
+		float3 oldNormal = tri->normal;
 		float3 n = tri->updateNormal(mesh);
 		if (dot(n, mesh.vertexNormals[v->id]) < 0) {
 			flip = true;
@@ -273,7 +285,6 @@ bool MeshDecimation::collapseEdge(Mesh& mesh, DeadVertex *u, DeadVertex *v) {
 	if (flip) {
 		V = oldV;
 		U = oldU;
-		std::cout << "Normal Flip! Abort." << std::endl;
 		return false;
 	}
 	size_t faceCount = 0;
@@ -286,20 +297,20 @@ bool MeshDecimation::collapseEdge(Mesh& mesh, DeadVertex *u, DeadVertex *v) {
 			|| u->neighbors.size() >= MAX_VALENCE) {
 		V = oldV;
 		U = oldU;
-		std::cout << "Max Valence! Abort. " <<faceCount<<" "<< v->neighbors.size()<<" "<< u->neighbors.size()<<std::endl;
 		return false;
 	}
-	std::cout<<"Remove "<<u->id<<std::endl;
 	// make tmp a Array of all the neighbors of u
 	std::set<DeadVertex *> tmp = u->neighbors;
 	// delete triangles on edge uv:
-	for (DeadTriangle* tri : u->faces) {
-		tri->remove();
+	std::set<DeadTriangle*> tmpNbrs = u->faces;
+	for (DeadTriangle* tri : tmpNbrs) {
+		if (tri->hasVertex(v))
+			tri->remove();
 	}
-	for (DeadTriangle* tri : u->faces) {
+	tmpNbrs = u->faces;
+	for (DeadTriangle* tri : tmpNbrs) {
 		tri->replaceVertex(mesh, u, v);
 	}
-
 	u->remove();
 	heap.remove(u);
 // recompute the edge collapse costs for neighboring vertices

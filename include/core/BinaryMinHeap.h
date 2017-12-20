@@ -129,6 +129,7 @@ public:
 		currentSize = 0;
 		heapArray.clear();
 		heapArray.shrink_to_fit();
+		backPointers.clear();
 	}
 protected:
 
@@ -268,6 +269,7 @@ public:
 		currentSize = 0;
 		heapArray.clear();
 		heapArray.shrink_to_fit();
+		backPointers.clear();
 	}
 protected:
 

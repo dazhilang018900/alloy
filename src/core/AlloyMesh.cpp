@@ -1143,6 +1143,13 @@ box3f Mesh::updateBoundingBox() {
 	boundingBox = box3f(minPt, maxPt - minPt);
 	return boundingBox;
 }
+void Mesh::flipNormals(){
+#pragma omp parallel for
+	for (int i = 0; i < (int) vertexNormals.size(); i++) {
+		float3& norm=vertexNormals[i];
+		norm=-norm;
+	}
+}
 void Mesh::scale(float sc) {
 #pragma omp parallel for
 	for (int i = 0; i < (int) vertexLocations.size(); i++) {

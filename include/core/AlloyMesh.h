@@ -122,6 +122,7 @@ public:
 		mesh.dirtyOffScreen = true;
 
 	}
+	void flipNormals();
 	bool isEmpty()const {
 		return (vertexLocations.size()==0&&vertexNormals.size()==0&&vertexColors.size()==0&&lineIndexes.size()==0&&quadIndexes.size()==0&&triIndexes.size()==0&&textureMap.size()==0);
 	}

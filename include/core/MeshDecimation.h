@@ -83,14 +83,13 @@ protected:
 	std::vector<DeadTriangle> triangles;
 	std::vector<DeadVertex> vertexes;
 	BinaryMinHeapPtr<float> heap;
-	void decimateInternal(Mesh& mesh, float threshold, int totalCount,
-			int targetCount);
+	size_t decimateInternal(Mesh& mesh, float threshold, int totalCount,int targetCount);
 	bool collapseEdge(Mesh& mesh, DeadVertex *u, DeadVertex *v);
 	void computeEdgeCostAtVertex(Mesh& mesh, DeadVertex *v);
 	float computeEdgeCollapseCost(Mesh& mesh, DeadVertex *u, DeadVertex *v);
 public:
-	friend class DeadTriangle;
-	void solve(Mesh& mesh, float amount);
+	void solve(Mesh& mesh, float decimationAmount,bool flipNormals=false,const std::function<bool(const std::string& message, float progress)>& monitor =
+			nullptr);
 };
 }
 
