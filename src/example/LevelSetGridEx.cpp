@@ -29,7 +29,6 @@
 using namespace aly;
 LevelSetGridEx::LevelSetGridEx() :
 		Application(1200, 800, "Endless Grid Example") {
-
 }
 bool LevelSetGridEx::init(Composite& rootNode) {
 	srand((unsigned int) time(nullptr));

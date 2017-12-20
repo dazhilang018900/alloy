@@ -320,6 +320,7 @@ bool MeshDecimation::collapseEdge(Mesh& mesh, DeadVertex *u, DeadVertex *v) {
 	}
 	return true;
 }
+
 float MeshDecimation::computeEdgeCollapseCost(Mesh& mesh, DeadVertex *u,
 		DeadVertex *v) {
 // if we collapse edge uv by moving u to v then how

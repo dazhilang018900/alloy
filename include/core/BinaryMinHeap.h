@@ -76,7 +76,9 @@ public:
 		return currentSize;
 	}
 	void change(const vec<int, C>& pos, Indexable<T, C>* x) {
-		size_t index = backPointers.at(pos);
+		auto found=backPointers.find(pos);
+		if(found==backPointers.end())return;
+		size_t index = found->second;
 		Indexable<T, C>* v = heapArray[index];
 		if (x != v) {
 			heapArray[index] = x;
@@ -228,7 +230,9 @@ public:
 		}
 	}
 	void change(const size_t& pos, T value) {
-		size_t index = backPointers.at(pos);
+		auto found=backPointers.find(pos);
+		if(found==backPointers.end())return;
+		size_t index = found->second;
 		IndexablePtr<T>* v = heapArray[index];
 		if (value < v->value) {
 			v->value = value;
