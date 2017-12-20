@@ -132,9 +132,9 @@ void MeshDecimation::solve(Mesh& mesh, float decimationAmount, bool flipNormals,
 	Vector3ui& triIndexes = mesh.triIndexes;
 	size_t vertexCount = vertexLocations.size();
 	size_t triCount = triIndexes.size();
-	heap.reserve(vertexLocations.size());
-	vertexes.resize(vertexLocations.size());
-	triangles.resize(triIndexes.size());
+	heap.reserve(vertexCount);
+	vertexes.resize(vertexCount);
+	triangles.resize(triCount);
 	for (size_t i = 0; i < vertexCount; i++) {
 		vertexes[i].id = i;
 	}
@@ -143,7 +143,6 @@ void MeshDecimation::solve(Mesh& mesh, float decimationAmount, bool flipNormals,
 		triangles[i].set(&vertexes[tri.x], &vertexes[tri.y], &vertexes[tri.z]);
 		triangles[i].updateNormal(mesh);
 	}
-
 	int targetRemoveCount = static_cast<int>(decimationAmount * vertexCount);
 	size_t lastRemoveCount = -1;
 	size_t removeCount = 0;
@@ -158,7 +157,7 @@ void MeshDecimation::solve(Mesh& mesh, float decimationAmount, bool flipNormals,
 					(vertexCount - (int) mesh.vertexLocations.size())
 							/ (float) targetRemoveCount);
 		}
-		decimateInternal(mesh, amt, vertexCount, targetRemoveCount);
+		int removeCount=decimateInternal(mesh, amt, vertexCount, targetRemoveCount);
 		validCount = 0;
 		for (const DeadVertex& v : vertexes) {
 			if (v.isValid())
@@ -229,8 +228,12 @@ size_t MeshDecimation::decimateInternal(Mesh& mesh, float threshold,
 	heap.reserve(vertexCount);
 	for (size_t i = 0; i < vertexCount; i++) {
 		DeadVertex* vert=&vertexes[i];
-		computeEdgeCostAtVertex(mesh,vert);
-		heap.add(vert);
+		if(vert->isValid()){
+			computeEdgeCostAtVertex(mesh,vert);
+			heap.add(vert);
+		} else {
+			vert->collapse=nullptr;
+		}
 	}
 	size_t removeCount = 0;
 	while (vertexes.size() > 0 && !heap.isEmpty()) {
@@ -238,11 +241,10 @@ size_t MeshDecimation::decimateInternal(Mesh& mesh, float threshold,
 			break;
 		// get the next vertex to collapse
 		DeadVertex *mn = static_cast<DeadVertex*>(heap.remove());
-		int removed = static_cast<int>(100.0f * removeCount
-				/ (float) vertexCount);
 		if (mn->isValid()&&collapseEdge(mesh, mn, mn->collapse)) {
 			removeCount++;
 		}
+
 	}
 	heap.clear();
 	return removeCount;

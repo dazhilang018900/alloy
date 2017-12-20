@@ -118,14 +118,22 @@ public:
 	}
 	Indexable<T, C>* remove() {
 		Indexable<T, C>* minItem = peek();
-		heapArray[1] = heapArray[currentSize--];
-		percolateDown(1);
+		if(currentSize>1){
+			heapArray[1] = heapArray[currentSize--];
+			percolateDown(1);
+		} else {
+			currentSize=0;
+		}
 		return minItem;
 	}
 	void remove(Indexable<T, C>* item) {
 		size_t idx = backPointers[item->index];
-		heapArray[idx] = heapArray[currentSize--];
-		percolateDown(idx);
+		if(currentSize>1){
+			heapArray[idx] = heapArray[currentSize--];
+			percolateDown(idx);
+		} else {
+			currentSize=0;
+		}
 	}
 	void clear() {
 		currentSize = 0;
@@ -230,6 +238,7 @@ public:
 		}
 	}
 	void change(const size_t& pos, T value) {
+
 		auto found=backPointers.find(pos);
 		if(found==backPointers.end())return;
 		size_t index = found->second;
@@ -260,14 +269,23 @@ public:
 	}
 	IndexablePtr<T>* remove() {
 		IndexablePtr<T>* minItem = peek();
-		heapArray[1] = heapArray[currentSize--];
-		percolateDown(1);
+		if(currentSize>1){
+			heapArray[1] = heapArray[currentSize--];
+			percolateDown(1);
+		} else {
+			currentSize=0;
+		}
 		return minItem;
 	}
 	void remove(IndexablePtr<T>* item) {
 		size_t idx = backPointers[item->index];
-		heapArray[idx] = heapArray[currentSize--];
-		percolateDown(idx);
+		if(currentSize>1){
+			heapArray[idx] = heapArray[currentSize--];
+			percolateDown(idx);
+		} else {
+			currentSize=0;
+		}
+
 	}
 	void clear() {
 		currentSize = 0;

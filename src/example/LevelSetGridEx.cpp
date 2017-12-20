@@ -33,10 +33,11 @@ LevelSetGridEx::LevelSetGridEx() :
 bool LevelSetGridEx::init(Composite& rootNode) {
 	srand((unsigned int) time(nullptr));
 	//mesh.load(getFullPath("models/eagle.ply"));
-	mesh.load(getFullPath("models/armadillo.ply"));
+
+	mesh.load("/home/blake/cache/COLORIZEMESH_0CBMQNMD/pointcloud.ply");
 	MeshDecimation md;
-	md.solve(mesh,0.75f,false);
-	WriteMeshToFile(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"armadillo_dec.ply",mesh);
+	md.solve(mesh,0.5f,true);
+	WriteMeshToFile(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"pointcloud_dec.ply",mesh);
 	std::exit(0);
 	/*
 	EndlessGrid<float> grid({16,8,2}, 0.0f);
