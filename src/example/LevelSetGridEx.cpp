@@ -24,6 +24,7 @@
 #include "AlloyVolume.h"
 #include "AlloyIsoSurface.h"
 #include "grid/EndlessGrid.h"
+#include "MeshProcessing.h"
 #include "../../include/example/LevelSetGridEx.h"
 using namespace aly;
 LevelSetGridEx::LevelSetGridEx() :
@@ -33,7 +34,12 @@ LevelSetGridEx::LevelSetGridEx() :
 bool LevelSetGridEx::init(Composite& rootNode) {
 	srand((unsigned int) time(nullptr));
 	//mesh.load(getFullPath("models/eagle.ply"));
-	mesh.load(getFullPath("models/horse.ply"));
+	mesh.load(getFullPath("models/armadillo.ply"));
+	MeshDecimation md;
+	md.solve(mesh,0.5f);
+
+	WriteMeshToFile(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"armadillo_dec.ply",mesh);
+	std::exit(0);
 	/*
 	EndlessGrid<float> grid({16,8,2}, 0.0f);
 	MeshToLevelSet(mesh, grid, 2.5f, true,1.8f);

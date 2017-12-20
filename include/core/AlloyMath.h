@@ -2631,6 +2631,20 @@ namespace std {
 			return ((size_t) val.x) | (((size_t) val.y) << 32);;
 		}
 	};
+	template<> struct hash<aly::int1> {
+		typedef aly::int1 argument_type;
+		typedef std::size_t result_type;
+		std::size_t operator()(const aly::int1& val) const {
+			return val.x;
+		}
+	};
+	template<> struct hash<aly::vec<size_t,1>> {
+		typedef aly::vec<size_t,1> argument_type;
+		typedef std::size_t result_type;
+		std::size_t operator()(const aly::vec<size_t,1>& val) const {
+			return val.x;
+		}
+	};
 	template<> struct equal_to<aly::int4> {
 		constexpr bool operator()(const aly::int4& a, const aly::int4 &b) const {
 			return (a.x == b.x && a.y == b.y && a.z == b.z&& a.w == b.w);
@@ -2644,6 +2658,16 @@ namespace std {
 	template<> struct equal_to<aly::int2> {
 		constexpr bool operator()(const aly::int2& a, const aly::int2 &b) const {
 			return (a.x == b.x && a.y == b.y);
+		}
+	};
+	template<> struct equal_to<aly::int1> {
+		constexpr bool operator()(const aly::int1& a, const aly::int1 &b) const {
+			return (a.x == b.x);
+		}
+	};
+	template<> struct equal_to<aly::vec<size_t,1>> {
+		constexpr bool operator()(const aly::vec<size_t,1>& a, const aly::vec<size_t,1> &b) const {
+			return (a.x == b.x);
 		}
 	};
 }
