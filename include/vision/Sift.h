@@ -198,14 +198,13 @@ protected:
 	void setImage(const aly::Image1f& img) {
 		orig = img;
 	}
-	void solve();
+	void solve(bool generateDesriptors);
 public:
 	Sift(SiftOptions options=SiftOptions());
-	template<class T, int C, ImageType I> void solve(const Image<T,C,I>& img){
+	template<class T, int C, ImageType I> void solve(const Image<T,C,I>& img,bool generateDescriptors=true){
 		setImage(img);
-		solve();
+		solve(generateDescriptors);
 	}
-	/** Returns the list of keypoints. */
 	Keypoints const& getKeypoints(void) const{
 		return keypoints;
 	}
@@ -221,7 +220,6 @@ public:
 	Octaves& getOctaves(void){
 		return octaves;
 	}
-	/** Returns the list of descriptors. */
 	Descriptors const& getDescriptors(void) const;
 
 	/**

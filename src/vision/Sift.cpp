@@ -12,7 +12,7 @@
 #include <stdexcept>
 #include <AlloyImageProcessing.h>
 #include <omp.h>
-#include <Sift.h>
+#include "vision/Sift.h"
 #define MATH_POW2(x) ((x)*(x))
 /* Floating-point epsilon comparisons. */
 #define MATH_EPSILON_EQ(x,v,eps) (((v - eps) <= x) && (x <= (v + eps)))
@@ -38,7 +38,7 @@ Sift::Sift(	SiftOptions options):options(options) {
 
 /* ---------------------------------------------------------------- */
 
-void Sift::solve() {
+void Sift::solve(bool generateDescriptors) {
 	if (this->options.minOctave < -1
 			|| this->options.minOctave > this->options.maxOctave)
 		throw std::invalid_argument("Invalid octave range");
@@ -48,13 +48,7 @@ void Sift::solve() {
 	this->create();
 	this->extremaDetection();
 	this->keypointLocalization();
-	/*
-	 //Don't clean up here
-	for (OctavePtr oct:octaves){
-		oct->dog.clear();
-	}
-	*/
-	this->descriptorGeneration();
+	if(generateDescriptors)this->descriptorGeneration();
 }
 
 /* ---------------------------------------------------------------- */
