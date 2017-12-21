@@ -1097,22 +1097,25 @@ namespace aly {
 		int N =  (int)mesh.vertexLocations.size();
 		SparseMatrix1f A(N, N);
 		Vector3f b(N);
+
 		for (std::unordered_set<uint32_t>& nbrs : nbrTable) {
 			int K = (int)nbrs.size() - 1;
-			float3 pt = mesh.vertexLocations[index];
-			{
-				auto nbrIter = nbrs.begin();
-				nbrIter++;
-				for (int k = 0; k < K; k++) {
-					float w = -smoothness / K;
-					int offset = *nbrIter;
-					A.set(index, offset, w);
+			if(K>0){
+				float3 pt = mesh.vertexLocations[index];
+				{
+					auto nbrIter = nbrs.begin();
 					nbrIter++;
+					for (int k = 0; k < K; k++) {
+						float w = -smoothness / K;
+						int offset = *nbrIter;
+						A.set(index, offset, w);
+						nbrIter++;
+					}
 				}
+				A.set(index, index, smoothness + 1);
+				b[index] = pt;
+				index++;
 			}
-			A.set(index, index, smoothness + 1);
-			b[index] = pt;
-			index++;
 		}
 		SolveBICGStab(b, A, mesh.vertexLocations, smoothIterations,errorTolerance);
 		mesh.updateVertexNormals();

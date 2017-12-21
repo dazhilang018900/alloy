@@ -83,7 +83,7 @@ protected:
 	std::vector<DeadTriangle> triangles;
 	std::vector<DeadVertex> vertexes;
 	BinaryMinHeapPtr<float> heap;
-	size_t decimateInternal(Mesh& mesh, float threshold, int totalCount,int targetCount);
+	size_t decimateInternal(Mesh& mesh, float threshold, int totalCount,int targetCount,const std::function<bool(const std::string& message, float progress)>& monitor=nullptr);
 	bool collapseEdge(Mesh& mesh, DeadVertex *u, DeadVertex *v);
 	void computeEdgeCostAtVertex(Mesh& mesh, DeadVertex *v);
 	float computeEdgeCollapseCost(Mesh& mesh, DeadVertex *u, DeadVertex *v);

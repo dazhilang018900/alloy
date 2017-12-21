@@ -78,7 +78,6 @@ void DeadTriangle::replaceVertex(Mesh& mesh, DeadVertex *vold,
 	} else if (vold == vertex[1]) {
 		vertex[1] = vnew;
 	} else {
-		assert(vold == vertex[2]);
 		vertex[2] = vnew;
 	}
 	vold->remove(this);
@@ -149,15 +148,8 @@ void MeshDecimation::solve(Mesh& mesh, float decimationAmount, bool flipNormals,
 
 	size_t validCount = vertexCount;
 	while (vertexCount - validCount < targetRemoveCount) {
-		float amt = (targetRemoveCount
-				- (vertexCount - mesh.vertexLocations.size()))
-				/ (float) mesh.vertexLocations.size();
-		if (monitor) {
-			monitor("Decimate",
-					(vertexCount - (int) mesh.vertexLocations.size())
-							/ (float) targetRemoveCount);
-		}
-		int removeCount=decimateInternal(mesh, amt, vertexCount, targetRemoveCount);
+		float amt = (targetRemoveCount- (vertexCount - mesh.vertexLocations.size()))/ (float) mesh.vertexLocations.size();
+		int removeCount=decimateInternal(mesh, amt,validCount, targetRemoveCount, monitor);
 		validCount = 0;
 		for (const DeadVertex& v : vertexes) {
 			if (v.isValid())
@@ -180,7 +172,7 @@ void MeshDecimation::solve(Mesh& mesh, float decimationAmount, bool flipNormals,
 		vertexLocations.data.reserve(vertexCount);
 		for (size_t i = 0; i < vertexCount; i++) {
 			DeadVertex& vert = vertexes[i];
-			if (vert.isValid()) {
+			if (vert.isValid()&&vert.neighbors.size()>0) {
 				size_t id = vert.id;
 				vert.index = vertexLocations.size();
 				vertexLocations.push_back(vertexLocationsCopy[id]);
@@ -198,7 +190,7 @@ void MeshDecimation::solve(Mesh& mesh, float decimationAmount, bool flipNormals,
 		vertexLocations.data.reserve(vertexCount);
 		for (size_t i = 0; i < vertexCount; i++) {
 			DeadVertex& vert = vertexes[i];
-			if (vert.isValid()) {
+			if (vert.isValid()&&vert.neighbors.size()>0) {
 				size_t id = vert.id;
 				vert.index = vertexLocations.size();
 				vertexLocations.push_back(vertexLocationsCopy[id]);
@@ -216,14 +208,13 @@ void MeshDecimation::solve(Mesh& mesh, float decimationAmount, bool flipNormals,
 							tri.vertex[2]->index));
 		}
 	}
-
 	if (flipNormals) {
 		mesh.flipNormals();
 	}
 }
 
 size_t MeshDecimation::decimateInternal(Mesh& mesh, float threshold,
-		int totalCount, int targetCount) {
+		int validCount, int targetCount,const std::function<bool(const std::string& message, float progress)>& monitor) {
 	size_t vertexCount =vertexes.size();
 	heap.reserve(vertexCount);
 	for (size_t i = 0; i < vertexCount; i++) {
@@ -235,10 +226,13 @@ size_t MeshDecimation::decimateInternal(Mesh& mesh, float threshold,
 			vert->collapse=nullptr;
 		}
 	}
-	size_t removeCount = 0;
+	size_t removeCount = vertexCount-validCount;
 	while (vertexes.size() > 0 && !heap.isEmpty()) {
-		if (removeCount >= threshold * vertexCount)
+		if (removeCount >= targetCount)
 			break;
+		if(monitor){
+			monitor("Decimate",removeCount/(float)targetCount);
+		}
 		// get the next vertex to collapse
 		DeadVertex *mn = static_cast<DeadVertex*>(heap.remove());
 		if (mn->isValid()&&collapseEdge(mesh, mn, mn->collapse)) {
