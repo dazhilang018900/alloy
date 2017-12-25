@@ -920,6 +920,7 @@ void WriteImageToFile(const std::string& file, const ImageRGBf& img) {
 		WriteImageToFile(file, rgb);
 	}
 }
+
 void ConvertImage(const ImageRGBAf& in, ImageRGB& out) {
 	out.resize(in.width, in.height);
 	out.id = in.id;

@@ -290,6 +290,7 @@ namespace aly {
 				}
 			}
 		}
+
 		void Daisy::ti_get_histogram(std::vector<float>& histogram, float x, float y, float shift, const std::vector<OrientationLayer >& hcube)
 		{
 			int ishift = int(shift);
@@ -705,6 +706,7 @@ namespace aly {
 		void Daisy::getDescriptor(float x, float y, Descriptor& descriptor, int orientation, Normalization normalizationType, bool disableInterpolation) {
 			getUnnormalizedDescriptor(x, y, orientation, descriptor, disableInterpolation);
 			normalizeDescriptor(descriptor, normalizationType);
+			descriptor.location=float2(x,y);
 		}
 		void Daisy::updateSelectedCubes() {
 			selectedCubes.resize(radiusBins);

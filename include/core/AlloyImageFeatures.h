@@ -36,7 +36,8 @@ namespace aly {
 		};
 		class Descriptor: public std::vector<float> {
 		public:
-			Descriptor(size_t sz=0) :std::vector<float>(sz) {
+			float2 location;
+			Descriptor(size_t sz=0,float2 location=float2(0.0f)) :std::vector<float>(sz),location(location) {
 			}
 			Descriptor(const std::vector<float>& data):std::vector<float>(data.size()) {
 				std::vector<float>::assign(data.begin(), data.end());
@@ -226,6 +227,7 @@ namespace aly {
 				return out;
 			}
 		};
+		typedef std::vector<Descriptor> Descriptors;
 		class Daisy {
 		protected:
 			static const float sigma_0;
@@ -252,6 +254,7 @@ namespace aly {
 			int radiusBins;
 			int angleBins;
 			int histogramBins;
+
 			void computeCubeSigmas();
 			void computeGridPoints();
 			void computeScales(Image1f& scaleMap);

@@ -1610,29 +1610,29 @@ bool ListBox::onMouseDown(ListEntry* entry, AlloyContext* context,
 							break;
 						}
 					}
-				} else if(e.isShiftDown()){
-					int startIndex=-1;
-					int endIndex=-1;
-					if(lastSelected.size()>0){
-						auto lastEntry=lastSelected.back();
-						int index=0;
-						for(auto le:listEntries){
-							if(le.get()==lastEntry){
-								startIndex=index;
+				} else if (e.isShiftDown()) {
+					int startIndex = -1;
+					int endIndex = -1;
+					if (lastSelected.size() > 0) {
+						auto lastEntry = lastSelected.back();
+						int index = 0;
+						for (auto le : listEntries) {
+							if (le.get() == lastEntry) {
+								startIndex = index;
 							}
-							if(le.get()==entry){
-								endIndex=index;
+							if (le.get() == entry) {
+								endIndex = index;
 							}
 							index++;
 						}
-						if(startIndex>endIndex){
-							std::swap(startIndex,endIndex);
+						if (startIndex > endIndex) {
+							std::swap(startIndex, endIndex);
 						}
-						for(int i=startIndex;i<=endIndex;i++){
-							if(!listEntries[i]->isSelected()){
+						for (int i = startIndex; i <= endIndex; i++) {
+							if (!listEntries[i]->isSelected()) {
 								listEntries[i]->setSelected(true);
 								lastSelected.push_back(listEntries[i].get());
-								if(listEntries[i].get()!=entry){
+								if (listEntries[i].get() != entry) {
 									if (onSelect)
 										onSelect(entry, e);
 								}
@@ -2001,6 +2001,7 @@ ListBox::ListBox(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims) :
 		Composite(name, pos, dims) {
 	dirty = false;
+	enableDelete = false;
 	enableMultiSelection = false;
 	scrollingDown = false;
 	scrollingUp = false;
@@ -2015,7 +2016,62 @@ ListBox::ListBox(const std::string& name, const AUnit2D& pos,
 	dragBox = box2px(float2(0, 0), float2(0, 0));
 	Application::addListener(this);
 }
+bool ListBox::removeAll() {
+	if (!enableDelete) {
+		std::cerr << "Could not delete from list box [" << getName()
+				<< "] because delete is not enabled" << std::endl;
+		return false;
+	}
+	std::vector<ListEntryPtr>& entries = getEntries();
+	std::vector<ListEntryPtr> removalList = entries;
+	entries.clear();
+	if (removalList.size() > 0) {
+		update();
+		AlloyApplicationContext()->requestPack();
+		if (onDeleteEntry) {
+			onDeleteEntry(removalList);
+		}
+		return true;
+	}
+	return false;
+}
+bool ListBox::removeSelected() {
+	if (!enableDelete) {
+		std::cerr << "Could not delete from list box [" << getName()
+				<< "] because delete is not enabled" << std::endl;
+		return false;
+	}
+	std::vector<ListEntryPtr>& entries = getEntries();
+	bool removed = false;
+	ListEntryPtr next;
+	std::vector<ListEntryPtr> removalList;
+	for (int i = 0; i < (int) entries.size(); i++) {
+		ListEntryPtr entry = entries[i];
+		if (entry->isSelected()) {
+			if (i < (int) entries.size() - 1) {
+				next = entries[i + 1];
+			}
+			entries.erase(entries.begin() + i);
+			removalList.push_back(entry);
+			removed = true;
+			i--;
+		}
+	}
+	if (next.get() != nullptr) {
+		next->setSelected(true);
+	}
+	if (removed) {
+		update();
+		AlloyApplicationContext()->requestPack();
+		if (onDeleteEntry) {
+			onDeleteEntry(removalList);
+		}
+		return true;
+	}
+	return false;
+}
 bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
+	if(!isVisible())return false;
 	if (!context->isMouseOver(this, true)) {
 		if (!Composite::onEventHandler(context, e)) {
 			bool ret = false;
@@ -2030,22 +2086,32 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 		}
 	}
 	Region* mouseDownRegion = context->getMouseDownObject();
-	if (mouseDownRegion==nullptr) {
+	if (mouseDownRegion == nullptr) {
 		for (auto entry : listEntries) {
-			if (entry->isSelected()&&context->isMouseOver(entry.get(),true)) {
+			if (entry->isSelected()
+					&& context->isMouseOver(entry.get(), true)) {
 				context->setMouseDownObject(entry.get());
 				break;
 			}
 		}
 	}
-	if(e.type ==InputType::Key){
-		if(e.isControlDown()&&e.key==GLFW_KEY_A&&enableMultiSelection){
-			for(auto entry:listEntries){
+	if (e.type == InputType::Key) {
+		if (e.isDown() && e.isControlDown() && e.key == GLFW_KEY_A
+				&& enableMultiSelection) {
+			for (auto entry : listEntries) {
 				if (!entry->isSelected()) {
 					entry->setSelected(true);
 					lastSelected.push_back(entry.get());
-					if (onSelect)onSelect(entry.get(), e);
+					if (onSelect)
+						onSelect(entry.get(), e);
 				}
+			}
+		}
+		if (e.isUp() && enableDelete && e.key == GLFW_KEY_DELETE) {
+			if(e.isControlDown()){
+				removeAll();
+			} else {
+				removeSelected();
 			}
 		}
 	}
@@ -2076,7 +2142,8 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 				}
 
 			}
-		} else if(!context->isMouseDown() && e.type == InputType::MouseButton) {
+		} else if (!context->isMouseDown()
+				&& e.type == InputType::MouseButton) {
 			if (enableMultiSelection) {
 				int index = 0;
 				for (std::shared_ptr<ListEntry> entry : listEntries) {
@@ -2095,7 +2162,8 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 						if (!entry->isSelected()) {
 							entry->setSelected(true);
 							lastSelected.push_back(entry.get());
-							if (onSelect)onSelect(entry.get(), e);
+							if (onSelect)
+								onSelect(entry.get(), e);
 						}
 					}
 				}
@@ -2105,8 +2173,8 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 					entry->setSelected(false);
 				}
 				lastSelected.clear();
-				if(onSelect){
-					onSelect(nullptr,e);
+				if (onSelect) {
+					onSelect(nullptr, e);
 				}
 			}
 			dragBox = box2px(float2(0, 0), float2(0, 0));
@@ -2938,6 +3006,7 @@ MultiFileSelector::MultiFileSelector(const std::string& name,
 	valueRegion = ListBoxPtr(
 			new ListBox(name, CoordPX(0.0f, 0.0f),
 					CoordPerPX(1.0f, 1.0f, -entryHeight - 3.0f, 0.0f)));
+	valueRegion->setEnableDelete(true);
 	RegionPtr bgRegion = RegionPtr(
 			new Region(name, CoordPerPX(1.0f, 0.0f, -entryHeight - 3, 0.0f),
 					CoordPerPX(0.0f, 1.0f, 2.0f, 0.0f)));
@@ -2997,33 +3066,12 @@ MultiFileSelector::MultiFileSelector(const std::string& name,
 	Composite::add(downButton);
 	Composite::add(eraseButton);
 	Composite::add(bgRegion);
-	eraseButton->onMouseDown =
-			[this](AlloyContext* context, const InputEvent& e) {
-				if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
-					std::vector<ListEntryPtr>& entries = valueRegion->getEntries();
-					bool removed = false;
-					ListEntryPtr next;
-					for (int i = 0; i < (int) entries.size(); i++) {
-						ListEntryPtr entry = entries[i];
-						if (entry->isSelected()) {
-							if (i < (int) entries.size() - 1) {
-								next = entries[i + 1];
-							}
-							entries.erase(entries.begin() + i);
-							removed = true;
-						}
-					}
-					if (next.get() != nullptr) {
-						next->setSelected(true);
-					}
-					if (removed) {
-						update();
-						context->requestPack();
-						fireEvent();
-					}
-				}
-				return false;
-			};
+	valueRegion->onDeleteEntry=[this](const std::vector<ListEntryPtr>& removalList){
+		fireEvent();
+	};
+	eraseButton->onMouseDown = [this](AlloyContext* context, const InputEvent& e) {
+		return valueRegion->removeAll();
+	};
 	upButton->onMouseDown = [this](AlloyContext* context, const InputEvent& e) {
 		if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
 			std::vector<ListEntryPtr>& entries = valueRegion->getEntries();
@@ -3527,6 +3575,7 @@ NumberListBox::NumberListBox(const std::string& name, const AUnit2D& pos,
 	valueRegion = ListBoxPtr(
 			new ListBox(name, CoordPX(0.0f, 0.0f),
 					CoordPerPX(1.0f, 1.0f, -entryHeight - 3.0f, 0.0f)));
+	valueRegion->setEnableDelete(true);
 	RegionPtr bgRegion = RegionPtr(
 			new Region(name, CoordPerPX(1.0f, 0.0f, -entryHeight - 3, 0.0f),
 					CoordPerPX(0.0f, 1.0f, 2.0f, 0.0f)));
@@ -3609,31 +3658,12 @@ NumberListBox::NumberListBox(const std::string& name, const AUnit2D& pos,
 			};
 	eraseButton->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& e) {
-				if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
-					std::vector<ListEntryPtr>& entries = valueRegion->getEntries();
-					bool removed = false;
-					ListEntryPtr next;
-					for (int i = 0; i < (int) entries.size(); i++) {
-						ListEntryPtr entry = entries[i];
-						if (entry->isSelected()) {
-							if (i < (int) entries.size() - 1) {
-								next = entries[i + 1];
-							}
-							entries.erase(entries.begin() + i);
-							removed = true;
-						}
-					}
-					if (next.get() != nullptr) {
-						next->setSelected(true);
-					}
-					if (removed) {
-						update();
-						context->requestPack();
-						fireEvent();
-					}
-				}
-				return false;
+				return valueRegion->removeAll();
 			};
+	valueRegion->onDeleteEntry=[this](const std::vector<ListEntryPtr>& removalList){
+		fireEvent();
+	};
+
 	upButton->onMouseDown = [this](AlloyContext* context, const InputEvent& e) {
 		if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
 			std::vector<ListEntryPtr>& entries = valueRegion->getEntries();

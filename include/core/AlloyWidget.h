@@ -511,6 +511,7 @@ struct FileFilterRule {
 class ListBox: public Composite {
 protected:
 	bool enableMultiSelection;
+	bool enableDelete;
 	box2px dragBox;
 	int startItem;
 	int endItem;
@@ -521,6 +522,7 @@ protected:
 	bool dirty;
 	std::vector<std::shared_ptr<ListEntry>> listEntries;
 	std::list<ListEntry*> lastSelected;
+
 	void addToActiveList(ListEntry* entry) {
 		lastSelected.push_back(entry);
 	}
@@ -529,7 +531,8 @@ protected:
 	}
 public:
 	void update();
-
+	bool removeSelected();
+	bool removeAll();
 	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp) override;
 	box2px getDragBox() const {
 		return dragBox;
@@ -543,6 +546,9 @@ public:
 	void addEntry(const std::shared_ptr<ListEntry>& entry) {
 		listEntries.push_back(entry);
 		dirty = true;
+	}
+	inline void setEnableDelete(bool val){
+		enableDelete=val;
 	}
 	void clearEntries();
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& e) override;
@@ -561,6 +567,7 @@ public:
 	bool onMouseDown(ListEntry* entry, AlloyContext* context,
 			const InputEvent& e);
 	std::function<void(ListEntry*, const InputEvent&)> onSelect;
+	std::function<void(const std::vector<std::shared_ptr<ListEntry>>& deleteList)> onDeleteEntry;
 };
 class FileDialog: public Composite {
 private:

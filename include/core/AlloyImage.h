@@ -1171,6 +1171,8 @@ void ConvertImage(const ImageRGBAf& in, ImageRGB& out);
 void ConvertImage(const ImageRGB& in, ImageRGBAf& out);
 void ConvertImage(const ImageRGBf& in, ImageRGBA& out);
 
+
+inline void ConvertImage(const Image1f& in, Image1f& out){out=in;}
 inline void ConvertImage(const ImageRGB& in, ImageRGB& out){out=in;}
 inline void ConvertImage(const ImageRGBA& in, ImageRGBA& out){out=in;}
 inline void ConvertImage(const ImageRGBf& in, ImageRGBf& out){out=in;}
