@@ -296,7 +296,7 @@ void Sift::keypointLocalization(void) {
 }
 
 /* ---------------------------------------------------------------- */
-const Descriptors& Sift::getDescriptors() const {
+const SiftDescriptors& Sift::getDescriptors() const {
 	return descriptors;
 }
 void Sift::descriptorGeneration(void) {
@@ -630,7 +630,7 @@ float Sift::keypointAbsoluteScale(SiftKeypoint const& kp) {
 
 /* ---------------------------------------------------------------- */
 void Sift::loadLoweDescriptors(std::string const& filename,
-		Descriptors* result) {
+		SiftDescriptors* result) {
 	std::ifstream in(filename.c_str());
 	if (!in.good())
 		throw std::runtime_error("Cannot open descriptor file");

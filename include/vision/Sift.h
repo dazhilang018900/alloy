@@ -177,7 +177,7 @@ public:
 typedef std::vector<std::shared_ptr<Octave>> Octaves;
 typedef std::shared_ptr<Octave> OctavePtr;
 typedef std::vector<SiftKeypoint> Keypoints;
-typedef std::vector<SiftDescriptor> Descriptors;
+typedef std::vector<SiftDescriptor> SiftDescriptors;
 class Sift {
 public:
 
@@ -220,14 +220,14 @@ public:
 	Octaves& getOctaves(void){
 		return octaves;
 	}
-	Descriptors const& getDescriptors(void) const;
+	SiftDescriptors const& getDescriptors(void) const;
 
 	/**
 	 * Helper function that creates SIFT descriptors from David Lowe's
 	 * SIFT descriptor files.
 	 */
 	static void loadLoweDescriptors(std::string const& filename,
-			Descriptors* result);
+			SiftDescriptors* result);
 
 
 protected:
@@ -251,7 +251,7 @@ private:
 	SiftOptions options;
 	Octaves octaves; // The image pyramid (the octaves)
 	Keypoints keypoints; // Detected keypoints
-	Descriptors descriptors; // Final SIFT descriptors
+	SiftDescriptors descriptors; // Final SIFT descriptors
 };
 
 }

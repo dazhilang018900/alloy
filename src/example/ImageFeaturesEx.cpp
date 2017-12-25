@@ -24,7 +24,6 @@
 #include "AlloyImageFeatures.h"
 #include "../../include/example/ImageFeaturesEx.h"
 using namespace aly;
-using namespace aly::daisy;
 ImageFeaturesEx::ImageFeaturesEx() :
 		Application(800, 600, "Image Features Example") {
 }
@@ -80,14 +79,14 @@ bool ImageFeaturesEx::init(Composite& rootNode) {
 	workerTask = WorkerTaskPtr(new WorkerTask([=] {
 		ImageRGBA resultImg(leftImg.width,rightImg.height);
 		Daisy daisy;
-		DescriptorField leftDescriptors;
-		DescriptorField rightDescriptors;
+		DaisyDescriptorField leftDescriptors;
+		DaisyDescriptorField rightDescriptors;
 		textLabel->setLabel("Computing left image descriptors ...");
 		daisy.initialize(left);
-		daisy.getDescriptors(leftDescriptors, Normalization::Sift);
+		daisy.getDescriptors(leftDescriptors, DaisyNormalization::Sift);
 		textLabel->setLabel("Computing right image descriptors ...");
 		daisy.initialize(right);
-		daisy.getDescriptors(rightDescriptors, Normalization::Sift);
+		daisy.getDescriptors(rightDescriptors, DaisyNormalization::Sift);
 		const int shiftBound = 64;
 		const float minScore = 0.8f;
 		textLabel->setLabel("Stereo matching ...");
