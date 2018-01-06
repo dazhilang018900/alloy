@@ -1,6 +1,5 @@
-
 #include "AlloyImageFeatures.h"
-using namespace aly::daisy;
+#include <AlloyImageProcessing.h>
 namespace aly {
 const float Daisy::sigma_0 = 1.0f;
 const float Daisy::sigma_1 = std::sqrt(2.0f);
@@ -9,34 +8,8 @@ const float Daisy::sigma_init = 1.6f;
 const float Daisy::sigma_step = (float) std::pow(2, 1.0f / 2);
 const int Daisy::scale_st = int(
 		(std::log(sigma_1 / sigma_0)) / (float) std::log(sigma_step));
-
-template<class T1, class T2> inline bool is_outside(T1 x, T2 lx, T2 ux, T1 y,
-		T2 ly, T2 uy) {
-	return (x < lx || y > ux || y < ly || y > uy);
-}
-
-/// returns the radial component of a point.
-template<class T> inline T magnitude(T x, T y) {
-	return std::sqrt(x * x + y * y);
-}
-
-/// Converts the given cartesian coordinates of a point to polar
-/// ones.
-template<class T> inline
-void cartesian2polar(T x, T y, float &r, float &th) {
-	r = magnitude(x, y);
-	th = angle(x, y);
-}
-
-/// Converts the given polar coordinates of a point to cartesian
-/// ones.
-template<class T1, class T2> inline
-void polar2cartesian(T1 r, T1 t, T2 &y, T2 &x) {
-	x = (T2) (r * std::cos(t));
-	y = (T2) (r * std::sin(t));
-}
-
-void WriteLayeredImageToFile(const std::string& file, const LayeredImage& img) {
+void WriteOrientationImagesToFile(const std::string& file,
+		const OrientationImages& img) {
 	std::ostringstream vstr;
 	std::string fileName = GetFileWithoutExtension(file);
 	vstr << fileName << ".raw";
@@ -163,259 +136,140 @@ void conv_vertical(T1* image, int h, int w, T2 *kernel, int ksize) {
 
 	int halfsize = ksize / 2;
 	assert(h + ksize < 4096);
-
 	int h_1w = (h - 1) * w;
-
 	for (int c = 0; c < w; c++) {
 		for (int i = 0; i < halfsize; i++)
 			buffer[i] = image[c];
-
 		for (int i = 0; i < h; i++)
 			buffer[halfsize + i] = image[i * w + c];
-
 		for (int i = 0; i < halfsize; i++)
 			buffer[halfsize + i + h] = image[h_1w + c];
-
 		conv_buffer_(buffer, kernel, h, ksize);
-
 		for (int r = 0; r < h; r++) {
 			image[r * w + c] = buffer[r];
 		}
 	}
 }
-template<typename T> inline
-void convolve_sym_(T* image, int h, int w, T* kernel, int ksize) {
-	conv_horizontal(image, h, w, kernel, ksize);
-	conv_vertical(image, h, w, kernel, ksize);
+void Convolve(const ImageLayer& image, ImageLayer& out,
+		const std::vector<float>& filter, int M, int N) {
+	out.resize(image.width, image.height);
+	int w = image.width;
+	int h = image.height;
+	out.resize(w, h);
+#pragma omp parallel for
+	for (int j = 0; j < image.height; j++) {
+		for (int i = 0; i < image.width; i++) {
+			float vsum(0.0);
+			for (int ii = 0; ii < (int) M; ii++) {
+				for (int jj = 0; jj < (int) N; jj++) {
+					vsum += filter[ii + M * jj]
+							* image(i + ii - (int) M / 2, j + jj - (int) N / 2);
+				}
+			}
+			out[i + j * w] = vsum;
+		}
+	}
 }
-void convolve_sym(float* image, int h, int w, float* kernel, int ksize,
-		float* out = NULL) {
-	if (out == NULL)
-		out = image;
-	else
-		memcpy(out, image, sizeof(float) * h * w);
-	if (h == 240 && w == 320) {
-		convolve_sym_(out, 240, 320, kernel, ksize);
-		return;
-	}
-	if (h == 480 && w == 640) {
-		convolve_sym_(out, 480, 640, kernel, ksize);
-		return;
-	}
-	if (h == 512 && w == 512) {
-		convolve_sym_(out, 512, 512, kernel, ksize);
-		return;
-	}
-	if (h == 512 && w == 768) {
-		convolve_sym_(out, 512, 768, kernel, ksize);
-		return;
-	}
-	if (h == 600 && w == 800) {
-		convolve_sym_(out, 600, 800, kernel, ksize);
-		return;
-	}
-	if (h == 768 && w == 1024) {
-		convolve_sym_(out, 768, 1024, kernel, ksize);
-		return;
-	}
-	if (h == 1024 && w == 768) {
-		convolve_sym_(out, 1024, 768, kernel, ksize);
-		return;
-	}
-	if (h == 256 && w == 256) {
-		convolve_sym_(out, 256, 256, kernel, ksize);
-		return;
-	}
-	if (h == 128 && w == 128) {
-		convolve_sym_(out, 128, 128, kernel, ksize);
-		return;
-	}
-	if (h == 128 && w == 192) {
-		convolve_sym_(out, 128, 192, kernel, ksize);
-		return;
-	}
-	convolve_sym_(out, h, w, kernel, ksize);
-}
-void Smooth(const DaisyOrientationLayer & image, DaisyOrientationLayer & B, float sigma) {
+void Smooth(const ImageLayer & image, ImageLayer & out, float sigma) {
 	int fsz = (int) (5 * sigma);
 	if (fsz % 2 == 0)
 		fsz++;
 	if (fsz < 3)
 		fsz = 3;
-	std::vector<float> filter(fsz);
-	gaussian_1d(filter, fsz, sigma, 0);
-	B = image;
-	convolve_sym(B.ptr(), image.height, image.width, filter.data(), fsz);
-}
-void Smooth(DaisyOrientationLayer & image, float sigma) {
-	int fsz = (int) (5 * sigma);
-	if (fsz % 2 == 0)
-		fsz++;
-	if (fsz < 3)
-		fsz = 3;
-	std::vector<float> filter(fsz);
-	gaussian_1d(filter, fsz, sigma, 0);
-	convolve_sym(image.ptr(), image.height, image.width, filter.data(), fsz);
-}
-void Smooth(const Image1f & image, Image1f & B, float sigma) {
-	int fsz = (int) (5 * sigma);
-	if (fsz % 2 == 0)
-		fsz++;
-	if (fsz < 3)
-		fsz = 3;
-	std::vector<float> filter(fsz);
-	gaussian_1d(filter, fsz, sigma, 0);
-	B = image;
-	convolve_sym(B.ptr(), image.height, image.width, filter.data(), fsz);
-}
-
-void Smooth(Image1f & image, float sigma) {
-	int fsz = (int) (5 * sigma);
-	if (fsz % 2 == 0)
-		fsz++;
-	if (fsz < 3)
-		fsz = 3;
-	std::vector<float> filter(fsz);
-	gaussian_1d(filter, fsz, sigma, 0);
-	convolve_sym(image.ptr(), image.height, image.width, filter.data(), fsz);
+	std::vector<float> filter;
+	GaussianKernel(filter, fsz, fsz, sigma, sigma);
+	Convolve(image, out, filter, fsz, fsz);
 }
 Daisy::Daisy(int orientResolutions) :
-		orientationResolutions(orientResolutions),width(0),height(0),numberOfGridPoints(0),histogramBins(0),angleBins(0),radiusBins(0),descriptorRadius(0.0f),descriptorSize(0) {
+		width(0), height(0), numberOfGridPoints(0), histogramBins(0), angleBins(
+				0), radiusBins(0), descriptorRadius(0.0f), descriptorSize(0) {
 }
-void Daisy::i_get_histogram(float* histogram, float x, float y,
-		float shift, const std::vector<DaisyOrientationLayer>& cube) const {
-	int ishift = (int) shift;
-	double fshift = shift - ishift;
-	if (fshift < 0.01)
-		bi_get_histogram(histogram, x, y, ishift, cube);
-	else if (fshift > 0.99)
-		bi_get_histogram(histogram, x, y, ishift + 1, cube);
-	else
-		ti_get_histogram(histogram, x, y, shift, cube);
-}
-void Daisy::bi_get_histogram(float* histogram, float x, float y,int shift, const std::vector<DaisyOrientationLayer>& hcube) const {
-	int mnx = int(x);
-	int mny = int(y);
+void Daisy::getHistogram(float* histogram, int x, int y,
+		const std::vector<ImageLayer>& hcube) const {
 	for (int h = 0; h < histogramBins; h++) {
-		if (h + shift < histogramBins) {
-			histogram[h] = hcube[h + shift](x, y);
-		} else {
-			histogram[h] = hcube[h + shift - histogramBins](x, y);
+		histogram[h] = hcube[h](x, y);
+	}
+}
+void Daisy::getHistogram(float* histogram, float x, float y,
+		const std::vector<ImageLayer>& hcube) const {
+	for (int h = 0; h < histogramBins; h++) {
+		histogram[h] = hcube[h](x, y);
+	}
+}
+void Daisy::getDescriptors(DaisyDescriptorField& field,DaisyNormalization normalizationType){
+	field.resize(width,height);
+#pragma omp parallel for
+	for(int j=0;j<height;j++){
+		for(int i=0;i<width;i++){
+			getDescriptor(i,j,field(i,j),normalizationType,true);
+			//std::cout<<i<<","<<j<<": Descriptor "<<field(i,j)<<std::endl;
 		}
 	}
 }
+void Daisy::getDescriptor(float x, float y, DaisyDescriptor& descriptor) const {
+	descriptor.resize(descriptorSize);
+	getHistogram(descriptor.data(), x, y, smoothLayers[selectedCubes[0]]);
+	int r, rdt, region;
+	for (r = 0; r < radiusBins; r++) {
+		rdt = r * angleBins + 1;
+		for (region = rdt; region < rdt + angleBins; region++) {
+			float2 gpt = gridPoints[region];
+			getHistogram(&descriptor[region*histogramBins], x + gpt.x, y + gpt.y,
+					smoothLayers[selectedCubes[r]]);
 
-void Daisy::ti_get_histogram(float* histogram, float x, float y,
-		float shift, const std::vector<DaisyOrientationLayer>& hcube) const {
-	int ishift = int(shift);
-	float layer_alpha = shift - ishift;
-	std::vector<float> thist(histogramBins, 0.0f);
-	bi_get_histogram(thist.data(), x, y, ishift, hcube);
-	for (int h = 0; h < histogramBins - 1; h++) {
-		histogram[h] = (1 - layer_alpha) * thist[h]+ layer_alpha * thist[h + 1];
-	}
-	histogram[histogramBins - 1] = (1 - layer_alpha) * thist[histogramBins - 1]+ layer_alpha * thist[0];
-}
-void Daisy::ni_get_histogram(float* histogram, int x, int y,
-		int shift, const std::vector<DaisyOrientationLayer>& hcube)  const {
-	if (is_outside(x, 0, image.width - 1, y, 0, image.height - 1))
-		return;
-	for (int h = 0; h < histogramBins; h++) {
-		int hi = h + shift;
-		if (hi >= histogramBins)
-			hi -= histogramBins;
-		histogram[h] = hcube[hi](x, y);
-	}
-}
-void Daisy::i_get_descriptor(float x, float y, int orientation,
-		DaisyDescriptor& descriptor) const {
-	float shift = orientationShift[orientation];
-	descriptor.resize(descriptorSize);
-	i_get_histogram(descriptor.data(), x, y, shift, smoothLayers[selectedCubes[0]]);
-	int r, rdt, region;
-	float xx, yy;
-	const std::vector<float2>& grid = orientedGridPoints[orientation];
-	for (r = 0; r < radiusBins; r++) {
-		rdt = r * angleBins + 1;
-		for (region = rdt; region < rdt + angleBins; region++) {
-			xx = x + grid[region].x;
-			yy = y + grid[region].y;
-			if (is_outside(xx, 0, image.width - 1, yy, 0, image.height - 1))
-				continue;
-			i_get_histogram(&descriptor[region * histogramBins], xx, yy, shift, smoothLayers[selectedCubes[r]]);
 		}
 	}
 }
-void Daisy::ni_get_descriptor(float x, float y, int orientation,
-		DaisyDescriptor& descriptor) const {
-	float shift = orientationShift[orientation];
-	int ishift = (int) shift;
-	if (shift - ishift > 0.5)
-		ishift++;
-	int iy = (int) y;
-	if (y - iy > 0.5)
-		iy++;
-	int ix = (int) x;
-	if (x - ix > 0.5)
-		ix++;
-	// center
+void Daisy::getDescriptor(int x, int y, DaisyDescriptor& descriptor) const {
 	descriptor.resize(descriptorSize);
-	ni_get_histogram(descriptor.data(), ix, iy, ishift,smoothLayers[selectedCubes[0]]);
-	float xx, yy;
-	// petals of the flower
+	getHistogram(descriptor.data(), x, y, smoothLayers[selectedCubes[0]]);
 	int r, rdt, region;
-	std::vector<float> tmp(histogramBins);
-	const std::vector<float2>& grid = orientedGridPoints[orientation];
 	for (r = 0; r < radiusBins; r++) {
 		rdt = r * angleBins + 1;
 		for (region = rdt; region < rdt + angleBins; region++) {
-			xx = x + grid[region].x;
-			yy = y + grid[region].y;
-			iy = (int) yy;
-			if (yy - iy > 0.5)
-				iy++;
-			ix = (int) xx;
-			if (xx - ix > 0.5)
-				ix++;
-			if (is_outside(ix, 0, image.width - 1, iy, 0, image.height - 1)) {
-				continue;
-			}
-			ni_get_histogram(&descriptor[region * histogramBins], ix, iy, ishift,smoothLayers[selectedCubes[r]]);
+			float2 gpt = gridPoints[region];
+			getHistogram(&descriptor[region*histogramBins], (int) aly::round(x + gpt.x),(int) aly::round(y + gpt.y),smoothLayers[selectedCubes[r]]);
 		}
 	}
 }
-void Daisy::initialize(float _descriptorRadius,int _radiusBins, int _angleBins, int _histogramBins,bool smoothFirstLayer){
-	width=image.width;
-	height=image.height;
+void Daisy::initialize(const Image1f& image, float _descriptorRadius,
+		int _radiusBins, int _angleBins, int _histogramBins,
+		bool smoothFirstLayer) {
+	width = image.width;
+	height = image.height;
 	angleBins = _angleBins;
 	histogramBins = _histogramBins;
-	orientationResolutions=_angleBins;
 	radiusBins = _radiusBins;
 	descriptorRadius = _descriptorRadius;
 	numberOfGridPoints = angleBins * radiusBins + 1; // +1 is for center pixel
 	descriptorSize = numberOfGridPoints * _histogramBins;
-	for (int i = 0; i < ORIENTATIONS; i++) {
-		orientationShift[i] = (i / float(ORIENTATIONS)) * _histogramBins;
-	}
 	computeCubeSigmas();
 	computeGridPoints();
-	initialize(smoothFirstLayer);
-
+	initialize(image, smoothFirstLayer);
 }
 void Daisy::initialize(const ImageRGB& _image, float _descriptorRadius,
-		int _radiusBins, int _angleBins, int _histogramBins,bool smoothFirstLayer) {
+		int _radiusBins, int _angleBins, int _histogramBins,
+		bool smoothFirstLayer) {
+	Image1f image;
 	ConvertImage(_image, image);
-	initialize(_descriptorRadius,_radiusBins,_angleBins,_histogramBins,smoothFirstLayer);
+	initialize(image, _descriptorRadius, _radiusBins, _angleBins,
+			_histogramBins, smoothFirstLayer);
 }
 void Daisy::initialize(const ImageRGBA& _image, float _descriptorRadius,
-		int _radiusBins, int _angleBins, int _histogramBins,bool smoothFirstLayer) {
+		int _radiusBins, int _angleBins, int _histogramBins,
+		bool smoothFirstLayer) {
+	Image1f image;
 	ConvertImage(_image, image);
-	initialize(_descriptorRadius,_radiusBins,_angleBins,_histogramBins,smoothFirstLayer);
+	initialize(image, _descriptorRadius, _radiusBins, _angleBins,
+			_histogramBins, smoothFirstLayer);
 }
 void Daisy::initialize(const ImageRGBAf& _image, float _descriptorRadius,
-		int _radiusBins, int _angleBins, int _histogramBins,bool smoothFirstLayer) {
+		int _radiusBins, int _angleBins, int _histogramBins,
+		bool smoothFirstLayer) {
+	Image1f image;
 	ConvertImage(_image, image);
-	initialize(_descriptorRadius,_radiusBins,_angleBins,_histogramBins,smoothFirstLayer);
+	initialize(image, _descriptorRadius, _radiusBins, _angleBins,
+			_histogramBins, smoothFirstLayer);
 }
 int Daisy::quantizeRadius(float rad) {
 	if (rad <= sigmas[0])
@@ -434,227 +288,95 @@ int Daisy::quantizeRadius(float rad) {
 	}
 	return mini;
 }
-void Daisy::computeScales(Image1f& scaleMap)  const {
-	float sigma = std::pow(sigma_step, scale_st) * sigma_0;
-	Image1f sim;
-	Image1f next_sim;
-	Image1f max_dog(image.width, image.height);
-	scaleMap.resize(image.width, image.height);
-	scaleMap.setZero();
-	max_dog.setZero();
-	Smooth(image, sim, sigma);
-	float sigma_prev = sigma_0;
-	float sigma_new;
-	float sigma_inc;
-	for (int i = 0; i < scale_en; i++) {
-		sigma_new = std::pow(sigma_step, scale_st + i) * sigma_0;
-		sigma_inc = std::sqrt(sigma_new * sigma_new - sigma_prev * sigma_prev);
-		sigma_prev = sigma_new;
-		Smooth(sim, next_sim, sigma_inc);
-		for (int p = 0; p < (int) image.size(); p++) {
-			float dog = std::abs(next_sim[p].x - sim[p].x);
-			if (dog > max_dog[p]) {
-				max_dog[p].x=dog;
-				scaleMap[p].x=(float) i;
-			}
-		}
-		sim = next_sim;
-	}
-	//smooth scaling map
-	Smooth(scaleMap, sim, 10.0f);
-	scaleMap = sim;
-	for (int q = 0; q < (int) sim.size(); q++) {
-		scaleMap[q] = std::floor(scaleMap[q] + 0.5f);
-	}
-}
 
-void Daisy::layeredGradient(const Image1f& image, LayeredImage& layers,
+void Daisy::layeredGradient(const Image1f& image, OrientationImages& layers,
 		int layer_no) const {
-	DaisyOrientationLayer bdata;
+	ImageLayer bdata;
 	layers.resize(layer_no);
-	Image2f dxy(image.width,image.height);
+	Image2f dxy(image.width, image.height);
 #pragma omp parallel for
-	for(int j=0;j<image.height;j++){
-		for(int i=0;i<image.width;i++){
-			float dx=0.5f*(image(i+1,j)-image(i-1,j));
-			float dy=0.5f*(image(i,j+1)-image(i,j-1));
-			dxy(i,j)=float2(dx,dy);
+	for (int j = 0; j < image.height; j++) {
+		for (int i = 0; i < image.width; i++) {
+			float dx = 0.5f * (image(i + 1, j) - image(i - 1, j));
+			float dy = 0.5f * (image(i, j + 1) - image(i, j - 1));
+			dxy(i, j) = float2(dx, dy);
 		}
 	}
 	for (int l = 0; l < layer_no; l++) {
-		DaisyOrientationLayer & layer_l = layers[l];
+		ImageLayer & layer_l = layers[l];
 		layer_l.resize(image.width, image.height);
 		float angle = 2.0f * l * ALY_PI / layer_no;
 		float cosa = std::cos(angle);
 		float sina = std::sin(angle);
 #pragma omp parallel for
-		for(int j=0;j<image.height;j++){
-			for(int i=0;i<image.width;i++){
-				float2 grad=dxy(i,j);
+		for (int j = 0; j < image.height; j++) {
+			for (int i = 0; i < image.width; i++) {
+				float2 grad = dxy(i, j);
 				float value = cosa * grad.x + sina * grad.y;
 				if (value > 0) {
-					layer_l(i,j)=value;
+					layer_l(i, j) = value;
 				} else {
-					layer_l(i,j)=0.0f;
+					layer_l(i, j) = 0.0f;
 				}
 			}
 		}
-	}
-}
-void Daisy::smoothHistogram(std::vector<float>& hist, int hsz) const {
-	int i;
-	float prev, temp;
-	prev = hist[hsz - 1];
-	for (i = 0; i < hsz; i++) {
-		temp = hist[i];
-		hist[i] = (prev + hist[i] + hist[(i + 1 == hsz) ? 0 : i + 1]) / 3.0f;
-		prev = temp;
-	}
-}
-float Daisy::interpolatePeak(float left, float center, float right)  const {
-	if (center < 0.0f) {
-		left = -left;
-		center = -center;
-		right = -right;
-	}
-	float den = (left - 2.0f * center + right);
-	if (den == 0) {
-		return 0;
-	} else {
-		return 0.5f * (left - right) / den;
 	}
 }
 
-void Daisy::computeHistogram(const LayeredImage& hcube, int x, int y,
-		std::vector<float>& histogram)  const {
-	histogram.resize(histogramBins);
-	for (int h = 0; h < histogramBins; h++) {
-		histogram[h] = hcube[h](x, y);
-	}
-}
-/*
-void Daisy::computeHistograms() {
-	std::vector<float> hist;
-	//Just compies from smooth layers up one layer
-	for (int r = 0; r < cubeNumber; r++) {
-		LayeredImage& dst = smoothLayers[r];
-		LayeredImage& src = smoothLayers[r + 1];
-#pragma omp parallel for
-		for (int y = 0; y < image.height; y++) {
-			for (int x = 0; x < image.width; x++) {
-				computeHistogram(src, x, y, hist);
-				for (int i = 0; i < histogramBins; i++) {
-					dst[i](x, y) = hist[i];
-				}
-			}
-		}
-	}
-}
-*/
 void Daisy::computeSmoothedGradientLayers() {
 	float sigma;
 	for (int r = 1; r < smoothLayers.size(); r++) {
 		smoothLayers[r].resize(histogramBins);
-		for (DaisyOrientationLayer & img : smoothLayers[r]) {
-			img.resize(image.width, image.height);
+		for (ImageLayer & img : smoothLayers[r]) {
+			img.resize(width, height);
 		}
 	}
-	for (int r = 0; r < cubeNumber; r++) {
-		LayeredImage& prev_cube = smoothLayers[r];
-		LayeredImage& cube = smoothLayers[r+1];
+	for (int r = 0; r < radiusBins; r++) {
+		OrientationImages& prev_cube = smoothLayers[r];
+		OrientationImages& cube = smoothLayers[r + 1];
 		if (r == 0) {
 			sigma = sigmas[0];
 		} else {
-			sigma = std::sqrt(sigmas[r] * sigmas[r] - sigmas[r - 1] * sigmas[r - 1]);
+			sigma = std::sqrt(
+					sigmas[r] * sigmas[r] - sigmas[r - 1] * sigmas[r - 1]);
 		}
-#pragma omp parallel for
 		for (int th = 0; th < histogramBins; th++) {
 			Smooth(prev_cube[th], cube[th], sigma);
 		}
 	}
-	//computeHistograms();
 }
-void Daisy::computeOrientations(Image1i& orientMap, const Image1f& scaleMap,
-		bool scaleInvariant) const {
-	DaisyOrientationLayer tmp;
-	std::vector<DaisyOrientationLayer> layers;
-	layeredGradient(image, layers, orientationResolutions);
-	orientMap.resize(image.width, image.height);
-	orientMap.setZero();
-	int max_ind;
-	float max_val;
-	int next, prev;
-	float peak, angle;
-	float sigma_inc;
-	float sigma_prev = 0;
-	float sigma_new;
-	std::vector<float> hist(orientationResolutions);
-	for (int scale = 0; scale < scale_en; scale++) {
-		sigma_new = std::pow(sigma_step, scale) * descriptorRadius / 3.0f;
-		sigma_inc = std::sqrt(sigma_new * sigma_new - sigma_prev * sigma_prev);
-		sigma_prev = sigma_new;
-		for (DaisyOrientationLayer & layer : layers) {
-			Smooth(layer, tmp, sigma_inc);
-			layer = tmp;
+void Daisy::initialize(const Image1f& image, bool smoothFirstLayer) {
+	smoothLayers.resize(radiusBins + 1);
+	layeredGradient(image, smoothLayers[0], histogramBins);
+	float sigma = std::sqrt(sigma_init * sigma_init - 0.25f);
+	if (smoothFirstLayer) {
+		for (int i = 0; i < histogramBins; i++) {
+			ImageLayer tmp = smoothLayers[0][i];
+			Smooth(tmp, smoothLayers[0][i], sigma);
 		}
-		for (int j = 0; j < image.height; j++) {
-			for (int i = 0; i < image.width; i++) {
-				if (scaleInvariant && scaleMap.size() > 0
-						&& scaleMap(i, j).x != scale)
-					continue;
-				for (int ori = 0; ori < orientationResolutions; ori++) {
-					hist[ori] = layers[ori](i, j);
+	}
+	computeSmoothedGradientLayers();
+	for (int i = 0; i < smoothLayers.size(); i++) {
+		std::vector<ImageLayer>& orientations = smoothLayers[i];
+		int N = width * height;
+		int K = orientations.size();
+#pragma omp parallel for
+		for (int n = 0; n < N; n++) {
+			double sum = 0;
+			for (int k = 0; k < K; k++) {
+				sum += orientations[k][n];
+			}
+			if (sum > 1E-7f) {
+				sum = 1.0 / sum;
+				for (int k = 0; k < K; k++) {
+					orientations[k][n] *= sum;
 				}
-				for (int kk = 0; kk < 6; kk++) {
-					smoothHistogram(hist, orientationResolutions);
-				}
-				max_val = -1;
-				max_ind = 0;
-				for (int ori = 0; ori < orientationResolutions; ori++) {
-					if (hist[ori] > max_val) {
-						max_val = hist[ori];
-						max_ind = ori;
-					}
-				}
-				prev = max_ind - 1;
-				if (prev < 0)
-					prev += orientationResolutions;
-				next = max_ind + 1;
-				if (next >= orientationResolutions)
-					next -= orientationResolutions;
-				peak = interpolatePeak(hist[prev], hist[max_ind], hist[next]);
-				angle = (max_ind + peak) * 360.0f / orientationResolutions;
-				int iangle = (int) std::floor(angle);
-				if (iangle < 0)
-					iangle += 360;
-				if (iangle >= 360)
-					iangle -= 360;
-				if (!(iangle >= 0.0f && iangle < 360.0f)) {
-					angle = 0;
-				}
-				orientMap(i, j).x=iangle;
 			}
 		}
 	}
 }
-void Daisy::initialize(bool smoothFirstLayer) {
-	smoothLayers.resize(cubeNumber + 1);
-	layeredGradient(image, smoothLayers[0], histogramBins);
-	float sigma = std::sqrt(sigma_init * sigma_init - 0.25f);
-	// assuming a 0.5 image smoothness, we pull this to 1.6 as in sift
-	if(smoothFirstLayer){
-		for (int i = 0; i <histogramBins; i++) {
-			Smooth(smoothLayers[0][i], sigma);
-		}
-	}
-	computeSmoothedGradientLayers();
-	/*
-	for (int i = 0; i < smoothLayers.size(); i++) {
-		WriteLayeredImageToFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR << "smooth_gradient" << i << ".xml", smoothLayers[i]);
-	}
-	*/
-}
-void Daisy::normalizeDescriptor(DaisyDescriptor& desc, DaisyNormalization nrm_type)  const {
+void Daisy::normalizeDescriptor(DaisyDescriptor& desc,
+		DaisyNormalization nrm_type) const {
 	if (nrm_type == DaisyNormalization::Partial)
 		normalizePartial(desc);
 	else if (nrm_type == DaisyNormalization::Full)
@@ -663,7 +385,7 @@ void Daisy::normalizeDescriptor(DaisyDescriptor& desc, DaisyNormalization nrm_ty
 		normalizeSiftWay(desc);
 }
 
-void Daisy::normalizePartial(DaisyDescriptor& desc)  const {
+void Daisy::normalizePartial(DaisyDescriptor& desc) const {
 	float norm;
 	for (int h = 0; h < numberOfGridPoints; h++) {
 		norm = 0.0f;
@@ -679,7 +401,7 @@ void Daisy::normalizePartial(DaisyDescriptor& desc)  const {
 		}
 	}
 }
-void Daisy::normalizeFull(DaisyDescriptor& desc)  const {
+void Daisy::normalizeFull(DaisyDescriptor& desc) const {
 	float norm = 0.0f;
 	for (int i = 0; i < (int) desc.size(); i++) {
 		float val = desc[i];
@@ -692,7 +414,7 @@ void Daisy::normalizeFull(DaisyDescriptor& desc)  const {
 		}
 	}
 }
-void Daisy::normalizeSiftWay(DaisyDescriptor& desc)  const {
+void Daisy::normalizeSiftWay(DaisyDescriptor& desc) const {
 	bool changed = true;
 	int iter = 0;
 	float norm;
@@ -721,21 +443,14 @@ void Daisy::normalizeSiftWay(DaisyDescriptor& desc)  const {
 		}
 	}
 }
-void Daisy::getUnnormalizedDescriptor(float x, float y, int orientation,
-		DaisyDescriptor& descriptor, bool disableInterpolation) const {
-	if (disableInterpolation) {
-		ni_get_descriptor(x, y, orientation, descriptor);
-	} else {
-		i_get_descriptor(x, y, orientation, descriptor);
-	}
-}
 void Daisy::getDescriptor(float x, float y, DaisyDescriptor& descriptor,
-		int orientation, DaisyNormalization normalizationType,
-		bool disableInterpolation) const {
-	getUnnormalizedDescriptor(x, y, orientation, descriptor,
-			disableInterpolation);
+		DaisyNormalization normalizationType, bool disableInterpolation) const {
+	if (disableInterpolation) {
+		getDescriptor(int(x), int(y), descriptor);
+	} else {
+		getDescriptor(x, y, descriptor);
+	}
 	normalizeDescriptor(descriptor, normalizationType);
-	descriptor.location = float2(x, y);
 }
 void Daisy::updateSelectedCubes() {
 	selectedCubes.resize(radiusBins);
@@ -746,62 +461,13 @@ void Daisy::updateSelectedCubes() {
 }
 void Daisy::computeCubeSigmas() {
 	sigmas.resize(radiusBins);
-	float r_step = descriptorRadius / (float)radiusBins;
+	float r_step = descriptorRadius / (float) radiusBins;
 	for (int r = 0; r < radiusBins; r++) {
 		sigmas[r] = (r + 1) * r_step / 2.0f;
 	}
 	updateSelectedCubes();
 }
-void Daisy::getDescriptors(DaisyDescriptorField& descriptorField,
-		DaisyNormalization normalizationType, bool scaleInvariant,
-		bool rotationInvariant, bool disableInterpolation) {
-	Image1f scaleMap;
-	Image1i orientMap;
-	if (scaleInvariant) {
-		//Not really used
-		computeScales(scaleMap);
-	}
-	if (rotationInvariant) {
-		computeOrientations(orientMap, scaleMap, scaleInvariant);
-		computeOrientedGridPoints();
-	}
-	//d::cout << "Scale " << scaleMap << std::endl;
-	//WriteImageToRawFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR << "scale.xml", scaleMap);
 
-	//std::cout << "Orient " << orientMap << std::endl;
-	//WriteImageToRawFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR << "orient.xml", orientMap);
-
-	//std::cout << "Write Descriptor" << std::endl;
-	int orientation;
-	descriptorField.resize(image.width, image.height);
-#pragma omp parallel for
-	for (int j = 0; j < image.height; j++) {
-		for (int i = 0; i < image.width; i++) {
-			orientation = 0;
-			if (orientMap.size() > 0)
-				orientation = orientMap(i, j).x;
-			if (!(orientation >= 0 && orientation < ORIENTATIONS))
-				orientation = 0;
-			getUnnormalizedDescriptor((float) i, (float) j, orientation,
-					descriptorField(i, j), disableInterpolation);
-			normalizeDescriptor(descriptorField(i, j), normalizationType);
-		}
-	}
-}
-void Daisy::computeOrientedGridPoints() {
-	for (int i = 0; i < ORIENTATIONS; i++) {
-		float angle = -i * 2.0f * ALY_PI / ORIENTATIONS;
-		float cosa = std::cos(angle);
-		float sina = std::sin(angle);
-		std::vector<float2>& point_list = orientedGridPoints[i];
-		point_list.resize(numberOfGridPoints);
-		for (int k = 0; k < numberOfGridPoints; k++) {
-			float2 pt = gridPoints[k];
-			point_list[k] = float2(pt.x * cosa + pt.y * sina,
-					-pt.x * sina + pt.y * cosa);
-		}
-	}
-}
 inline double lengthL2(const DaisyDescriptor& a) {
 	double ret = 0.0;
 	int N = (int) a.size();
@@ -832,17 +498,14 @@ double angle(const DaisyDescriptor& a, const DaisyDescriptor& b) {
 void Daisy::computeGridPoints() {
 	double r_step = descriptorRadius / radiusBins;
 	double t_step = 2 * ALY_PI / angleBins;
-	gridPoints.resize(numberOfGridPoints,float2(0.0f,0.0f));
+	gridPoints.resize(numberOfGridPoints, float2(0.0f, 0.0f));
 	for (int r = 0; r < radiusBins; r++) {
 		int region = r * angleBins + 1;
 		for (int t = 0; t < angleBins; t++) {
 			float x, y;
-			polar2cartesian((r + 1) * r_step, t * t_step, x, y);
-			gridPoints[region + t] = float2(x, y);
-			//std::cout<<"Grid Point "<<region<<") "<<t<<" "<<gridPoints[region+t]<<std::endl;
+			gridPoints[region + t] = polar2cartesian((r + 1) * r_step,t * t_step);
 		}
 	}
-	computeOrientedGridPoints();
 }
 }
 

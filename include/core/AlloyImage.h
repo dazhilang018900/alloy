@@ -277,22 +277,22 @@ public:
 		width = 0;
 		height = 0;
 	}
-	vec<T, C>* vecPtr() {
+	inline vec<T, C>* vecPtr() {
 		if (data.size() == 0)
 			return nullptr;
 		return data.data();
 	}
-	const vec<T, C>* vecPtr() const {
+	inline const vec<T, C>* vecPtr() const {
 		if (data.size() == 0)
 			return nullptr;
 		return data.data();
 	}
-	T* ptr() {
+	inline T* ptr() {
 		if (data.size() == 0)
 			return nullptr;
 		return &(data.front()[0]);
 	}
-	const T* ptr() const {
+	inline const T* ptr() const {
 		if (data.size() == 0)
 			return nullptr;
 		return &(data.front()[0]);
@@ -300,30 +300,30 @@ public:
 	void setZero() {
 		data.assign(data.size(), vec<T, C>((T)0));
 	}
-	const vec<T, C>& operator[](const size_t i) const {
+	inline const vec<T, C>& operator[](const size_t i) const {
 		return data[i];
 	}
-	vec<T, C>& operator[](const size_t i) {
+	inline vec<T, C>& operator[](const size_t i) {
 		return data[i];
 	}
-	vec<T, C>& operator()(int i, int j) {
+	inline vec<T, C>& operator()(int i, int j) {
 		return data[clamp(i, 0, width - 1) + clamp(j, 0, height - 1) * (size_t)width];
 	}
-	vec<T, C>& operator()(const int2 ij) {
+	inline 	vec<T, C>& operator()(const int2 ij) {
 		return data[clamp(ij.x, 0, width - 1)
 			+ clamp(ij.y, 0, height - 1) * width];
 	}
-	const vec<T, C>& operator()(int i, int j) const {
+	inline 	const vec<T, C>& operator()(int i, int j) const {
 		return data[clamp(i, 0, width - 1) + clamp(j, 0, height - 1) *(size_t) width];
 	}
-	const vec<T, C>& operator()(const int2 ij) const {
+	inline 	const vec<T, C>& operator()(const int2 ij) const {
 		return data[clamp(ij.x, 0, width - 1)
 			+ clamp(ij.y, 0, height - 1) * width];
 	}
-	T& operator()(int i, int j, int c) {
+	inline 	T& operator()(int i, int j, int c) {
 		return data[clamp(i, 0, width - 1) + clamp(j, 0, height - 1) *(size_t) width][c];
 	}
-	const T& operator()(int i, int j, int c) const {
+	inline 	const T& operator()(int i, int j, int c) const {
 		return data[clamp(i, 0, width - 1) + clamp(j, 0, height - 1) *(size_t)width][c];
 	}
 	inline float operator()(float x, float y, int c) const {

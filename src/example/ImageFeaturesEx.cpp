@@ -36,7 +36,6 @@ bool ImageFeaturesEx::init(Composite& rootNode) {
 	ReadImageFromFile(getFullPath("images/stereo_right.png"), rightImg);
 	DownSample(leftImg, tmp);
 	leftImg = tmp;
-
 	ConvertImage(leftImg, left);
 	DownSample(rightImg, tmp);
 	rightImg = tmp;
@@ -46,18 +45,6 @@ bool ImageFeaturesEx::init(Composite& rootNode) {
 	for (RGBA& c : tmp.data) {
 		c = RGBA(64, 64, 64, 255);
 	}
-
-	/*
-	 {
-	Daisy daisy;
-	daisy.initialize(leftImg,15,3,8,8,true);
-	DaisyDescriptor ds;
-	daisy.getDescriptor(leftImg.width*0.5f,leftImg.height*0.5f,ds,0,DaisyNormalization::Sift,false);
-
-	std::cout<<"Descritpor "<<ds<<std::endl;
-	std::exit(0);
-	}
-*/
 	ImageGlyphPtr srcGlyph = createImageGlyph(leftImg, false);
 	ImageGlyphPtr tarGlyph = createImageGlyph(rightImg, false);
 	ImageGlyphPtr resultGlyph = createImageGlyph(tmp, false);
@@ -96,10 +83,11 @@ bool ImageFeaturesEx::init(Composite& rootNode) {
 		DaisyDescriptorField rightDescriptors;
 		textLabel->setLabel("Computing left image descriptors ...");
 		daisy.initialize(left);
-		daisy.getDescriptors(leftDescriptors, DaisyNormalization::Sift,true,true);
+
+		daisy.getDescriptors(leftDescriptors, DaisyNormalization::Sift);
 		textLabel->setLabel("Computing right image descriptors ...");
 		daisy.initialize(right);
-		daisy.getDescriptors(rightDescriptors, DaisyNormalization::Sift,true,true);
+		daisy.getDescriptors(rightDescriptors, DaisyNormalization::Sift);
 		const int shiftBound = 64;
 		const float minScore = 0.8f;
 		textLabel->setLabel("Stereo matching ...");

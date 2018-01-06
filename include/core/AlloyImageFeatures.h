@@ -2,57 +2,32 @@
 #define _IMAGEFEATURES_H
 #include <AlloyImage.h>
 #include <array>
+#include <vector>
 namespace aly {
-namespace daisy {
-inline void point_transform_via_homography(float* H, float x, float y, float &u,
-		float &v) {
-	float kxp = H[0] * x + H[1] * y + H[2];
-	float kyp = H[3] * x + H[4] * y + H[5];
-	float kp = H[6] * x + H[7] * y + H[8];
-	u = kxp / kp;
-	v = kyp / kp;
+enum class DaisyNormalization {UnNormalized = -1, Partial = 0, Full = 1, Sift = 2};
+inline void cartesian2polar(const float2& pt, float &r, float &th) {
+	r = length(pt);
+	th = std::atan2(pt.y, pt.x);
 }
-
-inline float epipolar_line_slope(float y, float x, float* F) {
-	float line[3];
-	line[0] = F[0] * x + F[1] * y + F[2];
-	line[1] = F[3] * x + F[4] * y + F[5];
-	line[2] = F[6] * x + F[7] * y + F[8];
-
-	float m = -line[0] / line[1];
-	float slope = std::atan(m) * 180 / ALY_PI;
-
-	if (slope < 0)
-		slope += 360;
-	if (slope >= 360)
-		slope -= 360;
-
-	return slope;
+inline float2 polar2cartesian(float r, float t) {
+	return float2(r * std::cos(t), r * std::sin(t));
 }
-
-
-}
-enum class DaisyNormalization {
-	Partial = 0, Full = 1, Sift = 2
-};
 class DaisyDescriptor: public std::vector<float> {
 public:
-	float2 location;
-	DaisyDescriptor(size_t sz = 0, float2 location = float2(0.0f)) :
-			std::vector<float>(sz), location(location) {
+	DaisyDescriptor(size_t sz = 0) :
+			std::vector<float>(sz) {
 	}
 	DaisyDescriptor(const std::vector<float>& data) :
 			std::vector<float>(data.size()) {
 		std::vector<float>::assign(data.begin(), data.end());
 	}
 };
-
-class DaisyOrientationLayer {
+class ImageLayer {
 protected:
 	std::vector<float> data;
 public:
 	int width, height;
-	DaisyOrientationLayer(int w = 0, int h = 0) :
+	ImageLayer(int w = 0, int h = 0) :
 			width(w), height(h) {
 
 	}
@@ -71,53 +46,40 @@ public:
 		width = 0;
 		height = 0;
 	}
-	float* ptr() {
+	inline float* ptr() {
 		if (data.size() == 0)
 			return nullptr;
 		return data.data();
 	}
-	const float* ptr() const {
+	inline const float* ptr() const {
 		if (data.size() == 0)
 			return nullptr;
 		return data.data();
 	}
-	const float& operator[](const size_t i) const {
+	inline const float& operator[](const size_t i) const {
 		return data[i];
 	}
-	float& operator[](const size_t i) {
+	inline float& operator[](const size_t i) {
 		return data[i];
 	}
-	float& operator()(int i, int j) {
+	inline float& operator()(int i, int j) {
 		return data[clamp(i, 0, width - 1) + clamp(j, 0, height - 1) * width];
 	}
-	float& operator()(const int2 ij) {
+	inline float& operator()(const int2 ij) {
 		return data[clamp(ij.x, 0, width - 1)
 				+ clamp(ij.y, 0, height - 1) * width];
 	}
-	const float& operator()(int i, int j) const {
+	inline const float& operator()(int i, int j) const {
 		return data[clamp(i, 0, width - 1) + clamp(j, 0, height - 1) * width];
 	}
-	const float& operator()(const int2 ij) const {
+	inline const float& operator()(const int2 ij) const {
 		return data[clamp(ij.x, 0, width - 1)
 				+ clamp(ij.y, 0, height - 1) * width];
 	}
-
 	void setZero() {
 		data.assign(data.size(), 0.0f);
 	}
-	float operator()(float x, float y) {
-		int i = static_cast<int>(std::floor(x));
-		int j = static_cast<int>(std::floor(y));
-		float rgb00 = operator()(i, j);
-		float rgb10 = operator()(i + 1, j);
-		float rgb11 = operator()(i + 1, j + 1);
-		float rgb01 = operator()(i, j + 1);
-		float dx = x - i;
-		float dy = y - j;
-		return ((rgb00 * (1.0f - dx) + rgb10 * dx) * (1.0f - dy)
-				+ (rgb01 * (1.0f - dx) + rgb11 * dx) * dy);
-	}
-	float operator()(float x, float y) const {
+	inline float operator()(float x, float y) const {
 		int i = static_cast<int>(std::floor(x));
 		int j = static_cast<int>(std::floor(y));
 		const float rgb00 = operator()(i, j);
@@ -129,9 +91,29 @@ public:
 		return ((rgb00 * (1.0f - dx) + rgb10 * dx) * (1.0f - dy)
 				+ (rgb01 * (1.0f - dx) + rgb11 * dx) * dy);
 	}
+	inline aly::float2 gradient(float x, float y) const {
+		float v21 = (operator()(x + 1, y));
+		float v12 = (operator()(x, y + 1));
+		float v10 = (operator()(x, y - 1));
+		float v01 = (operator()(x - 1, y));
+		float dx = ((v21 - v01) * 0.5f);
+		float dy = ((v12 - v10) * 0.5f);
+		return float2(dx, dy);
+	}
+	inline aly::float2 gradient(int x, int y) const {
+		float v21 = (operator()(x + 1, y));
+		float v12 = (operator()(x, y + 1));
+		float v10 = (operator()(x, y - 1));
+		float v01 = (operator()(x - 1, y));
+		float dx = ((v21 - v01) * 0.5f);
+		float dy = ((v12 - v10) * 0.5f);
+		return float2(dx, dy);
+	}
 };
-typedef std::vector<DaisyOrientationLayer> LayeredImage;
-void WriteLayeredImageToFile(const std::string& file, const LayeredImage& img);
+
+typedef std::vector<ImageLayer> OrientationImages;
+void WriteOrientationImagesToFile(const std::string& file,
+		const OrientationImages& img);
 
 inline double dot(const DaisyDescriptor& a, const DaisyDescriptor& b) {
 	double ret = 0.0;
@@ -145,7 +127,10 @@ inline double lengthL2(const DaisyDescriptor& a);
 inline double lengthSqr(const DaisyDescriptor& a);
 inline double lengthL1(const DaisyDescriptor& a);
 inline double angle(const DaisyDescriptor& a, const DaisyDescriptor& b);
-void Smooth(const DaisyOrientationLayer & image, DaisyOrientationLayer & B, float sigma);
+void Smooth(const ImageLayer & image, ImageLayer & B, float sigma);
+void Convolve(const ImageLayer& image, ImageLayer& out,
+		const std::vector<float>& filter, int M, int N);
+
 class DaisyDescriptorField {
 protected:
 	std::vector<DaisyDescriptor> data;
@@ -234,16 +219,16 @@ public:
 		return out;
 	}
 };
-template< class L, class R> std::basic_ostream<L, R> & operator <<(
+template<class L, class R> std::basic_ostream<L, R> & operator <<(
 		std::basic_ostream<L, R> & ss, const DaisyDescriptor& A) {
 	size_t index = 0;
-	size_t N=A.size();
-	ss<<A.location<<" [";
-	for (size_t index=0;index<N;index++) {
-		if(index<N-1){
-			ss << A[index]<<",";
+	size_t N = A.size();
+	ss << "[";
+	for (size_t index = 0; index < N; index++) {
+		if (index < N - 1) {
+			ss << A[index] << ",";
 		} else {
-			ss << A[index]<<"]";
+			ss << A[index] << "]";
 		}
 	}
 	return ss;
@@ -257,86 +242,64 @@ protected:
 	static const float sigma_init;
 	static const float sigma_step;
 	static const int scale_st;
-	static const int scale_en = 3;
-	static const int ORIENTATIONS = 360;
-	static const int cubeNumber = 3;
-	Image1f image;
 	std::vector<float2> gridPoints;
-	std::vector<LayeredImage> smoothLayers;
-	int orientationResolutions;
+	std::vector<OrientationImages> smoothLayers;
 	std::vector<int> selectedCubes;
 	std::vector<float> sigmas;
-	std::array<std::vector<float2>, ORIENTATIONS> orientedGridPoints;
 	int numberOfGridPoints;
 	int descriptorSize;
-	std::array<float, 360> orientationShift;
-	//bool disableInterpolation;
 	float descriptorRadius;
 	int radiusBins;
 	int angleBins;
 	int histogramBins;
-
 	void computeCubeSigmas();
 	void computeGridPoints();
-	void computeScales(Image1f& scaleMap) const ;
-	//void computeHistograms();
-	void computeOrientations(Image1i& orientMap, const Image1f& scaleMap,
-			bool scaleInvariant) const;
 	void updateSelectedCubes();
 	void computeOrientedGridPoints();
 	void computeSmoothedGradientLayers();
-	float interpolatePeak(float left, float center, float right) const ;
-	void smoothHistogram(std::vector<float>& hist, int hsz) const ;
-	void layeredGradient(const Image1f& image, LayeredImage& layers,
+	void layeredGradient(const Image1f& image, OrientationImages& layers,
 			int layer_no = 8) const;
 	int quantizeRadius(float rad);
-	void getUnnormalizedDescriptor(float x, float y, int orientation,
-			DaisyDescriptor& descriptor, bool disableInterpolation) const;
-	void normalizeSiftWay(DaisyDescriptor& desc) const ;
-	void normalizePartial(DaisyDescriptor& desc) const ;
-	void normalizeFull(DaisyDescriptor& desc) const ;
-	void normalizeDescriptor(DaisyDescriptor& desc, DaisyNormalization nrm_type) const ;
-	void computeHistogram(const LayeredImage& hcube, int x, int y,
-			std::vector<float>& histogram) const ;
-	void i_get_descriptor(float x, float y, int orientation,DaisyDescriptor& descriptor) const;
-	void i_get_histogram(float* histogram, float x, float y,
-			float shift, const std::vector<DaisyOrientationLayer>& cube) const;
-	void bi_get_histogram(float* histogram, float x, float y,
-			int shift, const std::vector<DaisyOrientationLayer>& cube) const;
-	void ti_get_histogram(float* histogram, float x, float y,
-			float shift, const std::vector<DaisyOrientationLayer>& cube) const;
-	void ni_get_histogram(float* histogram, int x, int y,
-			int shift, const std::vector<DaisyOrientationLayer>& hcube) const;
-	void ni_get_descriptor(float x, float y, int orientation,
-			DaisyDescriptor& descriptor) const;
-	void initialize(bool smoothFirstLayer);
-	void initialize(float descriptorRadius,int radiusBins, int angleBins, int histogramBins,bool smoothFirstLayer);
+	void normalizeSiftWay(DaisyDescriptor& desc) const;
+	void normalizePartial(DaisyDescriptor& desc) const;
+	void normalizeFull(DaisyDescriptor& desc) const;
+	void normalizeDescriptor(DaisyDescriptor& desc,
+			DaisyNormalization nrm_type) const;
+	void getDescriptor(float x, float y, DaisyDescriptor& descriptor) const;
+	void getDescriptor(int x, int y, DaisyDescriptor& descriptor) const;
+	void getHistogram(float* histogram, int x, int y,
+			const std::vector<ImageLayer>& hcube) const;
+	void getHistogram(float* histogram, float x, float y,
+			const std::vector<ImageLayer>& hcube) const;
+	void initialize(const Image1f& image, bool smoothFirstLayer);
+	void initialize(const Image1f& image, float descriptorRadius,
+			int radiusBins, int angleBins, int histogramBins,
+			bool smoothFirstLayer);
 public:
-	int width,height;
+	int width, height;
 	bool isInitialized() const {
-		return (width!=0&&height!=0);
+		return (width != 0 && height != 0);
 	}
-
 	Daisy(int orientationResolutions = 8);
 	void initialize(const ImageRGB& image, float descriptorRadius = 15.0f,
-			int radiusBins = 3, int angleBins = 8, int histogramBins = 8,bool smoothFirstLayer=true);
+			int radiusBins = 3, int angleBins = 8, int histogramBins = 8,
+			bool smoothFirstLayer = true);
 	void initialize(const ImageRGBAf& image, float descriptorRadius = 15.0f,
-			int radiusBins = 3, int angleBins = 8, int histogramBins = 8,bool smoothFirstLayer=true);
+			int radiusBins = 3, int angleBins = 8, int histogramBins = 8,
+			bool smoothFirstLayer = true);
 	void initialize(const ImageRGBA& image, float descriptorRadius = 15.0f,
-			int radiusBins = 3, int angleBins = 8, int histogramBins = 8,bool smoothFirstLayer=true);
-
-	void getDescriptors(DaisyDescriptorField& descriptorField,
-			DaisyNormalization normalizationType = DaisyNormalization::Sift,
-			bool scaleInvariant = false, bool rotationInartiant = true,
-			bool disableInterpolation = false);
-	void getDescriptor(float i, float j, DaisyDescriptor& out, int orientation =
-			0, DaisyNormalization normalizationType = DaisyNormalization::Sift,
+			int radiusBins = 3, int angleBins = 8, int histogramBins = 8,
+			bool smoothFirstLayer = true);
+	void getDescriptor(float i, float j, DaisyDescriptor& out,
+			DaisyNormalization normalizationType,
 			bool disableInterpolation = false) const;
-	inline void getDescriptor(float2 pix, DaisyDescriptor& out, int orientation =
-			0, DaisyNormalization normalizationType = DaisyNormalization::Sift,
+	inline void getDescriptor(float2 pix, DaisyDescriptor& out,
+			DaisyNormalization normalizationType,
 			bool disableInterpolation = false) const {
-		getDescriptor(pix.x,pix.y,out,orientation,normalizationType,disableInterpolation);
+		getDescriptor(pix.x, pix.y, out, normalizationType,
+				disableInterpolation);
 	}
+	void getDescriptors(DaisyDescriptorField& field,DaisyNormalization normalizationType);
 };
 }
 #endif

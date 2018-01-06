@@ -28,8 +28,8 @@ template<class T, size_t M, size_t N> void GaussianKernel(T (&kernel)[M][N],
 		T sigmaY = T(0.607902736 * (N - 1) * 0.5)) {
 	T sum = 0;
 #pragma omp parallel for reduction(+:sum)
-	for (int i = 0; i < (int)M; i++) {
-		for (int j = 0; j < (int)N; j++) {
+	for (int i = 0; i < (int) M; i++) {
+		for (int j = 0; j < (int) N; j++) {
 			T x = T(i - 0.5 * (M - 1));
 			T y = T(j - 0.5 * (N - 1));
 			double xn = x / sigmaX;
@@ -41,64 +41,222 @@ template<class T, size_t M, size_t N> void GaussianKernel(T (&kernel)[M][N],
 	}
 	sum = T(1) / sum;
 #pragma omp parallel for
-	for (int i = 0; i < (int)M; i++) {
-		for (int j = 0; j < (int)N; j++) {
+	for (int i = 0; i < (int) M; i++) {
+		for (int j = 0; j < (int) N; j++) {
 			kernel[i][j] *= sum;
 		}
 	}
 }
-
+template<class T, size_t M> void GaussianKernel(T (&kernel)[M],
+		T sigmaX = T(0.607902736 * (M - 1) * 0.5)) {
+	T sum = 0;
+#pragma omp parallel for reduction(+:sum)
+	for (int i = 0; i < (int) M; i++) {
+		T x = T(i - 0.5 * (M - 1));
+		double xn = x / sigmaX;
+		T w = T(std::exp(-0.5 * (xn * xn)));
+		sum += w;
+		kernel[i] = w;
+	}
+	sum = T(1) / sum;
+#pragma omp parallel for
+	for (int i = 0; i < (int) M; i++) {
+		kernel[i] *= sum;
+	}
+}
+template<class T, size_t M> void GaussianKernelDerivative(T (&gX)[M],
+		T (&gY)[M], T sigmaX = T(0.607902736 * (M - 1) * 0.5)) {
+	T sum = 0;
+#pragma omp parallel for reduction(+:sum)
+	for (int i = 0; i < (int) M; i++) {
+		T x = T(i - 0.5 * (M - 1));
+		double xn = x / sigmaX;
+		T w = T(std::exp(-0.5 * (xn * xn)));
+		sum += w;
+		gX[i] = (T) (w * xn / sigmaX);
+	}
+	sum = T(1) / sum;
+#pragma omp parallel for
+	for (int i = 0; i < (int) M; i++) {
+		gX[i] *= sum;
+	}
+}
+template<class T, size_t M> void GaussianKernelLaplacian(T (&kernel)[M],
+		T sigmaX = T(0.607902736 * (M - 1) * 0.5)) {
+	T sum = 0;
+	T sum2 = 0;
+	for (int i = 0; i < (int) M; i++) {
+		T x = T(i - 0.5 * (M - 1));
+		double xn = x / sigmaX;
+		T w = T(std::exp(-0.5 * (xn * xn)));
+		sum += w;
+		T ww = (T) (w * (xn * xn / (sigmaX * sigmaX) - 1 / (sigmaX * sigmaX)));
+		sum2 += ww;
+		kernel[i] = ww;
+	}
+	sum = T(1) / sum;
+	sum2 /= T(M);
+	for (int i = 0; i < (int) M; i++) {
+		kernel[i] = (kernel[i] - sum2) * sum;
+	}
+}
+template<class T> void GaussianKernel(std::vector<T>& kernel, int M, int N,
+		T sigmaX, T sigmaY) {
+	T sum = 0;
+	kernel.resize(M*N);
+#pragma omp parallel for reduction(+:sum)
+	for (int i = 0; i < M; i++) {
+		for (int j = 0; j < N; j++) {
+			T x = T(i - 0.5 * (M - 1));
+			T y = T(j - 0.5 * (N - 1));
+			double xn = x / sigmaX;
+			double yn = y / sigmaY;
+			T w = T(std::exp(-0.5 * (xn * xn + yn * yn)));
+			sum += w;
+			kernel[i + M * j] = w;
+		}
+	}
+	sum = T(1) / sum;
+#pragma omp parallel for
+	for (int i = 0; i < (int) M; i++) {
+		for (int j = 0; j < (int) N; j++) {
+			kernel[i + M * j] *= sum;
+		}
+	}
+}
+template<class T> void GaussianKernelDerivative(std::vector<T>& gX,std::vector<T>& gY,int M,int N, T sigmaX,T sigmaY) {
+	T sum = 0;
+	gX.resize(M*N);
+	gY.resize(M*N);
+#pragma omp parallel for reduction(+:sum)
+	for (int i = 0; i < (int) M; i++) {
+		for (int j = 0; j < (int) N; j++) {
+			T x = T(i - 0.5 * (M - 1));
+			T y = T(j - 0.5 * (N - 1));
+			double xn = x / sigmaX;
+			double yn = y / sigmaY;
+			T w = T(std::exp(-0.5 * (xn * xn + yn * yn)));
+			sum += w;
+			gX[i+j*M] = (T) (w * xn / sigmaX);
+			gY[i+j*M] = (T) (w * yn / sigmaY);
+		}
+	}
+	sum = T(1) / sum;
+#pragma omp parallel for
+	for (int i = 0; i < (int) M; i++) {
+		for (int j = 0; j < (int) N; j++) {
+			gX[i+j*M] *= sum;
+			gY[i+j*M] *= sum;
+		}
+	}
+}
+template<class T> void GaussianKernel(std::vector<T>& kernel, int M, T sigma) {
+	kernel.resize(M);
+	T sum = 0;
+#pragma omp parallel for reduction(+:sum)
+	for (int i = 0; i < (int) M; i++) {
+		T x = T(i - 0.5 * (M - 1));
+		double xn = x / sigma;
+		T w = T(std::exp(-0.5 * (xn * xn)));
+		sum += w;
+		kernel[i] = w;
+	}
+	sum = T(1) / sum;
+#pragma omp parallel for
+	for (int i = 0; i < (int) M; i++) {
+		kernel[i] *= sum;
+	}
+}
+template<class T> void GaussianKernelDerivative(std::vector<T>& kernel, int M,
+		T sigma) {
+	T sum = 0;
+	kernel.resize(M);
+#pragma omp parallel for reduction(+:sum)
+	for (int i = 0; i < (int) M; i++) {
+		T x = T(i - 0.5 * (M - 1));
+		double xn = x / sigma;
+		T w = T(std::exp(-0.5 * (xn * xn)));
+		sum += w;
+		kernel[i] = (T) (w * xn / sigma);
+	}
+	sum = T(1) / sum;
+#pragma omp parallel for
+	for (int i = 0; i < (int) M; i++) {
+		kernel[i] *= sum;
+	}
+}
+template<class T> void GaussianKernelLaplacian(std::vector<T>& kernel, int M,
+		T sigma) {
+	T sum = 0;
+	T sum2 = 0;
+	kernel.resize(M);
+	for (int i = 0; i < (int) M; i++) {
+		T x = T(i - 0.5 * (M - 1));
+		double xn = x / sigma;
+		T w = T(std::exp(-0.5 * (xn * xn)));
+		sum += w;
+		T ww = (T) (w * (xn * xn / (sigma * sigma) - 1 / (sigma * sigma)));
+		sum2 += ww;
+		kernel[i] = ww;
+	}
+	sum = T(1) / sum;
+	sum2 /= T(M);
+	for (int i = 0; i < (int) M; i++) {
+		kernel[i] = (kernel[i] - sum2) * sum;
+	}
+}
 template<class T, size_t M, size_t N> void GaussianKernelDerivative(
 		T (&gX)[M][N], T (&gY)[M][N], T sigmaX = T(0.607902736 * (M - 1) * 0.5),
 		T sigmaY = T(0.607902736 * (N - 1) * 0.5)) {
 	T sum = 0;
 #pragma omp parallel for reduction(+:sum)
-	for (int i = 0; i < (int)M; i++) {
-		for (int j = 0; j < (int)N; j++) {
+	for (int i = 0; i < (int) M; i++) {
+		for (int j = 0; j < (int) N; j++) {
 			T x = T(i - 0.5 * (M - 1));
 			T y = T(j - 0.5 * (N - 1));
 			double xn = x / sigmaX;
 			double yn = y / sigmaY;
 			T w = T(std::exp(-0.5 * (xn * xn + yn * yn)));
 			sum += w;
-			gX[i][j] = (T)(w * xn / sigmaX);
-			gY[i][j] = (T)(w * yn / sigmaY);
+			gX[i][j] = (T) (w * xn / sigmaX);
+			gY[i][j] = (T) (w * yn / sigmaY);
 
 		}
 	}
 	sum = T(1) / sum;
 #pragma omp parallel for
-	for (int i = 0; i < (int)M; i++) {
-		for (int j = 0; j < (int)N; j++) {
+	for (int i = 0; i < (int) M; i++) {
+		for (int j = 0; j < (int) N; j++) {
 			gX[i][j] *= sum;
 			gY[i][j] *= sum;
 		}
 	}
 }
+
 template<class T, size_t M, size_t N> void GaussianKernelLaplacian(
 		T (&kernel)[M][N], T sigmaX = T(0.607902736 * (M - 1) * 0.5), T sigmaY =
 				T(0.607902736 * (N - 1) * 0.5)) {
 	T sum = 0;
 	T sum2 = 0;
-	for (int i = 0; i < (int)M; i++) {
-		for (int j = 0; j < (int)N; j++) {
+	for (int i = 0; i < (int) M; i++) {
+		for (int j = 0; j < (int) N; j++) {
 			T x = T(i - 0.5 * (M - 1));
 			T y = T(j - 0.5 * (N - 1));
 			double xn = x / sigmaX;
 			double yn = y / sigmaY;
 			T w = T(std::exp(-0.5 * (xn * xn + yn * yn)));
 			sum += w;
-			T ww = (T)(w
+			T ww = (T) (w
 					* (xn * xn / (sigmaX * sigmaX) + yn * yn / (sigmaY * sigmaY)
-						   - 1 / (sigmaX * sigmaX)       - 1 / (sigmaY * sigmaY)));
+							- 1 / (sigmaX * sigmaX) - 1 / (sigmaY * sigmaY)));
 			sum2 += ww;
 			kernel[i][j] = ww;
 		}
 	}
 	sum = T(1) / sum;
 	sum2 /= T(M * N);
-	for (int i = 0; i < (int)M; i++) {
-		for (int j = 0; j < (int)N; j++) {
+	for (int i = 0; i < (int) M; i++) {
+		for (int j = 0; j < (int) N; j++) {
 			kernel[i][j] = (kernel[i][j] - sum2) * sum;
 		}
 	}
@@ -112,8 +270,8 @@ template<class T, size_t M, size_t N> struct GaussianOperators {
 			T sigmaY = T(0.607902736 * (N - 1) * 0.5)) {
 		T sum = 0;
 		T sum2 = 0;
-		for (int i = 0; i < (int)M; i++) {
-			for (int j = 0; j < (int)N; j++) {
+		for (int i = 0; i < (int) M; i++) {
+			for (int j = 0; j < (int) N; j++) {
 				T x = T(i - 0.5 * (M - 1));
 				T y = T(j - 0.5 * (N - 1));
 				double xn = x / sigmaX;
@@ -123,19 +281,22 @@ template<class T, size_t M, size_t N> struct GaussianOperators {
 				filterGradX[i][j] = w * xn / sigmaX;
 				filterGradY[i][j] = w * yn / sigmaY;
 				sum += w;
-				T ww = w
-					* (xn * xn / (sigmaX * sigmaX) + yn * yn / (sigmaY * sigmaY)
-						- 1 / (sigmaX * sigmaX) - 1 / (sigmaY * sigmaY));
+				T ww =
+						w
+								* (xn * xn / (sigmaX * sigmaX)
+										+ yn * yn / (sigmaY * sigmaY)
+										- 1 / (sigmaX * sigmaX)
+										- 1 / (sigmaY * sigmaY));
 				sum2 += ww;
 				filterLaplacian[i][j] = ww;
 			}
 		}
 		sum = T(1) / sum;
 		sum2 /= T(M * N);
-		for (int i = 0; i < (int)M; i++) {
-			for (int j = 0; j < (int)N; j++) {
+		for (int i = 0; i < (int) M; i++) {
+			for (int j = 0; j < (int) N; j++) {
 				filterLaplacian[i][j] = (filterLaplacian[i][j] - sum2) * sum;
-				filter[i][j] *=sum;
+				filter[i][j] *= sum;
 				filterGradX[i][j] *= sum;
 				filterGradY[i][j] *= sum;
 			}
@@ -143,11 +304,12 @@ template<class T, size_t M, size_t N> struct GaussianOperators {
 	}
 };
 template<size_t M, size_t N, class T, int C, ImageType I> void Gradient(
-		const Image<T, C, I>& image, Image<T, C, I>& gX, Image<T, C, I>& gY, double sigmaX = (0.607902736 * (M - 1) * 0.5),
-	double sigmaY = (0.607902736 * (N - 1) * 0.5)) {
+		const Image<T, C, I>& image, Image<T, C, I>& gX, Image<T, C, I>& gY,
+		double sigmaX = (0.607902736 * (M - 1) * 0.5),
+		double sigmaY = (0.607902736 * (N - 1) * 0.5)) {
 
 	double filterX[M][N], filterY[M][N];
-	GaussianKernelDerivative(filterX, filterY,sigmaX,sigmaY);
+	GaussianKernelDerivative(filterX, filterY, sigmaX, sigmaY);
 
 	gX.resize(image.width, image.height);
 	gY.resize(image.width, image.height);
@@ -156,9 +318,10 @@ template<size_t M, size_t N, class T, int C, ImageType I> void Gradient(
 		for (int i = 0; i < image.width; i++) {
 			vec<double, C> vsumX(0.0);
 			vec<double, C> vsumY(0.0);
-			for (int ii = 0; ii < (int)M; ii++) {
-				for (int jj = 0; jj < (int)N; jj++) {
-					vec<T, C> val = image(i + ii - (int)M / 2, j + jj - (int)N / 2);
+			for (int ii = 0; ii < (int) M; ii++) {
+				for (int jj = 0; jj < (int) N; jj++) {
+					vec<T, C> val = image(i + ii - (int) M / 2,
+							j + jj - (int) N / 2);
 					vsumX += filterX[ii][jj] * vec<double, C>(val);
 					vsumY += filterY[ii][jj] * vec<double, C>(val);
 				}
@@ -169,18 +332,20 @@ template<size_t M, size_t N, class T, int C, ImageType I> void Gradient(
 	}
 }
 template<size_t M, size_t N, class T, int C, ImageType I> void Laplacian(
-		const Image<T, C, I>& image, Image<T, C, I>& L, double sigmaX = (0.607902736 * (M - 1) * 0.5),
-	double sigmaY = (0.607902736 * (N - 1) * 0.5)) {
+		const Image<T, C, I>& image, Image<T, C, I>& L,
+		double sigmaX = (0.607902736 * (M - 1) * 0.5),
+		double sigmaY = (0.607902736 * (N - 1) * 0.5)) {
 	float filter[M][N];
-	GaussianKernelLaplacian(filter,(float)sigmaX,(float)sigmaY);
+	GaussianKernelLaplacian(filter, (float) sigmaX, (float) sigmaY);
 	L.resize(image.width, image.height);
 #pragma omp parallel for
 	for (int j = 0; j < image.height; j++) {
 		for (int i = 0; i < image.width; i++) {
 			vec<float, C> vsum(0.0);
-			for (int ii = 0; ii < (int)M; ii++) {
-				for (int jj = 0; jj < (int)N; jj++) {
-					vec<T, C> val = image(i + ii - (int)M / 2, j + jj - (int)N / 2);
+			for (int ii = 0; ii < (int) M; ii++) {
+				for (int jj = 0; jj < (int) N; jj++) {
+					vec<T, C> val = image(i + ii - (int) M / 2,
+							j + jj - (int) N / 2);
 					vsum += filter[ii][jj] * vec<float, C>(val);
 				}
 			}
@@ -188,19 +353,41 @@ template<size_t M, size_t N, class T, int C, ImageType I> void Laplacian(
 		}
 	}
 }
+template<int C> void Convolve(const Image<float, C, ImageType::FLOAT>& image,Image<float, C, ImageType::FLOAT>& out,const std::vector<float>& filter, int M, int N) {
+	out.resize(image.width, image.height);
+	int w = image.width;
+	int h = image.height;
+	out.resize(w, h);
+	out.resize(image.width, image.height);
+#pragma omp parallel for
+	for (int j = 0; j < image.height; j++) {
+		for (int i = 0; i < image.width; i++) {
+			vec<float, C> vsum(0.0);
+			for (int ii = 0; ii < (int) M; ii++) {
+				for (int jj = 0; jj < (int) N; jj++) {
+					vsum += filter[ii + M * jj]* image(i + ii - (int) M / 2, j + jj - (int) N / 2);
+				}
+			}
+			out[i + j * w] = vsum;
+		}
+	}
+}
+
 template<size_t M, size_t N, class T, int C, ImageType I> void Smooth(
-		const Image<T, C, I>& image, Image<T, C, I>& B, double sigmaX = (0.607902736 * (M - 1) * 0.5),
-	double sigmaY = (0.607902736 * (N - 1) * 0.5)) {
+		const Image<T, C, I>& image, Image<T, C, I>& B,
+		double sigmaX = (0.607902736 * (M - 1) * 0.5),
+		double sigmaY = (0.607902736 * (N - 1) * 0.5)) {
 	float filter[M][N];
-	GaussianKernel(filter,(float)sigmaX,(float)sigmaY);
+	GaussianKernel(filter, (float) sigmaX, (float) sigmaY);
 	B.resize(image.width, image.height);
 #pragma omp parallel for
 	for (int j = 0; j < image.height; j++) {
 		for (int i = 0; i < image.width; i++) {
 			vec<float, C> vsum(0.0);
-			for (int ii = 0; ii < (int)M; ii++) {
-				for (int jj = 0; jj < (int)N; jj++) {
-					vec<T, C> val = image(i + ii - (int)M / 2, j + jj - (int)N / 2);
+			for (int ii = 0; ii < (int) M; ii++) {
+				for (int jj = 0; jj < (int) N; jj++) {
+					vec<T, C> val = image(i + ii - (int) M / 2,
+							j + jj - (int) N / 2);
 					vsum += filter[ii][jj] * vec<float, C>(val);
 				}
 			}
@@ -208,75 +395,57 @@ template<size_t M, size_t N, class T, int C, ImageType I> void Smooth(
 		}
 	}
 }
-template<class T, int C, ImageType I> void Smooth(const Image<T, C, I>& image, Image<T, C, I>& B,double sigmaX,double sigmaY) {
+template<class T, int C, ImageType I> void Smooth(const Image<T, C, I>& image,
+		Image<T, C, I>& B, double sigmaX, double sigmaY) {
 	double sigma = std::max(sigmaX, sigmaY);
 	if (sigma < 1.5f) {
-		Smooth<3, 3>(image, B,sigmaX, sigmaY);
-	}
-	else if (sigma < 2.5f) {
+		Smooth<3, 3>(image, B, sigmaX, sigmaY);
+	} else if (sigma < 2.5f) {
 		Smooth<5, 5>(image, B, sigmaX, sigmaY);
-	}
-	else if (sigma < 3.5f) {
+	} else if (sigma < 3.5f) {
 		Smooth<7, 7>(image, B, sigmaX, sigmaY);
-	}
-	else if (sigma < 5.5f) {
+	} else if (sigma < 5.5f) {
 		Smooth<11, 11>(image, B, sigmaX, sigmaY);
-	}
-	else if (sigma < 6.5f) {
+	} else if (sigma < 6.5f) {
 		Smooth<13, 13>(image, B, sigmaX, sigmaY);
-	}
-	else if (sigma < 7.5f) {
+	} else if (sigma < 7.5f) {
 		Smooth<15, 15>(image, B, sigmaX, sigmaY);
-	}
-	else if (sigma < 8.5f) {
+	} else if (sigma < 8.5f) {
 		Smooth<17, 17>(image, B, sigmaX, sigmaY);
-	}
-	else if (sigma < 9.5f) {
+	} else if (sigma < 9.5f) {
 		Smooth<19, 19>(image, B, sigmaX, sigmaY);
-	}
-	else if (sigma < 10.5f) {
+	} else if (sigma < 10.5f) {
 		Smooth<21, 21>(image, B, sigmaX, sigmaY);
-	}
-	else if (sigma < 11.5f) {
+	} else if (sigma < 11.5f) {
 		Smooth<23, 23>(image, B, sigmaX, sigmaY);
-	}
-	else if (sigma < 12.5f) {
+	} else if (sigma < 12.5f) {
 		Smooth<25, 25>(image, B, sigmaX, sigmaY);
 	}
 }
-template<class T, int C, ImageType I> void Gradient(const Image<T, C, I>& image, Image<T, C, I>& gX,Image<T, C, I>& gY,double sigmaX,double sigmaY) {
+template<class T, int C, ImageType I> void Gradient(const Image<T, C, I>& image,
+		Image<T, C, I>& gX, Image<T, C, I>& gY, double sigmaX, double sigmaY) {
 	double sigma = std::max(sigmaX, sigmaY);
 	if (sigma < 1.5f) {
-		Gradient<3, 3>(image, gX, gY,sigmaX, sigmaY);
-	}
-	else if (sigma < 2.5f) {
+		Gradient<3, 3>(image, gX, gY, sigmaX, sigmaY);
+	} else if (sigma < 2.5f) {
 		Gradient<5, 5>(image, gX, gY, sigmaX, sigmaY);
-	}
-	else if (sigma < 3.5f) {
+	} else if (sigma < 3.5f) {
 		Gradient<7, 7>(image, gX, gY, sigmaX, sigmaY);
-	}
-	else if (sigma < 5.5f) {
+	} else if (sigma < 5.5f) {
 		Gradient<11, 11>(image, gX, gY, sigmaX, sigmaY);
-	}
-	else if (sigma < 6.5f) {
+	} else if (sigma < 6.5f) {
 		Gradient<13, 13>(image, gX, gY, sigmaX, sigmaY);
-	}
-	else if (sigma < 7.5f) {
+	} else if (sigma < 7.5f) {
 		Gradient<15, 15>(image, gX, gY, sigmaX, sigmaY);
-	}
-	else if (sigma < 8.5f) {
+	} else if (sigma < 8.5f) {
 		Gradient<17, 17>(image, gX, gY, sigmaX, sigmaY);
-	}
-	else if (sigma < 9.5f) {
+	} else if (sigma < 9.5f) {
 		Gradient<19, 19>(image, gX, gY, sigmaX, sigmaY);
-	}
-	else if (sigma < 10.5f) {
+	} else if (sigma < 10.5f) {
 		Gradient<21, 21>(image, gX, gY, sigmaX, sigmaY);
-	}
-	else if (sigma < 11.5f) {
+	} else if (sigma < 11.5f) {
 		Gradient<23, 23>(image, gX, gY, sigmaX, sigmaY);
-	}
-	else if (sigma < 12.5f) {
+	} else if (sigma < 12.5f) {
 		Gradient<25, 25>(image, gX, gY, sigmaX, sigmaY);
 	}
 }
@@ -331,23 +500,8 @@ template<class T, int C, ImageType I> void Gradient11x11(
 	Gradient<11, 11>(image, gX, gY);
 }
 
-template<class C, class R, size_t M,size_t N> std::basic_ostream<C, R> & operator <<(
-	std::basic_ostream<C, R> & ss, float (&data)[M][N]) {
-	ss << std::endl;
-	for (size_t ii = 0; ii < M; ii++) {
-		for (size_t jj = 0; jj < N; jj++) {
-			ss<< std::setw(8) << std::setfill(' ') << data[ii][jj];
-			if (jj < N - 1) {
-				ss << ",";
-			}
-		}
-		ss << std::endl;
-	}
-	return ss;
-}
-
 template<class C, class R, size_t M, size_t N> std::basic_ostream<C, R> & operator <<(
-	std::basic_ostream<C, R> & ss, double(&data)[M][N]) {
+		std::basic_ostream<C, R> & ss, float (&data)[M][N]) {
 	ss << std::endl;
 	for (size_t ii = 0; ii < M; ii++) {
 		for (size_t jj = 0; jj < N; jj++) {
@@ -362,7 +516,22 @@ template<class C, class R, size_t M, size_t N> std::basic_ostream<C, R> & operat
 }
 
 template<class C, class R, size_t M, size_t N> std::basic_ostream<C, R> & operator <<(
-	std::basic_ostream<C, R> & ss, int(&data)[M][N]) {
+		std::basic_ostream<C, R> & ss, double (&data)[M][N]) {
+	ss << std::endl;
+	for (size_t ii = 0; ii < M; ii++) {
+		for (size_t jj = 0; jj < N; jj++) {
+			ss << std::setw(8) << std::setfill(' ') << data[ii][jj];
+			if (jj < N - 1) {
+				ss << ",";
+			}
+		}
+		ss << std::endl;
+	}
+	return ss;
+}
+
+template<class C, class R, size_t M, size_t N> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, int (&data)[M][N]) {
 	ss << std::endl;
 	for (size_t ii = 0; ii < M; ii++) {
 		for (size_t jj = 0; jj < N; jj++) {
@@ -377,7 +546,7 @@ template<class C, class R, size_t M, size_t N> std::basic_ostream<C, R> & operat
 }
 
 template<class C, class R, size_t M> std::basic_ostream<C, R> & operator <<(
-	std::basic_ostream<C, R> & ss, float(&data)[M]) {
+		std::basic_ostream<C, R> & ss, float (&data)[M]) {
 	ss << "[";
 	for (int ii = 0; ii < M; ii++) {
 		ss << data[ii];
@@ -391,14 +560,13 @@ template<class C, class R, size_t M> std::basic_ostream<C, R> & operator <<(
 }
 
 template<class C, class R, size_t M> std::basic_ostream<C, R> & operator <<(
-	std::basic_ostream<C, R> & ss, double(&data)[M]) {
+		std::basic_ostream<C, R> & ss, double (&data)[M]) {
 	ss << "[";
 	for (int ii = 0; ii < M; ii++) {
 		ss << data[ii];
 		if (ii < M - 1) {
 			ss << ",";
-		}
-		else {
+		} else {
 			ss << "]";
 		}
 	}
@@ -406,25 +574,8 @@ template<class C, class R, size_t M> std::basic_ostream<C, R> & operator <<(
 }
 
 template<class C, class R, size_t M> std::basic_ostream<C, R> & operator <<(
-	std::basic_ostream<C, R> & ss, int(&data)[M]) {
+		std::basic_ostream<C, R> & ss, int (&data)[M]) {
 	ss << "[";
-	for (int ii = 0; ii < M; ii++) {
-		ss << data[ii];
-		if (ii < M - 1) {
-			ss << ",";
-		}
-		else {
-			ss << "]";
-		}
-	}
-	return ss;
-}
-
-
-template<class C, class R> std::basic_ostream<C, R> & operator <<(
-	std::basic_ostream<C, R> & ss, const std::vector<double>& data) {
-	ss << "[";
-	size_t M=data.size();
 	for (int ii = 0; ii < M; ii++) {
 		ss << data[ii];
 		if (ii < M - 1) {
@@ -436,11 +587,10 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 	return ss;
 }
 
-
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
-	std::basic_ostream<C, R> & ss, const std::vector<float>& data) {
+		std::basic_ostream<C, R> & ss, const std::vector<double>& data) {
 	ss << "[";
-	size_t M=data.size();
+	size_t M = data.size();
 	for (int ii = 0; ii < M; ii++) {
 		ss << data[ii];
 		if (ii < M - 1) {
@@ -452,11 +602,25 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 	return ss;
 }
 
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const std::vector<float>& data) {
+	ss << "[";
+	size_t M = data.size();
+	for (int ii = 0; ii < M; ii++) {
+		ss << data[ii];
+		if (ii < M - 1) {
+			ss << ",";
+		} else {
+			ss << "]";
+		}
+	}
+	return ss;
+}
 
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
-	std::basic_ostream<C, R> & ss, const std::vector<int>& data) {
+		std::basic_ostream<C, R> & ss, const std::vector<int>& data) {
 	ss << "[";
-	size_t M=data.size();
+	size_t M = data.size();
 	for (int ii = 0; ii < M; ii++) {
 		ss << data[ii];
 		if (ii < M - 1) {
