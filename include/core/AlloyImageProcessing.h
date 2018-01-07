@@ -395,6 +395,16 @@ template<size_t M, size_t N, class T, int C, ImageType I> void Smooth(
 		}
 	}
 }
+template<int C> void Smooth(const Image<float,C,ImageType::FLOAT>& image,const Image<float,C,ImageType::FLOAT>& out, float sigma) {
+	int fsz = (int) (5 * sigma);
+	if (fsz % 2 == 0)
+		fsz++;
+	if (fsz < 3)
+		fsz = 3;
+	std::vector<float> filter;
+	GaussianKernel(filter, fsz, fsz, sigma, sigma);
+	Convolve(image, out, filter, fsz, fsz);
+}
 template<class T, int C, ImageType I> void Smooth(const Image<T, C, I>& image,
 		Image<T, C, I>& B, double sigmaX, double sigmaY) {
 	double sigma = std::max(sigmaX, sigmaY);
