@@ -82,11 +82,11 @@ bool ImageFeaturesEx::init(Composite& rootNode) {
 		DaisyDescriptorField leftDescriptors;
 		DaisyDescriptorField rightDescriptors;
 		textLabel->setLabel("Computing left image descriptors ...");
-		daisy.initialize(left);
+		daisy.initialize(left,15,3,8,8);
 
 		daisy.getDescriptors(leftDescriptors, DaisyNormalization::Sift);
 		textLabel->setLabel("Computing right image descriptors ...");
-		daisy.initialize(right);
+		daisy.initialize(right,15,3,8,8);
 		daisy.getDescriptors(rightDescriptors, DaisyNormalization::Sift);
 		const int shiftBound = 64;
 		const float minScore = 0.8f;

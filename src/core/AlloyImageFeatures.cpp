@@ -115,22 +115,49 @@ Daisy::Daisy(int orientResolutions) :
 }
 void Daisy::getHistogram(float* histogram, int x, int y,
 		const std::vector<ImageLayer>& hcube) const {
+	/*
+	 double sum = 0;
+	 for (int h = 0; h < histogramBins; h++) {
+	 sum += histogram[h] = hcube[h](x, y);
+	 }
+	 if (sum > 1E-7f) {
+	 sum = 1.0 / sum;
+	 for (int h = 0; h < histogramBins; h++) {
+	 histogram[h] *= sum;
+	 }
+	 }
+	 */
 	for (int h = 0; h < histogramBins; h++) {
 		histogram[h] = hcube[h](x, y);
 	}
+
 }
 void Daisy::getHistogram(float* histogram, float x, float y,
 		const std::vector<ImageLayer>& hcube) const {
+
+	/*
+	 double sum = 0;
+	 for (int h = 0; h < histogramBins; h++) {
+	 sum+=histogram[h] = hcube[h](x, y);
+	 }
+	 if (sum > 1E-7f) {
+	 sum = 1.0 / sum;
+	 for (int h = 0; h < histogramBins; h++) {
+	 histogram[h] *= sum;
+	 }
+	 }
+	 */
 	for (int h = 0; h < histogramBins; h++) {
 		histogram[h] = hcube[h](x, y);
 	}
 }
-void Daisy::getDescriptors(DaisyDescriptorField& field,DaisyNormalization normalizationType){
-	field.resize(width,height);
+void Daisy::getDescriptors(DaisyDescriptorField& field,
+		DaisyNormalization normalizationType) {
+	field.resize(width, height);
 #pragma omp parallel for
-	for(int j=0;j<height;j++){
-		for(int i=0;i<width;i++){
-			getDescriptor(i,j,field(i,j),normalizationType,true);
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width; i++) {
+			getDescriptor(i, j, field(i, j), normalizationType, true);
 			//std::cout<<i<<","<<j<<": Descriptor "<<field(i,j)<<std::endl;
 		}
 	}
@@ -143,8 +170,8 @@ void Daisy::getDescriptor(float x, float y, DaisyDescriptor& descriptor) const {
 		rdt = r * angleBins + 1;
 		for (region = rdt; region < rdt + angleBins; region++) {
 			float2 gpt = gridPoints[region];
-			getHistogram(&descriptor[region*histogramBins], x + gpt.x, y + gpt.y,
-					smoothLayers[selectedCubes[r]]);
+			getHistogram(&descriptor[region * histogramBins], x + gpt.x,
+					y + gpt.y, smoothLayers[selectedCubes[r]]);
 
 		}
 	}
@@ -157,7 +184,9 @@ void Daisy::getDescriptor(int x, int y, DaisyDescriptor& descriptor) const {
 		rdt = r * angleBins + 1;
 		for (region = rdt; region < rdt + angleBins; region++) {
 			float2 gpt = gridPoints[region];
-			getHistogram(&descriptor[region*histogramBins], (int) aly::round(x + gpt.x),(int) aly::round(y + gpt.y),smoothLayers[selectedCubes[r]]);
+			getHistogram(&descriptor[region * histogramBins],
+					(int) aly::round(x + gpt.x), (int) aly::round(y + gpt.y),
+					smoothLayers[selectedCubes[r]]);
 		}
 	}
 }
@@ -266,8 +295,7 @@ void Daisy::computeSmoothedGradientLayers() {
 		if (r == 0) {
 			sigma = sigmas[0];
 		} else {
-			sigma = std::sqrt(
-					sigmas[r] * sigmas[r] - sigmas[r - 1] * sigmas[r - 1]);
+			sigma = std::sqrt(sigmas[r] * sigmas[r] - sigmas[r - 1] * sigmas[r - 1]);
 		}
 		for (int th = 0; th < histogramBins; th++) {
 			Smooth(prev_cube[th], cube[th], sigma);
@@ -432,7 +460,8 @@ void Daisy::computeGridPoints() {
 		int region = r * angleBins + 1;
 		for (int t = 0; t < angleBins; t++) {
 			float x, y;
-			gridPoints[region + t] = polar2cartesian((r + 1) * r_step,t * t_step);
+			gridPoints[region + t] = polar2cartesian((r + 1) * r_step,
+					t * t_step);
 		}
 	}
 }
