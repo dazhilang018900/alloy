@@ -100,7 +100,7 @@ void Sift::add(const Image1f& image, float has_sigma, float target_sigma) {
 	oct->gray.resize(this->options.samplesPerOctave + 3);
 	oct->dog.resize(this->options.samplesPerOctave + 2);
 	if (target_sigma > has_sigma) {
-		aly::Smooth(image, base, target_sigma, target_sigma);
+		aly::Smooth(image, base, target_sigma);
 	} else {
 		base = image;
 	}
@@ -111,7 +111,7 @@ void Sift::add(const Image1f& image, float has_sigma, float target_sigma) {
 		/* Calculate the blur sigma the image will get. */
 		float sigmak = sigma * k;
 		float blur_sigma = std::sqrt(MATH_POW2(sigmak) - MATH_POW2(sigma));
-		aly::Smooth(base, oct->gray[i], blur_sigma, blur_sigma);
+		aly::Smooth(base, oct->gray[i], blur_sigma);
 		oct->dog[i-1]=oct->gray[i] - base;
 		base = oct->gray[i];
 		sigma = sigmak;

@@ -79,6 +79,74 @@ void WriteOrientationImagesToFile(const std::string& file,
 	myfile << sstr.str();
 	myfile.close();
 }
+void ConvolveHorizontal(const ImageLayer& input, ImageLayer& output,const std::vector<float>& filter) {
+	const int w = input.width;
+	const int h = input.height;
+	const int hlen = filter.size();
+	output.resize(w, h);
+	int c, hL, hR;
+	if (hlen & 1) { // odd kernel size
+		c = hlen / 2;
+		hL = c;
+		hR = c;
+	} else { // even kernel size : center is shifted to the left
+		c = hlen / 2 - 1;
+		hL = c;
+		hR = c + 1;
+	}
+#pragma omp parallel for
+	for (int j = 0; j < h; j++) {
+		for (int i = 0; i < w; i++) {
+			int jx1 = c - i;
+			int jx2 = w - 1 - i + c;
+			float sum = 0.0f;
+			// Convolution with boundaries extension
+			for (int jx = 0; jx <= hR + hL; jx++) {
+				int idx_x = i - c + jx;
+				if (jx < jx1)
+					idx_x = jx1 - jx - 1;
+				if (jx > jx2)
+					idx_x = w - (jx - jx2);
+				sum += input[j * w + idx_x] * filter[jx]; //symmetric kernel? Don't flip!
+			}
+			output[j * w + i] = sum;
+		}
+	}
+}
+void ConvolveVertical(const ImageLayer& input, ImageLayer& output,const std::vector<float>& filter) {
+	const int w = input.width;
+	const int h = input.height;
+	const int hlen = filter.size();
+	output.resize(w, h);
+	int c, hL, hR;
+	if (hlen & 1) { // odd kernel size
+		c = hlen / 2;
+		hL = c;
+		hR = c;
+	} else { // even kernel size : center is shifted to the left
+		c = hlen / 2 - 1;
+		hL = c;
+		hR = c + 1;
+	}
+#pragma omp parallel for
+	for (int j = 0; j < h; j++) {
+		for (int i = 0; i < w; i++) {
+			int jy1 = c - j;
+			int jy2 = h - 1 - j + c;
+			float sum = 0.0f;
+			// Convolution with boundaries extension
+			for (int jy = 0; jy <= hR + hL; jy++) {
+				int idx_y = j - c + jy;
+				if (jy < jy1)
+					idx_y = jy1 - jy - 1;
+				if (jy > jy2)
+					idx_y = h - (jy - jy2);
+				sum += input[idx_y * w + i] * filter[jy]; //symmetric kernel? Don't flip!
+			}
+			output[j * w + i] = sum;
+		}
+	}
+}
 void Convolve(const ImageLayer& image, ImageLayer& out,
 		const std::vector<float>& filter, int M, int N) {
 	out.resize(image.width, image.height);
@@ -100,14 +168,16 @@ void Convolve(const ImageLayer& image, ImageLayer& out,
 	}
 }
 void Smooth(const ImageLayer & image, ImageLayer & out, float sigma) {
-	int fsz = (int) (5 * sigma);
+	int fsz = (int) (3 * sigma+1);
 	if (fsz % 2 == 0)
 		fsz++;
 	if (fsz < 3)
 		fsz = 3;
 	std::vector<float> filter;
-	GaussianKernel(filter, fsz, fsz, sigma, sigma);
-	Convolve(image, out, filter, fsz, fsz);
+	ImageLayer tmp;
+	GaussianKernel(filter,fsz,sigma);
+	ConvolveHorizontal(image, tmp, filter);
+	ConvolveVertical(tmp, out, filter);
 }
 Daisy::Daisy(int orientResolutions) :
 		width(0), height(0), numberOfGridPoints(0), histogramBins(0), angleBins(
@@ -115,18 +185,6 @@ Daisy::Daisy(int orientResolutions) :
 }
 void Daisy::getHistogram(float* histogram, int x, int y,
 		const std::vector<ImageLayer>& hcube) const {
-	/*
-	 double sum = 0;
-	 for (int h = 0; h < histogramBins; h++) {
-	 sum += histogram[h] = hcube[h](x, y);
-	 }
-	 if (sum > 1E-7f) {
-	 sum = 1.0 / sum;
-	 for (int h = 0; h < histogramBins; h++) {
-	 histogram[h] *= sum;
-	 }
-	 }
-	 */
 	for (int h = 0; h < histogramBins; h++) {
 		histogram[h] = hcube[h](x, y);
 	}
@@ -134,19 +192,6 @@ void Daisy::getHistogram(float* histogram, int x, int y,
 }
 void Daisy::getHistogram(float* histogram, float x, float y,
 		const std::vector<ImageLayer>& hcube) const {
-
-	/*
-	 double sum = 0;
-	 for (int h = 0; h < histogramBins; h++) {
-	 sum+=histogram[h] = hcube[h](x, y);
-	 }
-	 if (sum > 1E-7f) {
-	 sum = 1.0 / sum;
-	 for (int h = 0; h < histogramBins; h++) {
-	 histogram[h] *= sum;
-	 }
-	 }
-	 */
 	for (int h = 0; h < histogramBins; h++) {
 		histogram[h] = hcube[h](x, y);
 	}
@@ -330,6 +375,7 @@ void Daisy::initialize(const Image1f& image, bool smoothFirstLayer) {
 				}
 			}
 		}
+		//WriteOrientationImagesToFile(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"smoothed"<<i<<".xml",smoothLayers[i]);
 	}
 }
 void Daisy::normalizeDescriptor(DaisyDescriptor& desc,

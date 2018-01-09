@@ -130,7 +130,8 @@ inline double angle(const DaisyDescriptor& a, const DaisyDescriptor& b);
 void Smooth(const ImageLayer & image, ImageLayer & B, float sigma);
 void Convolve(const ImageLayer& image, ImageLayer& out,
 		const std::vector<float>& filter, int M, int N);
-
+void ConvolveHorizontal(const ImageLayer& input, ImageLayer& output,const std::vector<float>& filter);
+void ConvolveVertical(const ImageLayer& input, ImageLayer& output,const std::vector<float>& filter);
 class DaisyDescriptorField {
 protected:
 	std::vector<DaisyDescriptor> data;

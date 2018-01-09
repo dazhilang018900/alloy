@@ -103,7 +103,7 @@ template<class T, size_t M> void GaussianKernelLaplacian(T (&kernel)[M],
 template<class T> void GaussianKernel(std::vector<T>& kernel, int M, int N,
 		T sigmaX, T sigmaY) {
 	T sum = 0;
-	kernel.resize(M*N);
+	kernel.resize(M * N);
 #pragma omp parallel for reduction(+:sum)
 	for (int i = 0; i < M; i++) {
 		for (int j = 0; j < N; j++) {
@@ -124,10 +124,11 @@ template<class T> void GaussianKernel(std::vector<T>& kernel, int M, int N,
 		}
 	}
 }
-template<class T> void GaussianKernelDerivative(std::vector<T>& gX,std::vector<T>& gY,int M,int N, T sigmaX,T sigmaY) {
+template<class T> void GaussianKernelDerivative(std::vector<T>& gX,
+		std::vector<T>& gY, int M, int N, T sigmaX, T sigmaY) {
 	T sum = 0;
-	gX.resize(M*N);
-	gY.resize(M*N);
+	gX.resize(M * N);
+	gY.resize(M * N);
 #pragma omp parallel for reduction(+:sum)
 	for (int i = 0; i < (int) M; i++) {
 		for (int j = 0; j < (int) N; j++) {
@@ -137,16 +138,16 @@ template<class T> void GaussianKernelDerivative(std::vector<T>& gX,std::vector<T
 			double yn = y / sigmaY;
 			T w = T(std::exp(-0.5 * (xn * xn + yn * yn)));
 			sum += w;
-			gX[i+j*M] = (T) (w * xn / sigmaX);
-			gY[i+j*M] = (T) (w * yn / sigmaY);
+			gX[i + j * M] = (T) (w * xn / sigmaX);
+			gY[i + j * M] = (T) (w * yn / sigmaY);
 		}
 	}
 	sum = T(1) / sum;
 #pragma omp parallel for
 	for (int i = 0; i < (int) M; i++) {
 		for (int j = 0; j < (int) N; j++) {
-			gX[i+j*M] *= sum;
-			gY[i+j*M] *= sum;
+			gX[i + j * M] *= sum;
+			gY[i + j * M] *= sum;
 		}
 	}
 }
@@ -353,19 +354,89 @@ template<size_t M, size_t N, class T, int C, ImageType I> void Laplacian(
 		}
 	}
 }
-template<int C> void Convolve(const Image<float, C, ImageType::FLOAT>& image,Image<float, C, ImageType::FLOAT>& out,const std::vector<float>& filter, int M, int N) {
-	out.resize(image.width, image.height);
+
+template<int C> void ConvolveHorizontal(const Image<float, C, ImageType::FLOAT>& input,Image<float, C, ImageType::FLOAT>& output,const std::vector<float>& filter) {
+	const int w = input.width;
+	const int h = input.height;
+	const int hlen = filter.size();
+	output.resize(w, h);
+	int c, hL, hR;
+	if (hlen & 1) { // odd kernel size
+		c = hlen / 2;
+		hL = c;
+		hR = c;
+	} else { // even kernel size : center is shifted to the left
+		c = hlen / 2 - 1;
+		hL = c;
+		hR = c + 1;
+	}
+#pragma omp parallel for
+	for (int j = 0; j < h; j++) {
+		for (int i = 0; i < w; i++) {
+			int jx1 = c - i;
+			int jx2 = w - 1 - i + c;
+			float sum = 0.0f;
+			// Convolution with boundaries extension
+			for (int jx = 0; jx <= hR + hL; jx++) {
+				int idx_x = i - c + jx;
+				if (jx < jx1)
+					idx_x = jx1 - jx - 1;
+				if (jx > jx2)
+					idx_x = w - (jx - jx2);
+				sum += input[j * w + idx_x] * filter[jx]; //symmetric kernel? Don't flip!
+			}
+			output[j * w + i] = sum;
+		}
+	}
+}
+template<int C> void ConvolveVertical(const Image<float, C, ImageType::FLOAT>& input,Image<float, C, ImageType::FLOAT>& output,const std::vector<float>& filter) {
+	const int w = input.width;
+	const int h = input.height;
+	const int hlen = filter.size();
+	output.resize(w, h);
+	int c, hL, hR;
+	if (hlen & 1) { // odd kernel size
+		c = hlen / 2;
+		hL = c;
+		hR = c;
+	} else { // even kernel size : center is shifted to the left
+		c = hlen / 2 - 1;
+		hL = c;
+		hR = c + 1;
+	}
+#pragma omp parallel for
+	for (int j = 0; j < h; j++) {
+		for (int i = 0; i < w; i++) {
+			int jy1 = c - j;
+			int jy2 = h - 1 - j + c;
+			float sum = 0.0f;
+			// Convolution with boundaries extension
+			for (int jy = 0; jy <= hR + hL; jy++) {
+				int idx_y = j - c + jy;
+				if (jy < jy1)
+					idx_y = jy1 - jy - 1;
+				if (jy > jy2)
+					idx_y = h - (jy - jy2);
+				sum += input[idx_y * w + i] * filter[jy]; //symmetric kernel? Don't flip!
+			}
+			output[j * w + i] = sum;
+		}
+	}
+}
+template<int C> void Convolve(const Image<float, C, ImageType::FLOAT>& image,
+		Image<float, C, ImageType::FLOAT>& out,
+		const std::vector<float>& filter, int M, int N) {
 	int w = image.width;
 	int h = image.height;
 	out.resize(w, h);
-	out.resize(image.width, image.height);
 #pragma omp parallel for
 	for (int j = 0; j < image.height; j++) {
 		for (int i = 0; i < image.width; i++) {
 			vec<float, C> vsum(0.0);
 			for (int ii = 0; ii < (int) M; ii++) {
 				for (int jj = 0; jj < (int) N; jj++) {
-					vsum += filter[ii + M * jj]* image(i + ii - (int) M / 2, j + jj - (int) N / 2);
+					vsum += filter[ii + M * jj]
+							* image(i + ii - (int) M / 2, j + jj - (int) N / 2);
 				}
 			}
 			out[i + j * w] = vsum;
@@ -395,7 +466,8 @@ template<size_t M, size_t N, class T, int C, ImageType I> void Smooth(
 		}
 	}
 }
-template<int C> void Smooth(const Image<float,C,ImageType::FLOAT>& image,const Image<float,C,ImageType::FLOAT>& out, float sigma) {
+template<int C> void Smooth(const Image<float, C, ImageType::FLOAT>& image,
+		Image<float, C, ImageType::FLOAT>& out, float sigma) {
 	int fsz = (int) (5 * sigma);
 	if (fsz % 2 == 0)
 		fsz++;
