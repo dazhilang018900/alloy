@@ -816,7 +816,7 @@ template<class T, int N> vec<T, N> normalize(const vec<T, N> & v,
 		const double eps = 1E-6) {
 	return v / std::max(length(v), static_cast<T>(eps));
 }
-template<class T, int N> void unitize(vec<T, N> & v, const double eps = 1E-6) {
+template<class T, int N> void unitize(vec<T, N> & v, const double eps = 1E-10) {
 	v /= std::max(length(v), static_cast<T>(eps));
 }
 template<class T> inline vec<T,2> proj(const vec<T,3>& v)
