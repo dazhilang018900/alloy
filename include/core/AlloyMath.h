@@ -816,6 +816,36 @@ template<class T, int N> vec<T, N> normalize(const vec<T, N> & v,
 		const double eps = 1E-6) {
 	return v / std::max(length(v), static_cast<T>(eps));
 }
+template<class T, int N> void unitize(vec<T, N> & v, const double eps = 1E-6) {
+	v /= std::max(length(v), static_cast<T>(eps));
+}
+template<class T> inline vec<T,2> proj(const vec<T,3>& v)
+{
+    vec<T,2> u(v[0], v[1]);
+    if( v[2]!=1.0 && v[2]!=0.0 )
+	u /= v[2];
+    return u;
+};
+template<class T> inline vec<T,3> proj(const vec<T,4>& v)
+{
+    vec<T,3> u(v[0], v[1], v[2]);
+    if( v[3]!=1.0 && v[3]!=0.0 )
+	u /= v[3];
+    return u;
+};
+template<class T> void ortho(const vec<T,3>& z,vec<T,3>& x, vec<T,3>& y) {
+  if (std::abs(z[0]) > 0.5f) {
+    x[0] = z[1];    x[1] = -z[0];    x[2] = 0;
+  }
+  else if (std::abs(z[1]) > 0.5f) {
+    x[1] = z[2];    x[2] = -z[1];    x[0] = 0;
+  }
+  else {
+    x[2] = z[0];    x[0] = -z[2];    x[1] = 0;
+  }
+  unitize(x);
+  y = cross(z, x);
+};
 
 //////////////////////////////
 // Matrix algebra functions //
@@ -1255,6 +1285,17 @@ template<class C, class R, class T> std::basic_ostream<C, R> & operator <<(
 		const std::pair<vec<T, 4>, vec<T, 4>> & v) {
 	return ss << "<" << v.first << ", " << v.second << ">";
 }
+template<class T> inline std::istream &operator>>(std::istream &in, vec<T,4>& v)
+{ return in >> v[0] >> v[1] >> v[2] >> v[3]; };
+
+template<class T> inline std::istream &operator>>(std::istream &in, vec<T,3>& v)
+{ return in >> v[0] >> v[1] >> v[2]; };
+
+template<class T> inline std::istream &operator>>(std::istream &in, vec<T,2>& v)
+{ return in >> v[0] >> v[1]; };
+
+template<class T> inline std::istream &operator>>(std::istream &in, vec<T,1>& v)
+{ return in >> v[0]; };
 
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
 		std::basic_ostream<C, R> & ss, const vec<uint8_t, 1> & v) {
