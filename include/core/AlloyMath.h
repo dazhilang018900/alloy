@@ -816,8 +816,11 @@ template<class T, int N> vec<T, N> normalize(const vec<T, N> & v,
 		const double eps = 1E-6) {
 	return v / std::max(length(v), static_cast<T>(eps));
 }
-template<class T, int N> void unitize(vec<T, N> & v, const double eps = 1E-10) {
-	v /= std::max(length(v), static_cast<T>(eps));
+template<class T, int N> void unitize(vec<T, N> & v) {
+	T len=length(v);
+	if(len!=0&&len!=1){
+		v /= len;
+	}
 }
 template<class T> inline vec<T,2> proj(const vec<T,3>& v)
 {
@@ -846,7 +849,21 @@ template<class T> void ortho(const vec<T,3>& z,vec<T,3>& x, vec<T,3>& y) {
   unitize(x);
   y = cross(z, x);
 };
-
+template<class T> void ortho(const vec<T,4>& z,vec<T,4>& x, vec<T,4>& y) {
+	if (std::abs(z[0]) > 0.5) {
+	  x[0] = z[1];    x[1] = -z[0];    x[2] = 0;
+	}
+	else if (fabs(z[1]) > 0.5) {
+	  x[1] = z[2];    x[2] = -z[1];    x[0] = 0;
+	}
+	else {
+	  x[2] = z[0];    x[0] = -z[2];    x[1] = 0;
+	}
+	unitize(x);
+	y[0] = z[1] * x[2] - z[2] * x[1];
+	y[1] = z[2] * x[0] - z[0] * x[2];
+	y[2] = z[0] * x[1] - z[1] * x[0];
+};
 //////////////////////////////
 // Matrix algebra functions //
 //////////////////////////////

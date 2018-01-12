@@ -737,10 +737,12 @@ template<class T> double dot(const std::vector<T>& a,const std::vector<T>& b) {
 				MakeString() << "Vector dimensions do not match. " << a.size()
 						<< "!=" << b.size());
 	size_t sz = a.size();
-#pragma omp parallel for reduction(+:ans)
+
+//#pragma omp parallel for reduction(+:ans)
 	for (int i = 0; i < (int) sz; i++) {
 		ans += double(a[i])*double(b[i]);
 	}
+
 	return ans;
 }
 template<class T, int C> T lengthSqr(const Vector<T, C>& a) {
