@@ -179,6 +179,7 @@ void Smooth(const ImageLayer & image, ImageLayer & out, float sigma) {
 	ConvolveHorizontal(image, tmp, filter);
 	ConvolveVertical(tmp, out, filter);
 }
+
 Daisy::Daisy(int orientResolutions) :
 		width(0), height(0), numberOfGridPoints(0), histogramBins(0), angleBins(
 				0), radiusBins(0), descriptorRadius(0.0f), descriptorSize(0) {
