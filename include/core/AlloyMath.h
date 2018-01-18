@@ -678,6 +678,18 @@ template<class T, int M> vec<T, M> sqrt(const vec<T, M> & v) {
 		result[m] = std::sqrt(v[m]);
 	return result;
 }
+inline float sqr(const float& v) {
+	return v*v;
+}
+inline double sqr(const double& v) {
+	return v*v;
+}
+template<int M> vec<float, M> sqr(const vec<float,M>& v) {
+	return v*v;
+}
+template<int M> vec<double, M> sqr(const vec<double,M>& v) {
+	return v*v;
+}
 template<class T, int M> vec<T, M> clamp(const vec<T, M> & v, const T& mn,
 		const T& mx) {
 	vec<T, M> result;

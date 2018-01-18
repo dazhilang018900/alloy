@@ -346,6 +346,19 @@ public:
 		var = var / (double) (data.size() - 1);
 		return vec<T, C>(aly::sqrt(var));
 	}
+	std::pair<vec<T, C>,vec<T, C>> meanAndStdDev() const {
+		if (data.size() < 2) {
+			return {mean(),vec<T, C>(T(0))};
+		}
+		vec<T, C> avg = mean();
+		vec<double, C> var(0.0);
+		for (const vec<T, C>& val : data) {
+			vec<double, C> e = vec<double, C>(val - avg);
+			var += e * e;
+		}
+		var = var / (double) (data.size() - 1);
+		return {avg,vec<T, C>(aly::sqrt(var))};
+	}
 };
 void WriteVectorToFile(const std::string& file, const Vector<float, 4>& vector);
 void ReadVectorFromFile(const std::string& file, Vector<float, 4>& vector);
