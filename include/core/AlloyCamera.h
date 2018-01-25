@@ -40,6 +40,7 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(std::basic_ost
 	}
 	return ss;
 }
+class CameraProjector;
 struct CameraParameters {
 	bool changed;
 	float nearPlane, farPlane;
@@ -76,7 +77,7 @@ struct CameraParameters {
 	float3 transformScreenDepthToWorld(const float3& pt) const;
 	float3 transformNormalizedImageDepthToWorld(const float3& pt, bool flip = true) const;
 	float3 transformImageDepthToWorld(const float3& pt, int w, int h, bool flip = true) const;
-
+	CameraProjector getProjector() const;
 	virtual void aim(const aly::box2px& bounds = box2px(pixel2(0.0f, 0.0f), pixel2(1.0f, 1.0f)));
 	virtual ~CameraParameters() {
 	}
@@ -225,9 +226,58 @@ public:
 	}
 	static const float sDeg2rad;
 };
+struct CameraProjector {
+	//Do not write directly because they are interdependent, use setters instead!
+	aly::float3x3 K;
+	aly::float3x3 Kinv;
+	aly::float3x3 R;
+	aly::float3 T;
+	aly::float4x4 Pose;
+	aly::float3 origin;
+	aly::int2 dimensions;
+	template<class Archive>
+	void save(Archive & archive) const {
+		archive(CEREAL_NVP(K), CEREAL_NVP(Pose),CEREAL_NVP(dimensions));
+	}
+	template<class Archive>
+	void load(Archive & archive) {
+		archive(CEREAL_NVP(K), CEREAL_NVP(Pose),CEREAL_NVP(dimensions));
+		R=SubMatrix(Pose);
+		T=Pose.w.xyz();
+		Kinv=inverse(K);
+		origin=-transpose(R)*T;
+	}
+	CameraProjector():K(aly::float3x3::identity()),Pose(aly::float4x4::identity()){}
+	CameraProjector(const aly::CameraParameters& cam);
+	void setDimensions(const aly::int2& dims);
+	void setTranslation(const aly::float3& t);
+	void setRotation(const aly::float3x3& R);
+	void setPose(const aly::float4x4& P);
+	void setIntrinsics(const aly::float3x3& K);
+	void setFocalLength(float fx,float fy) ;
+	bool isVisible(const aly::float3& pt,const aly::float3& normal,float tol=0.0f)  const ;
+	bool isVisible(const aly::float3& pt)  const ;
+	bool isVisible(const aly::float2& pt)  const ;
+
+	aly::CameraParameters getCameraParameters(float zNear=0.001f,float zFar=1.0f) const;
+	aly::float3 transformImageToWorld(const aly::float3& pt) const;
+	aly::float2 transformWorldToImage(const aly::float3& pt) const;
+	aly::lineseg2f transformWorldToImage(const aly::lineseg3f& pt) const;
+	aly::float3 getOrigin() const;
+	aly::float3x4 getProjection() const;
+	aly::float3 getDirection(const aly::float2& q) const;
+	aly::float2 getFocalLength() const;
+	aly::float2 getPrincipalPoint() const;
+	const aly::float3x3& getRotation() const {return R;}
+	const aly::float3& getTranslation()	const { return T;}
+	const aly::float4x4& getPose() const {return Pose;}
+	const aly::float3x3& getCameraIntrinsics() const {return K;}
+};
+
 void WriteCameraParametersToFile(const std::string& file, const CameraParameters& params);
 void ReadCameraParametersFromFile(const std::string& file, CameraParameters& params);
-
+void WriteCameraProjectorToFile(const std::string& file, const CameraProjector& params);
+void ReadCameraProjectorFromFile(const std::string& file, CameraProjector& params);
 // class Camera
 }
 #endif /* ALLOYCAMERA_H_ */
