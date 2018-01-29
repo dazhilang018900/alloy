@@ -35,6 +35,7 @@ void Application::initInternal() {
 	context->addAssetDirectory("../assets/");
 	context->addAssetDirectory("../data/assets/");
 	context->addAssetDirectory("../../assets/");
+	context->addAssetDirectory("../../../assets/");
 	context->loadFont(FontType::Normal, "sans", "fonts/Roboto-Regular.ttf");
 	context->loadFont(FontType::Bold, "sans-bold", "fonts/Roboto-Bold.ttf");
 	context->loadFont(FontType::Italic, "sans-italic",
