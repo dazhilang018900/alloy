@@ -67,6 +67,12 @@
     <Filter Include="include\grid">
       <UniqueIdentifier>{02d42770-2d42-4e6b-99f6-9c80770c0b1d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\vision">
+      <UniqueIdentifier>{244a18cd-99ef-4598-9885-a7f9ac110bdc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\vision">
+      <UniqueIdentifier>{d37acdbb-76f5-41bb-82ac-09e5056dca48}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\core\nanovg.cpp">
@@ -292,9 +298,6 @@
       <Filter>src\core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\core\sha2.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\Sift.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\core\tiny_obj_loader.cpp">
@@ -566,6 +569,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\example\LevelSetGridEx.cpp">
       <Filter>src\example</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\MeshDecimation.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vision\Sift.cpp">
+      <Filter>src\vision</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -989,9 +998,6 @@
     <ClInclude Include="..\..\include\core\sha2.h">
       <Filter>include\core</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\Sift.h">
-      <Filter>include\core</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\core\tiny_obj_loader.h">
       <Filter>include\core</Filter>
     </ClInclude>
@@ -1366,6 +1372,12 @@
     </ClInclude>
     <ClInclude Include="..\..\include\example\LevelSetGridEx.h">
       <Filter>include\example</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\core\MeshDecimation.h">
+      <Filter>include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\vision\Sift.h">
+      <Filter>include\vision</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

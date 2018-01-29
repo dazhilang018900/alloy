@@ -40,7 +40,7 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(std::basic_ost
 	}
 	return ss;
 }
-class CameraProjector;
+struct CameraProjector;
 struct CameraParameters {
 	bool changed;
 	float nearPlane, farPlane;

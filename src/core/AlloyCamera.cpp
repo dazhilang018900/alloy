@@ -685,7 +685,7 @@ aly::lineseg2f CameraProjector::transformWorldToImage(
 	seg2.start = transformWorldToImage(seg3.start);
 	seg2.end = transformWorldToImage(seg3.end);
 	if (aly::ClipLine(seg2, float2(0.0f, 0.0f),
-			float2(dimensions.x, dimensions.y))) {
+			float2((float)dimensions.x, (float)dimensions.y))) {
 		return seg2;
 	}
 	return lineseg2f::NONE;

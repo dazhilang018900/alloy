@@ -149,7 +149,7 @@ void MeshDecimation::solve(Mesh& mesh, float decimationAmount, bool flipNormals,
 	size_t validCount = vertexCount;
 	while (vertexCount - validCount < targetRemoveCount) {
 		float amt = (targetRemoveCount- (vertexCount - mesh.vertexLocations.size()))/ (float) mesh.vertexLocations.size();
-		int removeCount=decimateInternal(mesh, amt,validCount, targetRemoveCount, monitor);
+		size_t removeCount= decimateInternal(mesh, amt,(int)validCount, (int)targetRemoveCount, monitor);
 		validCount = 0;
 		for (const DeadVertex& v : vertexes) {
 			if (v.isValid())
@@ -204,8 +204,8 @@ void MeshDecimation::solve(Mesh& mesh, float decimationAmount, bool flipNormals,
 		DeadTriangle& tri = triangles[n];
 		if (tri.isValid()) {
 			triIndexes.push_back(
-					uint3(tri.vertex[0]->index, tri.vertex[1]->index,
-							tri.vertex[2]->index));
+					uint3((uint32_t)tri.vertex[0]->index, (uint32_t)tri.vertex[1]->index,
+							(uint32_t)tri.vertex[2]->index));
 		}
 	}
 	if (flipNormals) {

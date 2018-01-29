@@ -30,9 +30,9 @@ namespace aly {
 		std::vector<std::list<int>> vertNbrs(N);
 		int indexCount = (int)indexes.size();
 		for (int i = 0; i < indexCount; i += 3) {
-			int v1 = indexes[i];
-			int v2 = indexes[i + 1];
-			int v3 = indexes[i + 2];
+			int v1 = (int)indexes[i];
+			int v2 = (int)indexes[i + 1];
+			int v3 = (int)indexes[i + 2];
 			vertNbrs[v1].push_back(v2);
 			vertNbrs[v1].push_back(v3);
 			vertNbrs[v2].push_back(v3);
@@ -159,7 +159,7 @@ namespace aly {
 		size_t N=indexes.size();
 		mesh.vertexColors.resize(mesh.vertexLocations.size(),RGBAf(0.0f));
 		for (size_t i = 0; i <N; i++) {
-			int idx=indexes[i];
+			int idx= (int)indexes[i];
 			int l = labels[idx];
 			if (l >= 0 && l < (int)colorMap.size()) {
 				uint3 tri=mesh.triIndexes[i/3];
