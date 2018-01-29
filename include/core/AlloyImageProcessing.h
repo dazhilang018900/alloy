@@ -64,8 +64,7 @@ template<class T, size_t M> void GaussianKernel(T (&kernel)[M],
 		kernel[i] *= sum;
 	}
 }
-template<class T, size_t M> void GaussianKernelDerivative(T (&gX)[M],
-		T (&gY)[M], T sigmaX = T(0.607902736 * (M - 1) * 0.5)) {
+template<class T, size_t M> void GaussianKernelDerivative(T (&gX)[M], T sigmaX = T(0.607902736 * (M - 1) * 0.5)) {
 	T sum = 0;
 #pragma omp parallel for reduction(+:sum)
 	for (int i = 0; i < (int) M; i++) {
