@@ -432,6 +432,7 @@ void Application::onWindowFocus(int focused) {
 		context->hasFocus = false;
 	}
 }
+
 void Application::getScreenShot(ImageRGBA& img) {
 	int w = 0, h = 0;
 	glfwGetFramebufferSize(context->window, &w, &h);

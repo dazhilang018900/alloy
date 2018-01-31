@@ -162,6 +162,9 @@ public:
 	void fireEvent(const InputEvent& event);
 	void getScreenShot(ImageRGBA& img);
 	void getScreenShot(ImageRGB& img);
+	inline void setDebug(bool debug){
+		showDebugIcon=debug;
+	}
 	ImageRGBA getScreenShot();
 	InputEvent getLastInputEvent() {
 		return inputEvent;
@@ -186,6 +189,7 @@ public:
 	Composite& getRoot() {
 		return rootRegion;
 	}
+
 	virtual bool init(Composite& rootNode)=0;
 	void run(int swapInterval = 0); //no vsync by default
 	void runOnce(const std::string& fileName);

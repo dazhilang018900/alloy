@@ -231,7 +231,9 @@ public:
 					MakeString() << "Texture format not supported "
 							<< textureImage.getTypeName());
 		}
-
+		if(textureImage.width==0||textureImage.height==0){
+			throw std::runtime_error("Cannot initialize zero size texture.");
+		}
 		CHECK_GL_ERROR();
 		if (mipmap) {
 			glBindTexture( GL_TEXTURE_2D, textureId);

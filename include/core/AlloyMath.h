@@ -47,6 +47,18 @@ template<typename T> T min(const T& x, const T& y) {
 template<typename T> T max(const T& x, const T& y) {
 	return ((x) > (y) ? (x) : (y));
 }
+template<typename T> T max(const T& x, const T& y, const T& z) {
+	return ((x) > (y) ? ((x>z)?x:z) : ((y>z)?y:z));
+}
+template<typename T> T max(const T& x, const T& y, const T& z, const T& w) {
+	return max(max(x,y),max(z,w));
+}
+template<typename T> T min(const T& x, const T& y, const T& z) {
+	return ((x) < (y) ? ((x<z)?x:z) : ((y<z)?y:z));
+}
+template<typename T> T min(const T& x, const T& y, const T& z, const T& w) {
+	return min(min(x,y),min(z,w));
+}
 template<typename T> T clamp(const T& val, const T& min, const T& max) {
 	return aly::min(aly::max(val, min), max);
 }

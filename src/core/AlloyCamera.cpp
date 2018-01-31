@@ -410,6 +410,7 @@ void Camera::aim(const box2px& bounds) {
 		needsDisplay = true;
 	}
 }
+
 void CameraParameters::aim(const box2px& bounds) {
 	if (changed) {
 		changed = false;

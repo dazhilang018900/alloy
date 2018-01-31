@@ -97,6 +97,9 @@ struct CameraParameters {
 	virtual void setDirty(bool d) {
 		changed = true;
 	}
+	virtual bool isDirty() const {
+		return changed;
+	}
 	virtual float getScale() const;
 };
 class Camera: public CameraParameters, public EventHandler {
@@ -186,7 +189,7 @@ public:
 	float4x4 getPose() const {
 		return Model;
 	}
-	bool isDirty() const {
+	virtual bool isDirty() const override {
 		return needsDisplay || changed;
 	}
 	virtual void setDirty(bool d) override {
