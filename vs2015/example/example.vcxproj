@@ -85,9 +85,9 @@
     <Import Project="..\props\Alloy.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IntDir>build\$(Configuration)-$(Platform)\</IntDir>
+    <IntDir>$(SolutionDir)\build\$(Configuration)-$(Platform)\$(ProjectName)</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>build\$(Configuration)-$(Platform)\</OutDir>
+    <OutDir>$(SolutionDir)\build\$(Configuration)-$(Platform)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
