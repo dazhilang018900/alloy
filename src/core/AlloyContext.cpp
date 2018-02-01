@@ -258,7 +258,7 @@ void AlloyContext::addAssetDirectory(const std::string& dir) {
 		assetDirectories.push_back(dirCopy);
 	}
 }
-const std::shared_ptr<Font>& AlloyContext::loadFont(FontType type,
+std::shared_ptr<Font> AlloyContext::loadFont(FontType type,
 		const std::string& name, const std::string& file) {
 
 	try {
@@ -274,7 +274,7 @@ const std::shared_ptr<Font>& AlloyContext::loadFont(FontType type,
 	}
 	return std::shared_ptr<Font>();
 }
-const std::shared_ptr<Font>& AlloyContext::loadFont(int idx,
+std::shared_ptr<Font> AlloyContext::loadFont(int idx,
 		const std::string& name, const std::string& file) {
 
 	try {
@@ -289,7 +289,7 @@ const std::shared_ptr<Font>& AlloyContext::loadFont(int idx,
 	}
 	return std::shared_ptr<Font>();
 }
-const std::shared_ptr<Font>& AlloyContext::loadFont(const std::string& name,
+std::shared_ptr<Font> AlloyContext::loadFont(const std::string& name,
 		const std::string& file) {
 	try {
 		fonts.push_back(
