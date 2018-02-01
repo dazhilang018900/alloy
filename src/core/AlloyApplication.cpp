@@ -412,6 +412,15 @@ void Application::onCursorPos(double xpos, double ypos) {
 	InputEvent& e = inputEvent;
 	e=InputEvent();
 	e.type = InputType::Cursor;
+	if(context->leftMouseButton){
+		e.button=GLFW_MOUSE_BUTTON_LEFT;
+	} else if(context->rightMouseButton){
+		e.button=GLFW_MOUSE_BUTTON_RIGHT;
+	} else if(context->middleMouseButton){
+		e.button=GLFW_MOUSE_BUTTON_MIDDLE;
+	} else {
+		e.button=-1;
+	}
 	e.cursor = pixel2((pixel) (xpos), (pixel) (ypos));
 	fireEvent(e);
 }

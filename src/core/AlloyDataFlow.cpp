@@ -1501,7 +1501,7 @@ namespace aly {
 				}
 			}
 			if (e.type == InputType::Cursor || e.type == InputType::MouseButton) {
-				if (context->isMouseDrag() && e.button == GLFW_MOUSE_BUTTON_LEFT) {
+				if (context->isMouseDrag()) {
 					if (dragBox.dimensions.x * dragBox.dimensions.y > 0
 							|| (connectingPort == nullptr && mouseOverNode == nullptr && mouseDragNode == nullptr)) {
 						if (mouseDownInRegion) {
