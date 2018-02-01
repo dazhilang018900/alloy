@@ -44,13 +44,14 @@ private:
 	Composite rootRegion;
 	bool showDebugIcon;
 	bool forceClose = false;
-	
 	std::shared_ptr<ImageShader> imageShader;
 	std::list<std::exception_ptr> caughtExceptions;
 	//std::shared_ptr<GLFrameBuffer> uiFrameBuffer;
 	std::function<void(const int2& dimensions)> onResize;
 	std::function<void()> onExit;
 	void initInternal();
+protected:
+	virtual void loadFonts();
 public:
 
 	void close() {

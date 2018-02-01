@@ -36,18 +36,6 @@ void Application::initInternal() {
 	context->addAssetDirectory("../data/assets/");
 	context->addAssetDirectory("../../assets/");
 	context->addAssetDirectory("../../../assets/");
-	context->loadFont(FontType::Normal, "sans", "fonts/Roboto-Regular.ttf");
-	context->loadFont(FontType::Bold, "sans-bold", "fonts/Roboto-Bold.ttf");
-	context->loadFont(FontType::Italic, "sans-italic",
-			"fonts/Roboto-Italic.ttf");
-	context->loadFont(FontType::Code, "sans", "fonts/Hack-Regular.ttf");
-	context->loadFont(FontType::CodeBold, "sans-bold", "fonts/Hack-Bold.ttf");
-	context->loadFont(FontType::CodeItalic, "sans-bold-italic",
-			"fonts/Hack-Italic.ttf");
-	context->loadFont(FontType::CodeBoldItalic, "sans-bold-italic",
-			"fonts/Hack-BoldItalic.ttf");
-	context->loadFont(FontType::Entypo, "entypo", "fonts/entypo.ttf");
-	context->loadFont(FontType::Icon, "icons", "fonts/fontawesome.ttf");
 	glfwSetWindowUserPointer(context->window, this);
 	glfwSetWindowRefreshCallback(context->window,
 			[](GLFWwindow * window ) {Application* app = (Application *)(glfwGetWindowUserPointer(window)); try {app->onWindowRefresh();} catch(...) {app->throwException(std::current_exception());}});
@@ -603,10 +591,24 @@ void Application::runOnce(const std::string& fileName) {
 	getScreenShot(img);
 	WriteImageToFile(fileName, img);
 }
+void Application::loadFonts(){
+	context->loadFont(FontType::Normal, "sans", "fonts/Roboto-Regular.ttf");
+	context->loadFont(FontType::Bold, "sans-bold", "fonts/Roboto-Bold.ttf");
+	context->loadFont(FontType::Italic, "sans-italic","fonts/Roboto-Italic.ttf");
+	context->loadFont(FontType::Code, "sans", "fonts/Hack-Regular.ttf");
+	context->loadFont(FontType::CodeBold, "sans-bold", "fonts/Hack-Bold.ttf");
+	context->loadFont(FontType::CodeItalic, "sans-bold-italic","fonts/Hack-Italic.ttf");
+	context->loadFont(FontType::CodeBoldItalic, "sans-bold-italic","fonts/Hack-BoldItalic.ttf");
+	context->loadFont(FontType::Entypo, "entypo", "fonts/entypo.ttf");
+	context->loadFont(FontType::Icon, "basic_icons", "fonts/fontawesome.ttf");
+	context->loadFont(FontType::AwesomeRegular, "regular_icons", "fonts/fa-regular.ttf");
+	context->loadFont(FontType::AwesomeSolid, "solid_icons", "fonts/fa-solid.ttf");
+	context->loadFont(FontType::AwesomeBrands, "brands", "fonts/fa-brands.ttf");
+}
 void Application::run(int swapInterval) {
 	const double POLL_INTERVAL_SEC = 0.5f;
-
 	context->makeCurrent();
+	loadFonts();
 	if (!init(rootRegion)) {
 		throw std::runtime_error("Error occurred in application init()");
 	}

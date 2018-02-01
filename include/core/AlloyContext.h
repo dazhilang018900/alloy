@@ -315,9 +315,9 @@ namespace aly {
 			return assetDirectories;
 		}
 		void addAssetDirectory(const std::string& dir);
-		std::shared_ptr<Font>& loadFont(FontType type, const std::string& name, const std::string& partialFile);
-		std::shared_ptr<Font>& loadFont(int idx, const std::string& name, const std::string& partialFile);
-		std::shared_ptr<Font>& loadFont(const std::string& name, const std::string& partialFile);
+		const std::shared_ptr<Font>& loadFont(FontType type, const std::string& name, const std::string& partialFile);
+		const std::shared_ptr<Font>& loadFont(int idx, const std::string& name, const std::string& partialFile);
+		const std::shared_ptr<Font>& loadFont(const std::string& name, const std::string& partialFile);
 		std::string getFullPath(const std::string& partialFile);
 
 		inline int getFrameBufferWidth() const {

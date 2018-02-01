@@ -103,11 +103,15 @@ enum class FontType {
 	Bold = 1,
 	Italic = 2,
 	Icon = 3,
+	Awesome = 3,
 	Entypo =4,
 	Code = 5,
 	CodeBold = 6,
 	CodeItalic = 7,
-	CodeBoldItalic = 8
+	CodeBoldItalic = 8,
+	AwesomeRegular=9,
+	AwesomeSolid=10,
+	AwesomeBrands=11
 };
 //const int ALY_NUMBER_OF_FONTS = 9;
 enum WindowPosition {
@@ -263,6 +267,13 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 		return ss << "Awesome Icons";
 	case FontType::Entypo:
 		return ss << "Entypo Icons";
+	case FontType::AwesomeRegular:
+		return ss << "Awesome Regular";
+	case FontType::AwesomeSolid:
+		return ss << "Awesome Solid";
+	case FontType::AwesomeBrands:
+		return ss << "Awesome Brands";
+
 	}
 	return ss;
 }
