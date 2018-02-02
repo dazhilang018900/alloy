@@ -20,12 +20,12 @@
  */
 #include "Alloy.h"
 #include "AlloyDelaunay.h"
-#include "../../include/example/LocatorEx.h"
+#include "../../include/example/MaxFlowEx.h"
 using namespace aly;
-LocatorEx::LocatorEx() :
-	Application(800, 800, "Point Locator Example") {
+MaxFlowEx::MaxFlowEx() :
+	Application(800, 800, "Max-Flow Example") {
 }
-bool LocatorEx::init(Composite& rootNode) {
+bool MaxFlowEx::init(Composite& rootNode) {
 	const int N = 300;
 	const int K = 5;
 	const float SEARCH_RADIUS = 0.2f;
