@@ -449,6 +449,7 @@ template<class T, int C> T min(const Array<T, C>& a) {
 	}
 	return tmp;
 }
+
 template<class T, int C> T length(const Array<T, C>& a) {
 	return std::sqrt(lengthSqr(a));
 }

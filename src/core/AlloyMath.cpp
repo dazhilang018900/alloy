@@ -24,7 +24,202 @@
 #include <random>
 using namespace std;
 namespace aly {
+int4 min(const std::vector<int4>& a,int init) {
+	size_t sz = a.size();
+	int4 tmp(init);
+	for (size_t i = 0; i < sz; i++) {
+		tmp = aly::min(tmp,a[i]);
+	}
+	return tmp;
+}
+int4 max(const std::vector<int4>& a,int init) {
+	size_t sz = a.size();
+	int4 tmp(init);
+	for (size_t i = 0; i < sz; i++) {
+		tmp = aly::max(a[i],tmp);
+	}
+	return tmp;
+}
 
+float4 min(const std::vector<float4>& a,float init) {
+	size_t sz = a.size();
+	float4 tmp(init);
+	for (size_t i = 0; i < sz; i++) {
+		tmp = aly::min(tmp,a[i]);
+	}
+	return tmp;
+}
+float4 max(const std::vector<float4>& a,float init) {
+	size_t sz = a.size();
+	float4 tmp(init);
+	for (size_t i = 0; i < sz; i++) {
+		tmp = aly::max(a[i],tmp);
+	}
+	return tmp;
+}
+double4 min(const std::vector<double4>& a,double init) {
+	size_t sz = a.size();
+	double4 tmp(init);
+	for (size_t i = 0; i < sz; i++) {
+		tmp = aly::min(tmp,a[i]);
+	}
+	return tmp;
+}
+double4 max(const std::vector<double4>& a,double init) {
+	size_t sz = a.size();
+	double4 tmp(init);
+	for (size_t i = 0; i < sz; i++) {
+		tmp = aly::max(a[i],tmp);
+	}
+	return tmp;
+}
+
+int3 min(const std::vector<int3>& a,int init) {
+	size_t sz = a.size();
+	int3 tmp(init);
+	for (size_t i = 0; i < sz; i++) {
+		tmp = aly::min(tmp,a[i]);
+	}
+	return tmp;
+}
+int3 max(const std::vector<int3>& a,int init) {
+	size_t sz = a.size();
+	int3 tmp(init);
+	for (size_t i = 0; i < sz; i++) {
+		tmp = aly::max(a[i],tmp);
+	}
+	return tmp;
+}
+
+float3 min(const std::vector<float3>& a,float init) {
+	size_t sz = a.size();
+	float3 tmp(init);
+	for (size_t i = 0; i < sz; i++) {
+		tmp = aly::min(tmp,a[i]);
+	}
+	return tmp;
+}
+float3 max(const std::vector<float3>& a,float init) {
+	size_t sz = a.size();
+	float3 tmp(init);
+	for (size_t i = 0; i < sz; i++) {
+		tmp = aly::max(a[i],tmp);
+	}
+	return tmp;
+}
+double3 min(const std::vector<double3>& a,double init) {
+	size_t sz = a.size();
+	double3 tmp(init);
+	for (size_t i = 0; i < sz; i++) {
+		tmp = aly::min(tmp,a[i]);
+	}
+	return tmp;
+}
+double3 max(const std::vector<double3>& a,double init) {
+	size_t sz = a.size();
+	double3 tmp(init);
+	for (size_t i = 0; i < sz; i++) {
+		tmp = aly::max(a[i],tmp);
+	}
+	return tmp;
+}
+int2 min(const std::vector<int2>& a,int init) {
+	size_t sz = a.size();
+	int2 tmp(init);
+	for (size_t i = 0; i < sz; i++) {
+		tmp = aly::min(tmp,a[i]);
+	}
+	return tmp;
+}
+int2 max(const std::vector<int2>& a,int init) {
+	size_t sz = a.size();
+	int2 tmp(init);
+	for (size_t i = 0; i < sz; i++) {
+		tmp = aly::max(a[i],tmp);
+	}
+	return tmp;
+}
+
+float2 min(const std::vector<float2>& a,float init) {
+	size_t sz = a.size();
+	float2 tmp(init);
+	for (size_t i = 0; i < sz; i++) {
+		tmp = aly::min(tmp,a[i]);
+	}
+	return tmp;
+}
+float2 max(const std::vector<float2>& a,float init) {
+	size_t sz = a.size();
+	float2 tmp(init);
+	for (size_t i = 0; i < sz; i++) {
+		tmp = aly::max(a[i],tmp);
+	}
+	return tmp;
+}
+double2 min(const std::vector<double2>& a,double init) {
+	size_t sz = a.size();
+	double2 tmp(init);
+	for (size_t i = 0; i < sz; i++) {
+		tmp = aly::min(tmp,a[i]);
+	}
+	return tmp;
+}
+double2 max(const std::vector<double2>& a,double init) {
+	size_t sz = a.size();
+	double2 tmp(init);
+	for (size_t i = 0; i < sz; i++) {
+		tmp = aly::max(a[i],tmp);
+	}
+	return tmp;
+}
+ int min(const std::vector<int>& a,int init) {
+	size_t sz = a.size();
+	int tmp=init;
+	for (size_t i = 0; i < sz; i++) {
+		tmp = std::min(tmp,a[i]);
+	}
+	return tmp;
+}
+ int max(const std::vector<int>& a,int init) {
+	size_t sz = a.size();
+	int tmp=init;
+	for (size_t i = 0; i < sz; i++) {
+		tmp = std::max(a[i],tmp);
+	}
+	return tmp;
+}
+ float min(const std::vector<float>& a,float init) {
+	size_t sz = a.size();
+	float tmp=init;
+	for (size_t i = 0; i < sz; i++) {
+		tmp = std::min(tmp,a[i]);
+	}
+	return tmp;
+}
+ float max(const std::vector<float>& a,float init) {
+	size_t sz = a.size();
+	float tmp=init;
+	for (size_t i = 0; i < sz; i++) {
+		tmp = std::max(a[i],tmp);
+	}
+	return tmp;
+}
+ double min(const std::vector<double>& a,double init) {
+	size_t sz = a.size();
+	double tmp=init;
+	for (size_t i = 0; i < sz; i++) {
+		tmp = std::min(tmp,a[i]);
+	}
+	return tmp;
+}
+ double max(const std::vector<double>& a,double init) {
+	size_t sz = a.size();
+	double tmp=init;
+	for (size_t i = 0; i < sz; i++) {
+		tmp = std::max(a[i],tmp);
+	}
+	return tmp;
+}
 /******************************************************************************
  * XLISP-STAT 2.1 Copyright (c) 1990, by Luke Tierney
  * XLISP version 2.1, Copyright (c) 1989, by David Betz.

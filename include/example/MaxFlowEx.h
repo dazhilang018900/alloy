@@ -27,15 +27,15 @@
 #include "AlloyVector.h"
 class MaxFlowEx: public aly::Application {
 protected:
-	std::vector<std::pair<size_t, float>> kNN;
-	std::vector < aly::float2i> nearest;
-	aly::float2i closest;
 	aly::float2 cursor;
 	aly::Vector2f samples;
 	aly::DrawPtr drawRegion;
-	std::vector<aly::uint3> delaunayTriangles;
-	std::unique_ptr<aly::Locator2f> locator;
-	std::unique_ptr<aly::Matcher2f> matcher;
+	std::vector<aly::int2> edges;
+	std::vector<float> weights;
+	std::vector<int> labels;
+	std::vector<aly::Color> edgeColors;
+	int vertexCount;
+	int srcId,sinkId;
 public:
 	MaxFlowEx();
 	bool init(aly::Composite& rootNode);
