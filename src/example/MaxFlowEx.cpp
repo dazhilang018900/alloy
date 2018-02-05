@@ -23,82 +23,97 @@
 #include "../../include/example/MaxFlowEx.h"
 using namespace aly;
 MaxFlowEx::MaxFlowEx() :
-		Application(800, 800, "Max-Flow Example"), srcId(-1), sinkId(-1) {
+		Application(1000, 1000, "Max-Flow Example"), srcId(-1), sinkId(-1) {
 }
 bool MaxFlowEx::init(Composite& rootNode) {
-	int M = 16;
+	int M = 20;
 	const int K = 5;
 	const float SEARCH_RADIUS = 0.2f;
 	drawRegion = DrawPtr(
-			new Draw("Draw Region", CoordPerPX(0.5f, 0.5f, -400, -400),
-					CoordPX(800, 800)));
+			new Draw("Draw Region", CoordPerPX(0.5f, 0.5f, -500, -500),
+					CoordPX(1000, 1000)));
+
 	rootNode.add(drawRegion);
-	float minY = 1E30f, maxY = -1E30f;
+	float sourceDist = 1E30f, sinkDist = 1E30f;
 	for (int i = 0; i < M; i++) {
 		for (int j = 0; j < M; j++) {
-			float2 pt = float2((i + RandomUniform(0.2,0.8)) / M, (j + RandomUniform(0.2,0.8)) / M);
+			float2 pt = float2((i + RandomUniform(0.2, 0.8)) / M,
+					(j + RandomUniform(0.2, 0.8)) / M);
 			int n = samples.size();
 			samples.push_back(pt);
-			if (pt.y < minY) {
-				minY = pt.y;
+			float d = distanceSqr(pt, float2(0.5f, 0.0f));
+			if (d < sourceDist) {
+				sourceDist = d;
 				srcId = n;
 			}
-			if (pt.y > maxY) {
-				maxY = pt.y;
+			d = distanceSqr(pt, float2(0.5f, 1.0f));
+			if (d < sinkDist) {
+				sinkDist = d;
 				sinkId = n;
 			}
 		}
 	}
 	int N = samples.size();
-	std::cout << "Source " << srcId << " Sink " << sinkId <<" "<<N<<std::endl;
+	std::cout << "Source " << srcId << " Sink " << sinkId << " " << N
+			<< std::endl;
 	flow.resize(N);
 	{
 		std::vector<aly::uint3> delaunayTriangles;
 		MakeDelaunay(samples, delaunayTriangles);
+		const float ANGLE = 25.0f;
+		float2 norm = float2(-sin(ANGLE * ALY_PI / 180.0f),
+				cos(ANGLE * ALY_PI / 180.0f));
 		for (uint3 tri : delaunayTriangles) {
 			for (int i = 0; i < 3; i++) {
 				int v1 = tri[i];
 				int v2 = tri[(i + 1) % 3];
 				edges.push_back(int2(v1, v2));
-				float2 midPt = 0.5f * (samples[v1] + samples[v2]);
-				float w = 2.0f * RandomUniform(0.5f, 1.0f)
-						* std::abs(midPt.y - 0.5f);
-				weights.push_back(w);
+				float w1 = 2.0f * RandomUniform(0.5f, 1.0f)
+						* std::abs(dot(samples[v1] - float2(0.5f, 0.5f), norm));
+				float w2 = 2.0f * RandomUniform(0.5f, 1.0f)
+						* std::abs(dot(samples[v2] - float2(0.5f, 0.5f), norm));
+				weights.push_back(0.5f * (w1 + w2));
 				if (v1 == srcId) {
-					flow.setSourceCapacity(v2, w);
+					flow.setSourceCapacity(v2, w2);
 				} else if (v2 == srcId) {
-					flow.setSourceCapacity(v1, w);
+					flow.setSourceCapacity(v1, w1);
 				} else if (v1 == sinkId) {
-					flow.setSinkCapacity(v2, w);
+					flow.setSinkCapacity(v2, w2);
 				} else if (v2 == sinkId) {
-					flow.setSinkCapacity(v1, w);
+					flow.setSinkCapacity(v1, w1);
 				} else {
 					//Internal edge
-					flow.addEdge(v1, v2, w, w);
+					flow.addEdge(v1, v2, w1, w2);
 				}
 			}
 		}
 	}
 	try {
-		flow.initialize();
-		flow.step();
+		flow.solve();
 	} catch (const std::exception& e) {
 		std::cerr << e.what() << std::endl;
 	}
 	edgeColors.resize(edges.size());
 	edgeLabels.resize(edges.size());
 	nodeLabels.resize(samples.size());
-	std::vector<MinMaxFlow::Node>& nodes = flow.getNodes();
+	std::vector<MaxFlow::Node>& nodes = flow.getNodes();
 	for (int i = 0; i < nodes.size(); i++) {
-		if (nodes[i].parent == MinMaxFlow::ORPHAN) {
-			nodeLabels[i] = static_cast<int>(MinMaxFlow::NodeType::Orphan);
+		if (nodes[i].parent == MaxFlow::ORPHAN) {
+			nodeLabels[i] = static_cast<int>(MaxFlow::NodeType::Orphan);
 		} else {
 			nodeLabels[i] = static_cast<int>(nodes[i].type);
 		}
 	}
-	nodeLabels[srcId] = static_cast<int>(MinMaxFlow::NodeType::Source);
-	nodeLabels[sinkId] = static_cast<int>(MinMaxFlow::NodeType::Sink);
+	nodeLabels[srcId] = static_cast<int>(MaxFlow::NodeType::Source);
+	nodeLabels[sinkId] = static_cast<int>(MaxFlow::NodeType::Sink);
 
+	std::set<aly::int2> saturatedSet;
+	for (std::shared_ptr<MaxFlow::Edge> edge : flow.getEdges()) {
+		if (edge->forwardCapacity <= MaxFlow::ZERO_TOLERANCE||edge->reverseCapacity <= MaxFlow::ZERO_TOLERANCE) {
+			saturatedSet.insert(int2(edge->source->id, edge->target->id));
+		}
+	}
+	saturated.resize(edgeLabels.size(),false);
 	for (int i = 0; i < edgeColors.size(); i++) {
 		int2 e = edges[i];
 		if (nodes[e.y].getParent() == &nodes[e.x]) {
@@ -107,13 +122,16 @@ bool MaxFlowEx::init(Composite& rootNode) {
 		if (nodes[e.x].getParent() == &nodes[e.y]) {
 			edgeLabels[i] = -1;
 		} else {
-			if(e.x==srcId||e.x==sinkId){
+			if (e.x == srcId || e.x == sinkId) {
 				edgeLabels[i] = 1;
-			} else if(e.y==srcId||e.y==sinkId){
+			} else if (e.y == srcId || e.y == sinkId) {
 				edgeLabels[i] = -1;
 			}
 		}
 		float w = weights[i];
+		if (saturatedSet.find(e) != saturatedSet.end()) {
+			saturated[i] = true;
+		}
 		edgeColors[i] = HSVtoColor(HSV(0, 0, 0.1f + w * 0.8f));
 	}
 	drawRegion->onDraw =
@@ -122,6 +140,7 @@ bool MaxFlowEx::init(Composite& rootNode) {
 				nvgLineJoin(nvg,NVG_ROUND);
 				nvgStrokeColor(nvg, Color(64, 64, 64));
 				nvgStrokeWidth(nvg, 2.0f);
+				std::vector<std::shared_ptr<MaxFlow::Edge>>& edgePtrs=flow.getEdges();
 				for (int n = 0;n < (int)edges.size();n++) {
 					int2 edge = edges[n];
 					int dir=edgeLabels[n];
@@ -129,13 +148,31 @@ bool MaxFlowEx::init(Composite& rootNode) {
 					float2 pt1 = samples[edge.y];
 					pt0 = pt0*bounds.dimensions + bounds.position;
 					pt1 = pt1*bounds.dimensions + bounds.position;
-					nvgStrokeColor(nvg,edgeColors[n]);
 
-					nvgStrokeWidth(nvg, (dir!=0)?4.0f:2.0f);
-					nvgBeginPath(nvg);
-					nvgMoveTo(nvg, pt0.x, pt0.y);
-					nvgLineTo(nvg, pt1.x, pt1.y);
-					nvgStroke(nvg);
+					std::shared_ptr<MaxFlow::Edge> edgePtr=edgePtrs[n];
+					if(saturated[n]){
+						nvgStrokeColor(nvg,edgeColors[n]);
+						nvgStrokeWidth(nvg, (dir!=0)?5.0f:3.0f);
+						nvgBeginPath(nvg);
+						nvgMoveTo(nvg, pt0.x, pt0.y);
+						nvgLineTo(nvg, pt1.x, pt1.y);
+						nvgStroke(nvg);
+
+						nvgStrokeColor(nvg,Color(192,64,64));
+						nvgStrokeWidth(nvg, 2.0f);
+						nvgBeginPath(nvg);
+						nvgMoveTo(nvg, pt0.x, pt0.y);
+						nvgLineTo(nvg, pt1.x, pt1.y);
+						nvgStroke(nvg);
+
+					} else {
+						nvgStrokeColor(nvg,edgeColors[n]);
+						nvgStrokeWidth(nvg, (dir!=0)?5.0f:3.0f);
+						nvgBeginPath(nvg);
+						nvgMoveTo(nvg, pt0.x, pt0.y);
+						nvgLineTo(nvg, pt1.x, pt1.y);
+						nvgStroke(nvg);
+					}
 				}
 				for (int n = 0;n < (int)edges.size();n++) {
 					int2 edge = edges[n];
@@ -149,36 +186,48 @@ bool MaxFlowEx::init(Composite& rootNode) {
 						float2 mid=0.5f*(pt0+pt1);
 						float2 vec=((float)dir)*normalize(pt1-pt0);
 						float2 orth(-vec.y,vec.x);
-						float s=6;
+						const float arrowSize=5;
 						nvgBeginPath(nvg);
-						nvgMoveTo(nvg,mid.x+vec.x*s,mid.y+vec.y*s);
-						nvgLineTo(nvg,mid.x+(orth.x-vec.x)*s,mid.y+(orth.y-vec.y)*s);
-						nvgLineTo(nvg,mid.x+(-orth.x-vec.x)*s,mid.y+(-orth.y-vec.y)*s);
+						nvgMoveTo(nvg,mid.x+vec.x*arrowSize,mid.y+vec.y*arrowSize);
+						nvgLineTo(nvg,mid.x+(orth.x-vec.x)*arrowSize,mid.y+(orth.y-vec.y)*arrowSize);
+						nvgLineTo(nvg,mid.x+(-orth.x-vec.x)*arrowSize,mid.y+(-orth.y-vec.y)*arrowSize);
 						nvgClosePath(nvg);
 						nvgFill(nvg);
 					}
 				}
 				nvgFillColor(nvg, Color(128, 128, 128));
+				nvgStrokeColor(nvg,Color(255,255,255));
+				nvgStrokeWidth(nvg,3.0f);
 				int id=0;
 				for (float2 pt : samples.data) {
 					int l=nodeLabels[id];
 					nvgBeginPath(nvg);
 					pt = pt*bounds.dimensions + bounds.position;
-					if(l==static_cast<int>(MinMaxFlow::NodeType::Source)) {
-						nvgFillColor(nvg,Color(32,32,128));
-						nvgCircle(nvg, pt.x, pt.y,(id==srcId)? 6.0f:4.0f);
-					} else if(l==static_cast<int>(MinMaxFlow::NodeType::Sink)) {
-						nvgFillColor(nvg,Color(32,128,32));
-						nvgCircle(nvg, pt.x, pt.y, (id==sinkId)? 6.0f:4.0f);
-					} else if(l==static_cast<int>(MinMaxFlow::NodeType::Orphan)) {
-						nvgFillColor(nvg,Color(255,0,0));
+					if(l==static_cast<int>(MaxFlow::NodeType::Source)) {
+						nvgFillColor(nvg,Color(64,64,192));
+						if(id==srcId) {
+							nvgCircle(nvg, pt.x, pt.y,6.0f);
+							nvgStroke(nvg);
+						} else {
+							nvgCircle(nvg, pt.x, pt.y,4.0f);
+						}
+					} else if(l==static_cast<int>(MaxFlow::NodeType::Sink)) {
+						nvgFillColor(nvg,Color(64,192,64));
+						if(id==sinkId) {
+							nvgCircle(nvg, pt.x, pt.y,6.0f);
+							nvgStroke(nvg);
+						} else {
+							nvgCircle(nvg, pt.x, pt.y,4.0f);
+						}
+					} else if(l==static_cast<int>(MaxFlow::NodeType::Orphan)) {
+						nvgFillColor(nvg,Color(192,0,0));
 						nvgCircle(nvg, pt.x, pt.y, 6.0f);
-					} else if(l==static_cast<int>(MinMaxFlow::NodeType::Unknown)) {
+					} else if(l==static_cast<int>(MaxFlow::NodeType::Unknown)) {
 						nvgFillColor(nvg,Color(192,192,192));
 						nvgCircle(nvg, pt.x, pt.y, 4.0f);
 					}
-					id++;
 					nvgFill(nvg);
+					id++;
 				}
 
 			};

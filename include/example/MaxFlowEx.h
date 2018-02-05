@@ -23,9 +23,9 @@
 #define MAXFLOW_EX_H_
 
 #include <AlloyLocator.h>
+#include <AlloyMaxFlow.h>
 #include "AlloyApplication.h"
 #include "AlloyVector.h"
-#include "AlloyMinMaxFlow.h"
 class MaxFlowEx: public aly::Application {
 protected:
 	aly::float2 cursor;
@@ -33,12 +33,14 @@ protected:
 	aly::DrawPtr drawRegion;
 	std::vector<aly::int2> edges;
 	std::vector<float> weights;
+	std::vector<bool> saturated;
 	std::vector<int> nodeLabels;
 	std::vector<int> edgeLabels;
 	std::vector<aly::Color> edgeColors;
+	std::vector<std::shared_ptr<aly::MaxFlow::Edge>> edgePtrs;
 	int vertexCount;
 	int srcId,sinkId;
-	aly::MinMaxFlow flow;
+	aly::MaxFlow flow;
 public:
 	MaxFlowEx();
 	bool init(aly::Composite& rootNode);

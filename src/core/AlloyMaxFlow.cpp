@@ -5,19 +5,19 @@
  *      Author: blake
  */
 
-#include <AlloyMinMaxFlow.h>
+#include <AlloyMaxFlow.h>
 namespace aly {
-MinMaxFlow::Edge* MinMaxFlow::ROOT = (MinMaxFlow::Edge*) -1;
-MinMaxFlow::Edge* MinMaxFlow::ORPHAN = (MinMaxFlow::Edge*) -2;
-const float MinMaxFlow::ZERO_TOLERANCE = 1E-6f;
-MinMaxFlow::Node* MinMaxFlow::Node::getParent() {
-	if (parent != nullptr && parent != MinMaxFlow::ROOT
-			&& parent != MinMaxFlow::ORPHAN) {
+MaxFlow::Edge* MaxFlow::ROOT = (MaxFlow::Edge*) -1;
+MaxFlow::Edge* MaxFlow::ORPHAN = (MaxFlow::Edge*) -2;
+const float MaxFlow::ZERO_TOLERANCE = 1E-8f;
+MaxFlow::Node* MaxFlow::Node::getParent() {
+	if (parent != nullptr && parent != MaxFlow::ROOT
+			&& parent != MaxFlow::ORPHAN) {
 		return parent->other(this);
 	}
 	return nullptr;
 }
-MinMaxFlow::Edge::Edge(Node* src, Node* tar, float fwd_cap, float rev_cap) :
+MaxFlow::Edge::Edge(Node* src, Node* tar, float fwd_cap, float rev_cap) :
 		source(src), target(tar), forwardCapacity(fwd_cap), reverseCapacity(
 				rev_cap) {
 	if (src != nullptr) {
@@ -26,44 +26,42 @@ MinMaxFlow::Edge::Edge(Node* src, Node* tar, float fwd_cap, float rev_cap) :
 		tar->edges.push_back(this);
 	}
 }
-const MinMaxFlow::Node* MinMaxFlow::Node::getParent() const {
-	if (parent != nullptr && parent != MinMaxFlow::ROOT
-			&& parent != MinMaxFlow::ORPHAN) {
+const MaxFlow::Node* MaxFlow::Node::getParent() const {
+	if (parent != nullptr && parent != MaxFlow::ROOT
+			&& parent != MaxFlow::ORPHAN) {
 		return parent->other(this);
 	}
 	return nullptr;
 }
-MinMaxFlow::MinMaxFlow(size_t sz) :
+MaxFlow::MaxFlow(size_t sz) :
 		iterationCount(0), totalFlow(0) {
 	resize(sz);
 }
-void MinMaxFlow::resize(size_t sz) {
+void MaxFlow::resize(size_t sz) {
 	nodes.resize(sz);
 	totalFlow = 0;
 	for (size_t id = 0; id < nodes.size(); id++) {
 		nodes[id].id = id;
 	}
 }
-void MinMaxFlow::setSource(size_t nodeId) {
+void MaxFlow::setSource(size_t nodeId) {
 	nodes[nodeId].type = NodeType::Source;
 }
-void MinMaxFlow::setSink(size_t nodeId) {
+void MaxFlow::setSink(size_t nodeId) {
 	nodes[nodeId].type = NodeType::Sink;
 }
-void MinMaxFlow::setCapacity(size_t nodeId, float cap) {
+void MaxFlow::setCapacity(size_t nodeId, float cap) {
 	nodes[nodeId].treeCapacity = cap;
 }
-void MinMaxFlow::initialize() {
+void MaxFlow::initialize() {
 	activeList.clear();
 	orphanList.clear();
-	changeList.clear();
 	iterationCount = 0;
 	bool foundSource = false;
 	bool foundSink = false;
 	for (Node& node : nodes) {
 		node.children.clear();
 		node.marked = false;
-		node.changed = false;
 		node.pathLength = 0;
 		node.timestamp = 0;
 		if (node.treeCapacity > 0) {
@@ -88,7 +86,7 @@ void MinMaxFlow::initialize() {
 		throw std::runtime_error("Could not find source and/or sink.");
 	}
 }
-float MinMaxFlow::augment(Edge *joinEdge) {
+float MaxFlow::augment(Edge *joinEdge) {
 	Node* srcNode = nullptr;
 	Node* sinkNode = nullptr;
 	if (joinEdge->source->type == NodeType::Source) {
@@ -106,7 +104,7 @@ float MinMaxFlow::augment(Edge *joinEdge) {
 	float bottleneck, cap;
 	/* 1. Finding bottleneck capacity */
 	/* 1a - the source tree */
-	bottleneck = joinEdge->getCapacity(srcNode);
+	bottleneck = joinEdge->getForwardCapacity(srcNode);
 	//std::cout << "Initial bottleneck " << bottleneck << std::endl;
 	pivot = srcNode;
 	//Backtrack towards source
@@ -114,14 +112,12 @@ float MinMaxFlow::augment(Edge *joinEdge) {
 		a = pivot->parent;
 		if (a == ROOT)
 			break;
-		std::cout << "Backtrack " << *pivot << " " << *a << std::endl;
 		cap = a->getReverseCapacity(pivot);
 		if (bottleneck > cap)
 			bottleneck = cap;
 		pivot = a->other(pivot);
 	}
 	cap = pivot->treeCapacity;
-	std::cout << "Source Tree Capacity " << cap << std::endl;
 	if (bottleneck > cap) {
 		bottleneck = cap;
 	}
@@ -131,15 +127,12 @@ float MinMaxFlow::augment(Edge *joinEdge) {
 		a = pivot->parent;
 		if (a == ROOT)
 			break;
-
-		std::cout << "Track " << *pivot << " " << *a << std::endl;
-		cap = a->getCapacity(pivot);
+		cap = a->getForwardCapacity(pivot);
 		if (bottleneck > cap)
 			bottleneck = cap;
 		pivot = a->other(pivot);
 	}
 	cap = -pivot->treeCapacity;
-	std::cout << "Sink Tree Capacity " << cap << std::endl;
 	if (bottleneck > cap)
 		bottleneck = cap;
 
@@ -147,7 +140,7 @@ float MinMaxFlow::augment(Edge *joinEdge) {
 	/* 2. Augmenting */
 	/* 2a - the source tree */
 	joinEdge->getReverseCapacity(srcNode) += bottleneck;
-	joinEdge->getCapacity(srcNode) -= bottleneck;
+	joinEdge->getForwardCapacity(srcNode) -= bottleneck;
 	pivot = srcNode;
 	//Backtrack towards source
 
@@ -155,13 +148,12 @@ float MinMaxFlow::augment(Edge *joinEdge) {
 		a = pivot->parent;
 		if (a == ROOT)
 			break;
-		a->getCapacity(pivot) += bottleneck;
+		a->getForwardCapacity(pivot) += bottleneck;
 		a->getReverseCapacity(pivot) -= bottleneck;
 		if (a->getReverseCapacity(pivot) <= ZERO_TOLERANCE) {
 			pivot->parent = ORPHAN;
 			orphanList.push_front(pivot);
 		}
-		std::cout<<"Backtrack again "<<*pivot<<std::endl;
 		pivot = a->other(pivot);
 	}
 	pivot->treeCapacity -= bottleneck;
@@ -169,43 +161,45 @@ float MinMaxFlow::augment(Edge *joinEdge) {
 		pivot->parent = ORPHAN;
 		orphanList.push_front(pivot);
 	}
+
 	pivot = sinkNode;
 	while (1) {
 		a = pivot->parent;
 		if (a == ROOT)
 			break;
 		a->getReverseCapacity(pivot) += bottleneck;
-		a->getCapacity(pivot) -= bottleneck;
-		if (a->getCapacity(pivot) <= ZERO_TOLERANCE) {
+		a->getForwardCapacity(pivot) -= bottleneck;
+		if (a->getForwardCapacity(pivot) <= ZERO_TOLERANCE) {
 			pivot->parent = ORPHAN;
 			orphanList.push_back(pivot);
 		}
-		std::cout<<"Track again"<<*pivot<<std::endl;
 		pivot = a->other(pivot);
 	}
+
 	pivot->treeCapacity += bottleneck;
-	if (pivot->treeCapacity <= ZERO_TOLERANCE) {
+
+	if (pivot->treeCapacity >= -ZERO_TOLERANCE) {
 		pivot->parent = ORPHAN;
-		orphanList.push_back(pivot);
+		orphanList.push_front(pivot);
 	}
 	return bottleneck;
 }
-void MinMaxFlow::setSourceCapacity(int i, float cap) {
+void MaxFlow::setSourceCapacity(int i, float cap) {
 	setNodeCapacity(i, cap, 0);
 }
-void MinMaxFlow::setSinkCapacity(int i, float cap) {
+void MaxFlow::setSinkCapacity(int i, float cap) {
 	setNodeCapacity(i, 0, cap);
 }
 
 
-const MinMaxFlow::Node* MinMaxFlow::Edge::other(const Node* n) const {
+const MaxFlow::Node* MaxFlow::Edge::other(const Node* n) const {
 	if (n == source)
 		return target;
 	if (n == target)
 		return source;
 	throw std::runtime_error(MakeString()<<"other()::Node does not attach to edge. "<<((n==nullptr)?std::string("null"):(MakeString()<<*n))<<" | "<<*this);
 }
-MinMaxFlow::Node* MinMaxFlow::Edge::other(const Node* n) {
+MaxFlow::Node* MaxFlow::Edge::other(const Node* n) {
 	if (n == source)
 		return target;
 	if (n == target)
@@ -213,7 +207,7 @@ MinMaxFlow::Node* MinMaxFlow::Edge::other(const Node* n) {
 	throw std::runtime_error(MakeString()<<"other()::Node does not attach to edge. "<<((n==nullptr)?std::string("null"):(MakeString()<<*n))<<" | "<<*this);
 }
 
-const float& MinMaxFlow::Edge::getCapacity(Node* n) const {
+const float& MaxFlow::Edge::getForwardCapacity(Node* n) const {
 	if (n == source)
 		return forwardCapacity;
 	if (n == target)
@@ -221,7 +215,7 @@ const float& MinMaxFlow::Edge::getCapacity(Node* n) const {
 	throw std::runtime_error("getCapacity()::Node does not attach to edge");
 	return forwardCapacity;
 }
-float& MinMaxFlow::Edge::getCapacity(Node* n) {
+float& MaxFlow::Edge::getForwardCapacity(Node* n) {
 	if (n == source)
 		return forwardCapacity;
 	if (n == target)
@@ -229,7 +223,7 @@ float& MinMaxFlow::Edge::getCapacity(Node* n) {
 	throw std::runtime_error("getCapacity()::Node does not attach to edge");
 	return forwardCapacity;
 }
-const float& MinMaxFlow::Edge::getReverseCapacity(Node* n) const {
+const float& MaxFlow::Edge::getReverseCapacity(Node* n) const {
 	if (n == source)
 		return reverseCapacity;
 	if (n == target)
@@ -237,7 +231,7 @@ const float& MinMaxFlow::Edge::getReverseCapacity(Node* n) const {
 	throw std::runtime_error("getReverseCapacity()::Node does not attach to edge");
 	return reverseCapacity;
 }
-float& MinMaxFlow::Edge::getReverseCapacity(Node* n) {
+float& MaxFlow::Edge::getReverseCapacity(Node* n) {
 	if (n == source)
 		return reverseCapacity;
 	if (n == target)
@@ -246,7 +240,7 @@ float& MinMaxFlow::Edge::getReverseCapacity(Node* n) {
 	return reverseCapacity;
 }
 
-MinMaxFlow::Node* MinMaxFlow::Edge::next(Node* n) const {
+MaxFlow::Node* MaxFlow::Edge::next(Node* n) const {
 	if (n == source)
 		return target;
 	if (n == target)
@@ -256,7 +250,7 @@ MinMaxFlow::Node* MinMaxFlow::Edge::next(Node* n) const {
 }
 
 
-void MinMaxFlow::setNodeCapacity(int i, float sourceCapacity,
+void MaxFlow::setNodeCapacity(int i, float sourceCapacity,
 		float sinkCapacity) {
 	float delta = nodes[i].treeCapacity;
 	if (delta > 0) {
@@ -268,7 +262,7 @@ void MinMaxFlow::setNodeCapacity(int i, float sourceCapacity,
 			(sourceCapacity < sinkCapacity) ? sourceCapacity : sinkCapacity;
 	nodes[i].treeCapacity = sourceCapacity - sinkCapacity; //negative for sink capacity
 }
-void MinMaxFlow::processSourceOrphan(Node *pivot) {
+void MaxFlow::processSourceOrphan(Node *pivot) {
 	static const int MAX_PATH_LENGTH = std::numeric_limits<int>::max();
 	Node *next;
 	Edge *minEdge = nullptr;
@@ -313,12 +307,11 @@ void MinMaxFlow::processSourceOrphan(Node *pivot) {
 			}
 		}
 	}
-	if (pivot->parent == minEdge) {
+	pivot->parent = minEdge;
+	if (pivot->parent!=nullptr) {
 		pivot->timestamp = iterationCount;
 		pivot->pathLength = minLength + 1;
 	} else {
-		//changeList.push_back(pivot);
-		pivot->changed = true;
 		for (Edge* a0 : pivot->edges) {
 			next = a0->other(pivot);
 			a = next->parent;
@@ -336,7 +329,7 @@ void MinMaxFlow::processSourceOrphan(Node *pivot) {
 	}
 }
 
-void MinMaxFlow::processSinkOrphan(Node *pivot) {
+void MaxFlow::processSinkOrphan(Node *pivot) {
 	static const int MAX_PATH_LENGTH = std::numeric_limits<int>::max();
 	Node *next;
 	Edge* minEdge = nullptr;
@@ -344,7 +337,7 @@ void MinMaxFlow::processSinkOrphan(Node *pivot) {
 	int d;
 	int minLength = MAX_PATH_LENGTH;
 	for (Edge* edge : pivot->edges) {
-		if (edge->getCapacity(pivot) > ZERO_TOLERANCE) {
+		if (edge->getForwardCapacity(pivot) > ZERO_TOLERANCE) {
 			next = edge->other(pivot);
 			if (next->parent != nullptr && next->type == NodeType::Sink) {
 				d = 0;
@@ -381,17 +374,16 @@ void MinMaxFlow::processSinkOrphan(Node *pivot) {
 			}
 		}
 	}
-	if (pivot->parent == minEdge) {
+	pivot->parent = minEdge;
+	if (pivot->parent!=nullptr) {
 		pivot->timestamp = iterationCount;
 		pivot->pathLength = minLength + 1;
 	} else {
-		//changeList.push_back(pivot);
-		pivot->changed = true;
 		for (Edge* a0 : pivot->edges) {
 			next = a0->other(pivot);
 			a = next->parent;
 			if (a != nullptr && next->type == NodeType::Sink) {
-				if (a0->getCapacity(pivot) > ZERO_TOLERANCE) {
+				if (a0->getForwardCapacity(pivot) > ZERO_TOLERANCE) {
 					activeList.push_back(next);
 					next->active = true;
 				}
@@ -403,15 +395,15 @@ void MinMaxFlow::processSinkOrphan(Node *pivot) {
 		}
 	}
 }
-
-void MinMaxFlow::step() {
+void MaxFlow::solve(){
 	Node* pivot = nullptr;
 	Node* nbr;
+	initialize();
 	while (1) {
 		if (pivot == nullptr) {
 			for (Node* node : activeList) {
 				if (node->active) {
-					if (node->parent != nullptr) { //node has parent, it's not part of any tree
+					if (node->parent != nullptr) { //node has parent, it belongs to a tree
 						pivot = node;
 						break;
 					}
@@ -420,24 +412,20 @@ void MinMaxFlow::step() {
 			if (pivot == nullptr)
 				break;
 		}
-		std::cout<<"New Pivot "<<*pivot<<std::endl;
+		std::cout<<"Pivot "<<*pivot<<" "<<totalFlow<<std::endl;
+		pivot->active = false;
 		Edge* joinEdge = nullptr;
 		if (pivot->type == NodeType::Source) {
 			for (Edge* a : pivot->edges) {
-				if (a->getCapacity(pivot) > ZERO_TOLERANCE) {
+				if (a->getForwardCapacity(pivot) > ZERO_TOLERANCE) {
 					nbr = a->next(pivot);
-					//std::cout << "Source Neighbor " << *nbr << " " << *a<< std::endl;
 					if (nbr->parent == nullptr) {
 						nbr->type = NodeType::Source;
 						nbr->parent = a;
 						nbr->timestamp = pivot->timestamp;
 						nbr->pathLength = pivot->pathLength + 1;
-
 						nbr->active = true;
 						activeList.push_back(nbr);
-
-						nbr->changed = true;
-						//changeList.push_back(nbr);
 					} else if (nbr->type == NodeType::Sink) {
 						joinEdge = a;
 						break;
@@ -453,18 +441,13 @@ void MinMaxFlow::step() {
 			for (Edge* a : pivot->edges) {
 				if (a->getReverseCapacity(pivot) > ZERO_TOLERANCE) {
 					nbr = a->next(pivot);
-					//std::cout << "Sink Neighbor " << *nbr << " " << *a<< std::endl;
 					if (!nbr->parent) {
 						nbr->type = NodeType::Sink;
 						nbr->parent = a;
 						nbr->timestamp = pivot->timestamp;
 						nbr->pathLength = pivot->pathLength + 1;
-
 						nbr->active = true;
 						activeList.push_back(nbr);
-
-						nbr->changed = true;
-						//changeList.push_back(nbr);
 					} else if (nbr->type == NodeType::Source) {
 						joinEdge = a;
 						break;
@@ -477,39 +460,24 @@ void MinMaxFlow::step() {
 				}
 			}
 		}
-
-		pivot->active = false;
 		iterationCount++;
 		if (joinEdge != nullptr) {
-			std::cout<<*joinEdge<<" "<<totalFlow<<std::endl;
 			totalFlow += augment(joinEdge);
-			std::cout<<"Done Augment"<<std::endl;
-			/*
 			while (!orphanList.empty()) {
 				Node* node = orphanList.front();
 				orphanList.pop_front();
-				std::cout<<"Process Orphan "<<*node<<std::endl;
 				if (node->type == NodeType::Sink) {
 					processSinkOrphan(node);
 				} else if (node->type == NodeType::Source) {
 					processSourceOrphan(node);
 				}
-				/*
-				 for (auto iter = changeList.begin(); iter != changeList.end();
-				 iter++) {
-				 if (*iter == node) {
-				 node->changed = false;
-				 changeList.erase(iter);
-				 break;
-				 }
-				 }
-				 */
-			//}
-			break;
+			}
+			if(pivot->parent==nullptr){
+				pivot=nullptr;
+			}
 		} else {
 			pivot = nullptr;
 		}
-		std::cout<<"Active List Size "<<activeList.size()<<std::endl;
 		for (auto iter = activeList.begin(); iter != activeList.end(); iter++) {
 			Node* node = *iter;
 			if (!node->active) {
@@ -521,10 +489,11 @@ void MinMaxFlow::step() {
 				}
 			}
 		}
+
 	}
 }
 
-std::shared_ptr<MinMaxFlow::Edge> MinMaxFlow::addEdge(int startId, int endId,
+std::shared_ptr<MaxFlow::Edge> MaxFlow::addEdge(int startId, int endId,
 		float fwd_cap, float rev_cap) {
 	assert(startId>=0&&startId<nodes.size());
 	assert(endId>=0&&endId<nodes.size());
