@@ -24,12 +24,15 @@ private:
 	int iterationCount;
 	float totalFlow;
 	float augment(Edge* joinEdge);
+	void processSourceOrphan(Node *i);
+	void processSinkOrphan(Node *i);
 public:
 	enum class NodeType {
-		Source = 0, Sink = 1, Unknown = 2
+		Source = 0, Sink = 1, Orphan=2, Unknown = 3
 	};
-	Edge* ROOT = (Edge*) -1;
-	Edge* ORPHAN = (Edge*) -2;
+	static const float ZERO_TOLERANCE;
+	static Edge* ROOT;
+	static Edge* ORPHAN;
 	struct Node {
 		size_t id;
 		//Node* next;
@@ -48,73 +51,36 @@ public:
 						NodeType::Unknown), active(false), marked(false), changed(
 						false), treeCapacity(0.0f) {
 		}
+		const Node* getParent() const;
+		Node* getParent();
+
 	};
 	struct Edge {
-	protected:
 		float forwardCapacity;
 		float reverseCapacity;
-	public:
 		Node* source = nullptr;
 		Node* target = nullptr;
 		Edge(Node* src = nullptr, Node* tar = nullptr, float fwd_cap = 0.0f,
-				float rev_cap = 0.0f) :
-				source(src), target(tar), forwardCapacity(fwd_cap), reverseCapacity(
-						rev_cap) {
-			if (src != nullptr) {
-				src->edges.push_back(this);
-			} else if (src != nullptr) {
-				tar->edges.push_back(this);
-			}
-		}
-		Node* other(Node* n) const {
-			if (n == source)
-				return target;
-			if (n == target)
-				return source;
-			throw std::runtime_error("Node does not attached to edge");
-		}
-		const float& getCapacity(Node* n) const {
-			if (n == source)
-				return forwardCapacity;
-			if (n == target)
-				return reverseCapacity;
-			throw std::runtime_error("Node does not attached to edge");
-			return forwardCapacity;
-		}
-		float& getCapacity(Node* n) {
-			if (n == source)
-				return forwardCapacity;
-			if (n == target)
-				return reverseCapacity;
-			throw std::runtime_error("Node does not attached to edge");
-			return forwardCapacity;
-		}
-		const float& getReverseCapacity(Node* n) const {
-			if (n == source)
-				return reverseCapacity;
-			if (n == target)
-				return forwardCapacity;
-			throw std::runtime_error("Node does not attached to edge");
-			return reverseCapacity;
-		}
-		float& getReverseCapacity(Node* n) {
-			if (n == source)
-				return reverseCapacity;
-			if (n == target)
-				return forwardCapacity;
-			throw std::runtime_error("Node does not attached to edge");
-			return reverseCapacity;
-		}
-
-		Node* next(Node* n) const {
-			if (n == source)
-				return target;
-			if (n == target)
-				return source;
-			return nullptr;
-		}
+				float rev_cap = 0.0f);
+		const Node* other(const Node* n) const;
+		Node* other(const Node* n);
+		const float& getCapacity(Node* n) const;
+		float& getCapacity(Node* n);
+		const float& getReverseCapacity(Node* n) const;
+		float& getReverseCapacity(Node* n);
+		Node* next(Node* n) const;
 	};
-	MinMaxFlow(size_t nodeCount);
+	MinMaxFlow(size_t sz=0);
+	inline std::vector<Node>& getNodes(){
+		return nodes;
+	}
+	inline std::vector<std::shared_ptr<Edge>>& getEdges(){
+		return edges;
+	}
+	void resize(size_t sz);
+	void setNodeCapacity(int i, float sourceCapacity, float sinkCapacity);
+	void setSourceCapacity(int i, float cap);
+	void setSinkCapacity(int i, float cap);
 	void initialize();
 	void setCapacity(size_t nodeId, float cap);
 	void setSource(size_t nodeId);
@@ -126,6 +92,36 @@ public:
 		return addEdge(edge.x, edge.y, fwd_cap, rev_cap);
 	}
 };
-
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const MinMaxFlow::NodeType& n) {
+	switch (n) {
+	case MinMaxFlow::NodeType::Source:
+		ss << "Source";
+		break;
+	case MinMaxFlow::NodeType::Sink:
+		ss << "Sink";
+		break;
+	case MinMaxFlow::NodeType::Orphan:
+		ss << "Orphan";
+		break;
+	case MinMaxFlow::NodeType::Unknown:
+	default:
+		ss << "Unknown";
+		break;
+	}
+	return ss;
+}
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const MinMaxFlow::Node& n) {
+	ss << "<" << n.id << " [" << n.type << "] cap=" << n.treeCapacity << " len="
+			<< n.pathLength << " time=" << n.timestamp << ">";
+	return ss;
+}
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const MinMaxFlow::Edge& e) {
+	ss << "[" << e.source->id << "::" << e.forwardCapacity << ","
+			<< e.target->id << "::" << e.reverseCapacity << "]";
+	return ss;
+}
 }
 #endif /* INCLUDE_CORE_ALLOYMINMAXFLOW_H_ */
