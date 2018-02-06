@@ -1,9 +1,30 @@
 /*
- * AlloyMinMaxFlow.h
- *
- *  Created on: Feb 3, 2018
- *      Author: blake
- */
+* Copyright(C) 2018, Blake C. Lucas, Ph.D. (img.science@gmail.com)
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+* The above copyright notice and this permission notice shall be included in
+* all copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+* THE SOFTWARE.
+
+-------------------------------------------------------------------------------
+This class implements the maxflow algorithm described in
+	"An Experimental Comparison of Min-Cut/Max-Flow Algorithms for Energy Minimization in Vision."
+	Yuri Boykov and Vladimir Kolmogorov. In IEEE Transactions on Pattern Analysis and Machine Intelligence (PAMI),
+	September 2004
+
+*/
 
 #ifndef INCLUDE_CORE_ALLOYMAXFLOW_H_
 #define INCLUDE_CORE_ALLOYMAXFLOW_H_
@@ -20,8 +41,7 @@ private:
 	std::vector<std::shared_ptr<Edge>> edges;
 	std::list<Node*> activeList;
 	std::list<Node*> orphanList;
-	//std::vector<Node*> changeList;
-	size_t iterationCount;
+	uint64_t iterationCount;
 	float totalFlow;
 	float augment(Edge* joinEdge);
 	void processSourceOrphan(Node *i);
@@ -35,19 +55,16 @@ public:
 	static Edge* ORPHAN;
 	struct Node {
 		size_t id;
-		//Node* next;
 		std::vector<Edge*> edges;
-		std::vector<Node*> children;
-		Edge *parent;	// node's parent
+		Edge *parent;
 		uint64_t timestamp;
 		int pathLength;
 		NodeType type;
 		bool active;
-		bool marked;	// set by mark_node()
 		float treeCapacity; // tree capacity to source >0 or sink <0
 		Node(size_t id = -1) :
 				id(id), parent(nullptr), timestamp(0), pathLength(0), type(
-						NodeType::Unknown), active(false), marked(false), treeCapacity(0.0f) {
+						NodeType::Unknown), active(false), treeCapacity(0.0f) {
 		}
 		const Node* getParent() const;
 		Node* getParent();
@@ -75,11 +92,13 @@ public:
 	inline std::vector<std::shared_ptr<Edge>>& getEdges() {
 		return edges;
 	}
-	void solve();
+	void solve(const std::function<bool(const std::string& message,float progress)>& monitor);
+	bool step();
+	void reset();
 	void resize(size_t sz);
-	void setNodeCapacity(int i, float sourceCapacity, float sinkCapacity);
-	void setSourceCapacity(int i, float cap);
-	void setSinkCapacity(int i, float cap);
+	void addNodeCapacity(int i, float sourceCapacity, float sinkCapacity);
+	void addSourceCapacity(int i, float cap);
+	void addSinkCapacity(int i, float cap);
 	void initialize();
 	void setCapacity(size_t nodeId, float cap);
 	void setSource(size_t nodeId);

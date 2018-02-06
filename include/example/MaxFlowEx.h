@@ -1,5 +1,5 @@
 /*
- * Copyright(C) 2017, Blake C. Lucas, Ph.D. (img.science@gmail.com)
+ * Copyright(C) 2018, Blake C. Lucas, Ph.D. (img.science@gmail.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -41,6 +41,7 @@ protected:
 	int vertexCount;
 	int srcId,sinkId;
 	aly::MaxFlow flow;
+	void updateRender();
 public:
 	MaxFlowEx();
 	bool init(aly::Composite& rootNode);
