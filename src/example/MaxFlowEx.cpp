@@ -108,8 +108,8 @@ bool MaxFlowEx::init(Composite& rootNode) {
 				int v2 = nbr.index;
 				if (v1 >= v2)
 					continue;
-				float w1 = clamp(RandomUniform(0.9f,1.1f)*aly::sqr(2.0f*dot(samples[v1] - float2(0.5f, 0.5f), norm)),0.0f,1.0f);
-				float w2 = clamp(RandomUniform(0.9f,1.1f)*aly::sqr(2.0f*dot(samples[v2] - float2(0.5f, 0.5f), norm)),0.0f,1.0f);
+				float w1 = clamp(RandomUniform(0.9f,1.1f)*aly::sqr(2.0f*dot(samples[v1] - float2(0.5f, 0.5f), norm)),0.0001f,1.0f);
+				float w2 = clamp(RandomUniform(0.9f,1.1f)*aly::sqr(2.0f*dot(samples[v2] - float2(0.5f, 0.5f), norm)),0.0001f,1.0f);
 				edges.push_back(int2(v1, v2));
 				weights.push_back(0.5f * (w1 + w2));
 				if (v1 == srcId) {
