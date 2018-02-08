@@ -319,6 +319,9 @@ std::string AlloyContext::getFullPath(const std::string& partialFile) {
 	for (std::string& dir : assetDirectories) {
 		std::string fullPath = RemoveTrailingSlash(dir) + ALY_PATH_SEPARATOR+ fileName;
 		if (FileExists(fullPath)) {
+			if (fullPath.size()>2&&fullPath.substr(0, 2) == "..") {
+				fullPath = RemoveTrailingSlash(GetCurrentWorkingDirectory()) + ALY_PATH_SEPARATOR + fullPath;
+			}
 			return fullPath;
 		}
 	}
