@@ -499,6 +499,9 @@
     <Lib>
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
+    <PostBuildEvent>
+      <Command>copy  /Y $(SolutionDir)\third_party\bin\Release\$(PlatformName)\glew32.dll $(SolutionDir)\build\$(Configuration)-$(Platform)\glew32.dll</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

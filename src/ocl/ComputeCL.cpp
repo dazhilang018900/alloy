@@ -196,12 +196,42 @@ std::shared_ptr<ProgramCL> CLCompile(const std::string& fileName,
 		const std::initializer_list<ConstantCL>& constants) {
 	std::vector<ConstantCL> tmp;
 	tmp.assign(constants.begin(), constants.end());
-	return CLCompile(fileName, tmp);
+	std::string file = fileName;
+	if (ALY_PATH_SEPARATOR[0] != '/') {
+		for (char& c : file) {
+			if (c == '/') {
+				c = ALY_PATH_SEPARATOR[0];
+			}
+		}
+	}
+	else if (ALY_PATH_SEPARATOR[0] != '\\') {
+		for (char& c : file) {
+			if (c == '\\') {
+				c = ALY_PATH_SEPARATOR[0];
+			}
+		}
+	}
+	return CLCompile(file, tmp);
 }
 std::shared_ptr<ProgramCL> CLCompile(const std::string& fileName,
 		const std::vector<ConstantCL>& constants) {
-	std::vector<std::string> tmp = { fileName };
-	return CLInstance()->compileFiles(GetFileNameWithoutExtension(fileName),
+	std::string file = fileName;
+	if (ALY_PATH_SEPARATOR[0] != '/') {
+		for (char& c : file) {
+			if (c == '/') {
+				c = ALY_PATH_SEPARATOR[0];
+			}
+		}
+	}
+	else if (ALY_PATH_SEPARATOR[0] != '\\') {
+		for (char& c : file) {
+			if (c == '\\') {
+				c = ALY_PATH_SEPARATOR[0];
+			}
+		}
+	}
+	std::vector<std::string> tmp = { file };
+	return CLInstance()->compileFiles(GetFileNameWithoutExtension(file),
 			tmp, constants);
 }
 void CLInitialize(const std::string& vendor, const ComputeCL::Device& device) {
@@ -553,7 +583,22 @@ std::shared_ptr<ProgramCL> ComputeCL::compileFiles(const std::string& name,
 		ss << c.toCode();
 	}
 	for (int k = 0; k < (int) fileNames.size(); k++) {
-		std::string file = AlloyDefaultContext()->getFullPath(fileNames[k]);
+		std::string file = fileNames[k];
+		if (ALY_PATH_SEPARATOR[0] != '/') {
+			for (char& c : file) {
+				if (c == '/') {
+					c = ALY_PATH_SEPARATOR[0];
+				}
+			}
+		}
+		else if (ALY_PATH_SEPARATOR[0] != '\\') {
+			for (char& c : file) {
+				if (c == '\\') {
+					c = ALY_PATH_SEPARATOR[0];
+				}
+			}
+		}
+		file = AlloyDefaultContext()->getFullPath(file);
 		std::string txtFile = ReadTextFile(file);
 		ss << txtFile;
 	}

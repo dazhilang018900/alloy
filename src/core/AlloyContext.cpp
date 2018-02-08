@@ -671,7 +671,7 @@ bool AlloyContext::isOffScreenRender() const {
 	return (windowHistory.back() == offscreenWindow);
 }
 bool AlloyContext::begin(bool onScreen) {
-	windowHistory.push_back(glfwGetCurrentContext());
+	if(glfwGetCurrentContext())windowHistory.push_back(glfwGetCurrentContext());
 	if (onScreen) {
 		glfwMakeContextCurrent(window);
 	} else {
