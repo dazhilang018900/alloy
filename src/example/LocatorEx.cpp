@@ -41,7 +41,7 @@ bool LocatorEx::init(Composite& rootNode) {
 	MakeDelaunay(samples, delaunayTriangles);
 	drawRegion->onDraw = [this, SEARCH_RADIUS](const AlloyContext* context, const box2px& bounds) {
 		NVGcontext* nvg = context->nvgContext;
-
+		nvgLineJoin(nvg,NVG_ROUND);
 		nvgStrokeColor(nvg, Color(64, 64, 64));
 		nvgStrokeWidth(nvg, 2.0f);
 		for (int n = 0;n < (int)delaunayTriangles.size();n++) {

@@ -1909,7 +1909,54 @@ private:
 			return (numer <= T(0));
 		}
 	}
-
+	inline int min(const std::vector<int>& a,int init=std::numeric_limits<int>::max()) {
+		size_t sz = a.size();
+		int tmp=init;
+		for (size_t i = 0; i < sz; i++) {
+			tmp = std::min(tmp,a[i]);
+		}
+		return tmp;
+	}
+	inline int max(const std::vector<int>& a,int init=std::numeric_limits<int>::min()) {
+		size_t sz = a.size();
+		int tmp=init;
+		for (size_t i = 0; i < sz; i++) {
+			tmp = std::max(a[i],tmp);
+		}
+		return tmp;
+	}
+	inline float min(const std::vector<float>& a,float init=std::numeric_limits<float>::max()) {
+		size_t sz = a.size();
+		float tmp=init;
+		for (size_t i = 0; i < sz; i++) {
+			tmp = std::min(tmp,a[i]);
+		}
+		return tmp;
+	}
+	inline float max(const std::vector<float>& a,float init=std::numeric_limits<float>::min()) {
+		size_t sz = a.size();
+		float tmp=init;
+		for (size_t i = 0; i < sz; i++) {
+			tmp = std::max(a[i],tmp);
+		}
+		return tmp;
+	}
+	inline double min(const std::vector<double>& a,double init=std::numeric_limits<double>::max()) {
+		size_t sz = a.size();
+		double tmp=init;
+		for (size_t i = 0; i < sz; i++) {
+			tmp = std::min(tmp,a[i]);
+		}
+		return tmp;
+	}
+	inline double max(const std::vector<double>& a,double init=std::numeric_limits<double>::min()) {
+		size_t sz = a.size();
+		double tmp=init;
+		for (size_t i = 0; i < sz; i++) {
+			tmp = std::max(a[i],tmp);
+		}
+		return tmp;
+	}
 public:
 	lineseg(const vec<T, M>& start = vec<T, M>(T(0)), const vec<T, M>& end =
 			vec<T, M>(T(0))) :
@@ -2458,6 +2505,44 @@ typedef box<uint32_t, 2> box2ui;
 typedef box<uint32_t, 3> box3ui;
 typedef box<uint32_t, 4> box4ui;
 
+
+double min(const std::vector<double>& a,double init=std::numeric_limits<double>::max());
+double max(const std::vector<double>& a,double init=std::numeric_limits<double>::min());
+
+float min(const std::vector<float>& a,float init=std::numeric_limits<float>::max());
+float max(const std::vector<float>& a,float init=std::numeric_limits<float>::min());
+
+int min(const std::vector<int>& a,int init=std::numeric_limits<int>::max());
+int max(const std::vector<int>& a,int init=std::numeric_limits<int>::min());
+
+double2 min(const std::vector<double2>& a,double init=std::numeric_limits<double>::max());
+double2 max(const std::vector<double2>& a,double init=std::numeric_limits<double>::min());
+
+float2 min(const std::vector<float2>& a,float init=std::numeric_limits<float>::max());
+float2 max(const std::vector<float2>& a,float init=std::numeric_limits<float>::min());
+
+int2 min(const std::vector<int2>& a,int init=std::numeric_limits<int>::max());
+int2 max(const std::vector<int2>& a,int init=std::numeric_limits<int>::min());
+
+double3 min(const std::vector<double3>& a,double init=std::numeric_limits<double>::max());
+double3 max(const std::vector<double3>& a,double init=std::numeric_limits<double>::min());
+
+float3 min(const std::vector<float3>& a,float init=std::numeric_limits<float>::max());
+float3 max(const std::vector<float3>& a,float init=std::numeric_limits<float>::min());
+
+int3 min(const std::vector<int3>& a,int init=std::numeric_limits<int>::max());
+int3 max(const std::vector<int3>& a,int init=std::numeric_limits<int>::min());
+
+
+double4 min(const std::vector<double4>& a,double init=std::numeric_limits<double>::max());
+double4 max(const std::vector<double4>& a,double init=std::numeric_limits<double>::min());
+
+float4 min(const std::vector<float4>& a,float init=std::numeric_limits<float>::max());
+float4 max(const std::vector<float4>& a,float init=std::numeric_limits<float>::min());
+
+int4 min(const std::vector<int4>& a,int init=std::numeric_limits<int>::max());
+int4 max(const std::vector<int4>& a,int init=std::numeric_limits<int>::min());
+
 inline RGBA ToRGBA(const RGBAf& r) {
 	return RGBA(clamp((int) (r.x * 255.0f), 0, 255),
 			clamp((int) (r.y * 255.0f), 0, 255),
@@ -2689,6 +2774,7 @@ float DistanceToQuadSqr(const float3& p, const float3& v0, const float3& v1,
 		const float3& v2, const float3& v3, const float3& normal,
 		float3* closestPoint);
 }
+
 namespace std {
 	template<> struct hash<aly::int4> {
 	typedef aly::int3 argument_type;
