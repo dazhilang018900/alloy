@@ -435,7 +435,7 @@ bool GaussianMixture::solve(const DenseMat<float>& data, int G, int km_iter,
 			double det = 1;
 			//std::cout << k << ") " << means.getColumn(k) << " ::" << priors[k];
 			for (int k = 0; k < D; k++) {
-				double d = Diag[k][k];
+				double d = std::max(0.0,(double)Diag[k][k]);
 				//std::cout << " sigma[" << k << "]=" << std::sqrt(d);
 				if (std::abs(d) > var_floor) {
 					det *= d;
@@ -548,6 +548,7 @@ void GaussianMixtureRGB::initializeParameters(const std::vector<float3>& X,
 											- (tmp * tmp)) :
 							float(var_floor);
 		}
+		//std::cout<<"Init Cov "<<fcov<<" SUM "<<sumMember<<" N "<<N<<std::endl;
 		priors[g] = sumMember / (float) N;
 	}
 }
@@ -822,8 +823,8 @@ bool GaussianMixtureRGB::solve(const std::vector<float3>& data, int G,
 			double det = 1;
 			//std::cout << k << ") " << means[k] << " ::" << priors[k];
 			for (int k = 0; k < 3; k++) {
-				double d = Diag[k][k];
-				//std::cout << " sigma[" << k << "]=" << std::sqrt(d);
+				double d = std::max(0.0f,Diag[k][k]);
+				//std::cout << " sigma[" << k << "]=" <<Diag[k][k]<<" "<< std::sqrt(d);
 				if (std::abs(d) > var_floor) {
 					det *= d;
 					d = 1.0 / d;
