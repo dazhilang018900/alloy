@@ -462,9 +462,9 @@ bool MaxFlow::step() {
 	if (pivot == nullptr) {
 		return false;
 	}
+	std::cout << "Pivot " << *pivot << " Total Flow=" << totalFlow<<" Active="<<activeList.size()<<std::endl;
 	while (1) {
 		Edge* joinEdge = nullptr;
-		//std::cout << "Pivot " << *pivot << " Total Flow=" << totalFlow<< std::endl;
 		if (pivot->type == NodeType::Source) {
 			for (Edge* a : pivot->edges) {
 				if (a->getForwardCapacity(pivot) > ZERO_TOLERANCE) {
