@@ -57,6 +57,8 @@ namespace aly {
 	enum class HashMethod {
 		SHA1 = 1, SHA224 = 224, SHA256 = 256, SHA384 = 384, SHA512 = 512
 	};
+	std::wstring ToWString(const std::string& str);
+	std::string ToString(const std::wstring& str);
 	struct FileDescription {
 		std::string fileLocation;
 		FileType fileType;

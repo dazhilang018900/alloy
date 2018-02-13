@@ -59,6 +59,7 @@ namespace aly {
 		if(sz>bufferSize){
 			throw ocl_runtime_error(MakeString()<<"Write size of "<<sz<<" bytes exceeds allocation "<<bufferSize<<" bytes.");
 		}
+		else if (sz == 0)return;
 		int err = clEnqueueWriteBuffer(CLQueue(), buffer, (block) ? CL_TRUE : CL_FALSE, 0, sz, data, 0, NULL, NULL);
 		if (err != CL_SUCCESS)
 			throw ocl_runtime_error("Could not write.", err);
