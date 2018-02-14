@@ -324,7 +324,7 @@ void ComputeCL::initialize(const std::string& vendor,
 	enumeratePlatforms();
 	int err = CL_SUCCESS;
 	if (platforms.size() != 0) {
-		std::cout << getPlatformInfo();
+		//std::cout << getPlatformInfo();
 		bool foundDevice = false;
 		try {
 			setDevice(deviceType = device, vendor);
@@ -348,7 +348,7 @@ void ComputeCL::initialize(const std::string& vendor,
 							<< "Could not initialize OpenCL with vendor "
 							<< vendor << " and device " << device);
 		}
-		std::string deviceInfo = getDeviceInfo(deviceId);
+		//std::string deviceInfo = getDeviceInfo(deviceId);
 		if (deviceType == Device::GPU
 				&& hasExtension(deviceId, "cl_khr_gl_sharing")) {
 			std::cout << "Initializing GL" << std::endl;
