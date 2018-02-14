@@ -233,7 +233,6 @@ void GaussianMixture::initializeParameters(const DenseMat<float>& X,
 		}
 		priors[g] = sumMember / (float) N;
 	}
-//em_fix_params(var_floor);
 }
 
 void GaussianMixture::initializeMeans(const DenseMat<float>& X) {
@@ -444,11 +443,12 @@ bool GaussianMixture::solve(const DenseMat<float>& data, int G, int km_iter,
 				Diag[k][k] = d;
 			}
 			//std::cout << std::endl;
-			scaleFactors[k] = 1.0 / (CORRECTION * std::sqrt(det));
+			scaleFactors[k] = (det>0)?1.0 / (CORRECTION * std::sqrt(det)) : 1.0 / CORRECTION;
 			invSigmas[k] = (U * Diag * Vt).transpose();
 
 		}
 		logl = 0;
+		const double maxSigmaDist=16*16;//16 sigmas is huge!
 		for (int n = 0; n < N; n++) {
 			VecMap<float> sample = data.getColumn(n);
 			double sum = 0;
@@ -456,7 +456,7 @@ bool GaussianMixture::solve(const DenseMat<float>& data, int G, int km_iter,
 				VecMap<float> mean = means.getColumn(k);
 				DenseMat<float> isig = invSigmas[k];
 				double dgaus = std::exp(
-						-0.5 * dot((sample - mean), isig * (sample - mean)))
+						-0.5 * clamp(dot((sample - mean), isig * (sample - mean)),-maxSigmaDist,maxSigmaDist))
 						* scaleFactors[k] * priors[k];
 				sum += dgaus;
 				W[n][k] = dgaus;
@@ -477,20 +477,22 @@ bool GaussianMixture::solve(const DenseMat<float>& data, int G, int km_iter,
 				alpha += W[n][k];
 				mean += W[n][k] * sample;
 			}
-			mean /= (float) alpha;
-			DenseMat<float>& cov = sigmas[k];
-			cov.setZero();
-			for (int n = 0; n < N; n++) {
-				VecMap<float> sample = data.getColumn(n);
-				Vec<float> diff = (sample - mean);
-				float w = W(n, k) / alpha;
-				for (int ii = 0; ii < D; ii++) {
-					for (int jj = 0; jj < D; jj++) {
-						cov[ii][jj] += w * diff[ii] * diff[jj];
+			if(alpha>0){
+				mean /= (float) alpha;
+				DenseMat<float>& cov = sigmas[k];
+				cov.setZero();
+				for (int n = 0; n < N; n++) {
+					VecMap<float> sample = data.getColumn(n);
+					Vec<float> diff = (sample - mean);
+					float w = W(n, k) / alpha;
+					for (int ii = 0; ii < D; ii++) {
+						for (int jj = 0; jj < D; jj++) {
+							cov[ii][jj] += w * diff[ii] * diff[jj];
+						}
 					}
 				}
+				priors[k] = alpha / N;
 			}
-			priors[k] = alpha / N;
 		}
 		if (std::abs(logl - lastlogl) < CONV_TOLERANCE) {
 			break;
@@ -832,32 +834,34 @@ bool GaussianMixtureRGB::solve(const std::vector<float3>& data, int G,
 				Diag[k][k] = d;
 			}
 			//std::cout << std::endl;
-			scaleFactors[k] = 1.0 / (CORRECTION * std::sqrt(det));
+			scaleFactors[k] = (det>0)?1.0 / (CORRECTION * std::sqrt(det)):1.0/CORRECTION;
 			invSigmas[k] = transpose(U * Diag * Vt);
-
+			//std::cout<<k<<") Inverse Sigma "<<Diag[k][k]<<" "<<scaleFactors[k]<<" "<<means[k]<<std::endl;
 		}
 		logl = 0;
+		const float maxSigmaDist=10*10;//16 sigmas is huge!
 		for (int n = 0; n < N; n++) {
 			float3 sample = data[n];
 			double sum = 0;
 			for (int k = 0; k < G; k++) {
 				float3& mean = means[k];
 				float3x3 isig = invSigmas[k];
-				double dgaus = std::exp(
-						-0.5 * dot((sample - mean), isig * (sample - mean)))
-						* scaleFactors[k] * priors[k];
+				double dgaus = std::exp(-0.5 * aly::clamp(dot((sample - mean), isig * (sample - mean)),-maxSigmaDist,maxSigmaDist)) * scaleFactors[k] * priors[k];
 				sum += dgaus;
 				W[n][k] = dgaus;
 			}
-			logl += std::log(sum);
+			logl += std::log(std::max(1E-16,sum));
 			for (int k = 0; k < G; k++) {
 				W[n][k] /= sum;
+				if(std::isnan(W[n][k])||std::isinf(W[n][k])){
+					std::cout<<"Weight is NaN"<<std::endl;
+					W[n][k]=0.0f;
+				}
 			}
 		}
 		logl /= N;
-		//std::cout << "Log Likelihood= " << logl << std::endl;
 		for (int k = 0; k < G; k++) {
-			float3& mean = means[k];
+			float3 mean;
 			mean = float3(0.0f);
 			double alpha = 0;
 			for (int n = 0; n < N; n++) {
@@ -865,20 +869,23 @@ bool GaussianMixtureRGB::solve(const std::vector<float3>& data, int G,
 				alpha += W[n][k];
 				mean += W[n][k] * sample;
 			}
-			mean /= (float) alpha;
-			float3x3& cov = sigmas[k];
-			cov = float3x3::zero();
-			for (int n = 0; n < N; n++) {
-				float3 sample = data[n];
-				float3 diff = (sample - mean);
-				float w = W(n, k) / alpha;
-				for (int ii = 0; ii < 3; ii++) {
-					for (int jj = 0; jj < 3; jj++) {
-						cov[ii][jj] += w * diff[ii] * diff[jj];
+			if(alpha>0){
+				mean /= (float) alpha;
+				means[k]=mean;
+				float3x3& cov = sigmas[k];
+				cov = float3x3::zero();
+				for (int n = 0; n < N; n++) {
+					float3 sample = data[n];
+					float3 diff = (sample - mean);
+					float w = W[n][k] / alpha;
+					for (int ii = 0; ii < 3; ii++) {
+						for (int jj = 0; jj < 3; jj++) {
+							cov[ii][jj] += w * diff[ii] * diff[jj];
+						}
 					}
 				}
+				priors[k] = alpha / N;
 			}
-			priors[k] = alpha / N;
 		}
 		if (std::abs(logl - lastlogl) < CONV_TOLERANCE) {
 			break;
