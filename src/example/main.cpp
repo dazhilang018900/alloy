@@ -18,6 +18,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#include <example/GrabCutEx.h>
 #include <MipavHeaderReaderWriter.h>
 #include "Alloy.h"
 #include "../../include/example/UnitsEx.h"
@@ -68,7 +69,6 @@
 #include "../../include/example/AnisotropicFilterEx.h"
 #include "../../include/example/LevelSetGridEx.h"
 #include "../../include/example/MaxFlowEx.h"
-
 #include "AlloyOptimization.h"
 #include "AlloyGaussianMixture.h"
 #include <cstring>
@@ -153,7 +153,7 @@ bool SANITY_CHECK() {
 }
 int main(int argc, char *argv[]) {
 	//change me when adding new example!
-	const int N=48;
+	const int N=49;
 
 	std::array<ExamplePtr,N> apps = {
 		MAKE_EXAMPLE(UnitsEx), MAKE_EXAMPLE(CompositeEx),MAKE_EXAMPLE(EventsEx), 
@@ -171,7 +171,8 @@ int main(int argc, char *argv[]) {
 		MAKE_EXAMPLE(TabPaneEx),MAKE_EXAMPLE(ParameterPaneEx),MAKE_EXAMPLE(TablePaneEx),
 		MAKE_EXAMPLE(TimelineEx),MAKE_EXAMPLE(MeshOptimizationEx),MAKE_EXAMPLE(ImageFeaturesEx),
 		MAKE_EXAMPLE(MeshTextureMapEx),MAKE_EXAMPLE(MeshReconstructionEx),MAKE_EXAMPLE(SoftBodyEx),
-		MAKE_EXAMPLE(AnisotropicFilterEx),MAKE_EXAMPLE(LevelSetGridEx),MAKE_EXAMPLE(MaxFlowEx)
+		MAKE_EXAMPLE(AnisotropicFilterEx),MAKE_EXAMPLE(LevelSetGridEx),MAKE_EXAMPLE(MaxFlowEx),
+		MAKE_EXAMPLE(GrabCutEx)
 	};
 	std::sort(apps.begin(),apps.end(),[=](const ExamplePtr& a,const ExamplePtr& b){
 		return std::lexicographical_compare(a->name.begin(), a->name.end(), b->name.begin(), b->name.end());

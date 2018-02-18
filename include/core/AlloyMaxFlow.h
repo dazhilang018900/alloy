@@ -92,6 +92,12 @@ public:
 	inline std::vector<std::shared_ptr<Edge>>& getEdges() {
 		return edges;
 	}
+	size_t getActiveListSize() const {
+		return activeList.size();
+	}
+	float getTotalFlow() const {
+		return totalFlow;
+	}
 	void solve(const std::function<bool(const std::string& message,float progress)>& monitor);
 	bool step();
 	void reset();

@@ -462,7 +462,7 @@ bool MaxFlow::step() {
 	if (pivot == nullptr) {
 		return false;
 	}
-	std::cout << "Pivot " << *pivot << " Total Flow=" << totalFlow<<" Active="<<activeList.size()<<std::endl;
+	//std::cout << "Pivot " << *pivot << " Total Flow=" << totalFlow<<" Active="<<activeList.size()<<std::endl;
 	while (1) {
 		Edge* joinEdge = nullptr;
 		if (pivot->type == NodeType::Source) {
