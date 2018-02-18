@@ -31,9 +31,10 @@ protected:
 	aly::box2f selectedRegion;
 	aly::MaxFlow maxFlow;
 	aly::ImageGlyphPtr imageGlyph;
-	int cycle=0;
-	float colorDiff = 0.05f;
-	float maxSigma = 6.0f;
+	int cycle;
+	float colorDiff;
+	float maxDist;
+	const int MAX_CYCLES=8;
 	void initSolver(aly::ImageRGBA& image,const aly::box2f& region);
 	void initSolver(aly::ImageRGBA& image);
 public:

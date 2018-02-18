@@ -89,7 +89,13 @@ void MaxFlow::initialize() {
 	iterationCount = 0;
 	bool foundSource = false;
 	bool foundSink = false;
-	for (Node& node : nodes) {
+	std::vector<size_t> order(nodes.size());
+	for(size_t i=0;i<nodes.size();i++){
+		order[i]=i;
+	}
+	aly::Shuffle(order);
+	for (size_t i:order) {
+		Node& node=nodes[i];
 		node.pathLength = 0;
 		node.timestamp = 0;
 		if (node.treeCapacity > 0) {
@@ -530,14 +536,17 @@ bool MaxFlow::step() {
 			break;
 		}
 	}
-	for (auto iter = activeList.begin(); iter != activeList.end(); iter++) {
-		Node* node = *iter;
-		if (!node->active) {
-			activeList.erase(iter);
-			if (!activeList.empty()) {
-				iter--;
-			} else {
-				break;
+	const int UPDATE_INTERVAL=256;
+	if(iterationCount%UPDATE_INTERVAL==0){
+		for (auto iter = activeList.begin(); iter != activeList.end(); iter++) {
+			Node* node = *iter;
+			if (!node->active) {
+				activeList.erase(iter);
+				if (!activeList.empty()) {
+					iter--;
+				} else {
+					break;
+				}
 			}
 		}
 	}

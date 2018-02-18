@@ -25,8 +25,10 @@
 #include "AlloyMaxFlow.h"
 #include "AlloyMath.h"
 using namespace aly;
-GrabCutEx::GrabCutEx() :
-		Application(900, 600, "Grab Cut Example") {
+GrabCutEx::GrabCutEx() : Application(900, 600, "Grab Cut Example") {
+	cycle = 0;
+	colorDiff = 0.03f;
+	maxDist = 6.0f;
 }
 void GrabCutEx::initSolver(aly::ImageRGBA& image, const aly::box2f& region) {
 	const int nbrX[] = { 0, 0, 1, -1 };
@@ -65,9 +67,9 @@ void GrabCutEx::initSolver(aly::ImageRGBA& image, const aly::box2f& region) {
 				}
 			}
 			maxFlow.addSourceCapacity(id,
-					aly::clamp(sc.x, 0.0f, maxSigma) / maxSigma);
+					aly::clamp(sc.x, 0.0f, maxDist) / maxDist);
 			maxFlow.addSinkCapacity(id,
-					aly::clamp(sc.y, 0.0f, maxSigma) / maxSigma);
+					aly::clamp(sc.y, 0.0f, maxDist) / maxDist);
 		}
 	}
 	maxFlow.initialize();
@@ -111,22 +113,24 @@ void GrabCutEx::initSolver(aly::ImageRGBA& image) {
 				}
 			}
 			maxFlow.addSourceCapacity(id,
-					aly::clamp(sc.x, 0.0f, maxSigma) / maxSigma);
+					aly::clamp(sc.x, 0.0f, maxDist) / maxDist);
 			maxFlow.addSinkCapacity(id,
-					aly::clamp(sc.y, 0.0f, maxSigma) / maxSigma);
+					aly::clamp(sc.y, 0.0f, maxDist) / maxDist);
 		}
 	}
 	maxFlow.initialize();
 }
 bool GrabCutEx::init(Composite& rootNode) {
 	ReadImageFromFile(getFullPath("images/flowers.png"), image);
+	/*
 	{
 		ImageRGBA tmp;
 		DownSample3x3(image, tmp);
 		image = tmp;
 	}
+*/
 	float2 dims = float2(image.dimensions());
-	selectedRegion = box2f(float2(15.0f, 15.0f), float2(225.0f, 160.0f));
+	selectedRegion = box2f(float2(25.0f, 25.0f), float2(460.0f, 320.0f));
 	initSolver(image, selectedRegion);
 	DrawPtr drawRegion =
 			MakeShared<Draw>("Draw", CoordPX(0, 0), CoordPercent(1.0f, 1.0f),
@@ -139,7 +143,7 @@ bool GrabCutEx::init(Composite& rootNode) {
 						float2 sz=selectedRegion.dimensions*bounds.dimensions/dims;
 						nvgRect(nvg,pos.x,pos.y,sz.x,sz.y);
 						nvgStroke(nvg);
-						const int MAX_CYCLES=5;
+
 						if(cycle<MAX_CYCLES) {
 							int iter = 0;
 							while (maxFlow.step()&&iter<4*image.width) {

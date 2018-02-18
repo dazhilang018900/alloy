@@ -246,7 +246,11 @@ Distance Field Example
 
 Max-Flow Graph Cut Example
 -------------------------
-[![DistanceFieldEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/maxflow.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/MaxFlowEx.cpp)
+[![MaxFlowEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/maxflow.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/MaxFlowEx.cpp)
+
+GrabCut Example
+-------------------------
+[![GrabCutEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/grabcut.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/GrabCutEx.cpp)
 
 One Euro Filter Example
 -------------------------
