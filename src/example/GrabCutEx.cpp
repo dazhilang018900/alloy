@@ -25,18 +25,18 @@
 #include "AlloyMaxFlow.h"
 #include "AlloyMath.h"
 using namespace aly;
-GrabCutEx::GrabCutEx() : Application(900, 600, "Grab Cut Example") {
+GrabCutEx::GrabCutEx() :
+		Application(900, 600, "Grab Cut Example"), nbrX( { 0, 0, 1, -1, 1, 1,
+				-1, -1 }), nbrY( { 1, -1, 0, 0, -1, 1, 1, -1 }) {
 	cycle = 0;
 	colorDiff = 0.03f;
 	maxDist = 6.0f;
 }
 void GrabCutEx::initSolver(aly::ImageRGBA& image, const aly::box2f& region) {
-	const int nbrX[] = { 0, 0, 1, -1 };
-	const int nbrY[] = { 1, -1, 0, 0 };
 	GaussianMixtureRGB fgModel, bgModel;
 	std::vector<RGBf> fgSamples, bgSamples;
-	for (int j = 0; j < image.height; j++) {
-		for (int i = 0; i < image.width; i++) {
+	for (int j = 0; j < image.height; j+=2) {
+		for (int i = 0; i < image.width; i+=2) {
 			if (region.contains(float2(i, j))) {
 				fgSamples.push_back(ToRGBf(image(i, j)));
 			} else {
@@ -44,10 +44,39 @@ void GrabCutEx::initSolver(aly::ImageRGBA& image, const aly::box2f& region) {
 			}
 		}
 	}
+
 	fgModel.solve(fgSamples, 5, 128, 32);
-	bgModel.solve(bgSamples, 5, 128, 32);
-	maxFlow.reset();
-	maxFlow.resize(image.width * image.height);
+	bgModel.solve(bgSamples, 2, 128, 32);
+	/*
+	 maxFlow.reset();
+	 maxFlow.resize(image.width * image.height);
+	 for (int j = 0; j < image.height; j++) {
+	 for (int i = 0; i < image.width; i++) {
+	 RGBf c = ToRGBf(image(i, j));
+	 float2 sc;
+	 sc.x = fgModel.distanceMahalanobis(c);
+	 sc.y = bgModel.distanceMahalanobis(c);
+	 int id = i + j * image.width;
+
+	 for (int k = 0; k <4; k++) {
+	 int ii = i + nbrX[k];
+	 int jj = j + nbrY[k];
+	 if (ii >= 0 && jj >= 0 && ii < image.width
+	 && jj < image.height) {
+	 aly::RGBf cc = ToRGBf(image(ii, jj));
+	 float w = std::exp(-lengthL1(c - cc) * 0.3333f / colorDiff);
+	 maxFlow.addEdge(id, ii + image.width * jj, w, w);
+	 }
+	 }
+	 maxFlow.addSourceCapacity(id,
+	 aly::clamp(sc.x, 0.0f, maxDist) / maxDist);
+	 maxFlow.addSinkCapacity(id,
+	 aly::clamp(sc.y, 0.0f, maxDist) / maxDist);
+	 }
+	 }
+	 maxFlow.initialize();
+	 */
+	fastMaxFlow.resize(image.width, image.height);
 	for (int j = 0; j < image.height; j++) {
 		for (int i = 0; i < image.width; i++) {
 			RGBf c = ToRGBf(image(i, j));
@@ -55,7 +84,6 @@ void GrabCutEx::initSolver(aly::ImageRGBA& image, const aly::box2f& region) {
 			sc.x = fgModel.distanceMahalanobis(c);
 			sc.y = bgModel.distanceMahalanobis(c);
 			int id = i + j * image.width;
-
 			for (int k = 0; k < 4; k++) {
 				int ii = i + nbrX[k];
 				int jj = j + nbrY[k];
@@ -63,25 +91,24 @@ void GrabCutEx::initSolver(aly::ImageRGBA& image, const aly::box2f& region) {
 						&& jj < image.height) {
 					aly::RGBf cc = ToRGBf(image(ii, jj));
 					float w = std::exp(-lengthL1(c - cc) * 0.3333f / colorDiff);
-					maxFlow.addEdge(id, ii + image.width * jj, w, w);
+					fastMaxFlow.setEdgeCapacity(i, j, k, w, w);
 				}
 			}
-			maxFlow.addSourceCapacity(id,
-					aly::clamp(sc.x, 0.0f, maxDist) / maxDist);
-			maxFlow.addSinkCapacity(id,
+			fastMaxFlow.setTerminalCapacity(i, j,
+					aly::clamp(sc.x, 0.0f, maxDist) / maxDist,
 					aly::clamp(sc.y, 0.0f, maxDist) / maxDist);
 		}
 	}
-	maxFlow.initialize();
-}
-void GrabCutEx::initSolver(aly::ImageRGBA& image) {
+	fastMaxFlow.initialize(true);
 
-	const int nbrX[] = { 0, 0, 1, -1 };
-	const int nbrY[] = { 1, -1, 0, 0 };
+	//fastMaxFlow.stash(cycle);
+}
+
+void GrabCutEx::initSolver(aly::ImageRGBA& image) {
 	GaussianMixtureRGB fgModel, bgModel;
 	std::vector<RGBf> fgSamples, bgSamples;
-	for (int j = 0; j < image.height; j++) {
-		for (int i = 0; i < image.width; i++) {
+	for (int j = 0; j < image.height; j+=2) {
+		for (int i = 0; i < image.width; i+=2) {
 			RGBAf c = ToRGBAf(image(i, j));
 			if (c.w > 0.5f) {
 				fgSamples.push_back(c.xyz());
@@ -91,9 +118,39 @@ void GrabCutEx::initSolver(aly::ImageRGBA& image) {
 		}
 	}
 	fgModel.solve(fgSamples, 5, 128, 32);
-	bgModel.solve(bgSamples, 5, 128, 32);
-	maxFlow.reset();
-	maxFlow.resize(image.width * image.height);
+	bgModel.solve(bgSamples, 2, 128, 32);
+
+	/*
+	 maxFlow.reset();
+	 maxFlow.resize(image.width * image.height);
+	 for (int j = 0; j < image.height; j++) {
+	 for (int i = 0; i < image.width; i++) {
+	 RGBf c = ToRGBf(image(i, j));
+	 float2 sc;
+	 sc.x = fgModel.distanceMahalanobis(c);
+	 sc.y = bgModel.distanceMahalanobis(c);
+	 int id = i + j * image.width;
+
+	 for (int k = 0; k < 8; k++) {
+	 int ii = i + nbrX[k];
+	 int jj = j + nbrY[k];
+	 if (ii >= 0 && jj >= 0 && ii < image.width
+	 && jj < image.height) {
+	 aly::RGBf cc = ToRGBf(image(ii, jj));
+	 float w = std::exp(-lengthL1(c - cc) * 0.3333f / colorDiff);
+	 maxFlow.addEdge(id, ii + image.width * jj, w, w);
+	 }
+	 }
+	 maxFlow.addSourceCapacity(id,
+	 aly::clamp(sc.x, 0.0f, maxDist) / maxDist);
+	 maxFlow.addSinkCapacity(id,
+	 aly::clamp(sc.y, 0.0f, maxDist) / maxDist);
+	 }
+	 }
+	 maxFlow.initialize();
+	 */
+
+	fastMaxFlow.reset();
 	for (int j = 0; j < image.height; j++) {
 		for (int i = 0; i < image.width; i++) {
 			RGBf c = ToRGBf(image(i, j));
@@ -101,7 +158,6 @@ void GrabCutEx::initSolver(aly::ImageRGBA& image) {
 			sc.x = fgModel.distanceMahalanobis(c);
 			sc.y = bgModel.distanceMahalanobis(c);
 			int id = i + j * image.width;
-
 			for (int k = 0; k < 4; k++) {
 				int ii = i + nbrX[k];
 				int jj = j + nbrY[k];
@@ -109,26 +165,26 @@ void GrabCutEx::initSolver(aly::ImageRGBA& image) {
 						&& jj < image.height) {
 					aly::RGBf cc = ToRGBf(image(ii, jj));
 					float w = std::exp(-lengthL1(c - cc) * 0.3333f / colorDiff);
-					maxFlow.addEdge(id, ii + image.width * jj, w, w);
+					fastMaxFlow.setEdgeCapacity(i, j, k, w, w);
 				}
 			}
-			maxFlow.addSourceCapacity(id,
-					aly::clamp(sc.x, 0.0f, maxDist) / maxDist);
-			maxFlow.addSinkCapacity(id,
+			fastMaxFlow.setTerminalCapacity(i, j,
+					aly::clamp(sc.x, 0.0f, maxDist) / maxDist,
 					aly::clamp(sc.y, 0.0f, maxDist) / maxDist);
 		}
 	}
-	maxFlow.initialize();
+	fastMaxFlow.initialize(false);
 }
+
 bool GrabCutEx::init(Composite& rootNode) {
 	ReadImageFromFile(getFullPath("images/flowers.png"), image);
 	/*
-	{
-		ImageRGBA tmp;
-		DownSample3x3(image, tmp);
-		image = tmp;
-	}
-*/
+	 {
+	 ImageRGBA tmp;
+	 DownSample3x3(image, tmp);
+	 image = tmp;
+	 }
+	 */
 	float2 dims = float2(image.dimensions());
 	selectedRegion = box2f(float2(25.0f, 25.0f), float2(460.0f, 320.0f));
 	initSolver(image, selectedRegion);
@@ -143,17 +199,30 @@ bool GrabCutEx::init(Composite& rootNode) {
 						float2 sz=selectedRegion.dimensions*bounds.dimensions/dims;
 						nvgRect(nvg,pos.x,pos.y,sz.x,sz.y);
 						nvgStroke(nvg);
-
+						/*
+						int iter = 0;
+						while (fastMaxFlow.step()&&iter<128) {
+							iter++;
+						}
+						if(iter>0) {
+							for(int j=0;j<image.height;j++) {
+								for(int i=0;i<image.width;i++) {
+									image(i,j).w = (fastMaxFlow.getFlow(i,j)<0)?255:0;
+								}
+							}
+							imageGlyph->set(image,context);
+						}
+*/
 						if(cycle<MAX_CYCLES) {
 							int iter = 0;
-							while (maxFlow.step()&&iter<4*image.width) {
+							while (fastMaxFlow.step()&&iter<8) {
 								iter++;
 							}
 							if(iter>0) {
-								std::vector<MaxFlow::Node>& nodes = maxFlow.getNodes();
-								for (int n = 0; n < nodes.size(); n++) {
-									MaxFlow::Node& node = nodes[n];
-									image[n].w = static_cast<uint8_t>(node.type)*255;
+								for(int j=0;j<image.height;j++) {
+									for(int i=0;i<image.width;i++) {
+										image(i,j).w = (fastMaxFlow.getFlow(i,j)<0)?255:0;
+									}
 								}
 								imageGlyph->set(image,context);
 							} else {

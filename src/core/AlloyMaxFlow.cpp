@@ -27,10 +27,15 @@
  */
 
 #include <AlloyMaxFlow.h>
+#include <AlloyImage.h>
 namespace aly {
 MaxFlow::Edge* MaxFlow::ROOT = (MaxFlow::Edge*) -1;
 MaxFlow::Edge* MaxFlow::ORPHAN = (MaxFlow::Edge*) -2;
 const float MaxFlow::ZERO_TOLERANCE = 1E-8f;
+const float FastMaxFlow::ZERO_TOLERANCE = 1E-8f;
+const float FastMaxFlow::INF_FLOW = std::numeric_limits<float>::max();
+const size_t FastMaxFlow::OUT_OF_BOUNDS = std::numeric_limits<size_t>::max();
+const int FastMaxFlow::INF_DISTANCE = std::numeric_limits<int>::max();
 MaxFlow::Node* MaxFlow::Node::getParent() {
 	if (parent != nullptr && parent != MaxFlow::ROOT
 			&& parent != MaxFlow::ORPHAN) {
@@ -90,12 +95,12 @@ void MaxFlow::initialize() {
 	bool foundSource = false;
 	bool foundSink = false;
 	std::vector<size_t> order(nodes.size());
-	for(size_t i=0;i<nodes.size();i++){
-		order[i]=i;
+	for (size_t i = 0; i < nodes.size(); i++) {
+		order[i] = i;
 	}
 	aly::Shuffle(order);
-	for (size_t i:order) {
-		Node& node=nodes[i];
+	for (size_t i : order) {
+		Node& node = nodes[i];
 		node.pathLength = 0;
 		node.timestamp = 0;
 		if (node.treeCapacity > 0) {
@@ -453,6 +458,16 @@ void MaxFlow::solve(
 		}
 	}
 }
+std::shared_ptr<MaxFlow::Edge> MaxFlow::addEdge(int startId, int endId,
+		float fwd_cap, float rev_cap) {
+	assert(startId >= 0 && startId < nodes.size());
+	assert(endId >= 0 && endId < nodes.size());
+	std::shared_ptr<Edge> edge(
+			new Edge(&nodes[startId], &nodes[endId], fwd_cap, rev_cap));
+	edges.push_back(edge);
+	return edge;
+}
+
 bool MaxFlow::step() {
 	Node* pivot = nullptr;
 	Node* nbr;
@@ -536,8 +551,8 @@ bool MaxFlow::step() {
 			break;
 		}
 	}
-	const int UPDATE_INTERVAL=256;
-	if(iterationCount%UPDATE_INTERVAL==0){
+	const int UPDATE_INTERVAL = 256;
+	if (iterationCount % UPDATE_INTERVAL == 0) {
 		for (auto iter = activeList.begin(); iter != activeList.end(); iter++) {
 			Node* node = *iter;
 			if (!node->active) {
@@ -552,15 +567,215 @@ bool MaxFlow::step() {
 	}
 	return true;
 }
-
-std::shared_ptr<MaxFlow::Edge> MaxFlow::addEdge(int startId, int endId,
-		float fwd_cap, float rev_cap) {
-	assert(startId >= 0 && startId < nodes.size());
-	assert(endId >= 0 && endId < nodes.size());
-	std::shared_ptr<Edge> edge(
-			new Edge(&nodes[startId], &nodes[endId], fwd_cap, rev_cap));
-	edges.push_back(edge);
-	return edge;
+FastMaxFlow::FastMaxFlow(int w, int h) :
+		width(w), height(h), nbrX( { 0, 0, 1, -1 }), nbrY( { 1, -1, 0, 0 }), reverse(
+				{ 1, 0, 3, 2 }) {
+	resize(w, h);
 }
+void FastMaxFlow::resize(int w, int h) {
+	width = w;
+	height = h;
+	for (int k = 0; k < 4; k++) {
+		edgeCapacity[k].resize(width * height, 0.0f);
+	}
+	excessFlow.resize(width * height, 0.0f);
+	distField.resize(width * height, INF_DISTANCE);
+	labels.resize(width * height, 2);
+}
+void FastMaxFlow::reset() {
+	size_t N = width * (size_t) height;
+	for (int k = 0; k < 4; k++) {
+		edgeCapacity[k].assign(N, 0.0f);
+	}
+	excessFlow.assign(N, 0.0f);
+	distField.assign(N, INF_DISTANCE);
+	labels.resize(N, 2);
+}
+size_t FastMaxFlow::index(int i, int j) const {
+	assert(i >= 0);
+	assert(j >= 0);
+	assert(i < width);
+	assert(j < height);
+
+	return i + j * (size_t) width;
+}
+size_t FastMaxFlow::index(int i, int j, int dir) const {
+
+	int ii = i + nbrX[dir];
+	int jj = j + nbrY[dir];
+	if (ii >= 0 && jj >= 0 && ii < width && jj < height) {
+		return ii + jj * (size_t) width;
+	} else {
+		return OUT_OF_BOUNDS;
+	}
+}
+void FastMaxFlow::push(size_t x, size_t y, int k) {
+	float flow = std::min(edgeCapacity[k][x], excessFlow[x]);
+	float delta = excessFlow[x] - flow;
+	if (delta < ZERO_TOLERANCE) {
+		excessFlow[x] = 0.0f;
+		flow+=delta;
+	} else {
+		excessFlow[x] = delta;
+	}
+	excessFlow[y]+=flow;
+	edgeCapacity[k][x] -= flow;
+	edgeCapacity[reverse[k]][y] += flow;
+}
+
+bool FastMaxFlow::relabel(int i, int j) {
+	int d = INF_DISTANCE;
+	size_t idx = index(i, j);
+	for (int k = 0; k < 4; k++) {
+		size_t y = index(i, j, k);
+		if (y != OUT_OF_BOUNDS && distField[y] != INF_DISTANCE
+				&& edgeCapacity[k][idx] > 0) {
+			d = std::min(distField[y] + 1, d);
+		}
+	}
+	if (d != distField[idx]) {
+		distField[idx] = d;
+		return true;
+	}
+	return false;
+}
+void FastMaxFlow::initialize(bool bfsInit) {
+	size_t N = width * (size_t) height;
+	for (int idx = 0; idx < N; idx++) {
+		if (excessFlow[idx] < ZERO_TOLERANCE) {
+			distField[idx] = 0;
+		}
+	}
+	iterationCount = 0;
+	const int shiftX[] = { 0, 0, 1, 1 };
+	const int shiftY[] = { 0, 1, 0, 1 };
+	int changeCount;
+	if (bfsInit) {
+		do {
+			changeCount = 0;
+			for (int c = 0; c < 4; c++) {
+#pragma omp parallel for reduction(+:changeCount)
+				for (int j = 0; j < height; j += 2) {
+					for (int i = 0; i < width; i += 2) {
+						int ii = i + shiftX[c];
+						int jj = j + shiftY[c];
+						if (ii < width && jj < height) {
+							size_t idx = index(ii, jj);
+							if (excessFlow[idx] >= 0) {
+								int d = INF_DISTANCE;
+								for (int k = 0; k < 4; k++) {
+									size_t y = index(ii, jj, k);
+									if (y != OUT_OF_BOUNDS
+											&& distField[y] != INF_DISTANCE
+											&& edgeCapacity[k][idx] > 0) {
+										d = std::min(distField[y] + 1, d);
+									}
+								}
+								if (d != distField[idx] && d != INF_DISTANCE) {
+									changeCount++;
+									distField[idx] = d;
+								}
+							}
+						}
+					}
+				}
+			}
+		} while (changeCount > 0);
+	}
+
+}
+bool FastMaxFlow::step() {
+	size_t N = width * (size_t) height;
+	int changeCount = 0;
+	const int shiftX[] = { 0, 0, 1, 1 };
+	const int shiftY[] = { 0, 1, 0, 1 };
+	for (int k = 0; k < 4; k++) {
+#pragma omp parallel for
+		for (int j = 0; j < height; j += 2) {
+			for (int i = 0; i < width; i += 2) {
+				int ii = i + shiftX[k];
+				int jj = j + shiftY[k];
+				if (ii < width && jj < height) {
+					size_t idx = index(ii, jj);
+					if (excessFlow[idx] > 0) {// && distField[idx] < N
+						relabel(ii, jj);
+					}
+				}
+			}
+		}
+	}
+	for (int k = 0; k < 4; k++) {
+#pragma omp parallel for
+		for (int j = 0; j < height; j++) {
+			for (int i = 0; i < width; i++) {
+				size_t x = index(i, j);
+				size_t y = index(i, j, k);
+				if (y != OUT_OF_BOUNDS && distField[y] == distField[x] - 1
+						&& excessFlow[x] > 0 && edgeCapacity[k][x] > 0) {
+					push(x, y, k);
+				}
+			}
+		}
+	}
+	static const int UPDATE_INTERVAL = 32;
+	if (iterationCount % UPDATE_INTERVAL == 0) {
+#pragma omp parallel for reduction(+:changeCount)
+		for (size_t idx = 0; idx < N; idx++) {
+			int l = (excessFlow[idx] < 0) ? 1 : 0;
+			if (l != labels[idx]) {
+				labels[idx] = l;
+				changeCount++;
+			}
+		}
+		if (changeCount == 0)
+			return false;
+	}
+	return true;
+}
+void FastMaxFlow::stash(int iter) {
+	std::cout << "Stash " << width << " " << height << std::endl;
+	Image4f sFlow(width, height);
+	Image2f tFlow(width, height);
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width; i++) {
+			size_t idx = index(i, j);
+			int dist = distField[idx];
+			sFlow(i, j) = float4(edgeCapacity[0][idx], edgeCapacity[1][idx],
+					edgeCapacity[2][idx], edgeCapacity[3][idx]);
+			tFlow(i, j) = float2(excessFlow[idx],
+					std::min(dist, width * height));
+		}
+	}
+	WriteImageToFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"sflow"<<std::setw(5)<<std::setfill('0')<<iter<<".xml",sFlow);
+	WriteImageToFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"tflow"<<std::setw(5)<<std::setfill('0')<<iter<<".xml",tFlow);
+}
+void FastMaxFlow::solve(int iterations) {
+	initialize(true);
+	int iter = 0;
+	stash(iter);
+	while (iter < iterations && step()) {
+		if (iter % 2000 == 0) {
+			std::cout << "Iteration " << iter << std::endl;
+			stash(iter);
+		}
+		iter++;
+	}
+	stash(iter);
+}
+void FastMaxFlow::setTerminalCapacity(int i, int j, float srcW, float sinkW) {
+	size_t idx = index(i, j);
+	excessFlow[idx] = srcW - sinkW;
+}
+void FastMaxFlow::setSourceCapacity(int i, int j, float w) {
+	excessFlow[index(i, j)] += w;
+}
+void FastMaxFlow::setSinkCapacity(int i, int j, float w) {
+	excessFlow[index(i, j)] += -w;
+}
+void FastMaxFlow::setEdgeCapacity(int i, int j, int dir, float w1, float w2) {
+	edgeCapacity[dir][index(i, j)] = w1;
+	edgeCapacity[reverse[dir]][index(i, j, dir)] = w2;
+}
+
 }
 

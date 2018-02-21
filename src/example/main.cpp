@@ -72,7 +72,6 @@
 #include "AlloyOptimization.h"
 #include "AlloyGaussianMixture.h"
 #include <cstring>
-
 /*
  For simple execution, main method should look like:
 
@@ -154,7 +153,6 @@ bool SANITY_CHECK() {
 int main(int argc, char *argv[]) {
 	//change me when adding new example!
 	const int N=49;
-
 	std::array<ExamplePtr,N> apps = {
 		MAKE_EXAMPLE(UnitsEx), MAKE_EXAMPLE(CompositeEx),MAKE_EXAMPLE(EventsEx), 
 		MAKE_EXAMPLE(DragEx), MAKE_EXAMPLE(TweenEx),MAKE_EXAMPLE(ImageEx), 
@@ -177,8 +175,8 @@ int main(int argc, char *argv[]) {
 	std::sort(apps.begin(),apps.end(),[=](const ExamplePtr& a,const ExamplePtr& b){
 		return std::lexicographical_compare(a->name.begin(), a->name.end(), b->name.begin(), b->name.end());
 	});
-	aly::WorkerTaskPtr workerTask;
 
+	aly::WorkerTaskPtr workerTask;
 	try {
 		//Example name is specified in a makefile at compile time so 
 		//all example applications are compiled to seperate exe targets.
