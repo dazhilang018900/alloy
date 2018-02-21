@@ -173,7 +173,7 @@ void GrabCutEx::initSolver(aly::ImageRGBA& image) {
 					aly::clamp(sc.y, 0.0f, maxDist) / maxDist);
 		}
 	}
-	fastMaxFlow.initialize(false);
+	fastMaxFlow.initialize(true);
 }
 
 bool GrabCutEx::init(Composite& rootNode) {
