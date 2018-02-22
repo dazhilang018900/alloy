@@ -26,8 +26,8 @@
 #include "AlloyMath.h"
 using namespace aly;
 GrabCutEx::GrabCutEx() :
-		Application(900, 600, "Grab Cut Example"), nbrX( { 0, 0, 1, -1, 1, 1,
-				-1, -1 }), nbrY( { 1, -1, 0, 0, -1, 1, 1, -1 }) {
+		Application(900, 600, "Grab Cut Example"), nbrX( { 1, -1, 0, 0 }), nbrY(
+				{ 0, 0, 1, -1 }) {
 	cycle = 0;
 	colorDiff = 0.03f;
 	maxDist = 6.0f;
@@ -35,8 +35,8 @@ GrabCutEx::GrabCutEx() :
 void GrabCutEx::initSolver(aly::ImageRGBA& image, const aly::box2f& region) {
 	GaussianMixtureRGB fgModel, bgModel;
 	std::vector<RGBf> fgSamples, bgSamples;
-	for (int j = 0; j < image.height; j+=2) {
-		for (int i = 0; i < image.width; i+=2) {
+	for (int j = 0; j < image.height; j += 2) {
+		for (int i = 0; i < image.width; i += 2) {
 			if (region.contains(float2(i, j))) {
 				fgSamples.push_back(ToRGBf(image(i, j)));
 			} else {
@@ -46,7 +46,7 @@ void GrabCutEx::initSolver(aly::ImageRGBA& image, const aly::box2f& region) {
 	}
 
 	fgModel.solve(fgSamples, 5, 128, 32);
-	bgModel.solve(bgSamples, 2, 128, 32);
+	bgModel.solve(bgSamples, 5, 128, 32);
 	/*
 	 maxFlow.reset();
 	 maxFlow.resize(image.width * image.height);
@@ -76,6 +76,7 @@ void GrabCutEx::initSolver(aly::ImageRGBA& image, const aly::box2f& region) {
 	 }
 	 maxFlow.initialize();
 	 */
+
 	fastMaxFlow.resize(image.width, image.height);
 	for (int j = 0; j < image.height; j++) {
 		for (int i = 0; i < image.width; i++) {
@@ -100,15 +101,14 @@ void GrabCutEx::initSolver(aly::ImageRGBA& image, const aly::box2f& region) {
 		}
 	}
 	fastMaxFlow.initialize(true);
-
 	//fastMaxFlow.stash(cycle);
 }
 
 void GrabCutEx::initSolver(aly::ImageRGBA& image) {
 	GaussianMixtureRGB fgModel, bgModel;
 	std::vector<RGBf> fgSamples, bgSamples;
-	for (int j = 0; j < image.height; j+=2) {
-		for (int i = 0; i < image.width; i+=2) {
+	for (int j = 0; j < image.height; j += 2) {
+		for (int i = 0; i < image.width; i += 2) {
 			RGBAf c = ToRGBAf(image(i, j));
 			if (c.w > 0.5f) {
 				fgSamples.push_back(c.xyz());
@@ -118,7 +118,7 @@ void GrabCutEx::initSolver(aly::ImageRGBA& image) {
 		}
 	}
 	fgModel.solve(fgSamples, 5, 128, 32);
-	bgModel.solve(bgSamples, 2, 128, 32);
+	bgModel.solve(bgSamples, 5, 128, 32);
 
 	/*
 	 maxFlow.reset();
@@ -173,6 +173,7 @@ void GrabCutEx::initSolver(aly::ImageRGBA& image) {
 					aly::clamp(sc.y, 0.0f, maxDist) / maxDist);
 		}
 	}
+
 	fastMaxFlow.initialize(true);
 }
 
@@ -185,6 +186,7 @@ bool GrabCutEx::init(Composite& rootNode) {
 	 image = tmp;
 	 }
 	 */
+
 	float2 dims = float2(image.dimensions());
 	selectedRegion = box2f(float2(25.0f, 25.0f), float2(460.0f, 320.0f));
 	initSolver(image, selectedRegion);
@@ -200,28 +202,37 @@ bool GrabCutEx::init(Composite& rootNode) {
 						nvgRect(nvg,pos.x,pos.y,sz.x,sz.y);
 						nvgStroke(nvg);
 						/*
-						int iter = 0;
-						while (fastMaxFlow.step()&&iter<128) {
-							iter++;
-						}
-						if(iter>0) {
-							for(int j=0;j<image.height;j++) {
-								for(int i=0;i<image.width;i++) {
-									image(i,j).w = (fastMaxFlow.getFlow(i,j)<0)?255:0;
-								}
-							}
-							imageGlyph->set(image,context);
-						}
-*/
+						 int iter = 0;
+						 while (fastMaxFlow.step()&&iter<128) {
+						 iter++;
+						 }
+						 if(iter>0) {
+						 for(int j=0;j<image.height;j++) {
+						 for(int i=0;i<image.width;i++) {
+						 image(i,j).w = (fastMaxFlow.getFlow(i,j)<0)?255:0;
+						 }
+						 }
+						 imageGlyph->set(image,context);
+						 }
+						 */
+
 						if(cycle<MAX_CYCLES) {
 							int iter = 0;
-							while (fastMaxFlow.step()&&iter<8) {
+							while (fastMaxFlow.step((cycle%2)?false:true)&&iter<8) {
 								iter++;
 							}
 							if(iter>0) {
 								for(int j=0;j<image.height;j++) {
 									for(int i=0;i<image.width;i++) {
-										image(i,j).w = (fastMaxFlow.getFlow(i,j)<0)?255:0;
+										float f=fastMaxFlow.getFlow(i,j);
+										if(f<0){
+											image(i,j).w = 255;
+										} else if(f>0){
+											image(i,j).w = 0;
+										} else {
+											image(i,j).w = (cycle%2)?255:0;
+											//image(i,j).w=(fastMaxFlow.getDistanceSink(i,j)<=fastMaxFlow.getDistanceSource(i,j))?255:0;
+										}
 									}
 								}
 								imageGlyph->set(image,context);

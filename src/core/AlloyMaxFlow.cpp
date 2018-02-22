@@ -568,7 +568,7 @@ bool MaxFlow::step() {
 	return true;
 }
 FastMaxFlow::FastMaxFlow(int w, int h) :
-		width(w), height(h), nbrX( { 0, 0, 1, -1 }), nbrY( { 1, -1, 0, 0 }), reverse(
+		width(w), height(h), nbrX( { 1, -1, 0, 0 }), nbrY( { 0, 0, 1, -1, }), reverse(
 				{ 1, 0, 3, 2 }) {
 	resize(w, h);
 }
@@ -579,7 +579,8 @@ void FastMaxFlow::resize(int w, int h) {
 		edgeCapacity[k].resize(width * height, 0.0f);
 	}
 	excessFlow.resize(width * height, 0.0f);
-	distField.resize(width * height, INF_DISTANCE);
+	distFieldSource.resize(width * height, INF_DISTANCE);
+	distFieldSink.resize(width * height, INF_DISTANCE);
 	labels.resize(width * height, 2);
 }
 void FastMaxFlow::reset() {
@@ -588,7 +589,8 @@ void FastMaxFlow::reset() {
 		edgeCapacity[k].assign(N, 0.0f);
 	}
 	excessFlow.assign(N, 0.0f);
-	distField.assign(N, INF_DISTANCE);
+	distFieldSink.assign(N, INF_DISTANCE);
+	distFieldSource.assign(N, INF_DISTANCE);
 	labels.resize(N, 2);
 }
 size_t FastMaxFlow::index(int i, int j) const {
@@ -603,47 +605,66 @@ size_t FastMaxFlow::index(int i, int j, int dir) const {
 
 	int ii = i + nbrX[dir];
 	int jj = j + nbrY[dir];
+
 	if (ii >= 0 && jj >= 0 && ii < width && jj < height) {
 		return ii + jj * (size_t) width;
 	} else {
 		return OUT_OF_BOUNDS;
 	}
 }
-void FastMaxFlow::push(size_t x, size_t y, int k) {
-	float flow = std::min(edgeCapacity[k][x], excessFlow[x]);
-	float delta = excessFlow[x] - flow;
-	if (delta < ZERO_TOLERANCE) {
-		excessFlow[x] = 0.0f;
-		flow+=delta;
-	} else {
-		excessFlow[x] = delta;
+void FastMaxFlow::pushSink(size_t x, size_t y, int k) {
+	float ef = excessFlow[x];
+	float ec = edgeCapacity[k][x];
+	if (distFieldSink[y] == distFieldSink[x] - 1 && ef > 0 && ec > 0) {
+		float flow = std::min(ef, ec);
+		excessFlow[x] -= flow;
+		excessFlow[y] += flow;
+		edgeCapacity[k][x] = std::max(edgeCapacity[k][x]-flow,0.0f);
+		edgeCapacity[reverse[k]][y] += flow;
 	}
-	excessFlow[y]+=flow;
-	edgeCapacity[k][x] -= flow;
-	edgeCapacity[reverse[k]][y] += flow;
 }
-
-bool FastMaxFlow::relabel(int i, int j) {
+void FastMaxFlow::pushSource(size_t x, size_t y, int k) {
+	float ef = excessFlow[x];
+	float ec = edgeCapacity[k][x];
+	if (distFieldSource[y] == distFieldSource[x] - 1 && ef < 0 && ec > 0) {
+		float flow = std::max(ef, -ec);
+		excessFlow[x] -= flow;
+		excessFlow[y] += flow;
+		edgeCapacity[k][x] = std::max(edgeCapacity[k][x]+flow,0.0f);
+		edgeCapacity[reverse[k]][y] -= flow;
+	}
+}
+int FastMaxFlow::relabelSink(int i, int j) {
 	int d = INF_DISTANCE;
 	size_t idx = index(i, j);
 	for (int k = 0; k < 4; k++) {
 		size_t y = index(i, j, k);
-		if (y != OUT_OF_BOUNDS && distField[y] != INF_DISTANCE
+		if (y != OUT_OF_BOUNDS && distFieldSink[y] != INF_DISTANCE
 				&& edgeCapacity[k][idx] > 0) {
-			d = std::min(distField[y] + 1, d);
+			d = std::min(distFieldSink[y] + 1, d);
 		}
 	}
-	if (d != distField[idx]) {
-		distField[idx] = d;
-		return true;
+	return d;
+}
+int FastMaxFlow::relabelSource(int i, int j) {
+	int d = INF_DISTANCE;
+	size_t idx = index(i, j);
+	for (int k = 0; k < 4; k++) {
+		size_t y = index(i, j, k);
+		if (y != OUT_OF_BOUNDS && distFieldSource[y] != INF_DISTANCE
+				&& edgeCapacity[k][idx] > 0) {
+			d = std::min(distFieldSource[y] + 1, d);
+		}
 	}
-	return false;
+	return d;
 }
 void FastMaxFlow::initialize(bool bfsInit) {
 	size_t N = width * (size_t) height;
 	for (int idx = 0; idx < N; idx++) {
-		if (excessFlow[idx] < ZERO_TOLERANCE) {
-			distField[idx] = 0;
+		if (excessFlow[idx] < 0) {
+			distFieldSink[idx] = 0;
+		} else if (excessFlow[idx] > 0) {
+			distFieldSource[idx] = 0;
 		}
 	}
 	iterationCount = 0;
@@ -661,19 +682,52 @@ void FastMaxFlow::initialize(bool bfsInit) {
 						int jj = j + shiftY[c];
 						if (ii < width && jj < height) {
 							size_t idx = index(ii, jj);
-							if (excessFlow[idx] >= 0) {
+							if (excessFlow[idx] > 0) {
 								int d = INF_DISTANCE;
 								for (int k = 0; k < 4; k++) {
 									size_t y = index(ii, jj, k);
 									if (y != OUT_OF_BOUNDS
-											&& distField[y] != INF_DISTANCE
+											&& distFieldSink[y] != INF_DISTANCE
 											&& edgeCapacity[k][idx] > 0) {
-										d = std::min(distField[y] + 1, d);
+										d = std::min(distFieldSink[y] + 1, d);
 									}
 								}
-								if (d != distField[idx] && d != INF_DISTANCE) {
+								if (d != distFieldSink[idx]
+										&& d != INF_DISTANCE) {
 									changeCount++;
-									distField[idx] = d;
+									distFieldSink[idx] = d;
+								}
+							}
+						}
+					}
+				}
+			}
+		} while (changeCount > 0);
+		do {
+			changeCount = 0;
+			for (int c = 0; c < 4; c++) {
+#pragma omp parallel for reduction(+:changeCount)
+				for (int j = 0; j < height; j += 2) {
+					for (int i = 0; i < width; i += 2) {
+						int ii = i + shiftX[c];
+						int jj = j + shiftY[c];
+						if (ii < width && jj < height) {
+							size_t idx = index(ii, jj);
+							if (excessFlow[idx] < 0) {
+								int d = INF_DISTANCE;
+								for (int k = 0; k < 4; k++) {
+									size_t y = index(ii, jj, k);
+									if (y != OUT_OF_BOUNDS
+											&& distFieldSource[y]
+													!= INF_DISTANCE
+											&& edgeCapacity[k][idx] > 0) {
+										d = std::min(distFieldSource[y] + 1, d);
+									}
+								}
+								if (d != distFieldSource[idx]
+										&& d != INF_DISTANCE) {
+									changeCount++;
+									distFieldSource[idx] = d;
 								}
 							}
 						}
@@ -684,66 +738,139 @@ void FastMaxFlow::initialize(bool bfsInit) {
 	}
 
 }
-bool FastMaxFlow::step() {
+void FastMaxFlow::stepSource() {
 	size_t N = width * (size_t) height;
 	int changeCount = 0;
 	const int shiftX[] = { 0, 0, 1, 1 };
 	const int shiftY[] = { 0, 1, 0, 1 };
-	for (int k = 0; k < 4; k++) {
-#pragma omp parallel for
-		for (int j = 0; j < height; j += 2) {
-			for (int i = 0; i < width; i += 2) {
-				int ii = i + shiftX[k];
-				int jj = j + shiftY[k];
-				if (ii < width && jj < height) {
-					size_t idx = index(ii, jj);
-					if (excessFlow[idx] > 0) {// && distField[idx] < N
-						relabel(ii, jj);
-					}
-				}
+	std::vector<int> tmp = distFieldSource;
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width; i++) {
+			size_t idx = index(i, j);
+			if (excessFlow[idx] <= 0) {
+				tmp[idx] = relabelSource(i, j);
 			}
 		}
 	}
-	for (int k = 0; k < 4; k++) {
+	distFieldSource = tmp;
 #pragma omp parallel for
-		for (int j = 0; j < height; j++) {
-			for (int i = 0; i < width; i++) {
-				size_t x = index(i, j);
-				size_t y = index(i, j, k);
-				if (y != OUT_OF_BOUNDS && distField[y] == distField[x] - 1
-						&& excessFlow[x] > 0 && edgeCapacity[k][x] > 0) {
-					push(x, y, k);
-				}
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width - 1; i++) {
+			size_t x = index(i, j);
+			size_t y = index(i, j, 0);
+			pushSource(x, y, 0);
+		}
+		for (int i = width - 1; i > 0; i--) {
+			size_t x = index(i, j);
+			size_t y = index(i, j, 1);
+			pushSource(x, y, 1);
+		}
+	}
+#pragma omp parallel for
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < height - 1; j++) {
+			size_t x = index(i, j);
+			size_t y = index(i, j, 2);
+			pushSource(x, y, 2);
+		}
+		for (int j = height - 1; j > 0; j--) {
+			size_t x = index(i, j);
+			size_t y = index(i, j, 3);
+			pushSource(x, y, 3);
+		}
+	}
+}
+
+void FastMaxFlow::stepSink() {
+	size_t N = width * (size_t) height;
+	int changeCount = 0;
+	const int shiftX[] = { 0, 0, 1, 1 };
+	const int shiftY[] = { 0, 1, 0, 1 };
+	std::vector<int> tmp = distFieldSink;
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width; i++) {
+			size_t idx = index(i, j);
+			if (excessFlow[idx] >= 0) {
+				tmp[idx] = relabelSink(i, j);
 			}
 		}
 	}
+	distFieldSink = tmp;
+#pragma omp parallel for
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width - 1; i++) {
+			size_t x = index(i, j);
+			size_t y = index(i, j, 0);
+			pushSink(x, y, 0);
+		}
+		for (int i = width - 1; i > 0; i--) {
+			size_t x = index(i, j);
+			size_t y = index(i, j, 1);
+			pushSink(x, y, 1);
+		}
+	}
+#pragma omp parallel for
+	for (int i = 0; i < width; i++) {
+		for (int j = 0; j < height - 1; j++) {
+			size_t x = index(i, j);
+			size_t y = index(i, j, 2);
+			pushSink(x, y, 2);
+		}
+		for (int j = height - 1; j > 0; j--) {
+			size_t x = index(i, j);
+			size_t y = index(i, j, 3);
+			pushSink(x, y, 3);
+		}
+	}
+
+}
+
+bool FastMaxFlow::step(bool sinkGrow) {
+	size_t N = width * (size_t) height;
 	static const int UPDATE_INTERVAL = 32;
+	//if (iterationCount % 100 == 0)stash(iterationCount);
+	if(sinkGrow){
+		stepSink();
+	} else {
+		stepSource();
+	}
+	int changeCount=0;
 	if (iterationCount % UPDATE_INTERVAL == 0) {
 #pragma omp parallel for reduction(+:changeCount)
 		for (size_t idx = 0; idx < N; idx++) {
-			int l = (excessFlow[idx] < 0) ? 1 : 0;
+
+			int l;
+			if(sinkGrow){
+				l=(excessFlow[idx] < 0) ? 1 : 0;
+			} else{
+				l=(excessFlow[idx] <=0) ? 1 : 0;
+			}
 			if (l != labels[idx]) {
 				labels[idx] = l;
 				changeCount++;
 			}
 		}
-		if (changeCount == 0)
+		if (changeCount == 0) {
+			//stash(iterationCount);
 			return false;
+		}
 	}
+	//if(iterationCount>=800)return false;
+	iterationCount++;
 	return true;
 }
 void FastMaxFlow::stash(int iter) {
 	std::cout << "Stash " << width << " " << height << std::endl;
 	Image4f sFlow(width, height);
-	Image2f tFlow(width, height);
+	Image3f tFlow(width, height);
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {
 			size_t idx = index(i, j);
-			int dist = distField[idx];
 			sFlow(i, j) = float4(edgeCapacity[0][idx], edgeCapacity[1][idx],
 					edgeCapacity[2][idx], edgeCapacity[3][idx]);
-			tFlow(i, j) = float2(excessFlow[idx],
-					std::min(dist, width * height));
+			tFlow(i, j) = float3(excessFlow[idx],
+					std::min(distFieldSink[idx], width * height),
+					std::min(distFieldSource[idx], width * height));
 		}
 	}
 	WriteImageToFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"sflow"<<std::setw(5)<<std::setfill('0')<<iter<<".xml",sFlow);
@@ -752,15 +879,15 @@ void FastMaxFlow::stash(int iter) {
 void FastMaxFlow::solve(int iterations) {
 	initialize(true);
 	int iter = 0;
-	stash(iter);
-	while (iter < iterations && step()) {
+	//stash(iter);
+	while (iter < iterations && step(true)) {
 		if (iter % 2000 == 0) {
 			std::cout << "Iteration " << iter << std::endl;
-			stash(iter);
+			//stash(iter);
 		}
 		iter++;
 	}
-	stash(iter);
+	//stash(iter);
 }
 void FastMaxFlow::setTerminalCapacity(int i, int j, float srcW, float sinkW) {
 	size_t idx = index(i, j);

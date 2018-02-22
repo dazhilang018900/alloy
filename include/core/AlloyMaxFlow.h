@@ -129,26 +129,38 @@ protected:
 	const int nbrY[4];
 	const int reverse[4];
 	std::vector<float> excessFlow;
-	std::vector<int> distField;
+	std::vector<int> distFieldSink;
+	std::vector<int> distFieldSource;
 	std::vector<uint8_t> labels;
 	std::vector<float> edgeCapacity[4];
 	size_t index(int i, int j) const;
 	size_t index(int i, int j, int dir) const;
-	void push(size_t x,size_t y,int k);
-	bool relabel(int i, int j);
+	void pushSink(size_t x,size_t y,int k);
+	void pushSource(size_t x,size_t y,int k);
+	int relabelSink(int i, int j);
+	int relabelSource(int i, int j);
 public:
 	FastMaxFlow(int width = 0, int height = 0);
 	void initialize(bool bfsInit=true);
-	bool step();
+	bool step(bool sinkGrow);
+	void stepSink();
+	void stepSource();
 	void resize(int width, int height);
 	void reset();
 	void solve(int iterations);
 	void stash(int iter);
-	inline int getDistance(int i, int j) const {
-		return distField[index(i, j)];
+	inline int getDistanceSink(int i, int j) const {
+		return distFieldSink[index(i, j)];
 	}
-	inline int getDistance(size_t idx) const {
-		return distField[idx];
+	inline int getDistanceSource(int i, int j) const {
+		return distFieldSource[index(i, j)];
+	}
+
+	inline int getDistanceSink(size_t idx) const {
+		return distFieldSink[idx];
+	}
+	inline int getDistanceSource(size_t idx) const {
+		return distFieldSource[idx];
 	}
 	inline float getFlow(size_t idx) const {
 		return excessFlow[idx];

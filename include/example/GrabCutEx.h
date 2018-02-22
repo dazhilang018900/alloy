@@ -27,8 +27,8 @@
 #include "AlloyMaxFlow.h"
 class GrabCutEx: public aly::Application {
 protected:
-	const int nbrX[8];
-	const int nbrY[8];
+	const int nbrX[4];
+	const int nbrY[4];
 	aly::ImageRGBA image;
 	aly::box2f selectedRegion;
 	aly::MaxFlow maxFlow;
@@ -37,7 +37,7 @@ protected:
 	int cycle;
 	float colorDiff;
 	float maxDist;
-	const int MAX_CYCLES=5;
+	const int MAX_CYCLES=7;
 	void initSolver(aly::ImageRGBA& image,const aly::box2f& region);
 	void initSolver(aly::ImageRGBA& image);
 public:

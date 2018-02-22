@@ -98,7 +98,6 @@ void SANITY_CHECK_GMM() {
 	std::cout << "Elapsed " << elapsed << std::endl;
 
 }
-
 void WriteGaussianMixtureToFile(const std::string& file,
 		const GaussianMixtureRGB& params) {
 	std::string ext = GetFileExtension(file);
@@ -854,7 +853,6 @@ bool GaussianMixtureRGB::solve(const std::vector<float3>& data, int G,
 			for (int k = 0; k < G; k++) {
 				W[n][k] /= sum;
 				if(std::isnan(W[n][k])||std::isinf(W[n][k])){
-					std::cout<<"Weight is NaN"<<std::endl;
 					W[n][k]=0.0f;
 				}
 			}
