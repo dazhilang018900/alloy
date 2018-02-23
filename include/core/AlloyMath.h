@@ -1636,6 +1636,12 @@ template<class T> T Angle(const vec<T, 3>& v0, const vec<T, 3>& v1,
 	float len2 = length(w);
 	return std::acos(dot(v, w) / std::max(1E-8f, len1 * len2));
 }
+template<class T> T Angle(const vec<T, 2>& v0, const vec<T, 2>& v1,
+		const vec<T, 2>& v2) {
+	vec<T, 2> v = normalize(v0 - v1);
+	vec<T, 2> w = normalize(v2 - v1);
+	return std::asin(crossMag(v,w));
+}
 template<class K, class T, int C> void ConvertType(vec<T, C> in,
 		vec<K, C>& out) {
 	for (int c = 0; c < C; c++) {

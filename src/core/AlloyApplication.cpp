@@ -409,6 +409,20 @@ void Application::onCursorPos(double xpos, double ypos) {
 	} else {
 		e.button=-1;
 	}
+	e.mods=0;
+	GLFWwindow* window = context->window;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)
+			| glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT))
+		e.mods |= GLFW_MOD_SHIFT;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)
+			| glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL))
+		e.mods |= GLFW_MOD_CONTROL;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_ALT)
+			| glfwGetKey(window, GLFW_KEY_RIGHT_ALT))
+		e.mods |= GLFW_MOD_ALT;
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SUPER)
+			| glfwGetKey(window, GLFW_KEY_RIGHT_SUPER))
+		e.mods |= GLFW_MOD_SUPER;
 	e.cursor = pixel2((pixel) (xpos), (pixel) (ypos));
 	fireEvent(e);
 }
@@ -460,6 +474,20 @@ void Application::onCursorEnter(int enter) {
 		e=InputEvent();
 		e.type = InputType::Cursor;
 		e.cursor = context->cursorPosition;
+		e.mods=0;
+		GLFWwindow* window = context->window;
+		if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)
+				| glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT))
+			e.mods |= GLFW_MOD_SHIFT;
+		if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)
+				| glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL))
+			e.mods |= GLFW_MOD_CONTROL;
+		if (glfwGetKey(window, GLFW_KEY_LEFT_ALT)
+				| glfwGetKey(window, GLFW_KEY_RIGHT_ALT))
+			e.mods |= GLFW_MOD_ALT;
+		if (glfwGetKey(window, GLFW_KEY_LEFT_SUPER)
+				| glfwGetKey(window, GLFW_KEY_RIGHT_SUPER))
+			e.mods |= GLFW_MOD_SUPER;
 		fireEvent(e);
 	} else {
 		context->hasFocus = true;
@@ -506,7 +534,6 @@ void Application::onMouseButton(int button, int action, int mods) {
 		lastClickTime = currentTime;
 	}
 	e.action = action;
-	e.mods = mods;
 	fireEvent(e);
 }
 void Application::onKey(int key, int scancode, int action, int mods) {

@@ -66,6 +66,8 @@ const Cursor Cursor::Vertical(0xf07d, 24.0f,
 		NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
 const Cursor Cursor::Position(0xf047, 24.0f,
 		NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
+const Cursor Cursor::Rotate(0xf021, 24.0f,
+		NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
 const Cursor Cursor::TextInsert(0xf246, 24.0f,
 		NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
 const Cursor Cursor::SlantDown(0xf07d, 24.0f,
