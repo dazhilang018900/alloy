@@ -690,6 +690,18 @@ template<class T, int M> vec<T, M> sqrt(const vec<T, M> & v) {
 		result[m] = std::sqrt(v[m]);
 	return result;
 }
+template<class T, int M> vec<T, M> pow(const vec<T, M> & v,const vec<T, M> & p) {
+	vec<T, M> result;
+	for (int m = 0; m < M; m++)
+		result[m] = std::pow(v[m],p[m]);
+	return result;
+}
+template<class T, int M> vec<T, M> pow(const vec<T, M> & v,const T& p) {
+	vec<T, M> result;
+	for (int m = 0; m < M; m++)
+		result[m] = std::pow(v[m],p);
+	return result;
+}
 inline float sqr(const float& v) {
 	return v*v;
 }
