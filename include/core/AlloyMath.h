@@ -702,6 +702,9 @@ template<class T, int M> vec<T, M> pow(const vec<T, M> & v,const T& p) {
 		result[m] = std::pow(v[m],p);
 	return result;
 }
+template<class T> T pow(const T& v,const T& p) {
+	return T(std::pow(double(v),double(p)));
+}
 inline float sqr(const float& v) {
 	return v*v;
 }

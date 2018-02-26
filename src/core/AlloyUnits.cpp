@@ -331,6 +331,36 @@ RGBAf HSVAtoRGBAf(const HSVA& hsv) {
 		return RGBAf(v, p, q, hsv.w);
 	}
 }
+uint32_t RGBtoRGB565(const aly::RGB& c){
+	return (uint32_t(c.z) << 11) | (uint32_t(c.y) << 5) | uint32_t(c.x);
+}
+uint32_t RGBtoRGB666(const aly::RGB& c){
+	uint32_t bhi =7&(uint32_t(c.z)>>3);
+	uint32_t blo= 7&(uint32_t(c.z));
+    return (bhi<<15)|(uint32_t(c.y)<<9)|(blo<<6)|uint32_t(c.x);
+}
+uint32_t RGBtoRGB888(const aly::RGB& c){
+	return (uint32_t(c.z) << 16) | (uint32_t(c.y) << 8) | uint32_t(c.x);
+}
+aly::RGB RGB565toRGB(uint32_t c){
+	uint32_t r = 31 & (c);
+	uint32_t g = 63 & (c >> 5);
+	uint32_t b = 31 & (c >> 11);
+	return aly::RGB(r,g,b);
+}
+aly::RGB RGB666toRGB(uint32_t c){
+	uint32_t r = 63 & (c);
+	uint32_t g = 63 & (c >> 9);
+	uint32_t b = ((c >> 6) & 7) + 8 * ((c >> 15) & 7);
+	return aly::RGB(r,g,b);
+}
+aly::RGB RGB888toRGB(uint32_t c){
+	uint32_t r = 255 & (c);
+	uint32_t g = 255 & (c >> 8);
+	uint32_t b = 255 & (c >> 16);
+	return aly::RGB(r,g,b);
+}
+
 Color HSVtoColor(const HSV& hsv) {
 	float h = hsv.x * 360.0f;
 	float s = hsv.y;
@@ -361,6 +391,7 @@ Color HSVtoColor(const HSV& hsv) {
 		return Color(v, p, q);
 	}
 }
+
 Color HSVAtoColor(const HSVA& hsva) {
 	Color c = HSVtoColor(hsva.xyz());
 	c.a = hsva.w;
