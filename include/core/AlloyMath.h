@@ -690,6 +690,9 @@ template<class T, int M> vec<T, M> sqrt(const vec<T, M> & v) {
 		result[m] = std::sqrt(v[m]);
 	return result;
 }
+template<class T> T sqrt(const T& v) {
+	return T(std::sqrt(double(v)));
+}
 template<class T, int M> vec<T, M> pow(const vec<T, M> & v,const vec<T, M> & p) {
 	vec<T, M> result;
 	for (int m = 0; m < M; m++)
