@@ -1404,36 +1404,12 @@ template<class C, class R, class T, int M, int N> std::basic_ostream<C, R> & ope
 	}
 	return ss;
 }
-template<class T> matrix<T, 4, 4> MakeRotation(const vec<T, 3>& axis, T angle) {
-	matrix<T, 4, 4> M = Identity<T, 4, 4>();
-	T mag = length(axis);
-	if (mag >= 1E-6f) {
-		mag = ((T) 1.0) / mag;
-		T ax = axis[0] * mag;
-		T ay = axis[1] * mag;
-		T az = axis[2] * mag;
-		T sinTheta = (T) sin(angle);
-		T cosTheta = (T) cos(angle);
-		T t = (T) 1.0 - cosTheta;
+matrix<float, 4, 4> MakeRotation(const vec<float, 3>& axis, float angle);
+matrix<double, 4, 4> MakeRotation(const vec<double, 3>& axis, double angle);
 
-		T xz = ax * az;
-		T xy = ax * ay;
-		T yz = ay * az;
+matrix<float, 4, 4> MakeRotation(const vec<float, 3>& axis);
+matrix<double, 4, 4> MakeRotation(const vec<double, 3>& axis);
 
-		M(0, 0) = t * ax * ax + cosTheta;
-		M(0, 1) = t * xy - sinTheta * az;
-		M(0, 2) = t * xz + sinTheta * ay;
-
-		M(1, 0) = t * xy + sinTheta * az;
-		M(1, 1) = t * ay * ay + cosTheta;
-		M(1, 2) = t * yz - sinTheta * ax;
-
-		M(2, 0) = t * xz - sinTheta * ay;
-		M(2, 1) = t * yz + sinTheta * ax;
-		M(2, 2) = t * az * az + cosTheta;
-	}
-	return M;
-}
 template<class T> vec<T, 2> Rotate(const vec<T, 2>& v, T angle) {
 	T cs = cos(angle);
 	T sn = sin(angle);

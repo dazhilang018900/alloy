@@ -24,201 +24,275 @@
 #include <random>
 using namespace std;
 namespace aly {
-int4 min(const std::vector<int4>& a,int init) {
+int4 min(const std::vector<int4>& a, int init) {
 	size_t sz = a.size();
 	int4 tmp(init);
 	for (size_t i = 0; i < sz; i++) {
-		tmp = aly::min(tmp,a[i]);
+		tmp = aly::min(tmp, a[i]);
 	}
 	return tmp;
 }
-int4 max(const std::vector<int4>& a,int init) {
+int4 max(const std::vector<int4>& a, int init) {
 	size_t sz = a.size();
 	int4 tmp(init);
 	for (size_t i = 0; i < sz; i++) {
-		tmp = aly::max(a[i],tmp);
+		tmp = aly::max(a[i], tmp);
 	}
 	return tmp;
 }
 
-float4 min(const std::vector<float4>& a,float init) {
+float4 min(const std::vector<float4>& a, float init) {
 	size_t sz = a.size();
 	float4 tmp(init);
 	for (size_t i = 0; i < sz; i++) {
-		tmp = aly::min(tmp,a[i]);
+		tmp = aly::min(tmp, a[i]);
 	}
 	return tmp;
 }
-float4 max(const std::vector<float4>& a,float init) {
+float4 max(const std::vector<float4>& a, float init) {
 	size_t sz = a.size();
 	float4 tmp(init);
 	for (size_t i = 0; i < sz; i++) {
-		tmp = aly::max(a[i],tmp);
+		tmp = aly::max(a[i], tmp);
 	}
 	return tmp;
 }
-double4 min(const std::vector<double4>& a,double init) {
+double4 min(const std::vector<double4>& a, double init) {
 	size_t sz = a.size();
 	double4 tmp(init);
 	for (size_t i = 0; i < sz; i++) {
-		tmp = aly::min(tmp,a[i]);
+		tmp = aly::min(tmp, a[i]);
 	}
 	return tmp;
 }
-double4 max(const std::vector<double4>& a,double init) {
+double4 max(const std::vector<double4>& a, double init) {
 	size_t sz = a.size();
 	double4 tmp(init);
 	for (size_t i = 0; i < sz; i++) {
-		tmp = aly::max(a[i],tmp);
+		tmp = aly::max(a[i], tmp);
 	}
 	return tmp;
 }
 
-int3 min(const std::vector<int3>& a,int init) {
+int3 min(const std::vector<int3>& a, int init) {
 	size_t sz = a.size();
 	int3 tmp(init);
 	for (size_t i = 0; i < sz; i++) {
-		tmp = aly::min(tmp,a[i]);
+		tmp = aly::min(tmp, a[i]);
 	}
 	return tmp;
 }
-int3 max(const std::vector<int3>& a,int init) {
+int3 max(const std::vector<int3>& a, int init) {
 	size_t sz = a.size();
 	int3 tmp(init);
 	for (size_t i = 0; i < sz; i++) {
-		tmp = aly::max(a[i],tmp);
+		tmp = aly::max(a[i], tmp);
 	}
 	return tmp;
 }
 
-float3 min(const std::vector<float3>& a,float init) {
+float3 min(const std::vector<float3>& a, float init) {
 	size_t sz = a.size();
 	float3 tmp(init);
 	for (size_t i = 0; i < sz; i++) {
-		tmp = aly::min(tmp,a[i]);
+		tmp = aly::min(tmp, a[i]);
 	}
 	return tmp;
 }
-float3 max(const std::vector<float3>& a,float init) {
+float3 max(const std::vector<float3>& a, float init) {
 	size_t sz = a.size();
 	float3 tmp(init);
 	for (size_t i = 0; i < sz; i++) {
-		tmp = aly::max(a[i],tmp);
+		tmp = aly::max(a[i], tmp);
 	}
 	return tmp;
 }
-double3 min(const std::vector<double3>& a,double init) {
+double3 min(const std::vector<double3>& a, double init) {
 	size_t sz = a.size();
 	double3 tmp(init);
 	for (size_t i = 0; i < sz; i++) {
-		tmp = aly::min(tmp,a[i]);
+		tmp = aly::min(tmp, a[i]);
 	}
 	return tmp;
 }
-double3 max(const std::vector<double3>& a,double init) {
+double3 max(const std::vector<double3>& a, double init) {
 	size_t sz = a.size();
 	double3 tmp(init);
 	for (size_t i = 0; i < sz; i++) {
-		tmp = aly::max(a[i],tmp);
+		tmp = aly::max(a[i], tmp);
 	}
 	return tmp;
 }
-int2 min(const std::vector<int2>& a,int init) {
+int2 min(const std::vector<int2>& a, int init) {
 	size_t sz = a.size();
 	int2 tmp(init);
 	for (size_t i = 0; i < sz; i++) {
-		tmp = aly::min(tmp,a[i]);
+		tmp = aly::min(tmp, a[i]);
 	}
 	return tmp;
 }
-int2 max(const std::vector<int2>& a,int init) {
+int2 max(const std::vector<int2>& a, int init) {
 	size_t sz = a.size();
 	int2 tmp(init);
 	for (size_t i = 0; i < sz; i++) {
-		tmp = aly::max(a[i],tmp);
+		tmp = aly::max(a[i], tmp);
 	}
 	return tmp;
 }
 
-float2 min(const std::vector<float2>& a,float init) {
+float2 min(const std::vector<float2>& a, float init) {
 	size_t sz = a.size();
 	float2 tmp(init);
 	for (size_t i = 0; i < sz; i++) {
-		tmp = aly::min(tmp,a[i]);
+		tmp = aly::min(tmp, a[i]);
 	}
 	return tmp;
 }
-float2 max(const std::vector<float2>& a,float init) {
+float2 max(const std::vector<float2>& a, float init) {
 	size_t sz = a.size();
 	float2 tmp(init);
 	for (size_t i = 0; i < sz; i++) {
-		tmp = aly::max(a[i],tmp);
+		tmp = aly::max(a[i], tmp);
 	}
 	return tmp;
 }
-double2 min(const std::vector<double2>& a,double init) {
+double2 min(const std::vector<double2>& a, double init) {
 	size_t sz = a.size();
 	double2 tmp(init);
 	for (size_t i = 0; i < sz; i++) {
-		tmp = aly::min(tmp,a[i]);
+		tmp = aly::min(tmp, a[i]);
 	}
 	return tmp;
 }
-double2 max(const std::vector<double2>& a,double init) {
+double2 max(const std::vector<double2>& a, double init) {
 	size_t sz = a.size();
 	double2 tmp(init);
 	for (size_t i = 0; i < sz; i++) {
-		tmp = aly::max(a[i],tmp);
+		tmp = aly::max(a[i], tmp);
 	}
 	return tmp;
 }
- int min(const std::vector<int>& a,int init) {
+int min(const std::vector<int>& a, int init) {
 	size_t sz = a.size();
-	int tmp=init;
+	int tmp = init;
 	for (size_t i = 0; i < sz; i++) {
-		tmp = std::min(tmp,a[i]);
+		tmp = std::min(tmp, a[i]);
 	}
 	return tmp;
 }
- int max(const std::vector<int>& a,int init) {
+int max(const std::vector<int>& a, int init) {
 	size_t sz = a.size();
-	int tmp=init;
+	int tmp = init;
 	for (size_t i = 0; i < sz; i++) {
-		tmp = std::max(a[i],tmp);
+		tmp = std::max(a[i], tmp);
 	}
 	return tmp;
 }
- float min(const std::vector<float>& a,float init) {
+float min(const std::vector<float>& a, float init) {
 	size_t sz = a.size();
-	float tmp=init;
+	float tmp = init;
 	for (size_t i = 0; i < sz; i++) {
-		tmp = std::min(tmp,a[i]);
+		tmp = std::min(tmp, a[i]);
 	}
 	return tmp;
 }
- float max(const std::vector<float>& a,float init) {
+float max(const std::vector<float>& a, float init) {
 	size_t sz = a.size();
-	float tmp=init;
+	float tmp = init;
 	for (size_t i = 0; i < sz; i++) {
-		tmp = std::max(a[i],tmp);
+		tmp = std::max(a[i], tmp);
 	}
 	return tmp;
 }
- double min(const std::vector<double>& a,double init) {
+double min(const std::vector<double>& a, double init) {
 	size_t sz = a.size();
-	double tmp=init;
+	double tmp = init;
 	for (size_t i = 0; i < sz; i++) {
-		tmp = std::min(tmp,a[i]);
+		tmp = std::min(tmp, a[i]);
 	}
 	return tmp;
 }
- double max(const std::vector<double>& a,double init) {
+double max(const std::vector<double>& a, double init) {
 	size_t sz = a.size();
-	double tmp=init;
+	double tmp = init;
 	for (size_t i = 0; i < sz; i++) {
-		tmp = std::max(a[i],tmp);
+		tmp = std::max(a[i], tmp);
 	}
 	return tmp;
+}
+template<class T> matrix<T, 4, 4> MakeRotationInternal(const vec<T, 3>& axis,
+		T angle) {
+	matrix<T, 4, 4> M = Identity<T, 4, 4>();
+	T mag = length(axis);
+	if (mag >= 1E-6f) {
+		mag = ((T) 1.0) / mag;
+		T ax = axis[0] * mag;
+		T ay = axis[1] * mag;
+		T az = axis[2] * mag;
+		T sinTheta = (T) sin(angle);
+		T cosTheta = (T) cos(angle);
+		T t = (T) 1.0 - cosTheta;
+
+		T xz = ax * az;
+		T xy = ax * ay;
+		T yz = ay * az;
+
+		M(0, 0) = t * ax * ax + cosTheta;
+		M(0, 1) = t * xy - sinTheta * az;
+		M(0, 2) = t * xz + sinTheta * ay;
+
+		M(1, 0) = t * xy + sinTheta * az;
+		M(1, 1) = t * ay * ay + cosTheta;
+		M(1, 2) = t * yz - sinTheta * ax;
+
+		M(2, 0) = t * xz - sinTheta * ay;
+		M(2, 1) = t * yz + sinTheta * ax;
+		M(2, 2) = t * az * az + cosTheta;
+	}
+	return M;
+}
+template<class T> matrix<T, 4, 4> MakeRotationInternal(const vec<T, 3>& axis) {
+	matrix<T, 4, 4> M = Identity<T, 4, 4>();
+	T mag = length(axis);
+	if (mag >= 1E-6f) {
+		T sinTheta = (T) sin(mag);
+		T cosTheta = (T) cos(mag);
+		mag = ((T) 1.0) / mag;
+		T ax = axis[0] * mag;
+		T ay = axis[1] * mag;
+		T az = axis[2] * mag;
+		T t = (T) 1.0 - cosTheta;
+
+		T xz = ax * az;
+		T xy = ax * ay;
+		T yz = ay * az;
+
+		M(0, 0) = t * ax * ax + cosTheta;
+		M(0, 1) = t * xy - sinTheta * az;
+		M(0, 2) = t * xz + sinTheta * ay;
+
+		M(1, 0) = t * xy + sinTheta * az;
+		M(1, 1) = t * ay * ay + cosTheta;
+		M(1, 2) = t * yz - sinTheta * ax;
+
+		M(2, 0) = t * xz - sinTheta * ay;
+		M(2, 1) = t * yz + sinTheta * ax;
+		M(2, 2) = t * az * az + cosTheta;
+	}
+	return M;
+}
+matrix<float, 4, 4> MakeRotation(const vec<float, 3>& axis, float angle) {
+	return MakeRotation(axis, angle);
+}
+matrix<double, 4, 4> MakeRotation(const vec<double, 3>& axis, double angle) {
+	return MakeRotation(axis, angle);
+}
+
+matrix<float, 4, 4> MakeRotation(const vec<float, 3>& axis) {
+	return MakeRotation(axis);
+}
+matrix<double, 4, 4> MakeRotation(const vec<double, 3>& axis) {
+	return MakeRotation(axis);
 }
 /******************************************************************************
  * XLISP-STAT 2.1 Copyright (c) 1990, by Luke Tierney
@@ -274,12 +348,12 @@ double2 max(const std::vector<double2>& a,double init) {
 
  */
 double3 ToBary(double2 p, float2 pt1, float2 pt2, float2 pt3) {
-	double a = (double)pt1.x - (double)pt3.x;
-	double b = (double)pt2.x - (double)pt3.x;
-	double c = (double)pt3.x - (double)p.x;
-	double d = (double)pt1.y - (double)pt3.y;
-	double e = (double)pt2.y - (double)pt3.y;
-	double f = (double)pt3.y - (double)p.y;
+	double a = (double) pt1.x - (double) pt3.x;
+	double b = (double) pt2.x - (double) pt3.x;
+	double c = (double) pt3.x - (double) p.x;
+	double d = (double) pt1.y - (double) pt3.y;
+	double e = (double) pt2.y - (double) pt3.y;
+	double f = (double) pt3.y - (double) p.y;
 	double l1 = (b * f - c * e) / (a * e - b * d);
 	double l2 = (a * f - c * d) / (b * d - a * e);
 	if (std::isnan(l1) || std::isinf(l1)) {
@@ -300,15 +374,15 @@ double3 ToBary(double2 p, float2 pt1, float2 pt2, float2 pt3) {
 	return double3(l1, l2, 1 - l1 - l2);
 }
 double3 ToBary(double3 p, float3 pt1, float3 pt2, float3 pt3) {
-	double a = (double)pt1.x - (double)pt3.x;
-	double b = (double)pt2.x - (double)pt3.x;
-	double c = (double)pt3.x - (double)p.x;
-	double d = (double)pt1.y - (double)pt3.y;
-	double e = (double)pt2.y - (double)pt3.y;
-	double f = (double)pt3.y - (double)p.y;
-	double g = (double)pt1.z - (double)pt3.z;
-	double h = (double)pt2.z - (double)pt3.z;
-	double i = (double)pt3.z - (double)p.z;
+	double a = (double) pt1.x - (double) pt3.x;
+	double b = (double) pt2.x - (double) pt3.x;
+	double c = (double) pt3.x - (double) p.x;
+	double d = (double) pt1.y - (double) pt3.y;
+	double e = (double) pt2.y - (double) pt3.y;
+	double f = (double) pt3.y - (double) p.y;
+	double g = (double) pt1.z - (double) pt3.z;
+	double h = (double) pt2.z - (double) pt3.z;
+	double i = (double) pt3.z - (double) p.z;
 	double l1 = (b * (f + i) - c * (e + h)) / (a * (e + h) - b * (d + g));
 	double l2 = (a * (f + i) - c * (d + g)) / (b * (d + g) - a * (e + h));
 	if (std::isnan(l1) || std::isinf(l1)) {
@@ -392,17 +466,19 @@ float2 FromBary(float3 b, float2 p1, float2 p2, float2 p3) {
 	return float2(p1.x * b.x + p2.x * b.y + p3.x * b.z,
 			p1.y * b.x + p2.y * b.y + p3.y * b.z);
 }
-bool Contains(float2 p, float2 pt1, float2 pt2, float2 pt3){
-	return (crossMag(p-pt1,pt2-pt1)<=0.0f&&crossMag(p-pt2,pt3-pt2)<=0.0f&&crossMag(p-pt3,pt1-pt3)<=0.0f);
+bool Contains(float2 p, float2 pt1, float2 pt2, float2 pt3) {
+	return (crossMag(p - pt1, pt2 - pt1) <= 0.0f
+			&& crossMag(p - pt2, pt3 - pt2) <= 0.0f
+			&& crossMag(p - pt3, pt1 - pt3) <= 0.0f);
 }
 float3 FromBary(double3 b, float3 p1, float3 p2, float3 p3) {
-	return float3((float)(p1.x * b.x + p2.x * b.y + p3.x * b.z),
-			(float)(p1.y * b.x + p2.y * b.y + p3.y * b.z),
-			(float)(p1.z * b.x + p2.z * b.y +p3.z * b.z));
+	return float3((float) (p1.x * b.x + p2.x * b.y + p3.x * b.z),
+			(float) (p1.y * b.x + p2.y * b.y + p3.y * b.z),
+			(float) (p1.z * b.x + p2.z * b.y + p3.z * b.z));
 }
 float2 FromBary(double3 b, float2 p1, float2 p2, float2 p3) {
-	return float2((float)(p1.x * b.x + p2.x * b.y + p3.x * b.z),
-		(float)(p1.y * b.x + p2.y * b.y + p3.y * b.z));
+	return float2((float) (p1.x * b.x + p2.x * b.y + p3.x * b.z),
+			(float) (p1.y * b.x + p2.y * b.y + p3.y * b.z));
 }
 template<class T, int m, int n> void SVD_INTERNAL(const matrix<T, m, n>& M,
 		matrix<T, m, m>& U, matrix<T, m, n>& D, matrix<T, n, n>& Vt) {
@@ -1076,7 +1152,8 @@ float Angle(const float3& v0, const float3& v1, const float3& v2) {
 	float len2 = length(w);
 	return std::acos(dot(v, w) / std::max(1E-8f, len1 * len2));
 }
-float DistanceToTriangleSqr(const float2& p, const float2& v0, const float2& v1,const float2& v2, float2* closestPoint) {
+float DistanceToTriangleSqr(const float2& p, const float2& v0, const float2& v1,
+		const float2& v2, float2* closestPoint) {
 	float distanceSquared = 0;
 	int region_id = 0;
 
