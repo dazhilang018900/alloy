@@ -576,6 +576,18 @@
     <ClCompile Include="..\..\src\vision\Sift.cpp">
       <Filter>src\vision</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\core\AlloyMaxFlow.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\Sift.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\GrabCutEx.cpp">
+      <Filter>src\example</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\MaxFlowEx.cpp">
+      <Filter>src\example</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\core\nanovg.h">
@@ -1378,6 +1390,18 @@
     </ClInclude>
     <ClInclude Include="..\..\include\vision\Sift.h">
       <Filter>include\vision</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\core\AlloyMaxFlow.h">
+      <Filter>include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\core\Sift.h">
+      <Filter>include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\example\GrabCutEx.h">
+      <Filter>include\example</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\example\MaxFlowEx.h">
+      <Filter>include\example</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -152,5 +152,14 @@
     <ClInclude Include="..\..\include\example\WindowPaneEx.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\example\GrabCutEx.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\example\LevelSetGridEx.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\example\MaxFlowEx.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

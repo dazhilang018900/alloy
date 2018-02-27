@@ -27,13 +27,16 @@
     <ClInclude Include="..\..\include\example\ExpandBarEx.h" />
     <ClInclude Include="..\..\include\example\ExpandTreeEx.h" />
     <ClInclude Include="..\..\include\example\ForceDirectedGraphEx.h" />
+    <ClInclude Include="..\..\include\example\GrabCutEx.h" />
     <ClInclude Include="..\..\include\example\GraphPaneEx.h" />
     <ClInclude Include="..\..\include\example\ImageEx.h" />
     <ClInclude Include="..\..\include\example\ImageFeaturesEx.h" />
     <ClInclude Include="..\..\include\example\ImageProcessingEx.h" />
     <ClInclude Include="..\..\include\example\IntersectorEx.h" />
     <ClInclude Include="..\..\include\example\LaplaceFillEx.h" />
+    <ClInclude Include="..\..\include\example\LevelSetGridEx.h" />
     <ClInclude Include="..\..\include\example\LocatorEx.h" />
+    <ClInclude Include="..\..\include\example\MaxFlowEx.h" />
     <ClInclude Include="..\..\include\example\MenuEx.h" />
     <ClInclude Include="..\..\include\example\MeshDepthEx.h" />
     <ClInclude Include="..\..\include\example\MeshMatcapEx.h" />
@@ -85,9 +88,9 @@
     <Import Project="..\props\Alloy.props" />
   </ImportGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IntDir>$(SolutionDir)\build\$(Configuration)-$(Platform)\$(ProjectName)</IntDir>
+    <IntDir>$(SolutionDir)\build\$(Configuration)-$(Platform)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)\build\$(Configuration)-$(Platform)</OutDir>
+    <OutDir>$(SolutionDir)\build\$(Configuration)-$(Platform)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -108,7 +111,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>glu32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>alloy.lib;glu32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\third_party\lib\$(PlatformName)\;$(SolutionDir)\build\$(Configuration)-$(Platform)\;$(CUDA_PATH)\lib\$(PlatformName)\;$(INTELOCLSDKROOT)\lib\$(PlatformName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

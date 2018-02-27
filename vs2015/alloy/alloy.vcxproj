@@ -36,6 +36,7 @@
     <ClCompile Include="..\..\src\core\AlloyIsoSurface.cpp" />
     <ClCompile Include="..\..\src\core\AlloyLBFGS.cpp" />
     <ClCompile Include="..\..\src\core\AlloyMath.cpp" />
+    <ClCompile Include="..\..\src\core\AlloyMaxFlow.cpp" />
     <ClCompile Include="..\..\src\core\AlloyMemMappedFile.cpp" />
     <ClCompile Include="..\..\src\core\AlloyMesh.cpp" />
     <ClCompile Include="..\..\src\core\AlloyMeshPrimitives.cpp" />
@@ -78,6 +79,7 @@
     <ClCompile Include="..\..\src\core\SanityChecks.cpp" />
     <ClCompile Include="..\..\src\core\sha1.cpp" />
     <ClCompile Include="..\..\src\core\sha2.cpp" />
+    <ClCompile Include="..\..\src\core\Sift.cpp" />
     <ClCompile Include="..\..\src\core\stb_dxt.cpp" />
     <ClCompile Include="..\..\src\core\svd3.cpp" />
     <ClCompile Include="..\..\src\core\TextureMapLocator.cpp" />
@@ -100,6 +102,7 @@
     <ClCompile Include="..\..\src\example\ExpandBarEx.cpp" />
     <ClCompile Include="..\..\src\example\ExpandTreeEx.cpp" />
     <ClCompile Include="..\..\src\example\ForceDirectedGraphEx.cpp" />
+    <ClCompile Include="..\..\src\example\GrabCutEx.cpp" />
     <ClCompile Include="..\..\src\example\GraphPaneEx.cpp" />
     <ClCompile Include="..\..\src\example\ImageEx.cpp" />
     <ClCompile Include="..\..\src\example\ImageFeaturesEx.cpp" />
@@ -109,6 +112,7 @@
     <ClCompile Include="..\..\src\example\LevelSetGridEx.cpp" />
     <ClCompile Include="..\..\src\example\LocatorEx.cpp" />
     <ClCompile Include="..\..\src\example\main.cpp" />
+    <ClCompile Include="..\..\src\example\MaxFlowEx.cpp" />
     <ClCompile Include="..\..\src\example\MenuEx.cpp" />
     <ClCompile Include="..\..\src\example\MeshDepthEx.cpp" />
     <ClCompile Include="..\..\src\example\MeshMatcapEx.cpp" />
@@ -251,6 +255,7 @@
     <ClInclude Include="..\..\include\core\AlloyLBFGS.h" />
     <ClInclude Include="..\..\include\core\AlloyLocator.h" />
     <ClInclude Include="..\..\include\core\AlloyMath.h" />
+    <ClInclude Include="..\..\include\core\AlloyMaxFlow.h" />
     <ClInclude Include="..\..\include\core\AlloyMemMappedFile.h" />
     <ClInclude Include="..\..\include\core\AlloyMesh.h" />
     <ClInclude Include="..\..\include\core\AlloyMeshPrimitives.h" />
@@ -309,6 +314,7 @@
     <ClInclude Include="..\..\include\core\process_win.h" />
     <ClInclude Include="..\..\include\core\sha1.h" />
     <ClInclude Include="..\..\include\core\sha2.h" />
+    <ClInclude Include="..\..\include\core\Sift.h" />
     <ClInclude Include="..\..\include\core\stb_dxt.h" />
     <ClInclude Include="..\..\include\core\stb_image.h" />
     <ClInclude Include="..\..\include\core\stb_image_write.h" />
@@ -334,6 +340,7 @@
     <ClInclude Include="..\..\include\example\ExpandBarEx.h" />
     <ClInclude Include="..\..\include\example\ExpandTreeEx.h" />
     <ClInclude Include="..\..\include\example\ForceDirectedGraphEx.h" />
+    <ClInclude Include="..\..\include\example\GrabCutEx.h" />
     <ClInclude Include="..\..\include\example\GraphPaneEx.h" />
     <ClInclude Include="..\..\include\example\ImageEx.h" />
     <ClInclude Include="..\..\include\example\ImageFeaturesEx.h" />
@@ -342,6 +349,7 @@
     <ClInclude Include="..\..\include\example\LaplaceFillEx.h" />
     <ClInclude Include="..\..\include\example\LevelSetGridEx.h" />
     <ClInclude Include="..\..\include\example\LocatorEx.h" />
+    <ClInclude Include="..\..\include\example\MaxFlowEx.h" />
     <ClInclude Include="..\..\include\example\MenuEx.h" />
     <ClInclude Include="..\..\include\example\MeshDepthEx.h" />
     <ClInclude Include="..\..\include\example\MeshMatcapEx.h" />
@@ -468,7 +476,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IntDir>$(SolutionDir)\build\$(Configuration)-$(Platform)\$(ProjectName)</IntDir>
-    <OutDir>$(SolutionDir)\build\$(Configuration)-$(Platform)</OutDir>
+    <OutDir>$(SolutionDir)\build\$(Configuration)-$(Platform)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -490,15 +498,18 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>
-      </AdditionalDependencies>
+      <AdditionalDependencies>tiff.lib;glu32.lib;opengl32.lib;OpenCL.lib;libpng16.lib;zlib.lib;glfw3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\third_party\lib\$(PlatformName)\;$(CUDA_PATH)\lib\$(PlatformName)\;$(INTELOCLSDKROOT)\lib\$(PlatformName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Lib>
-      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>tiff.lib;glu32.lib;opengl32.lib;OpenCL.lib;libpng16.lib;zlib.lib;glfw3.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\third_party\lib\$(PlatformName)\;$(CUDA_PATH)\lib\$(PlatformName)\;$(INTELOCLSDKROOT)\lib\$(PlatformName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
     <PostBuildEvent>
       <Command>copy  /Y $(SolutionDir)\third_party\bin\Release\$(PlatformName)\glew32.dll $(SolutionDir)\build\$(Configuration)-$(Platform)\glew32.dll</Command>
     </PostBuildEvent>
