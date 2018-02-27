@@ -579,9 +579,6 @@
     <ClCompile Include="..\..\src\core\AlloyMaxFlow.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\core\Sift.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\example\GrabCutEx.cpp">
       <Filter>src\example</Filter>
     </ClCompile>
@@ -924,9 +921,6 @@
       <Filter>include\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\core\AlloyTabPane.h">
-      <Filter>include\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyTensor.h">
       <Filter>include\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\core\AlloyTimeline.h">
@@ -1392,9 +1386,6 @@
       <Filter>include\vision</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\core\AlloyMaxFlow.h">
-      <Filter>include\core</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\core\Sift.h">
       <Filter>include\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\example\GrabCutEx.h">

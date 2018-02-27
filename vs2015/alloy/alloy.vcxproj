@@ -79,7 +79,6 @@
     <ClCompile Include="..\..\src\core\SanityChecks.cpp" />
     <ClCompile Include="..\..\src\core\sha1.cpp" />
     <ClCompile Include="..\..\src\core\sha2.cpp" />
-    <ClCompile Include="..\..\src\core\Sift.cpp" />
     <ClCompile Include="..\..\src\core\stb_dxt.cpp" />
     <ClCompile Include="..\..\src\core\svd3.cpp" />
     <ClCompile Include="..\..\src\core\TextureMapLocator.cpp" />
@@ -273,7 +272,6 @@
     <ClInclude Include="..\..\include\core\AlloySpline.h" />
     <ClInclude Include="..\..\include\core\AlloyTablePane.h" />
     <ClInclude Include="..\..\include\core\AlloyTabPane.h" />
-    <ClInclude Include="..\..\include\core\AlloyTensor.h" />
     <ClInclude Include="..\..\include\core\AlloyTensor2.h" />
     <ClInclude Include="..\..\include\core\AlloyTensor3.h" />
     <ClInclude Include="..\..\include\core\AlloyTimeline.h" />
@@ -314,7 +312,6 @@
     <ClInclude Include="..\..\include\core\process_win.h" />
     <ClInclude Include="..\..\include\core\sha1.h" />
     <ClInclude Include="..\..\include\core\sha2.h" />
-    <ClInclude Include="..\..\include\core\Sift.h" />
     <ClInclude Include="..\..\include\core\stb_dxt.h" />
     <ClInclude Include="..\..\include\core\stb_image.h" />
     <ClInclude Include="..\..\include\core\stb_image_write.h" />
@@ -502,7 +499,7 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\third_party\lib\$(PlatformName)\;$(CUDA_PATH)\lib\$(PlatformName)\;$(INTELOCLSDKROOT)\lib\$(PlatformName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Lib>
-      <AdditionalDependencies>tiff.lib;glu32.lib;opengl32.lib;OpenCL.lib;libpng16.lib;zlib.lib;glfw3.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glu32.lib;opengl32.lib;OpenCL.lib;libpng16.lib;zlib.lib;glfw3.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)\third_party\lib\$(PlatformName)\;$(CUDA_PATH)\lib\$(PlatformName)\;$(INTELOCLSDKROOT)\lib\$(PlatformName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
