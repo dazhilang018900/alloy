@@ -27,8 +27,9 @@
 #include "AlloyMaxFlow.h"
 class GrabCutEx: public aly::Application {
 protected:
-	const int nbrX[4];
-	const int nbrY[4];
+	const int nbrX[4]= { 1, -1, 0, 0 };
+	const int nbrY[4]={ 0, 0, 1, -1 };
+
 	aly::ImageRGBA image;
 	aly::box2f selectedRegion;
 	aly::MaxFlow maxFlow;

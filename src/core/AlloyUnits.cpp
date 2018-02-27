@@ -346,19 +346,19 @@ aly::RGB RGB565toRGB(uint32_t c){
 	uint32_t r = 31 & (c);
 	uint32_t g = 63 & (c >> 5);
 	uint32_t b = 31 & (c >> 11);
-	return aly::RGB(r,g,b);
+	return aly::ubyte3(r,g,b);
 }
 aly::RGB RGB666toRGB(uint32_t c){
 	uint32_t r = 63 & (c);
 	uint32_t g = 63 & (c >> 9);
 	uint32_t b = ((c >> 6) & 7) + 8 * ((c >> 15) & 7);
-	return aly::RGB(r,g,b);
+	return aly::ubyte3(r,g,b);
 }
 aly::RGB RGB888toRGB(uint32_t c){
 	uint32_t r = 255 & (c);
 	uint32_t g = 255 & (c >> 8);
 	uint32_t b = 255 & (c >> 16);
-	return aly::RGB(r,g,b);
+	return aly::ubyte3(r,g,b);
 }
 
 Color HSVtoColor(const HSV& hsv) {

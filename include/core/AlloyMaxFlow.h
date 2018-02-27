@@ -125,9 +125,9 @@ protected:
 	int width;
 	int height;
 	size_t iterationCount;
-	const int nbrX[4];
-	const int nbrY[4];
-	const int reverse[4];
+	const int nbrX[4]= { 1, -1, 0, 0 };
+	const int nbrY[4] = { 0, 0, 1, -1 };
+	const int reverse[4] = { 1, 0, 3, 2 };
 	std::vector<float> excessFlow;
 	std::vector<int> distFieldSink;
 	std::vector<int> distFieldSource;

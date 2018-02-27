@@ -568,8 +568,8 @@ bool MaxFlow::step() {
 	return true;
 }
 FastMaxFlow::FastMaxFlow(int w, int h) :
-		width(w), height(h), nbrX( { 1, -1, 0, 0 }), nbrY( { 0, 0, 1, -1, }), reverse(
-				{ 1, 0, 3, 2 }) {
+		width(w), height(h) {
+
 	resize(w, h);
 }
 void FastMaxFlow::resize(int w, int h) {
@@ -837,7 +837,7 @@ bool FastMaxFlow::step(bool sinkGrow) {
 	int changeCount=0;
 	if (iterationCount % UPDATE_INTERVAL == 0) {
 #pragma omp parallel for reduction(+:changeCount)
-		for (size_t idx = 0; idx < N; idx++) {
+		for (int idx = 0; idx < N; idx++) {
 
 			int l;
 			if(sinkGrow){

@@ -26,8 +26,7 @@
 #include "AlloyMath.h"
 using namespace aly;
 GrabCutEx::GrabCutEx() :
-		Application(900, 600, "Grab Cut Example"), nbrX( { 1, -1, 0, 0 }), nbrY(
-				{ 0, 0, 1, -1 }) {
+		Application(900, 600, "Grab Cut Example") {
 	cycle = 0;
 	colorDiff = 0.03f;
 	maxDist = 6.0f;
