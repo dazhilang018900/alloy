@@ -282,17 +282,17 @@ template<class T> matrix<T, 4, 4> MakeRotationInternal(const vec<T, 3>& axis) {
 	return M;
 }
 matrix<float, 4, 4> MakeRotation(const vec<float, 3>& axis, float angle) {
-	return MakeRotation(axis, angle);
+	return MakeRotationInternal(axis, angle);
 }
 matrix<double, 4, 4> MakeRotation(const vec<double, 3>& axis, double angle) {
-	return MakeRotation(axis, angle);
+	return MakeRotationInternal(axis, angle);
 }
 
 matrix<float, 4, 4> MakeRotation(const vec<float, 3>& axis) {
-	return MakeRotation(axis);
+	return MakeRotationInternal(axis);
 }
 matrix<double, 4, 4> MakeRotation(const vec<double, 3>& axis) {
-	return MakeRotation(axis);
+	return MakeRotationInternal(axis);
 }
 /******************************************************************************
  * XLISP-STAT 2.1 Copyright (c) 1990, by Luke Tierney
