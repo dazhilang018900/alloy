@@ -1864,13 +1864,15 @@ void TextField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 			break;
 		case GLFW_KEY_V:
 			if (e.isControlDown()) {
-				erase();
-				auto pasteText = glfwGetClipboardString(context->window);
-				value.insert(cursorStart, pasteText);
-				moveCursorTo(cursorStart + (int) std::string(pasteText).size(),
-						e.isShiftDown());
-				if (onTextEntered) {
-					onTextEntered(this);
+				const char* pasteText = glfwGetClipboardString(context->window);
+				if(pasteText!=nullptr){
+					erase();
+					value.insert(cursorStart, pasteText);
+					moveCursorTo(cursorStart + (int) std::string(pasteText).size(),
+							e.isShiftDown());
+					if (onTextEntered) {
+						onTextEntered(this);
+					}
 				}
 			}
 			break;
