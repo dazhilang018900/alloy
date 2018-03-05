@@ -7,7 +7,6 @@
       http://mozilla.org/MPL/2.0/.
  */
 #include <AlloyMemMappedFile.h>
-
 #ifdef ALY_WINDOWS
 	#include <windows.h>
 #else
@@ -123,12 +122,20 @@ namespace aly
         if (! pathname) return;
         if (isOpen()) close();
 	#ifdef ALY_WINDOWS
+
+#ifdef UNICODE
 		std::wstring wlink;
 		ToWideString(std::string(pathname), wlink);
         file_handle_ = ::CreateFile(wlink.c_str(), GENERIC_READ,
             FILE_SHARE_READ | FILE_SHARE_WRITE, 0,
             OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
         if (file_handle_ == INVALID_HANDLE_VALUE) return;
+#else
+		file_handle_ = ::CreateFile(pathname, GENERIC_READ,
+			FILE_SHARE_READ | FILE_SHARE_WRITE, 0,
+			OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+		if (file_handle_ == INVALID_HANDLE_VALUE) return;
+#endif
     #else
         file_handle_ = ::open(pathname, O_RDONLY);
         if (file_handle_ == -1) return;        
@@ -200,11 +207,17 @@ namespace aly
             }
             else return;
         }
+#ifdef UNICODE
 		std::wstring wlink;
 		ToWideString(std::string(pathname), wlink);
         file_handle_ = ::CreateFile(wlink.c_str(), GENERIC_READ | GENERIC_WRITE,
             FILE_SHARE_READ | FILE_SHARE_WRITE, 0,
             win_open_mode, FILE_ATTRIBUTE_NORMAL, 0);
+#else
+		file_handle_ = ::CreateFile(pathname, GENERIC_READ | GENERIC_WRITE,
+			FILE_SHARE_READ | FILE_SHARE_WRITE, 0,
+			win_open_mode, FILE_ATTRIBUTE_NORMAL, 0);
+#endif
         if (file_handle_ == INVALID_HANDLE_VALUE) return;
     #else
         int posix_open_mode = O_RDWR;
