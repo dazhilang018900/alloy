@@ -54,6 +54,10 @@ namespace aly {
 			return *this;
 		}
 	};
+	std::string MakeDesktopFile(const std::string& fileName);
+	std::string MakeWorkingDirectoryFile(const std::string& fileName);
+	std::string MakeExecutableDirectoryFile(const std::string& fileName);
+
 	bool Contains(const std::string& str, const std::string& pattern);
 	int Contains(std::string& str,std::vector<std::string> tokens);
 	std::vector<int> ExtractIntegers(const std::string& str);

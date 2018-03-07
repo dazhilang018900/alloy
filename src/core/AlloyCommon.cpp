@@ -19,6 +19,7 @@
  * THE SOFTWARE.
  */
 #include "AlloyCommon.h"
+#include "AlloyFileUtil.h"
 #include <string>
 //#include <algorithm>
 //#include <iterator>
@@ -123,6 +124,16 @@ void Trim(std::string &s) {
 bool Contains(const std::string& str, const std::string& pattern) {
 	return (str.find(pattern) != std::string::npos);
 }
+std::string MakeDesktopFile(const std::string& fileName){
+	return MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<fileName;
+}
+std::string MakeWorkingDirectoryFile(const std::string& fileName){
+	return MakeString()<<GetCurrentWorkingDirectory()<<ALY_PATH_SEPARATOR<<fileName;
+}
+std::string MakeExecutableDirectoryFile(const std::string& fileName){
+	return MakeString()<<GetExecutableDirectory()<<ALY_PATH_SEPARATOR<<fileName;
+}
+
 int Contains(std::string& str, std::vector<std::string> tokens) {
 	int count = 0;
 	for (std::string token : tokens) {
