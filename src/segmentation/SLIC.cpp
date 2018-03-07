@@ -455,6 +455,25 @@ namespace aly {
 		optimize(iterations);
 		enforceLabelConnectivity(labelImage);
 	}
+	void SuperPixels::solve(const ImageRGB& image, int K, int iterations) {
+		labImage.resize(image.width, image.height);
+		labelImage.resize(image.width, image.height);
+#pragma omp parallel for
+		for (int j = 0;j < image.height;j++) {
+			for (int i = 0;i < image.width;i++) {
+				labImage(i, j) = RGBtoLAB(ToRGBf(image(i, j)));
+			}
+		}
+		initializeSeeds(K);
+		if (perturbSeeds)
+		{
+			Image1f magImage;
+			gradientMagnitude(magImage);
+			refineSeeds(magImage);
+		}
+		optimize(iterations);
+		enforceLabelConnectivity(labelImage);
+	}
 	void SuperPixels::solve(const ImageRGBAf& image, int K, int iterations) {
 		labImage.resize(image.width, image.height);
 		labelImage.resize(image.width, image.height);
@@ -462,6 +481,25 @@ namespace aly {
 		for (int j = 0;j < image.height;j++) {
 			for (int i = 0;i < image.width;i++) {
 				labImage(i, j) = RGBtoLAB(image(i, j).xyz());
+			}
+		}
+		initializeSeeds(K);
+		if (perturbSeeds)
+		{
+			Image1f magImage;
+			gradientMagnitude(magImage);
+			refineSeeds(magImage);
+		}
+		optimize(iterations);
+		enforceLabelConnectivity(labelImage);
+	}
+	void SuperPixels::solve(const ImageRGBf& image, int K, int iterations) {
+		labImage.resize(image.width, image.height);
+		labelImage.resize(image.width, image.height);
+#pragma omp parallel for
+		for (int j = 0;j < image.height;j++) {
+			for (int i = 0;i < image.width;i++) {
+				labImage(i, j) = RGBtoLAB(image(i, j));
 			}
 		}
 		initializeSeeds(K);

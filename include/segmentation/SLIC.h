@@ -65,7 +65,9 @@ namespace aly {
 		
 	public:
 		void solve(const ImageRGBAf& image,int K,int iterations=128);
+		void solve(const ImageRGBf& image,int K,int iterations=128);
 		void solve(const ImageRGBA& image, int K, int iterations = 128);
+		void solve(const ImageRGB& image, int K, int iterations = 128);
 		float updateClusters(const Image1i& labelImage,int labelOffset=0);
 		float updateMaxColor(const Image1i& labelImage, int labelOffset = 0);
 		void enforceLabelConnectivity(Image1i& labelImage);
