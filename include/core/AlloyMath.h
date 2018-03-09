@@ -714,6 +714,18 @@ inline float sqr(const float& v) {
 inline double sqr(const double& v) {
 	return v*v;
 }
+inline int sqr(const int& v) {
+	return v*v;
+}
+inline int64_t sqr(const int64_t& v) {
+	return v*v;
+}
+inline uint64_t sqr(const uint64_t& v) {
+	return v*v;
+}
+inline int32_t sqr(const int32_t& v) {
+	return v*v;
+}
 template<int M> vec<float, M> sqr(const vec<float,M>& v) {
 	return v*v;
 }
@@ -1975,6 +1987,22 @@ public:
 		else if (t > T(1))
 			return aly::distance(pt, end);
 		return aly::distance(pt, start + t * (end - start));
+	}
+	vec<T, M> closest(const vec<T, M>& pt) const {
+		T l2 = aly::distanceSqr(start, end);
+		if (l2 < 1E-15f){
+			if(aly::distanceSqr(pt, start)< aly::distanceSqr(pt, end)){
+				return start;
+			} else {
+				return end;
+			}
+		}
+		T t = dot(pt - start, end - start) / l2;
+		if (t < T(0))
+			return start;
+		else if (t > T(1))
+			return end;
+		return start + t * (end - start);
 	}
 	bool intersects(const lineseg<T, M>& line, T& t, T& s,
 			T tolerance = T(1E-15)) const {
