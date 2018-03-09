@@ -723,7 +723,7 @@ inline int64_t sqr(const int64_t& v) {
 inline uint64_t sqr(const uint64_t& v) {
 	return v*v;
 }
-inline int32_t sqr(const int32_t& v) {
+inline uint32_t sqr(const uint32_t& v) {
 	return v*v;
 }
 template<int M> vec<float, M> sqr(const vec<float,M>& v) {
