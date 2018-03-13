@@ -72,7 +72,7 @@ template<typename T> T round(const T & v) {
 	return T(std::floor(T(v + 0.5)));
 }
 template<typename T> T round(const T & v, int sigs) {
-	return T(std::floor(T(v * pow(10, sigs) + 0.5)) * pow(10, -sigs));
+	return T(std::floor(T(v * std::pow(10, sigs) + 0.5)) * std::pow(10, -sigs));
 }
 float InvSqrt(float x);
 
@@ -2801,6 +2801,19 @@ float DistanceToTriangleSqr(const float2& p, const float2& v0, const float2& v1,
 float DistanceToQuadSqr(const float3& p, const float3& v0, const float3& v1,
 		const float3& v2, const float3& v3, const float3& normal,
 		float3* closestPoint);
+float DistanceToQuadSqr(const float3& p, const float3& v0, const float3& v1,
+		const float3& v2, const float3& v3,
+		float3* closestPoint);
+
+float DistanceToQuadSqr(const float2& p, const float2& v0, const float2& v1,const float2& v2, const float2& v3,float2* closestPoint);
+
+inline float DistanceToQuadSqr(const float2& p, const std::vector<float2>& corners,float2* closestPoint){
+	return DistanceToQuadSqr(p,corners[0],corners[1],corners[2],corners[3],closestPoint);
+}
+inline float DistanceToQuadSqr(const float2& p,float2 corners[4],float2* closestPoint){
+	return DistanceToQuadSqr(p,corners[0],corners[1],corners[2],corners[3],closestPoint);
+}
+
 }
 
 namespace std {

@@ -1298,7 +1298,9 @@ float DistanceToTriangleSqr(const float2& p, const float2& v0, const float2& v1,
 		float2 tmp = P - T;
 		distanceSquared = lengthSqr(tmp);
 	}
-	(*closestPoint) = T;
+	if(closestPoint!=nullptr){
+		(*closestPoint) = T;
+	}
 	return distanceSquared;
 }
 float DistanceToTriangleSqr(const float3& p, const float3& v0, const float3& v1,
@@ -1448,7 +1450,9 @@ float DistanceToTriangleSqr(const float3& p, const float3& v0, const float3& v1,
 		float3 tmp = P - T;
 		distanceSquared = lengthSqr(tmp);
 	}
-	(*closestPoint) = T;
+	if(closestPoint!=nullptr){
+		(*closestPoint) = T;
+	}
 	return distanceSquared;
 }
 
@@ -1468,11 +1472,53 @@ float DistanceToQuadSqr(const float3& p, const float3& v0, const float3& v1,
 	}
 
 	if (d1 < d2) {
-		*closestPoint = cp1;
+		if(closestPoint){
+			*closestPoint = cp1;
+		}
 		return d1;
 	} else {
-		*closestPoint = cp2;
+		if(closestPoint){
+			*closestPoint = cp2;
+		}
 		return d2;
 	}
 }
+float DistanceToQuadSqr(const float3& p, const float3& v0, const float3& v1,
+		const float3& v2, const float3& v3, float3* closestPoint) {
+	float3 cp1;
+	float3 cp2;
+	float d1, d2;
+	d1 = DistanceToTriangleSqr(p, v0, v1, v2, &cp1);
+	d2 = DistanceToTriangleSqr(p, v2, v3, v0, &cp2);
+	if (d1 < d2) {
+		if(closestPoint){
+			*closestPoint = cp1;
+		}
+		return d1;
+	} else {
+		if(closestPoint){
+			*closestPoint = cp2;
+		}
+		return d2;
+	}
+}
+float DistanceToQuadSqr(const float2& p, const float2& v0, const float2& v1,const float2& v2, const float2& v3,float2* closestPoint) {
+	float2 cp1;
+	float2 cp2;
+	float d1, d2;
+	d1 = DistanceToTriangleSqr(p, v0, v1, v2, &cp1);
+	d2 = DistanceToTriangleSqr(p, v2, v3, v0, &cp2);
+	if (d1 < d2) {
+		if(closestPoint){
+			*closestPoint = cp1;
+		}
+		return d1;
+	} else {
+		if(closestPoint){
+			*closestPoint = cp2;
+		}
+		return d2;
+	}
+}
+
 }
