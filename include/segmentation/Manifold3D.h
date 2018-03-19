@@ -18,20 +18,20 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-#ifndef INCLUDE_Manifold2D_H_
-#define INCLUDE_Manifold2D_H_
+#ifndef INCLUDE_Manifold3D_H_
+#define INCLUDE_Manifold3D_H_
 #include "GLComponent.h"
 #include "AlloyVector.h"
 #include "AlloyContext.h"
 #include "AlloyFileUtil.h"
-#include "segmentation/FluidParticles2D.h"
+#include "AlloyMesh.h"
 #include <cereal/cereal.hpp>
 #include <cereal/types/vector.hpp>
 #include <cereal/types/list.hpp>
 #include <array>
 namespace aly {
 	class AlloyContext;
-	class Manifold2D {
+	class Manifold3D {
 	protected:
 		bool onScreen;
 		std::shared_ptr<AlloyContext> context;
@@ -43,19 +43,11 @@ namespace aly {
 		bool dirty;
 		int vertexCount;
 	public:
-		std::vector<std::vector<uint32_t>> indexes;
-		Vector2f vertexes;
-		Vector2f particles;
-		Vector2f points;
-		Vector2f normals;
+		aly::Mesh mesh;
+		Vector3f particles;
 		Vector1i particleLabels;
 		Vector1i vertexLabels;
-		ImageRGBA overlay;
-		FluidParticles2D fluidParticles;
-		std::array<Vector2f,4> velocities;
-		Vector2f correspondence;
-		Vector2f clusterCenters;
-		Vector3f clusterColors;
+		Vector3f correspondence;
 		void setDirty(bool b) {
 			dirty = b;
 		}
@@ -67,32 +59,24 @@ namespace aly {
 		std::string getFile() const {
 			return file;
 		}
-		~Manifold2D();
-		Manifold2D(bool onScreen=true,const std::shared_ptr<AlloyContext>& context=AlloyDefaultContext());
+		~Manifold3D();
+		Manifold3D(bool onScreen=true,const std::shared_ptr<AlloyContext>& context=AlloyDefaultContext());
 		void updateNormals();
 		void setFile(const std::string& file) {
 			this->file = file;
 		}
 		template<class Archive> void save(Archive & archive) const {
-			if (overlay.size() > 0) {
-				std::string imageFile = GetFileWithoutExtension(file) + ".png";
-				WriteImageToFile(imageFile, overlay);
-			}
-			archive( CEREAL_NVP(vertexes),CEREAL_NVP(file), CEREAL_NVP(indexes), CEREAL_NVP(particles), CEREAL_NVP(points),  CEREAL_NVP(normals), CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels),CEREAL_NVP(correspondence), CEREAL_NVP(clusterCenters),CEREAL_NVP(clusterColors),CEREAL_NVP(fluidParticles));
+			archive(CEREAL_NVP(file), CEREAL_NVP(particles),CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels),CEREAL_NVP(correspondence));
 		}
 		template<class Archive> void load(Archive & archive) 
 		{
-			archive(CEREAL_NVP(vertexes), CEREAL_NVP(file), CEREAL_NVP(indexes), CEREAL_NVP(particles), CEREAL_NVP(points), CEREAL_NVP(normals), CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels), CEREAL_NVP(correspondence),CEREAL_NVP(clusterCenters), CEREAL_NVP(clusterColors),CEREAL_NVP(fluidParticles));
-			std::string imageFile = GetFileWithoutExtension(file) + ".png";
-			if (FileExists(imageFile)) {
-				ReadImageFromFile(imageFile, overlay);
-			}
+			archive(CEREAL_NVP(file), CEREAL_NVP(particles),CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels), CEREAL_NVP(correspondence));
 		}
-		void operator=(const Manifold2D &c);
-		Manifold2D(const Manifold2D& c);
+		void operator=(const Manifold3D &c);
+		Manifold3D(const Manifold3D& c);
 	};
-	void ReadContourFromFile(const std::string& file, Manifold2D& contour);
-	void WriteContourToFile(const std::string& file, Manifold2D& contour);
+	void ReadContourFromFile(const std::string& file, Manifold3D& contour);
+	void WriteContourToFile(const std::string& file, Manifold3D& contour);
 
 }
 #endif
