@@ -676,7 +676,7 @@ size_t IsoSurface::getIndex(int i, int j, int k) {
 }
 
 float IsoSurface::getValue(const float* vol, int i, int j, int k) {
-	size_t in1 = getIndex(i, j, k);
+	size_t in1 = getSafeIndex(i, j, k);
 	float val = vol[in1];
 	return val;
 }
