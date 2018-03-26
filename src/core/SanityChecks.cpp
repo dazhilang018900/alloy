@@ -242,19 +242,19 @@ namespace aly {
 	}
 	bool SANITY_CHECK_SUBDIVIDE() {
 		Mesh mesh;
-		mesh.load(AlloyDefaultContext()->getFullPath("models/monkey.obj"));
+		mesh.load(AlloyDefaultContext()->getFullPath("models/monkey.ply"));
 		Subdivide(mesh, SubDivisionScheme::CatmullClark);
 		Subdivide(mesh, SubDivisionScheme::CatmullClark);
 		Subdivide(mesh, SubDivisionScheme::CatmullClark);
 		WriteMeshToFile("monkey_catmullclark.ply", mesh);
 
-		mesh.load(AlloyDefaultContext()->getFullPath("models/monkey.obj"));
+		mesh.load(AlloyDefaultContext()->getFullPath("models/monkey.ply"));
 		Subdivide(mesh, SubDivisionScheme::Loop);
 		Subdivide(mesh, SubDivisionScheme::Loop);
 		Subdivide(mesh, SubDivisionScheme::Loop);
 		WriteMeshToFile("monkey_loop.ply", mesh);
 
-		mesh.load(AlloyDefaultContext()->getFullPath("models/monkey.obj"));
+		mesh.load(AlloyDefaultContext()->getFullPath("models/monkey.ply"));
 		box3f box = mesh.getBoundingBox();
 		mesh.vertexColors.resize(mesh.vertexLocations.size());
 		for (int n = 0; n < (int)mesh.vertexLocations.size(); n++) {
@@ -267,7 +267,7 @@ namespace aly {
 		Subdivide(mesh, SubDivisionScheme::CatmullClark);
 		WriteMeshToFile("monkey_catmullclark_color.ply", mesh);
 
-		mesh.load(AlloyDefaultContext()->getFullPath("models/monkey.obj"));
+		mesh.load(AlloyDefaultContext()->getFullPath("models/monkey.ply"));
 		mesh.vertexColors.resize(mesh.vertexLocations.size());
 		for (int n = 0; n < (int)mesh.vertexLocations.size(); n++) {
 			float3 pt = mesh.vertexLocations[n];

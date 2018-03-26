@@ -35,7 +35,7 @@ namespace aly {
 		return true;
 	}
 
-	void IsoContour::solve(const Image1f& levelset, Vector2f& points, std::vector<std::list<uint32_t>>& lines, float isoLevel, const TopologyRule2D& topoRule, const Winding& winding) {
+	void IsoContour::solve(const Image1f& levelset, Vector2f& points, std::vector<std::vector<uint32_t>>& lines, float isoLevel, const TopologyRule2D& topoRule, const Winding& winding) {
 		rows = levelset.width;
 		cols = levelset.height;
 		this->isoLevel = isoLevel;
@@ -62,7 +62,7 @@ namespace aly {
 		}
 		EdgeSplitPtr lastSplit = pts.front();
 		bool firstPass = true;
-		std::list<uint32_t> curvePath;
+		std::vector<uint32_t> curvePath;
 		index = 0;
 		while (lastSplit.get() != nullptr) {
 			curvePath.push_back(lastSplit->vid);

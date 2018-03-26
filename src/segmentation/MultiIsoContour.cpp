@@ -37,7 +37,7 @@ namespace aly {
 	}
 
 
-	void MultiIsoContour::solve(const Image1f& levelset, const Image1i& labels, Vector2f& points, Vector1i& vertexLabels, std::vector<std::list<uint32_t>>& lines, float isoLevel, const TopologyRule2D& topoRule, const Winding& winding) {
+	void MultiIsoContour::solve(const Image1f& levelset, const Image1i& labels, Vector2f& points, Vector1i& vertexLabels, std::vector<std::vector<uint32_t>>& lines, float isoLevel, const TopologyRule2D& topoRule, const Winding& winding) {
 		rows = levelset.width;
 		cols = levelset.height;
 		this->isoLevel = isoLevel;
@@ -87,7 +87,7 @@ namespace aly {
 			if (pts.size() == 0)continue;
 			EdgeSplitPtr lastSplit = pts.front();
 			bool firstPass = true;
-			std::list<uint32_t> curvePath;
+			std::vector<uint32_t> curvePath;
 			index = 0;
 			while (lastSplit.get() != nullptr) {
 				curvePath.push_back(lastSplit->vid);

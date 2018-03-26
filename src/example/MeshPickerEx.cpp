@@ -28,7 +28,7 @@ MeshPickerEx::MeshPickerEx() :
 bool MeshPickerEx::init(Composite& rootNode) {
 	box3f renderBBox = box3f(float3(-0.5f, -0.5f, -0.5f),float3(1.0f, 1.0f, 1.0f));
 	meshArray.resize(3);
-	meshArray[0].load(getFullPath("models/monkey.obj"));
+	meshArray[0].load(getFullPath("models/monkey.ply"));
 	meshArray[1].load(getFullPath("models/torus.ply"));
 	meshArray[2].load(getFullPath("models/icosahedron.ply"));
 	Subdivide(meshArray[2], SubDivisionScheme::Loop);

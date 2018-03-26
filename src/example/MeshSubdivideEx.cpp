@@ -30,7 +30,7 @@ MeshSubdivideEx::MeshSubdivideEx() :
 bool MeshSubdivideEx::init(Composite& rootNode) {
 	box3f renderBBox = box3f(float3(-0.5f, -0.5f, -0.5f),
 			float3(1.0f, 1.0f, 1.0f));
-	mesh.load(getFullPath("models/monkey.obj"));
+	mesh.load(getFullPath("models/monkey.ply"));
 	mesh.updateVertexNormals();
 	//Initialize depth buffer to store the render
 	int w = getContext()->getScreenWidth();
@@ -65,7 +65,7 @@ bool MeshSubdivideEx::init(Composite& rootNode) {
 
 	resetButton->onMouseDown =
 			[=](AlloyContext* context,const InputEvent& e) {
-				mesh.load(getFullPath("models/monkey.obj"));
+				mesh.load(getFullPath("models/monkey.ply"));
 				mesh.updateVertexNormals();
 				mesh.setDirty(true);
 				return true;

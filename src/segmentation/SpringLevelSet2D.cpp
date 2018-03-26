@@ -117,7 +117,7 @@ namespace aly {
 		int iter = 0;
 		do {
 			maxDelta = 0.0f;
-			for (std::list<uint32_t> curve : contour.indexes) {
+			for (std::vector<uint32_t> curve : contour.indexes) {
 				uint32_t cur = 0, prev = 0, next = 0;
 				if (curve.size() > 1) {
 					auto prevIter = curve.begin();
@@ -229,7 +229,7 @@ namespace aly {
 			requestUpdateContour = false;
 		}
 		int fillCount = 0;
-		for (std::list<uint32_t> curve : contour.indexes) {
+		for (std::vector<uint32_t> curve : contour.indexes) {
 			size_t count = 0;
 			uint32_t first = 0, prev = 0;
 			if (curve.size() > 1) {
@@ -680,7 +680,7 @@ return -(v11*grad / len);
 		for(Vector2f& vel:contour.velocities){
 			vel.clear();
 		}
-		for (std::list<uint32_t> curve : contour.indexes) {
+		for (std::vector<uint32_t> curve : contour.indexes) {
 			size_t count = 0;
 			uint32_t first = 0, prev = 0;
 			if (curve.size() > 1) {

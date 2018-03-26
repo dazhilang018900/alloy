@@ -29,7 +29,7 @@ protected:
 	const float maxDistance = 40.0f;
 	float currentIso;
 	aly::Vector2f curvePoints;
-	std::vector<std::list<uint32_t>> curveIndexes;
+	std::vector<std::vector<uint32_t>> curveIndexes;
 	aly::Vector2f tracePoints;
 	aly::Vector2ui traceIndexes;
 	aly::Image1f distField;

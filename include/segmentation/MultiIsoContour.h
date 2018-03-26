@@ -98,7 +98,7 @@ public:
 	}
 
 	void solve(const Image1f& levelset, const Image1i& labels, Vector2f& points, Vector1i& vertexLabels,
-		std::vector<std::list<uint32_t>>& indexes, float isoLevel = 0.0f,
+		std::vector<std::vector<uint32_t>>& indexes, float isoLevel = 0.0f,
 		const TopologyRule2D& rule = TopologyRule2D::Unconstrained,
 		const Winding& winding = Winding::CounterClockwise);
 

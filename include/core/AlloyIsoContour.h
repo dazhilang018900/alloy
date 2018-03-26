@@ -151,7 +151,7 @@ public:
 					TopologyRule2D::Unconstrained, const Winding& winding =
 					Winding::CounterClockwise);
 	void solve(const Image1f& levelset, Vector2f& points,
-			std::vector<std::list<uint32_t>>& indexes, float isoLevel = 0.0f,
+			std::vector<std::vector<uint32_t>>& indexes, float isoLevel = 0.0f,
 			const TopologyRule2D& rule = TopologyRule2D::Unconstrained,
 			const Winding& winding = Winding::CounterClockwise);
 };

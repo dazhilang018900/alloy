@@ -100,7 +100,7 @@ bool DistanceFieldEx::init(Composite& rootNode) {
 		nvgLineCap(nvg, NVG_ROUND);
 		nvgBeginPath(nvg);
 		for (int n = 0;n < (int)curveIndexes.size();n++) {
-			std::list<uint32_t> curve = curveIndexes[n];
+			std::vector<uint32_t> curve = curveIndexes[n];
 			bool firstTime = true;
 			for (uint32_t idx : curve) {
 				float2 pt = curvePoints[idx];
