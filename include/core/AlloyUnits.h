@@ -265,11 +265,11 @@ Color HSVAtoColor(const HSVA& hsv);
 RGBf HSVtoRGBf(const HSV& hsv);
 RGBAf HSVAtoRGBAf(const HSVA& hsv);
 
-uint32_t RGBtoRGB565(const aly::RGB& c);
+uint16_t RGBtoRGB565(const aly::RGB& c);
 uint32_t RGBtoRGB666(const aly::RGB& c);
 uint32_t RGBtoRGB888(const aly::RGB& c);
 
-aly::RGB RGB565toRGB(uint32_t c);//only requires 16 bits
+aly::RGB RGB565toRGB(uint16_t c);//only requires 16 bits
 aly::RGB RGB666toRGB(uint32_t c);//only requires 18 bits
 aly::RGB RGB888toRGB(uint32_t c);//only requires 24 bits
 
