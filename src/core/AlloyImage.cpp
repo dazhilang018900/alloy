@@ -440,6 +440,14 @@ void WriteImageToFile(const std::string& file, const ImageRGB& image) {
 		throw std::runtime_error(MakeString() << "Could not write " << file);
 	}
 }
+void WriteImageToFile(const std::string& file, const ImageRGB& image,int quality) {
+	std::string ext = GetFileExtension(file);
+	if (ext == "jpg" || ext == "jpeg") {
+		stbi_write_jpg(file.c_str(), image.width, image.height, 3,image.data.data(),quality);
+	} else {
+		throw std::runtime_error(MakeString() << "Could not write " << file);
+	}
+}
 void WriteImageToFile(const std::string& file, const Image1ub& image) {
 	std::string ext = GetFileExtension(file);
 	if (ext == "xml") {

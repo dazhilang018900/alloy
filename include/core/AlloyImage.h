@@ -1135,6 +1135,7 @@ typedef Image<double, 4, ImageType::DOUBLE> Image4d;
 
 void WriteImageToFile(const std::string& file, const ImageRGBA& img);
 void WriteImageToFile(const std::string& file, const ImageRGB& img);
+void WriteImageToFile(const std::string& file, const ImageRGB& img,int quality);
 void WriteImageToFile(const std::string& file, const ImageRGBAf& img);
 void WriteImageToFile(const std::string& file, const ImageRGBf& img);
 
