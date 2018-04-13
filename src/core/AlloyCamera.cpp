@@ -407,6 +407,8 @@ void Camera::aim(const box2px& bounds) {
 		NormalViewModel = transpose(ViewModelInverse);
 		ViewInverse = inverse(View);
 		NormalView = transpose(ViewInverse);
+		dimensions.x=(int)bounds.dimensions.x;
+		dimensions.y=(int)bounds.dimensions.y;
 		needsDisplay = true;
 	}
 }

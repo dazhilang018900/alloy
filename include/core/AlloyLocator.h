@@ -54,10 +54,13 @@ template<class T, int C> struct xvec: public vec<T, C> {
 	}
 };
 
+typedef xvec<float, 1> float1i;
 typedef xvec<float, 2> float2i;
 typedef xvec<float, 3> float3i;
 typedef xvec<float, 4> float4i;
 
+
+typedef xvec<double, 1> double1i;
 typedef xvec<double, 2> double2i;
 typedef xvec<double, 3> double3i;
 typedef xvec<double, 4> double4i;

@@ -282,6 +282,16 @@ public:
 	}
 	template<class T, int C, ImageType I> void draw(
 			const GLTexture<T, C, I>& depthBuffer,
+			const GLTextureRGB& texture, CameraParameters& camera,
+			const box2px& bounds, const box2px& viewport,
+			const box2px& textureBounds = box2px(float2(0, 0), float2(1, 1))) {
+		begin().set("textureImage", texture, 0).set("depthBuffer", depthBuffer,
+				1).set("depthBufferSize", depthBuffer.dimensions()).set(
+				"bounds", bounds).set("viewport", viewport).set("texBounds",
+				textureBounds).draw(depthBuffer).end();
+	}
+	template<class T, int C, ImageType I> void draw(
+			const GLTexture<T, C, I>& depthBuffer,
 			const GLTextureRGBAf& texture, CameraParameters& camera,
 			const float2& location, const float2& dimensions,
 			const box2px& viewport,

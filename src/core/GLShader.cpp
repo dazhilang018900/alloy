@@ -45,6 +45,10 @@ GLShader& GLShader::draw(const GLComponent& comp) {
 	comp.draw();
 	return *this;
 }
+GLShader& GLShader::draw(GLComponent* comp) {
+	comp->draw();
+	return *this;
+}
 GLShader& GLShader::draw(Mesh& mesh, const GLMesh::PrimitiveType& type,  bool forceVertexColor) {
 	mesh.draw(type,onScreen,forceVertexColor);
 	return *this;

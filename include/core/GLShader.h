@@ -340,6 +340,7 @@ public:
 	GLShader& draw(const std::list<Mesh*>& meshes,const GLMesh::PrimitiveType& type, bool froceVertexColor=false );
 	GLShader& draw(Mesh* mesh,const GLMesh::PrimitiveType& type, bool froceVertexColor=false );
 	GLShader& draw(const GLComponent& comps);
+	GLShader& draw(GLComponent* comps);
 	GLShader& draw(Mesh& meshes, const GLMesh::PrimitiveType& type,bool froceVertexColor = false);
 
 	void end();
