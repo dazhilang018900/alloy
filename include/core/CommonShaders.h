@@ -394,6 +394,44 @@ public:
 
 	}
 };
+
+class ImageDepthShader: public GLShader {
+public:
+	enum class Filter {
+		NONE, FXAA, SMALL_BLUR, MEDIUM_BLUR, LARGE_BLUR
+	};
+	ImageDepthShader( const Filter& filter = Filter::NONE,bool onScreen = true,
+			const std::shared_ptr<AlloyContext>& context =
+					AlloyDefaultContext());
+	template<class T, int C, ImageType I> void draw(
+			const GLTexture<T, C, I>& imageTexture, const box2px& bounds,
+			float alpha = 1.0f, bool flip = false) {
+		glEnable(GL_DEPTH_TEST);
+		glDisable(GL_BLEND);
+		begin().set("flip", flip ? 1 : 0).set("textureImage", imageTexture, 0).set(
+				"bounds", bounds).set("alpha", alpha).set("viewport",
+				context->getViewport()).draw(imageTexture).end();
+	}
+	template<class T, int C, ImageType I> void draw(
+			const GLTexture<T, C, I>& imageTexture,
+			float alpha = 1.0f, bool flip = false) {
+		glEnable(GL_DEPTH_TEST);
+		glDisable(GL_BLEND);
+		begin().set("flip", flip ? 1 : 0).set("textureImage", imageTexture, 0).set(
+				"bounds", context->getViewport()).set("alpha", alpha).set("viewport",
+				context->getViewport()).draw(imageTexture).end();
+	}
+	template<class T, int C, ImageType I> void draw(
+			const GLTexture<T, C, I>& imageTexture, const float2& location,
+			const float2& dimensions, float alpha = 1.0f, bool flip = false) {
+		glEnable(GL_DEPTH_TEST);
+		glDisable(GL_BLEND);
+		begin().set("flip", flip ? 1 : 0).set("textureImage", imageTexture, 0).set(
+				"bounds", box2px(location, dimensions)).set("alpha", alpha).set(
+				"viewport", context->getViewport()).draw(imageTexture).end();
+
+	}
+};
 class EdgeEffectsShader: public GLShader {
 public:
 	EdgeEffectsShader(bool onScreen = true,

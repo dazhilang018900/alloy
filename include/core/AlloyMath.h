@@ -726,6 +726,18 @@ inline uint64_t sqr(const uint64_t& v) {
 inline uint32_t sqr(const uint32_t& v) {
 	return v*v;
 }
+inline float ToDegrees(float angle){
+	return (float)(angle*180.0f/ALY_PI);
+}
+inline double ToDegrees(double angle){
+	return (double)(angle*180.0/ALY_PI);
+}
+inline float ToRadians(float angle){
+	return (float)(angle*ALY_PI/180.0f);
+}
+inline double ToRadians(double angle){
+	return (double)(angle*ALY_PI/180.0);
+}
 template<int M> vec<float, M> sqr(const vec<float,M>& v) {
 	return v*v;
 }
