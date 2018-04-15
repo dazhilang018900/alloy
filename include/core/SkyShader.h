@@ -21,7 +21,7 @@
  */
 
 /*
- Procedural Sky Shader implementation derived from Dimitri Diakopoulos's work and is <http://unlicense.org>
+ Procedural Sky Shader implementation derived from Dimitri Diakopoulos's work that is <http://unlicense.org>
  https://github.com/ddiakopoulos/sandbox/blob/b346f56f47c4ef2dc72ba0c38696495a5b6cc9e9/gl/gl-procedural-sky.hpp
  */
 #ifndef INCLUDE_CORE_SKYSHADER_H_
@@ -29,7 +29,6 @@
 #include <GLShader.h>
 #include <AlloyMesh.h>
 #include <AlloyMath.h>
-#include "hosek_data_rgb.h"
 namespace aly {
 double sky_evaluate_spline(const double * spline, size_t stride, double value);
 double sky_evaluate(const double * dataset, size_t stride, float turbidity,float albedo, float sunTheta);
@@ -53,8 +52,10 @@ struct PreethamSkyRadianceData {
 };
 class ProceduralSky: public GLShader {
 protected:
+	Camera camera;
 	Mesh skyMesh;
-	virtual void renderInternal(float4x4 viewProj, float3 sunDir,float4x4 world) = 0;
+	virtual void renderInternal(float3 sunDir) = 0;
+	virtual void recompute(float turbidity, float albedo,float normalizedSunY) = 0;
 public:
 	float2 sunPosition;
 	float normalizedSunY = 1.15f;
@@ -62,32 +63,28 @@ public:
 	float turbidity = 4.f;
 	std::function<void()> onParametersChanged;
 	ProceduralSky(bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
-	void render(float4x4 viewProj, float3 eyepoint, float farClip);
-	// Set in degrees. Theta = 0 - 90, Phi = 0 - 360
+	void draw(const box2px& viewport);
 	void setSunPositionDegrees(float theta, float phi);
 	void setSunPosition(float theta, float phi);
-	void setSunPosition(float3 dir);
-	// Get in degrees
 	float2 getSunPosition() const;
 	float3 getSunDirection() const;
-	virtual void recompute(float turbidity, float albedo,float normalizedSunY) = 0;
+	void update();
 };
 class HosekProceduralSky: public ProceduralSky {
-private:
+protected:
 	HosekSkyRadianceData data;
-	virtual void renderInternal(float4x4 viewProj, float3 sunDir,float4x4 world) override;
+	virtual void renderInternal(float3 sunDir) override;
+	virtual void recompute(float turbidity, float albedo, float normalizedSunY)override;
 public:
 	HosekProceduralSky(bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
-	virtual void recompute(float turbidity, float albedo, float normalizedSunY)override;
 };
 class PreethamProceduralSky: public ProceduralSky {
-private:
+protected:
 	PreethamSkyRadianceData data;
-	virtual void renderInternal(float4x4 viewProj, float3 sunDir,
-			float4x4 world) override;
+	virtual void renderInternal(float3 sunDir) override;
+	virtual void recompute(float turbidity, float albedo, float normalizedSunY) override;
 public:
 	PreethamProceduralSky(bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
-	virtual void recompute(float turbidity, float albedo, float normalizedSunY) override;
 };
 }
 #endif /* INCLUDE_CORE_SKYSHADER_H_ */

@@ -760,11 +760,9 @@ public:
 	inline void setExtent(int distance) {
 		kernelSize = distance;
 	}
-		
 	template<class T,int C, ImageType I> void draw(
 			const GLTexture<T, C, I>& imageTexture, const box2px& bounds,
 			const box2px& viewport) {
-
 		begin().set("KERNEL_SIZE", kernelSize).set("innerColor", innerGlowColor).set(
 				"outerColor", outerGlowColor).set("edgeColor", edgeColor).set(
 				"textureImage", imageTexture, 0).set("bounds", bounds).set(
