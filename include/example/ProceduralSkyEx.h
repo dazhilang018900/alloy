@@ -26,7 +26,10 @@
 #include "AlloyWidget.h"
 class ProceduralSkyEx: public aly::Application {
 protected:
-	aly::Number sunPitch,sunAngle;
+	aly::Number sunPitch,sunAngle,albedo,strength,turbidity;
+	aly::HorizontalSliderPtr albedoSlider;
+	aly::HorizontalSliderPtr turbiditySlider;
+	aly::HorizontalSliderPtr strengthSlider;
 	aly::HorizontalSliderPtr pitchSlider;
 	aly::HorizontalSliderPtr angleSlider;
 	aly::SelectionPtr methodSelection;

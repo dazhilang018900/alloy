@@ -55,13 +55,18 @@ protected:
 	Camera camera;
 	Mesh skyMesh;
 	virtual void renderInternal(float3 sunDir) = 0;
-	virtual void recompute(float turbidity, float albedo,float normalizedSunY) = 0;
-public:
-	float2 sunPosition;
+	virtual void recompute(float turbidity, float albedo,float normalizedSunY){
+		throw std::runtime_error("recompute() must be implemented");
+	}
 	float normalizedSunY = 1.15f;
 	float albedo = 0.1f;
-	float turbidity = 4.f;
+	float turbidity = 4.0f;
+	float2 sunPosition;
+public:
 	std::function<void()> onParametersChanged;
+	void setAlbedo(float a);
+	void setTurbidity(float t);
+	void setStrength(float n);
 	ProceduralSky(bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
 	void draw(const box2px& viewport);
 	void setSunPositionDegrees(float theta, float phi);
@@ -74,7 +79,7 @@ class HosekProceduralSky: public ProceduralSky {
 protected:
 	HosekSkyRadianceData data;
 	virtual void renderInternal(float3 sunDir) override;
-	virtual void recompute(float turbidity, float albedo, float normalizedSunY)override;
+	virtual void recompute(float turbidity, float albedo, float normalizedSunY) override;
 public:
 	HosekProceduralSky(bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
 };

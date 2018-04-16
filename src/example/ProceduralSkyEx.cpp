@@ -23,44 +23,82 @@
 #include "../../include/example/ProceduralSkyEx.h"
 using namespace aly;
 ProceduralSkyEx::ProceduralSkyEx() :
-		Application(800, 600, "Procedural Sky Example") {
+		Application(960, 540, "Procedural Sky Example") {
 }
 bool ProceduralSkyEx::init(Composite& rootNode) {
-	box3f renderBBox = box3f(float3(-0.5f, -0.5f, -0.5f),float3(1.0f, 1.0f, 1.0f));
+	box3f renderBBox = box3f(float3(-0.5f, -0.5f, -0.5f),
+			float3(1.0f, 1.0f, 1.0f));
 	//Make region on screen to render 3d view
-	renderRegion=MakeComposite("Render View",CoordPX(0,0),CoordPercent(1.0f,1.0f),COLOR_NONE,COLOR_NONE,UnitPX(0.0f));
-	sunPitch=Integer(65);
-	sunAngle=Integer(130);
+	renderRegion = MakeComposite("Render View", CoordPX(0, 0),
+			CoordPercent(1.0f, 1.0f), COLOR_NONE, COLOR_NONE, UnitPX(0.0f));
+	sunPitch = Integer(50);
+	sunAngle = Integer(110);
+	albedo = Float(0.1f);
+	strength = Float(1.15f);
+	turbidity=Float(4.0f);
 	pitchSlider = HorizontalSliderPtr(
-			new HorizontalSlider("Sun Elevation", CoordPX(5.0f, 5.0f),
+			new HorizontalSlider("Zenith Angle", CoordPX(5.0f, 5.0f),
 					CoordPX(200.0f, 45.0f), true, Integer(0), Integer(90),
 					sunPitch));
 	angleSlider = HorizontalSliderPtr(
-			new HorizontalSlider("Azimuth", CoordPX(5.0f, 55.0f),
+			new HorizontalSlider("Azimuth Angle", CoordPX(5.0f, 55.0f),
 					CoordPX(200.0f, 45.0f), true, Integer(0), Integer(180),
 					sunAngle));
-	methodSelection= SelectionPtr(
-				new Selection("Method", CoordPerPX(1.0f, 0.0f, -150.0f, 5.0f),
-						CoordPX(145.0f, 30.0f), std::vector<std::string> {
-								"Hosek","Preetham" }));
+	albedoSlider = HorizontalSliderPtr(
+			new HorizontalSlider("Albedo", CoordPX(5.0f, 105.0f),
+					CoordPX(200.0f, 45.0f), true, Float(0), Float(0.5f),
+					albedo));
+	strengthSlider = HorizontalSliderPtr(
+			new HorizontalSlider("Strength", CoordPX(5.0f, 160.0f),
+					CoordPX(200.0f, 45.0f), true, Float(0.5), Float(2.0f),
+					strength));
+	turbiditySlider = HorizontalSliderPtr(
+			new HorizontalSlider("Turbidity", CoordPX(5.0f, 210.0f),
+					CoordPX(200.0f, 45.0f), true, Float(1.0f), Float(10.0f),
+					turbidity));
+	methodSelection = SelectionPtr(
+			new Selection("Method", CoordPerPX(1.0f, 0.0f, -150.0f, 5.0f),
+					CoordPX(145.0f, 30.0f), std::vector<std::string> { "Hosek",
+							"Preetham" }));
+
+	pitchSlider->setOnChangeEvent(
+			[this](const Number& val) {
+				preethamShader.setSunPositionDegrees(sunAngle.toFloat(),sunPitch.toFloat());
+				hosekShader.setSunPositionDegrees(sunAngle.toFloat(),sunPitch.toFloat());
+			});
+	angleSlider->setOnChangeEvent(
+			[this](const Number& val) {
+				preethamShader.setSunPositionDegrees(sunAngle.toFloat(),sunPitch.toFloat());
+				hosekShader.setSunPositionDegrees(sunAngle.toFloat(),sunPitch.toFloat());
+			});
+	albedoSlider->setOnChangeEvent([this](const Number& val) {
+		hosekShader.setAlbedo(albedo.toFloat());
+		preethamShader.setAlbedo(albedo.toFloat());
+	});
+	strengthSlider->setOnChangeEvent([this](const Number& val) {
+		hosekShader.setStrength(strength.toFloat());
+		preethamShader.setStrength(strength.toFloat());
+	});
+	turbiditySlider->setOnChangeEvent([this](const Number& val) {
+		hosekShader.setTurbidity(turbidity.toFloat());
+		preethamShader.setTurbidity(turbidity.toFloat());
+	});
 	methodSelection->setSelectedIndex(0);
 	renderRegion->add(methodSelection);
 	renderRegion->add(pitchSlider);
 	renderRegion->add(angleSlider);
+	renderRegion->add(albedoSlider);
+	renderRegion->add(strengthSlider);
+	renderRegion->add(turbiditySlider);
 	rootNode.add(renderRegion);
 	return true;
 
 }
-void ProceduralSkyEx::draw(AlloyContext* context){
-	//Recompute lighting at every draw pass.
-	if(methodSelection->getSelectedIndex()==0){
-		hosekShader.setSunPositionDegrees(sunAngle.toFloat(),sunPitch.toFloat());
-		hosekShader.update();
-		hosekShader.draw(context->pixelRatio*renderRegion->getBounds());
+void ProceduralSkyEx::draw(AlloyContext* context) {
+	if (methodSelection->getSelectedIndex() == 0) {
+		hosekShader.draw(context->pixelRatio * renderRegion->getBounds());
 	} else {
-		preethamShader.setSunPositionDegrees(sunAngle.toFloat(),sunPitch.toFloat());
-		preethamShader.update();
-		preethamShader.draw(context->pixelRatio*renderRegion->getBounds());
+		preethamShader.draw(context->pixelRatio * renderRegion->getBounds());
 	}
 }
 
