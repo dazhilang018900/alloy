@@ -30,7 +30,7 @@ void MeshPositionShader::draw(const std::initializer_list<Mesh*>& meshes,
 	frameBuffer.begin(float4(0.0f,0.0f,0.0f,0.0f));
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
-	begin().set("IS_FLAT",flatShading ? 1 : 0).set("TWO_SIDED",flatShading ? 1 : 0).set(camera, frameBuffer.getViewport()).set("PoseMat",float4x4::identity());
+	begin().set("IS_FLAT",flatShading ? 1 : 0).set("TWO_SIDED",twoSided ? 1 : 0).set(camera, frameBuffer.getViewport()).set("PoseMat",float4x4::identity());
 	set("IS_QUAD", 1).draw(meshes, GLMesh::PrimitiveType::QUADS);
 	set("IS_QUAD", 0).draw(meshes, GLMesh::PrimitiveType::TRIANGLES);
 	end();
@@ -1226,10 +1226,10 @@ void main()
 })");
 	}
 }
-ImageDepthShader::ImageDepthShader( const Filter& filter,bool onScreen,
+ImageDepthShader::ImageDepthShader( const ImageShader::Filter& filter,bool onScreen,
 		const std::shared_ptr<AlloyContext>& context) :
 		GLShader(onScreen, context) {
-	if (filter == Filter::NONE) {
+	if (filter == ImageShader::Filter::NONE) {
 		initialize({},
 			R"(
 		 #version 330
@@ -1251,12 +1251,18 @@ layout(location = 1) in vec2 vt;
 		 uniform sampler2D textureImage;
 		 uniform float alpha;
 		 void main() {
-		 vec4 rgba=texture(textureImage,uv);
-		 gl_FragDepth=rgba.w;
-         rgba.w=alpha;
-		 FragColor=rgba;
+			 vec4 rgba=texture(textureImage,uv);
+			 gl_FragDepth=rgba.w;
+			 if(rgba.w>0&&rgba.w<1.0){
+				 rgba.w=alpha;
+				  FragColor=rgba;
+			 } else {
+				 rgba.w=0;
+				 FragColor=rgba;
+				 discard;
+			 }	
 		 })");
-	} else if (filter == Filter::SMALL_BLUR) {
+	} else if (filter == ImageShader::Filter::SMALL_BLUR) {
 		initialize( { },
 				R"(
 			 #version 330
@@ -1265,7 +1271,7 @@ layout(location = 1) in vec2 vt;
 			 uniform vec4 bounds;
 			 uniform vec4 viewport;
 			uniform int flip;
-			
+			uniform float alpha;
 			out vec2 uv;
 					 void main() {
 			if(flip!=0)uv=vec2(vt.x,1.0-vt.y); else uv=vt;
@@ -1291,11 +1297,18 @@ layout(location = 1) in vec2 vt;
 				rgba+=weights[6]*textureOffset(textureImage,uv, ivec2(-1, 1));
 				rgba+=weights[7]*textureOffset(textureImage,uv, ivec2( 0, 1));
 				rgba+=weights[8]*textureOffset(textureImage,uv, ivec2( 1, 1));
-				FragColor=rgba/16.0;
-				FragColor.w=1.0;
+				rgba=rgba/16.0;
 		 		gl_FragDepth=center.w;
+				if(center.w>0&&center.w<1.0){
+					 rgba.w=alpha;
+					  FragColor=rgba;
+				 } else {
+					 rgba.w=0;
+					 FragColor=rgba;
+					 discard;
+				 }
 			 })");
-	} else if (filter == Filter::LARGE_BLUR) {
+	} else if (filter == ImageShader::Filter::LARGE_BLUR) {
 		initialize( { },
 				R"(
 			 #version 330
@@ -1304,6 +1317,7 @@ layout(location = 1) in vec2 vt;
 			 uniform vec4 bounds;
 			 uniform vec4 viewport;
 			uniform int flip;
+
 			out vec2 uv;
 					 void main() {
 			if(flip!=0)uv=vec2(vt.x,1.0-vt.y); else uv=vt;
@@ -1314,8 +1328,10 @@ layout(location = 1) in vec2 vt;
 					 #version 330
 			 in vec2 uv;
 			 uniform vec4 bounds;
+
 			 uniform sampler2D textureImage;
 			out vec4 FragColor;
+uniform float alpha;
 			 void main() {
                 vec4 colors[9];
 				const float weights[25]=float[25](
@@ -1363,11 +1379,18 @@ vec2 uvs;
 sum+=256.0;
 					}
 				}
-				FragColor=rgba/sum;
-				FragColor.w=1.0;
+				rgba=rgba/sum;
 		 		gl_FragDepth=center.w;
+				 if(center.w>0&&center.w<1.0){
+					 rgba.w=alpha;
+					  FragColor=rgba;
+				 } else {
+					 rgba.w=0;
+					 FragColor=rgba;
+					 discard;
+				 }
 			 })");
-	} else if (filter == Filter::MEDIUM_BLUR) {
+	} else if (filter == ImageShader::Filter::MEDIUM_BLUR) {
 		initialize( { },
 				R"(
 			 #version 330
@@ -1387,6 +1410,7 @@ sum+=256.0;
 			 in vec2 uv;
 			 uniform vec4 bounds;
 			 uniform sampler2D textureImage;
+uniform float alpha;
 out vec4 FragColor;
 			 void main() {
                 vec4 colors[9];
@@ -1427,12 +1451,20 @@ out vec4 FragColor;
 						rgba+=weights[22]*textureOffset(textureImage,uv, ivec2( 0, 2));
 						rgba+=weights[23]*textureOffset(textureImage,uv, ivec2( 1, 2));
 						rgba+=weights[24]*textureOffset(textureImage,uv, ivec2( 2, 2));
-				FragColor=rgba/256.0;
-				FragColor.w=1.0;
+
+				rgba=rgba/256;
 		 		gl_FragDepth=center.w;
+				 if(center.w>0&&center.w<1.0){
+					 rgba.w=alpha;
+					  FragColor=rgba;
+				 } else {
+					 rgba.w=0;
+					 FragColor=rgba;
+					 discard;
+				 }
 
 			 })");
-	} else if (filter == Filter::FXAA) {
+	} else if (filter == ImageShader::Filter::FXAA) {
 		initialize( { },
 				R"(
  #version 330
@@ -1457,6 +1489,7 @@ void main() {
 uniform sampler2D tex0; // 0
 out vec4 FragColor;
 uniform vec4 bounds;
+uniform float alpha;
 uniform float FXAA_SPAN_MAX = 8.0;
 uniform float FXAA_REDUCE_MUL = 1.0/8.0;
 in vec4 posPos;
@@ -1526,8 +1559,14 @@ void main()
 { 
 	vec4 center=PostFX(tex0, 0.0);
 	gl_FragDepth=center.w;
-	center.w=1.0;
-  	FragColor =center; 
+	if(center.w>0&&center.w<1.0){
+		 center.w=alpha;
+		  FragColor=center;
+	} else {
+		 center.w=0;
+		 FragColor=center;
+		 discard;
+	}
 })");
 	}
 }
