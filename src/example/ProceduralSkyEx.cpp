@@ -50,11 +50,11 @@ bool ProceduralSkyEx::init(Composite& rootNode) {
 					CoordPX(200.0f, 45.0f), true, Float(0), Float(0.5f),
 					albedo));
 	strengthSlider = HorizontalSliderPtr(
-			new HorizontalSlider("Strength", CoordPX(5.0f, 160.0f),
+			new HorizontalSlider("Strength", CoordPX(5.0f, 155.0f),
 					CoordPX(200.0f, 45.0f), true, Float(0.5), Float(2.0f),
 					strength));
 	turbiditySlider = HorizontalSliderPtr(
-			new HorizontalSlider("Turbidity", CoordPX(5.0f, 210.0f),
+			new HorizontalSlider("Turbidity", CoordPX(5.0f, 205.0f),
 					CoordPX(200.0f, 45.0f), true, Float(1.0f), Float(10.0f),
 					turbidity));
 	methodSelection = SelectionPtr(

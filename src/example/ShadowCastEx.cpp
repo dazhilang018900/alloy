@@ -54,7 +54,7 @@ bool ShadowCastEx::init(Composite& rootNode) {
 					CoordPX(200.0f, 45.0f), true, Integer(1), Integer(256),
 					samples));
 	spreadSlider = HorizontalSliderPtr(
-			new HorizontalSlider("Spread", CoordPX(5.0f, 160.0f),
+			new HorizontalSlider("Spread", CoordPX(5.0f, 155.0f),
 					CoordPX(200.0f, 45.0f), true, Float(0.0f), Float(8.0f),
 					spread));
 
