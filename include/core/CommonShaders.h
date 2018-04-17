@@ -41,6 +41,9 @@ public:
 			bool flatShading=false,bool twoSided=true){
 		draw({&mesh},camera,frameBuffer,flatShading,twoSided);
 	}
+	void draw(Mesh& mesh,
+			CameraParameters& camera,const box2px& bbox,
+			bool flatShading=false,bool twoSided=true);
 };
 class DepthAndNormalShader: public GLShader {
 public:
@@ -54,6 +57,9 @@ public:
 			const std::initializer_list<std::pair<Mesh*, float4x4>>& meshes,
 			CameraParameters& camera, GLFrameBuffer& framebuffer,
 			bool flatShading = false);
+	void draw(Mesh& mesh,
+			CameraParameters& camera,const box2px& bbox,
+			bool flatShading=false);
 	void draw(const std::list<Mesh*>& meshes, CameraParameters& camera,
 			GLFrameBuffer& framebuffer, bool flatShading = false);
 	void draw(const std::vector<Mesh*>& meshes, CameraParameters& camera,

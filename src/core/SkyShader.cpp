@@ -1308,14 +1308,15 @@ PreethamSkyRadianceData PreethamSkyRadianceData::compute(float3 sun_direction,
 	return {A, B, C, D, E, Z};
 }
 
-ProceduralSky::ProceduralSky(float sphereRadius,bool onScreen,
+ProceduralSky::ProceduralSky(float sphereRadius, bool onScreen,
 		const std::shared_ptr<AlloyContext>& context) :
 		GLShader(onScreen, context) {
-	TessellatedSphere(sphereRadius, 3, SubDivisionScheme::Loop, context).clone(skyMesh);
-	setSunPositionDegrees(110,72);
+	TessellatedSphere(sphereRadius, 3, SubDivisionScheme::Loop, context).clone(
+			skyMesh);
+	setSunPositionDegrees(110, 72);
 }
-void ProceduralSky::draw(CameraParameters& camera,const box2px& viewport) {
-	if(dirty){
+void ProceduralSky::draw(CameraParameters& camera, const box2px& viewport) {
+	if (dirty) {
 		update();
 	}
 	glDisable(GL_BLEND);
@@ -1323,14 +1324,28 @@ void ProceduralSky::draw(CameraParameters& camera,const box2px& viewport) {
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 	begin().set("MIN_DEPTH", camera.getNearPlane()).set("MAX_DEPTH",
-			camera.getFarPlane()).set("IS_QUAD", false).set(camera, viewport).set("NormalInverseMat",transpose(camera.NormalView)).set(
-			"PoseMat", float4x4::identity());
+			camera.getFarPlane()).set("IS_QUAD", false).set(camera, viewport).set(
+			"NormalInverseMat", transpose(camera.NormalView)).set("PoseMat",
+			float4x4::identity());
 	renderInternal(getSunDirection());
 	GLShader::draw(skyMesh, GLMesh::PrimitiveType::TRIANGLES);
 	glDisable(GL_CULL_FACE);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_BLEND);
-	dirty=false;
+	dirty = false;
+}
+void ProceduralSky::draw(Mesh& mesh, CameraParameters& camera,
+		const box2px& viewport) {
+	if (dirty) {
+		update();
+	}
+	begin().set("MIN_DEPTH", camera.getNearPlane()).set("MAX_DEPTH",
+			camera.getFarPlane()).set(camera, viewport).set("NormalInverseMat",
+			transpose(camera.NormalView)).set("PoseMat", float4x4::identity());
+	renderInternal(getSunDirection());
+	set("IS_QUAD", 1).draw(mesh, GLMesh::PrimitiveType::QUADS);
+	set("IS_QUAD", 0).draw(mesh, GLMesh::PrimitiveType::TRIANGLES);
+	dirty = false;
 }
 void ProceduralSky::setSunPositionDegrees(float theta, float phi) {
 	sunPosition = {ToRadians(theta), ToRadians(phi)};
@@ -1349,15 +1364,15 @@ void ProceduralSky::update() {
 }
 void ProceduralSky::setAlbedo(float a) {
 	albedo = a;
-	dirty=true;
+	dirty = true;
 }
 void ProceduralSky::setTurbidity(float t) {
 	turbidity = t;
-	dirty=true;
+	dirty = true;
 }
 void ProceduralSky::setStrength(float n) {
 	normalizedSunY = n;
-	dirty=true;
+	dirty = true;
 }
 
 float3 ProceduralSky::getSunDirection() const {
@@ -1365,6 +1380,12 @@ float3 ProceduralSky::getSunDirection() const {
 	return float3(-std::cos(-sunPosition.x) * sp, std::cos(sunPosition.y),
 			std::sin(-sunPosition.x) * sp);
 	//return Transform(MakeRotationY(sunPosition.y)*MakeRotationX(-sunPosition.x),float3(0,0,1));
+}
+aly::RGBf HosekProceduralSky::evaluate(float3 normal) const {
+	float cos_theta = clamp(normal.y, 0.0f, 1.0f);
+	float cos_gamma = clamp(dot(normal, getSunDirection()), 0.0f, 1.0f);
+	float gamma = std::acos(cos_gamma);
+	return data.Z*sky_hosek_wilkie(cos_theta, gamma, cos_gamma, data.A, data.B, data.C,data.D, data.E, data.F, data.G, data.H, data.I);
 }
 void HosekProceduralSky::recompute(float turbidity, float albedo,
 		float normalizedSunY) {
@@ -1388,9 +1409,9 @@ void HosekProceduralSky::renderInternal(float3 sunDir) {
 	set("SunDirection", sunDir);
 }
 
-HosekProceduralSky::HosekProceduralSky(float sphereRadius,bool onScreen,
+HosekProceduralSky::HosekProceduralSky(float sphereRadius, bool onScreen,
 		const std::shared_ptr<AlloyContext>& context) :
-		ProceduralSky(sphereRadius,onScreen, context) {
+		ProceduralSky(sphereRadius, onScreen, context) {
 	initialize( { },
 			R"(	#version 330
 					layout(location = 3) in vec3 vp0;
@@ -1432,6 +1453,8 @@ out vec4 FragColor;
 uniform vec3 A, B, C, D, E, F, G, H, I, Z;
 uniform vec3 SunDirection;
 uniform mat4 NormalInverseMat;
+uniform float MIN_DEPTH;
+uniform float MAX_DEPTH;
 // ArHosekSkyModel_GetRadianceInternal
 vec3 HosekWilkie(float cos_theta, float gamma, float cos_gamma)
 {
@@ -1440,13 +1463,14 @@ vec3 HosekWilkie(float cos_theta, float gamma, float cos_gamma)
 }
 void main()
 {
-	vec3 V = normalize((NormalInverseMat*vec4(vert,0.0)).xyz);
+	vec3 V = normalize((NormalInverseMat*vec4(normal,0.0)).xyz);
 	float cos_theta = clamp(V.y, 0, 1);
 	float cos_gamma = clamp(dot(V, SunDirection), 0, 1);
 	float gamma_ = acos(cos_gamma);
 
-	vec3 R = Z * HosekWilkie(cos_theta, gamma_, cos_gamma);
-   FragColor= vec4(R, 1);
+		vec3 R = Z * HosekWilkie(cos_theta, gamma_, cos_gamma);
+   		FragColor= vec4(R, 1);
+		gl_FragDepth=(-vert.z-MIN_DEPTH)/(MAX_DEPTH-MIN_DEPTH);
 })",
 			R"(	#version 330
 		layout (points) in;
@@ -1544,9 +1568,9 @@ EndPrimitive();
 	update();
 }
 
-PreethamProceduralSky::PreethamProceduralSky(float sphereRadius,bool onScreen,
+PreethamProceduralSky::PreethamProceduralSky(float sphereRadius, bool onScreen,
 		const std::shared_ptr<AlloyContext>& context) :
-		ProceduralSky(sphereRadius,onScreen, context) {
+		ProceduralSky(sphereRadius, onScreen, context) {
 	initialize( { },
 			R"(	#version 330
 					layout(location = 3) in vec3 vp0;
@@ -1587,13 +1611,15 @@ out vec4 FragColor;
 uniform vec3 A, B, C, D, E, Z;
 uniform vec3 SunDirection;
 uniform mat4 NormalInverseMat;
+uniform float MIN_DEPTH;
+uniform float MAX_DEPTH;
 vec3 sky_perez(float cos_theta, float gamma, float cos_gamma, vec3 A, vec3 B, vec3 C, vec3 D, vec3 E)
 {
     return (1 + A * exp(B / (cos_theta + 0.01))) * (1 + C * exp(D * gamma) + E * cos_gamma * cos_gamma);
 }
 void main()
 {
-	vec3 V = normalize((NormalInverseMat*vec4(vert,0.0)).xyz);
+	vec3 V = normalize((NormalInverseMat*vec4(normal,0.0)).xyz);
     float cos_theta = clamp(V.y, 0, 1);
     float cos_gamma = dot(V, SunDirection);
     float gamma = acos(cos_gamma);
@@ -1605,6 +1631,7 @@ void main()
     float b = dot(vec3( 0.055648, -0.204043,  1.057311), R_XYZ);
 
     FragColor = vec4(vec3(r, g, b), 1);
+    gl_FragDepth=(-vert.z-MIN_DEPTH)/(MAX_DEPTH-MIN_DEPTH);
 })",
 			R"(	#version 330
 		layout (points) in;

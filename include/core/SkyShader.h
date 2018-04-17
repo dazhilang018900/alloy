@@ -69,6 +69,7 @@ public:
 	void setStrength(float n);
 	ProceduralSky(float sphereRadius=1.0f,bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
 	void draw(CameraParameters& camera,const box2px& viewport);
+	void draw(Mesh& mesh,CameraParameters& camera,const box2px& viewport);
 	void setSunPositionDegrees(float theta, float phi);
 	void setSunPosition(float theta, float phi);
 	float2 getSunPosition() const;
@@ -82,6 +83,7 @@ protected:
 	virtual void recompute(float turbidity, float albedo, float normalizedSunY) override;
 public:
 	HosekProceduralSky(float sphereRadius=1.0f,bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
+	aly::RGBf evaluate(float3 normal) const ;
 };
 class PreethamProceduralSky: public ProceduralSky {
 protected:

@@ -37,7 +37,17 @@ void MeshPositionShader::draw(const std::initializer_list<Mesh*>& meshes,
 	glEnable(GL_BLEND);
 	frameBuffer.end();
 }
-
+void MeshPositionShader::draw(Mesh& mesh,
+		CameraParameters& camera,const box2px& bbox,
+		bool flatShading,bool twoSided){
+	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+	begin().set("IS_FLAT",flatShading ? 1 : 0).set("TWO_SIDED",twoSided ? 1 : 0).set(camera, bbox).set("PoseMat",float4x4::identity());
+	set("IS_QUAD", 1).draw(mesh, GLMesh::PrimitiveType::QUADS);
+	set("IS_QUAD", 0).draw(mesh, GLMesh::PrimitiveType::TRIANGLES);
+	end();
+	glEnable(GL_BLEND);
+}
 MeshPositionShader::MeshPositionShader(bool onScreen,const std::shared_ptr<AlloyContext>& context) :
 		GLShader(onScreen, context){
 	initialize({},
@@ -2188,6 +2198,20 @@ void DepthAndNormalShader::draw(
 	glEnable(GL_BLEND);
 	frameBuffer.end();
 }
+void DepthAndNormalShader::draw(Mesh& mesh,
+		CameraParameters& camera,const box2px& bbox,
+		bool flatShading) {
+	glDisable(GL_BLEND);
+	glEnable(GL_DEPTH_TEST);
+	begin().set("MIN_DEPTH", camera.getNearPlane()).set("IS_FLAT",
+			flatShading ? 1 : 0).set("MAX_DEPTH", camera.getFarPlane()).set(
+			camera, bbox).set("PoseMat",
+			float4x4::identity());
+	set("IS_QUAD", 1).draw(mesh, GLMesh::PrimitiveType::QUADS);
+	set("IS_QUAD", 0).draw(mesh, GLMesh::PrimitiveType::TRIANGLES);
+	end();
+	glEnable(GL_BLEND);
+}
 void DepthAndNormalShader::draw(
 		const std::initializer_list<std::pair<Mesh*, float4x4>>& meshes,
 		CameraParameters& camera, GLFrameBuffer& frameBuffer,
@@ -2975,7 +2999,7 @@ OutlineShader::OutlineShader(
 		0.05f, 1.0f), outerGlowColor(0.1f, 0.05f, 0.5f, 1.0f), edgeColor(
 			1.0f, 1.0f, 1.0f, 1.0f) {
 	setLineWidth(2.0f);
-	
+
 	initialize({},
 		R"(
 			#version 330
