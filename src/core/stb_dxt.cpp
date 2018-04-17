@@ -32,7 +32,10 @@
  - RygsDXTc source repository : http://code.google.com/p/rygsdxtc/
  */
 
+
+#define STB_DXT_IMPLEMENTATION
 #include <stb_dxt.h>
+#include <assert.h>
 namespace aly {
 int stb__Mul8Bit(int a, int b) {
 	int t = a * b + 128;
