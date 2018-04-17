@@ -40,10 +40,15 @@ bool MeshTextureMapEx::init(Composite& rootNode) {
 	box3f renderBBox = box3f(float3(-0.5f, -0.5f, -0.5f), float3(1.0f, 1.0f, 1.0f));
 	mesh.load(getFullPath("models/tanya.ply"));
 	mesh.updateVertexNormals();
-
 	textureMapMesh();
 	labelRegions();
 	texImage.load(mesh.textureImage);
+	std::vector<RGBAf> tmpColors;
+	ColorizeMeshTextureRegions(mesh,tmpColors);
+	colors.resize(tmpColors.size());
+	for(int i=0;i<colors.size();i++){
+		colors[i]=Color(tmpColors[i]);
+	}
 	//Make region on screen to render 3d view
 	renderRegion = MakeRegion("Render View", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f), COLOR_NONE, COLOR_WHITE, UnitPX(1.0f));
 	renderRegion->borderWidth = UnitPX(1.0f);
@@ -188,10 +193,12 @@ bool MeshTextureMapEx::init(Composite& rootNode) {
 				float area = std::abs(crossMag(uv2 - uv1, uv3 - uv1));
 
 				if (area > minArea) {
+
 					if (fill) {
 						nvgFillColor(nvg, colors[i]);
 						nvgStrokeColor(nvg, colors[i].toSemiTransparent(1.0f));
 					}
+
 					nvgBeginPath(nvg);
 					nvgMoveTo(nvg, uv1.x, uv1.y);
 					nvgLineTo(nvg, uv2.x, uv2.y);

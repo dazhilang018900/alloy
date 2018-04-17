@@ -252,6 +252,18 @@ GrabCut Example
 -------------------------
 [![GrabCutEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/grabcut.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/GrabCutEx.cpp)
 
+Procedural Sky Example
+-------------------------
+[![ProceduralSkyEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0041.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/ProceduralSkyEx.cpp)
+
+Soft Shadow Example
+-------------------------
+[![ShadowCastEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0042.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/ShadowCastEx.cpp)
+
+Automatic Mesh Texture Map Example
+-------------------------
+[![MeshTextureMapEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0043.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/MeshTextureMapEx.cpp)
+
 One Euro Filter Example
 -------------------------
 [![OneEuroFilterEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0035.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/OneEuroFilterEx.cpp)

@@ -149,8 +149,11 @@ namespace aly{
 		void evaluate(aly::Mesh& mesh,const std::function<bool(const std::string& status, float progress)>& statusHandler =nullptr);
 	};
 	int ColorizeMeshTextureRegions(Mesh& mesh);
-	int LabelTextureRegions(const aly::Mesh& mesh, std::vector<size_t>& indexes, std::vector<int>& cc, std::vector<int>& labels, float distanceTolerance=1E-6f);
+	int ColorizeMeshTextureRegions(Mesh& mesh,std::vector<RGBAf>& colors);
+	int LabelTextureRegions(const aly::Mesh& mesh, std::vector<int>& indexes, std::vector<int>& cc, std::vector<int>& labels, float distanceTolerance=1E-6f);
 	int GetConnectedVertexComponents(const aly::Mesh& mesh, std::vector<int>& cc, std::vector<int>& labels);
 	int GetConnectedTextureComponents(const std::vector<size_t>& indexes, int N, std::vector<int>& cc, std::vector<int>& labels);
+	int GetConnectedTextureComponents(const std::vector<int>& indexes, int N, std::vector<int>& cc, std::vector<int>& labels);
+
 }
 #endif

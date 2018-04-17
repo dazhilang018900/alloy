@@ -85,6 +85,65 @@ namespace aly {
 		} while (pivot >= 0);
 		return (int)cclist.size();
 	}
+	int GetConnectedTextureComponents(const std::vector<int>& indexes, int N, std::vector<int>& cclist, std::vector<int>& labels) {
+			std::vector<std::list<int>> vertNbrs(N);
+			int indexCount = (int)indexes.size();
+			for (int i = 0; i < indexCount; i += 3) {
+				int v1 = (int)indexes[i];
+				int v2 = (int)indexes[i + 1];
+				int v3 = (int)indexes[i + 2];
+				vertNbrs[v1].push_back(v2);
+				vertNbrs[v1].push_back(v3);
+				vertNbrs[v2].push_back(v3);
+				vertNbrs[v2].push_back(v1);
+				vertNbrs[v3].push_back(v1);
+				vertNbrs[v3].push_back(v2);
+			}
+			labels.resize(N, -1);
+			int pivot = 0;
+			int cc = 0;
+			std::list<int> queue;
+
+			cclist.clear();
+			int masked = 0;
+			int ccCount = 0;
+			std::vector<int> nbrs;
+			cclist.clear();
+			do {
+				ccCount = 0;
+				queue.clear();
+				labels[pivot] = cc;
+				ccCount++;
+				queue.push_back(pivot);
+				masked++;
+				int iter = 0;
+				while (queue.size() > 0) {
+					int v = queue.front();
+					queue.pop_front();
+					nbrs.clear();
+					iter++;
+					for (int nbr : vertNbrs[v]) {
+						if (labels[nbr] < 0) {
+							labels[nbr] = cc;
+							ccCount++;
+							masked++;
+							queue.push_back(nbr);
+						}
+					}
+				}
+				cclist.push_back(ccCount);
+				int lastPivot = pivot;
+				pivot = -1;
+				for (int i = lastPivot + 1; i < N; i++) {
+					if (labels[i] < 0) {
+						pivot = i;
+						break;
+					}
+				}
+				cc++;
+			} while (pivot >= 0);
+			return (int)cclist.size();
+		}
 	int GetConnectedVertexComponents(const aly::Mesh& mesh, std::vector<int>& cclist, std::vector<int>& labels) {
 		int vertexCount = (int)mesh.vertexLocations.size();
 		int faceCount = (int)mesh.triIndexes.size();
@@ -148,7 +207,7 @@ namespace aly {
 		return (int)cclist.size();
 	}
 	int ColorizeMeshTextureRegions(Mesh& mesh){
-		std::vector<size_t> indexes;
+		std::vector<int> indexes;
 		std::vector<int> cc;
 		std::vector<int> labels;
 		int count=LabelTextureRegions(mesh, indexes, cc, labels);
@@ -168,7 +227,30 @@ namespace aly {
 		}
 		return count;
 	}
-	int LabelTextureRegions(const aly::Mesh& mesh, std::vector<size_t>& indexes, std::vector<int>& cclist, std::vector<int>& labels, float distanceTolerance) {
+	int ColorizeMeshTextureRegions(Mesh& mesh,std::vector<RGBAf>& colors){
+		std::vector<int> indexes;
+		std::vector<int> cc;
+		std::vector<int> labels;
+		int count=LabelTextureRegions(mesh, indexes, cc, labels);
+		std::vector<RGBAf> colorMap(cc.size());
+		for (int i = 0; i < (int)cc.size(); i++) {
+			colorMap[i] = HSVAtoRGBAf(HSVA(RandomUniform(0.0f, 1.0f), RandomUniform(0.3f, 1.0f), RandomUniform(0.5f, 1.0f), 0.5f));
+		}
+		size_t N=indexes.size();
+		colors.resize(N,RGBAf(0.0f,0.0f,0.0f,0.0f));
+		mesh.vertexColors.resize(mesh.vertexLocations.size(),RGBAf(0.0f));
+		for (size_t i = 0; i <N; i++) {
+			int idx= (int)indexes[i];
+			int l = labels[idx];
+			if (l >= 0 && l < (int)colorMap.size()) {
+				colors[i]=colorMap[l];
+				uint3 tri=mesh.triIndexes[i/3];
+				mesh.vertexColors[tri[i%3]] =colorMap[l];
+			}
+		}
+		return count;
+	}
+	int LabelTextureRegions(const aly::Mesh& mesh, std::vector<int>& indexes, std::vector<int>& cclist, std::vector<int>& labels, float distanceTolerance) {
 		const Vector2f& uvs = mesh.textureMap;
 		Locator2f locator(uvs);
 		std::vector<float2i> result;
