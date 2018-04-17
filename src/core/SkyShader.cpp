@@ -1323,7 +1323,7 @@ void ProceduralSky::draw(CameraParameters& camera,const box2px& viewport) {
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_FRONT);
 	begin().set("MIN_DEPTH", camera.getNearPlane()).set("MAX_DEPTH",
-			camera.getFarPlane()).set("IS_QUAD", false).set(camera, viewport).set(
+			camera.getFarPlane()).set("IS_QUAD", false).set(camera, viewport).set("NormalInverseMat",transpose(camera.NormalView)).set(
 			"PoseMat", float4x4::identity());
 	renderInternal(getSunDirection());
 	GLShader::draw(skyMesh, GLMesh::PrimitiveType::TRIANGLES);
@@ -1431,7 +1431,7 @@ in vec3 normal;
 out vec4 FragColor;
 uniform vec3 A, B, C, D, E, F, G, H, I, Z;
 uniform vec3 SunDirection;
-uniform mat4 NormalMat;
+uniform mat4 NormalInverseMat;
 // ArHosekSkyModel_GetRadianceInternal
 vec3 HosekWilkie(float cos_theta, float gamma, float cos_gamma)
 {
@@ -1440,7 +1440,7 @@ vec3 HosekWilkie(float cos_theta, float gamma, float cos_gamma)
 }
 void main()
 {
-	vec3 V = normalize((NormalMat*vec4(vert,0.0)).xyz);
+	vec3 V = normalize((NormalInverseMat*vec4(vert,0.0)).xyz);
 	float cos_theta = clamp(V.y, 0, 1);
 	float cos_gamma = clamp(dot(V, SunDirection), 0, 1);
 	float gamma_ = acos(cos_gamma);
@@ -1586,14 +1586,14 @@ in vec3 normal;
 out vec4 FragColor;
 uniform vec3 A, B, C, D, E, Z;
 uniform vec3 SunDirection;
-uniform mat4 NormalMat;
+uniform mat4 NormalInverseMat;
 vec3 sky_perez(float cos_theta, float gamma, float cos_gamma, vec3 A, vec3 B, vec3 C, vec3 D, vec3 E)
 {
     return (1 + A * exp(B / (cos_theta + 0.01))) * (1 + C * exp(D * gamma) + E * cos_gamma * cos_gamma);
 }
 void main()
 {
-	vec3 V = normalize((NormalMat*vec4(vert,0.0)).xyz);
+	vec3 V = normalize((NormalInverseMat*vec4(vert,0.0)).xyz);
     float cos_theta = clamp(V.y, 0, 1);
     float cos_gamma = dot(V, SunDirection);
     float gamma = acos(cos_gamma);
