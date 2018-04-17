@@ -36,6 +36,7 @@ protected:
 	aly::CompositePtr renderRegion;
 	aly::HosekProceduralSky hosekShader;
 	aly::PreethamProceduralSky preethamShader;
+	aly::Camera camera;
 public:
 	ProceduralSkyEx();
 	bool init(aly::Composite& rootNode);

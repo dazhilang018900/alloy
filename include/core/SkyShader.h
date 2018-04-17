@@ -52,12 +52,12 @@ struct PreethamSkyRadianceData {
 };
 class ProceduralSky: public GLShader {
 protected:
-	Camera camera;
 	Mesh skyMesh;
 	virtual void renderInternal(float3 sunDir) = 0;
 	virtual void recompute(float turbidity, float albedo,float normalizedSunY){
 		throw std::runtime_error("recompute() must be implemented");
 	}
+	bool dirty=true;
 	float normalizedSunY = 1.15f;
 	float albedo = 0.1f;
 	float turbidity = 4.0f;
@@ -67,8 +67,8 @@ public:
 	void setAlbedo(float a);
 	void setTurbidity(float t);
 	void setStrength(float n);
-	ProceduralSky(bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
-	void draw(const box2px& viewport);
+	ProceduralSky(float sphereRadius=1.0f,bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
+	void draw(CameraParameters& camera,const box2px& viewport);
 	void setSunPositionDegrees(float theta, float phi);
 	void setSunPosition(float theta, float phi);
 	float2 getSunPosition() const;
@@ -81,7 +81,7 @@ protected:
 	virtual void renderInternal(float3 sunDir) override;
 	virtual void recompute(float turbidity, float albedo, float normalizedSunY) override;
 public:
-	HosekProceduralSky(bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
+	HosekProceduralSky(float sphereRadius=1.0f,bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
 };
 class PreethamProceduralSky: public ProceduralSky {
 protected:
@@ -89,7 +89,7 @@ protected:
 	virtual void renderInternal(float3 sunDir) override;
 	virtual void recompute(float turbidity, float albedo, float normalizedSunY) override;
 public:
-	PreethamProceduralSky(bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
+	PreethamProceduralSky(float sphereRadius=1.0f,bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
 };
 }
 #endif /* INCLUDE_CORE_SKYSHADER_H_ */

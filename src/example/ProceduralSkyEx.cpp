@@ -23,7 +23,8 @@
 #include "../../include/example/ProceduralSkyEx.h"
 using namespace aly;
 ProceduralSkyEx::ProceduralSkyEx() :
-		Application(960, 540, "Procedural Sky Example") {
+		Application(960, 540, "Procedural Sky Example"), hosekShader(1.0f), preethamShader(
+				1.0f) {
 }
 bool ProceduralSkyEx::init(Composite& rootNode) {
 	box3f renderBBox = box3f(float3(-0.5f, -0.5f, -0.5f),
@@ -31,11 +32,11 @@ bool ProceduralSkyEx::init(Composite& rootNode) {
 	//Make region on screen to render 3d view
 	renderRegion = MakeComposite("Render View", CoordPX(0, 0),
 			CoordPercent(1.0f, 1.0f), COLOR_NONE, COLOR_NONE, UnitPX(0.0f));
-	sunPitch = Integer(50);
+	sunPitch = Integer(72);
 	sunAngle = Integer(110);
 	albedo = Float(0.1f);
 	strength = Float(1.15f);
-	turbidity=Float(4.0f);
+	turbidity = Float(4.0f);
 	pitchSlider = HorizontalSliderPtr(
 			new HorizontalSlider("Zenith Angle", CoordPX(5.0f, 5.0f),
 					CoordPX(200.0f, 45.0f), true, Integer(0), Integer(90),
@@ -60,6 +61,16 @@ bool ProceduralSkyEx::init(Composite& rootNode) {
 			new Selection("Method", CoordPerPX(1.0f, 0.0f, -150.0f, 5.0f),
 					CoordPX(145.0f, 30.0f), std::vector<std::string> { "Hosek",
 							"Preetham" }));
+	pitchSlider->backgroundColor = MakeColor(
+			getContext()->theme.DARK.toSemiTransparent(0.5f));
+	angleSlider->backgroundColor = MakeColor(
+			getContext()->theme.DARK.toSemiTransparent(0.5f));
+	albedoSlider->backgroundColor = MakeColor(
+			getContext()->theme.DARK.toSemiTransparent(0.5f));
+	strengthSlider->backgroundColor = MakeColor(
+			getContext()->theme.DARK.toSemiTransparent(0.5f));
+	turbiditySlider->backgroundColor = MakeColor(
+			getContext()->theme.DARK.toSemiTransparent(0.5f));
 
 	pitchSlider->setOnChangeEvent(
 			[this](const Number& val) {
@@ -83,6 +94,13 @@ bool ProceduralSkyEx::init(Composite& rootNode) {
 		hosekShader.setTurbidity(turbidity.toFloat());
 		preethamShader.setTurbidity(turbidity.toFloat());
 	});
+	camera.setNearFarPlanes(0.1f, 6.0f);
+	camera.setZoom(1.25f);
+	camera.setZoomRange(1.25f, 1.25f);
+	camera.setTranslationRange(float3(0.0f), float3(0.0f));
+	camera.setCameraType(CameraType::Perspective);
+	camera.setDirty(true);
+	addListener(&camera);
 	methodSelection->setSelectedIndex(0);
 	renderRegion->add(methodSelection);
 	renderRegion->add(pitchSlider);
@@ -92,13 +110,14 @@ bool ProceduralSkyEx::init(Composite& rootNode) {
 	renderRegion->add(turbiditySlider);
 	rootNode.add(renderRegion);
 	return true;
-
 }
 void ProceduralSkyEx::draw(AlloyContext* context) {
 	if (methodSelection->getSelectedIndex() == 0) {
-		hosekShader.draw(context->pixelRatio * renderRegion->getBounds());
+		hosekShader.draw(camera,
+				context->pixelRatio * renderRegion->getBounds());
 	} else {
-		preethamShader.draw(context->pixelRatio * renderRegion->getBounds());
+		preethamShader.draw(camera,
+				context->pixelRatio * renderRegion->getBounds());
 	}
 }
 

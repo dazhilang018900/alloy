@@ -24,11 +24,12 @@
 
 #include "AlloyApplication.h"
 #include "CommonShaders.h"
+#include <AlloyWidget.h>
 #include "ShadowCastShader.h"
 class ShadowCastEx: public aly::Application {
 protected:
 	int lightWidth,lightHeight;
-	aly::RegionPtr renderRegion;
+	aly::CompositePtr renderRegion;
 	aly::GLFrameBuffer depthFrameBuffer;
 	aly::GLFrameBuffer positionFrameBuffer;
 	aly::GLFrameBuffer lightDepthBuffer;
@@ -43,6 +44,13 @@ protected:
 	aly::Mesh grid;
 	aly::Camera camera;
 	aly::Camera lightCamera;
+
+	aly::Number pitch,angle,samples,spread;
+	aly::HorizontalSliderPtr pitchSlider;
+	aly::HorizontalSliderPtr angleSlider;
+	aly::HorizontalSliderPtr samplesSlider;
+	aly::HorizontalSliderPtr spreadSlider;
+
 public:
 	ShadowCastEx();
 	bool init(aly::Composite& rootNode);

@@ -117,6 +117,10 @@ protected:
 	CameraType cameraType;
 	Region* activeRegion;
 	bool includeParentRegion;
+	float minScale;
+	float maxScale;
+	float3 minTranslation;
+	float3 maxTranslation;
 	void handleKeyEvent(GLFWwindow* win, int key, int action);
 	void handleButtonEvent(int button, int action);
 	void handleCursorEvent(float x, float y);
@@ -124,6 +128,14 @@ protected:
 public:
 	Camera();
 	void reset();
+	void setZoomRange(float mn,float mx){
+		minScale=mn;
+		maxScale=mx;
+	}
+	void setTranslationRange(float3 mn,float3 mx){
+		minTranslation=mn;
+		maxTranslation=mx;
+	}
 	std::string getName() const override {
 		return "Camera";
 	}

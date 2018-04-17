@@ -325,7 +325,7 @@ Camera::Camera() :
 				0.2f), strafeSpeed(0.001f), distanceToObject(1.0), mouseDown(
 				false), startTumbling(false), zoomMode(false), needsDisplay(
 				true), cameraType(CameraType::Perspective), activeRegion(
-				nullptr), includeParentRegion(true) {
+				nullptr), includeParentRegion(true),minScale(1E-3f),maxScale(10000),minTranslation(-1E30f),maxTranslation(1E30f) {
 }
 float CameraParameters::getScale() const {
 	float3x3 U, D, Vt;
@@ -458,22 +458,22 @@ void Camera::handleKeyEvent(GLFWwindow* win, int key, int action) {
 		reset();
 		changed = true;
 	} else if (key == GLFW_KEY_UP) {
-		cameraTrans[1] += 0.025f;
+		cameraTrans[1]=aly::clamp(cameraTrans[1] + 0.025f,minTranslation[1],maxTranslation[1]);
 		changed = true;
 	} else if (key == GLFW_KEY_DOWN) {
-		cameraTrans[1] -= 0.025f;
+		cameraTrans[1]=aly::clamp(cameraTrans[1] - 0.025f,minTranslation[1],maxTranslation[1]);
 		changed = true;
 	} else if (key == GLFW_KEY_LEFT) {
-		cameraTrans[0] -= 0.025f;
+		cameraTrans[0]=aly::clamp(cameraTrans[0] - 0.025f,minTranslation[0],maxTranslation[0]);
 		changed = true;
 	} else if (key == GLFW_KEY_RIGHT) {
-		cameraTrans[0] += 0.025f;
+		cameraTrans[0]=aly::clamp(cameraTrans[0] + 0.025f,minTranslation[0],maxTranslation[0]);
 		changed = true;
 	} else if (key == GLFW_KEY_PAGE_UP) {
-		distanceToObject = std::max(1E-3f, (1 + zoomSpeed) * distanceToObject);
+		distanceToObject = aly::clamp((float)(1 + zoomSpeed) * distanceToObject,minScale,maxScale);
 		changed = true;
 	} else if (key == GLFW_KEY_PAGE_DOWN) {
-		distanceToObject = std::max(1E-3f, (1 - zoomSpeed) * distanceToObject);
+		distanceToObject = aly::clamp((float) (1 - zoomSpeed) * distanceToObject,minScale,maxScale);
 		changed = true;
 	} else {
 		if (glfwGetKey(win, key) == GLFW_PRESS) {
@@ -571,8 +571,7 @@ void Camera::handleCursorEvent(float x, float y) {
 	mouseYPos = y;
 }
 void Camera::handleScrollEvent(int pos) {
-	distanceToObject = std::max(1E-3f,
-			(1 - pos * zoomSpeed) * distanceToObject);
+	distanceToObject = aly::clamp((1 - pos * zoomSpeed) * distanceToObject,minScale,maxScale);
 	changed = true;
 }
 

@@ -1308,18 +1308,14 @@ PreethamSkyRadianceData PreethamSkyRadianceData::compute(float3 sun_direction,
 	return {A, B, C, D, E, Z};
 }
 
-ProceduralSky::ProceduralSky(bool onScreen,
+ProceduralSky::ProceduralSky(float sphereRadius,bool onScreen,
 		const std::shared_ptr<AlloyContext>& context) :
 		GLShader(onScreen, context) {
-	TessellatedSphere(1.0f, 3, SubDivisionScheme::Loop, context).clone(skyMesh);
-	camera.setNearFarPlanes(-3.0f, 3.0f);
-	camera.setZoom(1.25f);
-	camera.setCameraType(CameraType::Orthographic);
-	camera.setDirty(true);
-	setSunPositionDegrees(110,50);
+	TessellatedSphere(sphereRadius, 3, SubDivisionScheme::Loop, context).clone(skyMesh);
+	setSunPositionDegrees(110,72);
 }
-void ProceduralSky::draw(const box2px& viewport) {
-	if(camera.isDirty()){
+void ProceduralSky::draw(CameraParameters& camera,const box2px& viewport) {
+	if(dirty){
 		update();
 	}
 	glDisable(GL_BLEND);
@@ -1334,16 +1330,16 @@ void ProceduralSky::draw(const box2px& viewport) {
 	glDisable(GL_CULL_FACE);
 	glClear(GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_BLEND);
-	camera.setDirty(false);
+	dirty=false;
 }
 void ProceduralSky::setSunPositionDegrees(float theta, float phi) {
 	sunPosition = {ToRadians(theta), ToRadians(phi)};
-	camera.setDirty(true);
+	dirty=true;
 }
 
 void ProceduralSky::setSunPosition(float theta, float phi) {
 	sunPosition = {theta,phi};
-	camera.setDirty(true);
+	dirty=true;
 }
 float2 ProceduralSky::getSunPosition() const {
 	return float2(ToDegrees(sunPosition.x), ToDegrees(sunPosition.y));
@@ -1353,15 +1349,15 @@ void ProceduralSky::update() {
 }
 void ProceduralSky::setAlbedo(float a) {
 	albedo = a;
-	camera.setDirty(true);
+	dirty=true;
 }
 void ProceduralSky::setTurbidity(float t) {
 	turbidity = t;
-	camera.setDirty(true);
+	dirty=true;
 }
 void ProceduralSky::setStrength(float n) {
 	normalizedSunY = n;
-	camera.setDirty(true);
+	dirty=true;
 }
 
 float3 ProceduralSky::getSunDirection() const {
@@ -1392,9 +1388,9 @@ void HosekProceduralSky::renderInternal(float3 sunDir) {
 	set("SunDirection", sunDir);
 }
 
-HosekProceduralSky::HosekProceduralSky(bool onScreen,
+HosekProceduralSky::HosekProceduralSky(float sphereRadius,bool onScreen,
 		const std::shared_ptr<AlloyContext>& context) :
-		ProceduralSky(onScreen, context) {
+		ProceduralSky(sphereRadius,onScreen, context) {
 	initialize( { },
 			R"(	#version 330
 					layout(location = 3) in vec3 vp0;
@@ -1435,6 +1431,7 @@ in vec3 normal;
 out vec4 FragColor;
 uniform vec3 A, B, C, D, E, F, G, H, I, Z;
 uniform vec3 SunDirection;
+uniform mat4 NormalMat;
 // ArHosekSkyModel_GetRadianceInternal
 vec3 HosekWilkie(float cos_theta, float gamma, float cos_gamma)
 {
@@ -1443,7 +1440,7 @@ vec3 HosekWilkie(float cos_theta, float gamma, float cos_gamma)
 }
 void main()
 {
-	vec3 V = normalize(vert);
+	vec3 V = normalize((NormalMat*vec4(vert,0.0)).xyz);
 	float cos_theta = clamp(V.y, 0, 1);
 	float cos_gamma = clamp(dot(V, SunDirection), 0, 1);
 	float gamma_ = acos(cos_gamma);
@@ -1547,9 +1544,9 @@ EndPrimitive();
 	update();
 }
 
-PreethamProceduralSky::PreethamProceduralSky(bool onScreen,
+PreethamProceduralSky::PreethamProceduralSky(float sphereRadius,bool onScreen,
 		const std::shared_ptr<AlloyContext>& context) :
-		ProceduralSky(onScreen, context) {
+		ProceduralSky(sphereRadius,onScreen, context) {
 	initialize( { },
 			R"(	#version 330
 					layout(location = 3) in vec3 vp0;
@@ -1589,13 +1586,14 @@ in vec3 normal;
 out vec4 FragColor;
 uniform vec3 A, B, C, D, E, Z;
 uniform vec3 SunDirection;
+uniform mat4 NormalMat;
 vec3 sky_perez(float cos_theta, float gamma, float cos_gamma, vec3 A, vec3 B, vec3 C, vec3 D, vec3 E)
 {
     return (1 + A * exp(B / (cos_theta + 0.01))) * (1 + C * exp(D * gamma) + E * cos_gamma * cos_gamma);
 }
 void main()
 {
-    vec3 V = normalize(vert);
+	vec3 V = normalize((NormalMat*vec4(vert,0.0)).xyz);
     float cos_theta = clamp(V.y, 0, 1);
     float cos_gamma = dot(V, SunDirection);
     float gamma = acos(cos_gamma);

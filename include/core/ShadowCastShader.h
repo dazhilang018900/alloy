@@ -21,8 +21,13 @@
  */
 
 #include <GLShader.h>
+#include <CommonShaders.h>
 namespace aly {
 class ShadowCastShader: public GLShader {
+protected:
+	GLFrameBuffer frameBuffer;
+	aly::ImageShader blurShader;
+	aly::ImageShader imageShader;
 public:
 	ShadowCastShader(bool onScreen = true,
 			const std::shared_ptr<AlloyContext>& context =
@@ -34,7 +39,7 @@ public:
 			CameraParameters& camera,
 			CameraParameters& lightCamera,
 			float softness=4.0f,
-			float depthTolerance=0.01f,
+			float depthTolerance=0.001f,
 			float alpha=1.0f,
 			int samples=64);
 };

@@ -2508,7 +2508,7 @@ DepthAndTextureShader::DepthAndTextureShader(bool onScreen,
 				layout(location = 5) in vec3 vp2;
 				layout(location = 6) in vec3 vp3;
 
-										layout(location = 11) in vec2 vt0;
+				layout(location = 11) in vec2 vt0;
 				layout(location = 12) in vec2 vt1;
 				layout(location = 13) in vec2 vt2;
 				layout(location = 14) in vec2 vt3;

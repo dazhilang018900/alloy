@@ -35,7 +35,57 @@ bool ShadowCastEx::init(Composite& rootNode) {
 	Subdivide(monkey,SubDivisionScheme::Loop);
 	monkey.updateVertexNormals();
 	//Make region on screen to render 3d view
-	renderRegion=MakeRegion("Render View",CoordPX(0.0f,0.0f),CoordPercent(1.0f,1.0f),COLOR_NONE,COLOR_WHITE,UnitPX(1.0f));
+	renderRegion=MakeComposite("Render View",CoordPX(0.0f,0.0f),CoordPercent(1.0f,1.0f),COLOR_NONE,COLOR_WHITE,UnitPX(1.0f));
+	spread=Float(2.0f);
+	samples=Integer(64);
+	pitch=Integer(40);
+	angle=Integer(33);
+
+	pitchSlider = HorizontalSliderPtr(
+			new HorizontalSlider("Zenith Angle", CoordPX(5.0f, 5.0f),
+					CoordPX(200.0f, 45.0f), true, Integer(5), Integer(90),
+					pitch));
+	angleSlider = HorizontalSliderPtr(
+			new HorizontalSlider("Azimuth Angle", CoordPX(5.0f, 55.0f),
+					CoordPX(200.0f, 45.0f), true, Integer(-180), Integer(180),
+					angle));
+	samplesSlider = HorizontalSliderPtr(
+			new HorizontalSlider("Samples", CoordPX(5.0f, 105.0f),
+					CoordPX(200.0f, 45.0f), true, Integer(1), Integer(256),
+					samples));
+	spreadSlider = HorizontalSliderPtr(
+			new HorizontalSlider("Spread", CoordPX(5.0f, 160.0f),
+					CoordPX(200.0f, 45.0f), true, Float(0.0f), Float(8.0f),
+					spread));
+
+	pitchSlider->backgroundColor = MakeColor(
+			getContext()->theme.DARK.toSemiTransparent(0.5f));
+	angleSlider->backgroundColor = MakeColor(
+			getContext()->theme.DARK.toSemiTransparent(0.5f));
+
+	samplesSlider->backgroundColor = MakeColor(
+			getContext()->theme.DARK.toSemiTransparent(0.5f));
+	spreadSlider->backgroundColor = MakeColor(
+			getContext()->theme.DARK.toSemiTransparent(0.5f));
+
+	renderRegion->add(pitchSlider);
+	renderRegion->add(angleSlider);
+	renderRegion->add(samplesSlider);
+	renderRegion->add(spreadSlider);
+	pitchSlider->setOnChangeEvent(
+			[this](const Number& val) {
+				lightCamera.setModelRotation(float4x4::identity());
+				lightCamera.rotateModelY(ToRadians(angle.toFloat()));
+				lightCamera.rotateModelX(ToRadians(pitch.toFloat()));
+
+			});
+	angleSlider->setOnChangeEvent(
+			[this](const Number& val) {
+				lightCamera.setModelRotation(float4x4::identity());
+				lightCamera.rotateModelY(ToRadians(angle.toFloat()));
+				lightCamera.rotateModelX(ToRadians(pitch.toFloat()));
+
+		});
 	//Initialize depth buffer to store the render
 	depthFrameBuffer.initialize(getContext()->getScreenWidth(),getContext()->getScreenHeight());
 	colorFrameBuffer.initialize(getContext()->getScreenWidth(),getContext()->getScreenHeight());
@@ -43,7 +93,7 @@ bool ShadowCastEx::init(Composite& rootNode) {
 	lightDepthBuffer.initialize(lightWidth,lightHeight);
 	//Set up camera
 	camera.setNearFarPlanes(0.1f, 10.0f);
-	camera.setZoom(0.6f);
+	camera.setZoom(0.3f);
 	camera.rotateModelY(ToRadians(-40.0f));
 	camera.rotateModelX(ToRadians(35.0f));
 	camera.setCameraType(CameraType::Perspective);
@@ -56,30 +106,27 @@ bool ShadowCastEx::init(Composite& rootNode) {
 	lightCamera.rotateModelX(ToRadians(45.0f));
 	lightCamera.setCameraType(CameraType::Perspective);
 	lightCamera.setDirty(true);
-
 	//Add listener to respond to mouse manipulations
 	addListener(&camera);
-
 	//Setup light. "w" channel used to configure contributions of different lighting terms.
 	phongShader[0] = SimpleLight(Color(1.0f, 0.2f, 0.2f, 0.25f),
 		Color(1.0f, 1.0f, 1.0f, 0.25f), Color(0.9f, 0.1f, 0.1f, 0.5f),
 		Color(0.9f, 0.1f, 0.1f, 0.5f), 16.0f, float3(0, 0.0, 2.0),
 		float3(0, 1, 0));
 	phongShader[0].moveWithCamera = false;
-
 	wireframeShader.setFaceColor(Color(0.5f, 0.5f, 0.5f, 1.0f));
 	wireframeShader.setEdgeColor(Color(0.8f, 0.8f, 0.8f, 1.0f));
 	wireframeShader.setLineWidth(2.0f);
 	wireframeShader.setSolid(true);
 	Grid(3.0f,3.0f,4,4).clone(grid);
 	grid.transform(MakeTranslation(float3(0.0f,-0.25f,0.0f))*MakeRotationX(ALY_PI*0.5f));
-	monkey.transform(MakeTranslation(float3(0.0f,0.15f,0.25f))*MakeTransform(monkey.getBoundingBox(), renderBBox));
+	monkey.transform(MakeTranslation(float3(0.0f,0.15f,0.5f))*MakeTransform(monkey.getBoundingBox(), renderBBox));
 	//Add render component to root node so it is relatively positioned.
 	rootNode.add(renderRegion);
 	return true;
 }
 void ShadowCastEx::draw(AlloyContext* context){
-	if (camera.isDirty()) {
+	if (camera.isDirty()||lightCamera.isDirty()) {
 		positionShader.draw({&grid,&monkey}, camera, positionFrameBuffer,false,true);
 		depthAndNormalShader.draw({&grid,&monkey}, lightCamera, lightDepthBuffer,false);
 		depthAndNormalShader.draw(monkey, camera, depthFrameBuffer);
@@ -92,8 +139,8 @@ void ShadowCastEx::draw(AlloyContext* context){
 	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
 	glDisable(GL_DEPTH_TEST);
 	glEnable(GL_BLEND);
-	shadowCastShader.draw(colorFrameBuffer.getTexture(),positionFrameBuffer.getTexture(),lightDepthBuffer.getTexture(),camera,lightCamera,3.0f,0.01f,0.8f,64);
-
+	shadowCastShader.draw(colorFrameBuffer.getTexture(),positionFrameBuffer.getTexture(),lightDepthBuffer.getTexture(),camera,lightCamera,spread.toFloat(),0.005f,0.8f,samples.toInteger());
 	camera.setDirty(false);
+	lightCamera.setDirty(false);
 }
 

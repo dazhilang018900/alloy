@@ -22,7 +22,7 @@
 #include <ShadowCastShader.h>
 namespace aly {
 ShadowCastShader::ShadowCastShader(bool onScreen, const std::shared_ptr<AlloyContext>& context) :
-		GLShader(onScreen, context) {
+		GLShader(onScreen, context),blurShader(ImageShader::Filter::MEDIUM_BLUR,onScreen,context) ,imageShader(ImageShader::Filter::NONE,onScreen,context) {
 	initialize({}, R"(#version 330
 layout(location = 0) in vec3 vp; 
 layout(location = 1) in vec2 vt; 
@@ -38,7 +38,7 @@ uniform ivec2 shadowBufferSize;
 uniform ivec2 depthBufferSize;
 uniform float MIN_DEPTH;
 uniform float MAX_DEPTH;
-uniform float softness;
+uniform float spread;
 uniform float depthTolerance;
 uniform int samples;
 uniform float alpha;
@@ -60,7 +60,7 @@ float noise(vec2 p){
     return res*res;
 }
 float texture2DCompare(sampler2D depths, vec2 uv, float compare){
-	float depth = texture(depths, uv).w*(MAX_DEPTH-MIN_DEPTH)+MIN_DEPTH;
+	float depth = texture(depths, uv).w;//*(MAX_DEPTH-MIN_DEPTH)+MIN_DEPTH;
 	return step(compare, depth);
 }
 float texture2DShadowLerp(sampler2D depths, vec2 size, vec2 uv, float compare){
@@ -82,7 +82,7 @@ float PCF(sampler2D depths, vec2 size, vec2 uv,vec2 pt, float compare){
 	for(int n=0;n<samples;n++){
 		float dx=noise(vec2(seed*size.x,n));
 		float dy=noise(vec2(seed*size.x,samples-1-n));
-		vec2 off = softness*(2*vec2(dx,dy)-1)/size;
+		vec2 off = spread*(2*vec2(dx,dy)-1)/size;
 		result += texture2DShadowLerp(depths, size, uv+off, compare);
 	}
 	return result/samples;
@@ -107,13 +107,15 @@ void main() {
 		if(proj.x>-1.0&&proj.x<1.0&&proj.y>-1.0&&proj.y<1.0){
 			proj.x=0.5*(proj.x+1);
 			proj.y=0.5*(proj.y+1);
-			visible=PCF(shadowDepthTexture,vec2(shadowBufferSize.x,shadowBufferSize.y),proj,vec2(uv.x*depthBufferSize.x,uv.y*depthBufferSize.y), -pos.z-depthTolerance);
+			visible=PCF(shadowDepthTexture,vec2(shadowBufferSize.x,shadowBufferSize.y),proj,vec2(uv.x*depthBufferSize.x,uv.y*depthBufferSize.y), (-pos.z-MIN_DEPTH)/(MAX_DEPTH-MIN_DEPTH)-depthTolerance);
 		}
-		c=alpha*visible*color+(1.0f-alpha)*color;
+		c=(1.0-alpha)*color;
 		c.w=1.0;
+		c=(1.0-visible)*c;
 		FragColor=c;
 	} else {
 		FragColor=vec4(0.0,0.0,0.0,0.0);
+		discard;
 	}
 })");
 }
@@ -124,17 +126,21 @@ void ShadowCastShader::draw(
 		const GLTextureRGBAf& shadowDepthTexture,
 		CameraParameters& camera,
 		CameraParameters& lightCamera,
-	    float softness,
+	    float spread,
 		float depthTolerance,
 		float alpha,
 		int samples) {
+	if(objectColorTexture.dimensions()!=frameBuffer.bounds.dimensions){
+		frameBuffer.initialize(objectColorTexture.getWidth(),objectColorTexture.getHeight());
+	}
+	frameBuffer.begin();
 	begin() .set("objectColorTexture",objectColorTexture,0)
 			.set("objectPositionTexture", objectPositionTexture,1)
 			.set("shadowDepthTexture", shadowDepthTexture,2)
 			.set("depthBufferSize", objectPositionTexture.dimensions())
 			.set("shadowBufferSize", shadowDepthTexture.dimensions())
 			.set("CameraViewModelMat",camera.ViewModel)
-		    .set("softness", softness)
+		    .set("spread", spread)
 			.set("depthTolerance",depthTolerance)
 			.set("alpha",alpha)
 			.set("samples",samples)
@@ -145,6 +151,10 @@ void ShadowCastShader::draw(
 			.set("ProjMat",lightCamera.Projection)
 			.draw(objectPositionTexture)
 			.end();
+	frameBuffer.end();
+	glEnable(GL_BLEND);
+	imageShader.draw(objectColorTexture,1.0f,false);
+	blurShader.draw(frameBuffer.getTexture(),1.0,false);
 }
 
 }
