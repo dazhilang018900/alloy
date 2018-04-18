@@ -8,9 +8,9 @@
 #include "segmentation/Phantom.h"
 #include <AlloyDistanceField.h>
 namespace aly {
-Phantom::Phantom(int rows, int cols, int slices) :
+Phantom::Phantom(int rows, int cols, int slices,float maxDist) :
 		rows(rows), cols(cols), slices(slices), noiseLevel(0.1f), invert(false), fuzziness(
-				2.0f), heavisideType(Heaviside::ARCTAN) {
+				2.0f), heavisideType(Heaviside::ARCTAN),maxDistance(maxDist) {
 
 }
 float Phantom::heaviside(float val, float fuzziness, Heaviside heavy) {
@@ -42,15 +42,21 @@ float Phantom::heaviside(float val, float fuzziness, Heaviside heavy) {
 
 	}
 }
-const Volume1f& Phantom::solve() {
+const Volume1f& Phantom::solve(bool distanceFieldOnly) {
 	Volume1f vol(rows, cols, slices);
 	solveInternal(vol);
-	finish(vol);
+	if(distanceFieldOnly){
+		DistanceField3f df;
+		df.solve(vol, levelSet, maxDistance);
+	} else {
+		finish(vol);
+	}
 	return levelSet;
 }
 void Phantom::finish(const Volume1f& vol) {
 	DistanceField3f df;
-	df.solve(vol, levelSet, 10.0f);
+	df.solve(vol, levelSet, maxDistance);
+#pragma omp parallel for
 	for (int k = 0; k < slices; k++) {
 		for (int j = 0; j < cols; j++) {
 			for (int i = 0; i < rows; i++) {
@@ -70,6 +76,7 @@ void Phantom::finish(const Volume1f& vol) {
 
 void PhantomBubbles::solveInternal(Volume1f& levelset) {
 	float scale = 2.0 / std::min(rows, std::min(cols, slices));
+#pragma omp parallel for
 	for (int i = 0; i < rows; i++) {
 		for (int j = 0; j < cols; j++) {
 			for (int k = 0; k < slices; k++) {
@@ -83,6 +90,7 @@ void PhantomBubbles::solveInternal(Volume1f& levelset) {
 		float3 center((RandomUniform(-1.0f, 1.0f)) * (1 - ra - 4.0 / rows),
 				(RandomUniform(-1.0f, 1.0f)) * (1 - ra - 4.0 / cols),
 				(RandomUniform(-1.0f, 1.0f)) * (1 - ra - 4.0 / slices));
+#pragma omp parallel for
 		for (int i = 0; i < rows; i++) {
 			for (int j = 0; j < cols; j++) {
 				for (int k = 0; k < slices; k++) {
@@ -102,6 +110,7 @@ void PhantomBubbles::solveInternal(Volume1f& levelset) {
 }
 void PhantomTorus::solveInternal(Volume1f& levelset) {
 	float scale = 2.0 / std::min(rows, std::min(cols, slices));
+#pragma omp parallel for
 	for (int i = 0; i < rows; i++) {
 		for (int j = 0; j < cols; j++) {
 			for (int k = 0; k < slices; k++) {
@@ -121,6 +130,7 @@ void PhantomTorus::solveInternal(Volume1f& levelset) {
 
 void PhantomSphere::solveInternal(Volume1f& levelset) {
 	float scale = 2.0 / std::min(rows, std::min(cols, slices));
+#pragma omp parallel for
 	for (int i = 0; i < rows; i++) {
 		for (int j = 0; j < cols; j++) {
 			for (int k = 0; k < slices; k++) {
@@ -138,6 +148,7 @@ void PhantomSphere::solveInternal(Volume1f& levelset) {
 }
 
 void PhantomCube::solveInternal(Volume1f& levelset) {
+#pragma omp parallel for
 	for (int i = 0; i < rows; i++) {
 		for (int j = 0; j < cols; j++) {
 			for (int k = 0; k < slices; k++) {
@@ -157,6 +168,7 @@ void PhantomCube::solveInternal(Volume1f& levelset) {
 }
 void PhantomMetasphere::solveInternal(Volume1f& levelset) {
 	float scale = 2.0 / std::min(rows, std::min(cols, slices));
+#pragma omp parallel for
 	for (int i = 0; i < rows; i++) {
 		for (int j = 0; j < cols; j++) {
 			for (int k = 0; k < slices; k++) {

@@ -15,6 +15,7 @@ enum class Heaviside {
 };
 class Phantom {
 protected:
+	float maxDistance;
 	int rows, cols, slices;
 	float noiseLevel;
 	bool invert;
@@ -24,9 +25,18 @@ protected:
 	void finish(const Volume1f& vol);
 	float heaviside(float val, float fuzziness, Heaviside heavy);
 	virtual void solveInternal(Volume1f& vol) = 0;
+	const Volume1f& solve(bool distanceFieldOnly = false);
 public:
-	Phantom(int rows, int cols, int slices);
-	const Volume1f& solve();
+	Phantom(int rows, int cols, int slices, float maxDist = 10.0f);
+	inline const Volume1f& solveDistanceField() {
+		return solve(true);
+	}
+	inline const Volume1f& solveLevelSet() {
+		return solve(false);
+	}
+	const Volume1f& getLevelSet() const {
+		return levelSet;
+	}
 	inline void setFuzziness(float fuzz) {
 		fuzziness = fuzz;
 	}
@@ -50,9 +60,9 @@ protected:
 	int numBubbles;
 	virtual void solveInternal(Volume1f& vol) override;
 public:
-	PhantomBubbles(int rows, int cols, int slices) :
-			Phantom(rows, cols, slices), minRadius(0.025f), maxRadius(0.2f), numBubbles(
-					10) {
+	PhantomBubbles(int rows, int cols, int slices, float maxDistance = 10.0f) :
+			Phantom(rows, cols, slices, maxDistance), minRadius(0.025f), maxRadius(
+					0.2f), numBubbles(10) {
 	}
 	inline void setMaxRadius(float maxRadius) {
 		this->maxRadius = maxRadius;
@@ -60,7 +70,7 @@ public:
 	inline void setMinRadius(float minRadius) {
 		this->minRadius = minRadius;
 	}
-	inline void setNumberOfBubbles(float numBubbles) {
+	inline void setNumberOfBubbles(int numBubbles) {
 		this->numBubbles = numBubbles;
 	}
 
@@ -73,9 +83,9 @@ protected:
 	float outerRadius;
 	virtual void solveInternal(Volume1f& vol) override;
 public:
-	PhantomTorus(int rows, int cols, int slices) :
-			Phantom(rows, cols, slices), center(0.0f), innerRadius(0.2f), outerRadius(
-					0.6f) {
+	PhantomTorus(int rows, int cols, int slices, float maxDistance = 10.0f) :
+			Phantom(rows, cols, slices, maxDistance), center(0.0f), innerRadius(
+					0.2f), outerRadius(0.6f) {
 	}
 	inline void setCenter(float3 c) {
 		center = c;
@@ -94,8 +104,8 @@ protected:
 	float radius;
 	virtual void solveInternal(Volume1f& vol) override;
 public:
-	PhantomSphere(int rows, int cols, int slices) :
-			Phantom(rows, cols, slices), center(0.0f), radius(0.5f) {
+	PhantomSphere(int rows, int cols, int slices, float maxDistance = 10.0f) :
+			Phantom(rows, cols, slices, maxDistance), center(0.0f), radius(0.5f) {
 	}
 	inline void setRadius(float r) {
 		radius = r;
@@ -111,8 +121,8 @@ protected:
 	float width;
 	virtual void solveInternal(Volume1f& vol) override;
 public:
-	PhantomCube(int rows, int cols, int slices) :
-			Phantom(rows, cols, slices), center(0.0f), width(0.5f) {
+	PhantomCube(int rows, int cols, int slices, float maxDistance = 10.0f) :
+			Phantom(rows, cols, slices, maxDistance), center(0.0f), width(0.5f) {
 	}
 	inline void setCenter(float3 c) {
 		center = c;
@@ -130,9 +140,9 @@ protected:
 	float minAmplitude;
 	virtual void solveInternal(Volume1f& vol) override;
 public:
-	PhantomMetasphere(int rows, int cols, int slices) :
-			Phantom(rows, cols, slices), center(0.0f), frequency(6.0f), minAmplitude(
-					0.7f), maxAmplitude(0.9f) {
+	PhantomMetasphere(int rows, int cols, int slices, float maxDistance = 10.0f) :
+			Phantom(rows, cols, slices, maxDistance), center(0.0f), frequency(
+					6.0f), minAmplitude(0.7f), maxAmplitude(0.9f) {
 	}
 	inline void setCenter(float3 c) {
 		center = c;
@@ -156,8 +166,9 @@ protected:
 	virtual void solveInternal(Volume1f& vol) override;
 
 public:
-	PhantomCheckerBoard(int rows, int cols, int slices) :
-			Phantom(rows, cols, slices), center(0.0f), width(0.7f), xFrequency(
+	PhantomCheckerBoard(int rows, int cols, int slices, float maxDistance =
+			10.0f) :
+			Phantom(rows, cols, slices, maxDistance), center(0.0f), width(0.7f), xFrequency(
 					1), yFrequency(1), zFrequency(1) {
 
 	}

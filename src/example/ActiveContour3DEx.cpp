@@ -19,6 +19,7 @@
  * THE SOFTWARE.
  */
 #include "../../include/example/ActiveContour3DEx.h"
+#include "segmentation/Phantom.h"
 using namespace aly;
 ActiveContour3DEx::ActiveContour3DEx() :
 		Application(800, 600, "Acitve Contour 3D"), matcapShader(
@@ -30,6 +31,24 @@ bool ActiveContour3DEx::init(Composite& rootNode) {
 			float3(1.0f, 1.0f, 1.0f));
 	mesh.load(getFullPath("models/monkey.ply"));
 	mesh.updateVertexNormals();
+	{
+		PhantomBubbles bubbles(128, 128, 128, 4.0f);
+		bubbles.setNoiseLevel(0.0f);
+		bubbles.setNumberOfBubbles(12);
+		bubbles.setFuzziness(0.5f);
+		bubbles.setMinRadius(0.2f);
+		bubbles.setMaxRadius(0.3f);
+		bubbles.setInvertContrast(true);
+		Volume1f targetVol = bubbles.solveLevelSet();
+		PhantomCube cube(128, 128, 128, 4.0f);
+		cube.setCenter(float3(0.0f));
+		cube.setWidth(1.21);
+		Volume1f sourceVol = cube.solveDistanceField();
+		WriteVolumeToFile(MakeDesktopFile("cube.xml"), sourceVol);
+		activeContour.setInitialDistanceField(sourceVol);
+		activeContour.setPressure(targetVol, 0.5f, 0.5f);
+		activeContour.setCurvature(0.5f);
+	}
 	//Initialize depth buffer to store the render
 	int w = getContext()->getScreenWidth();
 	int h = getContext()->getScreenHeight();
@@ -50,8 +69,8 @@ bool ActiveContour3DEx::init(Composite& rootNode) {
 	subCatmullClark->setAspectRule(AspectRule::Unspecified);
 
 	TextButtonPtr resetButton = TextButtonPtr(
-			new TextButton("Reset",
-					CoordPerPX(0.5f, 0.0f, 0, 5), CoordPX(100, 30)));
+			new TextButton("Reset", CoordPerPX(0.5f, 0.0f, 0, 5),
+					CoordPX(100, 30)));
 	resetButton->setOrigin(Origin::TopCenter);
 	resetButton->setAspectRule(AspectRule::Unspecified);
 
@@ -61,13 +80,12 @@ bool ActiveContour3DEx::init(Composite& rootNode) {
 	subLoop->setOrigin(Origin::TopCenter);
 	subLoop->setAspectRule(AspectRule::Unspecified);
 
-	resetButton->onMouseDown =
-			[=](AlloyContext* context,const InputEvent& e) {
-				mesh.load(getFullPath("models/monkey.ply"));
-				mesh.updateVertexNormals();
-				mesh.setDirty(true);
-				return true;
-			};
+	resetButton->onMouseDown = [=](AlloyContext* context,const InputEvent& e) {
+		mesh.load(getFullPath("models/monkey.ply"));
+		mesh.updateVertexNormals();
+		mesh.setDirty(true);
+		return true;
+	};
 
 	subCatmullClark->onMouseDown =
 			[=](AlloyContext* context,const InputEvent& e) {
