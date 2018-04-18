@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
@@ -15,6 +15,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\include\example\ActiveContour3DEx.h" />
     <ClInclude Include="..\..\include\example\AnisotropicFilterEx.h" />
     <ClInclude Include="..\..\include\example\ColorSpaceEx.h" />
     <ClInclude Include="..\..\include\example\CompositeEx.h" />
@@ -56,6 +57,8 @@
     <ClInclude Include="..\..\include\example\ParameterPaneEx.h" />
     <ClInclude Include="..\..\include\example\PoissonBlendEx.h" />
     <ClInclude Include="..\..\include\example\PoissonInpaintEx.h" />
+    <ClInclude Include="..\..\include\example\ProceduralSkyEx.h" />
+    <ClInclude Include="..\..\include\example\ShadowCastEx.h" />
     <ClInclude Include="..\..\include\example\SoftBodyEx.h" />
     <ClInclude Include="..\..\include\example\SplineEx.h" />
     <ClInclude Include="..\..\include\example\TablePaneEx.h" />
@@ -70,13 +73,13 @@
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>example</RootNamespace>
     <ProjectName>ExampleUI</ProjectName>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>

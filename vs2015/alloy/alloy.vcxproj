@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|x64">
       <Configuration>Release</Configuration>
@@ -36,6 +36,7 @@
     <ClCompile Include="..\..\src\core\AlloyIsoSurface.cpp" />
     <ClCompile Include="..\..\src\core\AlloyLBFGS.cpp" />
     <ClCompile Include="..\..\src\core\AlloyMath.cpp" />
+    <ClCompile Include="..\..\src\core\AlloyMathBase.cpp" />
     <ClCompile Include="..\..\src\core\AlloyMaxFlow.cpp" />
     <ClCompile Include="..\..\src\core\AlloyMemMappedFile.cpp" />
     <ClCompile Include="..\..\src\core\AlloyMesh.cpp" />
@@ -79,6 +80,8 @@
     <ClCompile Include="..\..\src\core\SanityChecks.cpp" />
     <ClCompile Include="..\..\src\core\sha1.cpp" />
     <ClCompile Include="..\..\src\core\sha2.cpp" />
+    <ClCompile Include="..\..\src\core\ShadowCastShader.cpp" />
+    <ClCompile Include="..\..\src\core\SkyShader.cpp" />
     <ClCompile Include="..\..\src\core\stb_dxt.cpp" />
     <ClCompile Include="..\..\src\core\svd3.cpp" />
     <ClCompile Include="..\..\src\core\TextureMapLocator.cpp" />
@@ -88,6 +91,7 @@
     <ClCompile Include="..\..\src\core\tinysplinecpp.cpp" />
     <ClCompile Include="..\..\src\core\tinyxml2.cpp" />
     <ClCompile Include="..\..\src\core\tiny_obj_loader.cpp" />
+    <ClCompile Include="..\..\src\example\ActiveContour3DEx.cpp" />
     <ClCompile Include="..\..\src\example\AnisotropicFilterEx.cpp" />
     <ClCompile Include="..\..\src\example\AnyFunctionEx.cpp" />
     <ClCompile Include="..\..\src\example\ColorSpaceEx.cpp" />
@@ -131,6 +135,8 @@
     <ClCompile Include="..\..\src\example\ParameterPaneEx.cpp" />
     <ClCompile Include="..\..\src\example\PoissonBlendEx.cpp" />
     <ClCompile Include="..\..\src\example\PoissonInpaintEx.cpp" />
+    <ClCompile Include="..\..\src\example\ProceduralSkyEx.cpp" />
+    <ClCompile Include="..\..\src\example\ShadowCastEx.cpp" />
     <ClCompile Include="..\..\src\example\SoftBodyEx.cpp" />
     <ClCompile Include="..\..\src\example\SplineEx.cpp" />
     <ClCompile Include="..\..\src\example\TablePaneEx.cpp" />
@@ -164,13 +170,16 @@
     <ClCompile Include="..\..\src\poisson\Geometry.cpp" />
     <ClCompile Include="..\..\src\poisson\MarchingCubes.cpp" />
     <ClCompile Include="..\..\src\segmentation\ActiveContour2D.cpp" />
+    <ClCompile Include="..\..\src\segmentation\ActiveContour3D.cpp" />
     <ClCompile Include="..\..\src\segmentation\ContourShaders.cpp" />
     <ClCompile Include="..\..\src\segmentation\FluidParticles2D.cpp" />
     <ClCompile Include="..\..\src\segmentation\Manifold2D.cpp" />
+    <ClCompile Include="..\..\src\segmentation\Manifold3D.cpp" />
     <ClCompile Include="..\..\src\segmentation\MultiActiveContour2D.cpp" />
     <ClCompile Include="..\..\src\segmentation\MultiIsoContour.cpp" />
     <ClCompile Include="..\..\src\segmentation\MultiSpringLevelSet2D.cpp" />
     <ClCompile Include="..\..\src\segmentation\MultiSpringLevelSetSecondOrder2D.cpp" />
+    <ClCompile Include="..\..\src\segmentation\Phantom.cpp" />
     <ClCompile Include="..\..\src\segmentation\Simulation.cpp" />
     <ClCompile Include="..\..\src\segmentation\SLIC.cpp" />
     <ClCompile Include="..\..\src\segmentation\SpringlCache2D.cpp" />
@@ -254,6 +263,7 @@
     <ClInclude Include="..\..\include\core\AlloyLBFGS.h" />
     <ClInclude Include="..\..\include\core\AlloyLocator.h" />
     <ClInclude Include="..\..\include\core\AlloyMath.h" />
+    <ClInclude Include="..\..\include\core\AlloyMathBase.h" />
     <ClInclude Include="..\..\include\core\AlloyMaxFlow.h" />
     <ClInclude Include="..\..\include\core\AlloyMemMappedFile.h" />
     <ClInclude Include="..\..\include\core\AlloyMesh.h" />
@@ -312,9 +322,13 @@
     <ClInclude Include="..\..\include\core\process_win.h" />
     <ClInclude Include="..\..\include\core\sha1.h" />
     <ClInclude Include="..\..\include\core\sha2.h" />
+    <ClInclude Include="..\..\include\core\ShadowCastShader.h" />
+    <ClInclude Include="..\..\include\core\SkyShader.h" />
     <ClInclude Include="..\..\include\core\stb_dxt.h" />
     <ClInclude Include="..\..\include\core\stb_image.h" />
     <ClInclude Include="..\..\include\core\stb_image_write.h" />
+    <ClInclude Include="..\..\include\core\stb_perlin.h" />
+    <ClInclude Include="..\..\include\core\stb_rect_pack.h" />
     <ClInclude Include="..\..\include\core\stb_truetype.h" />
     <ClInclude Include="..\..\include\core\svd3.h" />
     <ClInclude Include="..\..\include\core\TextureMapLocator.h" />
@@ -325,6 +339,7 @@
     <ClInclude Include="..\..\include\core\tinysplinecpp.h" />
     <ClInclude Include="..\..\include\core\tinyxml2.h" />
     <ClInclude Include="..\..\include\core\tiny_obj_loader.h" />
+    <ClInclude Include="..\..\include\example\ActiveContour3DEx.h" />
     <ClInclude Include="..\..\include\example\AnisotropicFilterEx.h" />
     <ClInclude Include="..\..\include\example\ColorSpaceEx.h" />
     <ClInclude Include="..\..\include\example\CompositeEx.h" />
@@ -366,6 +381,8 @@
     <ClInclude Include="..\..\include\example\ParameterPaneEx.h" />
     <ClInclude Include="..\..\include\example\PoissonBlendEx.h" />
     <ClInclude Include="..\..\include\example\PoissonInpaintEx.h" />
+    <ClInclude Include="..\..\include\example\ProceduralSkyEx.h" />
+    <ClInclude Include="..\..\include\example\ShadowCastEx.h" />
     <ClInclude Include="..\..\include\example\SoftBodyEx.h" />
     <ClInclude Include="..\..\include\example\SplineEx.h" />
     <ClInclude Include="..\..\include\example\TablePaneEx.h" />
@@ -435,13 +452,16 @@
     <ClInclude Include="..\..\include\poisson\SparseMatrix.hpp" />
     <ClInclude Include="..\..\include\poisson\Trimmer.h" />
     <ClInclude Include="..\..\include\segmentation\ActiveContour2D.h" />
+    <ClInclude Include="..\..\include\segmentation\ActiveContour3D.h" />
     <ClInclude Include="..\..\include\segmentation\ContourShaders.h" />
     <ClInclude Include="..\..\include\segmentation\FluidParticles2D.h" />
     <ClInclude Include="..\..\include\segmentation\Manifold2D.h" />
+    <ClInclude Include="..\..\include\segmentation\Manifold3D.h" />
     <ClInclude Include="..\..\include\segmentation\MultiActiveContour2D.h" />
     <ClInclude Include="..\..\include\segmentation\MultiIsoContour.h" />
     <ClInclude Include="..\..\include\segmentation\MultiSpringLevelSet2D.h" />
     <ClInclude Include="..\..\include\segmentation\MultiSpringLevelSetSecondOrder2D.h" />
+    <ClInclude Include="..\..\include\segmentation\Phantom.h" />
     <ClInclude Include="..\..\include\segmentation\Simulation.h" />
     <ClInclude Include="..\..\include\segmentation\SLIC.h" />
     <ClInclude Include="..\..\include\segmentation\SpringlCache2D.h" />
@@ -453,13 +473,13 @@
     <ProjectGuid>{E990BB2D-D073-48A2-841A-8231A304F580}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>alloy</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.16299.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfMfc>false</UseOfMfc>

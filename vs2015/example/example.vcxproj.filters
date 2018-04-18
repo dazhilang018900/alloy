@@ -161,5 +161,14 @@
     <ClInclude Include="..\..\include\example\MaxFlowEx.h">
       <Filter>include</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\example\ActiveContour3DEx.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\example\ProceduralSkyEx.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\example\ShadowCastEx.h">
+      <Filter>include</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

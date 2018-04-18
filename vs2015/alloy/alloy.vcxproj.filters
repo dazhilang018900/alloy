@@ -585,6 +585,33 @@
     <ClCompile Include="..\..\src\example\MaxFlowEx.cpp">
       <Filter>src\example</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\segmentation\ActiveContour3D.cpp">
+      <Filter>src\segmentation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\segmentation\Phantom.cpp">
+      <Filter>src\segmentation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\ActiveContour3DEx.cpp">
+      <Filter>src\example</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\ProceduralSkyEx.cpp">
+      <Filter>src\example</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\ShadowCastEx.cpp">
+      <Filter>src\example</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\AlloyMathBase.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\ShadowCastShader.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\SkyShader.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\segmentation\Manifold3D.cpp">
+      <Filter>src\segmentation</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\core\nanovg.h">
@@ -1392,6 +1419,39 @@
       <Filter>include\example</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\example\MaxFlowEx.h">
+      <Filter>include\example</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\segmentation\ActiveContour3D.h">
+      <Filter>include\segmentation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\segmentation\Phantom.h">
+      <Filter>include\segmentation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\example\ActiveContour3DEx.h">
+      <Filter>include\example</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\core\AlloyMathBase.h">
+      <Filter>include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\core\ShadowCastShader.h">
+      <Filter>include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\core\SkyShader.h">
+      <Filter>include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\core\stb_perlin.h">
+      <Filter>include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\core\stb_rect_pack.h">
+      <Filter>include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\segmentation\Manifold3D.h">
+      <Filter>include\segmentation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\example\ProceduralSkyEx.h">
+      <Filter>include\example</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\example\ShadowCastEx.h">
       <Filter>include\example</Filter>
     </ClInclude>
   </ItemGroup>
