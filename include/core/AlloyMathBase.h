@@ -1920,6 +1920,13 @@ template<class T, int M> matrix<T, M, 4> transpose(const matrix<T, 4, M> & m) {
 	return {m.row(0), m.row(1), m.row(2), m.row(3)};
 }
 
+template <class T,int M, int N> vec<T, M> trace(const matrix<T, M, N>& Mt){
+	vec<T,M> V;
+	for(int m=0;m<M;m++){
+		V[m]=Mt(m,m);
+	}
+	return V;
+}
 //////////////////////////////////
 // Quaternion algebra functions //
 //////////////////////////////////

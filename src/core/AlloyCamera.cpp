@@ -592,6 +592,7 @@ CameraProjector::CameraProjector(const aly::CameraParameters& cam) {
 bool CameraProjector::isVisible(const aly::float2& pt) const {
 	return (pt.x >= 0 && pt.y >= 0 && pt.x < dimensions.x && pt.y < dimensions.y);
 }
+
 void CameraProjector::setDimensions(const aly::int2& dims) {
 	if (dimensions.x > 0 && dimensions.y > 0) {
 		float sx = dims.x / (float) dimensions.x;
