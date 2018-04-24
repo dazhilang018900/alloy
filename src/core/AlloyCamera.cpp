@@ -587,7 +587,7 @@ CameraProjector::CameraProjector(const aly::CameraParameters& cam) {
 	R = SubMatrix(Pose);
 	T = Pose.w.xyz();
 	Kinv = inverse(K);
-	origin = -transpose(R) * T;
+	origin = -inverse(R) * T;
 }
 bool CameraProjector::isVisible(const aly::float2& pt) const {
 	return (pt.x >= 0 && pt.y >= 0 && pt.x < dimensions.x && pt.y < dimensions.y);
@@ -608,18 +608,18 @@ void CameraProjector::setDimensions(const aly::int2& dims) {
 void CameraProjector::setTranslation(const aly::float3& t) {
 	this->T = t;
 	Pose.w = float4(t, 1.0f);
-	origin = -transpose(R) * T;
+	origin = -inverse(R) * T;
 }
 void CameraProjector::setRotation(const aly::float3x3& R) {
 	this->R = R;
 	Pose = MakeTransform(R, T);
-	origin = -transpose(R) * T;
+	origin = -inverse(R) * T;
 }
 void CameraProjector::setPose(const aly::float4x4& P) {
 	Pose = P;
 	R = SubMatrix(Pose);
 	T = Pose.w.xyz();
-	origin = -transpose(R) * T;
+	origin = -inverse(R) * T;
 }
 void CameraProjector::setIntrinsics(const float3x3& K) {
 	this->K = K;
@@ -651,7 +651,7 @@ bool CameraProjector::isVisible(const aly::float3& pt) const {
 }
 aly::float3 CameraProjector::transformImageToWorld(
 		const aly::float3& pt) const {
-	return transpose(R) * (Kinv * pt - T);
+	return inverse(R) * (Kinv * pt - T);
 }
 aly::float3 CameraProjector::getOrigin() const {
 	return origin;
@@ -673,7 +673,7 @@ aly::float2 CameraProjector::getPrincipalPoint() const {
 	return aly::float2(K(2, 0), K(2, 1));
 }
 aly::float3 CameraProjector::getDirection(const float2& q) const {
-	return normalize(transpose(R) * Kinv * float3(q.x, q.y, 1.0f));
+	return normalize(inverse(R) * Kinv * float3(q.x, q.y, 1.0f));
 }
 aly::float2 CameraProjector::transformWorldToImage(
 		const aly::float3& pt) const {
