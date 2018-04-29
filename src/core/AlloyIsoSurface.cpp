@@ -402,6 +402,7 @@ void IsoSurface::solve(const float* data, const int& rows, const int& cols,
 void IsoSurface::solve(const Volume1f& data, Mesh& mesh, const MeshType& type,
 		bool regularize, const float& isoLevel) {
 	std::vector<int3> narrowBandList;
+	backgroundValue=1E30f;
 	for (int z = 0; z < data.slices; z++) {
 		for (int y = 0; y < data.cols; y++) {
 			for (int x = 0; x < data.rows; x++) {
@@ -419,11 +420,9 @@ void IsoSurface::solve(const Volume1f& data, const std::vector<int3>& indexList,
 		const float& isoLevel) {
 	mesh.clear();
 	if (type == MeshType::Triangle) {
-		solveTri(data.ptr(), data.rows, data.cols, data.slices, indexList, mesh,
-				isoLevel);
+		solveTri(data.ptr(), data.rows, data.cols, data.slices, indexList, mesh,isoLevel);
 	} else {
-		solveQuad(data.ptr(), data.rows, data.cols, data.slices, indexList,
-				mesh, isoLevel);
+		solveQuad(data.ptr(), data.rows, data.cols, data.slices, indexList,mesh, isoLevel);
 	}
 	if (regularizeTest) {
 		regularize(data.ptr(), mesh);

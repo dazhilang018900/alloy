@@ -383,12 +383,12 @@ namespace aly {
 		contour.velocities[2][idx] = k3;
 		contour.velocities[1][idx] = k2;
 		contour.velocities[0][idx] = k1;
-		if (mSimulationIteration >= 4) {
+		if (simulationIteration >= 4) {
 			f = (1.0f / 6.0f)*(k1 + 2.0f * k2 + 2.0f * k3 + k4);
 		}
-		else if (mSimulationIteration == 3) {
+		else if (simulationIteration == 3) {
 			f = (1.0f / 4.0f)*(k1 + 2.0f * k2 + k3);
-		} if (mSimulationIteration == 2) {
+		} if (simulationIteration == 2) {
 			f = (1.0f / 2.0f)*(k1 + k2);
 		}
 		
@@ -729,7 +729,7 @@ namespace aly {
 		contour.setDirty(true);
 		if (cache.get() != nullptr) {
 			Manifold2D* contour = getContour();
-			contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR << "contour" << std::setw(4) << std::setfill('0') << mSimulationIteration << ".bin");
+			contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR << "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 		}
 		if (unsignedShader.get() == nullptr) {
 			unsignedShader.reset(new UnsignedDistanceShader(true, AlloyApplicationContext()));
@@ -740,7 +740,7 @@ namespace aly {
 		relax();
 		updateNearestNeighbors();
 		updateUnsignedLevelSet();		
-		cache->set((int)mSimulationIteration, contour);
+		cache->set((int)simulationIteration, contour);
 		return true;
 	}
 	void MultiSpringLevelSet2D::relax() {
@@ -755,7 +755,7 @@ namespace aly {
 		MultiActiveContour2D::cleanup();
 	}
 	bool MultiSpringLevelSet2D::stepInternal() {
-		double remaining = mTimeStep;
+		double remaining = timeStep;
 		double t = 0.0;
 		const int evolveIterations = 8;
 		do {
@@ -794,17 +794,17 @@ namespace aly {
 				contour.setDirty(true);
 				requestUpdateContour = false;
 			}
-			remaining = mTimeStep - t;
+			remaining = timeStep - t;
 		} while (remaining > 1E-5f);
-		mSimulationTime += t;
-		mSimulationIteration++;
+		simulationTime += t;
+		simulationIteration++;
 		if (cache.get() != nullptr) {
 			Manifold2D* contour = getContour();
 			refineContour(false);
-			contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR << "contour" << std::setw(4) << std::setfill('0') << mSimulationIteration << ".bin");
-			cache->set((int)mSimulationIteration, *contour);
+			contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR << "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
+			cache->set((int)simulationIteration, *contour);
 		}
-		return (mSimulationTime < mSimulationDuration);
+		return (simulationTime < simulationDuration);
 	}
 
 	void MultiSpringLevelSet2D::setup(const aly::ParameterPanePtr& pane) {

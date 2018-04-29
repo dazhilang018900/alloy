@@ -27,7 +27,7 @@ SimulationListener::~SimulationListener(){
 
 }
 bool Simulation::step() {
-	uint64_t iter = mSimulationIteration;
+	uint64_t iter = simulationIteration;
 	bool ret = stepInternal();
 	if (onUpdate) {
 		onUpdate(iter, !ret);
@@ -39,14 +39,14 @@ RecurrentTask(
 [this](uint64_t iteration){
 	return step();
 },5),
-		mPaused(false),
-		mComputeTimeSeconds(0.0),
-		mName(name),
-		mIsInitialized(false),
-		mTimeStep(0),
-		mSimulationDuration(0),
-		mSimulationTime(0),
-		mSimulationIteration(0) {
+		paused(false),
+		computeTimeSeconds(0.0),
+		name(name),
+		isInitialized(false),
+		timeStep(0),
+		simulationDuration(0),
+		simulationTime(0),
+		simulationIteration(0) {
 
 }
 

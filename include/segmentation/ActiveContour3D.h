@@ -32,8 +32,8 @@
 namespace aly {
 class ActiveManifold3D: public Simulation {
 protected:
-	IsoSurface isoContour;
-	Mesh contour;
+	IsoSurface isoSurface;
+	Mesh mesh;
 	bool clampSpeed;
 
 	Number advectionParam;
@@ -43,7 +43,7 @@ protected:
 
 	const float MAX_DISTANCE = 3.5f;
 	const int maxLayers = 3;
-	bool requestUpdateContour;
+	bool requestUpdateSurface;
 	Volume1f initialLevelSet;
 	Volume1f levelSet;
 	Volume1f swapLevelSet;
@@ -65,7 +65,7 @@ protected:
 	virtual float evolve(float maxStep);
 	void rebuildNarrowBand();
 
-	bool updateContour();
+	bool updateSurface();
 	virtual bool stepInternal() override;
 public:
 	ActiveManifold3D();
@@ -107,7 +107,7 @@ public:
 	void setAdvection(float c) {
 		advectionParam.setValue(c);
 	}
-	Mesh* getContour();
+	Mesh* getSurface();
 	Volume1f& getLevelSet();
 	const Volume1f& getLevelSet() const;
 	virtual bool init() override;

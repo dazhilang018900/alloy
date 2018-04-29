@@ -24,20 +24,21 @@
 
 #include "AlloyApplication.h"
 #include "AlloyWidget.h"
+#include "AlloyTimeline.h"
 #include "CommonShaders.h"
 #include "segmentation/ActiveContour3D.h"
 
 class ActiveContour3DEx: public aly::Application {
 protected:
 	aly::GLFrameBuffer depthFrameBuffer;
-	aly::GLFrameBuffer wireframeFrameBuffer;
 	aly::DepthAndNormalShader depthAndNormalShader;
-	aly::WireframeShader wireframeShader;
 	aly::MatcapShader matcapShader;
 	aly::ImageShader imageShader;
-	aly::Mesh mesh;
 	aly::Camera camera;
-	aly::ActiveManifold3D activeContour;
+	aly::ActiveManifold3D simulation;
+	aly::IconButtonPtr playButton,stopButton;
+    std::shared_ptr<aly::TimelineSlider> timelineSlider;
+    bool running;
 public:
 	ActiveContour3DEx();
 	bool init(aly::Composite& rootNode);

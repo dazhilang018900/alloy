@@ -127,10 +127,10 @@ bool ActiveManifold2D::init() {
 	int2 dims = initialLevelSet.dimensions();
 	if (dims.x == 0 || dims.y == 0)
 		return false;
-	mSimulationDuration = std::max(dims.x, dims.y) * 0.5f;
-	mSimulationIteration = 0;
-	mSimulationTime = 0;
-	mTimeStep = 1.0f;
+	simulationDuration = std::max(dims.x, dims.y) * 0.5f;
+	simulationIteration = 0;
+	simulationTime = 0;
+	timeStep = 1.0f;
 	levelSet.resize(dims.x, dims.y);
 	swapLevelSet.resize(dims.x, dims.y);
 #pragma omp parallel for
@@ -146,8 +146,8 @@ bool ActiveManifold2D::init() {
 	if (cache.get() != nullptr) {
 		updateContour();
 		contour.setFile(
-				MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "contour" << std::setw(4) << std::setfill('0') << mSimulationIteration << ".bin");
-		cache->set((int) mSimulationIteration, contour);
+				MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
+		cache->set((int) simulationIteration, contour);
 	}
 	return true;
 }
@@ -609,22 +609,22 @@ float ActiveManifold2D::evolve(float maxStep) {
 	return timeStep;
 }
 bool ActiveManifold2D::stepInternal() {
-	double remaining = mTimeStep;
+	double remaining = timeStep;
 	double t = 0.0;
 	do {
 		float timeStep = evolve(std::min(0.5f, (float) remaining));
 		t += (double) timeStep;
-		remaining = mTimeStep - t;
+		remaining = timeStep - t;
 	} while (remaining > 1E-5f);
-	mSimulationTime += t;
-	mSimulationIteration++;
+	simulationTime += t;
+	simulationIteration++;
 	if (cache.get() != nullptr) {
 		updateContour();
 		contour.setFile(
-				MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "contour" << std::setw(4) << std::setfill('0') << mSimulationIteration << ".bin");
-		cache->set((int) mSimulationIteration, contour);
+				MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
+		cache->set((int) simulationIteration, contour);
 	}
-	return (mSimulationTime < mSimulationDuration);
+	return (simulationTime < simulationDuration);
 }
 void ActiveManifold2D::rescale(aly::Image1f& pressureForce) {
 	float minValue = 1E30f;

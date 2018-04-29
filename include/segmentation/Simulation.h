@@ -34,15 +34,15 @@ public:
 };
 class Simulation: public aly::RecurrentTask {
 protected:
-	bool mPaused;
-	double mComputeTimeSeconds;
-	std::string mName;
-	bool mIsInitialized;
-	double mTimeStep;
-	double mSimulationDuration;
-	double mSimulationTime;
+	bool paused;
+	double computeTimeSeconds;
+	std::string name;
+	bool isInitialized;
+	double timeStep;
+	double simulationDuration;
+	double simulationTime;
 	std::string outputDirectory;
-	uint64_t mSimulationIteration;
+	uint64_t simulationIteration;
 	std::thread mSimulationThread;
 	virtual bool stepInternal()=0;
 public:
@@ -53,13 +53,13 @@ public:
 	virtual void cleanup()=0;
 	virtual void setup(const aly::ParameterPanePtr& pane)=0;
 	Simulation(const std::string& name);
-	inline const std::string& getName()const {return mName;}
-	inline void setName(const std::string& name){mName=name;}
-	inline double getSimulationTime()const {return mSimulationTime;}
-	inline double getSimulationDuration() const {return mSimulationDuration;}
-	inline uint64_t getSimulationIteration()const {return mSimulationIteration;}
-	inline double getComputeTimePerFrame() const {return mComputeTimeSeconds;}
-	inline double getTimeStep() const {return mTimeStep;}
+	inline const std::string& getName()const {return name;}
+	inline void setName(const std::string& name){this->name=name;}
+	inline double getSimulationTime()const {return simulationTime;}
+	inline double getSimulationDuration() const {return simulationDuration;}
+	inline uint64_t getSimulationIteration()const {return simulationIteration;}
+	inline double getComputeTimePerFrame() const {return computeTimeSeconds;}
+	inline double getTimeStep() const {return timeStep;}
 	virtual ~Simulation(){};
 };
 

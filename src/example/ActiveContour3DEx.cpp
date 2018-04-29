@@ -24,15 +24,14 @@ using namespace aly;
 ActiveContour3DEx::ActiveContour3DEx() :
 		Application(800, 600, "Acitve Contour 3D"), matcapShader(
 				getFullPath("images/JG_Silver.png")), imageShader(
-				ImageShader::Filter::SMALL_BLUR) {
+				ImageShader::Filter::SMALL_BLUR), running(false) {
 }
 bool ActiveContour3DEx::init(Composite& rootNode) {
 	box3f renderBBox = box3f(float3(-0.5f, -0.5f, -0.5f),
 			float3(1.0f, 1.0f, 1.0f));
-	mesh.load(getFullPath("models/monkey.ply"));
-	mesh.updateVertexNormals();
+	int D = 128;
 	{
-		PhantomBubbles bubbles(128, 128, 128, 4.0f);
+		PhantomBubbles bubbles(D, D, D, 4.0f);
 		bubbles.setNoiseLevel(0.0f);
 		bubbles.setNumberOfBubbles(12);
 		bubbles.setFuzziness(0.5f);
@@ -40,97 +39,147 @@ bool ActiveContour3DEx::init(Composite& rootNode) {
 		bubbles.setMaxRadius(0.3f);
 		bubbles.setInvertContrast(true);
 		Volume1f targetVol = bubbles.solveLevelSet();
-		PhantomCube cube(128, 128, 128, 4.0f);
+		PhantomCube cube(D, D, D, 4.0f);
 		cube.setCenter(float3(0.0f));
 		cube.setWidth(1.21);
 		Volume1f sourceVol = cube.solveDistanceField();
-		WriteVolumeToFile(MakeDesktopFile("cube.xml"), sourceVol);
-		activeContour.setInitialDistanceField(sourceVol);
-		activeContour.setPressure(targetVol, 0.5f, 0.5f);
-		activeContour.setCurvature(0.5f);
+		//WriteVolumeToFile(MakeDesktopFile("cube.xml"), sourceVol);
+		simulation.setInitialDistanceField(sourceVol);
+		simulation.setPressure(targetVol, 0.5f, 0.5f);
+		simulation.setCurvature(0.5f);
+		simulation.init();
 	}
+	simulation.onUpdate =
+			[this](uint64_t iteration, bool lastIteration) {
+				if (lastIteration || (int)iteration == timelineSlider->getMaxValue().toInteger()) {
+					stopButton->setVisible(false);
+					playButton->setVisible(true);
+					running = false;
+				}
+				AlloyApplicationContext()->addDeferredTask([this]() {
+							timelineSlider->setUpperValue((int)simulation.getSimulationIteration());
+							timelineSlider->setTimeValue((int)simulation.getSimulationIteration());
+						});
+			};
+
 	//Initialize depth buffer to store the render
 	int w = getContext()->getScreenWidth();
 	int h = getContext()->getScreenHeight();
 	depthFrameBuffer.initialize(w, h);
-	wireframeFrameBuffer.initialize(w, h);
 	//Set up camera
 	camera.setNearFarPlanes(-5.0f, 5.0f);
 	camera.setZoom(1.0f);
 	camera.setCameraType(CameraType::Orthographic);
 	//Map object geometry into unit bounding box for draw.
-	camera.setPose(MakeTransform(mesh.getBoundingBox(), renderBBox));
+	camera.setPose(MakeTransform(box3f(float3(0.0f), float3(D)), renderBBox));
 	//Add listener to respond to mouse manipulations
 	addListener(&camera);
-	TextButtonPtr subCatmullClark = TextButtonPtr(
-			new TextButton("Subdivide Catmull-Clark",
-					CoordPerPX(0.25f, 0.0f, 0, 5), CoordPX(200, 30)));
-	subCatmullClark->setOrigin(Origin::TopCenter);
-	subCatmullClark->setAspectRule(AspectRule::Unspecified);
-
-	TextButtonPtr resetButton = TextButtonPtr(
-			new TextButton("Reset", CoordPerPX(0.5f, 0.0f, 0, 5),
-					CoordPX(100, 30)));
-	resetButton->setOrigin(Origin::TopCenter);
-	resetButton->setAspectRule(AspectRule::Unspecified);
-
-	TextButtonPtr subLoop = TextButtonPtr(
-			new TextButton("Subdivide Loop", CoordPerPX(0.75f, 0.0f, 0, 5),
-					CoordPX(200, 30)));
-	subLoop->setOrigin(Origin::TopCenter);
-	subLoop->setAspectRule(AspectRule::Unspecified);
-
-	resetButton->onMouseDown = [=](AlloyContext* context,const InputEvent& e) {
-		mesh.load(getFullPath("models/monkey.ply"));
-		mesh.updateVertexNormals();
-		mesh.setDirty(true);
-		return true;
-	};
-
-	subCatmullClark->onMouseDown =
-			[=](AlloyContext* context,const InputEvent& e) {
-				Subdivide(mesh,SubDivisionScheme::CatmullClark);
-				mesh.updateVertexNormals();
-				mesh.setDirty(true);
-				return true;
-			};
-	subLoop->onMouseDown = [=](AlloyContext* context,const InputEvent& e) {
-		Subdivide(mesh,SubDivisionScheme::Loop);
-		mesh.updateVertexNormals();
-		mesh.setDirty(true);
-		return true;
-	};
-	wireframeShader.setFaceColor(Color(0.1f, 0.1f, 1.0f, 0.5f));
-	wireframeShader.setEdgeColor(Color(1.0f, 0.8f, 0.1f, 1.0f));
-	wireframeShader.setLineWidth(1.5f);
-
 	setOnResize([this](const int2& dims) {
 		if(!getContext()->hasDeferredTasks()) {
 			getContext()->addDeferredTask([this]() {
 						int w=getContext()->getScreenWidth();
 						int h=getContext()->getScreenHeight();
 						depthFrameBuffer.initialize(w,h);
-						wireframeFrameBuffer.initialize(w,h);
 						camera.setDirty(true);
 					});
 		}
 	});
-	rootNode.add(subCatmullClark);
-	rootNode.add(subLoop);
-	rootNode.add(resetButton);
+	playButton = IconButtonPtr(
+			new IconButton(0xf144, CoordPerPX(0.5f, 0.5f, -35.0f, -35.0f),
+					CoordPX(70.0f, 70.0f)));
+	stopButton = IconButtonPtr(
+			new IconButton(0xf28d, CoordPerPX(0.5f, 0.5f, -35.0f, -35.0f),
+					CoordPX(70.0f, 70.0f)));
+	playButton->borderWidth = UnitPX(0.0f);
+	stopButton->borderWidth = UnitPX(0.0f);
+	playButton->backgroundColor = MakeColor(getContext()->theme.DARKER);
+	stopButton->backgroundColor = MakeColor(getContext()->theme.DARKER);
+	playButton->foregroundColor = MakeColor(0, 0, 0, 0);
+	stopButton->foregroundColor = MakeColor(0, 0, 0, 0);
+	playButton->iconColor = MakeColor(getContext()->theme.LIGHTER);
+	stopButton->iconColor = MakeColor(getContext()->theme.LIGHTER);
+	playButton->borderColor = MakeColor(getContext()->theme.LIGHTEST);
+	stopButton->borderColor = MakeColor(getContext()->theme.LIGHTEST);
+	playButton->onMouseDown =
+			[this](AlloyContext* context, const InputEvent& e) {
+				if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
+					stopButton->setVisible(true);
+					playButton->setVisible(false);
+					int maxIteration = (int)std::ceil(simulation.getSimulationDuration() / simulation.getTimeStep());
+					timelineSlider->setTimeValue(0);
+					timelineSlider->setMaxValue(maxIteration);
+					timelineSlider->setVisible(true);
+					context->addDeferredTask([this]() {
+								simulation.init();
+								running = true;
+							});
+					return true;
+				}
+				return false;
+			};
+	stopButton->onMouseDown =
+			[this](AlloyContext* context, const InputEvent& e) {
+				if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
+					stopButton->setVisible(false);
+					playButton->setVisible(true);
+					running = false;
+					return true;
+				}
+				return false;
+			};
+	stopButton->setVisible(false);
+	CompositePtr infoComposite = CompositePtr(
+			new Composite("Info", CoordPerPX(0.0f, 1.0f, 0.0f, -80.0f),
+					CoordPX(80.0f, 80.0f)));
+	infoComposite->backgroundColor = MakeColor(getContext()->theme.DARKER);
+	infoComposite->borderColor = MakeColor(getContext()->theme.DARK);
+	infoComposite->borderWidth = UnitPX(0.0f);
+
+	infoComposite->add(playButton);
+	infoComposite->add(stopButton);
+
+	timelineSlider = TimelineSliderPtr(
+			new TimelineSlider("Timeline",
+					CoordPerPX(0.0f, 1.0f, 80.0f, -80.0f),
+					CoordPerPX(1.0f, 0.0f, -80.0f, 80.0f), Integer(0),
+					Integer(0), Integer(0)));
+	timelineSlider->backgroundColor = MakeColor(
+			AlloyApplicationContext()->theme.DARKER);
+	timelineSlider->borderColor = MakeColor(
+			AlloyApplicationContext()->theme.DARK);
+	timelineSlider->borderWidth = UnitPX(0.0f);
+	timelineSlider->onChangeEvent =
+			[this](const Number& timeValue, const Number& lowerValue, const Number& upperValue) {};
+	timelineSlider->setMajorTick(100);
+	timelineSlider->setMinorTick(10);
+	timelineSlider->setLowerValue(0);
+	timelineSlider->setUpperValue(0);
+	int maxIteration = (int) std::ceil(
+			simulation.getSimulationDuration() / simulation.getTimeStep());
+	timelineSlider->setMaxValue(maxIteration);
+	timelineSlider->setVisible(true);
+	timelineSlider->setModifiable(false);
+	rootNode.add(infoComposite);
+	rootNode.add(timelineSlider);
+
 	return true;
 }
 void ActiveContour3DEx::draw(AlloyContext* context) {
+	if (running) {
+		if (!simulation.step()) {
+			running = false;
+		} else {
+			camera.setDirty(true);
+		}
+	}
 	if (camera.isDirty()) {
-		depthAndNormalShader.draw(mesh, camera, depthFrameBuffer);
-		wireframeShader.draw(mesh, camera, wireframeFrameBuffer);
+		Mesh* mesh = simulation.getSurface();
+		depthAndNormalShader.draw(*mesh, camera, depthFrameBuffer);
 	}
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	matcapShader.draw(depthFrameBuffer.getTexture(), camera,
 			context->getViewport(), context->getViewport(), RGBAf(1.0f));
-	imageShader.draw(wireframeFrameBuffer.getTexture(), context->getViewport(),
-			1.0f, false);
 	camera.setDirty(false);
 }
 

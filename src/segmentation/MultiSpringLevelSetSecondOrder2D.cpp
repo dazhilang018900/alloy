@@ -58,12 +58,12 @@ namespace aly {
 		contour.velocities[1][idx] = k2;
 		contour.velocities[0][idx] = k1;
 		float2 correction = f;
-		if (mSimulationIteration >= 4) {
+		if (simulationIteration >= 4) {
 			f = (1.0f / 6.0f)*(k1 + 2.0f * k2 + 2.0f * k3 + k4);
 		}
-		else if (mSimulationIteration == 3) {
+		else if (simulationIteration == 3) {
 			f = (1.0f / 4.0f)*(k1 + 2.0f * k2 + k3);
-		} if (mSimulationIteration == 2) {
+		} if (simulationIteration == 2) {
 			f = (1.0f / 2.0f)*(k1 + k2);
 		}
 		//Approximate RK4 correction for vertices to save memory.
