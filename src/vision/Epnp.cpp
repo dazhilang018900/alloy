@@ -35,31 +35,33 @@
 using namespace std;
 #include "vision/Epnp.h"
 namespace aly {
-aly::float4x4 SolvePnP(const aly::Vector3f& pts, const aly::Vector2f& pxs,const CameraProjector& view) {
+aly::float4x4 SolvePnP(const aly::Vector3f& pts, const aly::Vector2f& pxs,
+		const CameraProjector& view) {
 	Epnp PnP;
-	PnP.set_internal_parameters(view.K(0,2), view.K(1,2), view.K(0,0),view.K(1,1));
+	PnP.set_internal_parameters(view.K(0, 2), view.K(1, 2), view.K(0, 0),
+			view.K(1, 1));
 	PnP.set_maximum_number_of_correspondences(pts.size());
 	PnP.reset_correspondences();
 	for (int i = 0; i < pts.size(); i++) {
-		float3 pt=pts[i];
-		float2 pix=pxs[i];
-		PnP.add_correspondence(pt.x,pt.y,pt.z,pix.x,pix.y,1.0f);
+		float3 pt = pts[i];
+		float2 pix = pxs[i];
+		PnP.add_correspondence(pt.x, pt.y, pt.z, pix.x, pix.y, 1.0f);
 	}
 	double R_est[3][3];
-	double t_est[3]={0,0,0};
+	double t_est[3] = { 0, 0, 0 };
 	double err2 = PnP.compute_pose(R_est, t_est);
 	double rot_err, transl_err;
-	float4x4 M=float4x4::identity();
-	for(int i=0;i<3;i++){
-		for(int j=0;j<3;j++){
-			M(i,j)=R_est[i][j];
+	float4x4 M = float4x4::identity();
+	for (int i = 0; i < 3; i++) {
+		for (int j = 0; j < 3; j++) {
+			M(i, j) = R_est[i][j];
 		}
-		M(i,3)=t_est[i];
+		M(i, 3) = t_est[i];
 	}
 	return M;
 }
 Epnp::Epnp(void) {
-	cws_determinant=0;
+	cws_determinant = 0;
 	maximum_number_of_correspondences = 0;
 	number_of_correspondences = 0;
 	pws = 0;
@@ -80,7 +82,7 @@ Epnp::~Epnp() {
 	delete[] pcs;
 	delete[] signs; //added
 }
-void Epnp::set_internal_parameters(double u,double v,double fu,double fv){
+void Epnp::set_internal_parameters(double u, double v, double fu, double fv) {
 	this->uc = u;
 	this->vc = v;
 	this->fu = fu;
@@ -137,10 +139,8 @@ void Epnp::choose_control_points(void) {
 	for (int i = 0; i < number_of_correspondences; i++)
 		for (int j = 0; j < 3; j++)
 			cws[0][j] += pws[3 * i + j];
-
 	for (int j = 0; j < 3; j++)
 		cws[0][j] /= number_of_correspondences;
-
 	// Take C1, C2, and C3 from PCA on the reference points:
 	DenseMat<double> PW0(number_of_correspondences, 3);
 
@@ -153,23 +153,42 @@ void Epnp::choose_control_points(void) {
 	DenseMat<double> D;
 	DenseMat<double> Vt;
 	SVD(PW0tPW0, U, D, Vt);
-	for (int i = 1; i < 4; i++) {
-		double k = sqrt(D(i - 1, i - 1) / number_of_correspondences);
-		for (int j = 0; j < 3; j++)
-			cws[i][j] = cws[0][j] + k * U(j, (i - 1));
+	double det = D(0, 0) * D(1, 1) * D(2, 2);
+	if (det != 0) {
+		for (int i = 1; i < 4; i++) {
+			double k = sqrt(D(i - 1, i - 1) / number_of_correspondences);
+			for (int j = 0; j < 3; j++) {
+				cws[i][j] = cws[0][j] + k * U(j, (i - 1));
+			}
+		}
+	} else {
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 3; j++) {
+				cws[i][j] = pws[3 * i + j]-pws[j] + cws[0][j];
+			}
+		}
 	}
+
 }
 
 void Epnp::compute_barycentric_coordinates(void) {
 	double3x3 CC;
-	for (int i = 0; i < 3; i++)
-		for (int j = 1; j < 4; j++)
+	for (int i = 0; i < 3; i++) {
+		for (int j = 1; j < 4; j++) {
 			CC(i, j - 1) = cws[j][i] - cws[0][i];
-	double3x3 CC_inv = inverse(CC);
+		}
+	}
+	double3x3 U,D,Vt;
+	SVD(CC,U,D,Vt);
+	for(int i=0;i<3;i++){
+		if(std::abs(D(i,i))>1E-15f){
+			D(i,i)=1.0/D(i,i);
+		}
+	}
+	double3x3 CC_inv = transpose(Vt)*D*transpose(U);
 	for (int i = 0; i < number_of_correspondences; i++) {
 		double * pi = pws + 3 * i;
 		double * a = alphas + 4 * i;
-
 		for (int j = 0; j < 3; j++)
 			a[1 + j] = CC_inv(j, 0) * (pi[0] - cws[0][0])
 					+ CC_inv(j, 1) * (pi[1] - cws[0][1])
@@ -217,8 +236,9 @@ double Epnp::compute_pose(double R[3][3], double t[3]) {
 	choose_control_points();
 	compute_barycentric_coordinates();
 	DenseMat<double> M(2 * number_of_correspondences, 12);
-	for (int i = 0; i < number_of_correspondences; i++)
+	for (int i = 0; i < number_of_correspondences; i++){
 		fill_M(M, 2 * i, alphas + 4 * i, us[2 * i], us[2 * i + 1]);
+	}
 	DenseMat<double> MtM = M.transpose() * M;
 	DenseMat<double> U, D, Vt;
 	SVD(MtM, U, D, Vt);
@@ -227,32 +247,25 @@ double Epnp::compute_pose(double R[3][3], double t[3]) {
 	Vec<double> Rho(6);
 	compute_L_6x10(Ut, L_6x10);
 	compute_rho(Rho);
-
 	double Betas[4][4], rep_errors[4];
 	double Rs[4][3][3], ts[4][3];
-
 	find_betas_approx_1(L_6x10, Rho, Betas[1]);
 	gauss_newton(L_6x10, Rho, Betas[1]);
 	rep_errors[1] = compute_R_and_t(Ut, Betas[1], Rs[1], ts[1]);
-
 	find_betas_approx_2(L_6x10, Rho, Betas[2]);
 	gauss_newton(L_6x10, Rho, Betas[2]);
 	rep_errors[2] = compute_R_and_t(Ut, Betas[2], Rs[2], ts[2]);
-
 	find_betas_approx_3(L_6x10, Rho, Betas[3]);
 	gauss_newton(L_6x10, Rho, Betas[3]);
 	rep_errors[3] = compute_R_and_t(Ut, Betas[3], Rs[3], ts[3]);
-
 	int N = 1;
 	if (rep_errors[2] < rep_errors[1])
 		N = 2;
 	if (rep_errors[3] < rep_errors[N])
 		N = 3;
-
 	copy_R_and_t(Rs[N], ts[N], R, t);
 	return rep_errors[N];
 }
-
 void Epnp::copy_R_and_t(const double R_src[3][3], const double t_src[3],
 		double R_dst[3][3], double t_dst[3]) {
 	for (int i = 0; i < 3; i++) {
@@ -282,8 +295,7 @@ double Epnp::reprojection_error(const double R[3][3], const double t[3]) {
 		double ue = uc + fu * Xc * inv_Zc;
 		double ve = vc + fv * Yc * inv_Zc;
 		double u = us[2 * i], v = us[2 * i + 1];
-
-		sum2 += sqrt((u - ue) * (u - ue) + (v - ve) * (v - ve));
+		sum2 += std::sqrt((u - ue) * (u - ue) + (v - ve) * (v - ve));
 	}
 
 	return sum2 / number_of_correspondences;
@@ -416,12 +428,12 @@ void Epnp::find_betas_approx_1(const DenseMat<double> & L_6x10,
 	}
 	Vec<double> b4 = Solve(L_6x4, Rho, MatrixFactorization::SVD);
 	if (b4[0] < 0) {
-		betas[0] = sqrt(-b4[0]);
+		betas[0] = std::sqrt(-b4[0]);
 		betas[1] = -b4[1] / betas[0];
 		betas[2] = -b4[2] / betas[0];
 		betas[3] = -b4[3] / betas[0];
 	} else {
-		betas[0] = sqrt(b4[0]);
+		betas[0] = std::sqrt(b4[0]);
 		betas[1] = b4[1] / betas[0];
 		betas[2] = b4[2] / betas[0];
 		betas[3] = b4[3] / betas[0];
@@ -487,15 +499,13 @@ void Epnp::find_betas_approx_3(const DenseMat<double> & L_6x10,
 
 void Epnp::compute_L_6x10(const DenseMat<double> & Ut,
 		DenseMat<double> & L_6x10) {
-	double dv[4][6][3];
-
+	double3 dv[4][6];
 	for (int i = 0; i < 4; i++) {
 		int a = 0, b = 1;
 		for (int j = 0; j < 6; j++) {
 			dv[i][j][0] = Ut(11 - i, 3 * a) - Ut(11 - i, 3 * b);
 			dv[i][j][1] = Ut(11 - i, 3 * a + 1) - Ut(11 - i, 3 * b + 1);
 			dv[i][j][2] = Ut(11 - i, 3 * a + 2) - Ut(11 - i, 3 * b + 2);
-
 			b++;
 			if (b > 3) {
 				a++;
@@ -505,16 +515,16 @@ void Epnp::compute_L_6x10(const DenseMat<double> & Ut,
 	}
 
 	for (int i = 0; i < 6; i++) {
-		L_6x10(i, 0) = dot(dv[0][i], dv[0][i]);
-		L_6x10(i, 1) = 2.0f * dot(dv[0][i], dv[1][i]);
-		L_6x10(i, 2) = dot(dv[1][i], dv[1][i]);
-		L_6x10(i, 3) = 2.0f * dot(dv[0][i], dv[2][i]);
-		L_6x10(i, 4) = 2.0f * dot(dv[1][i], dv[2][i]);
-		L_6x10(i, 5) = dot(dv[2][i], dv[2][i]);
-		L_6x10(i, 6) = 2.0f * dot(dv[0][i], dv[3][i]);
-		L_6x10(i, 7) = 2.0f * dot(dv[1][i], dv[3][i]);
-		L_6x10(i, 8) = 2.0f * dot(dv[2][i], dv[3][i]);
-		L_6x10(i, 9) = dot(dv[3][i], dv[3][i]);
+		L_6x10(i, 0) = aly::dot(dv[0][i], dv[0][i]);
+		L_6x10(i, 1) = 2.0 * aly::dot(dv[0][i], dv[1][i]);
+		L_6x10(i, 2) = aly::dot(dv[1][i], dv[1][i]);
+		L_6x10(i, 3) = 2.0 * aly::dot(dv[0][i], dv[2][i]);
+		L_6x10(i, 4) = 2.0 * aly::dot(dv[1][i], dv[2][i]);
+		L_6x10(i, 5) = aly::dot(dv[2][i], dv[2][i]);
+		L_6x10(i, 6) = 2.0 * aly::dot(dv[0][i], dv[3][i]);
+		L_6x10(i, 7) = 2.0 * aly::dot(dv[1][i], dv[3][i]);
+		L_6x10(i, 8) = 2.0 * aly::dot(dv[2][i], dv[3][i]);
+		L_6x10(i, 9) = aly::dot(dv[3][i], dv[3][i]);
 	}
 }
 
@@ -556,11 +566,11 @@ void Epnp::gauss_newton(const DenseMat<double> & L_6x10,
 		const Vec<double> & Rho, double betas[4]) {
 	const int iterations_number = 5;
 	DenseMat<double> A(6, 4);
-	Vec<double> B;
+	Vec<double> B(6);
 	Vec<double> X;
 	for (int k = 0; k < iterations_number; k++) {
 		compute_A_and_b_gauss_newton(L_6x10, Rho, betas, A, B);
-		X=Solve(A,B,MatrixFactorization::QR);
+		X = Solve(A, B, MatrixFactorization::QR);
 		for (int i = 0; i < 4; i++)
 			betas[i] += X[i];
 	}
