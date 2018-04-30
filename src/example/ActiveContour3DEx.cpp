@@ -20,9 +20,10 @@
  */
 #include "../../include/example/ActiveContour3DEx.h"
 #include "segmentation/Phantom.h"
+#include <AlloyGradientVectorFlow.h>
 using namespace aly;
 ActiveContour3DEx::ActiveContour3DEx() :
-		Application(800, 600, "Acitve Contour 3D"), matcapShader(
+		Application(1024, 600, "Acitve Contour 3D"), matcapShader(
 				getFullPath("images/JG_Silver.png")), imageShader(
 				ImageShader::Filter::SMALL_BLUR), running(false) {
 }
@@ -39,14 +40,19 @@ bool ActiveContour3DEx::init(Composite& rootNode) {
 		bubbles.setMaxRadius(0.3f);
 		bubbles.setInvertContrast(true);
 		Volume1f targetVol = bubbles.solveLevelSet();
+		Volume1f edgeVol;
+		Volume3f vectorField;
+		SolveEdgeFilter(targetVol, edgeVol, 1);
+		SolveGradientVectorFlow(edgeVol, vectorField, 0.1f, 16, true);
 		PhantomCube cube(D, D, D, 4.0f);
 		cube.setCenter(float3(0.0f));
 		cube.setWidth(1.21);
 		Volume1f sourceVol = cube.solveDistanceField();
 		//WriteVolumeToFile(MakeDesktopFile("cube.xml"), sourceVol);
 		simulation.setInitialDistanceField(sourceVol);
-		simulation.setPressure(targetVol, 0.5f, 0.5f);
-		simulation.setCurvature(0.5f);
+		simulation.setPressure(targetVol, 0.4f, 0.5f);
+		simulation.setCurvature(0.25f);
+		simulation.setVectorField(vectorField, 0.2f);
 		simulation.init();
 	}
 	simulation.onUpdate =
@@ -65,7 +71,7 @@ bool ActiveContour3DEx::init(Composite& rootNode) {
 	//Initialize depth buffer to store the render
 	int w = getContext()->getScreenWidth();
 	int h = getContext()->getScreenHeight();
-	depthFrameBuffer.initialize(w, h);
+
 	//Set up camera
 	camera.setNearFarPlanes(-5.0f, 5.0f);
 	camera.setZoom(1.0f);
@@ -84,6 +90,7 @@ bool ActiveContour3DEx::init(Composite& rootNode) {
 					});
 		}
 	});
+
 	playButton = IconButtonPtr(
 			new IconButton(0xf144, CoordPerPX(0.5f, 0.5f, -35.0f, -35.0f),
 					CoordPX(70.0f, 70.0f)));
@@ -159,12 +166,35 @@ bool ActiveContour3DEx::init(Composite& rootNode) {
 	timelineSlider->setMaxValue(maxIteration);
 	timelineSlider->setVisible(true);
 	timelineSlider->setModifiable(false);
+
+	ParameterPanePtr controls = ParameterPanePtr(
+			new ParameterPane("Controls", CoordPX(0.0f, 0.0f),
+					CoordPerPX(0.0f, 1.0f, 400.0f, -80.0f)));
+	controls->onChange =
+			[this](const std::string& label, const AnyInterface& value) {
+				//parametersDirty = true;
+			};
+	renderRegion = RegionPtr(
+			new aly::Region("Render Region", CoordPX(400.0f, 0.0f),
+					CoordPerPX(1.0f, 1.0f, -400.0f, -80.0f)));
+	simulation.setup(controls);
+	controls->setAlwaysShowVerticalScrollBar(false);
+	controls->setScrollEnabled(false);
+	controls->backgroundColor = MakeColor(getContext()->theme.DARKER);
+	controls->borderColor = MakeColor(getContext()->theme.DARK);
+	controls->borderWidth = UnitPX(1.0f);
+	rootNode.add(controls);
+	rootNode.add(renderRegion);
 	rootNode.add(infoComposite);
 	rootNode.add(timelineSlider);
 
 	return true;
 }
 void ActiveContour3DEx::draw(AlloyContext* context) {
+	if (depthFrameBuffer.getWidth() == 0) {
+		box2f bbox = renderRegion->getBounds();
+		depthFrameBuffer.initialize(bbox.dimensions.x, bbox.dimensions.y);
+	}
 	if (running) {
 		if (!simulation.step()) {
 			running = false;
@@ -179,7 +209,8 @@ void ActiveContour3DEx::draw(AlloyContext* context) {
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	matcapShader.draw(depthFrameBuffer.getTexture(), camera,
-			context->getViewport(), context->getViewport(), RGBAf(1.0f));
+			renderRegion->getBounds() * context->pixelRatio,
+			context->getViewport(), RGBAf(1.0f));
 	camera.setDirty(false);
 }
 

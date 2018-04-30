@@ -181,6 +181,7 @@ void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField, float mu,
 	const float minSpeed = 0.1f;
 	const float captureDist = 1.5f;
 	if (normalize) {
+#pragma omp parallel for
 		for (int i = 0; i < src.width; i++) {
 			for (int j = 0; j < src.height; j++) {
 				float d = std::abs(src(i, j).x);
@@ -211,7 +212,7 @@ void SolveGradientVectorFlow(const Volume1f& src, Volume3f& vectorField,
 	for (int i = 0; i < src.rows; i++) {
 		for (int j = 0; j < src.cols; j++) {
 			for (int k = 0; k < src.slices; k++) {
-				int idx = i + j * src.rows + j * src.rows * src.cols;
+				int idx = i + j * src.rows + k * src.rows * src.cols;
 				float v211 = src(i + 1, j, k).x;
 				float v121 = src(i, j + 1, k).x;
 				float v101 = src(i, j - 1, k).x;
@@ -247,7 +248,7 @@ void SolveGradientVectorFlow(const Volume1f& src, Volume3f& vectorField,
 					if (ii >= 0 && ii < src.rows && jj >= 0 && jj < src.cols
 							&& kk >= 0 && kk < src.slices) {
 						A(idx, ii + jj * src.rows + kk * src.rows * src.cols) +=
-								float3(mu * 0.25f);
+								float3(mu * 0.166666f);
 
 					}
 				}
@@ -259,6 +260,7 @@ void SolveGradientVectorFlow(const Volume1f& src, Volume3f& vectorField,
 	const float minSpeed = 0.1f;
 	const float captureDist = 1.5f;
 	if (normalize) {
+#pragma omp parallel for
 		for (int i = 0; i < src.rows; i++) {
 			for (int j = 0; j < src.cols; j++) {
 				for (int k = 0; k < src.slices; k++) {
@@ -323,6 +325,7 @@ void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField,
 	const float minSpeed = 0.1f;
 	const float captureDist = 1.5f;
 	if (normalize) {
+#pragma omp parallel for
 		for (int i = 0; i < src.width; i++) {
 			for (int j = 0; j < src.height; j++) {
 				float d = std::abs(src(i, j).x);
@@ -353,7 +356,7 @@ void SolveGradientVectorFlow(const Volume1f& src, Volume3f& vectorField,
 	for (int i = 0; i < src.rows; i++) {
 		for (int j = 0; j < src.cols; j++) {
 			for (int k = 0; k < src.slices; k++) {
-				int idx = i + j * src.rows + j * src.rows * src.cols;
+				int idx = i + j * src.rows + k * src.rows * src.cols;
 				float v211 = src(i + 1, j, k).x;
 				float v121 = src(i, j + 1, k).x;
 				float v101 = src(i, j - 1, k).x;
@@ -379,6 +382,7 @@ void SolveGradientVectorFlow(const Volume1f& src, Volume3f& vectorField,
 				}
 				float len = max(1E-6f, length(grad));
 				grad = -sign(v111) * (grad / std::max(1E-6f, len));
+
 				float w = weights(i, j, k).x;
 				x[idx] = grad;
 				b[idx] = w * grad;
@@ -390,7 +394,7 @@ void SolveGradientVectorFlow(const Volume1f& src, Volume3f& vectorField,
 					if (ii >= 0 && ii < src.rows && jj >= 0 && jj < src.cols
 							&& kk >= 0 && kk < src.slices) {
 						A(idx, ii + jj * src.rows + kk * src.rows * src.cols) +=
-								float3(mu * 0.25f);
+								float3(mu * 0.166666f);
 
 					}
 				}
@@ -548,7 +552,7 @@ void SolveGradientVectorFlow(const Volume1f& src, Volume3f& vectorField,
 	for (int i = 0; i < src.rows; i++) {
 		for (int j = 0; j < src.cols; j++) {
 			for (int k = 0; k < src.slices; k++) {
-				int idx = i + j * src.rows + j * src.rows * src.cols;
+				int idx = i + j * src.rows + k * src.rows * src.cols;
 				if (mask(i, j, k).x) {
 
 					float v211 = src(i + 1, j, k).x;

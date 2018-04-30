@@ -25,11 +25,10 @@
 #include <AlloyVolume.h>
 #include <AlloyMath.h>
 namespace aly {
-	void SolveEdgeFilter(const ImageRGB& img,Image1f& out,int K);
-	void SolveEdgeFilter(const ImageRGBf& img,Image1f& out,int K);
-	void SolveEdgeFilter(const Image1f& img,Image1f& out,int K);
-
-	void SolveEdgeFilter(const Volume1f& img,Volume1f& out,int K);
+	void SolveEdgeFilter(const ImageRGB& img,Image1f& out,int K=1);
+	void SolveEdgeFilter(const ImageRGBf& img,Image1f& out,int K=1);
+	void SolveEdgeFilter(const Image1f& img,Image1f& out,int K=1);
+	void SolveEdgeFilter(const Volume1f& img,Volume1f& out,int K=1);
 
 	void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField, int iterations, bool normalize);
 	void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField,float mu, int iterations, bool normalize);

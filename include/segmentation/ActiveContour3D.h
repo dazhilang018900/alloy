@@ -52,6 +52,7 @@ protected:
 	std::vector<float> deltaLevelSet;
 	std::vector<int3> activeList;
 	std::mutex contourLock;
+	aly::HorizontalSliderPtr pressureSlider,curavtureSlider,advectionSlider;
 	bool getBitValue(int i);
 	void rescale(aly::Volume1f& pressureForce);
 	void pressureMotion(int i, int j, int k, size_t index);

@@ -30,6 +30,7 @@
 
 class ActiveContour3DEx: public aly::Application {
 protected:
+	aly::RegionPtr renderRegion;
 	aly::GLFrameBuffer depthFrameBuffer;
 	aly::DepthAndNormalShader depthAndNormalShader;
 	aly::MatcapShader matcapShader;

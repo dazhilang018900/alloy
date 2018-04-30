@@ -71,7 +71,8 @@ void ActiveManifold3D::plugLevelSet(int i, int j, int k, size_t index) {
 bool ActiveManifold3D::updateSurface() {
 	if (requestUpdateSurface) {
 		std::lock_guard<std::mutex> lockMe(contourLock);
-		isoSurface.solve(levelSet,activeList, mesh, MeshType::Triangle,false, 0.0f);
+		isoSurface.solve(levelSet,activeList, mesh, MeshType::Triangle,true, 0.0f);
+		mesh.updateVertexNormals(false,4);
 		requestUpdateSurface = false;
 		return true;
 	}
