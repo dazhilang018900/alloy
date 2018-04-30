@@ -22,10 +22,22 @@
 #ifndef INCLUDE_MAPPINGFIELD_H_
 #define INCLUDE_MAPPINGFIELD_H_
 #include <AlloyImage.h>
+#include <AlloyVolume.h>
 #include <AlloyMath.h>
 namespace aly {
+	void SolveEdgeFilter(const ImageRGB& img,Image1f& out,int K);
+	void SolveEdgeFilter(const ImageRGBf& img,Image1f& out,int K);
+	void SolveEdgeFilter(const Image1f& img,Image1f& out,int K);
+
+	void SolveEdgeFilter(const Volume1f& img,Volume1f& out,int K);
+
 	void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField, int iterations, bool normalize);
 	void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField,float mu, int iterations, bool normalize);
 	void SolveGradientVectorFlow(const Image1f& src, Image2f& vectorField,const Image1f& weights,float mu,int iterations,  bool normalize);
+
+	void SolveGradientVectorFlow(const Volume1f& src, Volume3f& vectorField, int iterations, bool normalize);
+	void SolveGradientVectorFlow(const Volume1f& src, Volume3f& vectorField,float mu, int iterations, bool normalize);
+	void SolveGradientVectorFlow(const Volume1f& src, Volume3f& vectorField,const Volume1f& weights,float mu,int iterations,  bool normalize);
+
 }
 #endif
