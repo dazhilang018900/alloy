@@ -158,7 +158,9 @@ bool ActiveContour3DEx::init(Composite& rootNode) {
 			AlloyApplicationContext()->theme.DARK);
 	timelineSlider->borderWidth = UnitPX(0.0f);
 	timelineSlider->onChangeEvent =
-			[this](const Number& timeValue, const Number& lowerValue, const Number& upperValue) {};
+			[this](const Number& timeValue, const Number& lowerValue, const Number& upperValue) {
+		camera.setDirty(true);
+	};
 	timelineSlider->setMajorTick(100);
 	timelineSlider->setMinorTick(10);
 	timelineSlider->setLowerValue(0);
