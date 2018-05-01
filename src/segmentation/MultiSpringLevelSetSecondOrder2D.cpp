@@ -21,7 +21,7 @@
 #include "segmentation/MultiSpringLevelSetSecondOrder2D.h"
 #include "AlloyApplication.h"
 namespace aly {
-	MultiSpringLevelSetSecondOrder2D::MultiSpringLevelSetSecondOrder2D(const std::shared_ptr<SpringlCache2D>& cache) :MultiSpringLevelSet2D(cache) {
+	MultiSpringLevelSetSecondOrder2D::MultiSpringLevelSetSecondOrder2D(const std::shared_ptr<ManifoldCache2D>& cache) :MultiSpringLevelSet2D(cache) {
 		setName("Second Order Multi Spring Level Set");
 	}
 	void MultiSpringLevelSetSecondOrder2D::computeForce(size_t idx, float2& f1, float2& f2, float2& f) {

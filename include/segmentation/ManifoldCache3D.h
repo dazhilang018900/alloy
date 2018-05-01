@@ -19,19 +19,19 @@
  * THE SOFTWARE.
  */
 
-#ifndef INCLUDE_SPRINGLCACHE2D_H_
-#define INCLUDE_SPRINGLCACHE2D_H_
-#include "Manifold2D.h"
+#ifndef INCLUDE_MANIFOLDCACHE3D_H_
+#define INCLUDE_MANIFOLDCACHE3D_H_
+#include "Manifold3D.h"
 #include <mutex>
 #include <map>
 #include <set>
 namespace aly {
-	class CacheElement {
+	class CacheElement3D {
 	protected:
 		bool loaded;
 		bool writeOnce;
 		std::string contourFile;
-		std::shared_ptr<Manifold2D> contour;
+		std::shared_ptr<Manifold3D> contour;
 
 		std::mutex accessLock;
 	public:
@@ -39,36 +39,36 @@ namespace aly {
 			std::lock_guard<std::mutex> lockMe(accessLock);
 			return loaded;
 		}
-		CacheElement():loaded(false), writeOnce(true){
+		CacheElement3D():loaded(false), writeOnce(true){
 		}
-		~CacheElement();
+		~CacheElement3D();
 		std::string getFile() const {
 			return contourFile;
 		}
 		void load();
 		void unload();
-		void set(const Manifold2D& springl);
-		std::shared_ptr<Manifold2D> getContour();
+		void set(const Manifold3D& springl);
+		std::shared_ptr<Manifold3D> getContour();
 	};
 	struct CacheCompare {
 		inline bool operator() (const std::pair<uint64_t, int>& lhs, const std::pair<uint64_t, int>& rhs) const {
 			return lhs.first < rhs.first;
 		}
 	};
-	class SpringlCache2D {
+	class ManifoldCache3D {
 	protected:
-		std::map<int, std::shared_ptr<CacheElement>> cache;
+		std::map<int, std::shared_ptr<CacheElement3D>> cache;
 		std::set<std::pair<uint64_t, int>, CacheCompare> loadedList;
 		std::mutex accessLock;
 		int maxElements;
 		uint64_t counter;
 	public:
-		SpringlCache2D(int elem=32):maxElements(elem),counter(0){
+		ManifoldCache3D(int elem=32):maxElements(elem),counter(0){
 
 		}
 
-		std::shared_ptr<CacheElement> set(int frame, const Manifold2D& springl);
-		std::shared_ptr<CacheElement> get(int frame);
+		std::shared_ptr<CacheElement3D> set(int frame, const Manifold3D& springl);
+		std::shared_ptr<CacheElement3D> get(int frame);
 		int unload();
 		void clear();
 	};

@@ -30,6 +30,8 @@
 
 class ActiveContour3DEx: public aly::Application {
 protected:
+	int lastTime;
+	aly::Mesh mesh;
 	aly::RegionPtr renderRegion;
 	aly::GLFrameBuffer depthFrameBuffer;
 	aly::DepthAndNormalShader depthAndNormalShader;

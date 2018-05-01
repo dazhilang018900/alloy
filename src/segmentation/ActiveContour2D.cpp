@@ -79,7 +79,7 @@ Image1f& ActiveManifold2D::getLevelSet() {
 const Image1f& ActiveManifold2D::getLevelSet() const {
 	return levelSet;
 }
-ActiveManifold2D::ActiveManifold2D(const std::shared_ptr<SpringlCache2D>& cache) :
+ActiveManifold2D::ActiveManifold2D(const std::shared_ptr<ManifoldCache2D>& cache) :
 		Simulation("Active Contour 2D"), cache(cache), preserveTopology(false), clampSpeed(
 				false), requestUpdateContour(false) {
 	advectionParam = Float(1.0f);
@@ -89,7 +89,7 @@ ActiveManifold2D::ActiveManifold2D(const std::shared_ptr<SpringlCache2D>& cache)
 }
 
 ActiveManifold2D::ActiveManifold2D(const std::string& name,
-		const std::shared_ptr<SpringlCache2D>& cache) :
+		const std::shared_ptr<ManifoldCache2D>& cache) :
 		Simulation(name), cache(cache), preserveTopology(false), clampSpeed(
 				false), requestUpdateContour(false) {
 	advectionParam = Float(1.0f);

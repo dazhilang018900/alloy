@@ -24,16 +24,16 @@
 #include <AlloyVector.h>
 #include <AlloyImage.h>
 #include <AlloyIsoContour.h>
+#include <segmentation/ManifoldCache2D.h>
 #include <vector>
 #include <list>
 #include <tuple>
 #include <mutex>
 #include "Simulation.h"
-#include "SpringlCache2D.h"
 namespace aly {
 class ActiveManifold2D: public Simulation {
 protected:
-	std::shared_ptr<SpringlCache2D> cache;
+	std::shared_ptr<ManifoldCache2D> cache;
 	IsoContour isoContour;
 	Manifold2D contour;
 	bool preserveTopology;
@@ -73,9 +73,9 @@ protected:
 			float timeStep);
 	virtual bool stepInternal() override;
 public:
-	ActiveManifold2D(const std::shared_ptr<SpringlCache2D>& cache = nullptr);
+	ActiveManifold2D(const std::shared_ptr<ManifoldCache2D>& cache = nullptr);
 	ActiveManifold2D(const std::string& name,
-			const std::shared_ptr<SpringlCache2D>& cache = nullptr);
+			const std::shared_ptr<ManifoldCache2D>& cache = nullptr);
 	float evolve();
 	Image1f& getPressureImage();
 	const Image1f& getPressureImage() const;

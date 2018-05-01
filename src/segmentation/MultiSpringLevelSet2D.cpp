@@ -30,7 +30,7 @@ namespace aly {
 	float MultiSpringLevelSet2D::EXTENT = 0.5f;
 	float MultiSpringLevelSet2D::SHARPNESS = 5.0f;
 	
-	MultiSpringLevelSet2D::MultiSpringLevelSet2D(const std::shared_ptr<SpringlCache2D>& cache) :MultiActiveContour2D("Multi Spring Level Set 2D", cache), resampleEnabled(true) {
+	MultiSpringLevelSet2D::MultiSpringLevelSet2D(const std::shared_ptr<ManifoldCache2D>& cache) :MultiActiveContour2D("Multi Spring Level Set 2D", cache), resampleEnabled(true) {
 	}
 	void MultiSpringLevelSet2D::setSpringls(const Vector2f& particles, const Vector2f& points) {
 		contour.particles = particles;

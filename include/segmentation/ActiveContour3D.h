@@ -29,11 +29,15 @@
 #include <tuple>
 #include <mutex>
 #include "Simulation.h"
+#include "Manifold3D.h"
+#include "ManifoldCache3D.h"
 namespace aly {
 class ActiveManifold3D: public Simulation {
 protected:
+	std::shared_ptr<ManifoldCache3D> cache;
 	IsoSurface isoSurface;
-	Mesh mesh;
+	Manifold3D contour;
+
 	bool clampSpeed;
 
 	Number advectionParam;
@@ -69,8 +73,8 @@ protected:
 	bool updateSurface();
 	virtual bool stepInternal() override;
 public:
-	ActiveManifold3D();
-	ActiveManifold3D(const std::string& name);
+	ActiveManifold3D(const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
+	ActiveManifold3D(const std::string& name,const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
 	float evolve();
 	Volume1f& getPressureImage();
 	const Volume1f& getPressureImage() const;
@@ -108,11 +112,14 @@ public:
 	void setAdvection(float c) {
 		advectionParam.setValue(c);
 	}
-	Mesh* getSurface();
+	Manifold3D* getSurface();
 	Volume1f& getLevelSet();
 	const Volume1f& getLevelSet() const;
 	virtual bool init() override;
 	virtual void cleanup() override;
+	std::shared_ptr<ManifoldCache3D> getCache() const {
+		return cache;
+	}
 	virtual void setup(const aly::ParameterPanePtr& pane) override;
 	void setInitialDistanceField(const Volume1f& img) {
 		initialLevelSet = img;

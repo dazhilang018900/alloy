@@ -21,9 +21,9 @@
 
 #ifndef INCLUDE_SPRINGLSSECONDORDER_H_
 #define INCLUDE_SPRINGLSSECONDORDER_H_
+#include <segmentation/ManifoldCache2D.h>
 #include "ActiveContour2D.h"
 #include "Simulation.h"
-#include "SpringlCache2D.h"
 #include "ContourShaders.h"
 #include "AlloyLocator.h"
 #include "SpringLevelSet2D.h"
@@ -36,7 +36,7 @@ namespace aly {
 
 	public:
 
-		SpringlsSecondOrder(const std::shared_ptr<SpringlCache2D>& cache = nullptr);
+		SpringlsSecondOrder(const std::shared_ptr<ManifoldCache2D>& cache = nullptr);
 
 	};
 }

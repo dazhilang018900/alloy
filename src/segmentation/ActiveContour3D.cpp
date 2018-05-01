@@ -61,25 +61,31 @@ void ActiveManifold3D::plugLevelSet(int i, int j, int k, size_t index) {
 	v110 = sgn * levelSet(i, j, k - 1);
 	v112 = sgn * levelSet(i, j, k + 1);
 	//if (v111 > 0 && v111 < 0.5f && v011 > 0 && v121 > 0 && v101 > 0 && v211 > 0 && v112 > 0 && v110 > 0) {
-	if (v111 <= 0 &&  v111 >= -0.5f &&
-			v011 < 0 && v121 < 0 &&
-			v101 < 0 && v211 < 0 &&
-			v112 < 0 && v110 < 0) {
+	if (v111 <= 0 && v111 >= -0.5f && v011 < 0 && v121 < 0 && v101 < 0
+			&& v211 < 0 && v112 < 0 && v110 < 0) {
 		levelSet(i, j, k) = sgn * MAX_DISTANCE;
 	}
+}
+void ActiveManifold3D::cleanup() {
+	if (cache.get() != nullptr)
+		cache->clear();
 }
 bool ActiveManifold3D::updateSurface() {
 	if (requestUpdateSurface) {
 		std::lock_guard<std::mutex> lockMe(contourLock);
-		isoSurface.solve(levelSet,activeList, mesh, MeshType::Triangle,true, 0.0f);
-		mesh.updateVertexNormals(false,4);
+		Mesh mesh;
+		isoSurface.solve(levelSet, activeList, mesh, MeshType::Triangle, true,0.0f);
+		mesh.updateVertexNormals(false, 4);
+		contour.vertexLocations = mesh.vertexLocations;
+		contour.vertexNormals = mesh.vertexNormals;
+		contour.triIndexes = mesh.triIndexes;
 		requestUpdateSurface = false;
 		return true;
 	}
 	return false;
 }
-Mesh* ActiveManifold3D::getSurface() {
-	return &mesh;
+Manifold3D* ActiveManifold3D::getSurface() {
+	return &contour;
 }
 Volume1f& ActiveManifold3D::getLevelSet() {
 	return levelSet;
@@ -87,8 +93,9 @@ Volume1f& ActiveManifold3D::getLevelSet() {
 const Volume1f& ActiveManifold3D::getLevelSet() const {
 	return levelSet;
 }
-ActiveManifold3D::ActiveManifold3D() :
-		Simulation("Active Contour 3D"), clampSpeed(false), requestUpdateSurface(
+ActiveManifold3D::ActiveManifold3D(
+		const std::shared_ptr<ManifoldCache3D>& cache) :
+		Simulation("Active Contour 3D"), cache(cache), clampSpeed(false), requestUpdateSurface(
 				false) {
 	advectionParam = Float(1.0f);
 	pressureParam = Float(0.0f);
@@ -96,8 +103,10 @@ ActiveManifold3D::ActiveManifold3D() :
 	curvatureParam = Float(0.3f);
 }
 
-ActiveManifold3D::ActiveManifold3D(const std::string& name) :
-		Simulation(name), clampSpeed(false), requestUpdateSurface(false) {
+ActiveManifold3D::ActiveManifold3D(const std::string& name,
+		const std::shared_ptr<ManifoldCache3D>& cache) :
+		Simulation(name), cache(cache), clampSpeed(false), requestUpdateSurface(
+				false) {
 	advectionParam = Float(1.0f);
 	pressureParam = Float(0.0f);
 	targetPressureParam = Float(0.5f);
@@ -124,13 +133,11 @@ void ActiveManifold3D::setup(const aly::ParameterPanePtr& pane) {
 			Float(4.0f));
 	pane->addCheckBox("Clamp Speed", clampSpeed);
 }
-void ActiveManifold3D::cleanup() {
-}
 bool ActiveManifold3D::init() {
 	int3 dims = initialLevelSet.dimensions();
 	if (dims.x == 0 || dims.y == 0 || dims.z == 0)
 		return false;
-	simulationDuration = std::max(std::max(dims.x, dims.y), dims.z)*1.75f;
+	simulationDuration = std::max(std::max(dims.x, dims.y), dims.z) * 1.75f;
 	simulationIteration = 0;
 	simulationTime = 0;
 	timeStep = 1.0f;
@@ -145,7 +152,12 @@ bool ActiveManifold3D::init() {
 	}
 	rebuildNarrowBand();
 	requestUpdateSurface = true;
-	updateSurface();
+	if (cache.get() != nullptr) {
+		updateSurface();
+		contour.setFile(
+				MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "surface" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
+		cache->set((int) simulationIteration, contour);
+	}
 	return true;
 }
 void ActiveManifold3D::pressureAndAdvectionMotion(int i, int j, int k,
@@ -421,7 +433,8 @@ int ActiveManifold3D::addElements() {
 			int3 pos2 = int3(pos.x + xOff, pos.y + yOff, pos.z + zOff);
 			float val1 = levelSet(pos.x, pos.y, pos.z);
 			float val2 = levelSet(pos2.x, pos2.y, pos2.z);
-			if (std::abs(val1) <= MAX_DISTANCE - 1.0f && val2 == INDICATOR + offset) {
+			if (std::abs(val1) <= MAX_DISTANCE - 1.0f
+					&& val2 == INDICATOR + offset) {
 				activeList.push_back(pos2);
 				val2 = swapLevelSet(pos2.x, pos2.y, pos2.z);
 				val2 = aly::sign(val2) * MAX_DISTANCE;
@@ -512,13 +525,13 @@ void ActiveManifold3D::pressureMotion(int i, int j, int k, size_t gid) {
 	float pressure = 0;
 	if (force > 0) {
 		float GradientSqrPos = DxNegMax * DxNegMax + DxPosMin * DxPosMin
-				+ DyNegMax * DyNegMax + DyPosMin * DyPosMin + DzNegMax * DzNegMax
-				+ DzPosMin * DzPosMin;
+				+ DyNegMax * DyNegMax + DyPosMin * DyPosMin
+				+ DzNegMax * DzNegMax + DzPosMin * DzPosMin;
 		pressure = -force * std::sqrt(GradientSqrPos);
 	} else if (force < 0) {
 		float GradientSqrNeg = DxPosMax * DxPosMax + DxNegMin * DxNegMin
-				+ DyPosMax * DyPosMax + DyNegMin * DyNegMin + DzPosMax * DzPosMax
-				+ DzNegMin * DzNegMin;
+				+ DyPosMax * DyPosMax + DyNegMin * DyNegMin
+				+ DzPosMax * DzPosMax + DzNegMin * DzNegMin;
 		pressure = -force * std::sqrt(GradientSqrNeg);
 	}
 	deltaLevelSet[gid] = kappa + pressure;
@@ -647,7 +660,12 @@ bool ActiveManifold3D::stepInternal() {
 	//WriteImageToRawFile(MakeDesktopFile(MakeString()<<"current_levelse"<<std::setw(4)<<std::setfill('0')<<mSimulationIteration<<".xml"),levelSet);
 	simulationTime += t;
 	simulationIteration++;
-	updateSurface();
+	if (cache.get() != nullptr) {
+		updateSurface();
+		contour.setFile(
+				MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "surface" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
+		cache->set((int) simulationIteration, contour);
+	}
 	return (simulationTime < simulationDuration);
 }
 void ActiveManifold3D::rescale(aly::Volume1f& pressureForce) {

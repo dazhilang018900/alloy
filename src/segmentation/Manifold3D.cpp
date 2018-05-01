@@ -25,12 +25,51 @@
 #include <cereal/archives/json.hpp>
 #include <cereal/archives/portable_binary.hpp>
 namespace aly {
+void ReadContourFromFile(const std::string& file, Manifold3D& params) {
+	std::string ext = GetFileExtension(file);
+	if (ext == "json") {
+		std::ifstream os(file);
+		cereal::JSONInputArchive archive(os);
+		archive(cereal::make_nvp("surface", params));
+	} else if (ext == "xml") {
+		std::ifstream os(file);
+		cereal::XMLInputArchive archive(os);
+		archive(cereal::make_nvp("surface", params));
+	} else {
+		std::ifstream os(file, std::ios::binary);
+		cereal::PortableBinaryInputArchive archive(os);
+		archive(cereal::make_nvp("surface", params));
+	}
+}
+
+void WriteContourToFile(const std::string& file, Manifold3D& params) {
+	params.setFile(file);
+	std::string ext = GetFileExtension(file);
+	if (ext == "json") {
+		std::ofstream os(file);
+		cereal::JSONOutputArchive archive(os);
+		archive(cereal::make_nvp("surface", params));
+	} else if (ext == "xml") {
+		std::ofstream os(file);
+		cereal::XMLOutputArchive archive(os);
+		archive(cereal::make_nvp("surface", params));
+	} else {
+		std::ofstream os(file, std::ios::binary);
+		cereal::PortableBinaryOutputArchive archive(os);
+		archive(cereal::make_nvp("surface", params));
+	}
+	params.setFile(file);
+}
+
 void Manifold3D::operator=(const Manifold3D &c) {
 	onScreen = c.onScreen;
 	context = c.context;
 	particles = c.particles;
 	correspondence = c.correspondence;
 	vertexLabels = c.vertexLabels;
+	vertexLocations=c.vertexLocations;
+	vertexNormals=c.vertexNormals;
+	triIndexes=c.triIndexes;
 	file = c.file;
 	particleLabels = c.particleLabels;
 }
@@ -42,6 +81,9 @@ Manifold3D::Manifold3D(const Manifold3D& c) :
 	particles = c.particles;
 	correspondence = c.correspondence;
 	vertexLabels = c.vertexLabels;
+	vertexLocations=c.vertexLocations;
+	vertexNormals=c.vertexNormals;
+	triIndexes=c.triIndexes;
 	file = c.file;
 	particleLabels = c.particleLabels;
 }
@@ -96,7 +138,6 @@ void Manifold3D::draw() {
 	context->end();
 }
 void Manifold3D::update() {
-	mesh.update(true);
 	context->begin(onScreen);
 	if (vao == 0)
 		glGenVertexArrays(1, &vao);
@@ -135,9 +176,6 @@ void Manifold3D::update() {
 	}
 	context->end();
 	dirty = false;
-}
-void Manifold3D::updateNormals() {
-	mesh.updateVertexNormals();
 }
 
 }

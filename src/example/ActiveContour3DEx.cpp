@@ -23,13 +23,15 @@
 #include <AlloyGradientVectorFlow.h>
 using namespace aly;
 ActiveContour3DEx::ActiveContour3DEx() :
-		Application(1024, 600, "Acitve Contour 3D"), matcapShader(
-				getFullPath("images/JG_Silver.png")), imageShader(
-				ImageShader::Filter::SMALL_BLUR), running(false) {
+Application(1024, 600, "Acitve Contour 3D"), matcapShader(
+		getFullPath("images/JG_Silver.png")), imageShader(
+		ImageShader::Filter::SMALL_BLUR), running(false),
+simulation(std::shared_ptr<ManifoldCache3D>(new ManifoldCache3D())) {
 }
 bool ActiveContour3DEx::init(Composite& rootNode) {
 	box3f renderBBox = box3f(float3(-0.5f, -0.5f, -0.5f),
 			float3(1.0f, 1.0f, 1.0f));
+	lastTime = -1;
 	int D = 128;
 	{
 		PhantomBubbles bubbles(D, D, D, 4.0f);
@@ -203,8 +205,24 @@ void ActiveContour3DEx::draw(AlloyContext* context) {
 		}
 	}
 	if (camera.isDirty()) {
-		Mesh* mesh = simulation.getSurface();
-		depthAndNormalShader.draw(*mesh, camera, depthFrameBuffer);
+
+		int currentTime = timelineSlider->getTimeValue().toInteger();
+		if (currentTime != lastTime) {
+			std::shared_ptr<CacheElement3D> elem = simulation.getCache()->get(
+					currentTime);
+			Manifold3D* contour;
+			if (elem.get() != nullptr) {
+				contour = elem->getContour().get();
+			} else {
+				contour = simulation.getSurface();
+			}
+			mesh.vertexLocations = contour->vertexLocations;
+			mesh.vertexNormals = contour->vertexNormals;
+			mesh.triIndexes = contour->triIndexes;
+			mesh.setDirty(true);
+			lastTime = currentTime;
+		}
+		depthAndNormalShader.draw(mesh, camera, depthFrameBuffer);
 	}
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);

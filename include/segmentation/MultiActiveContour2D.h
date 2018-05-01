@@ -23,17 +23,17 @@
 #define INCLUDE_MultiActiveContour2D_H_
 #include <AlloyVector.h>
 #include <AlloyImage.h>
+#include <segmentation/ManifoldCache2D.h>
 #include "segmentation/MultiIsoContour.h"
 #include <vector>
 #include <list>
 #include <tuple>
 #include <mutex>
 #include "segmentation/Simulation.h"
-#include "segmentation/SpringlCache2D.h"
 namespace aly {
 	class MultiActiveContour2D: public Simulation {
 	protected:
-		std::shared_ptr<SpringlCache2D> cache;
+		std::shared_ptr<ManifoldCache2D> cache;
 		MultiIsoContour isoContour;
 		Manifold2D contour;
 		std::vector<int> labelList;
@@ -85,8 +85,8 @@ namespace aly {
 		float getSwapLevelSetValue(int i, int j, int l) const;
 		std::map<int, aly::Color> lineColors;
 	public:
-		MultiActiveContour2D(const std::shared_ptr<SpringlCache2D>& cache=nullptr);
-		MultiActiveContour2D(const std::string& name,const std::shared_ptr<SpringlCache2D>& cache = nullptr);
+		MultiActiveContour2D(const std::shared_ptr<ManifoldCache2D>& cache=nullptr);
+		MultiActiveContour2D(const std::string& name,const std::shared_ptr<ManifoldCache2D>& cache = nullptr);
 		void setCurvature(float c) {
 			curvatureParam.setValue(c);
 		}

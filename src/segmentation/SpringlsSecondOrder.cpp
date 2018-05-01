@@ -23,7 +23,7 @@
 namespace aly {
 
 	
-	SpringlsSecondOrder::SpringlsSecondOrder(const std::shared_ptr<SpringlCache2D>& cache) :SpringLevelSet2D(cache){
+	SpringlsSecondOrder::SpringlsSecondOrder(const std::shared_ptr<ManifoldCache2D>& cache) :SpringLevelSet2D(cache){
 		setName("Second Order Spring Level Set");
 	}
 	

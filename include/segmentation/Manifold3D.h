@@ -43,7 +43,9 @@ namespace aly {
 		bool dirty;
 		int vertexCount;
 	public:
-		aly::Mesh mesh;
+		Vector3f vertexLocations;
+		Vector3f vertexNormals;
+		Vector3ui triIndexes;
 		Vector3f particles;
 		Vector1i particleLabels;
 		Vector1i vertexLabels;
@@ -61,16 +63,15 @@ namespace aly {
 		}
 		~Manifold3D();
 		Manifold3D(bool onScreen=true,const std::shared_ptr<AlloyContext>& context=AlloyDefaultContext());
-		void updateNormals();
 		void setFile(const std::string& file) {
 			this->file = file;
 		}
 		template<class Archive> void save(Archive & archive) const {
-			archive(CEREAL_NVP(file), CEREAL_NVP(particles),CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels),CEREAL_NVP(correspondence));
+			archive(CEREAL_NVP(file),CEREAL_NVP(vertexLocations),CEREAL_NVP(vertexNormals),CEREAL_NVP(triIndexes), CEREAL_NVP(particles),CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels),CEREAL_NVP(correspondence));
 		}
 		template<class Archive> void load(Archive & archive) 
 		{
-			archive(CEREAL_NVP(file), CEREAL_NVP(particles),CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels), CEREAL_NVP(correspondence));
+			archive(CEREAL_NVP(file),CEREAL_NVP(vertexLocations),CEREAL_NVP(vertexNormals),CEREAL_NVP(triIndexes), CEREAL_NVP(particles),CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels), CEREAL_NVP(correspondence));
 		}
 		void operator=(const Manifold3D &c);
 		Manifold3D(const Manifold3D& c);

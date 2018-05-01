@@ -98,7 +98,7 @@ namespace aly {
 		float2x2 S(float2(sx,0.0f),float2(0.0f,sy));
 		return U*S*Vt;
 	}
-	SpringLevelSet2D::SpringLevelSet2D(const std::shared_ptr<SpringlCache2D>& cache) :ActiveManifold2D("Spring Level Set 2D", cache), resampleEnabled(true){
+	SpringLevelSet2D::SpringLevelSet2D(const std::shared_ptr<ManifoldCache2D>& cache) :ActiveManifold2D("Spring Level Set 2D", cache), resampleEnabled(true){
 	}
 	void SpringLevelSet2D::setSpringls(const Vector2f& particles, const Vector2f& points) {
 		contour.particles = particles;

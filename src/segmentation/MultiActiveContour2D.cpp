@@ -96,7 +96,7 @@ namespace aly {
 	Manifold2D* MultiActiveContour2D::getContour() {
 		return &contour;
 	}
-	MultiActiveContour2D::MultiActiveContour2D(const std::shared_ptr<SpringlCache2D>& cache) :Simulation("Active Contour 2D"),
+	MultiActiveContour2D::MultiActiveContour2D(const std::shared_ptr<ManifoldCache2D>& cache) :Simulation("Active Contour 2D"),
 		cache(cache), preserveTopology(false), clampSpeed(false), requestUpdateContour(
 			false) {
 		advectionParam = Float(1.0f);
@@ -104,7 +104,7 @@ namespace aly {
 		targetPressureParam = Float(0.5f);
 		curvatureParam = Float(0.3f);
 	}
-	MultiActiveContour2D::MultiActiveContour2D(const std::string& name, const std::shared_ptr<SpringlCache2D>& cache) : Simulation(name),
+	MultiActiveContour2D::MultiActiveContour2D(const std::string& name, const std::shared_ptr<ManifoldCache2D>& cache) : Simulation(name),
 		cache(cache), preserveTopology(false), clampSpeed(false), requestUpdateContour(
 			false) {
 		advectionParam = Float(1.0f);

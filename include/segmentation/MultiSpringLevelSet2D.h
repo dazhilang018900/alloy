@@ -21,9 +21,9 @@
 
 #ifndef INCLUDE_MULTISPRINGLEVELSET2D_H_
 #define INCLUDE_MULTISPRINGLEVELSET2D_H_
+#include <segmentation/ManifoldCache2D.h>
 #include "MultiActiveContour2D.h"
 #include "Simulation.h"
-#include "SpringlCache2D.h"
 #include "ContourShaders.h"
 #include "AlloyLocator.h"
 namespace aly {
@@ -68,7 +68,7 @@ namespace aly {
 
 	public:
 
-		MultiSpringLevelSet2D(const std::shared_ptr<SpringlCache2D>& cache = nullptr);
+		MultiSpringLevelSet2D(const std::shared_ptr<ManifoldCache2D>& cache = nullptr);
 		void setSpringls(const Vector2f& particles, const Vector2f& points);
 		virtual bool init() override;
 		virtual void cleanup() override;
