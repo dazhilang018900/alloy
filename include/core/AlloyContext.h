@@ -97,8 +97,10 @@ namespace aly {
 		const std::string file;
 		ImageGlyph(const std::string& file, AlloyContext* context, bool mipmap = false);
 		ImageGlyph(const ImageRGBA& rgba, AlloyContext* context, bool mipmap = false);
+		ImageGlyph(const ImageRGB& rgb, AlloyContext* context, bool mipmap = false);
 		void draw(const box2px& bounds, const Color& fgColor, const Color& bgColor, AlloyContext* context) override;
 		void set(const ImageRGBA& rgba, AlloyContext* context);
+		void set(const ImageRGB& rgb, AlloyContext* context);
 		void set(const ImageRGBAf& rgba, AlloyContext* context);
 		~ImageGlyph();
 	};

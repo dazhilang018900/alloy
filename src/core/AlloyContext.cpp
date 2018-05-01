@@ -158,6 +158,11 @@ ImageGlyph::ImageGlyph(const std::string& file, AlloyContext* context,
 void ImageGlyph::set(const ImageRGBA& rgba, AlloyContext* context) {
 	nvgUpdateImage(context->nvgContext, handle, rgba.ptr());
 }
+void ImageGlyph::set(const ImageRGB& rgb, AlloyContext* context) {
+	ImageRGBA rgba;
+	ConvertImage(rgb,rgba);//Slow!!
+	nvgUpdateImage(context->nvgContext, handle, rgba.ptr());
+}
 void ImageGlyph::set(const ImageRGBAf& rgba, AlloyContext* context) {
 	ImageRGBA tmp;
 	ConvertImage(rgba, tmp);
@@ -171,6 +176,16 @@ ImageGlyph::~ImageGlyph() {
 ImageGlyph::ImageGlyph(const ImageRGBA& rgba, AlloyContext* context,
 		bool mipmap) :
 		Glyph("image_rgba", GlyphType::Image, 0, 0) {
+	handle = nvgCreateImageRGBA(context->nvgContext, rgba.width, rgba.height,
+			(mipmap) ? NVG_IMAGE_GENERATE_MIPMAPS : 0, rgba.ptr());
+	width = (pixel) rgba.width;
+	height = (pixel) rgba.height;
+}
+ImageGlyph::ImageGlyph(const ImageRGB& rgb, AlloyContext* context,
+		bool mipmap) :
+		Glyph("image_rgba", GlyphType::Image, 0, 0) {
+	ImageRGBA rgba;
+	ConvertImage(rgb,rgba);
 	handle = nvgCreateImageRGBA(context->nvgContext, rgba.width, rgba.height,
 			(mipmap) ? NVG_IMAGE_GENERATE_MIPMAPS : 0, rgba.ptr());
 	width = (pixel) rgba.width;
