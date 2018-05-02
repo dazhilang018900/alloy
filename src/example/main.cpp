@@ -73,6 +73,10 @@
 #include "../../include/example/ProceduralSkyEx.h"
 #include "../../include/example/ShadowCastEx.h"
 #include "../../include/example/ActiveContour2DEx.h"
+#include "../../include/example/FluidSimulationEx.h"
+#include "../../include/example/MultiLevelSetEx.h"
+#include "../../include/example/SuperPixelEx.h"
+#include "../../include/example/MagicPixelEx.h"
 #include "AlloyOptimization.h"
 #include "AlloyGaussianMixture.h"
 #include <cstring>
@@ -155,7 +159,7 @@ bool SANITY_CHECK() {
 
 int main(int argc, char *argv[]) {
 	//change me when adding new example!
-	const int N=53;
+	const int N=57;
 	std::array<ExamplePtr,N> apps = {
 		MAKE_EXAMPLE(UnitsEx), MAKE_EXAMPLE(CompositeEx),MAKE_EXAMPLE(EventsEx), 
 		MAKE_EXAMPLE(DragEx), MAKE_EXAMPLE(TweenEx),MAKE_EXAMPLE(ImageEx), 
@@ -174,7 +178,8 @@ int main(int argc, char *argv[]) {
 		MAKE_EXAMPLE(MeshTextureMapEx),MAKE_EXAMPLE(MeshReconstructionEx),MAKE_EXAMPLE(SoftBodyEx),
 		MAKE_EXAMPLE(AnisotropicFilterEx),MAKE_EXAMPLE(LevelSetGridEx),MAKE_EXAMPLE(MaxFlowEx),
 		MAKE_EXAMPLE(GrabCutEx),MAKE_EXAMPLE(ActiveContour3DEx),MAKE_EXAMPLE(ProceduralSkyEx),
-		MAKE_EXAMPLE(ShadowCastEx),MAKE_EXAMPLE(ActiveContour2DEx)
+		MAKE_EXAMPLE(ShadowCastEx),MAKE_EXAMPLE(ActiveContour2DEx),MAKE_EXAMPLE(FluidSimulationEx),
+		MAKE_EXAMPLE(SuperPixelEx),MAKE_EXAMPLE(MagicPixelEx),MAKE_EXAMPLE(MultiLevelSetEx)
 	};
 	std::sort(apps.begin(),apps.end(),[=](const ExamplePtr& a,const ExamplePtr& b){
 		return std::lexicographical_compare(a->name.begin(), a->name.end(), b->name.begin(), b->name.end());

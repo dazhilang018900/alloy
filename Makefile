@@ -5,6 +5,7 @@ SRC += $(call rwildcard, ./src/physics/, *.cpp)
 SRC += $(call rwildcard, ./src/poisson/, *.cpp)
 SRC += $(call rwildcard, ./src/segmentation/, *.cpp)
 SRC += $(call rwildcard, ./src/grid/, *.cpp)
+SRC += $(call rwildcard, ./src/fluid/, *.cpp)
 SRC += $(call rwildcard, ./src/vision/, *.cpp)
 # SRC += $(call rwildcard, ./src/tiger/, *.cpp)
 CXX = g++
