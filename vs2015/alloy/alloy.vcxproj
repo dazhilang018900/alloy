@@ -182,7 +182,7 @@
     <ClCompile Include="..\..\src\segmentation\Phantom.cpp" />
     <ClCompile Include="..\..\src\segmentation\Simulation.cpp" />
     <ClCompile Include="..\..\src\segmentation\SLIC.cpp" />
-    <ClCompile Include="..\..\src\segmentation\SpringlCache2D.cpp" />
+    <ClCompile Include="..\..\src\segmentation\ManifoldCache2D.cpp" />
     <ClCompile Include="..\..\src\segmentation\SpringLevelSet2D.cpp" />
     <ClCompile Include="..\..\src\segmentation\SpringlsSecondOrder.cpp" />
     <ClCompile Include="..\..\src\vision\Sift.cpp" />
@@ -464,7 +464,7 @@
     <ClInclude Include="..\..\include\segmentation\Phantom.h" />
     <ClInclude Include="..\..\include\segmentation\Simulation.h" />
     <ClInclude Include="..\..\include\segmentation\SLIC.h" />
-    <ClInclude Include="..\..\include\segmentation\SpringlCache2D.h" />
+    <ClInclude Include="..\..\include\segmentation\ManifoldCache2D.h" />
     <ClInclude Include="..\..\include\segmentation\SpringLevelSet2D.h" />
     <ClInclude Include="..\..\include\segmentation\SpringlsSecondOrder.h" />
     <ClInclude Include="..\..\include\vision\Sift.h" />

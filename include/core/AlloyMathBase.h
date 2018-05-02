@@ -468,6 +468,15 @@ template<class T, int M> struct matrix<T, M, 3> {
 		z.z = a22;
 
 	}
+	matrix(T a00, T a01, T a02, T a10, T a11, T a12) {
+
+		x.x = a00;
+		x.y = a10;
+		y.x = a01;
+		y.y = a11;
+		z.x = a02;
+		z.y = a12;
+	}
 	matrix(C x, C y, C z) :
 			x(x), y(y), z(z) {
 	}
@@ -548,6 +557,33 @@ template<class T, int M> struct matrix<T, M, 4> {
 		w.y = a13;
 		w.z = a23;
 		w.w = a33;
+	}
+	matrix(T a00, T a01, T a02, T a03, T a10, T a11, T a12, T a13, T a20, T a21,
+			T a22, T a23) {
+
+		x.x = a00;
+		x.y = a10;
+		x.z = a20;
+		y.x = a01;
+		y.y = a11;
+		y.z = a21;
+		z.x = a02;
+		z.y = a12;
+		z.z = a22;
+		w.x = a03;
+		w.y = a13;
+		w.z = a23;
+	}
+	matrix(T a00, T a01, T a02, T a03, T a10, T a11, T a12, T a13) {
+
+		x.x = a00;
+		x.y = a10;
+		y.x = a01;
+		y.y = a11;
+		z.x = a02;
+		z.y = a12;
+		w.x = a03;
+		w.y = a13;
 	}
 	explicit matrix(T s) :
 			x(s), y(s), z(s), w(s) {
