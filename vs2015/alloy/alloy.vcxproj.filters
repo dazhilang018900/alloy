@@ -528,7 +528,7 @@
     <ClCompile Include="..\..\src\segmentation\SLIC.cpp">
       <Filter>src\segmentation</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\SpringlCache2D.cpp">
+    <ClCompile Include="..\..\src\segmentation\ManifoldCache2D.cpp">
       <Filter>src\segmentation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\segmentation\SpringLevelSet2D.cpp">
@@ -1253,7 +1253,7 @@
     <ClInclude Include="..\..\include\segmentation\SLIC.h">
       <Filter>include\segmentation</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\SpringlCache2D.h">
+    <ClInclude Include="..\..\include\segmentation\ManifoldCache2D.h">
       <Filter>include\segmentation</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\segmentation\SpringLevelSet2D.h">
