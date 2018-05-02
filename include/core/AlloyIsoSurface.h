@@ -26,7 +26,7 @@ struct EdgeInfo {
 	float3 point;
 	bool winding = false;
 };
-struct EdgeSplit {
+struct EdgeSplit3D {
 private:
 	int row, col, slice;
 	int64_t index;
@@ -44,7 +44,7 @@ public:
 	/** The vertex id for the interpolated point. */
 	size_t vertexId;
 
-	EdgeSplit() :
+	EdgeSplit3D() :
 			index(0), row(0), col(0), slice(0), vertexId(0), point(), voxelIndex1(
 					0), voxelIndex2(0), color() {
 
@@ -57,14 +57,14 @@ public:
 	 * @param pt2
 	 *            the upper grid point
 	 */
-	EdgeSplit(const int3& pt1, const int3& pt2, const int& r, const int& c,
+	EdgeSplit3D(const int3& pt1, const int3& pt2, const int& r, const int& c,
 			const int& s) :
 			voxelIndex1(pt1), voxelIndex2(pt2), index(r * c * s), row(r), col(
 					c), slice(s), vertexId(0), point(), color() {
 
 	}
 
-	EdgeSplit(const EdgeSplit& edgeSplit) :
+	EdgeSplit3D(const EdgeSplit3D& edgeSplit) :
 			voxelIndex1(edgeSplit.voxelIndex1), voxelIndex2(
 					edgeSplit.voxelIndex2), index(edgeSplit.index), row(
 					edgeSplit.row), col(edgeSplit.col), slice(edgeSplit.slice), point(
@@ -73,7 +73,7 @@ public:
 
 	}
 
-	EdgeSplit& operator=(const EdgeSplit& edgeSplit) {
+	EdgeSplit3D& operator=(const EdgeSplit3D& edgeSplit) {
 		if (this != &edgeSplit) {
 			voxelIndex1 = edgeSplit.voxelIndex1;
 			voxelIndex2 = edgeSplit.voxelIndex2;
@@ -94,8 +94,8 @@ public:
 	 *            the split
 	 *
 	 * @return true, if successful ** */
-	//bool equals(const EdgeSplit& split)
-	bool operator==(const EdgeSplit& split) {
+	//bool equals(const EdgeSplit3D& split)
+	bool operator==(const EdgeSplit3D& split) {
 		return ((voxelIndex1 == split.voxelIndex1
 				&& voxelIndex2 == split.voxelIndex2)
 				|| (voxelIndex1 == split.voxelIndex2
@@ -183,16 +183,16 @@ private:
 	float interpolate(const float *data, float x, float y, float z);
 	float getImageValue(const float* image, int i, int j, int k);
 	void triangulateUsingMarchingCubes(const float* pVolMat,
-			std::unordered_map<uint64_t, EdgeSplit>& splits,
+			std::unordered_map<uint64_t, EdgeSplit3D>& splits,
 			std::vector<IsoTriangle>& triangles, int x, int y, int z,
 			size_t& vertexCount);
 	void triangulateUsingMarchingCubes(const float* pVolMat,
-			std::unordered_map<int4, EdgeSplit>& splits,
+			std::unordered_map<int4, EdgeSplit3D>& splits,
 			std::vector<IsoTriangle>& triangles,
 			int x, int y, int z,
 			int ox, int oy, int oz, size_t& vertexCount);
 	void triangulateUsingMarchingCubes(const float* pVolMat,
-			std::vector<EdgeSplit>& splits,
+			std::vector<EdgeSplit3D>& splits,
 			std::vector<IsoTriangle>& triangles,
 			int x, int y, int z, size_t& vertexCount);
 

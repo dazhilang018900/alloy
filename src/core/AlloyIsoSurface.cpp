@@ -547,7 +547,7 @@ void IsoSurface::solveTri(const float* vol, const int& rows, const int& cols,
 	std::vector<uint3> &indexes = mesh.triIndexes.data;
 	std::vector<float3> &points = mesh.vertexLocations.data;
 	std::vector<float3> &normals = mesh.vertexNormals.data;
-	std::unordered_map<uint64_t, EdgeSplit> splits;
+	std::unordered_map<uint64_t, EdgeSplit3D> splits;
 	std::vector<IsoTriangle> triangles;
 	triangles.reserve(indexList.size() * 2);
 	size_t vertexCount = 0;
@@ -607,7 +607,7 @@ void IsoSurface::solveTri(const EndlessGridFloat& grid, Mesh& mesh,
 	this->isoLevel = isoLevel;
 	std::vector<aly::float3> &points = mesh.vertexLocations.data;
 	std::vector<uint3> &indexes = mesh.triIndexes.data;
-	std::unordered_map<int4, EdgeSplit> splits;
+	std::unordered_map<int4, EdgeSplit3D> splits;
 	std::vector<IsoTriangle> triangles;
 	size_t vertexCount = 0;
 	triangleCount = 0;
@@ -1065,7 +1065,7 @@ void IsoSurface::findActiveVoxels(const float* vol,
 
 }
 void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
-		std::unordered_map<uint64_t, EdgeSplit>& splits,
+		std::unordered_map<uint64_t, EdgeSplit3D>& splits,
 		std::vector<IsoTriangle>& triangles, int x, int y, int z,
 		size_t& vertexCount) {
 	int3 afCubeValue[8];
@@ -1083,24 +1083,24 @@ void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 	int iEdgeFlags = cubeEdgeFlagsCC626[iFlagIndex];
 	if (iEdgeFlags == 0)
 		return;
-	EdgeSplit split;
-	EdgeSplit asEdgeVertex[12];
+	EdgeSplit3D split;
+	EdgeSplit3D asEdgeVertex[12];
 	for (int iEdge = 0; iEdge < 12; ++iEdge) {
 		if ((iEdgeFlags & (1 << iEdge)) != 0) {
 			int3 v = afCubeValue[edgeConnection[iEdge][0]];
 			if (getValue(vol, v.x, v.y, v.z) < isoLevel) {
-				split = EdgeSplit(afCubeValue[edgeConnection[iEdge][0]],
+				split = EdgeSplit3D(afCubeValue[edgeConnection[iEdge][0]],
 						afCubeValue[edgeConnection[iEdge][1]], rows, cols,
 						slices);
 			} else {
-				split = EdgeSplit(afCubeValue[edgeConnection[iEdge][1]],
+				split = EdgeSplit3D(afCubeValue[edgeConnection[iEdge][1]],
 						afCubeValue[edgeConnection[iEdge][0]], rows, cols,
 						slices);
 			}
 
 			uint64_t lHashValue = split.hashValue();
 
-			std::unordered_map<uint64_t, EdgeSplit>::const_iterator itr;
+			std::unordered_map<uint64_t, EdgeSplit3D>::const_iterator itr;
 			itr = splits.find(lHashValue);
 
 			if (itr == splits.end()) {
@@ -1119,7 +1119,7 @@ void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 						+ (vertexOffset[edgeConnection[iEdge][0]][2]
 								+ fOffset * edgeDirection[iEdge][2]));
 				split.point = pt3d;
-				splits.insert(std::pair<uint64_t, EdgeSplit>(lHashValue, split));
+				splits.insert(std::pair<uint64_t, EdgeSplit3D>(lHashValue, split));
 			} else {
 				split = itr->second;
 			}
@@ -1145,7 +1145,7 @@ void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 }
 
 void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
-		std::unordered_map<int4, EdgeSplit>& splits, std::vector<IsoTriangle>& triangles,
+		std::unordered_map<int4, EdgeSplit3D>& splits, std::vector<IsoTriangle>& triangles,
 		int x, int y, int z, int ox, int oy, int oz, size_t& vertexCount) {
 	int3 afCubeValue[8];
 	int3 off = int3(ox, oy, oz);
@@ -1163,23 +1163,23 @@ void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 	int iEdgeFlags = cubeEdgeFlagsCC626[iFlagIndex];
 	if (iEdgeFlags == 0)
 		return;
-	EdgeSplit split;
-	EdgeSplit asEdgeVertex[12];
+	EdgeSplit3D split;
+	EdgeSplit3D asEdgeVertex[12];
 	for (int iEdge = 0; iEdge < 12; ++iEdge) {
 		if ((iEdgeFlags & (1 << iEdge)) != 0) {
 			int3 v = afCubeValue[edgeConnection[iEdge][0]];
 			if (getValue(vol, v.x, v.y, v.z) < isoLevel) {
-				split = EdgeSplit(afCubeValue[edgeConnection[iEdge][0]],
+				split = EdgeSplit3D(afCubeValue[edgeConnection[iEdge][0]],
 						afCubeValue[edgeConnection[iEdge][1]], rows, cols,
 						slices);
 			} else {
-				split = EdgeSplit(afCubeValue[edgeConnection[iEdge][1]],
+				split = EdgeSplit3D(afCubeValue[edgeConnection[iEdge][1]],
 						afCubeValue[edgeConnection[iEdge][0]], rows, cols,
 						slices);
 			}
 
 			int4 lHashValue = split.bigHashValue();
-			std::unordered_map<int4, EdgeSplit>::const_iterator itr;
+			std::unordered_map<int4, EdgeSplit3D>::const_iterator itr;
 			itr = splits.find(lHashValue);
 			if (itr == splits.end()) {
 				split.vertexId = vertexCount++;
@@ -1197,7 +1197,7 @@ void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 						+ (vertexOffset[edgeConnection[iEdge][0]][2]
 								+ fOffset * edgeDirection[iEdge][2]));
 				split.point = pt3d;
-				splits.insert(std::pair<int4, EdgeSplit>(lHashValue, split));
+				splits.insert(std::pair<int4, EdgeSplit3D>(lHashValue, split));
 			} else {
 				split = itr->second;
 			}
@@ -1222,7 +1222,7 @@ void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 }
 
 void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
-		std::vector<EdgeSplit>& splits, std::vector<IsoTriangle>& triangles,
+		std::vector<EdgeSplit3D>& splits, std::vector<IsoTriangle>& triangles,
 		int x, int y, int z, size_t& vertexCount) {
 	int3 afCubeValue[8];
 	int iFlagIndex = 0;
@@ -1239,17 +1239,17 @@ void IsoSurface::triangulateUsingMarchingCubes(const float* vol,
 	int iEdgeFlags = cubeEdgeFlagsCC626[iFlagIndex];
 	if (iEdgeFlags == 0)
 		return;
-	EdgeSplit split;
-	EdgeSplit asEdgeVertex[12];
+	EdgeSplit3D split;
+	EdgeSplit3D asEdgeVertex[12];
 	for (int iEdge = 0; iEdge < 12; ++iEdge) {
 		if ((iEdgeFlags & (1 << iEdge)) != 0) {
 			int3 v = afCubeValue[edgeConnection[iEdge][0]];
 			if (getValue(vol, v.x, v.y, v.z) < isoLevel) {
-				split = EdgeSplit(afCubeValue[edgeConnection[iEdge][0]],
+				split = EdgeSplit3D(afCubeValue[edgeConnection[iEdge][0]],
 						afCubeValue[edgeConnection[iEdge][1]], rows, cols,
 						slices);
 			} else {
-				split = EdgeSplit(afCubeValue[edgeConnection[iEdge][1]],
+				split = EdgeSplit3D(afCubeValue[edgeConnection[iEdge][1]],
 						afCubeValue[edgeConnection[iEdge][0]], rows, cols,
 						slices);
 			}

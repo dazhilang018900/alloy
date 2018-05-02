@@ -25,7 +25,7 @@
 #include <algorithm>
 #include <set>
 namespace aly {
-	bool MultiIsoContour::orient(const Image1f& img, const EdgeSplit& split1, const EdgeSplit& split2, Edge& edge) {
+	bool MultiIsoContour::orient(const Image1f& img, const EdgeSplit2D& split1, const EdgeSplit2D& split2, Edge& edge) {
 		float2 pt1 = split1.pt2d;
 		float2 pt2 = split2.pt2d;
 		float1x2 norm = img.gradient(0.5f * (pt1.x + pt2.x), 0.5f * (pt2.y + pt2.y));
@@ -535,7 +535,7 @@ namespace aly {
 		edges.push_back(edge);
 	}
 	EdgeSplitPtr MultiIsoContour::createSplit(std::map<uint64_t, EdgeSplitPtr>& splits, int p1x, int p1y, int p2x, int p2y, int l, int& vertCount) {
-		EdgeSplitPtr split = EdgeSplitPtr(new EdgeSplit(uint2(p1x, p1y), uint2(p2x, p2y)));
+		EdgeSplitPtr split = EdgeSplitPtr(new EdgeSplit2D(uint2(p1x, p1y), uint2(p2x, p2y)));
 		uint64_t hash = split->hashValue(rows, cols);
 		if (splits.find(hash) != splits.end()) {
 			EdgeSplitPtr foundSplit = splits[hash];

@@ -127,7 +127,7 @@ bool ActiveManifold2D::init() {
 	int2 dims = initialLevelSet.dimensions();
 	if (dims.x == 0 || dims.y == 0)
 		return false;
-	simulationDuration = std::max(dims.x, dims.y) * 0.5f;
+	simulationDuration = std::max(dims.x, dims.y);
 	simulationIteration = 0;
 	simulationTime = 0;
 	timeStep = 1.0f;

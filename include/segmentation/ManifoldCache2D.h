@@ -50,7 +50,7 @@ namespace aly {
 		void set(const Manifold2D& springl);
 		std::shared_ptr<Manifold2D> getContour();
 	};
-	struct CacheCompare {
+	struct CacheCompare2D {
 		inline bool operator() (const std::pair<uint64_t, int>& lhs, const std::pair<uint64_t, int>& rhs) const {
 			return lhs.first < rhs.first;
 		}
@@ -58,7 +58,7 @@ namespace aly {
 	class ManifoldCache2D {
 	protected:
 		std::map<int, std::shared_ptr<CacheElement2D>> cache;
-		std::set<std::pair<uint64_t, int>, CacheCompare> loadedList;
+		std::set<std::pair<uint64_t, int>, CacheCompare2D> loadedList;
 		std::mutex accessLock;
 		int maxElements;
 		uint64_t counter;

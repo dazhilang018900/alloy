@@ -1,12 +1,4 @@
 /*
- * ActiveContour2DEx.cpp
- *
- *  Created on: May 1, 2018
- *      Author: blake
- */
-
-
-/*
  * Copyright(C) 2016, Blake C. Lucas, Ph.D. (img.science@gmail.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,9 +18,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include <AlloyGradientVectorFlow.h>
-#include "Alloy.h"
-#include "ActiveContour2DEx.h"
+
+#include "../../include/example/ActiveContour2DEx.h"
+#include "AlloyGradientVectorFlow.h"
 #include "AlloyDistanceField.h"
 #include "AlloyIsoContour.h"
 #include "segmentation/SpringLevelSet2D.h"
@@ -36,7 +28,7 @@
 using namespace aly;
 
 ActiveContour2DEx::ActiveContour2DEx(int example) :
-	Application(1300, 1000, "Level Set Segmentation Toy", false), currentIso(0.0f),example(example) {
+	Application(1300, 1000, "Active Contour 2D", false), currentIso(0.0f),example(example) {
 }
 void ActiveContour2DEx::createTextLevelSet(aly::Image1f& distField, aly::Image1f& gray, int w, int h, const std::string& text, float textSize, float maxDistance) {
 	GLFrameBuffer renderBuffer;
@@ -358,7 +350,7 @@ bool ActiveContour2DEx::init(Composite& rootNode) {
 		nvgStrokeColor(nvg, lineColor);
 		nvgStrokeWidth(nvg, lineWidth.toFloat());
 		for (int n = 0;n < (int)contour->indexes.size();n++) {
-			std::list<uint32_t> curve = contour->indexes[n];
+			std::vector<uint32_t> curve = contour->indexes[n];
 			nvgPathWinding(nvg, NVG_CW);
 			nvgBeginPath(nvg);
 			bool firstTime = true;

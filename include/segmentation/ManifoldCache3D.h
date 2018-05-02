@@ -50,7 +50,7 @@ namespace aly {
 		void set(const Manifold3D& springl);
 		std::shared_ptr<Manifold3D> getContour();
 	};
-	struct CacheCompare {
+	struct CacheCompare3D {
 		inline bool operator() (const std::pair<uint64_t, int>& lhs, const std::pair<uint64_t, int>& rhs) const {
 			return lhs.first < rhs.first;
 		}
@@ -58,7 +58,7 @@ namespace aly {
 	class ManifoldCache3D {
 	protected:
 		std::map<int, std::shared_ptr<CacheElement3D>> cache;
-		std::set<std::pair<uint64_t, int>, CacheCompare> loadedList;
+		std::set<std::pair<uint64_t, int>, CacheCompare3D> loadedList;
 		std::mutex accessLock;
 		int maxElements;
 		uint64_t counter;

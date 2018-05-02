@@ -87,7 +87,7 @@ protected:
 	EdgeSplitPtr createSplit(std::map<uint64_t, EdgeSplitPtr>& splits, int p1x,int p1y, int p2x, int p2y, int l, int& vertCount);
 	void addEdge(std::map<uint64_t, EdgeSplitPtr>& splits,std::list<EdgePtr>& edges, int p1x, int p1y, int p2x, int p2y,int p3x, int p3y, int p4x, int p4y,int l, int& vertCount);
 	void processSquare(int x, int y,int l, std::map<uint64_t, EdgeSplitPtr>& splits,std::list<EdgePtr>& edges,int & vertCount);
-	bool orient(const Image1f& img, const EdgeSplit& split1,const EdgeSplit& split2, Edge& edge);
+	bool orient(const Image1f& img, const EdgeSplit2D& split1,const EdgeSplit2D& split2, Edge& edge);
 public:
 	MultiIsoContour(bool nudgeLevelSet = true, float levelSetTolerance = 1E-3f) :
 			nudgeLevelSet(nudgeLevelSet), LEVEL_SET_TOLERANCE(

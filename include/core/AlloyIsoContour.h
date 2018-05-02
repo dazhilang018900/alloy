@@ -40,14 +40,14 @@ struct Edge: public uint2 {
 	}
 };
 typedef std::shared_ptr<Edge> EdgePtr;
-struct EdgeSplit {
+struct EdgeSplit2D {
 	EdgePtr e1, e2;
 	uint2 pt1;
 	uint2 pt2;
 	float2 pt2d;
 	uint vid;
 public:
-	EdgeSplit(uint2 pt1 = uint2(std::numeric_limits<uint32_t>::max()),
+	EdgeSplit2D(uint2 pt1 = uint2(std::numeric_limits<uint32_t>::max()),
 			uint2 pt2 = uint2(std::numeric_limits<uint32_t>::max())) :
 			pt1(pt1), pt2(pt2), vid(std::numeric_limits<uint32_t>::max()) {
 	}
@@ -67,11 +67,11 @@ public:
 	}
 
 };
-typedef std::shared_ptr<EdgeSplit> EdgeSplitPtr;
+typedef std::shared_ptr<EdgeSplit2D> EdgeSplitPtr;
 inline bool operator==(const Edge& e1, const Edge e2) {
 	return ((e1.x == e2.x && e1.y == e2.y) || (e1.x == e2.y && e1.y == e2.x));
 }
-inline bool operator==(const EdgeSplit& split1, const EdgeSplit& split2) {
+inline bool operator==(const EdgeSplit2D& split1, const EdgeSplit2D& split2) {
 	return ((split1.pt1 == split2.pt1 && split1.pt2 == split2.pt2)
 			|| (split1.pt1 == split2.pt2 && split1.pt2 == split2.pt1));
 }
@@ -136,8 +136,8 @@ protected:
 			std::list<EdgePtr>& edges);
 	void processSquare(int x, int y, std::map<uint64_t, EdgeSplitPtr>& splits,
 			std::list<EdgePtr>& edges);
-	bool orient(const Image1f& img, const EdgeSplit& split1,
-			const EdgeSplit& split2, Edge& edge);
+	bool orient(const Image1f& img, const EdgeSplit2D& split1,
+			const EdgeSplit2D& split2, Edge& edge);
 public:
 	IsoContour(bool nudgeLevelSet = true, float levelSetTolerance = 1E-3f) :
 			nudgeLevelSet(nudgeLevelSet), LEVEL_SET_TOLERANCE(
