@@ -120,7 +120,7 @@ void FluidSimulation::placeWalls() {
 	// Ceiling Wall
 	obj->mThickness = 3 * fluidVoxelSize;
 	obj->mType = ObjectType::WALL;
-	obj->mMaterial = ObjectMaterial::OPAQUE;
+	obj->mMaterial = ObjectMaterial::SOLID;
 	obj->mVisible = false;
 	obj->mMin = float2(0.0, my - wallThickness);
 	obj->mMax = float2(mx, my);
@@ -225,7 +225,7 @@ void FluidSimulation::repositionParticles(std::vector<int>& indices) {
 void FluidSimulation::addParticle(float2 pt, float2 center, ObjectType type) {
 	SimulationObject *inside_obj = nullptr;
 	const int MAX_INT = std::numeric_limits<int>::max();
-	const float MAX_ANGLE = 30.0f * M_PI / 180.0f;
+	const float MAX_ANGLE = 30.0f * ALY_PI / 180.0f;
 	bool found = false;
 	if (type == ObjectType::FLUID) {
 		for (std::shared_ptr<SimulationObject>& obj : fluidObjects) {

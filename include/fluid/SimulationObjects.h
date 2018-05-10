@@ -33,7 +33,7 @@ enum class ObjectType {
 	AIR = 0, FLUID = 1, WALL = 2
 };
 enum class ObjectMaterial {
-	GLASS = 0, OPAQUE = 1, RED = 2
+	GLASS = 0,SOLID = 1, RED = 2
 };
 
 enum class ObjectShape {
@@ -61,7 +61,7 @@ public:
 	;
 	SimulationObject(ObjectShape shape) :
 			mShape(shape), mVisible(true), mThickness(0.0f), mType(
-					ObjectType::AIR), mMaterial(ObjectMaterial::OPAQUE) {
+					ObjectType::AIR), mMaterial(ObjectMaterial::SOLID) {
 
 	}
 };

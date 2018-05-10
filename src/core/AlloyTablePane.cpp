@@ -386,10 +386,10 @@ void LazyTableComposite::pack(const pixel2& pos, const pixel2& dims,
 			(int) std::floor(
 					(extents.position.y - cellPadding.y)
 							/ (entryHeight + cellSpacing.y)));
-	size_t edIndex = std::min((int) children.size(),
+	size_t edIndex = std::max(0,std::min((int) children.size(),
 			(int) std::floor(
 					(extents.position.y + bounds.dimensions.y - cellPadding.y)
-							/ (entryHeight + cellSpacing.y)) + 1);
+							/ (entryHeight + cellSpacing.y)) + 1));
 
 	for (size_t i = 0; i < stIndex; i++) {
 		std::shared_ptr<Region>& region = children[i];

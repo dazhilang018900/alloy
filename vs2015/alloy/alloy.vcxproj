@@ -91,6 +91,7 @@
     <ClCompile Include="..\..\src\core\tinysplinecpp.cpp" />
     <ClCompile Include="..\..\src\core\tinyxml2.cpp" />
     <ClCompile Include="..\..\src\core\tiny_obj_loader.cpp" />
+    <ClCompile Include="..\..\src\example\ActiveContour2DEx.cpp" />
     <ClCompile Include="..\..\src\example\ActiveContour3DEx.cpp" />
     <ClCompile Include="..\..\src\example\AnisotropicFilterEx.cpp" />
     <ClCompile Include="..\..\src\example\AnyFunctionEx.cpp" />
@@ -104,6 +105,7 @@
     <ClCompile Include="..\..\src\example\EventsEx.cpp" />
     <ClCompile Include="..\..\src\example\ExpandBarEx.cpp" />
     <ClCompile Include="..\..\src\example\ExpandTreeEx.cpp" />
+    <ClCompile Include="..\..\src\example\FluidSimulationEx.cpp" />
     <ClCompile Include="..\..\src\example\ForceDirectedGraphEx.cpp" />
     <ClCompile Include="..\..\src\example\GrabCutEx.cpp" />
     <ClCompile Include="..\..\src\example\GraphPaneEx.cpp" />
@@ -114,6 +116,7 @@
     <ClCompile Include="..\..\src\example\LaplaceFillEx.cpp" />
     <ClCompile Include="..\..\src\example\LevelSetGridEx.cpp" />
     <ClCompile Include="..\..\src\example\LocatorEx.cpp" />
+    <ClCompile Include="..\..\src\example\MagicPixelEx.cpp" />
     <ClCompile Include="..\..\src\example\main.cpp" />
     <ClCompile Include="..\..\src\example\MaxFlowEx.cpp" />
     <ClCompile Include="..\..\src\example\MenuEx.cpp" />
@@ -131,6 +134,7 @@
     <ClCompile Include="..\..\src\example\MeshTextureMapEx.cpp" />
     <ClCompile Include="..\..\src\example\MeshVertexColorEx.cpp" />
     <ClCompile Include="..\..\src\example\MeshWireframeEx.cpp" />
+    <ClCompile Include="..\..\src\example\MultiLevelSetEx.cpp" />
     <ClCompile Include="..\..\src\example\OneEuroFilterEx.cpp" />
     <ClCompile Include="..\..\src\example\ParameterPaneEx.cpp" />
     <ClCompile Include="..\..\src\example\PoissonBlendEx.cpp" />
@@ -139,12 +143,17 @@
     <ClCompile Include="..\..\src\example\ShadowCastEx.cpp" />
     <ClCompile Include="..\..\src\example\SoftBodyEx.cpp" />
     <ClCompile Include="..\..\src\example\SplineEx.cpp" />
+    <ClCompile Include="..\..\src\example\SuperPixelEx.cpp" />
     <ClCompile Include="..\..\src\example\TablePaneEx.cpp" />
     <ClCompile Include="..\..\src\example\TabPaneEx.cpp" />
     <ClCompile Include="..\..\src\example\TimelineEx.cpp" />
     <ClCompile Include="..\..\src\example\TweenEx.cpp" />
     <ClCompile Include="..\..\src\example\UnitsEx.cpp" />
     <ClCompile Include="..\..\src\example\WindowPaneEx.cpp" />
+    <ClCompile Include="..\..\src\fluid\FluidSimulation.cpp" />
+    <ClCompile Include="..\..\src\fluid\LaplaceSolver.cpp" />
+    <ClCompile Include="..\..\src\fluid\ParticleLocator.cpp" />
+    <ClCompile Include="..\..\src\fluid\SimulationObjects.cpp" />
     <ClCompile Include="..\..\src\grid\EndlessGrid.cpp" />
     <ClCompile Include="..\..\src\grid\EndlessNode.cpp" />
     <ClCompile Include="..\..\src\ocl\BufferCL.cpp" />
@@ -173,8 +182,11 @@
     <ClCompile Include="..\..\src\segmentation\ActiveContour3D.cpp" />
     <ClCompile Include="..\..\src\segmentation\ContourShaders.cpp" />
     <ClCompile Include="..\..\src\segmentation\FluidParticles2D.cpp" />
+    <ClCompile Include="..\..\src\segmentation\MagicPixelLevelSet.cpp" />
+    <ClCompile Include="..\..\src\segmentation\MagicPixels.cpp" />
     <ClCompile Include="..\..\src\segmentation\Manifold2D.cpp" />
     <ClCompile Include="..\..\src\segmentation\Manifold3D.cpp" />
+    <ClCompile Include="..\..\src\segmentation\ManifoldCache3D.cpp" />
     <ClCompile Include="..\..\src\segmentation\MultiActiveContour2D.cpp" />
     <ClCompile Include="..\..\src\segmentation\MultiIsoContour.cpp" />
     <ClCompile Include="..\..\src\segmentation\MultiSpringLevelSet2D.cpp" />
@@ -185,6 +197,8 @@
     <ClCompile Include="..\..\src\segmentation\ManifoldCache2D.cpp" />
     <ClCompile Include="..\..\src\segmentation\SpringLevelSet2D.cpp" />
     <ClCompile Include="..\..\src\segmentation\SpringlsSecondOrder.cpp" />
+    <ClCompile Include="..\..\src\segmentation\SuperPixelLevelSet.cpp" />
+    <ClCompile Include="..\..\src\vision\Epnp.cpp" />
     <ClCompile Include="..\..\src\vision\Sift.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -339,6 +353,7 @@
     <ClInclude Include="..\..\include\core\tinysplinecpp.h" />
     <ClInclude Include="..\..\include\core\tinyxml2.h" />
     <ClInclude Include="..\..\include\core\tiny_obj_loader.h" />
+    <ClInclude Include="..\..\include\example\ActiveContour2DEx.h" />
     <ClInclude Include="..\..\include\example\ActiveContour3DEx.h" />
     <ClInclude Include="..\..\include\example\AnisotropicFilterEx.h" />
     <ClInclude Include="..\..\include\example\ColorSpaceEx.h" />
@@ -351,6 +366,7 @@
     <ClInclude Include="..\..\include\example\EventsEx.h" />
     <ClInclude Include="..\..\include\example\ExpandBarEx.h" />
     <ClInclude Include="..\..\include\example\ExpandTreeEx.h" />
+    <ClInclude Include="..\..\include\example\FluidSimulationEx.h" />
     <ClInclude Include="..\..\include\example\ForceDirectedGraphEx.h" />
     <ClInclude Include="..\..\include\example\GrabCutEx.h" />
     <ClInclude Include="..\..\include\example\GraphPaneEx.h" />
@@ -361,6 +377,7 @@
     <ClInclude Include="..\..\include\example\LaplaceFillEx.h" />
     <ClInclude Include="..\..\include\example\LevelSetGridEx.h" />
     <ClInclude Include="..\..\include\example\LocatorEx.h" />
+    <ClInclude Include="..\..\include\example\MagicPixelEx.h" />
     <ClInclude Include="..\..\include\example\MaxFlowEx.h" />
     <ClInclude Include="..\..\include\example\MenuEx.h" />
     <ClInclude Include="..\..\include\example\MeshDepthEx.h" />
@@ -377,6 +394,7 @@
     <ClInclude Include="..\..\include\example\MeshTextureMapEx.h" />
     <ClInclude Include="..\..\include\example\MeshVertexColorEx.h" />
     <ClInclude Include="..\..\include\example\MeshWireframeEx.h" />
+    <ClInclude Include="..\..\include\example\MultiLevelSetEx.h" />
     <ClInclude Include="..\..\include\example\OneEuroFilterEx.h" />
     <ClInclude Include="..\..\include\example\ParameterPaneEx.h" />
     <ClInclude Include="..\..\include\example\PoissonBlendEx.h" />
@@ -385,12 +403,17 @@
     <ClInclude Include="..\..\include\example\ShadowCastEx.h" />
     <ClInclude Include="..\..\include\example\SoftBodyEx.h" />
     <ClInclude Include="..\..\include\example\SplineEx.h" />
+    <ClInclude Include="..\..\include\example\SuperPixelEx.h" />
     <ClInclude Include="..\..\include\example\TablePaneEx.h" />
     <ClInclude Include="..\..\include\example\TabPaneEx.h" />
     <ClInclude Include="..\..\include\example\TimelineEx.h" />
     <ClInclude Include="..\..\include\example\TweenEx.h" />
     <ClInclude Include="..\..\include\example\UnitsEx.h" />
     <ClInclude Include="..\..\include\example\WindowPaneEx.h" />
+    <ClInclude Include="..\..\include\fluid\FluidSimulation.h" />
+    <ClInclude Include="..\..\include\fluid\LaplaceSolver.h" />
+    <ClInclude Include="..\..\include\fluid\ParticleLocator.h" />
+    <ClInclude Include="..\..\include\fluid\SimulationObjects.h" />
     <ClInclude Include="..\..\include\grid\EndlessGrid.h" />
     <ClInclude Include="..\..\include\grid\EndlessNode.h" />
     <ClInclude Include="..\..\include\ocl\BufferCL.h" />
@@ -455,8 +478,11 @@
     <ClInclude Include="..\..\include\segmentation\ActiveContour3D.h" />
     <ClInclude Include="..\..\include\segmentation\ContourShaders.h" />
     <ClInclude Include="..\..\include\segmentation\FluidParticles2D.h" />
+    <ClInclude Include="..\..\include\segmentation\MagicPixelLevelSet.h" />
+    <ClInclude Include="..\..\include\segmentation\MagicPixels.h" />
     <ClInclude Include="..\..\include\segmentation\Manifold2D.h" />
     <ClInclude Include="..\..\include\segmentation\Manifold3D.h" />
+    <ClInclude Include="..\..\include\segmentation\ManifoldCache3D.h" />
     <ClInclude Include="..\..\include\segmentation\MultiActiveContour2D.h" />
     <ClInclude Include="..\..\include\segmentation\MultiIsoContour.h" />
     <ClInclude Include="..\..\include\segmentation\MultiSpringLevelSet2D.h" />
@@ -467,6 +493,8 @@
     <ClInclude Include="..\..\include\segmentation\ManifoldCache2D.h" />
     <ClInclude Include="..\..\include\segmentation\SpringLevelSet2D.h" />
     <ClInclude Include="..\..\include\segmentation\SpringlsSecondOrder.h" />
+    <ClInclude Include="..\..\include\segmentation\SuperPixelLevelSet.h" />
+    <ClInclude Include="..\..\include\vision\Epnp.h" />
     <ClInclude Include="..\..\include\vision\Sift.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

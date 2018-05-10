@@ -73,6 +73,12 @@
     <Filter Include="include\vision">
       <UniqueIdentifier>{d37acdbb-76f5-41bb-82ac-09e5056dca48}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\fluid">
+      <UniqueIdentifier>{125cee82-d608-4c4a-b44d-0a3b788c0e4e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="include\fluid">
+      <UniqueIdentifier>{7c389d5b-37eb-47fb-9449-b88e172c616a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\core\nanovg.cpp">
@@ -611,6 +617,48 @@
     </ClCompile>
     <ClCompile Include="..\..\src\segmentation\Manifold3D.cpp">
       <Filter>src\segmentation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vision\Epnp.cpp">
+      <Filter>src\vision</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\segmentation\MagicPixelLevelSet.cpp">
+      <Filter>src\segmentation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\segmentation\MagicPixels.cpp">
+      <Filter>src\segmentation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\segmentation\ManifoldCache3D.cpp">
+      <Filter>src\segmentation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\segmentation\SuperPixelLevelSet.cpp">
+      <Filter>src\segmentation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\ActiveContour2DEx.cpp">
+      <Filter>src\example</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\FluidSimulationEx.cpp">
+      <Filter>src\example</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\MagicPixelEx.cpp">
+      <Filter>src\example</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\MultiLevelSetEx.cpp">
+      <Filter>src\example</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\SuperPixelEx.cpp">
+      <Filter>src\example</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\fluid\FluidSimulation.cpp">
+      <Filter>src\fluid</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\fluid\LaplaceSolver.cpp">
+      <Filter>src\fluid</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\fluid\ParticleLocator.cpp">
+      <Filter>src\fluid</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\fluid\SimulationObjects.cpp">
+      <Filter>src\fluid</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1453,6 +1501,48 @@
     </ClInclude>
     <ClInclude Include="..\..\include\example\ShadowCastEx.h">
       <Filter>include\example</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\vision\Epnp.h">
+      <Filter>include\vision</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\segmentation\MagicPixelLevelSet.h">
+      <Filter>include\segmentation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\segmentation\MagicPixels.h">
+      <Filter>include\segmentation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\segmentation\ManifoldCache3D.h">
+      <Filter>include\segmentation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\segmentation\SuperPixelLevelSet.h">
+      <Filter>include\segmentation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\example\ActiveContour2DEx.h">
+      <Filter>include\example</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\example\FluidSimulationEx.h">
+      <Filter>include\example</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\example\MagicPixelEx.h">
+      <Filter>include\example</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\example\MultiLevelSetEx.h">
+      <Filter>include\example</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\example\SuperPixelEx.h">
+      <Filter>include\example</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\fluid\FluidSimulation.h">
+      <Filter>include\fluid</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\fluid\LaplaceSolver.h">
+      <Filter>include\fluid</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\fluid\ParticleLocator.h">
+      <Filter>include\fluid</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\fluid\SimulationObjects.h">
+      <Filter>include\fluid</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
