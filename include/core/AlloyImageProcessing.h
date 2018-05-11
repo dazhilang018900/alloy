@@ -27,6 +27,7 @@ enum BayerFilter {
 	BGGR = 0, RGGB = 1, GBRG = 2, GRBG = 3
 };
 void Demosaic(const Image1ub& gray, ImageRGB& color,const BayerFilter& filter=BayerFilter::RGGB);
+void Demosaic(const Image1ub& gray, ImageRGBf& color,const BayerFilter& filter=BayerFilter::RGGB);
 template<class T, size_t M, size_t N> void GaussianKernel(T (&kernel)[M][N],
 		T sigmaX = T(0.607902736 * (M - 1) * 0.5),
 		T sigmaY = T(0.607902736 * (N - 1) * 0.5)) {
