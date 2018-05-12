@@ -38,7 +38,7 @@ protected:
 	aly::MatcapShader matcapShader;
 	aly::ImageShader imageShader;
 	aly::Camera camera;
-	aly::ActiveManifold3D simulation;
+	aly::ActiveContour3D simulation;
 	aly::IconButtonPtr playButton,stopButton;
     std::shared_ptr<aly::TimelineSlider> timelineSlider;
     bool running;

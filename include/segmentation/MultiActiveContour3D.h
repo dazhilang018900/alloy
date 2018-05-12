@@ -33,7 +33,7 @@
 #include "segmentation/ManifoldCache3D.h"
 #include "segmentation/MultiIsoSurface.h"
 namespace aly {
-class MultiManifold3D: public Simulation {
+class MultiActiveContourd3D: public Simulation {
 protected:
 	std::shared_ptr<ManifoldCache3D> cache;
 	MultiIsoSurface isoSurface;
@@ -87,8 +87,8 @@ protected:
 	float getSwapLevelSetValue(int i, int j,int k, int l) const;
 
 public:
-	MultiManifold3D(const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
-	MultiManifold3D(const std::string& name,const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
+	MultiActiveContourd3D(const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
+	MultiActiveContourd3D(const std::string& name,const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
 	float evolve();
 	Volume1f& getPressureImage();
 	const Volume1f& getPressureImage() const;

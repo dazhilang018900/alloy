@@ -227,6 +227,7 @@ void ActiveContour3DEx::draw(AlloyContext* context) {
 		}
 		depthAndNormalShader.draw(mesh, camera, depthFrameBuffer);
 	}
+
 	glEnable(GL_BLEND);
 	glDisable(GL_DEPTH_TEST);
 	matcapShader.draw(depthFrameBuffer.getTexture(), camera,
