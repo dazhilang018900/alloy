@@ -19,8 +19,8 @@
  * THE SOFTWARE.
  */
 
-#ifndef INCLUDE_ACTIVEManifold3D_H_
-#define INCLUDE_ACTIVEManifold3D_H_
+#ifndef INCLUDE_MultiManifold3D_H_
+#define INCLUDE_MultiManifold3D_H_
 #include <AlloyVector.h>
 #include <AlloyVolume.h>
 #include <AlloyIsoSurface.h>
@@ -28,14 +28,15 @@
 #include <list>
 #include <tuple>
 #include <mutex>
-#include "Simulation.h"
-#include "Manifold3D.h"
-#include "ManifoldCache3D.h"
+#include "segmentation/Simulation.h"
+#include "segmentation/Manifold3D.h"
+#include "segmentation/ManifoldCache3D.h"
+#include "segmentation/MultiIsoSurface.h"
 namespace aly {
-class ActiveManifold3D: public Simulation {
+class MultiManifold3D: public Simulation {
 protected:
 	std::shared_ptr<ManifoldCache3D> cache;
-	IsoSurface isoSurface;
+	MultiIsoSurface isoSurface;
 	Manifold3D contour;
 
 	bool clampSpeed;
@@ -48,13 +49,20 @@ protected:
 	const float MAX_DISTANCE = 3.5f;
 	const int maxLayers = 3;
 	bool requestUpdateSurface;
+	std::vector<int> labelList;
+	std::map<int, aly::Color> lineColors;
 	Volume1f initialLevelSet;
+	Volume1i initialLabels;
 	Volume1f levelSet;
 	Volume1f swapLevelSet;
 	Volume1f pressureImage;
 	Volume3f vecFieldImage;
+	Volume1i swapLabelImage;
+	Volume1i labelImage;
 	std::vector<float> deltaLevelSet;
 	std::vector<int3> activeList;
+	std::vector<int> objectIds;
+	std::vector<int> forceIndexes;
 	std::mutex contourLock;
 	aly::HorizontalSliderPtr pressureSlider,curavtureSlider,advectionSlider;
 	bool getBitValue(int i);
@@ -72,9 +80,15 @@ protected:
 
 	bool updateSurface();
 	virtual bool stepInternal() override;
+	float getLevelSetValue(int i, int j,int k, int l) const;
+	float getUnionLevelSetValue(int i, int j,int k, int l) const;
+	float getLevelSetValue(float i, float j,float k, int l) const;
+	float getUnionLevelSetValue(float i, float j,float k, int l) const;
+	float getSwapLevelSetValue(int i, int j,int k, int l) const;
+
 public:
-	ActiveManifold3D(const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
-	ActiveManifold3D(const std::string& name,const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
+	MultiManifold3D(const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
+	MultiManifold3D(const std::string& name,const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
 	float evolve();
 	Volume1f& getPressureImage();
 	const Volume1f& getPressureImage() const;
@@ -120,6 +134,7 @@ public:
 	std::shared_ptr<ManifoldCache3D> getCache() const {
 		return cache;
 	}
+	void setInitial(const Volume1i& labels);
 	virtual void setup(const aly::ParameterPanePtr& pane) override;
 	void setInitialDistanceField(const Volume1f& img) {
 		initialLevelSet = img;

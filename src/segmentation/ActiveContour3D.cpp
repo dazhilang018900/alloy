@@ -28,7 +28,7 @@ void ActiveManifold3D::rebuildNarrowBand() {
 #pragma omp parallel for
 		for (int i = 0; i < (int) activeList.size(); i++) {
 			int3 pos = activeList[i];
-			updateDistanceField(pos.x, pos.y, pos.z, band, i);
+			updateDistanceField(pos.x, pos.y, pos.z, band);
 		}
 	}
 	for (int k = 0; k < swapLevelSet.slices; k++) {
@@ -153,6 +153,7 @@ bool ActiveManifold3D::init() {
 	rebuildNarrowBand();
 	requestUpdateSurface = true;
 	if (cache.get() != nullptr) {
+		cache->clear();
 		updateSurface();
 		contour.setFile(
 				MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "surface" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
@@ -536,8 +537,7 @@ void ActiveManifold3D::pressureMotion(int i, int j, int k, size_t gid) {
 	}
 	deltaLevelSet[gid] = kappa + pressure;
 }
-void ActiveManifold3D::updateDistanceField(int i, int j, int k, int band,
-		size_t index) {
+void ActiveManifold3D::updateDistanceField(int i, int j, int k, int band) {
 	float v111;
 	float v011;
 	float v121;
@@ -627,7 +627,7 @@ float ActiveManifold3D::evolve(float maxStep) {
 #pragma omp parallel for
 		for (int i = 0; i < (int) activeList.size(); i++) {
 			int3 pos = activeList[i];
-			updateDistanceField(pos.x, pos.y, pos.z, band, i);
+			updateDistanceField(pos.x, pos.y, pos.z, band);
 		}
 	}
 #pragma omp parallel for

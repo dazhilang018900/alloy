@@ -408,7 +408,7 @@ namespace aly {
 					float denom = DxCtr * DxCtr + DyCtr * DyCtr;
 					float kappa = 0;
 					const float maxCurvatureForce = 10.0f;
-					if (std::abs(denom) > 1E-3f) {
+					if (std::abs(denom) > 1E-5f) {
 						kappa = curvatureParam.toFloat() * numer / denom;
 					}
 					else {

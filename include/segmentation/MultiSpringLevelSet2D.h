@@ -22,7 +22,7 @@
 #ifndef INCLUDE_MULTISPRINGLEVELSET2D_H_
 #define INCLUDE_MULTISPRINGLEVELSET2D_H_
 #include <segmentation/ManifoldCache2D.h>
-#include "MultiActiveContour2D.h"
+
 #include "Simulation.h"
 #include "ContourShaders.h"
 #include "AlloyLocator.h"

@@ -118,6 +118,7 @@ bool ActiveContour3DEx::init(Composite& rootNode) {
 					timelineSlider->setTimeValue(0);
 					timelineSlider->setMaxValue(maxIteration);
 					timelineSlider->setVisible(true);
+
 					context->addDeferredTask([this]() {
 								simulation.init();
 								running = true;

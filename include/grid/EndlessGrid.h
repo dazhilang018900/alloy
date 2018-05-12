@@ -29,7 +29,23 @@
 #include <map>
 #include <iostream>
 namespace aly {
-
+struct FloatInt:public std::pair<float,int>{
+	FloatInt(float x,int i):std::pair<float,int>(x,i){
+	}
+	FloatInt():std::pair<float,int>(0,-1){
+	}
+	FloatInt(const FloatInt& val):std::pair<float,int>(val.first,val.second){
+	}
+	FloatInt(const std::pair<float,int>& val):FloatInt(val.first,val.second){
+	}
+	inline float value(int l)const {
+		if(l==second){
+			return -first;
+		} else {
+			return first;
+		}
+	}
+};
 template<typename T, int N> struct Stencil {
 	T data[N][N][N];
 	EndlessNode<T>* leaf = nullptr;
@@ -689,10 +705,15 @@ void GetStencilCross(const EndlessGrid<int>& grid, int3 pos,
 
 void FloodFill(EndlessGrid<float>& grid, float narrowBand);
 float3 GetNormal(const EndlessGrid<float>& grid, int i, int j, int k);
-float GetInterpolatedValue(const EndlessGrid<float>& grid, float x, float y,
-		float z);
-float3 GetInterpolatedNormal(const EndlessGrid<float>& grid, float x, float y,
-		float z);
+float GetInterpolatedValue(const EndlessGrid<float>& grid, float x, float y,float z);
+float3 GetInterpolatedNormal(const EndlessGrid<float>& grid, float x, float y,float z);
+float4 GetNormalAndValue(const EndlessGrid<float>& grid, int i, int j, int k);
+
+float3 GetNormal(const EndlessGrid<FloatInt>& grid, int i, int j, int k,int l);
+float GetInterpolatedValue(const EndlessGrid<FloatInt>& grid, float x, float y,float z,int l);
+float3 GetInterpolatedNormal(const EndlessGrid<FloatInt>& grid, float x, float y,float z,int l);
+float4 GetNormalAndValue(const EndlessGrid<FloatInt>& grid, int i, int j, int k,int l);
+
 float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 		float narrowBand, bool flipSign = true, float voxelScale = 0.75f,
 		const std::function<bool(const std::string& message, float progress)>& monitor =
@@ -715,7 +736,7 @@ typedef EndlessGrid<int> EndlessGridInt;
 typedef EndlessGrid<float2> EndlessGridFloat2;
 typedef EndlessGrid<float3> EndlessGridFloat3;
 typedef EndlessGrid<float4> EndlessGridFloat4;
-typedef EndlessGrid<std::pair<float, int>> EndlessGridFloatIndex;
+typedef EndlessGrid<FloatInt> EndlessGridFloatInt;
 typedef EndlessGrid<RGBf> EndlessGridRGBf;
 typedef EndlessGrid<RGBAf> EndlessGridRGBAf;
 
@@ -724,7 +745,7 @@ typedef EndlessNode<int> EndlessNodeInt;
 typedef EndlessNode<float2> EndlessNodeFloat2;
 typedef EndlessNode<float3> EndlessNodeFloat3;
 typedef EndlessNode<float4> EndlessNodeFloat4;
-typedef EndlessNode<std::pair<float, int>> EndlessNodeFloatIndex;
+typedef EndlessNode<FloatInt> EndlessNodeFloatInt;
 typedef EndlessNode<RGBf> EndlessNodeRGBf;
 typedef EndlessNode<RGBAf> EndlessNodeRGBAf;
 

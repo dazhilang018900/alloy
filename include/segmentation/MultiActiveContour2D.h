@@ -37,6 +37,7 @@ namespace aly {
 		MultiIsoContour isoContour;
 		Manifold2D contour;
 		std::vector<int> labelList;
+		std::map<int, aly::Color> lineColors;
 		bool preserveTopology;
 		bool clampSpeed;
 
@@ -78,12 +79,10 @@ namespace aly {
 		virtual bool stepInternal() override;
 		float getLevelSetValue(int i, int j, int l) const;
 		float getUnionLevelSetValue(int i, int j, int l) const;
-
 		float getLevelSetValue(float i, float j, int l) const;
 		float getUnionLevelSetValue(float i, float j, int l) const;
-
 		float getSwapLevelSetValue(int i, int j, int l) const;
-		std::map<int, aly::Color> lineColors;
+
 	public:
 		MultiActiveContour2D(const std::shared_ptr<ManifoldCache2D>& cache=nullptr);
 		MultiActiveContour2D(const std::string& name,const std::shared_ptr<ManifoldCache2D>& cache = nullptr);

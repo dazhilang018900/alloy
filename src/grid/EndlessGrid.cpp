@@ -338,6 +338,114 @@ void FloodFill(EndlessGrid<float>& grid, float narrowBand) {
 
 }
 
+float3 GetNormal(const EndlessGrid<FloatInt>& grid, int i, int j, int k,int l) {
+	EndlessNodeFloatInt* node = nullptr;
+	float gx, gy, gz;
+	FloatInt centerVal;
+	if (grid.getLeafValue(i, j, k, node, centerVal)) {
+		gx = grid.getLeafValue(i + 1, j, k, node).value(l)
+				- grid.getLeafValue(i - 1, j, k, node).value(l);
+		gy = grid.getLeafValue(i, j + 1, k, node).value(l)
+				- grid.getLeafValue(i, j - 1, k, node).value(l);
+		gz = grid.getLeafValue(i, j, k + 1, node).value(l)
+				- grid.getLeafValue(i, j, k - 1, node).value(l);
+		return float3(gx, gy, gz);
+	} else {
+		gx = grid.getLeafValue(i + 1, j, k).value(l) - grid.getLeafValue(i - 1, j, k).value(l);
+		gy = grid.getLeafValue(i, j + 1, k).value(l) - grid.getLeafValue(i, j - 1, k).value(l);
+		gz = grid.getLeafValue(i, j, k + 1).value(l) - grid.getLeafValue(i, j, k - 1).value(l);
+		return float3(gx, gy, gz);
+	}
+}
+float4 GetNormalAndValue(const EndlessGrid<FloatInt>& grid, int i, int j, int k,int l) {
+	EndlessNodeFloatInt* node = nullptr;
+	float gx, gy, gz;
+	FloatInt centerVal;
+	if (grid.getLeafValue(i, j, k, node, centerVal)) {
+		gx = grid.getLeafValue(i + 1, j, k, node).value(l)
+				- grid.getLeafValue(i - 1, j, k, node).value(l);
+		gy = grid.getLeafValue(i, j + 1, k, node).value(l)
+				- grid.getLeafValue(i, j - 1, k, node).value(l);
+		gz = grid.getLeafValue(i, j, k + 1, node).value(l)
+				- grid.getLeafValue(i, j, k - 1, node).value(l);
+		return float4(gx, gy, gz, centerVal.value(l));
+	} else {
+		gx = grid.getLeafValue(i + 1, j, k).value(l) - grid.getLeafValue(i - 1, j, k).value(l);
+		gy = grid.getLeafValue(i, j + 1, k).value(l) - grid.getLeafValue(i, j - 1, k).value(l);
+		gz = grid.getLeafValue(i, j, k + 1).value(l) - grid.getLeafValue(i, j, k - 1).value(l);
+		centerVal = grid.getLeafValue(i, j, k);
+		return float4(gx, gy, gz, centerVal.value(l));
+	}
+}
+
+
+
+float GetInterpolatedValue(const EndlessGrid<FloatInt>& grid, float x, float y,
+		float z,int l) {
+	int x1 = (int) std::ceil(x);
+	int y1 = (int) std::ceil(y);
+	int z1 = (int) std::ceil(z);
+	int x0 = (int) std::floor(x);
+	int y0 = (int) std::floor(y);
+	int z0 = (int) std::floor(z);
+	float dx = x - x0;
+	float dy = y - y0;
+	float dz = z - z0;
+	float hx = 1.0f - dx;
+	float hy = 1.0f - dy;
+	float hz = 1.0f - dz;
+	EndlessNodeFloatInt* node = nullptr;
+	FloatInt centerVal;
+	if (!grid.getLeafValue(x0, y0, z0, node, centerVal)) {
+		return ((((grid.getLeafValue(x0, y0, z0).value(l) * hx
+				+ grid.getLeafValue(x1, y0, z0).value(l) * dx) * hy
+				+ (grid.getLeafValue(x0, y1, z0).value(l) * hx
+						+ grid.getLeafValue(x1, y1, z0).value(l) * dx) * dy) * hz
+				+ ((grid.getLeafValue(x0, y0, z1).value(l) * hx
+						+ grid.getLeafValue(x1, y0, z1).value(l) * dx) * hy
+						+ (grid.getLeafValue(x0, y1, z1).value(l) * hx
+								+ grid.getLeafValue(x1, y1, z1).value(l) * dx) * dy) * dz));
+	} else {
+		return ((((centerVal.value(l) * hx + grid.getLeafValue(x1, y0, z0, node).value(l) * dx)
+				* hy
+				+ (grid.getLeafValue(x0, y1, z0, node).value(l) * hx
+						+ grid.getLeafValue(x1, y1, z0, node).value(l) * dx) * dy) * hz
+				+ ((grid.getLeafValue(x0, y0, z1, node).value(l) * hx
+						+ grid.getLeafValue(x1, y0, z1, node).value(l) * dx) * hy
+						+ (grid.getLeafValue(x0, y1, z1, node).value(l) * hx
+								+ grid.getLeafValue(x1, y1, z1, node).value(l) * dx) * dy)
+						* dz));
+	}
+
+}
+float3 GetInterpolatedNormal(const EndlessGrid<FloatInt>& grid, float x, float y,
+		float z,int l) {
+	int x1 = (int) std::ceil(x);
+	int y1 = (int) std::ceil(y);
+	int z1 = (int) std::ceil(z);
+	int x0 = (int) std::floor(x);
+	int y0 = (int) std::floor(y);
+	int z0 = (int) std::floor(z);
+	float dx = x - x0;
+	float dy = y - y0;
+	float dz = z - z0;
+	float hx = 1.0f - dx;
+	float hy = 1.0f - dy;
+	float hz = 1.0f - dz;
+	return aly::float3(
+			(((GetNormal(grid, x0, y0, z0,l) * hx
+					+ GetNormal(grid, x1, y0, z0,l) * dx) * hy
+					+ (GetNormal(grid, x0, y1, z0,l) * hx
+							+ GetNormal(grid, x1, y1, z0,l) * dx) * dy) * hz
+					+ ((GetNormal(grid, x0, y0, z1,l) * hx
+							+ GetNormal(grid, x1, y0, z1,l) * dx) * hy
+							+ (GetNormal(grid, x0, y1, z1,l) * hx
+									+ GetNormal(grid, x1, y1, z1,l) * dx) * dy)
+							* dz));
+}
+
+
+
 float3 GetNormal(const EndlessGrid<float>& grid, int i, int j, int k) {
 	EndlessNodeFloat* node = nullptr;
 	float gx, gy, gz, centerVal;
