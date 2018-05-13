@@ -20,7 +20,7 @@
  */
 #include "segmentation/MultiActiveContour3D.h"
 namespace aly {
-void MultiActiveContourd3D::rebuildNarrowBand() {
+void MultiActiveContour3D::rebuildNarrowBand() {
 	activeList.clear();
 	for (int band = 1; band <= maxLayers; band++) {
 #pragma omp parallel for
@@ -41,7 +41,7 @@ void MultiActiveContourd3D::rebuildNarrowBand() {
 	deltaLevelSet.resize(7 * activeList.size(), 0.0f);
 	objectIds.resize(7 * activeList.size(), -1);
 }
-void MultiActiveContourd3D::plugLevelSet(int i, int j, int k, size_t index) {
+void MultiActiveContour3D::plugLevelSet(int i, int j, int k, size_t index) {
 	int label = labelImage(i, j, k);
 	int activeLabels[26];
 	activeLabels[0] = labelImage(i + 1, j, k - 1);
@@ -84,14 +84,18 @@ void MultiActiveContourd3D::plugLevelSet(int i, int j, int k, size_t index) {
 		levelSet(i, j, k) = 3.0f;
 	}
 }
-void MultiActiveContourd3D::cleanup() {
+void MultiActiveContour3D::cleanup() {
 	if (cache.get() != nullptr)
 		cache->clear();
 }
-bool MultiActiveContourd3D::updateSurface() {
+bool MultiActiveContour3D::updateSurface() {
 	if (requestUpdateSurface) {
 		std::lock_guard<std::mutex> lockMe(contourLock);
 		Mesh mesh;
+		WriteImageToRawFile(MakeDesktopFile("levelset.xml"),levelSet);
+		WriteImageToRawFile(MakeDesktopFile("labels.xml"),labelImage);
+
+
 		isoSurface.solve(levelSet,labelImage, activeList, mesh, MeshType::Triangle,true,1);
 		mesh.updateVertexNormals(false, 4);
 		contour.vertexLocations = mesh.vertexLocations;
@@ -102,16 +106,16 @@ bool MultiActiveContourd3D::updateSurface() {
 	}
 	return false;
 }
-Manifold3D* MultiActiveContourd3D::getSurface() {
+Manifold3D* MultiActiveContour3D::getSurface() {
 	return &contour;
 }
-Volume1f& MultiActiveContourd3D::getLevelSet() {
+Volume1f& MultiActiveContour3D::getLevelSet() {
 	return levelSet;
 }
-const Volume1f& MultiActiveContourd3D::getLevelSet() const {
+const Volume1f& MultiActiveContour3D::getLevelSet() const {
 	return levelSet;
 }
-MultiActiveContourd3D::MultiActiveContourd3D(const std::shared_ptr<ManifoldCache3D>& cache) :
+MultiActiveContour3D::MultiActiveContour3D(const std::shared_ptr<ManifoldCache3D>& cache) :
 		Simulation("Active Contour 3D"), cache(cache), clampSpeed(false), requestUpdateSurface(
 				false) {
 	advectionParam = Float(1.0f);
@@ -120,7 +124,7 @@ MultiActiveContourd3D::MultiActiveContourd3D(const std::shared_ptr<ManifoldCache
 	curvatureParam = Float(0.3f);
 }
 
-MultiActiveContourd3D::MultiActiveContourd3D(const std::string& name,
+MultiActiveContour3D::MultiActiveContour3D(const std::string& name,
 		const std::shared_ptr<ManifoldCache3D>& cache) :
 		Simulation(name), cache(cache), clampSpeed(false), requestUpdateSurface(
 				false) {
@@ -129,17 +133,17 @@ MultiActiveContourd3D::MultiActiveContourd3D(const std::string& name,
 	targetPressureParam = Float(0.5f);
 	curvatureParam = Float(0.3f);
 }
-float MultiActiveContourd3D::evolve() {
+float MultiActiveContour3D::evolve() {
 	return evolve(0.5f);
 }
-Volume1f& MultiActiveContourd3D::getPressureImage() {
+Volume1f& MultiActiveContour3D::getPressureImage() {
 	return pressureImage;
 }
 
-const Volume1f& MultiActiveContourd3D::getPressureImage() const {
+const Volume1f& MultiActiveContour3D::getPressureImage() const {
 	return pressureImage;
 }
-void MultiActiveContourd3D::setup(const aly::ParameterPanePtr& pane) {
+void MultiActiveContour3D::setup(const aly::ParameterPanePtr& pane) {
 	pane->addNumberField("Target Pressure", targetPressureParam, Float(0.0f),
 			Float(1.0f));
 	pane->addNumberField("Pressure Weight", pressureParam, Float(-2.0f),
@@ -150,7 +154,7 @@ void MultiActiveContourd3D::setup(const aly::ParameterPanePtr& pane) {
 			Float(4.0f));
 	pane->addCheckBox("Clamp Speed", clampSpeed);
 }
-void MultiActiveContourd3D::setInitial(const Volume1i& labels) {
+void MultiActiveContour3D::setInitialLabels(const Volume1i& labels) {
 	this->initialLabels = labels;
 	this->swapLabelImage = labels;
 	this->labelImage = labels;
@@ -193,7 +197,7 @@ void MultiActiveContourd3D::setInitial(const Volume1i& labels) {
 	initialLevelSet = levelSet;
 }
 
-bool MultiActiveContourd3D::init() {
+bool MultiActiveContour3D::init() {
 	int3 dims = initialLevelSet.dimensions();
 	if (dims.x == 0 || dims.y == 0 || dims.z == 0)
 		return false;
@@ -207,12 +211,10 @@ bool MultiActiveContourd3D::init() {
 	swapLabelImage.resize(dims.x, dims.y, dims.z);
 #pragma omp parallel for
 	for (int i = 0; i < (int) initialLevelSet.size(); i++) {
-		float val = clamp(initialLevelSet[i], -(maxLayers + 1.0f),
-				(maxLayers + 1.0f));
+		float val = aly::clamp(initialLevelSet[i], 0.0f,(maxLayers + 1.0f));
 		levelSet[i] = val;
 		swapLevelSet[i] = val;
 	}
-
 	labelImage = initialLabels;
 	swapLabelImage = initialLabels;
 	std::set<int> labelSet;
@@ -223,7 +225,6 @@ bool MultiActiveContourd3D::init() {
 			L = std::max(L, l.x + 1);
 		}
 	}
-
 	forceIndexes.resize(L, -1);
 	labelList.clear();
 	labelList.assign(labelSet.begin(), labelSet.end());
@@ -232,23 +233,23 @@ bool MultiActiveContourd3D::init() {
 	}
 	L = (int) labelList.size();
 	if (L < 256) {
-		lineColors.clear();
-		lineColors[0] = RGBAf(0.0f, 0.0f, 0.0f, 0.0f);
+		objectColors.clear();
+		objectColors[0] = RGBAf(0.0f, 0.0f, 0.0f, 0.0f);
 		int CL = std::min(256, L);
 		for (int i = 0; i < L; i++) {
 			int l = labelList[i];
 			HSV hsv = HSV((l % CL) / (float) CL, 0.7f, 0.7f);
-			lineColors[l] = HSVtoColor(hsv);
+			objectColors[l] = HSVtoColor(hsv);
 		}
 	} else {
-		if ((int) lineColors.size() != L + 1) {
-			lineColors.clear();
-			lineColors[0] = RGBAf(0.0f, 0.0f, 0.0f, 0.0f);
+		if ((int) objectColors.size() != L + 1) {
+			objectColors.clear();
+			objectColors[0] = RGBAf(0.0f, 0.0f, 0.0f, 0.0f);
 			for (int i = 0; i < L; i++) {
 				int l = labelList[i];
 				HSV hsv = HSV(RandomUniform(0.0f, 1.0f),
 						RandomUniform(0.5f, 1.0f), RandomUniform(0.5f, 1.0f));
-				lineColors[l] = HSVtoColor(hsv);
+				objectColors[l] = HSVtoColor(hsv);
 			}
 		}
 	}
@@ -262,21 +263,21 @@ bool MultiActiveContourd3D::init() {
 	}
 	return true;
 }
-float MultiActiveContourd3D::getSwapLevelSetValue(int i, int j, int k, int l) const {
+float MultiActiveContour3D::getSwapLevelSetValue(int i, int j, int k, int l) const {
 	if (swapLabelImage(i, j, k).x == l) {
 		return -swapLevelSet(i, j, k);
 	} else {
 		return swapLevelSet(i, j, k);
 	}
 }
-float MultiActiveContourd3D::getLevelSetValue(int i, int j, int k, int l) const {
+float MultiActiveContour3D::getLevelSetValue(int i, int j, int k, int l) const {
 	if (labelImage(i, j, k).x == l) {
 		return -levelSet(i, j, k);
 	} else {
 		return levelSet(i, j, k);
 	}
 }
-float MultiActiveContourd3D::getUnionLevelSetValue(int i, int j, int k, int l) const {
+float MultiActiveContour3D::getUnionLevelSetValue(int i, int j, int k, int l) const {
 	int c = labelImage(i, j, k).x;
 	if (c == l || c == 0) {
 		return -levelSet(i, j, k);
@@ -284,7 +285,7 @@ float MultiActiveContourd3D::getUnionLevelSetValue(int i, int j, int k, int l) c
 		return levelSet(i, j, k);
 	}
 }
-float MultiActiveContourd3D::getLevelSetValue(float x, float y, float z,
+float MultiActiveContour3D::getLevelSetValue(float x, float y, float z,
 		int l) const {
 	int i = static_cast<int>(std::floor(x));
 	int j = static_cast<int>(std::floor(y));
@@ -307,7 +308,7 @@ float MultiActiveContourd3D::getLevelSetValue(float x, float y, float z,
 	return (1.0f - dz) * lower + dz * upper;
 
 }
-float MultiActiveContourd3D::getUnionLevelSetValue(float x, float y, float z,
+float MultiActiveContour3D::getUnionLevelSetValue(float x, float y, float z,
 		int l) const {
 	int i = static_cast<int>(std::floor(x));
 	int j = static_cast<int>(std::floor(y));
@@ -329,7 +330,7 @@ float MultiActiveContourd3D::getUnionLevelSetValue(float x, float y, float z,
 			+ (rgb011 * (1.0f - dx) + rgb111 * dx) * dy);
 	return (1.0f - dz) * lower + dz * upper;
 }
-void MultiActiveContourd3D::pressureAndAdvectionMotion(int i, int j, int k,size_t gid) {
+void MultiActiveContour3D::pressureAndAdvectionMotion(int i, int j, int k,size_t gid) {
 	float v111 = swapLevelSet(i, j, k).x;
 	float2 grad;
 	if (v111 > 0.5f) {
@@ -468,7 +469,7 @@ void MultiActiveContourd3D::pressureAndAdvectionMotion(int i, int j, int k,size_
 		}
 	}
 }
-void MultiActiveContourd3D::advectionMotion(int i, int j, int k, size_t gid) {
+void MultiActiveContour3D::advectionMotion(int i, int j, int k, size_t gid) {
 	float v111 = swapLevelSet(i, j, k).x;
 	float2 grad;
 	if (v111 > 0.5f) {
@@ -580,7 +581,7 @@ void MultiActiveContourd3D::advectionMotion(int i, int j, int k, size_t gid) {
 	}
 
 }
-void MultiActiveContourd3D::applyForces(int i, int j, int k, size_t index,
+void MultiActiveContour3D::applyForces(int i, int j, int k, size_t index,
 		float timeStep) {
 	float delta;
 	float old = swapLevelSet(i, j, k);
@@ -595,7 +596,7 @@ void MultiActiveContourd3D::applyForces(int i, int j, int k, size_t index,
 	levelSet(i, j, k) = float1(old);
 }
 
-int MultiActiveContourd3D::deleteElements() {
+int MultiActiveContour3D::deleteElements() {
 	std::vector<int3> newList;
 	for (int i = 0; i < (int) activeList.size(); i++) {
 		int3 pos = activeList[i];
@@ -612,7 +613,7 @@ int MultiActiveContourd3D::deleteElements() {
 	activeList = newList;
 	return diff;
 }
-int MultiActiveContourd3D::addElements() {
+int MultiActiveContour3D::addElements() {
 	const int xNeighborhood[6] = { -1, 1, 0, 0, 0, 0 };
 	const int yNeighborhood[6] = { 0, 0, -1, 1, 0, 0 };
 	const int zNeighborhood[6] = { 0, 0, 0, 0, -1, 1 };
@@ -656,7 +657,7 @@ int MultiActiveContourd3D::addElements() {
 	}
 	return (int) (activeList.size() - sz);
 }
-void MultiActiveContourd3D::pressureMotion(int i, int j, int k, size_t gid) {
+void MultiActiveContour3D::pressureMotion(int i, int j, int k, size_t gid) {
 	float v111 = swapLevelSet(i, j, k).x;
 	float2 grad;
 	if (v111 > 0.5f) {
@@ -774,7 +775,7 @@ void MultiActiveContourd3D::pressureMotion(int i, int j, int k, size_t gid) {
 		}
 	}
 }
-void MultiActiveContourd3D::updateDistanceField(int i, int j, int k, int band) {
+void MultiActiveContour3D::updateDistanceField(int i, int j, int k, int band) {
 	float v111;
 	float v011;
 	float v121;
@@ -795,17 +796,17 @@ void MultiActiveContourd3D::updateDistanceField(int i, int j, int k, int band) {
 	v112 = getLevelSetValue(i, j, k + 1,label);
 	if (levelSet(i, j, k).x > band - 0.5f) {
 		v111 = (MAX_DISTANCE + 0.5f);
-		v111 = (v011 < -1) ? v111 : min(std::abs(v011-1), v111);
-		v111 = (v121 < -1) ? v111 : min(std::abs(v121-1), v111);
-		v111 = (v101 < -1) ? v111 : min(std::abs(v101-1), v111);
-		v111 = (v211 < -1) ? v111 : min(std::abs(v211-1), v111);
-		v111 = (v110 < -1) ? v111 : min(std::abs(v110-1), v111);
-		v111 = (v112 < -1) ? v111 : min(std::abs(v112-1), v111);
+		v111 =  min(std::abs(v011-1), v111);
+		v111 =  min(std::abs(v121-1), v111);
+		v111 =  min(std::abs(v101-1), v111);
+		v111 =  min(std::abs(v211-1), v111);
+		v111 =  min(std::abs(v110-1), v111);
+		v111 =  min(std::abs(v112-1), v111);
 		levelSet(i,j,k)=v111;
 	}
 }
 
-float MultiActiveContourd3D::evolve(float maxStep) {
+float MultiActiveContour3D::evolve(float maxStep) {
 	if (pressureImage.size() > 0) {
 		if (vecFieldImage.size() > 0) {
 #pragma omp parallel for
@@ -870,7 +871,7 @@ float MultiActiveContourd3D::evolve(float maxStep) {
 	objectIds.resize(7*activeList.size(), -1);
 	return timeStep;
 }
-bool MultiActiveContourd3D::stepInternal() {
+bool MultiActiveContour3D::stepInternal() {
 	double remaining = timeStep;
 	double t = 0.0;
 	do {
@@ -889,7 +890,7 @@ bool MultiActiveContourd3D::stepInternal() {
 	}
 	return (simulationTime < simulationDuration);
 }
-void MultiActiveContourd3D::rescale(aly::Volume1f& pressureForce) {
+void MultiActiveContour3D::rescale(aly::Volume1f& pressureForce) {
 	float minValue = 1E30f;
 	float maxValue = -1E30f;
 	if (!std::isnan(targetPressureParam.toFloat())) {

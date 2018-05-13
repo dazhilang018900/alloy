@@ -226,4 +226,47 @@ void PhantomCheckerBoard::solveInternal(Volume1f& levelset) {
 		}
 	}
 }
+PhantomSphereCollection::PhantomSphereCollection(int rows, int cols, int slices,float radius) {
+	int gridRows = (int) std::floor(rows / (2 * radius + 3));
+	int gridCols = (int) std::floor(cols / (2 * radius + 3));
+	int gridSlices = (int) std::floor(slices / (2 * radius + 3));
+	float deltaX = rows / (float) gridRows;
+	float deltaY = cols / (float) gridCols;
+	float deltaZ = slices / (float) gridSlices;
+	distfieldImage.resize(rows, cols, slices);
+	labelImage.resize(rows, cols, slices);
+	std::vector<float3> gridPoints;
+	for (int k = 0; k < gridSlices; k++) {
+		for (int j = 0; j < gridCols; j++) {
+			for (int i = 0; i < gridRows; i++) {
+				gridPoints.push_back(
+						float3((i + 0.5f) * deltaX, (j + 0.5f) * deltaY,
+								(k + 0.5f) * deltaZ));
+			}
+		}
+	}
+	int numDots=gridPoints.size();
+	Shuffle(gridPoints);
+	for (int i = 0; i < rows; i++) {
+		for (int j = 0; j < cols; j++) {
+			for (int k = 0; k < slices; k++) {
+				float val = 10.0f;
+				int label = 0;
+				for (int l = 0; l < numDots; l++) {
+					float3 pt = gridPoints[l];
+					float dist = (pt.x - i) * (pt.x - i)
+							+ (pt.y - j) * (pt.y - j)
+							+ (pt.z - k) * (pt.z - k);
+					if (dist < radius * radius) {
+						label = l+1;
+					}
+					val = (float) std::min(val,
+							std::abs(std::sqrt(dist) - radius));
+				}
+				labelImage(i, j, k) = label;
+				distfieldImage(i, j, k) = val;
+			}
+		}
+	}
+}
 }

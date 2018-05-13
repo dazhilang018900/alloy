@@ -33,7 +33,7 @@
 #include "segmentation/ManifoldCache3D.h"
 #include "segmentation/MultiIsoSurface.h"
 namespace aly {
-class MultiActiveContourd3D: public Simulation {
+class MultiActiveContour3D: public Simulation {
 protected:
 	std::shared_ptr<ManifoldCache3D> cache;
 	MultiIsoSurface isoSurface;
@@ -50,7 +50,7 @@ protected:
 	const int maxLayers = 3;
 	bool requestUpdateSurface;
 	std::vector<int> labelList;
-	std::map<int, aly::Color> lineColors;
+	std::map<int, aly::Color> objectColors;
 	Volume1f initialLevelSet;
 	Volume1i initialLabels;
 	Volume1f levelSet;
@@ -87,8 +87,8 @@ protected:
 	float getSwapLevelSetValue(int i, int j,int k, int l) const;
 
 public:
-	MultiActiveContourd3D(const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
-	MultiActiveContourd3D(const std::string& name,const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
+	MultiActiveContour3D(const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
+	MultiActiveContour3D(const std::string& name,const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
 	float evolve();
 	Volume1f& getPressureImage();
 	const Volume1f& getPressureImage() const;
@@ -134,10 +134,11 @@ public:
 	std::shared_ptr<ManifoldCache3D> getCache() const {
 		return cache;
 	}
-	void setInitial(const Volume1i& labels);
+	void setInitialLabels(const Volume1i& labels);
 	virtual void setup(const aly::ParameterPanePtr& pane) override;
-	void setInitialDistanceField(const Volume1f& img) {
+	void setInitialDistanceField(const Volume1f& img,const Volume1i& lab) {
 		initialLevelSet = img;
+		initialLabels=lab;
 	}
 };
 }

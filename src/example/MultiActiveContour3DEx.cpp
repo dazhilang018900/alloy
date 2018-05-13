@@ -18,40 +18,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "../../include/example/ActiveContour3DEx.h"
+#include "../../include/example/MultiActiveContour3DEx.h"
 #include "segmentation/Phantom.h"
 #include <AlloyGradientVectorFlow.h>
 using namespace aly;
-ActiveContour3DEx::ActiveContour3DEx() :
-Application(1024, 600, "Acitve Contour 3D"), matcapShader(
+MultiActiveContour3DEx::MultiActiveContour3DEx() :
+Application(1024, 600, "Multi-Object Active Contour 3D Example"), matcapShader(
 		getFullPath("images/JG_Silver.png")), imageShader(
 		ImageShader::Filter::SMALL_BLUR), running(false),
 simulation(std::shared_ptr<ManifoldCache3D>(new ManifoldCache3D())) {
 }
-bool ActiveContour3DEx::init(Composite& rootNode) {
+
+bool MultiActiveContour3DEx::init(Composite& rootNode) {
 	box3f renderBBox = box3f(float3(-0.5f, -0.5f, -0.5f),
 			float3(1.0f, 1.0f, 1.0f));
 	lastTime = -1;
 	const int D = 128;
 	{
-		PhantomBubbles bubbles(D, D, D, 4.0f);
-		bubbles.setNoiseLevel(0.0f);
-		bubbles.setNumberOfBubbles(12);
-		bubbles.setFuzziness(0.5f);
-		bubbles.setMinRadius(0.2f);
-		bubbles.setMaxRadius(0.3f);
-		bubbles.setInvertContrast(true);
-		Volume1f targetVol = bubbles.solveLevelSet();
+		PhantomMetasphere metasphere(D,D,D);
+		metasphere.setNoiseLevel(0.1);
+		metasphere.setFuzziness(0.5f);
+		metasphere.setInvertContrast(true);
+		Volume1f targetVol = metasphere.solveLevelSet();
 		Volume1f edgeVol;
 		Volume3f vectorField;
 		SolveEdgeFilter(targetVol, edgeVol, 1);
 		SolveGradientVectorFlow(edgeVol, vectorField, 0.1f, 16, true);
-		PhantomCube cube(D, D, D, 4.0f);
-		cube.setCenter(float3(0.0f));
-		cube.setWidth(1.21);
-		Volume1f sourceVol = cube.solveDistanceField();
-		//WriteVolumeToFile(MakeDesktopFile("cube.xml"), sourceVol);
-		simulation.setInitialDistanceField(sourceVol);
+		PhantomSphereCollection bubbles(D, D, D, 15);
+		Volume1f sourceVol = bubbles.getDistanceField();
+		Volume1i sourceLabels=bubbles.getLabels();
+		simulation.setInitialDistanceField(sourceVol,sourceLabels);
 		simulation.setPressure(targetVol, 0.4f, 0.5f);
 		simulation.setCurvature(0.25f);
 		simulation.setVectorField(vectorField, 0.2f);
@@ -195,7 +191,7 @@ bool ActiveContour3DEx::init(Composite& rootNode) {
 
 	return true;
 }
-void ActiveContour3DEx::draw(AlloyContext* context) {
+void MultiActiveContour3DEx::draw(AlloyContext* context) {
 	if (depthFrameBuffer.getWidth() == 0) {
 		box2f bbox = renderRegion->getBounds();
 		depthFrameBuffer.initialize(bbox.dimensions.x, bbox.dimensions.y);

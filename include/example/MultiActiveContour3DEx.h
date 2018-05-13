@@ -1,5 +1,5 @@
 /*
- * Copyright(C) 2016, Blake C. Lucas, Ph.D. (img.science@gmail.com)
+ * Copyright(C) 2018, Blake C. Lucas, Ph.D. (img.science@gmail.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,48 +19,35 @@
  * THE SOFTWARE.
  */
 
-#ifndef MULTILEVELSETTOY_H_
-#define MULTILEVELSETTOY_H_
+#ifndef INCLUDE_EXAMPLE_MULTIACTIVECONTOUR3DEx_H_
+#define INCLUDE_EXAMPLE_MULTIACTIVECONTOUR3DEx_H_
 
-#include <segmentation/ManifoldCache2D.h>
 #include "AlloyApplication.h"
-#include "AlloyVector.h"
-#include "segmentation/MultiActiveContour2D.h"
-#include "AlloyWorker.h"
+#include "AlloyWidget.h"
 #include "AlloyTimeline.h"
-#include "segmentation/Simulation.h"
-class MultiLevelSetEx: public aly::Application {
-protected:
-	float currentIso;
-	int example;
-	aly::ImageRGBA img;
-	aly::Image1f gray;
-	bool parametersDirty;
-	bool frameBuffersDirty;
-	bool running = false;
-	aly::Image2f vecField;
-	aly::Number lineWidth;
-	aly::Number particleSize;
+#include "CommonShaders.h"
+#include "segmentation/MultiActiveContour3D.h"
 
-	aly::Color pointColor;
-	aly::Color normalColor;
-	aly::Color springlColor;
-	aly::Color matchColor;
-	aly::Color vecfieldColor;
-	aly::AdjustableCompositePtr resizeableRegion;
-	std::shared_ptr<aly::MultiActiveContour2D> simulation;
+class MultiActiveContour3DEx: public aly::Application {
+protected:
+	int lastTime;
+	aly::Mesh mesh;
+	aly::RegionPtr renderRegion;
+	aly::GLFrameBuffer depthFrameBuffer;
+	aly::DepthAndNormalShader depthAndNormalShader;
+	aly::MatcapShader matcapShader;
+	aly::ImageShader imageShader;
+	aly::Camera camera;
+	aly::MultiActiveContour3D simulation;
 	aly::IconButtonPtr playButton,stopButton;
     std::shared_ptr<aly::TimelineSlider> timelineSlider;
-	void createCircleLevelSet(int w, int h, int rows, int cols, float r, aly::Image1f& levelset, aly::Image1i& labelImage);
-
-	void createTextLevelSet(aly::Image1f& levelSet,aly::Image1f& gray,int w,int h,const std::string& text,float textSize,float maxDistance);
+    bool running;
 public:
-	std::shared_ptr<aly::ManifoldCache2D> cache;
-	MultiLevelSetEx(int example=0);
-	virtual void draw(aly::AlloyContext* context) override;
+	MultiActiveContour3DEx();
 	bool init(aly::Composite& rootNode);
-
+	void draw(aly::AlloyContext* context);
 };
 
-#endif
 
+
+#endif /* INCLUDE_EXAMPLE_MultiActiveContour3DEx_H_ */

@@ -184,5 +184,20 @@ public:
 		width = w;
 	}
 };
+
+class PhantomSphereCollection {
+protected:
+	Volume1f distfieldImage;
+	Volume1i labelImage;
+public:
+	PhantomSphereCollection(int rows, int cols, int slices, float radius);
+	const Volume1f& getDistanceField()const {
+		return distfieldImage;
+	}
+	const Volume1i& getLabels() const {;
+		return labelImage;
+	}
+};
+
 }
 #endif /* INCLUDE_SEGMENTATION_PHANTOM_H_ */

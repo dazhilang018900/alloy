@@ -19,6 +19,7 @@
  * THE SOFTWARE.
  */
 #include <example/GrabCutEx.h>
+#include <example/MultiActiveContour2DEx.h>
 #include <MipavHeaderReaderWriter.h>
 #include "Alloy.h"
 #include "../../include/example/UnitsEx.h"
@@ -74,9 +75,10 @@
 #include "../../include/example/ShadowCastEx.h"
 #include "../../include/example/ActiveContour2DEx.h"
 #include "../../include/example/FluidSimulationEx.h"
-#include "../../include/example/MultiLevelSetEx.h"
 #include "../../include/example/SuperPixelEx.h"
 #include "../../include/example/MagicPixelEx.h"
+#include "../../include/example/MultiActiveContour2DEx.h"
+#include "../../include/example/MultiActiveContour3DEx.h"
 #include "AlloyOptimization.h"
 #include "AlloyGaussianMixture.h"
 #include <cstring>
@@ -156,10 +158,9 @@ bool SANITY_CHECK() {
 	SANITY_CHECK_SVD();
 	return ret;
 }
-
 int main(int argc, char *argv[]) {
 	//change me when adding new example!
-	const int N=57;
+	const int N=58;
 	std::array<ExamplePtr,N> apps = {
 		MAKE_EXAMPLE(UnitsEx), MAKE_EXAMPLE(CompositeEx),MAKE_EXAMPLE(EventsEx), 
 		MAKE_EXAMPLE(DragEx), MAKE_EXAMPLE(TweenEx),MAKE_EXAMPLE(ImageEx), 
@@ -179,7 +180,7 @@ int main(int argc, char *argv[]) {
 		MAKE_EXAMPLE(AnisotropicFilterEx),MAKE_EXAMPLE(LevelSetGridEx),MAKE_EXAMPLE(MaxFlowEx),
 		MAKE_EXAMPLE(GrabCutEx),MAKE_EXAMPLE(ActiveContour3DEx),MAKE_EXAMPLE(ProceduralSkyEx),
 		MAKE_EXAMPLE(ShadowCastEx),MAKE_EXAMPLE(ActiveContour2DEx),MAKE_EXAMPLE(FluidSimulationEx),
-		MAKE_EXAMPLE(SuperPixelEx),MAKE_EXAMPLE(MagicPixelEx),MAKE_EXAMPLE(MultiLevelSetEx)
+		MAKE_EXAMPLE(SuperPixelEx),MAKE_EXAMPLE(MagicPixelEx),MAKE_EXAMPLE(MultiActiveContour2DEx),MAKE_EXAMPLE(MultiActiveContour3DEx)
 	};
 	std::sort(apps.begin(),apps.end(),[=](const ExamplePtr& a,const ExamplePtr& b){
 		return std::lexicographical_compare(a->name.begin(), a->name.end(), b->name.begin(), b->name.end());
