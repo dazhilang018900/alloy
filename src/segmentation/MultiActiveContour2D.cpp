@@ -203,7 +203,7 @@ namespace aly {
 			int CL = std::min(256, L);
 			for (int i = 0;i < L;i++) {
 				int l = labelList[i];
-				HSV hsv = HSV((l%CL) / (float)CL, 0.7f, 0.7f);
+				HSV hsv = HSVAtoColor(HSVA((l % CL) / (float) CL,0.7f,0.2*(l%2)+0.5f,1.0f));
 				lineColors[l] = HSVtoColor(hsv);
 			}
 		}

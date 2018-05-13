@@ -250,7 +250,7 @@ bool MultiActiveContour3D::init() {
 		int CL = std::min(256, L);
 		for (int i = 0; i < L; i++) {
 			int l = labelList[i];
-			objectColors[l] = HSVAtoColor(HSVA((l % CL) / (float) CL,0.7f,0.2*(l%2)/2.0f+0.5f,1.0f));
+			objectColors[l] = HSVAtoColor(HSVA((l % CL) / (float) CL,0.7f,0.2*(l%2)+0.5f,1.0f));
 		}
 	} else {
 		if ((int) objectColors.size() != L + 1) {
