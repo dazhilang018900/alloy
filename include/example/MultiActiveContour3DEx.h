@@ -27,14 +27,15 @@
 #include "AlloyTimeline.h"
 #include "CommonShaders.h"
 #include "segmentation/MultiActiveContour3D.h"
-
 class MultiActiveContour3DEx: public aly::Application {
 protected:
 	int lastTime;
 	aly::Mesh mesh;
 	aly::RegionPtr renderRegion;
 	aly::GLFrameBuffer depthFrameBuffer;
+	aly::GLFrameBuffer colorFrameBuffer;
 	aly::DepthAndNormalShader depthAndNormalShader;
+	aly::ColorVertexShader colorVertexShader;
 	aly::MatcapShader matcapShader;
 	aly::ImageShader imageShader;
 	aly::Camera camera;

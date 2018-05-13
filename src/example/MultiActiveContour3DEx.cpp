@@ -24,8 +24,7 @@
 using namespace aly;
 MultiActiveContour3DEx::MultiActiveContour3DEx() :
 Application(1024, 600, "Multi-Object Active Contour 3D Example"), matcapShader(
-		getFullPath("images/JG_Silver.png")), imageShader(
-		ImageShader::Filter::SMALL_BLUR), running(false),
+		getFullPath("images/JG_Silver.png")), running(false),
 simulation(std::shared_ptr<ManifoldCache3D>(new ManifoldCache3D())) {
 }
 
@@ -84,6 +83,7 @@ bool MultiActiveContour3DEx::init(Composite& rootNode) {
 						int w=getContext()->getScreenWidth();
 						int h=getContext()->getScreenHeight();
 						depthFrameBuffer.initialize(w,h);
+						colorFrameBuffer.initialize(w,h);
 						camera.setDirty(true);
 					});
 		}
@@ -195,6 +195,7 @@ void MultiActiveContour3DEx::draw(AlloyContext* context) {
 	if (depthFrameBuffer.getWidth() == 0) {
 		box2f bbox = renderRegion->getBounds();
 		depthFrameBuffer.initialize(bbox.dimensions.x, bbox.dimensions.y);
+		colorFrameBuffer.initialize(bbox.dimensions.x,bbox.dimensions.y);
 	}
 	if (running) {
 		if (!simulation.step()) {
@@ -204,7 +205,6 @@ void MultiActiveContour3DEx::draw(AlloyContext* context) {
 		}
 	}
 	if (camera.isDirty()) {
-
 		int currentTime = timelineSlider->getTimeValue().toInteger();
 		if (currentTime != lastTime) {
 			std::shared_ptr<CacheElement3D> elem = simulation.getCache()->get(
@@ -216,12 +216,15 @@ void MultiActiveContour3DEx::draw(AlloyContext* context) {
 				contour = simulation.getSurface();
 			}
 			mesh.vertexLocations = contour->vertexLocations;
+			mesh.vertexColors=contour->vertexColors;
 			mesh.vertexNormals = contour->vertexNormals;
 			mesh.triIndexes = contour->triIndexes;
+			mesh.quadIndexes=contour->quadIndexes;
 			mesh.setDirty(true);
 			lastTime = currentTime;
 		}
 		depthAndNormalShader.draw(mesh, camera, depthFrameBuffer);
+		colorVertexShader.draw(mesh,camera,colorFrameBuffer);
 	}
 
 	glEnable(GL_BLEND);
@@ -229,6 +232,7 @@ void MultiActiveContour3DEx::draw(AlloyContext* context) {
 	matcapShader.draw(depthFrameBuffer.getTexture(), camera,
 			renderRegion->getBounds() * context->pixelRatio,
 			context->getViewport(), RGBAf(1.0f));
+	imageShader.draw(colorFrameBuffer.getTexture(), context->pixelRatio*renderRegion->getBounds(), 0.5f, false);
 	camera.setDirty(false);
 }
 

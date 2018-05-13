@@ -135,8 +135,8 @@ public:
 			Mesh& mesh, const MeshType& type,
 			bool regularize, int label);
 	void solve(const Volume1f& data,const Volume1i& labels,
-			Mesh& mesh, const MeshType& type,
-			bool regularize, int label);
+			Mesh& mesh, const MeshType& type,std::map<int,std::pair<size_t,size_t>>& regions,
+			bool regularize);
 	void solve(const float* data, const int* labels, const int& rows, const int& cols,
 			const int& slices, const std::vector<int3>& indexList, Mesh& mesh,
 			const MeshType& type ,

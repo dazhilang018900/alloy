@@ -262,6 +262,7 @@ PhantomSphereCollection::PhantomSphereCollection(int rows, int cols, int slices,
 					}
 					val = (float) std::min(val,
 							std::abs(std::sqrt(dist) - radius));
+					val=std::max(val,0.001f);
 				}
 				labelImage(i, j, k) = label;
 				distfieldImage(i, j, k) = val;

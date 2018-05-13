@@ -94,7 +94,6 @@
 		 return 1;
 	 }
  }
-
  */
 #ifndef EXAMPLE_NAME
 #define EXAMPLE_NAME ""
@@ -133,7 +132,6 @@ template<class T> struct ExampleT: public Example {
 };
 typedef std::unique_ptr<Example> ExamplePtr;
 #define MAKE_EXAMPLE(NAME) ExamplePtr(new ExampleT<NAME>(#NAME))
-
 bool SANITY_CHECK() {
 	bool ret = true;
 	//ret &= SANITY_CHECK_LOCATOR();

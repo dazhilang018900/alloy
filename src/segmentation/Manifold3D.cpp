@@ -67,9 +67,11 @@ void Manifold3D::operator=(const Manifold3D &c) {
 	particles = c.particles;
 	correspondence = c.correspondence;
 	vertexLabels = c.vertexLabels;
+	vertexColors=c.vertexColors;
 	vertexLocations=c.vertexLocations;
 	vertexNormals=c.vertexNormals;
 	triIndexes=c.triIndexes;
+	quadIndexes=c.quadIndexes;
 	file = c.file;
 	particleLabels = c.particleLabels;
 }
@@ -81,9 +83,11 @@ Manifold3D::Manifold3D(const Manifold3D& c) :
 	particles = c.particles;
 	correspondence = c.correspondence;
 	vertexLabels = c.vertexLabels;
+	vertexColors=c.vertexColors;
 	vertexLocations=c.vertexLocations;
 	vertexNormals=c.vertexNormals;
 	triIndexes=c.triIndexes;
+	quadIndexes=c.quadIndexes;
 	file = c.file;
 	particleLabels = c.particleLabels;
 }
@@ -104,7 +108,6 @@ Manifold3D::~Manifold3D() {
 		glDeleteVertexArrays(1, &vao);
 		context->end();
 	}
-
 }
 void Manifold3D::draw() {
 	if (dirty) {

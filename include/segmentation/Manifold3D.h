@@ -45,7 +45,9 @@ namespace aly {
 	public:
 		Vector3f vertexLocations;
 		Vector3f vertexNormals;
+		Vector4f vertexColors;
 		Vector3ui triIndexes;
+		Vector4ui quadIndexes;
 		Vector3f particles;
 		Vector1i particleLabels;
 		Vector1i vertexLabels;
@@ -67,11 +69,11 @@ namespace aly {
 			this->file = file;
 		}
 		template<class Archive> void save(Archive & archive) const {
-			archive(CEREAL_NVP(file),CEREAL_NVP(vertexLocations),CEREAL_NVP(vertexNormals),CEREAL_NVP(triIndexes), CEREAL_NVP(particles),CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels),CEREAL_NVP(correspondence));
+			archive(CEREAL_NVP(file),CEREAL_NVP(vertexLocations),CEREAL_NVP(vertexNormals),CEREAL_NVP(vertexColors),CEREAL_NVP(triIndexes), CEREAL_NVP(quadIndexes), CEREAL_NVP(particles),CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels),CEREAL_NVP(correspondence));
 		}
 		template<class Archive> void load(Archive & archive) 
 		{
-			archive(CEREAL_NVP(file),CEREAL_NVP(vertexLocations),CEREAL_NVP(vertexNormals),CEREAL_NVP(triIndexes), CEREAL_NVP(particles),CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels), CEREAL_NVP(correspondence));
+			archive(CEREAL_NVP(file),CEREAL_NVP(vertexLocations),CEREAL_NVP(vertexNormals),CEREAL_NVP(vertexColors),CEREAL_NVP(triIndexes),CEREAL_NVP(quadIndexes),  CEREAL_NVP(particles),CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels), CEREAL_NVP(correspondence));
 		}
 		void operator=(const Manifold3D &c);
 		Manifold3D(const Manifold3D& c);

@@ -26,85 +26,84 @@
 #include <algorithm>
 using namespace std;
 namespace aly {
-const int3 MultiIsoSurface::AXIS_OFFSET[3] = { int3(1, 0, 0), int3(0, 1, 0), int3(0,
-		0, 1) };
+const int3 MultiIsoSurface::AXIS_OFFSET[3] = { int3(1, 0, 0), int3(0, 1, 0),
+		int3(0, 0, 1) };
 
 // ----------------------------------------------------------------------------
 
-const int3 MultiIsoSurface::EDGE_NODE_OFFSETS[3][4] = { { int3(0), int3(0, 0, 1),
-		int3(0, 1, 0), int3(0, 1, 1) }, { int3(0), int3(1, 0, 0), int3(0, 0, 1),
-		int3(1, 0, 1) },
-		{ int3(0), int3(0, 1, 0), int3(1, 0, 0), int3(1, 1, 0) }, };
+const int3 MultiIsoSurface::EDGE_NODE_OFFSETS[3][4] = { { int3(0), int3(0, 0,
+		1), int3(0, 1, 0), int3(0, 1, 1) }, { int3(0), int3(1, 0, 0), int3(0, 0,
+		1), int3(1, 0, 1) }, { int3(0), int3(0, 1, 0), int3(1, 0, 0), int3(1, 1,
+		0) }, };
 
 const uint32_t MultiIsoSurface::ENCODED_EDGE_NODE_OFFSETS[12] = { 0x00000000,
 		0x00100000, 0x00000400, 0x00100400, 0x00000000, 0x00000001, 0x00100000,
 		0x00100001, 0x00000000, 0x00000400, 0x00000001, 0x00000401, };
 
-const uint32_t MultiIsoSurface::ENCODED_EDGE_OFFSETS[12] = { 0x00000000, 0x00100000,
-		0x00000400, 0x00100400, 0x40000000, 0x40100000, 0x40000001, 0x40100001,
-		0x80000000, 0x80000400, 0x80000001, 0x80000401, };
+const uint32_t MultiIsoSurface::ENCODED_EDGE_OFFSETS[12] = { 0x00000000,
+		0x00100000, 0x00000400, 0x00100400, 0x40000000, 0x40100000, 0x40000001,
+		0x40100001, 0x80000000, 0x80000400, 0x80000001, 0x80000401, };
 
-const float MultiIsoSurface::edgeDirection[12][3] = { { 1.0f, 0.0f, 0.0f }, { 0.0f,
-		1.0f, 0.0f }, { -1.0f, 0.0f, 0.0f }, { 0.0f, -1.0f, 0.0f }, { 1.0f,
-		0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { -1.0f, 0.0f, 0.0f }, { 0.0f,
+const float MultiIsoSurface::edgeDirection[12][3] = { { 1.0f, 0.0f, 0.0f }, {
+		0.0f, 1.0f, 0.0f }, { -1.0f, 0.0f, 0.0f }, { 0.0f, -1.0f, 0.0f }, {
+		1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { -1.0f, 0.0f, 0.0f }, { 0.0f,
 		-1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f,
 		1.0f }, { 0.0f, 0.0f, 1.0f } };
 
 /* Lists the positions, relative to vertex 0, of each of the 8 vertices of a cube. */
-const int MultiIsoSurface::vertexOffset[8][3] = { { 0, 0, 0 }, { 1, 0, 0 },
-		{ 1, 1, 0 }, { 0, 1, 0 }, { 0, 0, 1 }, { 1, 0, 1 }, { 1, 1, 1 }, { 0, 1,
-				1 } };
+const int MultiIsoSurface::vertexOffset[8][3] =
+		{ { 0, 0, 0 }, { 1, 0, 0 }, { 1, 1, 0 }, { 0, 1, 0 }, { 0, 0, 1 }, { 1,
+				0, 1 }, { 1, 1, 1 }, { 0, 1, 1 } };
 
 /* Lists the index of the endpoint vertices for each of the 12 edges of the cube. */
-const int MultiIsoSurface::edgeConnection[12][2] = { { 0, 1 }, { 1, 2 }, { 2, 3 }, {
-		3, 0 }, { 4, 5 }, { 5, 6 }, { 6, 7 }, { 7, 4 }, { 0, 4 }, { 1, 5 }, { 2,
-		6 }, { 3, 7 } };
+const int MultiIsoSurface::edgeConnection[12][2] = { { 0, 1 }, { 1, 2 },
+		{ 2, 3 }, { 3, 0 }, { 4, 5 }, { 5, 6 }, { 6, 7 }, { 7, 4 }, { 0, 4 }, {
+				1, 5 }, { 2, 6 }, { 3, 7 } };
 
 /* Lists the index of the endpoint vertices for each of the 6 edges of the tetrahedron. */
-const int MultiIsoSurface::tetrahedronEdgeConnection[6][2] = { { 0, 1 }, { 1, 2 }, {
-		2, 0 }, { 0, 3 }, { 1, 3 }, { 2, 3 } };
+const int MultiIsoSurface::tetrahedronEdgeConnection[6][2] = { { 0, 1 },
+		{ 1, 2 }, { 2, 0 }, { 0, 3 }, { 1, 3 }, { 2, 3 } };
 
 /* Lists the index of verticies from a cube that made up each of the six tetrahedrons within the cube. */
-const int MultiIsoSurface::tetrahedronsInACube[6][4] = { { 0, 5, 1, 6 },
-		{ 0, 1, 2, 6 }, { 0, 2, 3, 6 }, { 0, 3, 7, 6 }, { 0, 7, 4, 6 }, { 0, 4,
-				5, 6 } };
+const int MultiIsoSurface::tetrahedronsInACube[6][4] = { { 0, 5, 1, 6 }, { 0, 1,
+		2, 6 }, { 0, 2, 3, 6 }, { 0, 3, 7, 6 }, { 0, 7, 4, 6 }, { 0, 4, 5, 6 } };
 
-const int MultiIsoSurface::tetrahedronTriangles[16][7] = { { -1, -1, -1, -1, -1, -1,
-		-1 }, { 0, 3, 2, -1, -1, -1, -1 }, { 0, 1, 4, -1, -1, -1, -1 }, { 1, 4,
-		2, 2, 4, 3, -1 }, { 1, 2, 5, -1, -1, -1, -1 }, { 0, 3, 5, 0, 5, 1, -1 },
-		{ 0, 2, 5, 0, 5, 4, -1 }, { 5, 4, 3, -1, -1, -1, -1 }, { 3, 4, 5, -1,
-				-1, -1, -1 }, { 4, 5, 0, 5, 2, 0, -1 },
+const int MultiIsoSurface::tetrahedronTriangles[16][7] = { { -1, -1, -1, -1, -1,
+		-1, -1 }, { 0, 3, 2, -1, -1, -1, -1 }, { 0, 1, 4, -1, -1, -1, -1 }, { 1,
+		4, 2, 2, 4, 3, -1 }, { 1, 2, 5, -1, -1, -1, -1 },
+		{ 0, 3, 5, 0, 5, 1, -1 }, { 0, 2, 5, 0, 5, 4, -1 }, { 5, 4, 3, -1, -1,
+				-1, -1 }, { 3, 4, 5, -1, -1, -1, -1 }, { 4, 5, 0, 5, 2, 0, -1 },
 		{ 1, 5, 0, 5, 3, 0, -1 }, { 5, 2, 1, -1, -1, -1, -1 }, { 3, 4, 2, 2, 4,
 				1, -1 }, { 4, 1, 0, -1, -1, -1, -1 },
 		{ 2, 3, 0, -1, -1, -1, -1 }, { -1, -1, -1, -1, -1, -1, -1 } };
 
-const int MultiIsoSurface::cubeEdgeFlags[256] = { 0x000, 0x109, 0x203, 0x30a, 0x406,
-		0x50f, 0x605, 0x70c, 0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03, 0xe09,
-		0xf00, 0x190, 0x099, 0x393, 0x29a, 0x596, 0x49f, 0x795, 0x69c, 0x99c,
-		0x895, 0xb9f, 0xa96, 0xd9a, 0xc93, 0xf99, 0xe90, 0x230, 0x339, 0x033,
-		0x13a, 0x636, 0x73f, 0x435, 0x53c, 0xa3c, 0xb35, 0x83f, 0x936, 0xe3a,
-		0xf33, 0xc39, 0xd30, 0x3a0, 0x2a9, 0x1a3, 0x0aa, 0x7a6, 0x6af, 0x5a5,
-		0x4ac, 0xbac, 0xaa5, 0x9af, 0x8a6, 0xfaa, 0xea3, 0xda9, 0xca0, 0x460,
-		0x569, 0x663, 0x76a, 0x066, 0x16f, 0x265, 0x36c, 0xc6c, 0xd65, 0xe6f,
-		0xf66, 0x86a, 0x963, 0xa69, 0xb60, 0x5f0, 0x4f9, 0x7f3, 0x6fa, 0x1f6,
-		0x0ff, 0x3f5, 0x2fc, 0xdfc, 0xcf5, 0xfff, 0xef6, 0x9fa, 0x8f3, 0xbf9,
-		0xaf0, 0x650, 0x759, 0x453, 0x55a, 0x256, 0x35f, 0x055, 0x15c, 0xe5c,
-		0xf55, 0xc5f, 0xd56, 0xa5a, 0xb53, 0x859, 0x950, 0x7c0, 0x6c9, 0x5c3,
-		0x4ca, 0x3c6, 0x2cf, 0x1c5, 0x0cc, 0xfcc, 0xec5, 0xdcf, 0xcc6, 0xbca,
-		0xac3, 0x9c9, 0x8c0, 0x8c0, 0x9c9, 0xac3, 0xbca, 0xcc6, 0xdcf, 0xec5,
-		0xfcc, 0x0cc, 0x1c5, 0x2cf, 0x3c6, 0x4ca, 0x5c3, 0x6c9, 0x7c0, 0x950,
-		0x859, 0xb53, 0xa5a, 0xd56, 0xc5f, 0xf55, 0xe5c, 0x15c, 0x055, 0x35f,
-		0x256, 0x55a, 0x453, 0x759, 0x650, 0xaf0, 0xbf9, 0x8f3, 0x9fa, 0xef6,
-		0xfff, 0xcf5, 0xdfc, 0x2fc, 0x3f5, 0x0ff, 0x1f6, 0x6fa, 0x7f3, 0x4f9,
-		0x5f0, 0xb60, 0xa69, 0x963, 0x86a, 0xf66, 0xe6f, 0xd65, 0xc6c, 0x36c,
-		0x265, 0x16f, 0x066, 0x76a, 0x663, 0x569, 0x460, 0xca0, 0xda9, 0xea3,
-		0xfaa, 0x8a6, 0x9af, 0xaa5, 0xbac, 0x4ac, 0x5a5, 0x6af, 0x7a6, 0x0aa,
-		0x1a3, 0x2a9, 0x3a0, 0xd30, 0xc39, 0xf33, 0xe3a, 0x936, 0x83f, 0xb35,
-		0xa3c, 0x53c, 0x435, 0x73f, 0x636, 0x13a, 0x033, 0x339, 0x230, 0xe90,
-		0xf99, 0xc93, 0xd9a, 0xa96, 0xb9f, 0x895, 0x99c, 0x69c, 0x795, 0x49f,
-		0x596, 0x29a, 0x393, 0x099, 0x190, 0xf00, 0xe09, 0xd03, 0xc0a, 0xb06,
-		0xa0f, 0x905, 0x80c, 0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203, 0x109,
-		0x000 };
+const int MultiIsoSurface::cubeEdgeFlags[256] = { 0x000, 0x109, 0x203, 0x30a,
+		0x406, 0x50f, 0x605, 0x70c, 0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03,
+		0xe09, 0xf00, 0x190, 0x099, 0x393, 0x29a, 0x596, 0x49f, 0x795, 0x69c,
+		0x99c, 0x895, 0xb9f, 0xa96, 0xd9a, 0xc93, 0xf99, 0xe90, 0x230, 0x339,
+		0x033, 0x13a, 0x636, 0x73f, 0x435, 0x53c, 0xa3c, 0xb35, 0x83f, 0x936,
+		0xe3a, 0xf33, 0xc39, 0xd30, 0x3a0, 0x2a9, 0x1a3, 0x0aa, 0x7a6, 0x6af,
+		0x5a5, 0x4ac, 0xbac, 0xaa5, 0x9af, 0x8a6, 0xfaa, 0xea3, 0xda9, 0xca0,
+		0x460, 0x569, 0x663, 0x76a, 0x066, 0x16f, 0x265, 0x36c, 0xc6c, 0xd65,
+		0xe6f, 0xf66, 0x86a, 0x963, 0xa69, 0xb60, 0x5f0, 0x4f9, 0x7f3, 0x6fa,
+		0x1f6, 0x0ff, 0x3f5, 0x2fc, 0xdfc, 0xcf5, 0xfff, 0xef6, 0x9fa, 0x8f3,
+		0xbf9, 0xaf0, 0x650, 0x759, 0x453, 0x55a, 0x256, 0x35f, 0x055, 0x15c,
+		0xe5c, 0xf55, 0xc5f, 0xd56, 0xa5a, 0xb53, 0x859, 0x950, 0x7c0, 0x6c9,
+		0x5c3, 0x4ca, 0x3c6, 0x2cf, 0x1c5, 0x0cc, 0xfcc, 0xec5, 0xdcf, 0xcc6,
+		0xbca, 0xac3, 0x9c9, 0x8c0, 0x8c0, 0x9c9, 0xac3, 0xbca, 0xcc6, 0xdcf,
+		0xec5, 0xfcc, 0x0cc, 0x1c5, 0x2cf, 0x3c6, 0x4ca, 0x5c3, 0x6c9, 0x7c0,
+		0x950, 0x859, 0xb53, 0xa5a, 0xd56, 0xc5f, 0xf55, 0xe5c, 0x15c, 0x055,
+		0x35f, 0x256, 0x55a, 0x453, 0x759, 0x650, 0xaf0, 0xbf9, 0x8f3, 0x9fa,
+		0xef6, 0xfff, 0xcf5, 0xdfc, 0x2fc, 0x3f5, 0x0ff, 0x1f6, 0x6fa, 0x7f3,
+		0x4f9, 0x5f0, 0xb60, 0xa69, 0x963, 0x86a, 0xf66, 0xe6f, 0xd65, 0xc6c,
+		0x36c, 0x265, 0x16f, 0x066, 0x76a, 0x663, 0x569, 0x460, 0xca0, 0xda9,
+		0xea3, 0xfaa, 0x8a6, 0x9af, 0xaa5, 0xbac, 0x4ac, 0x5a5, 0x6af, 0x7a6,
+		0x0aa, 0x1a3, 0x2a9, 0x3a0, 0xd30, 0xc39, 0xf33, 0xe3a, 0x936, 0x83f,
+		0xb35, 0xa3c, 0x53c, 0x435, 0x73f, 0x636, 0x13a, 0x033, 0x339, 0x230,
+		0xe90, 0xf99, 0xc93, 0xd9a, 0xa96, 0xb9f, 0x895, 0x99c, 0x69c, 0x795,
+		0x49f, 0x596, 0x29a, 0x393, 0x099, 0x190, 0xf00, 0xe09, 0xd03, 0xc0a,
+		0xb06, 0xa0f, 0x905, 0x80c, 0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203,
+		0x109, 0x000 };
 
 const int MultiIsoSurface::cubeEdgeFlagsCC618[256] = { 0x0, 0x109, 0x203, 0x30a,
 		0x406, 0x50f, 0x605, 0x70c, 0x80c, 0x905, 0xa0f, 0xb06, 0xc0a, 0xd03,
@@ -161,12 +160,12 @@ const int MultiIsoSurface::cubeEdgeFlagsCC626[256] = { 0x0, 0x109, 0x203, 0x30a,
 		0x49f, 0x596, 0x29a, 0x393, 0x99, 0x190, 0xf00, 0xe09, 0xd03, 0xc0a,
 		0xb06, 0xa0f, 0x905, 0x80c, 0x70c, 0x605, 0x50f, 0x406, 0x30a, 0x203,
 		0x109, 0x0 };
-const int MultiIsoSurface::triangleConnectionTable[4096] = { -1, -1, -1, -1, -1, -1,
-		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 8, 0, 3, -1, -1, -1, -1, -1, -1,
-		-1, -1, -1, -1, -1, -1, -1, 9, 1, 0, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-		-1, -1, -1, -1, 3, 8, 9, 9, 1, 3, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-		-1, 10, 2, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0, 1,
-		10, 10, 8, 0, 10, 2, 3, 3, 8, 10, -1, -1, -1, -1, 0, 9, 10, 10, 2, 0,
+const int MultiIsoSurface::triangleConnectionTable[4096] = { -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 8, 0, 3, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, 9, 1, 0, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, 3, 8, 9, 9, 1, 3, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, 10, 2, 1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 0,
+		1, 10, 10, 8, 0, 10, 2, 3, 3, 8, 10, -1, -1, -1, -1, 0, 9, 10, 10, 2, 0,
 		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 8, 9, 10, 10, 2, 8, 2, 3, 8, -1,
 		-1, -1, -1, -1, -1, -1, 11, 3, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1,
 		-1, -1, -1, -1, 2, 11, 8, 8, 0, 2, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -371,62 +370,59 @@ MultiIsoSurface::MultiIsoSurface() :
 
 MultiIsoSurface::~MultiIsoSurface() {
 }
-void MultiIsoSurface::solveQuad(const float* data,const int* labels, const int& rows, const int& cols,
-		const int& slices, const std::vector<int3>& indexList, Mesh& mesh,int label) {
+void MultiIsoSurface::solveQuad(const float* data, const int* labels,
+		const int& rows, const int& cols, const int& slices,
+		const std::vector<int3>& indexList, Mesh& mesh, int label) {
 	this->rows = rows;
 	this->cols = cols;
 	this->slices = slices;
 	std::unordered_set<int3> activeVoxels;
 	std::unordered_map<int4, EdgeInfo> activeEdges;
 	std::unordered_map<int3, uint32_t> vertexIndices;
-	findActiveVoxels(data,labels, indexList, activeVoxels, activeEdges,label);
-	generateVertexData(data,labels, activeVoxels, activeEdges, vertexIndices, mesh,label);
+	findActiveVoxels(data, labels, indexList, activeVoxels, activeEdges, label);
+	generateVertexData(data, labels, activeVoxels, activeEdges, vertexIndices,
+			mesh, label);
 	generateTriangles(activeEdges, vertexIndices, mesh);
 }
-void MultiIsoSurface::solve(
-		const float* data,
-		const int* labels,
-		const int& rows,
-		const int& cols,
-		const int& slices,
-		const std::vector<int3>& indexList,
-		Mesh& mesh,
-		const MeshType& type,
-		bool regularizeTest,
-		int label) {
+void MultiIsoSurface::solve(const float* data, const int* labels,
+		const int& rows, const int& cols, const int& slices,
+		const std::vector<int3>& indexList, Mesh& mesh, const MeshType& type,
+		bool regularizeTest, int label) {
 	mesh.clear();
 	if (type == MeshType::Triangle) {
-		solveTri(data,labels, rows, cols, slices, indexList, mesh, label);
+		solveTri(data, labels, rows, cols, slices, indexList, mesh, label);
 	} else {
-		solveQuad(data,labels, rows, cols, slices, indexList, mesh, label);
+		solveQuad(data, labels, rows, cols, slices, indexList, mesh, label);
 	}
 	if (regularizeTest) {
-		regularize(data, mesh,label);
+		regularize(data, mesh, label);
 	}
 	mesh.updateBoundingBox();
 }
-void MultiIsoSurface::solve(
-		const Volume1f& data,
-		const Volume1i& labels,
-		Mesh& mesh,
-		const MeshType& type,
-		bool regularize, int label) {
-	backgroundValue=1E30f;
-	std::map<int,std::vector<int3>> narrowbands;
+void MultiIsoSurface::solve(const Volume1f& data, const Volume1i& labels,
+		Mesh& mesh, const MeshType& type,std::map<int,std::pair<size_t,size_t>>& regions, bool regularize) {
+	backgroundValue = 1E30f;
+	std::map<int, std::vector<int3>> narrowbands;
 	std::set<int> labelSet;
-	for (int z = 1; z < data.slices-1; z++) {
-		for (int y = 1; y < data.cols-1; y++) {
-			for (int x = 1; x < data.rows-1; x++) {
-				int l=labels(x,y,z).x;
+	mesh.clear();
+	static const std::vector<int3> nbrs={
+			int3(0,0,0),
+			int3(0,0,1),
+			int3(0,1,0),
+			int3(0,1,1),
+			int3(1,0,0),
+			int3(1,0,1),
+			int3(1,1,0),
+			int3(1,1,1)
+	};
+	for (int z = 0; z < data.slices - 1; z++) {
+		for (int y = 0; y < data.cols - 1; y++) {
+			for (int x = 0; x < data.rows - 1; x++) {
+				int l = labels(x, y, z).x;
 				labelSet.clear();
-				labelSet.insert(labels(x+1,y+1,z+1));
-				labelSet.insert(labels(x+1,y+1,z));
-				labelSet.insert(labels(x+1,y  ,z+1));
-				labelSet.insert(labels(x+1,y  ,z));
-				labelSet.insert(labels(x  ,y+1,z+1));
-				labelSet.insert(labels(x  ,y+1,z));
-				labelSet.insert(labels(x  ,y  ,z+1));
-				labelSet.insert(labels(x  ,y  ,z));
+				for(int3 n:nbrs){
+					labelSet.insert(labels(n.x+x,n.y+y,n.z+z));
+				}
 				for (int l : labelSet) {
 					if (l != 0) {
 						narrowbands[l].push_back(int3(x, y, z));
@@ -435,32 +431,34 @@ void MultiIsoSurface::solve(
 			}
 		}
 	}
-	for(auto pr:narrowbands){
-		solve(data,labels, pr.second, mesh, type, regularize, pr.first);
+	regions.clear();
+	for (auto pr : narrowbands) {
+		size_t st=mesh.vertexLocations.size();
+		size_t ed;
+		solve(data, labels, pr.second, mesh, type, regularize, pr.first);
+		ed=mesh.vertexLocations.size();
+		regions[pr.first]={st,ed};
 	}
 }
-void MultiIsoSurface::solve(
-		const Volume1f& data,
-		const Volume1i& labels,
-		const std::vector<int3>& indexList,
-		Mesh& mesh, const MeshType& type,
-		bool regularizeTest,
-		int label) {
-	mesh.clear();
+void MultiIsoSurface::solve(const Volume1f& data, const Volume1i& labels,
+		const std::vector<int3>& indexList, Mesh& mesh, const MeshType& type,
+		bool regularizeTest, int label) {
 	if (type == MeshType::Triangle) {
-		solveTri(data.ptr(),labels.ptr(), data.rows, data.cols, data.slices, indexList, mesh, label);
+		solveTri(data.ptr(), labels.ptr(), data.rows, data.cols, data.slices,
+				indexList, mesh, label);
 	} else {
-		solveQuad(data.ptr(),labels.ptr(), data.rows, data.cols, data.slices, indexList,mesh, label);
+		solveQuad(data.ptr(), labels.ptr(), data.rows, data.cols, data.slices,
+				indexList, mesh, label);
 	}
 	if (regularizeTest) {
-		regularize(data.ptr(), mesh,label);
+		regularize(data.ptr(), mesh, label);
 		//mesh.updateVertexNormals();
 		//mesh.vertexNormals*=float3(-1.0f);
 	}
 	mesh.updateBoundingBox();
 }
 void MultiIsoSurface::solve(const EndlessGridFloatInt& grid, Mesh& mesh,
-		const MeshType& type, bool regularizeTest,int label) {
+		const MeshType& type, bool regularizeTest, int label) {
 	mesh.clear();
 	float oldBg = backgroundValue;
 	backgroundValue = grid.getBackgroundValue().value(label);
@@ -468,15 +466,16 @@ void MultiIsoSurface::solve(const EndlessGridFloatInt& grid, Mesh& mesh,
 		solveTri(grid, mesh, label);
 
 	} else {
-		solveQuad(grid, mesh,label);
+		solveQuad(grid, mesh, label);
 	}
 	if (regularizeTest) {
-		regularize(grid, mesh,label);
+		regularize(grid, mesh, label);
 	}
 	mesh.updateBoundingBox();
 	backgroundValue = oldBg;
 }
-void MultiIsoSurface::regularize(const EndlessGridFloatInt& grid, Mesh& mesh,int label) {
+void MultiIsoSurface::regularize(const EndlessGridFloatInt& grid, Mesh& mesh,
+		int label) {
 	const int TRACE_ITERATIONS = 16;
 	const int REGULARIZE_ITERATIONS = 3;
 	const float TRACE_THRESHOLD = 1E-5f;
@@ -487,8 +486,8 @@ void MultiIsoSurface::regularize(const EndlessGridFloatInt& grid, Mesh& mesh,int
 #pragma omp parallel for
 		for (int i = 0; i < (int) vertNbrs.size(); i++) {
 			float3 pt(0.0f);
-			int K=(int)vertNbrs[i].size();
-			if(K>3){
+			int K = (int) vertNbrs[i].size();
+			if (K > 3) {
 				for (uint32_t nbr : vertNbrs[i]) {
 					pt += mesh.vertexLocations[nbr];
 				}
@@ -497,7 +496,8 @@ void MultiIsoSurface::regularize(const EndlessGridFloatInt& grid, Mesh& mesh,int
 				pt = mesh.vertexLocations[i];
 			}
 			tmpPoints[i] = pt;
-			mesh.vertexNormals[i] = GetNormal(grid, (int) round(pt.x),(int) round(pt.y), (int) round(pt.z),label);
+			mesh.vertexNormals[i] = GetNormal(grid, (int) round(pt.x),
+					(int) round(pt.y), (int) round(pt.z), label);
 		}
 #pragma omp parallel for
 		for (int i = 0; i < (int) mesh.vertexLocations.size(); i++) {
@@ -521,7 +521,7 @@ void MultiIsoSurface::regularize(const EndlessGridFloatInt& grid, Mesh& mesh,int
 	const static float ANGLE_THRESH = std::acos(20.0f * ALY_PI / 180.0f);
 	mesh.updateVertexNormals(true);
 }
-void MultiIsoSurface::regularize(const float* data, Mesh& mesh,int label) {
+void MultiIsoSurface::regularize(const float* data, Mesh& mesh, int label) {
 	const int TRACE_ITERATIONS = 16;
 	const int REGULARIZE_ITERATIONS = 3;
 	const float TRACE_THRESHOLD = 1E-5f;
@@ -532,7 +532,7 @@ void MultiIsoSurface::regularize(const float* data, Mesh& mesh,int label) {
 #pragma omp parallel for
 		for (int i = 0; i < (int) vertNbrs.size(); i++) {
 			float3 pt(0.0f);
-			int K = (int)vertNbrs[i].size();
+			int K = (int) vertNbrs[i].size();
 			if (K > 3) {
 				for (uint32_t nbr : vertNbrs[i]) {
 					pt += mesh.vertexLocations[nbr];
@@ -542,7 +542,8 @@ void MultiIsoSurface::regularize(const float* data, Mesh& mesh,int label) {
 				pt = mesh.vertexLocations[i];
 			}
 			tmpPoints[i] = pt;
-			mesh.vertexNormals[i] = normalize(interpolateNormal(data, pt.x, pt.y, pt.z));
+			mesh.vertexNormals[i] = normalize(
+					interpolateNormal(data, pt.x, pt.y, pt.z));
 		}
 #pragma omp parallel for
 		for (int i = 0; i < (int) mesh.vertexLocations.size(); i++) {
@@ -564,9 +565,9 @@ void MultiIsoSurface::regularize(const float* data, Mesh& mesh,int label) {
 		}
 	}
 }
-void MultiIsoSurface::solveTri(const float* vol, const int* labels,const int& rows, const int& cols,
-		const int& slices, const std::vector<int3>& indexList, Mesh& mesh,
-		int label) {
+void MultiIsoSurface::solveTri(const float* vol, const int* labels,
+		const int& rows, const int& cols, const int& slices,
+		const std::vector<int3>& indexList, Mesh& mesh, int label) {
 	this->rows = rows;
 	this->cols = cols;
 	this->slices = slices;
@@ -579,40 +580,49 @@ void MultiIsoSurface::solveTri(const float* vol, const int* labels,const int& ro
 	triangles.reserve(indexList.size() * 2);
 	size_t vertexCount = 0;
 	triangleCount = 0;
+	size_t toffset = indexes.size();
+	uint32_t voffset = points.size();
+
 	for (size_t nn = 0; nn < elements; nn++) {
 		int3 index = indexList[nn];
 		if (index.x > 0 && index.y > 0 && index.z > 0 && index.x < rows - 1
 				&& index.y < cols - 1 && index.z < slices - 1)
-			triangulateUsingMarchingCubes(vol,labels, splits, triangles, index.x,
-					index.y, index.z,label, vertexCount);
+			triangulateUsingMarchingCubes(vol, labels, splits, triangles,
+					index.x, index.y, index.z, label, vertexCount);
 	}
-	indexes.resize(triangleCount);
+	indexes.resize(toffset + triangleCount);
+
 	if (winding == Winding::Clockwise) {
 		for (int k = 0; k < triangleCount; k++) {
 			IsoTriangle* triPtr = &triangles[k];
-			indexes[k] = uint3((uint32_t)triPtr->vertexIds[0], (uint32_t)triPtr->vertexIds[1],
-				(uint32_t)triPtr->vertexIds[2]);
+			indexes[toffset + k] = voffset
+					+ uint3((uint32_t) triPtr->vertexIds[0],
+							(uint32_t) triPtr->vertexIds[1],
+							(uint32_t) triPtr->vertexIds[2]);
 		}
 	} else if (winding == Winding::CounterClockwise) {
 		for (int k = 0; k < triangleCount; k++) {
 			IsoTriangle* triPtr = &triangles[k];
-			indexes[k] = uint3((uint32_t)triPtr->vertexIds[0], (uint32_t)triPtr->vertexIds[1],
-				(uint32_t)triPtr->vertexIds[2]);
+			indexes[toffset + k] = voffset
+					+ uint3((uint32_t) triPtr->vertexIds[0],
+							(uint32_t) triPtr->vertexIds[1],
+							(uint32_t) triPtr->vertexIds[2]);
 		}
 	}
 	const size_t splitCount = splits.size();
-	points.resize(splitCount);
-	normals.resize(splitCount);
+	points.resize(voffset + splitCount);
+	normals.resize(voffset + splitCount);
 	for (auto splitPtr = splits.begin(); splitPtr != splits.end(); ++splitPtr) {
 		size_t index = (splitPtr->second).vertexId;
 		aly::float3 pt = (splitPtr->second).point;
 		aly::float3 norm = interpolateNormal(vol, pt.x, pt.y, pt.z);
 		norm = norm / length(norm);
-		normals[index] = norm;
-		points[index] = pt;
+		normals[voffset + index] = norm;
+		points[voffset + index] = pt;
 	}
 }
-void MultiIsoSurface::solveQuad(const EndlessGridFloatInt& grid, Mesh& mesh,int label) {
+void MultiIsoSurface::solveQuad(const EndlessGridFloatInt& grid, Mesh& mesh,
+		int label) {
 	auto leafs = grid.getLeafNodes();
 	int dim = leafs.front()->dim;
 	int bdim = dim + 1;
@@ -622,11 +632,13 @@ void MultiIsoSurface::solveQuad(const EndlessGridFloatInt& grid, Mesh& mesh,int 
 	std::unordered_set<int3> activeVoxels;
 	std::unordered_map<int4, EdgeInfo> activeEdges;
 	std::unordered_map<int3, uint32_t> vertexIndices;
-	findActiveVoxels(grid, leafs, activeVoxels, activeEdges,label);
-	generateVertexData(grid, activeVoxels, activeEdges, vertexIndices, mesh,label);
+	findActiveVoxels(grid, leafs, activeVoxels, activeEdges, label);
+	generateVertexData(grid, activeVoxels, activeEdges, vertexIndices, mesh,
+			label);
 	generateTriangles(activeEdges, vertexIndices, mesh);
 }
-void MultiIsoSurface::solveTri(const EndlessGridFloatInt& grid, Mesh& mesh,int label) {
+void MultiIsoSurface::solveTri(const EndlessGridFloatInt& grid, Mesh& mesh,
+		int label) {
 	std::vector<aly::float3> &points = mesh.vertexLocations.data;
 	std::vector<uint3> &indexes = mesh.triIndexes.data;
 	std::unordered_map<int4, EdgeSplit3D> splits;
@@ -648,7 +660,7 @@ void MultiIsoSurface::solveTri(const EndlessGridFloatInt& grid, Mesh& mesh,int l
 		for (int z = 0; z < bdim; z++) {
 			for (int y = 0; y < bdim; y++) {
 				for (int x = 0; x < bdim; x++) {
-					std::pair<float,int> val;
+					std::pair<float, int> val;
 					if (x >= dim || y >= dim || z >= dim) {
 						val = grid.getLeafValue(loc.x + x, loc.y + y,
 								loc.z + z);
@@ -663,9 +675,9 @@ void MultiIsoSurface::solveTri(const EndlessGridFloatInt& grid, Mesh& mesh,int l
 		for (int z = 0; z < dim; z++) {
 			for (int y = 0; y < dim; y++) {
 				for (int x = 0; x < dim; x++) {
-					triangulateUsingMarchingCubes(data.data(),labels.data(), splits,
-							triangles, x, y, z,label, loc.x, loc.y, loc.z,
-							vertexCount);
+					triangulateUsingMarchingCubes(data.data(), labels.data(),
+							splits, triangles, x, y, z, label, loc.x, loc.y,
+							loc.z, vertexCount);
 				}
 			}
 		}
@@ -674,14 +686,16 @@ void MultiIsoSurface::solveTri(const EndlessGridFloatInt& grid, Mesh& mesh,int l
 	if (winding == Winding::Clockwise) {
 		for (int k = 0; k < triangleCount; k++) {
 			IsoTriangle* triPtr = &triangles[k];
-			indexes[k] = uint3((uint32_t)triPtr->vertexIds[0], (uint32_t)triPtr->vertexIds[1],
-				(uint32_t)triPtr->vertexIds[2]);
+			indexes[k] = uint3((uint32_t) triPtr->vertexIds[0],
+					(uint32_t) triPtr->vertexIds[1],
+					(uint32_t) triPtr->vertexIds[2]);
 		}
 	} else if (winding == Winding::CounterClockwise) {
 		for (int k = 0; k < triangleCount; k++) {
 			IsoTriangle* triPtr = &triangles[k];
-			indexes[k] = uint3((uint32_t)triPtr->vertexIds[0], (uint32_t)triPtr->vertexIds[1],
-				(uint32_t)triPtr->vertexIds[2]);
+			indexes[k] = uint3((uint32_t) triPtr->vertexIds[0],
+					(uint32_t) triPtr->vertexIds[1],
+					(uint32_t) triPtr->vertexIds[2]);
 		}
 	}
 	points.clear();
@@ -699,7 +713,8 @@ size_t MultiIsoSurface::getIndex(int i, int j, int k) {
 	return k * (rows * (size_t) cols) + j * (size_t) rows + (size_t) i;
 }
 
-float MultiIsoSurface::getValue(const float* vol,const int* labels, int i, int j, int k,int l) {
+float MultiIsoSurface::getValue(const float* vol, const int* labels, int i,
+		int j, int k, int l) {
 	size_t in1 = getSafeIndex(i, j, k);
 	float val = vol[in1];
 	int lab = labels[in1];
@@ -784,8 +799,9 @@ vector<int> MultiIsoSurface::buildFaceNeighborTable(int vertexCount,
 	return faceTable;
 }
 // debugged, no problem need optimization, i.e. vector->stack
-vector<vector<int>> MultiIsoSurface::buildVertexNeighborTable(const int vertexCount,
-		const int* indexes, const int indexCount, Winding direction) {
+vector<vector<int>> MultiIsoSurface::buildVertexNeighborTable(
+		const int vertexCount, const int* indexes, const int indexCount,
+		Winding direction) {
 	int v1, v2, v3;
 	vector<vector<int>> neighborTable(vertexCount);
 	vector<vector<int>> tmpTable(vertexCount);
@@ -853,8 +869,8 @@ vector<vector<int>> MultiIsoSurface::buildVertexNeighborTable(const int vertexCo
 	}
 	return neighborTable;
 }
-vector<vector<int>> MultiIsoSurface::buildVertexNeighborTable(const int vertexCount,
-		const int* indexes, const int indexCount) {
+vector<vector<int>> MultiIsoSurface::buildVertexNeighborTable(
+		const int vertexCount, const int* indexes, const int indexCount) {
 	int v1, v2, v3;
 	vector<vector<int>> neighborTable(vertexCount);
 	for (int i = 0; i < indexCount; i += 3) {
@@ -876,13 +892,15 @@ vector<vector<int>> MultiIsoSurface::buildVertexNeighborTable(const int vertexCo
 	}
 	return neighborTable;
 }
-void MultiIsoSurface::generateVertexData(const float*data,const int* labels,
-		const std::unordered_set<int3>& voxels, const std::unordered_map<int4, EdgeInfo>& edges,
-		std::unordered_map<int3, uint32_t>& vertexIndices, Mesh& buffer,int label) {
+void MultiIsoSurface::generateVertexData(const float*data, const int* labels,
+		const std::unordered_set<int3>& voxels,
+		const std::unordered_map<int4, EdgeInfo>& edges,
+		std::unordered_map<int3, uint32_t>& vertexIndices, Mesh& buffer,
+		int label) {
 	Vector3f& vert = buffer.vertexLocations;
 	Vector3f& norm = buffer.vertexNormals;
 	float3 p[12];
-	uint32_t idxCounter = 0;
+	uint32_t idxCounter = vert.size();
 	for (const auto& voxelID : voxels) {
 		int idx = 0;
 		for (int a = 0; a < 3; a++) {
@@ -906,17 +924,15 @@ void MultiIsoSurface::generateVertexData(const float*data,const int* labels,
 				interpolateNormal(data, nodePos.x, nodePos.y, nodePos.z));
 	}
 }
-void MultiIsoSurface::generateVertexData(
-		const EndlessGridFloatInt& grid,
+void MultiIsoSurface::generateVertexData(const EndlessGridFloatInt& grid,
 		const std::unordered_set<int3>& voxels,
 		const std::unordered_map<int4, EdgeInfo>& edges,
-		std::unordered_map<int3, uint32_t>& vertexIndices,
-		Mesh& buffer,
+		std::unordered_map<int3, uint32_t>& vertexIndices, Mesh& buffer,
 		int label) {
 	Vector3f& vert = buffer.vertexLocations;
 	Vector3f& norm = buffer.vertexNormals;
 	float3 p[12];
-	uint32_t idxCounter = 0;
+	uint32_t idxCounter = vert.size();
 	for (const auto& voxelID : voxels) {
 		int idx = 0;
 		for (int a = 0; a < 3; a++) {
@@ -937,10 +953,12 @@ void MultiIsoSurface::generateVertexData(
 		vertexIndices[voxelID] = idxCounter++;
 		vert.push_back(nodePos);
 		norm.push_back(
-				GetInterpolatedNormal(grid, nodePos.x, nodePos.y, nodePos.z,label));
+				GetInterpolatedNormal(grid, nodePos.x, nodePos.y, nodePos.z,
+						label));
 	}
 }
-void MultiIsoSurface::generateTriangles(const std::unordered_map<int4, EdgeInfo>& edges,
+void MultiIsoSurface::generateTriangles(
+		const std::unordered_map<int4, EdgeInfo>& edges,
 		const std::unordered_map<int3, uint32_t>& vertexIndices, Mesh& mesh) {
 	Vector4ui& quads = mesh.quadIndexes;
 	for (const auto& pair : edges) {
@@ -986,7 +1004,7 @@ void MultiIsoSurface::generateTriangles(const std::unordered_map<int4, EdgeInfo>
 void MultiIsoSurface::findActiveVoxels(const EndlessGridFloatInt& grid,
 		const std::list<EndlessNodeFloatInt*>& leafs,
 		std::unordered_set<int3>& activeVoxels,
-		std::unordered_map<int4, EdgeInfo>& activeEdges,int label) {
+		std::unordered_map<int4, EdgeInfo>& activeEdges, int label) {
 	int bdim = rows;
 	std::vector<float> data(rows * cols * slices);
 	std::vector<int> labels(rows * cols * slices);
@@ -996,7 +1014,7 @@ void MultiIsoSurface::findActiveVoxels(const EndlessGridFloatInt& grid,
 		for (int z = 0; z < bdim; z++) {
 			for (int y = 0; y < bdim; y++) {
 				for (int x = 0; x < bdim; x++) {
-					std::pair<float,int> val;
+					std::pair<float, int> val;
 					if (x >= dim || y >= dim || z >= dim) {
 						val = grid.getLeafValue(loc.x + x, loc.y + y,
 								loc.z + z);
@@ -1011,7 +1029,8 @@ void MultiIsoSurface::findActiveVoxels(const EndlessGridFloatInt& grid,
 		for (int z = 0; z < dim; z++) {
 			for (int y = 0; y < dim; y++) {
 				for (int x = 0; x < dim; x++) {
-					float fValue1 = getValue(data.data(),labels.data(),x, y, z,label);
+					float fValue1 = getValue(data.data(), labels.data(), x, y,
+							z, label);
 					if (fValue1 != backgroundValue) {
 						int3 pivot = int3(x + loc.x, y + loc.y, z + loc.z);
 						for (int a = 0; a < 3; a++) {
@@ -1020,18 +1039,19 @@ void MultiIsoSurface::findActiveVoxels(const EndlessGridFloatInt& grid,
 							if (nbr.x >= 0 && nbr.y >= 0 && nbr.z >= 0
 									&& nbr.x < rows && nbr.y < cols
 									&& nbr.z < slices) {
-								float fValue2 = getValue(data.data(),labels.data(),nbr.x,
-										nbr.y, nbr.z,label);
+								float fValue2 = getValue(data.data(),
+										labels.data(), nbr.x, nbr.y, nbr.z,
+										label);
 								if (fValue2 != backgroundValue
 										&& fValue1 * fValue2 < 0) {
-									float3 crossing((float)pivot.x, (float)pivot.y, (float)pivot.z);
+									float3 crossing((float) pivot.x,
+											(float) pivot.y, (float) pivot.z);
 									double fDelta = fValue2 - fValue1;
 									if (std::abs(fDelta) < 1E-3f) {
 										crossing += float3(axis) * 0.5f;
 									} else {
 										crossing += float3(axis)
-												* (float) (( - fValue1)
-														/ fDelta);
+												* (float) ((-fValue1) / fDelta);
 									}
 									EdgeInfo info;
 									info.point = crossing;
@@ -1056,18 +1076,20 @@ void MultiIsoSurface::findActiveVoxels(const EndlessGridFloatInt& grid,
 		}
 	}
 }
-void MultiIsoSurface::findActiveVoxels(const float* vol,const int* labels,
-		const std::vector<int3>& indexList, std::unordered_set<int3>& activeVoxels,
-		std::unordered_map<int4, EdgeInfo>& activeEdges,int label) {
+void MultiIsoSurface::findActiveVoxels(const float* vol, const int* labels,
+		const std::vector<int3>& indexList,
+		std::unordered_set<int3>& activeVoxels,
+		std::unordered_map<int4, EdgeInfo>& activeEdges, int label) {
 	for (int3 pivot : indexList) {
-		float fValue1 = getValue(vol,labels, pivot.x, pivot.y, pivot.z,label);
+		float fValue1 = getValue(vol, labels, pivot.x, pivot.y, pivot.z, label);
 		if (fValue1 != backgroundValue) {
 			for (int a = 0; a < 3; a++) {
 				int3 axis = AXIS_OFFSET[a];
 				int3 nbr = pivot + axis;
 				if (nbr.x >= 0 && nbr.y >= 0 && nbr.z >= 0 && nbr.x < rows
 						&& nbr.y < cols && nbr.z < slices) {
-					float fValue2 = getValue(vol,labels, nbr.x, nbr.y, nbr.z,label);
+					float fValue2 = getValue(vol, labels, nbr.x, nbr.y, nbr.z,
+							label);
 					if (fValue2 != backgroundValue && fValue1 * fValue2 < 0) {
 						float3 crossing(pivot);
 						double fDelta = fValue2 - fValue1;
@@ -1075,7 +1097,7 @@ void MultiIsoSurface::findActiveVoxels(const float* vol,const int* labels,
 							crossing += float3(axis) * 0.5f;
 						} else {
 							crossing += float3(axis)
-									* (float) (( - fValue1) / fDelta);
+									* (float) ((-fValue1) / fDelta);
 						}
 						EdgeInfo info;
 						info.point = crossing;
@@ -1098,9 +1120,8 @@ void MultiIsoSurface::findActiveVoxels(const float* vol,const int* labels,
 
 }
 void MultiIsoSurface::triangulateUsingMarchingCubes(const float* vol,
-		const int* labels,
-		std::unordered_map<uint64_t, EdgeSplit3D>& splits,
-		std::vector<IsoTriangle>& triangles, int x, int y, int z,int label,
+		const int* labels, std::unordered_map<uint64_t, EdgeSplit3D>& splits,
+		std::vector<IsoTriangle>& triangles, int x, int y, int z, int label,
 		size_t& vertexCount) {
 	int3 afCubeValue[8];
 	int iFlagIndex = 0;
@@ -1108,10 +1129,10 @@ void MultiIsoSurface::triangulateUsingMarchingCubes(const float* vol,
 		int3 v((x + vertexOffset[iVertex][0]), (y + vertexOffset[iVertex][1]),
 				((z + vertexOffset[iVertex][2])));
 		afCubeValue[iVertex] = v;
-		float val = getValue(vol,labels, v.x, v.y, v.z,label);
+		float val = getValue(vol, labels, v.x, v.y, v.z, label);
 		if (val == backgroundValue)
 			return;
-		if (val <0.0f)
+		if (val < 0.0f)
 			iFlagIndex |= 1 << iVertex;
 	}
 	int iEdgeFlags = cubeEdgeFlagsCC626[iFlagIndex];
@@ -1122,7 +1143,7 @@ void MultiIsoSurface::triangulateUsingMarchingCubes(const float* vol,
 	for (int iEdge = 0; iEdge < 12; ++iEdge) {
 		if ((iEdgeFlags & (1 << iEdge)) != 0) {
 			int3 v = afCubeValue[edgeConnection[iEdge][0]];
-			if (getValue(vol, labels,v.x, v.y, v.z,label) <0.0f) {
+			if (getValue(vol, labels, v.x, v.y, v.z, label) < 0.0f) {
 				split = EdgeSplit3D(afCubeValue[edgeConnection[iEdge][0]],
 						afCubeValue[edgeConnection[iEdge][1]], rows, cols,
 						slices);
@@ -1140,9 +1161,9 @@ void MultiIsoSurface::triangulateUsingMarchingCubes(const float* vol,
 			if (itr == splits.end()) {
 				split.vertexId = vertexCount++;
 				aly::float3 pt3d;
-				float fOffset = getOffset(vol,labels,
+				float fOffset = getOffset(vol, labels,
 						afCubeValue[edgeConnection[iEdge][0]],
-						afCubeValue[edgeConnection[iEdge][1]],label);
+						afCubeValue[edgeConnection[iEdge][1]], label);
 				pt3d.x = (x
 						+ (vertexOffset[edgeConnection[iEdge][0]][0]
 								+ fOffset * edgeDirection[iEdge][0]));
@@ -1153,7 +1174,8 @@ void MultiIsoSurface::triangulateUsingMarchingCubes(const float* vol,
 						+ (vertexOffset[edgeConnection[iEdge][0]][2]
 								+ fOffset * edgeDirection[iEdge][2]));
 				split.point = pt3d;
-				splits.insert(std::pair<uint64_t, EdgeSplit3D>(lHashValue, split));
+				splits.insert(
+						std::pair<uint64_t, EdgeSplit3D>(lHashValue, split));
 			} else {
 				split = itr->second;
 			}
@@ -1178,9 +1200,10 @@ void MultiIsoSurface::triangulateUsingMarchingCubes(const float* vol,
 
 }
 
-void MultiIsoSurface::triangulateUsingMarchingCubes(const float* vol,const int* labels,
-		std::unordered_map<int4, EdgeSplit3D>& splits, std::vector<IsoTriangle>& triangles,
-		int x, int y, int z,int label, int ox, int oy, int oz, size_t& vertexCount) {
+void MultiIsoSurface::triangulateUsingMarchingCubes(const float* vol,
+		const int* labels, std::unordered_map<int4, EdgeSplit3D>& splits,
+		std::vector<IsoTriangle>& triangles, int x, int y, int z, int label,
+		int ox, int oy, int oz, size_t& vertexCount) {
 	int3 afCubeValue[8];
 	int3 off = int3(ox, oy, oz);
 	int iFlagIndex = 0;
@@ -1188,7 +1211,7 @@ void MultiIsoSurface::triangulateUsingMarchingCubes(const float* vol,const int* 
 		int3 v((x + vertexOffset[iVertex][0]), (y + vertexOffset[iVertex][1]),
 				((z + vertexOffset[iVertex][2])));
 		afCubeValue[iVertex] = v + off;
-		float val = getValue(vol,labels, v.x, v.y, v.z,label);
+		float val = getValue(vol, labels, v.x, v.y, v.z, label);
 		if (val == backgroundValue)
 			return;
 		if (val < 0.0f)
@@ -1202,7 +1225,7 @@ void MultiIsoSurface::triangulateUsingMarchingCubes(const float* vol,const int* 
 	for (int iEdge = 0; iEdge < 12; ++iEdge) {
 		if ((iEdgeFlags & (1 << iEdge)) != 0) {
 			int3 v = afCubeValue[edgeConnection[iEdge][0]];
-			if (getValue(vol, labels,v.x, v.y, v.z,label) < 0.0f) {
+			if (getValue(vol, labels, v.x, v.y, v.z, label) < 0.0f) {
 				split = EdgeSplit3D(afCubeValue[edgeConnection[iEdge][0]],
 						afCubeValue[edgeConnection[iEdge][1]], rows, cols,
 						slices);
@@ -1218,9 +1241,9 @@ void MultiIsoSurface::triangulateUsingMarchingCubes(const float* vol,const int* 
 			if (itr == splits.end()) {
 				split.vertexId = vertexCount++;
 				aly::float3 pt3d;
-				float fOffset = getOffset(vol,labels,
+				float fOffset = getOffset(vol, labels,
 						afCubeValue[edgeConnection[iEdge][0]] - off,
-						afCubeValue[edgeConnection[iEdge][1]] - off,label);
+						afCubeValue[edgeConnection[iEdge][1]] - off, label);
 				pt3d.x = (ox + x
 						+ (vertexOffset[edgeConnection[iEdge][0]][0]
 								+ fOffset * edgeDirection[iEdge][0]));
@@ -1255,16 +1278,17 @@ void MultiIsoSurface::triangulateUsingMarchingCubes(const float* vol,const int* 
 	}
 }
 
-void MultiIsoSurface::triangulateUsingMarchingCubes(const float* vol,const int* labels,
-		std::vector<EdgeSplit3D>& splits, std::vector<IsoTriangle>& triangles,
-		int x, int y, int z,int label, size_t& vertexCount) {
+void MultiIsoSurface::triangulateUsingMarchingCubes(const float* vol,
+		const int* labels, std::vector<EdgeSplit3D>& splits,
+		std::vector<IsoTriangle>& triangles, int x, int y, int z, int label,
+		size_t& vertexCount) {
 	int3 afCubeValue[8];
 	int iFlagIndex = 0;
 	for (int iVertex = 0; iVertex < 8; ++iVertex) {
 		int3 v((x + vertexOffset[iVertex][0]), (y + vertexOffset[iVertex][1]),
 				((z + vertexOffset[iVertex][2])));
 		afCubeValue[iVertex] = v;
-		float val = getValue(vol,labels, v.x, v.y, v.z,label);
+		float val = getValue(vol, labels, v.x, v.y, v.z, label);
 		if (val == backgroundValue)
 			return;
 		if (val < 0.0f)
@@ -1278,7 +1302,7 @@ void MultiIsoSurface::triangulateUsingMarchingCubes(const float* vol,const int* 
 	for (int iEdge = 0; iEdge < 12; ++iEdge) {
 		if ((iEdgeFlags & (1 << iEdge)) != 0) {
 			int3 v = afCubeValue[edgeConnection[iEdge][0]];
-			if (getValue(vol, labels,v.x, v.y, v.z,label) < 0.0f) {
+			if (getValue(vol, labels, v.x, v.y, v.z, label) < 0.0f) {
 				split = EdgeSplit3D(afCubeValue[edgeConnection[iEdge][0]],
 						afCubeValue[edgeConnection[iEdge][1]], rows, cols,
 						slices);
@@ -1290,9 +1314,9 @@ void MultiIsoSurface::triangulateUsingMarchingCubes(const float* vol,const int* 
 
 			split.vertexId = vertexCount++;
 			aly::float3 pt3d;
-			float fOffset = getOffset(vol,labels,
+			float fOffset = getOffset(vol, labels,
 					afCubeValue[edgeConnection[iEdge][0]],
-					afCubeValue[edgeConnection[iEdge][1]],label);
+					afCubeValue[edgeConnection[iEdge][1]], label);
 			pt3d.x = (x
 					+ (vertexOffset[edgeConnection[iEdge][0]][0]
 							+ fOffset * edgeDirection[iEdge][0]));
@@ -1323,8 +1347,8 @@ void MultiIsoSurface::triangulateUsingMarchingCubes(const float* vol,const int* 
 		triangleCount++;
 	}
 }
-aly::float4 MultiIsoSurface::interpolateColor(const float4 *data, float x, float y,
-		float z) {
+aly::float4 MultiIsoSurface::interpolateColor(const float4 *data, float x,
+		float y, float z) {
 	int x1 = (int) std::ceil(x);
 	int y1 = (int) std::ceil(y);
 	int z1 = (int) std::ceil(z);
@@ -1352,17 +1376,18 @@ aly::float4 MultiIsoSurface::interpolateColor(const float4 *data, float x, float
 
 }
 
-float MultiIsoSurface::getOffset(const float* vol,const int* labels, const int3& v1, const int3& v2,int l) {
-	float fValue1 = getValue(vol,labels, v1.x, v1.y, v1.z,l);
-	float fValue2 = getValue(vol,labels, v2.x, v2.y, v2.z,l);
+float MultiIsoSurface::getOffset(const float* vol, const int* labels,
+		const int3& v1, const int3& v2, int l) {
+	float fValue1 = getValue(vol, labels, v1.x, v1.y, v1.z, l);
+	float fValue2 = getValue(vol, labels, v2.x, v2.y, v2.z, l);
 	double fDelta = fValue2 - fValue1;
 	if (std::abs(fDelta) < 1E-3f)
 		return 0.5f;
 	return (float) ((0.0f - fValue1) / fDelta);
 }
 
-aly::float3 MultiIsoSurface::interpolateNormal(const float *vol, float x, float y,
-		float z) {
+aly::float3 MultiIsoSurface::interpolateNormal(const float *vol, float x,
+		float y, float z) {
 	int x1 = (int) std::ceil(x);
 	int y1 = (int) std::ceil(y);
 	int z1 = (int) std::ceil(z);
@@ -1473,7 +1498,8 @@ void MultiIsoSurface::project(aly::float3* points, const int& numPoints,
 		points[i] = pt;
 	}
 }
-float MultiIsoSurface::interpolate(const float *data, float x, float y, float z) {
+float MultiIsoSurface::interpolate(const float *data, float x, float y,
+		float z) {
 	int x1 = (int) std::ceil(x);
 	int y1 = (int) std::ceil(y);
 	int z1 = (int) std::ceil(z);
