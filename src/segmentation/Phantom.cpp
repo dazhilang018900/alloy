@@ -184,9 +184,7 @@ void PhantomMetasphere::solveInternal(Volume1f& levelset) {
 								+ (y - center.y) * (y - center.y)
 								+ (z - center.z) * (z - center.z));
 				float alpha = std::atan2(y, x);
-				float r1 = std::sqrt(
-						maxAmplitude * maxAmplitude
-								- ((z - center.z) * (z - center.z)))
+				float r1 = std::sqrt(maxAmplitude * maxAmplitude- ((z - center.z) * (z - center.z)))
 						/ maxAmplitude;
 				float beta = std::atan2(z, rXY);
 				float d = (minAmplitude
@@ -195,10 +193,15 @@ void PhantomMetasphere::solveInternal(Volume1f& levelset) {
 				float r2 = (minAmplitude
 						+ (maxAmplitude - minAmplitude)
 								* (std::cos(2 * beta * frequency)));
-				levelset(i, j, k).x = 0.5 * ((rXY - r1 * d) + (rXYZ - r2));
+				if(r1<1.0f){
+					levelset(i, j, k).x = 0.5 * ((rXY - r1 * d) + (rXYZ - r2));
+				} else {
+					levelset(i, j, k).x = 1.0f;
+				}
 			}
 		}
 	}
+	//WriteImageToRawFile(MakeDesktopFile("ref.xml"),levelset);
 }
 void PhantomCheckerBoard::solveInternal(Volume1f& levelset) {
 	float scale = 2.0f / std::min(rows, std::min(cols, slices));

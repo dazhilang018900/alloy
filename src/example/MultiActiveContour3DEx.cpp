@@ -35,14 +35,17 @@ bool MultiActiveContour3DEx::init(Composite& rootNode) {
 	const int D = 128;
 	{
 		PhantomMetasphere metasphere(D,D,D);
-		metasphere.setNoiseLevel(0.1);
+		metasphere.setNoiseLevel(0.025);
 		metasphere.setFuzziness(0.5f);
 		metasphere.setInvertContrast(true);
 		Volume1f targetVol = metasphere.solveLevelSet();
 		Volume1f edgeVol;
 		Volume3f vectorField;
 		SolveEdgeFilter(targetVol, edgeVol, 1);
-		SolveGradientVectorFlow(edgeVol, vectorField, 0.1f, 16, true);
+		SolveGradientVectorFlow(edgeVol, vectorField, 0.1f, 8, true);
+		//WriteImageToRawFile(MakeDesktopFile("metasphere.xml"),targetVol);
+		//WriteImageToRawFile(MakeDesktopFile("edges.xml"),edgeVol);
+		//WriteImageToRawFile(MakeDesktopFile("vecfield.xml"),vectorField);
 		PhantomSphereCollection bubbles(D, D, D, 15);
 		Volume1f sourceVol = bubbles.getDistanceField();
 		Volume1i sourceLabels=bubbles.getLabels();
@@ -188,7 +191,7 @@ bool MultiActiveContour3DEx::init(Composite& rootNode) {
 	rootNode.add(renderRegion);
 	rootNode.add(infoComposite);
 	rootNode.add(timelineSlider);
-
+	camera.setActiveRegion(renderRegion.get());
 	return true;
 }
 void MultiActiveContour3DEx::draw(AlloyContext* context) {

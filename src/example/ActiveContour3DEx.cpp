@@ -192,6 +192,7 @@ bool ActiveContour3DEx::init(Composite& rootNode) {
 	rootNode.add(renderRegion);
 	rootNode.add(infoComposite);
 	rootNode.add(timelineSlider);
+	camera.setActiveRegion(renderRegion.get());
 
 	return true;
 }
