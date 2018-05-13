@@ -50,9 +50,9 @@ bool MultiActiveContour3DEx::init(Composite& rootNode) {
 		Volume1f sourceVol = bubbles.getDistanceField();
 		Volume1i sourceLabels=bubbles.getLabels();
 		simulation.setInitialDistanceField(sourceVol,sourceLabels);
-		simulation.setPressure(targetVol, 0.4f, 0.5f);
+		simulation.setPressure(targetVol, 1.0f, 0.5f);
 		simulation.setCurvature(0.25f);
-		simulation.setVectorField(vectorField, 0.2f);
+		simulation.setVectorField(vectorField, 0.0f);
 		simulation.init();
 	}
 	simulation.onUpdate =

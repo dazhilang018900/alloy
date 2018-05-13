@@ -92,10 +92,8 @@ bool MultiActiveContour3D::updateSurface() {
 	if (requestUpdateSurface) {
 		std::lock_guard<std::mutex> lockMe(contourLock);
 		Mesh mesh;
-		//WriteImageToRawFile(MakeDesktopFile("levelset.xml"),levelSet);
-		//WriteImageToRawFile(MakeDesktopFile("labels.xml"),labelImage);
 		std::map<int,std::pair<size_t,size_t>> regions;
-		isoSurface.solve(levelSet, labelImage, mesh, MeshType::Triangle,regions, true);
+		isoSurface.solve(levelSet, labelImage, mesh, MeshType::Triangle, regions, true);
 		mesh.updateVertexNormals(false, 4);
 		contour.vertexColors.resize(mesh.vertexLocations.size());
 		contour.vertexLabels.resize(mesh.vertexLocations.size());
@@ -112,7 +110,6 @@ bool MultiActiveContour3D::updateSurface() {
 		contour.triIndexes = mesh.triIndexes;
 		contour.quadIndexes = mesh.quadIndexes;
 		requestUpdateSurface = false;
-		//WriteMeshToFile(MakeDesktopFile("quad.ply"),mesh);
 		return true;
 	}
 	return false;
