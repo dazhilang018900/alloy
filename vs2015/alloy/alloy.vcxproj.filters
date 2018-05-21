@@ -642,9 +642,6 @@
     <ClCompile Include="..\..\src\example\MagicPixelEx.cpp">
       <Filter>src\example</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\example\MultiLevelSetEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\example\SuperPixelEx.cpp">
       <Filter>src\example</Filter>
     </ClCompile>
@@ -659,6 +656,18 @@
     </ClCompile>
     <ClCompile Include="..\..\src\fluid\SimulationObjects.cpp">
       <Filter>src\fluid</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\segmentation\MultiActiveContour3D.cpp">
+      <Filter>src\segmentation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\MultiActiveContour2DEx.cpp">
+      <Filter>src\example</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\MultiActiveContour3DEx.cpp">
+      <Filter>src\example</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\segmentation\MultiIsoSurface.cpp">
+      <Filter>src\segmentation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -1526,9 +1535,6 @@
     <ClInclude Include="..\..\include\example\MagicPixelEx.h">
       <Filter>include\example</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\MultiLevelSetEx.h">
-      <Filter>include\example</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\example\SuperPixelEx.h">
       <Filter>include\example</Filter>
     </ClInclude>
@@ -1543,6 +1549,18 @@
     </ClInclude>
     <ClInclude Include="..\..\include\fluid\SimulationObjects.h">
       <Filter>include\fluid</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\segmentation\MultiActiveContour3D.h">
+      <Filter>include\segmentation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\example\MultiActiveContour2DEx.h">
+      <Filter>include\example</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\example\MultiActiveContour3DEx.h">
+      <Filter>include\example</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\segmentation\MultiIsoSurface.h">
+      <Filter>include\segmentation</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

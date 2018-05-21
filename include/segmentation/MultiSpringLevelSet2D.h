@@ -21,11 +21,11 @@
 
 #ifndef INCLUDE_MULTISPRINGLEVELSET2D_H_
 #define INCLUDE_MULTISPRINGLEVELSET2D_H_
-#include <segmentation/ManifoldCache2D.h>
-
+#include "segmentation/ManifoldCache2D.h"
 #include "Simulation.h"
 #include "ContourShaders.h"
 #include "AlloyLocator.h"
+#include "segmentation/MultiActiveContour2D.h"
 namespace aly {
 	class MultiSpringLevelSet2D : public MultiActiveContour2D {
 	public:

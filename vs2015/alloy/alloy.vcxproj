@@ -134,7 +134,8 @@
     <ClCompile Include="..\..\src\example\MeshTextureMapEx.cpp" />
     <ClCompile Include="..\..\src\example\MeshVertexColorEx.cpp" />
     <ClCompile Include="..\..\src\example\MeshWireframeEx.cpp" />
-    <ClCompile Include="..\..\src\example\MultiLevelSetEx.cpp" />
+    <ClCompile Include="..\..\src\example\MultiActiveContour2DEx.cpp" />
+    <ClCompile Include="..\..\src\example\MultiActiveContour3DEx.cpp" />
     <ClCompile Include="..\..\src\example\OneEuroFilterEx.cpp" />
     <ClCompile Include="..\..\src\example\ParameterPaneEx.cpp" />
     <ClCompile Include="..\..\src\example\PoissonBlendEx.cpp" />
@@ -188,7 +189,9 @@
     <ClCompile Include="..\..\src\segmentation\Manifold3D.cpp" />
     <ClCompile Include="..\..\src\segmentation\ManifoldCache3D.cpp" />
     <ClCompile Include="..\..\src\segmentation\MultiActiveContour2D.cpp" />
+    <ClCompile Include="..\..\src\segmentation\MultiActiveContour3D.cpp" />
     <ClCompile Include="..\..\src\segmentation\MultiIsoContour.cpp" />
+    <ClCompile Include="..\..\src\segmentation\MultiIsoSurface.cpp" />
     <ClCompile Include="..\..\src\segmentation\MultiSpringLevelSet2D.cpp" />
     <ClCompile Include="..\..\src\segmentation\MultiSpringLevelSetSecondOrder2D.cpp" />
     <ClCompile Include="..\..\src\segmentation\Phantom.cpp" />
@@ -394,7 +397,8 @@
     <ClInclude Include="..\..\include\example\MeshTextureMapEx.h" />
     <ClInclude Include="..\..\include\example\MeshVertexColorEx.h" />
     <ClInclude Include="..\..\include\example\MeshWireframeEx.h" />
-    <ClInclude Include="..\..\include\example\MultiLevelSetEx.h" />
+    <ClInclude Include="..\..\include\example\MultiActiveContour2DEx.h" />
+    <ClInclude Include="..\..\include\example\MultiActiveContour3DEx.h" />
     <ClInclude Include="..\..\include\example\OneEuroFilterEx.h" />
     <ClInclude Include="..\..\include\example\ParameterPaneEx.h" />
     <ClInclude Include="..\..\include\example\PoissonBlendEx.h" />
@@ -484,7 +488,9 @@
     <ClInclude Include="..\..\include\segmentation\Manifold3D.h" />
     <ClInclude Include="..\..\include\segmentation\ManifoldCache3D.h" />
     <ClInclude Include="..\..\include\segmentation\MultiActiveContour2D.h" />
+    <ClInclude Include="..\..\include\segmentation\MultiActiveContour3D.h" />
     <ClInclude Include="..\..\include\segmentation\MultiIsoContour.h" />
+    <ClInclude Include="..\..\include\segmentation\MultiIsoSurface.h" />
     <ClInclude Include="..\..\include\segmentation\MultiSpringLevelSet2D.h" />
     <ClInclude Include="..\..\include\segmentation\MultiSpringLevelSetSecondOrder2D.h" />
     <ClInclude Include="..\..\include\segmentation\Phantom.h" />
