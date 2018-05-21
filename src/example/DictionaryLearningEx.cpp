@@ -38,21 +38,13 @@ bool DictionaryLearningEx::init(Composite& rootNode) {
 	 DownSample3x3(img,tmp);
 	 DownSample3x3(tmp,img);
 	 }
-	 */
-
-	 {
-	 ImageRGBA tmp;
-	 ReadImageFromFile(getFullPath("images/blake.png"), tmp);
-	 DownSample3x3(tmp,img);
-	 }
-
-		int patchSize = 8;
-		int subsample = 8;
-		int filters = 32;
-	 /*
+	*/
+	ReadImageFromFile(getFullPath("images/stereo_left.png"), img);
+	int patchSize = 8;
+	int subsample = 4;
+	int filters = 32;
+	/*
 	ImageRGBA tmp;
-
-
 	*/
 	/*
 	std::vector<std::string> outputFiles = GetDirectoryFileListing(
@@ -110,7 +102,7 @@ bool DictionaryLearningEx::init(Composite& rootNode) {
 
 	 learning.train({img},filters,subsample,patchSize,patchSize);
 	 learning.writeFilterBanks(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"filters1.png");
-	 learning.writeEstimatedPatches(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"reconstruction1.png",img.width/patchSize,img.height/patchSize);
+	 learning.writeEstimatedPatches(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"reconstruction.png",img.width/subsample,img.height/subsample);
 
 	 /*
 	 DownSample3x3(img,tmp);

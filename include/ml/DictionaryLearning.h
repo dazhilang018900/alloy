@@ -28,18 +28,8 @@ struct FilterBank {
 	void load(Archive & archive) {
 		archive(CEREAL_NVP(width), CEREAL_NVP(height), CEREAL_NVP(data));
 	}
-	float score(const std::vector<float>& sample) {
-		int N = (int) std::min(data.size(), sample.size());
-		double err = 0;
-		for (int i = 0; i < N; i++) {
-			err += std::abs(data[i] - sample[i]);
-		}
-		err /= N;
-		return (float) err;
-	}
-	void normalize() {
-
-	}
+	double score(const std::vector<float>& sample);
+	void normalize();
 };
 struct OrientedPatch {
 	int width, height;
@@ -62,51 +52,11 @@ struct OrientedPatch {
 					patchHeight) {
 		data.resize(patchWidth * patchHeight);
 	}
-	void sample(const aly::Image1f& gray) {
-		float2 tanget = MakeOrthogonalComplement(normal);
-		for (int j = 0; j < height; j++) {
-			for (int i = 0; i < width; i++) {
-				float2 pix(width * (i / (float) (width - 1) - 0.5f),
-						height * (j / (float) (height - 1) - 0.5f));
-				data[i + j * width] = gray(position.x + dot(normal, pix),
-						position.y + dot(tanget, pix));
-			}
-		}
-	}
-	float error(const std::vector<FilterBank>& banks) {
-		int N = (int) data.size();
-		int M = (int) weights.size();
-		double err = 0;
-		for (int i = 0; i < N; i++) {
-			float val = 0;
-			for (int j = 0; j < M; j++) {
-				val += banks[j].data[i] * weights[j];
-			}
-			err += std::abs(data[i] - val);
-		}
-		err /= N;
-		return (float) err;
-	}
+	void sample(const aly::Image1f& gray);
+	float error(const std::vector<FilterBank>& banks);
 	float synthesize(const std::vector<FilterBank>& banks,
-			std::vector<float>& sample) {
-		int N = (int) data.size();
-		int M = (int) weights.size();
-		double err = 0;
-		for (int i = 0; i < N; i++) {
-			float val = 0;
-			for (int j = 0; j < M; j++) {
-				val += banks[j].data[i] * weights[j];
-			}
-			err += std::abs(data[i] - val);
-		}
-		err /= N;
-		return (float) err;
-	}
-	void resize(int w, int h) {
-		data.resize(w * h, 0.0f);
-		width = w;
-		height = h;
-	}
+			std::vector<float>& sample);
+	void resize(int w, int h);
 };
 class DictionaryLearning {
 protected:
@@ -126,13 +76,14 @@ public:
 	DictionaryLearning();
 	void write(const std::string& outFile);
 	void read(const std::string& outFile);
-	void writeEstimatedPatches(const std::string& outImage, int M, int N);
+	void writeEstimatedPatches(const std::string& outImage,int M,int N);
 	void writeFilterBanks(const std::string& outImage);
 	virtual ~DictionaryLearning() {
 	}
 	void train(const std::vector<ImageRGBA>& img, int targetFilterBankSize = 32,
 			int subsample = 8, int patchWidth = 16, int patchHeight = 8);
 };
+void WritePatchesToFile(const std::string& file,const std::vector<OrientedPatch>& patches);
 void WriteFilterBanksToFile(const std::string& file,
 		const std::vector<FilterBank>& banks);
 void ReadFilterBanksFromFile(const std::string& file,

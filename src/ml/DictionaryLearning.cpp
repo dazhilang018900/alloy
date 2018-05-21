@@ -16,10 +16,102 @@
 #include <cereal/archives/portable_binary.hpp>
 #include "ml/DictionaryLearning.h"
 namespace aly {
-DictionaryLearning::DictionaryLearning() {
-	targetSparsity = 3;
+void OrientedPatch::sample(const aly::Image1f& gray) {
+	float2 tanget = MakeOrthogonalComplement(normal);
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width; i++) {
+			float2 pix(width * (i / (float) (width - 1) - 0.5f),
+					height * (j / (float) (height - 1) - 0.5f));
+			data[i + j * width] = gray(position.x + dot(normal, pix),
+					position.y + dot(tanget, pix));
+		}
+	}
+}
+float OrientedPatch::error(const std::vector<FilterBank>& banks) {
+	int N = (int) data.size();
+	int M = (int) weights.size();
+	double err = 0;
+	for (int i = 0; i < N; i++) {
+		float val = 0;
+		for (int j = 0; j < M; j++) {
+			val += banks[j].data[i] * weights[j];
+		}
+		err += std::abs(data[i] - val);
+	}
+	err /= N;
+	return (float) err;
+}
+float OrientedPatch::synthesize(const std::vector<FilterBank>& banks,
+		std::vector<float>& sample) {
+	int N = (int) data.size();
+	int M = (int) weights.size();
+	double err = 0;
+
+	int ww=width/2;
+	int hh=height/2;
+	sample.resize(ww*hh);
+	Image1f tmp(width,height);
+	for (int i = 0; i < N; i++) {
+		float val = 0;
+		for (int j = 0; j < M; j++) {
+			val += banks[j].data[i] * weights[j];
+		}
+		err += std::abs(data[i] - val);
+		tmp[i]=clamp(val,0.0f,1.0f);
+	}
+	float2 norm =   float2(normal.x,-normal.y);
+	float2 tanget = float2(normal.y, normal.x);
+	for (int j = 0; j < ww; j++) {
+		for (int i = 0; i < hh; i++) {
+			float2 pix(width * ((i+ww/2) / (float) (width - 1) - 0.5f),height * ((j+hh/2) / (float) (height - 1) - 0.5f));
+			pix=float2(width*0.5f+dot(norm, pix),height*0.5f+dot(tanget, pix));
+			if(tmp.contains(pix)){
+				sample[i + j * ww]=tmp(pix).x;
+			} else {
+				sample[i + j * hh]=-1.0f;
+			}
+		}
+	}
+	err/=N;
+	return (float) err;
+}
+void OrientedPatch::resize(int w, int h) {
+	data.resize(w * h, 0.0f);
+	width = w;
+	height = h;
+}
+double FilterBank::score(const std::vector<float>& sample) {
+	int N = (int) std::min(data.size(), sample.size());
+	double err = 0;
+	/*
+	for (int i = 0; i < N; i++) {
+		err += std::abs(data[i] - sample[i]);
+	}
+	err /= N;
+	*/
+	for (int i = 0; i < N; i++) {
+		err += data[i] * sample[i];
+	}
+	err= err/N;
+	return -err;
 }
 
+void FilterBank::normalize() {
+	double sum=0.0;
+	const int N=(int)data.size();
+	for(int i=0;i<N;i++){
+		sum+=data[i]*data[i];
+	}
+	sum=std::sqrt(sum)/N;
+	if(sum>1E-10){
+		for(int i=0;i<N;i++){
+			data[i]/=sum;
+		}
+	}
+}
+DictionaryLearning::DictionaryLearning() {
+	targetSparsity = 4;
+}
 std::set<int> DictionaryLearning::optimizeFilters(int start) {
 	int S = patches.size();
 	int K = filterBanks.size();
@@ -46,7 +138,7 @@ std::set<int> DictionaryLearning::optimizeFilters(int start) {
 		for (int kk = 0; kk < KK; kk++) {
 			int k = nonZeroIndexes[kk];
 			float w = patch.weights[k];
-			A(s,kk) = w;
+			A[s][kk] = w;
 		}
 	}
 	DenseMat<float> At = A.transpose();
@@ -74,6 +166,10 @@ std::set<int> DictionaryLearning::optimizeFilters(int start) {
 			bank.data[n] = x[kk];
 		}
 	}
+	for (int kk = 0; kk < KK; kk++) {
+		int k = nonZeroIndexes[kk];
+		filterBanks[k].normalize();
+	}
 	for (int i = 0; i < start; i++) {
 		nonZeroSet.insert(i);
 	}
@@ -83,8 +179,7 @@ void DictionaryLearning::solveOrthoMatchingPursuit(int T,
 		OrientedPatch& patch) {
 	std::vector<float>& sample = patch.data;
 	std::vector<float>& weights = patch.weights;
-	weights.resize(filterBanks.size());
-	weights.assign(filterBanks.size(), 0.0f);
+	weights.resize(filterBanks.size(),0.0f);
 	size_t B = filterBanks.size();
 	size_t N = sample.size();
 	DenseMat<float> A;
@@ -128,6 +223,7 @@ void DictionaryLearning::solveOrthoMatchingPursuit(int T,
 		r = A * x - b;
 		bestScore = 1E30;
 		count = 0;
+
 		for (int bk = 0; bk < B; bk++) {
 			if (mask[bk]) {
 				weights[bk] = x[count++];
@@ -148,14 +244,14 @@ void DictionaryLearning::solveOrthoMatchingPursuit(int T,
 					bestBank = bk;
 				}
 			}
-			if (bestBank < 0 || bestScore < 1E-5f) {
+			if (bestBank < 0) { // || bestScore < 1E-5f
 				break;
 			}
 			mask[bestBank] = true;
 			nonzero++;
 		}
+		//std::cout<<t<<") Weights "<<weights<<" residual="<<length(r)<<std::endl;
 	}
-//std::cout<<"Weights: "<<weights<<" RES "<<length(r)<<std::endl;
 }
 void DictionaryLearning::optimizeWeights(int t) {
 #pragma omp parallel for
@@ -253,9 +349,30 @@ void DictionaryLearning::write(const std::string& outFile) {
 void DictionaryLearning::read(const std::string& outFile) {
 	ReadFilterBanksFromFile(outFile, filterBanks);
 }
-void DictionaryLearning::writeEstimatedPatches(const std::string& outImage,
-		int M, int N) {
-	std::vector<ImageRGBA> tiles(patches.size());
+void WritePatchesToFile(const std::string& file,const std::vector<OrientedPatch>& patches){
+	std::vector<ImageRGB> tiles(patches.size());
+	int M=std::ceil(std::sqrt(patches.size()));
+	int N=(patches.size()%M==0)?(patches.size()/M):(1+patches.size()/M);
+	for (size_t idx = 0; idx < patches.size(); idx++) {
+		const OrientedPatch& p = patches[idx];
+		ImageRGB& tile = tiles[idx];
+		tile.resize(p.width, p.height);
+		int count=0;
+		for (int j = 0; j < p.height; j++) {
+			for (int i = 0; i < p.width; i++) {
+				tile[count] = ColorMapToRGB(p.data[count],ColorMap::RedToBlue);
+				count++;
+			}
+		}
+	}
+	ImageRGB out;
+	Tile(tiles, out, N, M);
+	WriteImageToFile(file, out);
+}
+void DictionaryLearning::writeEstimatedPatches(const std::string& outImage,int M,int N) {
+	//int M=std::ceil(std::sqrt(patches.size()));
+	//int N=(patches.size()%M==0)?(patches.size()/M):(1+patches.size()/M);
+	std::vector<ImageRGB> tiles(patches.size());
 	std::vector<double> scores(patches.size());
 	double maxError = 0;
 	for (int n = 0; n < patches.size(); n++) {
@@ -264,25 +381,30 @@ void DictionaryLearning::writeEstimatedPatches(const std::string& outImage,
 			maxError = scores[n];
 		}
 	}
+
 	for (size_t idx = 0; idx < patches.size(); idx++) {
 		OrientedPatch& p = patches[idx];
 		std::vector<float> tmp;
 		p.synthesize(filterBanks, tmp);
-		ImageRGBA& tile = tiles[idx];
-		tile.resize(p.width, p.height);
+		ImageRGB& tile = tiles[idx];
+		tile.resize(p.width/2, p.height/2);
 		int count = 0;
 		float cw = scores[idx] / maxError;
-		for (int j = 0; j < p.height; j++) {
-			for (int i = 0; i < p.width; i++) {
+		for (int j = 0; j < tile.height; j++) {
+			for (int i = 0; i < tile.width; i++) {
 				float val = tmp[count];
-				float err = std::abs(tmp[count] - p.data[count]);
-				tile[count] = ToRGBA(
-						HSVAtoRGBAf(HSVA(1.0f - 0.9f * cw, cw, val, 1.0f)));
+				if(val<0){
+					tile[count] =aly::RGB(0,0,0);
+				} else {
+					float err = std::abs(tmp[count] - p.data[count]);
+					tile[count] = ToRGB(HSVtoRGBf(HSV(1.0f - 0.9f * cw, cw, val)));
+				}
 				count++;
 			}
 		}
 	}
-	ImageRGBA out;
+	std::cout<<"Tiles "<<tiles.size()<<std::endl;
+	ImageRGB out;
 	Tile(tiles, out, N, M);
 	WriteImageToFile(outImage, out);
 }
@@ -336,13 +458,7 @@ void DictionaryLearning::train(const std::vector<ImageRGBA>& images,
 		int M = img.width / subsample;
 		for (int n = 0; n < N; n++) {
 			for (int m = 0; m < M; m++) {
-				float2 center;
-				//if (n % 2 == 0) {
-				center = float2(m * subsample + subsample * 0.5f, n * subsample + subsample * 0.5f);
-				//} else {
-				//	center = float2(m * subsample + subsample * 0.25f,
-				//			n * subsample + subsample * 0.5f);
-				//}
+				float2 center = float2(m * subsample + subsample * 0.5f, n * subsample + subsample * 0.5f);
 				float2 normal(gX(center).x, gY(center).x);
 				if (length(normal) < 1E-6f) {
 					normal = float2(1, 0);
@@ -356,8 +472,8 @@ void DictionaryLearning::train(const std::vector<ImageRGBA>& images,
 		}
 	}
 	std::cout<<"Patches "<<patches.size()<<" "<<patchWidth<<" "<<patchHeight<<std::endl;
-
-	const int initFilterBanks = 4;
+	WritePatchesToFile(MakeDesktopFile("tiles.png"),patches);
+	const int initFilterBanks = 8;
 	filterBanks.clear();
 	filterBanks.reserve(initFilterBanks);
 	size_t K = patchWidth * patchHeight;
@@ -371,28 +487,35 @@ void DictionaryLearning::train(const std::vector<ImageRGBA>& images,
 		float t = 2 * (j - (patchHeight - 1) * 0.5f) / (patchHeight - 1);
 		float s = 2 * (i - (patchWidth - 1) * 0.5f) / (patchWidth - 1);
 		filterBanks[0].data[k] = 1.0f;
-		filterBanks[1].data[k] = t;
-		filterBanks[2].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * t));
-		filterBanks[3].data[k] = std::exp(-0.5f * t * t / var);
-		//filterBanks[4].data[k] = std::exp(-0.5f * (t * t + s * s) / var);
+		filterBanks[1].data[k] = s;
+		filterBanks[2].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * s));
+		filterBanks[3].data[k] = std::exp(-0.5f * s * s / var);
+		filterBanks[4].data[k] = t;
+		filterBanks[5].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * t));
+		filterBanks[6].data[k] = std::exp(-0.5f * t * t / var);
+		filterBanks[7].data[k] = std::exp(-0.5f * (t * t + s * s) / var);
 	}
 	int KK = filterBanks.size() * 4;
 //Orthogonal basis pursuit
 	std::set<int> nonZeroSet;
-	const int optimizationIterations = 30;
+	const int optimizationIterations = 8;
 	int startFilter = filterBanks.size();
 	for (int n = 0; n < filterBanks.size(); n++) {
 		filterBanks[n].normalize();
 	}
+	//optimizeWeights(targetSparsity);
+
 	for (int l = 0; filterBanks.size() < targetFilterBankSize; l++) {
-		std::cout << "Filter Banks " << filterBanks.size() << std::endl;
-		std::cout << "Start Filter " << startFilter << "/" << filterBanks.size()<< std::endl;
+		std::cout << "Before Optimize Error: " << error() <<" for sparsity "<<targetSparsity<< std::endl;
 		for (int h = 0; h < optimizationIterations; h++) {
 			optimizeWeights(targetSparsity);
-			std::cout << "Weight Update Error: " << error() << std::endl;
+			//std::cout << "Weight Update Error: " << error() <<" for sparsity "<<targetSparsity<< std::endl;
 			nonZeroSet = optimizeFilters(startFilter);
+			//std::cout << "After Optimize Error: " << error() <<" for sparsity "<<targetSparsity<< std::endl;
 			//std::cout << "Non-Zero Set: " << nonZeroSet.size() << std::endl;
 		}
+		std::cout << "After Optimize Error: " << error() <<" for sparsity "<<targetSparsity<< std::endl;
+
 		if (filterBanks.size() == targetFilterBankSize)
 			break;
 		std::vector<std::pair<int, double>> scores;
@@ -403,7 +526,6 @@ void DictionaryLearning::train(const std::vector<ImageRGBA>& images,
 		add(fb);
 		//filterBanks.back().normalize();
 	}
-	patches.clear();
 }
 }
 
