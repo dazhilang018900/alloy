@@ -92,7 +92,7 @@ double FilterBank::score(const std::vector<float>& sample) {
 	for (int i = 0; i < N; i++) {
 		err += data[i] * sample[i];
 	}
-	err= err/N;
+	err= std::abs(err)/N;
 	return -err;
 }
 
@@ -506,7 +506,8 @@ void DictionaryLearning::train(const std::vector<ImageRGBA>& images,
 	//optimizeWeights(targetSparsity);
 
 	for (int l = 0; filterBanks.size() < targetFilterBankSize; l++) {
-		std::cout << "Before Optimize Error: " << error() <<" for sparsity "<<targetSparsity<< std::endl;
+		float err1=error() ;
+		std::cout << "Before Optimize Error: " << err1<<" for sparsity "<<targetSparsity<< std::endl;
 		for (int h = 0; h < optimizationIterations; h++) {
 			optimizeWeights(targetSparsity);
 			//std::cout << "Weight Update Error: " << error() <<" for sparsity "<<targetSparsity<< std::endl;
@@ -514,8 +515,10 @@ void DictionaryLearning::train(const std::vector<ImageRGBA>& images,
 			//std::cout << "After Optimize Error: " << error() <<" for sparsity "<<targetSparsity<< std::endl;
 			//std::cout << "Non-Zero Set: " << nonZeroSet.size() << std::endl;
 		}
-		std::cout << "After Optimize Error: " << error() <<" for sparsity "<<targetSparsity<< std::endl;
+		float err2=error();
 
+		std::cout << "After Optimize Error: " << err2 <<" for sparsity "<<targetSparsity<< std::endl;
+		if(std::abs(err2-err1)<1E-6f)break;
 		if (filterBanks.size() == targetFilterBankSize)
 			break;
 		std::vector<std::pair<int, double>> scores;
