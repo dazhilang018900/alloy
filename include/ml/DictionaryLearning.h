@@ -28,7 +28,7 @@ struct FilterBank {
 	void load(Archive & archive) {
 		archive(CEREAL_NVP(width), CEREAL_NVP(height), CEREAL_NVP(data));
 	}
-	double score(const std::vector<float>& sample);
+	double score(const std::vector<float>& sample,bool correlation=true);
 	void normalize();
 };
 struct OrientedPatch {
@@ -60,7 +60,6 @@ struct OrientedPatch {
 };
 class DictionaryLearning {
 protected:
-	int targetSparsity;
 	void solveOrthoMatchingPursuit(int m, OrientedPatch& patch);
 	void removeFilterBanks(const std::set<int>& indexes);
 	void add(const std::vector<FilterBank>& banks);

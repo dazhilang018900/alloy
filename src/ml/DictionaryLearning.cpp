@@ -73,20 +73,23 @@ void OrientedPatch::resize(int w, int h) {
 	width = w;
 	height = h;
 }
-double FilterBank::score(const std::vector<float>& sample) {
+double FilterBank::score(const std::vector<float>& sample,bool correlation) {
 	int N = (int) std::min(data.size(), sample.size());
 	double err = 0;
-	/*
-	for (int i = 0; i < N; i++) {
-		err += std::abs(data[i] - sample[i]);
+	//use positive correlation to avoid cancellations
+	if(correlation){
+		for (int i = 0; i < N; i++) {
+			err += data[i] * sample[i];
+		}
+		err= err/N;
+		return -err;
+	} else {
+		for (int i = 0; i < N; i++) {
+			err += std::abs(data[i] - sample[i]);
+		}
+		err /= N;
+		return err;
 	}
-	err /= N;
-	*/
-	for (int i = 0; i < N; i++) {
-		err += data[i] * sample[i];
-	}
-	err= std::abs(err)/N;
-	return -err;
 }
 
 void FilterBank::normalize() {
@@ -103,13 +106,12 @@ void FilterBank::normalize() {
 	}
 }
 DictionaryLearning::DictionaryLearning() {
-	targetSparsity = 3;
+
 }
 std::set<int> DictionaryLearning::optimizeFilters(int start) {
 	int S = patches.size();
 	int K = filterBanks.size();
 	int N = filterBanks.front().data.size();
-
 	std::set<int> nonZeroSet;
 	for (int s = 0; s < S; s++) {
 		OrientedPatch& patch = patches[s];
@@ -149,7 +151,7 @@ std::set<int> DictionaryLearning::optimizeFilters(int start) {
 				for (int ll = 0; ll < start; ll++) {
 					val -= filterBanks[ll].data[n] * patch.weights[ll];
 				}
-				AtB[kk] += val * At(kk,s);
+				AtB[kk] += val * At[kk][s];
 			}
 		}
 		x = Solve(AtA, AtB, MatrixFactorization::SVD);
@@ -188,7 +190,7 @@ void DictionaryLearning::solveOrthoMatchingPursuit(int T,
 	std::vector<bool> mask(B, false);
 	for (int bk = 0; bk < B; bk++) {
 		FilterBank& bank = filterBanks[bk];
-		score = bank.score(sample);
+		score = bank.score(sample,true);
 		if (score < bestScore) {
 			bestScore = score;
 			bestBank = bk;
@@ -231,7 +233,7 @@ void DictionaryLearning::solveOrthoMatchingPursuit(int T,
 					continue;
 				}
 				FilterBank& bank = filterBanks[bk];
-				score = bank.score(r.data);
+				score = bank.score(r.data,true);
 				if (score < bestScore) {
 					bestScore = score;
 					bestBank = bk;
@@ -441,7 +443,6 @@ void DictionaryLearning::train(const std::vector<ImageRGBA>& images,
 		int patchHeight,int sparsity) {
 	aly::Image1f gray;
 	Image1f gX, gY;
-	targetSparsity=sparsity;
 	patches.clear();
 	std::cout << "Start Learning " << patches.size() << "..." << std::endl;
 	for (int nn = 0; nn < images.size(); nn++) {
@@ -454,11 +455,14 @@ void DictionaryLearning::train(const std::vector<ImageRGBA>& images,
 			for (int m = 0; m < M; m++) {
 				float2 center = float2(m * subsample + subsample * 0.5f, n * subsample + subsample * 0.5f);
 				float2 normal(gX(center).x, gY(center).x);
+				/*
 				if (length(normal) < 1E-6f) {
 					normal = float2(1, 0);
 				} else {
 					normal = normalize(normal);
 				}
+				*/
+				normal = float2(1, 0);
 				OrientedPatch p(center, normal, patchWidth, patchHeight);
 				p.sample(gray);
 				patches.push_back(p);
@@ -467,14 +471,20 @@ void DictionaryLearning::train(const std::vector<ImageRGBA>& images,
 	}
 	std::cout<<"Patches "<<patches.size()<<" "<<patchWidth<<" "<<patchHeight<<std::endl;
 	WritePatchesToFile(MakeDesktopFile("tiles.png"),patches);
-	const int initFilterBanks = 9;
+	const int initFilterBanks = 13;
 	filterBanks.clear();
 	filterBanks.reserve(initFilterBanks);
 	size_t K = patchWidth * patchHeight;
 	for (int n = 0; n < initFilterBanks; n++) {
 		filterBanks.push_back(FilterBank(patchWidth, patchHeight));
 	}
-	float var = 0.33f * 0.33f;
+	float var = 0.4f * 0.4f;
+	//float var2 = 0.4f * 0.4f;
+	//float var3 = 0.5f * 0.5f;
+
+	float rcos=std::cos(ToRadians(8.0f));
+	float rsin=std::sin(ToRadians(8.0f));
+
 	for (int k = 0; k < K; k++) {
 		int i = k % patchWidth;
 		int j = k / patchWidth;
@@ -482,50 +492,63 @@ void DictionaryLearning::train(const std::vector<ImageRGBA>& images,
 		float s = 2 * (i - (patchWidth - 1) * 0.5f) / (patchWidth - 1);
 		filterBanks[0].data[k] = 1.0f;
 		filterBanks[1].data[k] = s;
-		filterBanks[2].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * s));
-		filterBanks[3].data[k] = std::exp(-0.5f * s * s / var);
+		filterBanks[2].data[k] = t;
+		filterBanks[3].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * s));
+		filterBanks[4].data[k] = std::exp(-0.5f * s * s / var);
 
-		filterBanks[4].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * (s-0.333333f)));
-		filterBanks[5].data[k] = std::exp(-0.5f * (s-0.333333f) * (s-0.333333f) / var);
+		float r1=rcos*s+rsin*t;
+		float r2=rcos*s-rsin*t;
+		filterBanks[5].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * r1));
+		filterBanks[6].data[k] = std::exp(-0.5f * r1 * r1 / var);
+		filterBanks[7].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * r2));
+		filterBanks[8].data[k] = std::exp(-0.5f * r2 * r2 / var);
+		//filterBanks[5].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * s));
+		//filterBanks[6].data[k] = std::exp(-0.5f * s * s / var2);
+		//filterBanks[7].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * s));
+		//filterBanks[8].data[k] = std::exp(-0.5f * s * s / var3);
 
-		filterBanks[6].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * (s+0.333333f)));
-		filterBanks[7].data[k] = std::exp(-0.5f * (s+0.333333f) * (s+0.333333f) / var);
+		filterBanks[9].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * (s-0.333333f)));
+		filterBanks[10].data[k] = std::exp(-0.5f * (s-0.333333f) * (s-0.333333f) / var);
+		filterBanks[11].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * (s+0.333333f)));
+		filterBanks[12].data[k] = std::exp(-0.5f * (s+0.333333f) * (s+0.333333f) / var);
+		//filterBanks[13].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * (t-0.333333f)));
+		//filterBanks[14].data[k] = std::exp(-0.5f * (t-0.333333f) * (t-0.333333f) / var);
+		//filterBanks[15].data[k] = std::exp(-0.5f * (t * t + s * s) / var);
 
-		filterBanks[8].data[k] = t;
-		//filterBanks[9].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * t));
-		//filterBanks[10].data[k] = std::exp(-0.5f * t * t / var);
-
-		//filterBanks[9].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * (t-0.333333f)));
-		//filterBanks[10].data[k] = std::exp(-0.5f * (t-0.333333f) * (t-0.333333f) / var);
-
-		//filterBanks[11].data[k] = std::exp(-0.5f * (t * t + s * s) / var);
 	}
 	int KK = filterBanks.size() * 4;
 //Orthogonal basis pursuit
 	std::set<int> nonZeroSet;
-	const int optimizationIterations = 8;
+	const int optimizationIterations = 4;
 	int startFilter = filterBanks.size();
 	for (int n = 0; n < filterBanks.size(); n++) {
 		filterBanks[n].normalize();
 	}
 	//optimizeWeights(targetSparsity);
-
 	for (int l = 0; filterBanks.size() < targetFilterBankSize; l++) {
 		float err1=error() ;
-		std::cout << "Before Optimize Error: " << err1<<" for sparsity "<<targetSparsity<< std::endl;
+		std::cout <<filterBanks.size()<<" Before Optimize Error: " << err1<<" for sparsity "<<sparsity<< std::endl;
 		for (int h = 0; h < optimizationIterations; h++) {
-			optimizeWeights(targetSparsity);
-			//std::cout << "Weight Update Error: " << error() <<" for sparsity "<<targetSparsity<< std::endl;
+			optimizeWeights(sparsity);
 			nonZeroSet = optimizeFilters(startFilter);
-			//std::cout << "After Optimize Error: " << error() <<" for sparsity "<<targetSparsity<< std::endl;
-			//std::cout << "Non-Zero Set: " << nonZeroSet.size() << std::endl;
 		}
 		float err2=error();
+		std::cout <<filterBanks.size()<<" After Optimize Error: " << err2 <<" for sparsity "<<sparsity<<std::endl;
+		/*
+		std::cout<<"non-zero =[";
+		for(int n:nonZeroSet){
+			std::cout<<n<<" ";
+		}
 
-		std::cout << "After Optimize Error: " << err2 <<" for sparsity "<<targetSparsity<< std::endl;
-		if(std::abs(err2-err1)<1E-6f)break;
-		if (filterBanks.size() == targetFilterBankSize)
+		std::cout<<"]"<<std::endl;
+				*/
+		if(std::abs(err2-err1)<1E-5f){
+			sparsity++;
+			startFilter--;
+		}
+		if (filterBanks.size() == targetFilterBankSize){
 			break;
+		}
 		std::vector<std::pair<int, double>> scores;
 		score(scores);
 		//Add to filter bank patch with most error
