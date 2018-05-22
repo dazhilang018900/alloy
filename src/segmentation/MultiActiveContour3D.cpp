@@ -709,7 +709,7 @@ void MultiActiveContour3D::pressureMotion(int i, int j, int k, size_t gid) {
 		return;
 	}
 	int activeLabels[7];
-	activeLabels[0] = swapLabelImage(i, j, k).x;
+	activeLabels[0] = swapLabelImage(i,     j, k).x;
 	activeLabels[1] = swapLabelImage(i + 1, j, k).x;
 	activeLabels[2] = swapLabelImage(i - 1, j, k).x;
 	activeLabels[3] = swapLabelImage(i, j + 1, k).x;

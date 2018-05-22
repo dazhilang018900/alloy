@@ -70,7 +70,6 @@ protected:
 	double error();
 	double score(std::vector<std::pair<int, double>>& scores);
 public:
-
 	std::vector<FilterBank> filterBanks;
 	std::vector<OrientedPatch> patches;
 	DictionaryLearning();
@@ -81,7 +80,7 @@ public:
 	virtual ~DictionaryLearning() {
 	}
 	void train(const std::vector<ImageRGBA>& img, int targetFilterBankSize = 32,
-			int subsample = 8, int patchWidth = 16, int patchHeight = 8);
+			int subsample = 8, int patchWidth = 16, int patchHeight = 8,int sparsity=4);
 };
 void WritePatchesToFile(const std::string& file,const std::vector<OrientedPatch>& patches);
 void WriteFilterBanksToFile(const std::string& file,

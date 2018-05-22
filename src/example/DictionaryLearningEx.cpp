@@ -31,18 +31,11 @@ DictionaryLearningEx::DictionaryLearningEx() :
 		Application(1200, 1000, "Learning Toy", false) {
 }
 bool DictionaryLearningEx::init(Composite& rootNode) {
-	/*
-	 {
-	 ImageRGBA tmp;
-	 ReadImageFromFile(getFullPath("images/blake.png"), img);
-	 DownSample3x3(img,tmp);
-	 DownSample3x3(tmp,img);
-	 }
-	*/
 	ReadImageFromFile(getFullPath("images/stereo_left.png"), img);
-	int patchSize = 8;
-	int subsample = 4;
-	int filters = 16;
+	int patchSize = 32;
+	int subsample = 32;
+	int filters = 32;
+	int sparsity = 4;
 	/*
 	ImageRGBA tmp;
 	*/
@@ -100,7 +93,7 @@ bool DictionaryLearningEx::init(Composite& rootNode) {
 	//learning.writeEstimatedPatches(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"reconstruction.png",samples[0].width/patchSize,samples[0].height/patchSize);
 
 
-	 learning.train({img},filters,subsample,patchSize,patchSize);
+	 learning.train({img},filters,subsample,patchSize,patchSize,sparsity);
 	 learning.writeFilterBanks(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"filters1.png");
 	 learning.writeEstimatedPatches(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"reconstruction.png",img.width/subsample,img.height/subsample);
 

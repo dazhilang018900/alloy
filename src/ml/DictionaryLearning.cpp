@@ -46,10 +46,7 @@ float OrientedPatch::synthesize(const std::vector<FilterBank>& banks,
 	int N = (int) data.size();
 	int M = (int) weights.size();
 	double err = 0;
-
-	int ww=width/2;
-	int hh=height/2;
-	sample.resize(ww*hh);
+	sample.resize(width*height);
 	Image1f tmp(width,height);
 	for (int i = 0; i < N; i++) {
 		float val = 0;
@@ -61,15 +58,11 @@ float OrientedPatch::synthesize(const std::vector<FilterBank>& banks,
 	}
 	float2 norm =   float2(normal.x,-normal.y);
 	float2 tanget = float2(normal.y, normal.x);
-	for (int j = 0; j < ww; j++) {
-		for (int i = 0; i < hh; i++) {
-			float2 pix(width * ((i+ww/2) / (float) (width - 1) - 0.5f),height * ((j+hh/2) / (float) (height - 1) - 0.5f));
+	for (int j = 0; j < width; j++) {
+		for (int i = 0; i < height; i++) {
+			float2 pix(width * (i / (float) (width - 1) - 0.5f),height * (j / (float) (height - 1) - 0.5f));
 			pix=float2(width*0.5f+dot(norm, pix),height*0.5f+dot(tanget, pix));
-			if(tmp.contains(pix)){
-				sample[i + j * ww]=tmp(pix).x;
-			} else {
-				sample[i + j * hh]=-1.0f;
-			}
+			sample[i + j * width]=tmp(pix).x;
 		}
 	}
 	err/=N;
@@ -110,7 +103,7 @@ void FilterBank::normalize() {
 	}
 }
 DictionaryLearning::DictionaryLearning() {
-	targetSparsity = 4;
+	targetSparsity = 3;
 }
 std::set<int> DictionaryLearning::optimizeFilters(int start) {
 	int S = patches.size();
@@ -387,7 +380,7 @@ void DictionaryLearning::writeEstimatedPatches(const std::string& outImage,int M
 		std::vector<float> tmp;
 		p.synthesize(filterBanks, tmp);
 		ImageRGB& tile = tiles[idx];
-		tile.resize(p.width/2, p.height/2);
+		tile.resize(p.width, p.height);
 		int count = 0;
 		float cw = scores[idx] / maxError;
 		for (int j = 0; j < tile.height; j++) {
@@ -445,9 +438,10 @@ void DictionaryLearning::writeFilterBanks(const std::string& outImage) {
 }
 void DictionaryLearning::train(const std::vector<ImageRGBA>& images,
 		int targetFilterBankSize, int subsample, int patchWidth,
-		int patchHeight) {
+		int patchHeight,int sparsity) {
 	aly::Image1f gray;
 	Image1f gX, gY;
+	targetSparsity=sparsity;
 	patches.clear();
 	std::cout << "Start Learning " << patches.size() << "..." << std::endl;
 	for (int nn = 0; nn < images.size(); nn++) {
@@ -473,7 +467,7 @@ void DictionaryLearning::train(const std::vector<ImageRGBA>& images,
 	}
 	std::cout<<"Patches "<<patches.size()<<" "<<patchWidth<<" "<<patchHeight<<std::endl;
 	WritePatchesToFile(MakeDesktopFile("tiles.png"),patches);
-	const int initFilterBanks = 8;
+	const int initFilterBanks = 9;
 	filterBanks.clear();
 	filterBanks.reserve(initFilterBanks);
 	size_t K = patchWidth * patchHeight;
@@ -490,10 +484,21 @@ void DictionaryLearning::train(const std::vector<ImageRGBA>& images,
 		filterBanks[1].data[k] = s;
 		filterBanks[2].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * s));
 		filterBanks[3].data[k] = std::exp(-0.5f * s * s / var);
-		filterBanks[4].data[k] = t;
-		filterBanks[5].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * t));
-		filterBanks[6].data[k] = std::exp(-0.5f * t * t / var);
-		filterBanks[7].data[k] = std::exp(-0.5f * (t * t + s * s) / var);
+
+		filterBanks[4].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * (s-0.333333f)));
+		filterBanks[5].data[k] = std::exp(-0.5f * (s-0.333333f) * (s-0.333333f) / var);
+
+		filterBanks[6].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * (s+0.333333f)));
+		filterBanks[7].data[k] = std::exp(-0.5f * (s+0.333333f) * (s+0.333333f) / var);
+
+		filterBanks[8].data[k] = t;
+		//filterBanks[9].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * t));
+		//filterBanks[10].data[k] = std::exp(-0.5f * t * t / var);
+
+		//filterBanks[9].data[k] = 0.5f - 1.0f / (1 + std::exp(6 * (t-0.333333f)));
+		//filterBanks[10].data[k] = std::exp(-0.5f * (t-0.333333f) * (t-0.333333f) / var);
+
+		//filterBanks[11].data[k] = std::exp(-0.5f * (t * t + s * s) / var);
 	}
 	int KK = filterBanks.size() * 4;
 //Orthogonal basis pursuit
