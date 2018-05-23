@@ -245,10 +245,10 @@ template<class T> vec<T, 3> MakeEulerAngles(const matrix<T, 4, 4>& coeff,
 			} else {
 				res[0] += T(ALY_PI);
 			}
-			T s2 = Vector2(coeff(j, i), coeff(k, i)).norm();
+			T s2 = length(vec<T,2>(coeff(j, i), coeff(k, i)));
 			res[1] = -std::atan2(s2, coeff(i, i));
 		} else {
-			T s2 = Vector2(coeff(j, i), coeff(k, i)).norm();
+			T s2 = length(vec<T,2>(coeff(j, i), coeff(k, i)));
 			res[1] = std::atan2(s2, coeff(i, i));
 		}
 		// With a=(0,1,0), we have i=0; j=1; k=2, and after computing the first two angles,
@@ -266,7 +266,7 @@ template<class T> vec<T, 3> MakeEulerAngles(const matrix<T, 4, 4>& coeff,
 				c1 * coeff(j, j) - s1 * coeff(k, j));
 	} else {
 		res[0] = std::atan2(coeff(j, k), coeff(k, k));
-		T c2 = Vector2(coeff(i, i), coeff(i, j)).norm();
+		T c2 = length(vec<T,2>(coeff(i, i), coeff(i, j)));
 		if ((odd && res[0] < T(0)) || ((!odd) && res[0] > T(0))) {
 			if (res[0] > T(0)) {
 				res[0] -= T(ALY_PI);
