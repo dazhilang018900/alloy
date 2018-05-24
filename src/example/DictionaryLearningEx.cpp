@@ -33,9 +33,9 @@ DictionaryLearningEx::DictionaryLearningEx() :
 bool DictionaryLearningEx::init(Composite& rootNode) {
 	ReadImageFromFile(getFullPath("images/stereo_left.png"), img);
 	int patchSize = 8;
-	int subsample = 8;
-	int filters = 64;
-	int sparsity = 3;
+	int subsample = 4;
+	int filters = 75;
+	int sparsity =3;
 	/*
 	ImageRGBA tmp;
 	*/
@@ -294,14 +294,14 @@ bool DictionaryLearningEx::init(Composite& rootNode) {
 									nvgStroke(nvg);
 								}
 
-								const std::vector<OrientedPatch>& banks=learning.patches;
+								const std::vector<SamplePatch>& banks=learning.patches;
 								if(lineWidth.toFloat()*0.1f*scale>0.5f) {
 									nvgStrokeColor(nvg, lineColor);
 									nvgStrokeWidth(nvg, lineWidth.toFloat()*0.1f*scale);
 									for(size_t idx=0;idx<banks.size();idx++) {
-										const OrientedPatch& bank=banks[idx];
-										float2 u=MakeOrthogonalComplement(bank.normal)*(float)bank.width*0.5f;
-										float2 v=bank.normal*(float)bank.height*0.5f;
+										const SamplePatch& bank=banks[idx];
+										float2 u(1.0f,0.0f);
+										float2 v(0.0f,1.0f);
 										nvgBeginPath(nvg);
 
 										float2 pt = bank.position+u+v;
@@ -335,26 +335,18 @@ bool DictionaryLearningEx::init(Composite& rootNode) {
 									nvgStrokeColor(nvg, normalColor);
 									nvgStrokeWidth(nvg, scale*0.1f);
 									for(size_t idx=0;idx<banks.size();idx++) {
-										const OrientedPatch& bank=banks[idx];
+										const SamplePatch& bank=banks[idx];
 										float2 pt = bank.position;
 										pt.x = pt.x / (float)img.width;
 										pt.y = pt.y / (float)img.height;
 										pt = pt*bounds.dimensions + bounds.position;
-										nvgBeginPath(nvg);
-										nvgMoveTo(nvg, pt.x, pt.y);
-										pt =bank.position + bank.normal*4.0f;
-										pt.x = pt.x / (float)img.width;
-										pt.y = pt.y / (float)img.height;
-										pt = pt*bounds.dimensions + bounds.position;
-										nvgLineTo(nvg, pt.x, pt.y);
-										nvgStroke(nvg);
 									}
 								}
 								float r=scale*0.5f;
 								if(r>0.5f) {
 									nvgFillColor(nvg, pointColor);
 									for(size_t idx=0;idx<banks.size();idx++) {
-										const OrientedPatch& bank=banks[idx];
+										const SamplePatch& bank=banks[idx];
 										float2 pt =bank.position;
 										pt.x = pt.x / (float)img.width;
 										pt.y = pt.y / (float)img.height;

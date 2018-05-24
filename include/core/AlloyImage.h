@@ -172,6 +172,10 @@ public:
 	void set(const std::vector<vec<T, C>>& val) {
 		data = val;
 	}
+	void set(const std::vector<T>& val) {
+		if(val.size()*sizeof(T)!=data.size()*typeSize())throw std::runtime_error("Could not assign vector to image because sizes mismatch.");
+		std::memcpy(ptr(),val.data(),data.size()*typeSize());
+	}
 	void set(vec<T, C>* val) {
 		if (val == nullptr)
 			return;
@@ -296,6 +300,15 @@ public:
 		if (data.size() == 0)
 			return nullptr;
 		return &(data.front()[0]);
+	}
+	inline void copyTo(std::vector<T>& out) const {
+		if(size()>0){
+			out.resize(size()*C);
+			std::memcpy(out.data(),ptr(),size()*typeSize());
+		}
+	}
+	inline void copyTo(std::vector<vec<T,C>>& out) const {
+		out=data;
 	}
 	void setZero() {
 		data.assign(data.size(), vec<T, C>((T)0));

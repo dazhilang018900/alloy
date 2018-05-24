@@ -31,36 +31,32 @@ struct FilterBank {
 	double score(const std::vector<float>& sample,bool correlation=true);
 	void normalize();
 };
-struct OrientedPatch {
+struct SamplePatch {
 	int width, height;
 	float2 position;
-	float2 normal;
 	std::vector<float> data;
 	std::vector<float> weights;
 	template<class Archive>
 	void save(Archive & archive) const {
-		archive(CEREAL_NVP(width), CEREAL_NVP(height), CEREAL_NVP(position),
-				CEREAL_NVP(normal), CEREAL_NVP(data), CEREAL_NVP(weights));
+		archive(CEREAL_NVP(width), CEREAL_NVP(height), CEREAL_NVP(position),CEREAL_NVP(data), CEREAL_NVP(weights));
 	}
 	template<class Archive>
 	void load(Archive & archive) {
-		archive(CEREAL_NVP(width), CEREAL_NVP(height), CEREAL_NVP(position),
-				CEREAL_NVP(normal), CEREAL_NVP(data), CEREAL_NVP(weights));
+		archive(CEREAL_NVP(width), CEREAL_NVP(height), CEREAL_NVP(position),CEREAL_NVP(data), CEREAL_NVP(weights));
 	}
-	OrientedPatch(float2 center, float2 normal, int patchWidth, int patchHeight) :
-			position(center), normal(normal), width(patchWidth), height(
+	SamplePatch(float2 center, float2 normal, int patchWidth, int patchHeight) :
+			position(center),width(patchWidth), height(
 					patchHeight) {
 		data.resize(patchWidth * patchHeight);
 	}
 	void sample(const aly::Image1f& gray);
-	float error(const std::vector<FilterBank>& banks);
-	float synthesize(const std::vector<FilterBank>& banks,
-			std::vector<float>& sample);
+	float error(const std::vector<FilterBank>& banks,bool correlation);
+	float synthesize(const std::vector<FilterBank>& banks,std::vector<float>& sample);
 	void resize(int w, int h);
 };
 class DictionaryLearning {
 protected:
-	void solveOrthoMatchingPursuit(int m, OrientedPatch& patch);
+	void solveOrthoMatchingPursuit(int m, SamplePatch& patch);
 	void removeFilterBanks(const std::set<int>& indexes);
 	void add(const std::vector<FilterBank>& banks);
 	void add(const FilterBank& banks);
@@ -70,7 +66,8 @@ protected:
 	double score(std::vector<std::pair<int, double>>& scores);
 public:
 	std::vector<FilterBank> filterBanks;
-	std::vector<OrientedPatch> patches;
+	std::vector<SamplePatch> patches;
+	std::set<int> excludeList;
 	DictionaryLearning();
 	void write(const std::string& outFile);
 	void read(const std::string& outFile);
@@ -81,7 +78,7 @@ public:
 	void train(const std::vector<ImageRGBA>& img, int targetFilterBankSize = 32,
 			int subsample = 8, int patchWidth = 16, int patchHeight = 8,int sparsity=4);
 };
-void WritePatchesToFile(const std::string& file,const std::vector<OrientedPatch>& patches);
+void WritePatchesToFile(const std::string& file,const std::vector<SamplePatch>& patches);
 void WriteFilterBanksToFile(const std::string& file,
 		const std::vector<FilterBank>& banks);
 void ReadFilterBanksFromFile(const std::string& file,
