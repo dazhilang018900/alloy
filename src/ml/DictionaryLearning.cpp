@@ -62,17 +62,14 @@ float SamplePatch::synthesize(const std::vector<FilterBank>& banks,
 	int N = (int) data.size();
 	int M = (int) weights.size();
 	double err = 0;
-	sample.resize(width * height / 4);
-	for (int ii = width / 4; ii < (3 * width) / 4; ii++) {
-		for (int jj = height / 4; jj < (3 * height) / 4; jj++) {
-			int i = ii + width * jj;
-			float val = 0;
-			for (int j = M; j < M; j++) {
-				val += banks[j].data[i] * weights[j];
-			}
-			err += std::abs(data[i] - val);
-			sample[i] = clamp(val, 0.0f, 1.0f);
+	sample.resize(width * height);
+	for (int i = 0; i < sample.size(); i++) {
+		float val = 0;
+		for (int j = 0; j < M; j++) {
+			val += banks[j].data[i] * weights[j];
 		}
+		err += std::abs(data[i] - val);
+		sample[i] = clamp(val, 0.0f, 1.0f);
 	}
 	err /= N;
 	return (float) err;
@@ -395,10 +392,9 @@ void DictionaryLearning::writeEstimatedPatches(const std::string& outImage,
 		std::vector<float> tmp;
 		p.synthesize(filterBanks, tmp);
 		ImageRGB& tile = tiles[idx];
-		tile.resize(p.width / 2, p.height / 2);
+		tile.resize(p.width, p.height);
 		int count = 0;
 		float cw = scores[idx] / maxError;
-		std::cout << "Tile " << tile.size() << " " << tmp.size() << std::endl;
 		for (int j = 0; j < tile.height; j++) {
 			for (int i = 0; i < tile.width; i++) {
 				float val = tmp[count];
@@ -425,9 +421,7 @@ void DictionaryLearning::writeEstimatedPatches(const std::string& outImage,
 double DictionaryLearning::score(std::vector<std::pair<int, double>>& scores) {
 	scores.resize(patches.size());
 	for (int n = 0; n < patches.size(); n++) {
-		if (excludeList.find(n) == excludeList.end()) {
-			scores[n]= {n,patches[n].error(filterBanks,false)};
-		}
+		scores[n]= {n,patches[n].error(filterBanks,false)};
 	}
 	std::sort(scores.begin(), scores.end(),
 			[=](const std::pair<int,double>& a,const std::pair<int,double>& b) {
@@ -500,9 +494,9 @@ void DictionaryLearning::train(const std::vector<ImageRGBA>& images,
 	float var = fuzz * fuzz;
 	//float var2 = 0.4f * 0.4f;
 	//float var3 = 0.5f * 0.5f;
-	std::vector<float> shifts = { -fuzz * 0.5f, 0.0f, fuzz * 0.5f };
+	std::vector<float> shifts = { -fuzz, -fuzz * 0.5f, 0.0f, fuzz * 0.5,fuzz };
 	std::vector<float> angles;
-	for (int a = 0; a < 180; a += 15) {
+	for (int a = 0; a < 180; a += 20) {
 		angles.push_back(a);
 	}
 
@@ -538,7 +532,6 @@ void DictionaryLearning::train(const std::vector<ImageRGBA>& images,
 	for (int n = 0; n < filterBanks.size(); n++) {
 		filterBanks[n].normalize();
 	}
-	excludeList.clear();
 	optimizeWeights(sparsity);
 	error();
 	for (int l = 0; filterBanks.size() < targetFilterBankSize; l++) {
@@ -570,13 +563,13 @@ void DictionaryLearning::train(const std::vector<ImageRGBA>& images,
 		std::vector<std::pair<int, double>> scores;
 		score(scores);
 		//Add to filter bank patch with most error
-		FilterBank fb(patches[scores[0].first].data, patchWidth, patchHeight);
-		excludeList.insert(scores[0].first);
+		int bestId=scores[0].first;
+		float err=scores[0].second;
+		FilterBank fb(patches[bestId].data, patchWidth, patchHeight);
 		startFilter = std::max((int) filterBanks.size() - 1, initFilterBanks);
-		std::cout << "Add Filter " << scores[0].first << " " << scores[0].second
-				<< std::endl;
 		add(fb);
 		filterBanks.back().normalize();
+		std::cout << "Add Filter " << bestId << " " << err<<" "<<filterBanks.back().score(patches[bestId].data)<<std::endl;
 	}
 }
 }

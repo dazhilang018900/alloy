@@ -67,7 +67,6 @@ protected:
 public:
 	std::vector<FilterBank> filterBanks;
 	std::vector<SamplePatch> patches;
-	std::set<int> excludeList;
 	DictionaryLearning();
 	void write(const std::string& outFile);
 	void read(const std::string& outFile);

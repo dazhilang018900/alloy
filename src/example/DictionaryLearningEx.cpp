@@ -33,8 +33,8 @@ DictionaryLearningEx::DictionaryLearningEx() :
 bool DictionaryLearningEx::init(Composite& rootNode) {
 	ReadImageFromFile(getFullPath("images/stereo_left.png"), img);
 	int patchSize = 8;
-	int subsample = 4;
-	int filters = 75;
+	int subsample = 8;
+	int filters = 128;
 	int sparsity =3;
 	/*
 	ImageRGBA tmp;
