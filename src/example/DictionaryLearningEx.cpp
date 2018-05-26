@@ -95,7 +95,8 @@ bool DictionaryLearningEx::init(Composite& rootNode) {
 
 	 learning.train({img},filters,subsample,patchSize,patchSize,sparsity);
 	 learning.writeFilterBanks(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"filters1.png");
-	 learning.writeEstimatedPatches(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"reconstruction.png",img.width/subsample,img.height/subsample);
+	 learning.stash(img, 1);
+	 //learning.writeEstimatedPatches(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"reconstruction.png",img.width/subsample,img.height/subsample);
 
 	 /*
 	 DownSample3x3(img,tmp);
@@ -220,9 +221,9 @@ bool DictionaryLearningEx::init(Composite& rootNode) {
 					CoordPerPX(0.5, 0.5, -img.width * downScale * 0.5f,
 							-img.height * downScale * 0.5f),
 					CoordPX(img.width * downScale, img.height * downScale)));
+
 	Application::addListener(resizeableRegion.get());
-	ImageGlyphPtr imageGlyph = AlloyApplicationContext()->createImageGlyph(img,
-			false);
+	ImageGlyphPtr imageGlyph;// = AlloyApplicationContext()->createImageGlyph(img,false);
 	DrawPtr drawContour =
 			DrawPtr(
 					new Draw("Contour Draw", CoordPX(0.0f, 0.0f),
