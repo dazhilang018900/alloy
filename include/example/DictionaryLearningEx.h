@@ -32,7 +32,7 @@
 #include "segmentation/Simulation.h"
 class DictionaryLearningEx: public aly::Application {
 protected:
-	aly::ImageRGBA img;
+	aly::ImageRGB img;
 	bool parametersDirty;
 	bool frameBuffersDirty;
 	bool running = false;
