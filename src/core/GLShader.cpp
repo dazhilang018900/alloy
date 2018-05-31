@@ -172,16 +172,28 @@ void GLShader::initialize(
 }
 
 GLShader::~GLShader() {
-	if(context.get()!=nullptr){
-		context->begin(onScreen);
-		glDetachShader(mProgramHandle, mFragmentShaderHandle);
-		glDeleteShader(mFragmentShaderHandle);
-		glDetachShader(mProgramHandle, mVertexShaderHandle);
-		glDeleteShader(mVertexShaderHandle);
-		glDetachShader(mProgramHandle, mGeometryShaderHandle);
-		glDeleteShader(mGeometryShaderHandle);
-		glDeleteProgram(mProgramHandle);
-		context->end();
+	try {
+		if(context.get()!=nullptr){
+			context->begin(onScreen);
+			if(mFragmentShaderHandle){
+				glDetachShader(mProgramHandle, mFragmentShaderHandle);
+				glDeleteShader(mFragmentShaderHandle);
+			}
+			if(mVertexShaderHandle){
+				glDetachShader(mProgramHandle, mVertexShaderHandle);
+				glDeleteShader(mVertexShaderHandle);
+			}
+			if(mGeometryShaderHandle){
+				glDetachShader(mProgramHandle, mGeometryShaderHandle);
+				glDeleteShader(mGeometryShaderHandle);
+			}
+			if(mProgramHandle){
+				glDeleteProgram(mProgramHandle);
+			}
+			context->end();
+		}
+	}catch(std::exception& e){
+		std::cerr<<"Error occurred while deleting shader"<<std::endl;
 	}
 }
 }
