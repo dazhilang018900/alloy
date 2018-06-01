@@ -1069,6 +1069,7 @@ namespace aly {
 		ImageRGBf srcRGBf;
 		ImageAf srcAf;
 		ImageRGB srcRGB;
+		/*
 		ReadImageFromFile(AlloyDefaultContext()->getFullPath("images/sfmarket.png"),
 			srcRGBAf);
 		ReadImageFromFile(AlloyDefaultContext()->getFullPath("images/sfmarket.png"),
@@ -1100,6 +1101,7 @@ namespace aly {
 		aly::WriteImageToFile("sfmarket_rgba_hdr.png", srcRGBAf);
 		aly::WriteImageToFile("sfmarket_rgb2_hdr.png", srcRGBf);
 		aly::WriteImageToFile("sfmarket_r_hdr.png", srcAf);
+		*/
 		return true;
 	}
 	bool SANITY_CHECK_IMAGE() {

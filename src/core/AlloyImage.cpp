@@ -22,6 +22,8 @@
 #include "AlloyCommon.h"
 #include "AlloyFileUtil.h"
 #include "AlloyMath.h"
+#include "tinytiffreader.h"
+#include "tinytiffwriter.h"
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include "stb_image.h"
@@ -414,6 +416,18 @@ void ConvertImage(const ImageRGBf& in, Image2ub& out, bool sRGB) {
 	}
 }
 
+template<class T, int C, ImageType I> void ReadTiffImageFromFileInternal(const std::string& file,Image<T,C,I>& image){
+	TinyTIFFReaderFile* tiffr=TinyTIFFReader_open(file.c_str());
+	if (!tiffr) {
+		throw std::runtime_error(MakeString()<<"Could not read TIFF file "<<file);
+	}
+	uint32_t width=TinyTIFFReader_getWidth(tiffr);
+	uint32_t height=TinyTIFFReader_getHeight(tiffr);
+	uint32_t frames=TinyTIFFReader_countFrames(tiffr);
+	size_t fileTypeSize=TinyTIFFReader_getBitsPerSample(tiffr)/8;
+	size_t typeSize=sizeof(T);
+	std::cout<<"Tiff "<<width<<" "<<height<<" "<<frames<<" "<<fileTypeSize<<std::endl;
+}
 void WriteImageToFile(const std::string& file, const ImageRGB& image) {
 	std::string ext = GetFileExtension(file);
 	if (ext == "xml") {
@@ -481,62 +495,74 @@ void WriteImageToFile(const std::string& file, const ImageRGBA& image) {
 void ReadImageFromFile(const std::string& file, ImageRGBA& image) {
 	std::string ext = GetFileExtension(file);
 	if (ext != "png" && ext != "tga" && ext != "bmp" && ext != "psd"
-			&& ext != "gif" && ext != "jpg") {
+			&& ext != "gif" && ext != "jpg"&&ext!="tiff"&&ext!="tif") {
 		throw std::runtime_error(
 				MakeString() << "Could not read file " << file);
 	}
-	unsigned char* img;
-	stbi_set_unpremultiply_on_load(1);
-	stbi_convert_iphone_png_to_rgb(1);
-	int w, h, n;
-	img = stbi_load(file.c_str(), &w, &h, &n, 4);
-	if (img == NULL) {
-		throw std::runtime_error(
-				MakeString() << "Could not read file " << file);
+	if(ext=="tiff"||ext=="tif"){
+		ReadTiffImageFromFileInternal(file,image);
+	} else {
+		unsigned char* img;
+		stbi_set_unpremultiply_on_load(1);
+		stbi_convert_iphone_png_to_rgb(1);
+		int w, h, n;
+		img = stbi_load(file.c_str(), &w, &h, &n, 4);
+		if (img == NULL) {
+			throw std::runtime_error(
+					MakeString() << "Could not read file " << file);
+		}
+		image.resize(w, h);
+		image.set(img);
+		stbi_image_free(img);
 	}
-	image.resize(w, h);
-	image.set(img);
-	stbi_image_free(img);
 }
 void ReadImageFromFile(const std::string& file, Image1ub& image) {
 	std::string ext = GetFileExtension(file);
 	if (ext != "png" && ext != "tga" && ext != "bmp" && ext != "psd"
-			&& ext != "gif" && ext != "jpg") {
+			&& ext != "gif" && ext != "jpg"&&ext!="tiff"&&ext!="tif") {
 		throw std::runtime_error(
 				MakeString() << "Could not read file " << file);
 	}
-	unsigned char* img;
-	stbi_set_unpremultiply_on_load(1);
-	stbi_convert_iphone_png_to_rgb(1);
-	int w, h, n;
-	img = stbi_load(file.c_str(), &w, &h, &n, 1);
-	if (img == NULL) {
-		throw std::runtime_error(
-				MakeString() << "Could not read file " << file);
+	if(ext=="tiff"||ext=="tif"){
+		ReadTiffImageFromFileInternal(file,image);
+	} else {
+		unsigned char* img;
+		stbi_set_unpremultiply_on_load(1);
+		stbi_convert_iphone_png_to_rgb(1);
+		int w, h, n;
+		img = stbi_load(file.c_str(), &w, &h, &n, 1);
+		if (img == NULL) {
+			throw std::runtime_error(
+					MakeString() << "Could not read file " << file);
+		}
+		image.resize(w, h);
+		image.set(img);
+		stbi_image_free(img);
 	}
-	image.resize(w, h);
-	image.set(img);
-	stbi_image_free(img);
 }
 void ReadImageFromFile(const std::string& file, ImageRGB& image) {
 	std::string ext = GetFileExtension(file);
 	if (ext != "png" && ext != "tga" && ext != "bmp" && ext != "psd"
-			&& ext != "gif" && ext != "jpg") {
+			&& ext != "gif" && ext != "jpg"&&ext!="tiff"&&ext!="tif") {
 		throw std::runtime_error(
 				MakeString() << "Could not read file " << file);
 	}
-	unsigned char* img;
-	stbi_set_unpremultiply_on_load(1);
-	stbi_convert_iphone_png_to_rgb(1);
-	int w, h, n;
-	img = stbi_load(file.c_str(), &w, &h, &n, 3);
-	if (img == NULL) {
-		throw std::runtime_error(
-				MakeString() << "Could not read file " << file);
+	if(ext=="tiff"||ext=="tif"){
+		ReadTiffImageFromFileInternal(file,image);
+	} else {
+		unsigned char* img;
+		stbi_set_unpremultiply_on_load(1);
+		stbi_convert_iphone_png_to_rgb(1);
+		int w, h, n;
+		img = stbi_load(file.c_str(), &w, &h, &n, 3);
+		if (img == NULL) {
+			throw std::runtime_error(
+					MakeString() << "Could not read file " << file);
+		}
+		image.resize(w, h);
+		image.set(img);
+		stbi_image_free(img);
 	}
-	image.resize(w, h);
-	image.set(img);
-	stbi_image_free(img);
 
 }
 void ReadImageFromFile(const std::string& file, ImageRGBAf& img) {
@@ -592,6 +618,8 @@ void ReadImageFromFile(const std::string& file, ImageRGBAf& img) {
 		img.resize(w, h);
 		img.set(data);
 		stbi_image_free(data);
+	} else 	if(ext=="tiff"||ext=="tif"){
+		ReadTiffImageFromFileInternal(file,img);
 	} else {
 		std::string ext = GetFileExtension(file);
 		ImageRGBA rgb;
@@ -661,6 +689,8 @@ void ReadImageFromFile(const std::string& file, ImageRGBf& img) {
 		img.resize(w, h);
 		img.set(data);
 		stbi_image_free(data);
+	} else if(ext=="tiff"||ext=="tif"){
+		ReadTiffImageFromFileInternal(file,img);
 	} else {
 		ImageRGB rgb;
 		ReadImageFromFile(file, rgb);
@@ -714,6 +744,8 @@ void ReadImageFromFile(const std::string& file, Image1f& img) {
 		img.resize(w, h);
 		img.set(data);
 		stbi_image_free(data);
+	} else if(ext=="tiff"||ext=="tif"){
+		ReadTiffImageFromFileInternal(file,img);
 	} else {
 		Image1ub rgb;
 		ReadImageFromFile(file, rgb);
