@@ -818,6 +818,12 @@ uint16_t TinyTIFFReader_getSamplesPerPixel(TinyTIFFReaderFile* tiff) {
     return 0;
 }
 
+uint16_t TinyTIFFReader_getCompressionType(TinyTIFFReaderFile* tiff) {
+    if (tiff) {
+        return tiff->currentFrame.compression;
+    }
+    return 0;
+}
 
 uint32_t TinyTIFFReader_countFrames(TinyTIFFReaderFile* tiff) {
 

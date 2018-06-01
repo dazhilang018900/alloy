@@ -19,13 +19,15 @@ enum FilterType{
 };
 struct FilterBank {
 	int width, height;
+	float angle;
+	float shift;
 	FilterType type;
 	std::vector<float> data;
 	FilterBank(int width=0, int height=0) :
-			data(width * height), width(width), height(height), type(FilterType::Unknown) {
+			data(width * height), width(width), height(height), type(FilterType::Unknown),angle(0),shift(0) {
 	}
 	FilterBank(const std::vector<float>& data, int width, int height) :
-			data(data), width(width), height(height), type(FilterType::Unknown) {
+			data(data), width(width), height(height), type(FilterType::Unknown),angle(0),shift(0) {
 	}
 	template<class Archive>
 	void save(Archive & archive) const {
@@ -64,7 +66,7 @@ struct SamplePatch {
 class DictionaryLearning {
 protected:
 	void solveOrthoMatchingPursuit(int m, SamplePatch& patch);
-	std::vector<int> solveOrthoMatchingPursuit(int sparsity, const Image1f& gray,float2 position);
+	std::vector<int> solveOrthoMatchingPursuit(int sparsity, const Image1f& gray,SamplePatch& patch);
 	void removeFilterBanks(const std::set<int>& indexes);
 	void add(const std::vector<FilterBank>& banks);
 	void add(const FilterBank& banks);

@@ -423,10 +423,40 @@ template<class T, int C, ImageType I> void ReadTiffImageFromFileInternal(const s
 	}
 	uint32_t width=TinyTIFFReader_getWidth(tiffr);
 	uint32_t height=TinyTIFFReader_getHeight(tiffr);
+	size_t channels=TinyTIFFReader_getSamplesPerPixel(tiffr);
 	uint32_t frames=TinyTIFFReader_countFrames(tiffr);
+	uint16_t compression=TinyTIFFReader_getCompressionType(tiffr);
 	size_t fileTypeSize=TinyTIFFReader_getBitsPerSample(tiffr)/8;
 	size_t typeSize=sizeof(T);
-	std::cout<<"Tiff "<<width<<" "<<height<<" "<<frames<<" "<<fileTypeSize<<std::endl;
+	if(width==0||height==0){
+		image.resize(width,height);
+		return;
+	}
+	if(typeSize!=fileTypeSize){
+		throw std::runtime_error(MakeString()<<"Tiff Error: Type sizes don't match "<<typeSize<<" / "<<fileTypeSize);
+	}
+	if(channels!=C){
+		throw std::runtime_error(MakeString()<<"Tiff Error: Channel sizes don't match "<<C<<" / "<<channels);
+	}
+	if(frames>1){
+		throw std::runtime_error(MakeString()<<"Tiff Error: Multi-frame images not not supported, frames="<<frames);
+	}
+
+	std::cout<<"Tiff "<<width<<" "<<height<<" "<<frames<<" "<<channels<<" "<<fileTypeSize<<" compression="<<compression<<std::endl;
+	image.resize(width,height);
+	std::vector<T> buffer;
+
+	for(int c=0;c<C;c++){
+		buffer.resize(width*height);
+		if(TinyTIFFReader_getSampleData(tiffr, buffer.data(),c)==0){
+			throw std::runtime_error(MakeString()<<"Tiff Error: Failed to read channel "<<c<<", "<<std::string(TinyTIFFReader_getLastError(tiffr)));
+		}
+		size_t N=buffer.size();
+		for(size_t n=0;n<N;n++){
+			image[n][c]=buffer[n];
+		}
+	}
+	TinyTIFFReader_close(tiffr);
 }
 void WriteImageToFile(const std::string& file, const ImageRGB& image) {
 	std::string ext = GetFileExtension(file);

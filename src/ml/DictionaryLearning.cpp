@@ -260,10 +260,7 @@ void DictionaryLearning::solveOrthoMatchingPursuit(int T, SamplePatch& patch) {
 	}
 }
 
-std::vector<int> DictionaryLearning::solveOrthoMatchingPursuit( int sparsity, const Image1f& gray,float2 position) {
-	int patchWidth=filterBanks.front().width;
-	int patchHeight=filterBanks.front().height;
-	SamplePatch patch(position,patchWidth,patchHeight);
+std::vector<int> DictionaryLearning::solveOrthoMatchingPursuit( int sparsity, const Image1f& gray,SamplePatch& patch) {
 	patch.sample(gray);
 	std::vector<float>& sample = patch.data;
 	std::vector<float>& weights = patch.weights;
@@ -548,17 +545,30 @@ void DictionaryLearning::stash(const ImageRGB& img,int subsample){
 	int N = img.height / subsample;
 	int M = img.width / subsample;
 	ImageRGBA edges(M,N);
+	Image2f orientation(M,N);
+	int patchWidth=filterBanks.front().width;
+	int patchHeight=filterBanks.front().height;
 #pragma omp parallel for
 	for (int n = 0; n < N; n++) {
 		for (int m = 0; m < M; m++) {
 			float2 center = float2(m * subsample + subsample * 0.5f,n * subsample + subsample * 0.5f);
-			std::vector<int> order=solveOrthoMatchingPursuit(4,gray,center);
+			SamplePatch patch(center,patchWidth,patchHeight);
+			std::vector<int> order=solveOrthoMatchingPursuit(4,gray,patch);
 			if(order.size()>3){
 				edges(m,n)=RGBA(order[0],order[1],order[2],order[3]);
+				for(int k=0;k<order.size();k++){
+					FilterBank& bank=filterBanks[order[k]];
+					if(bank.type==FilterType::Edge||bank.type==FilterType::Line){
+						float w=aly::sign(patch.weights[order[k]]);
+						orientation(m,n)=float2(bank.angle*w,bank.shift*w);
+					}
+				}
 			}
 		}
 	}
 	WriteImageToRawFile(MakeDesktopFile("edges.xml"),edges);
+	WriteImageToRawFile(MakeDesktopFile("orients.xml"),orientation);
+
 }
 void DictionaryLearning::train(const std::vector<ImageRGB>& images,
 		int targetFilterBankSize, int subsample, int patchWidth,
@@ -590,11 +600,11 @@ void DictionaryLearning::train(const std::vector<ImageRGB>& images,
 	//float var3 = 0.5f * 0.5f;
 	std::vector<float> shifts = { -fuzz, -fuzz * 0.5f, 0.0f, fuzz * 0.5,fuzz };
 	std::vector<float> angles;
-	for (int a = 0; a < 180; a += 20) {
+	for (int a = -180; a < 180; a += 20) {
 		angles.push_back(a);
 	}
 
-	int initFilterBanks = 3 + 2 * angles.size() * shifts.size();
+	int initFilterBanks = 3 +  angles.size() * shifts.size();
 	filterBanks.reserve(initFilterBanks);
 	for (int n = 0; n < initFilterBanks; n++) {
 		filterBanks.push_back(FilterBank(patchWidth, patchHeight));
@@ -612,18 +622,35 @@ void DictionaryLearning::train(const std::vector<ImageRGB>& images,
 			for (int sh = 0; sh < shifts.size(); sh++) {
 				float r = std::cos(ToRadians(angles[a])) * s
 						+ std::sin(ToRadians(angles[a])) * t + shifts[sh];
-				filterBanks[idx++].data[k] = 0.5f
-						- 1.0f / (1 + std::exp(r / var));
-				filterBanks[idx++].data[k] = std::exp(-0.5f * r * r / var);
+				filterBanks[idx++].data[k] = 0.5f- 1.0f / (1 + std::exp(r / var));
+				//filterBanks[idx++].data[k] = std::exp(-0.5f * r * r / var);
 			}
 		}
 	}
 	filterBanks[0].type=FilterType::Shading;
+	filterBanks[0].angle=-1;
+
 	filterBanks[1].type=FilterType::Shading;
+	filterBanks[1].angle=0;;
+
 	filterBanks[2].type=FilterType::Shading;
-	for(int k=3;k<filterBanks.size();k+=2){
-		filterBanks[k].type=FilterType::Edge;
-		filterBanks[k+1].type=FilterType::Line;
+	filterBanks[2].angle=90;
+	int idx=3;
+	for (int a = 0; a < angles.size(); a++) {
+		for (int sh = 0; sh < shifts.size(); sh++) {
+
+			filterBanks[idx].angle=angles[a];
+			filterBanks[idx].shift=shifts[sh];
+			filterBanks[idx].type=FilterType::Edge;
+			idx++;
+
+			/*
+			filterBanks[idx].angle=angles[a];
+			filterBanks[idx].shift=shifts[sh];
+			filterBanks[idx].type=FilterType::Line;
+			idx++;
+			*/
+		}
 	}
 	int KK = filterBanks.size() * 4;
 //Orthogonal basis pursuit

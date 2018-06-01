@@ -34,8 +34,8 @@ bool DictionaryLearningEx::init(Composite& rootNode) {
 	ReadImageFromFile(getFullPath("images/stereo_left.png"), img);
 	int patchSize = 8;
 	int subsample = 8;
-	int filters = 128;
-	int sparsity =3;
+	int filters = 3;
+	int sparsity =4;
 	/*
 	ImageRGBA tmp;
 	*/
@@ -92,11 +92,10 @@ bool DictionaryLearningEx::init(Composite& rootNode) {
 
 	//learning.writeEstimatedPatches(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"reconstruction.png",samples[0].width/patchSize,samples[0].height/patchSize);
 
-
 	 learning.train({img},filters,subsample,patchSize,patchSize,sparsity);
 	 learning.writeFilterBanks(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"filters1.png");
 	 learning.stash(img, 1);
-	 //learning.writeEstimatedPatches(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"reconstruction.png",img.width/subsample,img.height/subsample);
+	 learning.writeEstimatedPatches(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"reconstruction.png",img.width/subsample,img.height/subsample);
 
 	 /*
 	 DownSample3x3(img,tmp);

@@ -233,6 +233,8 @@ TINYTIFFREADER_LIB_EXPORT uint16_t TinyTIFFReader_getBitsPerSample(TinyTIFFReade
  */
 TINYTIFFREADER_LIB_EXPORT uint16_t TinyTIFFReader_getSamplesPerPixel(TinyTIFFReaderFile* tiff);
 
+TINYTIFFREADER_LIB_EXPORT uint16_t TinyTIFFReader_getCompressionType(TinyTIFFReaderFile* tiff);
+
 /*! \brief read the given sample from the current frame into the given buffer,
            the byteorder is transformed to the byteorder of the system!
     \ingroup TinyTIFFReader

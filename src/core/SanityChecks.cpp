@@ -1069,6 +1069,13 @@ namespace aly {
 		ImageRGBf srcRGBf;
 		ImageAf srcAf;
 		ImageRGB srcRGB;
+		Image1ub gray;
+		ReadImageFromFile("/home/blake/workspace/studio/alloy/assets/images/galaxy.tif",srcRGB);
+		WriteImageToFile(MakeDesktopFile("galaxy.png"),srcRGB);
+		ReadImageFromFile("/home/blake/workspace/studio/alloy/assets/images/mri.tif",gray);
+		WriteImageToFile(MakeDesktopFile("gray.png"),gray);
+		ReadImageFromFile("/home/blake/workspace/studio/assets/LUTs/LUT_STUDIO.tif",srcRGB);
+		WriteImageToFile(MakeDesktopFile("studio.png"),srcRGB);
 		/*
 		ReadImageFromFile(AlloyDefaultContext()->getFullPath("images/sfmarket.png"),
 			srcRGBAf);
