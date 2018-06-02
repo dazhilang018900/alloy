@@ -6,6 +6,7 @@
 namespace aly {
 bool WriteTiffImage(const std::string& file,const Image1ub& img);
 bool WriteTiffImage(const std::string& file,const Image1us& img);
+bool WriteTiffImage(const std::string& file,const Image2us& img);
 bool WriteTiffImage(const std::string& file,const Image3us& img);
 bool WriteTiffImage(const std::string& file,const Image4us& img);
 bool WriteTiffImage(const std::string& file,const Image1ui& img);

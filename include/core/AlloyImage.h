@@ -1152,6 +1152,16 @@ void WriteImageToFile(const std::string& file, const ImageRGB& img,int quality);
 void WriteImageToFile(const std::string& file, const ImageRGBAf& img);
 void WriteImageToFile(const std::string& file, const ImageRGBf& img);
 
+void WriteImageToFile(const std::string& file, const Image1us& img);
+void WriteImageToFile(const std::string& file, const Image2us& img);
+void WriteImageToFile(const std::string& file, const Image3us& img);
+void WriteImageToFile(const std::string& file, const Image4us& img);
+
+void ReadImageFromFile(const std::string& file, Image1us& img);
+void ReadImageFromFile(const std::string& file, Image2us& img);
+void ReadImageFromFile(const std::string& file, Image3us& img);
+void ReadImageFromFile(const std::string& file, Image4us& img);
+
 void WriteImageToFile(const std::string& file, const Image1f& img);
 void WriteImageToFile(const std::string& file, const Image2ub& img);
 void WriteImageToFile(const std::string& file, const Image2f& img);

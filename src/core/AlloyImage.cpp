@@ -900,6 +900,73 @@ void WriteImageToFile(const std::string& file, const Image1f& img) {
 		WriteImageToFile(file, rgb);
 	}
 }
+
+void WriteImageToFile(const std::string& file, const Image1us& img){
+	std::string ext = GetFileExtension(file);
+	if (ext == "tif" || ext == "tiff") {
+		WriteTiffImageToFileInternal(file,img);
+	} else {
+		throw std::runtime_error(MakeString() << "Could not write " << file);
+	}
+}
+void WriteImageToFile(const std::string& file, const Image2us& img){
+	std::string ext = GetFileExtension(file);
+	if (ext == "tif" || ext == "tiff") {
+		WriteTiffImageToFileInternal(file,img);
+	} else {
+		throw std::runtime_error(MakeString() << "Could not write " << file);
+	}
+}
+void WriteImageToFile(const std::string& file, const Image3us& img){
+	std::string ext = GetFileExtension(file);
+	if (ext == "tif" || ext == "tiff") {
+		WriteTiffImageToFileInternal(file,img);
+	} else {
+		throw std::runtime_error(MakeString() << "Could not write " << file);
+	}
+}
+void WriteImageToFile(const std::string& file, const Image4us& img){
+	std::string ext = GetFileExtension(file);
+	if (ext == "tif" || ext == "tiff") {
+		WriteTiffImageToFileInternal(file,img);
+	} else {
+		throw std::runtime_error(MakeString() << "Could not write " << file);
+	}
+}
+
+void ReadImageFromFile(const std::string& file, Image1us& img){
+	std::string ext = GetFileExtension(file);
+	if (ext == "tif" || ext == "tiff") {
+		ReadTiffImageFromFileInternal(file,img);
+	} else {
+		throw std::runtime_error(MakeString() << "Could not read " << file);
+	}
+}
+void ReadImageFromFile(const std::string& file, Image2us& img){
+	std::string ext = GetFileExtension(file);
+	if (ext == "tif" || ext == "tiff") {
+		ReadTiffImageFromFileInternal(file,img);
+	} else {
+		throw std::runtime_error(MakeString() << "Could not read " << file);
+	}
+}
+void ReadImageFromFile(const std::string& file, Image3us& img){
+	std::string ext = GetFileExtension(file);
+	if (ext == "tif" || ext == "tiff") {
+		ReadTiffImageFromFileInternal(file,img);
+	} else {
+		throw std::runtime_error(MakeString() << "Could not read " << file);
+	}
+}
+void ReadImageFromFile(const std::string& file, Image4us& img){
+	std::string ext = GetFileExtension(file);
+	if (ext == "tif" || ext == "tiff") {
+		ReadTiffImageFromFileInternal(file,img);
+	} else {
+		throw std::runtime_error(MakeString() << "Could not read " << file);
+	}
+}
+
 void WriteImageToFile(const std::string& file, const ImageRGBf& img) {
 	std::string ext = GetFileExtension(file);
 	if (ext == "xml") {

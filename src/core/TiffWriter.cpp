@@ -6,6 +6,7 @@ namespace aly {
 #ifdef TIFF_BIGENDIAN
 template<class T, int C, ImageType I> bool WriteTiffImageInternal(const std::string& name, const Image<T, C, I>& img,int compressionLevel=9) {
 	const int m_alpha_channel=(C==4)?1:0;
+	const int m_rowsperstrip = 32;
 	// Check for things this format doesn't support
 	if (img.width < 1 || img.height < 1) {
 		std::runtime_error("Image resolution must be at least 1x1");
@@ -23,10 +24,8 @@ template<class T, int C, ImageType I> bool WriteTiffImageInternal(const std::str
 		throw std::runtime_error(MakeString() << "Can't open " << name);
 		return false;
 	}
-	int m_rowsperstrip=1;
 	TIFFSetField(m_tif, TIFFTAG_IMAGEWIDTH, img.width);
 	TIFFSetField(m_tif, TIFFTAG_IMAGELENGTH, img.height);
-	m_rowsperstrip = 32;
 	TIFFSetField(m_tif, TIFFTAG_ROWSPERSTRIP, m_rowsperstrip);
 	TIFFSetField(m_tif, TIFFTAG_SAMPLESPERPIXEL, C);
 	const int orientation= ORIENTATION_TOPLEFT;
@@ -99,15 +98,16 @@ template<class T, int C, ImageType I> bool WriteTiffImageInternal(const std::str
 	TIFFSetField(m_tif, TIFFTAG_PHOTOMETRIC, m_photometric);
 	// ExtraSamples tag
 	if ((m_alpha_channel >= 0 || C > 3) && m_photometric != PHOTOMETRIC_SEPARATED) {
-		const bool unass = false;
 		int defaultchans = C >= 3 ? 3 : 1;
 		short e = C - defaultchans;
 		std::vector<unsigned short> extra(e);
+		//what the hell does this do?
 		for (int c = 0; c < e; ++c) {
-			if (m_alpha_channel == (c + defaultchans))
-				extra[c] = unass ? EXTRASAMPLE_UNASSALPHA : EXTRASAMPLE_ASSOCALPHA;
-			else
+			if (m_alpha_channel == (c + defaultchans)){
+				extra[c] = EXTRASAMPLE_ASSOCALPHA;
+			} else {
 				extra[c] = EXTRASAMPLE_UNSPECIFIED;
+			}
 		}
 		TIFFSetField(m_tif, TIFFTAG_EXTRASAMPLES, e, &extra[0]);
 	}
@@ -130,6 +130,9 @@ template<class T, int C, ImageType I> bool WriteTiffImageInternal(const std::str
 #endif
 
 bool WriteTiffImage(const std::string& file, const Image1us& img) {
+	return WriteTiffImageInternal(file, img);
+}
+bool WriteTiffImage(const std::string& file, const Image2us& img) {
 	return WriteTiffImageInternal(file, img);
 }
 bool WriteTiffImage(const std::string& file, const Image1ui& img) {

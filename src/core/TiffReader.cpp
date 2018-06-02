@@ -646,6 +646,9 @@ template<class T, int C, ImageType I> bool ReadTiffImageInternal(
 bool ReadTiffImage(const std::string& file, Image1us& img) {
 	return ReadTiffImageInternal(file, img);
 }
+bool ReadTiffImage(const std::string& file, Image2us& img) {
+	return ReadTiffImageInternal(file, img);
+}
 bool ReadTiffImage(const std::string& file, Image1ui& img) {
 	return ReadTiffImageInternal(file, img);
 }

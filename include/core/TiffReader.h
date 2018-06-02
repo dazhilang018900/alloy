@@ -117,6 +117,7 @@ bool ReadTiffHeader(const std::string& file,TiffHeader& header);
 
 bool ReadTiffImage(const std::string& file,Image1ub& img);
 bool ReadTiffImage(const std::string& file,Image1us& img);
+bool ReadTiffImage(const std::string& file,Image2us& img);
 bool ReadTiffImage(const std::string& file,Image3us& img);
 bool ReadTiffImage(const std::string& file,Image4us& img);
 bool ReadTiffImage(const std::string& file,Image1ui& img);
