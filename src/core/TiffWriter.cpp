@@ -6,7 +6,7 @@ namespace aly {
 #ifdef TIFF_BIGENDIAN
 template<class T, int C, ImageType I> bool WriteTiffImageInternal(const std::string& name, const Image<T, C, I>& img,int compressionLevel=9) {
 	const int m_alpha_channel=(C==4)?1:0;
-	const int m_rowsperstrip = 32;
+	int m_rowsperstrip = 32;
 	// Check for things this format doesn't support
 	if (img.width < 1 || img.height < 1) {
 		std::runtime_error("Image resolution must be at least 1x1");
@@ -114,10 +114,16 @@ template<class T, int C, ImageType I> bool WriteTiffImageInternal(const std::str
 	TIFFSetField(m_tif,TIFFTAG_PLANARCONFIG,PLANARCONFIG_CONTIG);
 	TIFFSetField(m_tif, TIFFTAG_XPOSITION, 0);
 	TIFFSetField(m_tif, TIFFTAG_YPOSITION, 0);
-	std::vector<vec<T,C>> scratch=img.data;
-    if(TIFFWriteEncodedStrip(m_tif, 0, scratch.data(), img.size()*img.typeSize()) == -1){
-    	throw std::runtime_error("Could not write scanlines");
-    }
+	int NS=(img.height%m_rowsperstrip==0)?img.height/m_rowsperstrip:img.height/m_rowsperstrip+1;
+	size_t rowSize=img.width*m_rowsperstrip;
+	std::vector<vec<T,C>> scratch(rowSize);
+	auto bgn=img.data.begin();
+	for(int strip=0;strip<NS;strip++){
+		scratch.assign(bgn+strip*rowSize,std::min(bgn+(strip+1)*rowSize,img.data.end()));
+		if(TIFFWriteEncodedStrip(m_tif, strip, scratch.data(),rowSize*img.typeSize()) <0){
+			throw std::runtime_error(MakeString()<<"Could not write strip "<<strip);
+		}
+	}
 	if (m_tif) {
 		TIFFClose(m_tif);    // N.B. TIFFClose doesn't return a status code
 	}

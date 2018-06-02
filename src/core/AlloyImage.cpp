@@ -1055,7 +1055,37 @@ void ConvertImage(const ImageRGBA& in, ImageRGBf& out) {
 		out[index++] = RGBf(ct.x / 255.0f, ct.y / 255.0f, ct.z / 255.0f);
 	}
 }
+void ConvertImage(const Image1ub& in, Image1us& out){
+	out.resize(in.width,in.height);
+	size_t index=0;
+	for(ubyte1& b:in.data){
+		out[index++].x=((unsigned int)b.x)<<8;
+	}
+}
+void ConvertImage(const Image2ub& in, Image2us& out){
+	out.resize(in.width,in.height);
+	size_t index=0;
+	for(ubyte2& b:in.data){
+		out[index++]=ushort2(((unsigned int)b.x)<<8,((unsigned int)b.y)<<8);
 
+	}
+}
+void ConvertImage(const Image3ub& in, Image3us& out){
+	out.resize(in.width,in.height);
+	size_t index=0;
+	for(ubyte3& b:in.data){
+		out[index++]=ushort3(((unsigned int)b.x)<<8,((unsigned int)b.y)<<8,((unsigned int)b.z)<<8);
+
+	}
+}
+void ConvertImage(const Image4ub& in, Image4us& out){
+	out.resize(in.width,in.height);
+	size_t index=0;
+	for(ubyte4& b:in.data){
+		out[index++]=ushort4(((unsigned int)b.x)<<8,((unsigned int)b.y)<<8,((unsigned int)b.z)<<8,((unsigned int)b.w)<<8);
+
+	}
+}
 void ConvertImage(const ImageRGBf& in, ImageRGBA& out) {
 	out.resize(in.width, in.height);
 	out.id = in.id;

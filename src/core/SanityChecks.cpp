@@ -1069,13 +1069,40 @@ namespace aly {
 		ImageRGBf srcRGBf;
 		ImageAf srcAf;
 		ImageRGB srcRGB;
+		ImageRGBA srcRGBA;
+
 		Image1ub gray;
+		Image1us gray_hdr;
+		Image3us rgb_hdr;
+
 		ReadImageFromFile("/home/blake/workspace/studio/alloy/assets/images/galaxy.tif",srcRGB);
 		WriteImageToFile(MakeDesktopFile("galaxy.png"),srcRGB);
 		ReadImageFromFile("/home/blake/workspace/studio/alloy/assets/images/mri.tif",gray);
 		WriteImageToFile(MakeDesktopFile("gray.png"),gray);
 		ReadImageFromFile("/home/blake/workspace/studio/assets/LUTs/LUT_STUDIO.tif",srcRGB);
 		WriteImageToFile(MakeDesktopFile("studio.png"),srcRGB);
+
+		ReadImageFromFile("/home/blake/workspace/studio/alloy/assets/images/sfmarket.png",srcRGB);
+		ReadImageFromFile("/home/blake/workspace/studio/alloy/assets/images/sfmarket.png",srcRGBA);
+		WriteImageToFile(MakeDesktopFile("sfmarket.tiff"),srcRGB);
+		for(int j=0;j<srcRGBA.height;j++){
+			for(int i=0;i<srcRGBA.width;i++){
+				bool vt = (i / 64) % 2 == 0;
+				bool ht = (j / 64) % 2 == 0;
+				srcRGBA(i,j).w=((vt && !ht) || (!vt && ht)) ?128: 255;
+			}
+		}
+		WriteImageToFile(MakeDesktopFile("sfmarket_alpha.tiff"),srcRGBA);
+		ConvertImage(srcRGB,gray);
+		WriteImageToFile(MakeDesktopFile("sfmarket_gray.tiff"),gray);
+
+
+		ConvertImage(gray,gray_hdr);
+		WriteImageToFile(MakeDesktopFile("sfmarket_gray_hdr.tiff"),gray_hdr);
+
+		ConvertImage(srcRGB,rgb_hdr);
+		WriteImageToFile(MakeDesktopFile("sfmarket_rgb_hdr.tiff"),rgb_hdr);
+
 		/*
 		ReadImageFromFile(AlloyDefaultContext()->getFullPath("images/sfmarket.png"),
 			srcRGBAf);
