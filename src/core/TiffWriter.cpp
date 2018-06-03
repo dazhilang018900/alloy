@@ -6,7 +6,10 @@ namespace aly {
 #ifdef TIFF_BIGENDIAN
 template<class T, int C, ImageType I> bool WriteTiffImageInternal(const std::string& name, const Image<T, C, I>& img,int compressionLevel=9) {
 	const int m_alpha_channel=(C==4)?1:0;
-	int m_rowsperstrip = 32;
+	int m_rowsperstrip = 64;
+	while(img.height%m_rowsperstrip!=0){
+		m_rowsperstrip>>=1;
+	}
 	// Check for things this format doesn't support
 	if (img.width < 1 || img.height < 1) {
 		std::runtime_error("Image resolution must be at least 1x1");
@@ -73,13 +76,22 @@ template<class T, int C, ImageType I> bool WriteTiffImageInternal(const std::str
 	}
 	TIFFSetField(m_tif, TIFFTAG_BITSPERSAMPLE, m_bitspersample);
 	TIFFSetField(m_tif, TIFFTAG_SAMPLEFORMAT, sampformat);
-	const int m_photometric = (C >= 3 ? PHOTOMETRIC_RGB : PHOTOMETRIC_MINISBLACK);
-	const int m_compression = COMPRESSION_ADOBE_DEFLATE; //could also use COMPRESSION_LZW, but there's a patent.
+	int m_photometric = (C >= 3 ? PHOTOMETRIC_RGB : PHOTOMETRIC_MINISBLACK);
+	int m_compression;
+	if(compressionLevel<0){
+		m_compression = COMPRESSION_LZW;
+	} else if(compressionLevel==0){
+		m_compression=  COMPRESSION_NONE;
+	} else {
+		m_compression = COMPRESSION_ADOBE_DEFLATE;
+	}
 	TIFFSetField(m_tif, TIFFTAG_COMPRESSION, m_compression);
 	// Use predictor when using compression
+	int planarconfig=PLANARCONFIG_CONTIG;
 	int m_predictor = PREDICTOR_NONE;
 	if (I == ImageType::FLOAT ||I == ImageType::DOUBLE) {
 		m_predictor = PREDICTOR_FLOATINGPOINT;
+		m_photometric = PHOTOMETRIC_MINISBLACK;
 		// N.B. Very old versions of libtiff did not support this
 		// predictor.  It's possible that certain apps can't read
 		// floating point TIFFs with this set.  But since it's been
@@ -91,9 +103,11 @@ template<class T, int C, ImageType I> bool WriteTiffImageInternal(const std::str
 	}
 	if (m_predictor != PREDICTOR_NONE)
 		TIFFSetField(m_tif, TIFFTAG_PREDICTOR, m_predictor);
+
 	if (m_compression == COMPRESSION_ADOBE_DEFLATE) {
 		TIFFSetField(m_tif, TIFFTAG_ZIPQUALITY, compressionLevel);
 	}
+
 	const int m_outputchans = C;
 	TIFFSetField(m_tif, TIFFTAG_PHOTOMETRIC, m_photometric);
 	// ExtraSamples tag
@@ -111,7 +125,7 @@ template<class T, int C, ImageType I> bool WriteTiffImageInternal(const std::str
 		}
 		TIFFSetField(m_tif, TIFFTAG_EXTRASAMPLES, e, &extra[0]);
 	}
-	TIFFSetField(m_tif,TIFFTAG_PLANARCONFIG,PLANARCONFIG_CONTIG);
+	TIFFSetField(m_tif,TIFFTAG_PLANARCONFIG,planarconfig);
 	TIFFSetField(m_tif, TIFFTAG_XPOSITION, 0);
 	TIFFSetField(m_tif, TIFFTAG_YPOSITION, 0);
 	int NS=(img.height%m_rowsperstrip==0)?img.height/m_rowsperstrip:img.height/m_rowsperstrip+1;
@@ -135,38 +149,39 @@ template<class T, int C, ImageType I> bool WriteTiffImageInternal(const std::str
 }
 #endif
 
-bool WriteTiffImage(const std::string& file, const Image1us& img) {
-	return WriteTiffImageInternal(file, img);
+bool WriteTiffImage(const std::string& file, const Image1us& img,int compressionLevel) {
+	return WriteTiffImageInternal(file, img,compressionLevel);
 }
-bool WriteTiffImage(const std::string& file, const Image2us& img) {
-	return WriteTiffImageInternal(file, img);
+bool WriteTiffImage(const std::string& file, const Image2us& img,int compressionLevel) {
+	return WriteTiffImageInternal(file, img,compressionLevel);
 }
-bool WriteTiffImage(const std::string& file, const Image1ui& img) {
-	return WriteTiffImageInternal(file, img);
+bool WriteTiffImage(const std::string& file, const Image1ui& img,int compressionLevel) {
+	return WriteTiffImageInternal(file, img,compressionLevel);
 }
-bool WriteTiffImage(const std::string& file, const Image1ub& img) {
-	return WriteTiffImageInternal(file, img);
+bool WriteTiffImage(const std::string& file, const Image1ub& img,int compressionLevel) {
+	return WriteTiffImageInternal(file, img,compressionLevel);
 }
-bool WriteTiffImage(const std::string& file, const ImageRGB& img) {
-	return WriteTiffImageInternal(file, img);
+bool WriteTiffImage(const std::string& file, const ImageRGB& img,int compressionLevel) {
+	return WriteTiffImageInternal(file, img,compressionLevel);
 }
-bool WriteTiffImage(const std::string& file, const ImageRGBA& img) {
-	return WriteTiffImageInternal(file, img);
+bool WriteTiffImage(const std::string& file, const ImageRGBA& img,int compressionLevel) {
+	return WriteTiffImageInternal(file, img,compressionLevel);
 }
-bool WriteTiffImage(const std::string& file, const Image3us& img) {
-	return WriteTiffImageInternal(file, img);
+bool WriteTiffImage(const std::string& file, const Image3us& img,int compressionLevel) {
+	return WriteTiffImageInternal(file, img,compressionLevel);
 }
-bool WriteTiffImage(const std::string& file, const Image4us& img) {
-	return WriteTiffImageInternal(file, img);
+bool WriteTiffImage(const std::string& file, const Image4us& img,int compressionLevel) {
+	return WriteTiffImageInternal(file, img,compressionLevel);
 }
-bool WriteTiffImage(const std::string& file, const Image1f& img) {
-	return WriteTiffImageInternal(file, img);
+/*
+bool WriteTiffImage(const std::string& file, const Image1f& img,int compressionLevel) {
+	return WriteTiffImageInternal(file, img,compressionLevel);
 }
-bool WriteTiffImage(const std::string& file, const ImageRGBf& img) {
-	return WriteTiffImageInternal(file, img);
+bool WriteTiffImage(const std::string& file, const ImageRGBf& img,int compressionLevel) {
+	return WriteTiffImageInternal(file, img,compressionLevel);
 }
-bool WriteTiffImage(const std::string& file, const ImageRGBAf& img) {
-	return WriteTiffImageInternal(file, img);
+bool WriteTiffImage(const std::string& file, const ImageRGBAf& img,int compressionLevel) {
+	return WriteTiffImageInternal(file, img,compressionLevel);
 }
-
+*/
 }

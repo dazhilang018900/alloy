@@ -1067,7 +1067,7 @@ namespace aly {
 	bool SANITY_CHECK_IMAGE_IO() {
 		ImageRGBAf srcRGBAf;
 		ImageRGBf srcRGBf;
-		ImageAf srcAf;
+		Image1f srcAf;
 		ImageRGB srcRGB;
 		ImageRGBA srcRGBA;
 
@@ -1096,6 +1096,13 @@ namespace aly {
 		ConvertImage(srcRGB,gray);
 		WriteImageToFile(MakeDesktopFile("sfmarket_gray.tiff"),gray);
 
+		ConvertImage(srcRGB,srcAf);
+		ConvertImage(srcRGB,srcRGBf);
+
+		//WriteImageToRawFile(MakeDesktopFile("sfmarket_gray_float.xml"),srcAf);
+		//WriteImageToRawFile(MakeDesktopFile("sfmarket_hdr_float.xml"),srcRGBf);
+		//WriteImageToFile(MakeDesktopFile("sfmarket_gray_float.tiff"),srcAf);
+		//WriteImageToFile(MakeDesktopFile("sfmarket_hdr_float.tiff"),srcRGBf);
 
 		ConvertImage(gray,gray_hdr);
 		WriteImageToFile(MakeDesktopFile("sfmarket_gray_hdr.tiff"),gray_hdr);

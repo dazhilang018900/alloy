@@ -249,7 +249,6 @@ void ConvertImage(const ImageRGB& in, Image1f& out, bool sRGB) {
 	out.id = in.id;
 	out.setPosition(in.position());
 	int N = (int) out.size();
-
 	if (sRGB) {
 #pragma omp parallel for
 		for (int i = 0; i < N; i++) {
@@ -420,23 +419,13 @@ template<class T, int C, ImageType I> void ReadTiffImageFromFileInternal(const s
 	ReadTiffImage(file,image);
 }
 template<class T, int C, ImageType I> void WriteTiffImageToFileInternal(const std::string& file,const Image<T,C,I>& image){
-	WriteTiffImage(file,image);
+	WriteTiffImage(file,image,-1);//use LZW
 }
 void WriteImageToFile(const std::string& file, const ImageRGB& image) {
 	std::string ext = GetFileExtension(file);
 	if (ext == "xml") {
 		WriteImageToRawFile(file, image);
 	} else if (ext == "png") {
-		/*
-		ImageRGBA tmp;
-		ConvertImage(image, tmp);
-		//Work around for malloc() error on linux.
-		if (!stbi_write_png(file.c_str(), tmp.width, tmp.height, 4,
-				tmp.data.data(), 4 * tmp.width)) {
-			throw std::runtime_error(
-					MakeString() << "Could not write " << file);
-		}
-		*/
 		if (!stbi_write_png(file.c_str(), image.width, image.height, 3,
 				image.data.data(), 3 * image.width)) {
 			throw std::runtime_error(
@@ -823,8 +812,6 @@ void WriteImageToFile(const std::string& file, const ImageRGBAf& img) {
 			throw std::runtime_error(
 					MakeString() << "Could not write " << file);
 		}
-	} else if (ext == "tif" || ext == "tiff") {
-		WriteTiffImageToFileInternal(file,img);
 	} else {
 		ImageRGBA rgb;
 		rgb.resize(img.width, img.height);
@@ -886,8 +873,6 @@ void WriteImageToFile(const std::string& file, const Image1f& img) {
 			throw std::runtime_error(
 					MakeString() << "Could not write " << file);
 		}
-	}  else if (ext == "tif" || ext == "tiff") {
-		WriteTiffImageToFileInternal(file,img);
 	} else {
 		Image1ub rgb;
 		rgb.resize(img.width, img.height);
@@ -1017,8 +1002,6 @@ void WriteImageToFile(const std::string& file, const ImageRGBf& img) {
 			throw std::runtime_error(
 					MakeString() << "Could not write " << file);
 		}
-	} else if (ext == "tif" || ext == "tiff") {
-		WriteTiffImageToFileInternal(file,img);
 	} else {
 		ImageRGB rgb;
 		rgb.resize(img.width, img.height);
