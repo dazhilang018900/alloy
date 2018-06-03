@@ -35,18 +35,18 @@ Source code is licensed under LGPLv3.
 namespace aly {
 enum class YUVFormat
 {
-	YUV_YUV,
-	YUV_YUV_INTERLEAVE,
-	YUV_UYVY,
-	YUV_YUYV,
-	YUV_YYUV
+	YUV,
+	YUV_INTERLEAVE,
+	UYVY,
+	YUYV,
+	YYUV
 };
 enum class YUVScale
 {
-	SCALE_H2V2,
-	SCALE_H2V1,
-	SCALE_H1V2,
-	SCALE_H1V1
+	H2V2,
+	H2V1,
+	H1V2,
+	H1V1
 };
 enum class YUVMatrix
 {

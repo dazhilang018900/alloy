@@ -135,24 +135,24 @@ void YUVConverter::evaluate(const ImageRGB& image, std::vector<uint8_t>& out) {
 	lumaHeight = image.height;
 	switch (uvScale) {
 	default: /* Default scale h1v1 */
-	case YUVScale::SCALE_H1V1:
+	case YUVScale::H1V1:
 		chromaWidth = lumaWidth;
 		chromaHeight = lumaHeight;
 		xMask = 0;
 		yMask = 0;
 		break;
-	case YUVScale::SCALE_H2V2:
+	case YUVScale::H2V2:
 		chromaWidth = lumaWidth / 2;
 		chromaHeight = lumaHeight / 2;
 		yMask = xMask = 1;
 		break;
-	case YUVScale::SCALE_H1V2:
+	case YUVScale::H1V2:
 		chromaWidth = lumaWidth;
 		chromaHeight = lumaHeight / 2;
 		xMask = 0;
 		yMask = 1;
 		break;
-	case YUVScale::SCALE_H2V1:
+	case YUVScale::H2V1:
 		chromaWidth = lumaWidth / 2;
 		chromaHeight = lumaHeight;
 		xMask = 1;
@@ -189,9 +189,9 @@ void YUVConverter::evaluate(const ImageRGB& image, std::vector<uint8_t>& out) {
 	yPtr = yPixels.data();
 	uPtr = uPixels.data();
 	vPtr = vPixels.data();
-	if (yuvFormat == YUVFormat::YUV_YUV||yuvFormat == YUVFormat::YUV_YUV_INTERLEAVE) {	// Writing planar image
+	if (yuvFormat == YUVFormat::YUV||yuvFormat == YUVFormat::YUV_INTERLEAVE) {	// Writing planar image
 		out.insert(out.end(), yPixels.begin(), yPixels.end());
-		if (yuvFormat == YUVFormat::YUV_YUV_INTERLEAVE) {	// U and V rows should be interleaved after each other
+		if (yuvFormat == YUVFormat::YUV_INTERLEAVE) {	// U and V rows should be interleaved after each other
 			while (chromaHeight--) {
 				out.insert(out.end(), uPtr, uPtr + chromaWidth);// Write U line
 				out.insert(out.end(), vPtr, vPtr + chromaWidth);// Write V line
@@ -203,7 +203,7 @@ void YUVConverter::evaluate(const ImageRGB& image, std::vector<uint8_t>& out) {
 			out.insert(out.end(), uPixels.begin(), uPixels.end());
 			out.insert(out.end(), vPixels.begin(), vPixels.end());
 		}
-	} else if (yuvFormat == YUVFormat::YUV_YYUV) {	// Writing planar image
+	} else if (yuvFormat == YUVFormat::YYUV) {	// Writing planar image
 		out.insert(out.end(), yPixels.begin(), yPixels.end());
 		// U and V columns should be interleaved after each other
 		for (uint32_t row = 0; row < chromaHeight; row++) {
@@ -214,7 +214,7 @@ void YUVConverter::evaluate(const ImageRGB& image, std::vector<uint8_t>& out) {
 		}
 	} else {
 		// Writing packed image
-		if (yuvFormat == YUVFormat::YUV_YUYV) {
+		if (yuvFormat == YUVFormat::YUYV) {
 			for (uint32_t row = 0; row < lumaHeight; row++) {
 				for (uint32_t col = 0; col < lumaWidth; col += 2) {	// Write in following order Y, U, Y, V
 					out.push_back(*yPtr++);
@@ -243,8 +243,8 @@ std::string toString(unsigned long value) {
 
 YUVConverter::YUVConverter() {
 	uvOrderSwap = false; /* no UV order swap */
-	yuvFormat = YUVFormat::YUV_YUV; /* YUV output mode. Default: h2v2 */
-	uvScale = YUVScale::SCALE_H1V1; /* UV scaling for planar mode. Default: h1v1 */
+	yuvFormat = YUVFormat::YUV; /* YUV output mode. Default: h2v2 */
+	uvScale = YUVScale::H1V1; /* UV scaling for planar mode. Default: h1v1 */
 	uvMatrix = YUVMatrix::JPEG;
 	setMatrix();
 }
@@ -260,44 +260,44 @@ YUVConverter::YUVConverter(YUVType type, YUVMatrix mat) {
 	switch (type) {
 	case YUVType::I420:
 		uvOrderSwap = false;
-		yuvFormat = YUVFormat::YUV_YUV;
-		uvScale = YUVScale::SCALE_H2V2;
+		yuvFormat = YUVFormat::YUV;
+		uvScale = YUVScale::H2V2;
 		uvMatrix = YUVMatrix::SDTV;
 		break;
 	case YUVType::YV12:
 		uvOrderSwap = true;
-		yuvFormat = YUVFormat::YUV_YUV;
-		uvScale = YUVScale::SCALE_H2V2;
+		yuvFormat = YUVFormat::YUV;
+		uvScale = YUVScale::H2V2;
 		uvMatrix = YUVMatrix::SDTV;
 		break;
 	case YUVType::YV16:
 		uvOrderSwap = true;
-		yuvFormat = YUVFormat::YUV_YUV;
-		uvScale = YUVScale::SCALE_H2V1;
+		yuvFormat = YUVFormat::YUV;
+		uvScale = YUVScale::H2V1;
 		uvMatrix = YUVMatrix::SDTV;
 		break;
 	case YUVType::NV12:
 		uvOrderSwap = false;
-		yuvFormat = YUVFormat::YUV_YYUV;
-		uvScale = YUVScale::SCALE_H2V2;
+		yuvFormat = YUVFormat::YYUV;
+		uvScale = YUVScale::H2V2;
 		uvMatrix = YUVMatrix::HDTV;
 		break;
 	case YUVType::YUY2:
 		uvOrderSwap = false;
-		yuvFormat = YUVFormat::YUV_YUYV;
-		uvScale = YUVScale::SCALE_H1V1;
+		yuvFormat = YUVFormat::YUYV;
+		uvScale = YUVScale::H1V1;
 		uvMatrix = YUVMatrix::JPEG;
 		break;
 	case YUVType::YVYU:
 		uvOrderSwap = true;
-		yuvFormat = YUVFormat::YUV_YUYV;
-		uvScale = YUVScale::SCALE_H1V1;
+		yuvFormat = YUVFormat::YUYV;
+		uvScale = YUVScale::H1V1;
 		uvMatrix = YUVMatrix::JPEG;
 		break;
 	case YUVType::UYVY:
 		uvOrderSwap = false;
-		yuvFormat = YUVFormat::YUV_UYVY;
-		uvScale = YUVScale::SCALE_H1V1;
+		yuvFormat = YUVFormat::UYVY;
+		uvScale = YUVScale::H1V1;
 		uvMatrix = YUVMatrix::JPEG;
 		break;
 	}
