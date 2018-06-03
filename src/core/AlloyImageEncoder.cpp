@@ -117,11 +117,10 @@ void YUVConverter::setMatrix() {
 	}
 }
 void YUVConverter::evaluate(const ImageRGB& image, std::vector<uint8_t>& out) {
-	uint8_t errorFlag = 1; // By default we will exiting with error
-	uint32_t bpp = 0;
 	uint32_t lumaWidth, lumaHeight;
 	uint32_t chromaWidth, chromaHeight;
-	uint32_t x, y, xMask, yMask;
+	uint32_t xMask, yMask;
+	int x, y;
 	uint8_t Rc, Gc, Bc;
 	uint8_t *rgbPixels;
 	uint8_t *yPtr, *uPtr, *vPtr;
@@ -171,7 +170,7 @@ void YUVConverter::evaluate(const ImageRGB& image, std::vector<uint8_t>& out) {
 	out.reserve(lumaHeight * lumaWidth + 2 * chromaWidth * chromaHeight);
 	for (y = 0; y < lumaHeight; y++) {
 		for (x = 0; x < lumaWidth; x++) {
-			aly::RGB c = image((int) x, (int) y);
+			aly::RGB c = image(x,y);
 			Rc = c.x;
 			Gc = c.y;
 			Bc = c.z;
@@ -235,12 +234,6 @@ void YUVConverter::evaluate(const ImageRGB& image, std::vector<uint8_t>& out) {
 		}
 	}
 }
-std::string toString(unsigned long value) {
-	std::ostringstream oss;
-	oss << value;
-	return oss.str();
-}
-
 YUVConverter::YUVConverter() {
 	uvOrderSwap = false; /* no UV order swap */
 	yuvFormat = YUVFormat::YUV; /* YUV output mode. Default: h2v2 */
