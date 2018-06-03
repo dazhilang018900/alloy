@@ -189,9 +189,9 @@ void YUVConverter::evaluate(const ImageRGB& image, std::vector<uint8_t>& out) {
 	yPtr = yPixels.data();
 	uPtr = uPixels.data();
 	vPtr = vPixels.data();
-	if (yuvFormat == YUVFormat::YUV_YUV) {	// Writing planar image
+	if (yuvFormat == YUVFormat::YUV_YUV||yuvFormat == YUVFormat::YUV_YUV_INTERLEAVE) {	// Writing planar image
 		out.insert(out.end(), yPixels.begin(), yPixels.end());
-		if (uvInterleave) {	// U and V rows should be interleaved after each other
+		if (yuvFormat == YUVFormat::YUV_YUV_INTERLEAVE) {	// U and V rows should be interleaved after each other
 			while (chromaHeight--) {
 				out.insert(out.end(), uPtr, uPtr + chromaWidth);// Write U line
 				out.insert(out.end(), vPtr, vPtr + chromaWidth);// Write V line
@@ -243,23 +243,20 @@ std::string toString(unsigned long value) {
 
 YUVConverter::YUVConverter() {
 	uvOrderSwap = false; /* no UV order swap */
-	uvInterleave = false; /* no UV interleaving */
 	yuvFormat = YUVFormat::YUV_YUV; /* YUV output mode. Default: h2v2 */
 	uvScale = YUVScale::SCALE_H1V1; /* UV scaling for planar mode. Default: h1v1 */
 	uvMatrix = YUVMatrix::JPEG;
 	setMatrix();
 }
 YUVConverter::YUVConverter(YUVMatrix mat, YUVFormat format, YUVScale scale,
-		bool orderSwap, bool interleave) {
+		bool orderSwap) {
 	uvOrderSwap = orderSwap;
-	uvInterleave = interleave;
 	yuvFormat = format;
 	uvScale = scale;
 	uvMatrix = mat;
 	setMatrix();
 }
-YUVConverter::YUVConverter(YUVType type, YUVMatrix mat, bool interleave) {
-	uvInterleave = interleave;
+YUVConverter::YUVConverter(YUVType type, YUVMatrix mat) {
 	switch (type) {
 	case YUVType::I420:
 		uvOrderSwap = false;

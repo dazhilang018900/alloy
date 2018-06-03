@@ -36,6 +36,7 @@ namespace aly {
 enum class YUVFormat
 {
 	YUV_YUV,
+	YUV_YUV_INTERLEAVE,
 	YUV_UYVY,
 	YUV_YUYV,
 	YUV_YYUV
@@ -66,19 +67,16 @@ enum class YUVType{
 class YUVConverter
 {
 public:
-	bool uvInterleave;			/* if not zero, UV rows in planar images are interleaved*/
+	YUVConverter();
+	YUVConverter(YUVMatrix mat,YUVFormat format,YUVScale scale,bool orderSwap);
+	YUVConverter(YUVType type,YUVMatrix mat=YUVMatrix::UNSPECIFIED);
+	void evaluate(const ImageRGB& image,std::vector<uint8_t>& out);
+protected:
 	bool uvOrderSwap;				/*Swap UV order*/
 	YUVFormat yuvFormat;			/* YUV output mode. Default: h2v2 */
 	YUVScale uvScale;			/* Defines how UV components are scaled in planar mode */
 	YUVMatrix uvMatrix;  		/*matrix type*/
-	std::string inFileNamePattern;
-	std::string outFileNamePattern;
 	std::vector<float>yuvMatrix;
-	YUVConverter();
-	YUVConverter(YUVMatrix mat,YUVFormat format,YUVScale scale,bool orderSwap,bool interleave);
-	YUVConverter(YUVType type,YUVMatrix mat=YUVMatrix::UNSPECIFIED,bool interleave=false);
-	void evaluate(const ImageRGB& image,std::vector<uint8_t>& out);
-protected:
 	void setJPEGMatrix();
 	void setSDTVMatrix();
 	void setHDTVMatrix();
