@@ -169,7 +169,6 @@ void YUVConverter::evaluate(const ImageRGB& image, std::vector<uint8_t>& out) {
 	uint32_t xMask, yMask;
 	int x, y;
 	uint8_t Rc, Gc, Bc;
-	uint8_t *rgbPixels;
 	uint8_t *yPtr, *uPtr, *vPtr;
 	bool warned = false;
 	// For performance reasons get matrix values here to put them on stack
@@ -349,21 +348,21 @@ YUVConverter::YUVConverter(YUVType type, YUVMatrix mat) {
 	setMatrix();
 }
 void YUVConverter::setJPEGMatrix() {
-	yuvMatrix = {0.299, 0.587, 0.114,
-		-0.168736, -0.331264, 0.5,
-		0.5, -0.418688, -0.081312};
+	yuvMatrix = {0.299f, 0.587f, 0.114f,
+		-0.168736f, -0.331264f, 0.5f,
+		0.5f, -0.418688f, -0.081312f};
 }
 
 void YUVConverter::setSDTVMatrix() {
-	yuvMatrix = {0.299, 0.587, 0.114,
-		-0.14713, -0.28886, 0.436,
-		0.615, -0.51499, -0.10001};
+	yuvMatrix = {0.299f, 0.587f, 0.114f,
+		-0.14713f, -0.28886f, 0.436f,
+		0.615f, -0.51499f, -0.10001f};
 }
 
 void YUVConverter::setHDTVMatrix() {
-	yuvMatrix = {0.2126, 0.7152, 0.0722,
-		-0.09991, -0.33609, 0.436,
-		0.615, -0.55861, -0.05639};
+	yuvMatrix = {0.2126f, 0.7152f, 0.0722f,
+		-0.09991f, -0.33609f, 0.436f,
+		0.615f, -0.55861f, -0.05639f};
 }
 }
 

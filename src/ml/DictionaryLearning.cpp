@@ -598,7 +598,7 @@ void DictionaryLearning::train(const std::vector<ImageRGB>& images,
 	float var = fuzz * fuzz;
 	//float var2 = 0.4f * 0.4f;
 	//float var3 = 0.5f * 0.5f;
-	std::vector<float> shifts = { -fuzz, -fuzz * 0.5f, 0.0f, fuzz * 0.5,fuzz };
+	std::vector<float> shifts = { -fuzz, -fuzz * 0.5f, 0.0f, fuzz * 0.5f,fuzz };
 	std::vector<float> angles;
 	for (int a = -180; a < 180; a += 20) {
 		angles.push_back(a);

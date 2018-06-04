@@ -79,6 +79,12 @@
     <Filter Include="include\fluid">
       <UniqueIdentifier>{7c389d5b-37eb-47fb-9449-b88e172c616a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\ml">
+      <UniqueIdentifier>{c002dc08-ff15-48d4-bd92-84ba5fffc8a3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\ml">
+      <UniqueIdentifier>{79d40b0e-aa7c-48d3-83da-aeb1cd2b8139}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\core\nanovg.cpp">
@@ -673,6 +679,15 @@
       <Filter>src\core</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\core\TiffWriter.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ml\DictionaryLearning.cpp">
+      <Filter>src\ml</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\DictionaryLearningEx.cpp">
+      <Filter>src\example</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\AlloyImageEncoder.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
   </ItemGroup>
@@ -1572,6 +1587,15 @@
       <Filter>include\core</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\core\TiffWriter.h">
+      <Filter>include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\ml\DictionaryLearning.h">
+      <Filter>include\ml</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\example\DictionaryLearningEx.h">
+      <Filter>include\example</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\core\AlloyImageEncoder.h">
       <Filter>include\core</Filter>
     </ClInclude>
   </ItemGroup>

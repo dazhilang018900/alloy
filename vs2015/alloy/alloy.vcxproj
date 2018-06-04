@@ -29,6 +29,7 @@
     <ClCompile Include="..\..\src\core\AlloyGradientVectorFlow.cpp" />
     <ClCompile Include="..\..\src\core\AlloyGraphPane.cpp" />
     <ClCompile Include="..\..\src\core\AlloyImage.cpp" />
+    <ClCompile Include="..\..\src\core\AlloyImageEncoder.cpp" />
     <ClCompile Include="..\..\src\core\AlloyImageFeatures.cpp" />
     <ClCompile Include="..\..\src\core\AlloyImageProcessing.cpp" />
     <ClCompile Include="..\..\src\core\AlloyIntersector.cpp" />
@@ -102,6 +103,7 @@
     <ClCompile Include="..\..\src\example\ControlsEx.cpp" />
     <ClCompile Include="..\..\src\example\DataFlowEx.cpp" />
     <ClCompile Include="..\..\src\example\DialogsEx.cpp" />
+    <ClCompile Include="..\..\src\example\DictionaryLearningEx.cpp" />
     <ClCompile Include="..\..\src\example\DistanceFieldEx.cpp" />
     <ClCompile Include="..\..\src\example\DragEx.cpp" />
     <ClCompile Include="..\..\src\example\EventsEx.cpp" />
@@ -159,6 +161,7 @@
     <ClCompile Include="..\..\src\fluid\SimulationObjects.cpp" />
     <ClCompile Include="..\..\src\grid\EndlessGrid.cpp" />
     <ClCompile Include="..\..\src\grid\EndlessNode.cpp" />
+    <ClCompile Include="..\..\src\ml\DictionaryLearning.cpp" />
     <ClCompile Include="..\..\src\ocl\BufferCL.cpp" />
     <ClCompile Include="..\..\src\ocl\BufferCLGL.cpp" />
     <ClCompile Include="..\..\src\ocl\ComputeCL.cpp" />
@@ -274,6 +277,7 @@
     <ClInclude Include="..\..\include\core\AlloyGradientVectorFlow.h" />
     <ClInclude Include="..\..\include\core\AlloyGraphPane.h" />
     <ClInclude Include="..\..\include\core\AlloyImage.h" />
+    <ClInclude Include="..\..\include\core\AlloyImageEncoder.h" />
     <ClInclude Include="..\..\include\core\AlloyImageFeatures.h" />
     <ClInclude Include="..\..\include\core\AlloyImageProcessing.h" />
     <ClInclude Include="..\..\include\core\AlloyIntersector.h" />
@@ -368,6 +372,7 @@
     <ClInclude Include="..\..\include\example\ControlsEx.h" />
     <ClInclude Include="..\..\include\example\DataFlowEx.h" />
     <ClInclude Include="..\..\include\example\DialogsEx.h" />
+    <ClInclude Include="..\..\include\example\DictionaryLearningEx.h" />
     <ClInclude Include="..\..\include\example\DistanceFieldEx.h" />
     <ClInclude Include="..\..\include\example\DragEx.h" />
     <ClInclude Include="..\..\include\example\EventsEx.h" />
@@ -424,6 +429,7 @@
     <ClInclude Include="..\..\include\fluid\SimulationObjects.h" />
     <ClInclude Include="..\..\include\grid\EndlessGrid.h" />
     <ClInclude Include="..\..\include\grid\EndlessNode.h" />
+    <ClInclude Include="..\..\include\ml\DictionaryLearning.h" />
     <ClInclude Include="..\..\include\ocl\BufferCL.h" />
     <ClInclude Include="..\..\include\ocl\BufferCLGL.h" />
     <ClInclude Include="..\..\include\ocl\ComputeCL.h" />
@@ -529,10 +535,8 @@
   <ImportGroup Label="ExtensionSettings">
     <Import Project="..\..\..\packages\libjpeg.redist.9.0.1.4\build\native\libjpeg.redist.targets" Condition="Exists('..\..\..\packages\libjpeg.redist.9.0.1.4\build\native\libjpeg.redist.targets')" />
     <Import Project="..\..\..\packages\libjpeg.9.0.1.4\build\native\libjpeg.targets" Condition="Exists('..\..\..\packages\libjpeg.9.0.1.4\build\native\libjpeg.targets')" />
-    <Import Project="..\..\..\packages\libtiff.redist.4.0.6.2\build\native\libtiff.redist.targets" Condition="Exists('..\..\..\packages\libtiff.redist.4.0.6.2\build\native\libtiff.redist.targets')" />
     <Import Project="..\..\..\packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets" Condition="Exists('..\..\..\packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets')" />
     <Import Project="..\..\..\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets" Condition="Exists('..\..\..\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets')" />
-    <Import Project="..\..\..\packages\libtiff.4.0.6.2\build\native\libtiff.targets" Condition="Exists('..\..\..\packages\libtiff.4.0.6.2\build\native\libtiff.targets')" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -567,7 +571,7 @@
       <AdditionalLibraryDirectories>$(SolutionDir)\third_party\lib\$(PlatformName)\;$(CUDA_PATH)\lib\$(PlatformName)\;$(INTELOCLSDKROOT)\lib\$(PlatformName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <Lib>
-      <AdditionalDependencies>glu32.lib;opengl32.lib;OpenCL.lib;libpng16.lib;zlib.lib;glfw3.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glu32.lib;opengl32.lib;OpenCL.lib;libpng16.lib;zlib.lib;glfw3.lib;glew32.lib;tiff.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Lib>
       <AdditionalLibraryDirectories>$(SolutionDir)\third_party\lib\$(PlatformName)\;$(CUDA_PATH)\lib\$(PlatformName)\;$(INTELOCLSDKROOT)\lib\$(PlatformName)\;$(ProjectDir)\..\third_party\lib\$(PlatformName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -586,9 +590,7 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\..\..\packages\libjpeg.redist.9.0.1.4\build\native\libjpeg.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\libjpeg.redist.9.0.1.4\build\native\libjpeg.redist.targets'))" />
     <Error Condition="!Exists('..\..\..\packages\libjpeg.9.0.1.4\build\native\libjpeg.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\libjpeg.9.0.1.4\build\native\libjpeg.targets'))" />
-    <Error Condition="!Exists('..\..\..\packages\libtiff.redist.4.0.6.2\build\native\libtiff.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\libtiff.redist.4.0.6.2\build\native\libtiff.redist.targets'))" />
     <Error Condition="!Exists('..\..\..\packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets'))" />
     <Error Condition="!Exists('..\..\..\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets'))" />
-    <Error Condition="!Exists('..\..\..\packages\libtiff.4.0.6.2\build\native\libtiff.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\libtiff.4.0.6.2\build\native\libtiff.targets'))" />
   </Target>
 </Project>
