@@ -18,7 +18,7 @@ template<class T, int C, ImageType I> bool WriteTiffImageInternal(const std::str
 	TIFF* m_tif = nullptr;
 	// Open the file
 #ifdef _WIN32
-	std::wstring wname = Strutil::utf8_to_utf16 (name);
+	std::wstring wname =ToWString(name);
 	m_tif = TIFFOpenW (wname.c_str(),"w");
 #else
 	m_tif = TIFFOpen(name.c_str(), "w");

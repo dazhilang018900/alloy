@@ -85,6 +85,8 @@
     <ClCompile Include="..\..\src\core\stb_dxt.cpp" />
     <ClCompile Include="..\..\src\core\svd3.cpp" />
     <ClCompile Include="..\..\src\core\TextureMapLocator.cpp" />
+    <ClCompile Include="..\..\src\core\TiffReader.cpp" />
+    <ClCompile Include="..\..\src\core\TiffWriter.cpp" />
     <ClCompile Include="..\..\src\core\tinyexr.cpp" />
     <ClCompile Include="..\..\src\core\tinyprocess.cpp" />
     <ClCompile Include="..\..\src\core\tinyspline.c" />
@@ -349,6 +351,8 @@
     <ClInclude Include="..\..\include\core\stb_truetype.h" />
     <ClInclude Include="..\..\include\core\svd3.h" />
     <ClInclude Include="..\..\include\core\TextureMapLocator.h" />
+    <ClInclude Include="..\..\include\core\TiffReader.h" />
+    <ClInclude Include="..\..\include\core\TiffWriter.h" />
     <ClInclude Include="..\..\include\core\tinyexr.h" />
     <ClInclude Include="..\..\include\core\tinyformat.h" />
     <ClInclude Include="..\..\include\core\tinyprocess.h" />
@@ -503,6 +507,9 @@
     <ClInclude Include="..\..\include\vision\Epnp.h" />
     <ClInclude Include="..\..\include\vision\Sift.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{E990BB2D-D073-48A2-841A-8231A304F580}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -519,7 +526,14 @@
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="..\..\..\packages\libjpeg.redist.9.0.1.4\build\native\libjpeg.redist.targets" Condition="Exists('..\..\..\packages\libjpeg.redist.9.0.1.4\build\native\libjpeg.redist.targets')" />
+    <Import Project="..\..\..\packages\libjpeg.9.0.1.4\build\native\libjpeg.targets" Condition="Exists('..\..\..\packages\libjpeg.9.0.1.4\build\native\libjpeg.targets')" />
+    <Import Project="..\..\..\packages\libtiff.redist.4.0.6.2\build\native\libtiff.redist.targets" Condition="Exists('..\..\..\packages\libtiff.redist.4.0.6.2\build\native\libtiff.redist.targets')" />
+    <Import Project="..\..\..\packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets" Condition="Exists('..\..\..\packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets')" />
+    <Import Project="..\..\..\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets" Condition="Exists('..\..\..\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets')" />
+    <Import Project="..\..\..\packages\libtiff.4.0.6.2\build\native\libtiff.targets" Condition="Exists('..\..\..\packages\libtiff.4.0.6.2\build\native\libtiff.targets')" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\props\Alloy.props" />
@@ -556,14 +570,25 @@
       <AdditionalDependencies>glu32.lib;opengl32.lib;OpenCL.lib;libpng16.lib;zlib.lib;glfw3.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)\third_party\lib\$(PlatformName)\;$(CUDA_PATH)\lib\$(PlatformName)\;$(INTELOCLSDKROOT)\lib\$(PlatformName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)\third_party\lib\$(PlatformName)\;$(CUDA_PATH)\lib\$(PlatformName)\;$(INTELOCLSDKROOT)\lib\$(PlatformName)\;$(ProjectDir)\..\third_party\lib\$(PlatformName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
     <ProjectReference>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
     </ProjectReference>
     <PostBuildEvent>
-      <Command>copy  /Y $(SolutionDir)\third_party\bin\Release\$(PlatformName)\glew32.dll $(SolutionDir)\build\$(Configuration)-$(Platform)\glew32.dll</Command>
+      <Command>copy  /Y $(ProjectDir)\..\third_party\bin\Release\$(PlatformName)\glew32.dll $(SolutionDir)\build\$(Configuration)-$(Platform)\glew32.dll</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\..\packages\libjpeg.redist.9.0.1.4\build\native\libjpeg.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\libjpeg.redist.9.0.1.4\build\native\libjpeg.redist.targets'))" />
+    <Error Condition="!Exists('..\..\..\packages\libjpeg.9.0.1.4\build\native\libjpeg.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\libjpeg.9.0.1.4\build\native\libjpeg.targets'))" />
+    <Error Condition="!Exists('..\..\..\packages\libtiff.redist.4.0.6.2\build\native\libtiff.redist.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\libtiff.redist.4.0.6.2\build\native\libtiff.redist.targets'))" />
+    <Error Condition="!Exists('..\..\..\packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v120.windesktop.msvcstl.dyn.rt-dyn.targets'))" />
+    <Error Condition="!Exists('..\..\..\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.1.2.8.8\build\native\zlib.v140.windesktop.msvcstl.dyn.rt-dyn.targets'))" />
+    <Error Condition="!Exists('..\..\..\packages\libtiff.4.0.6.2\build\native\libtiff.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\libtiff.4.0.6.2\build\native\libtiff.targets'))" />
+  </Target>
 </Project>

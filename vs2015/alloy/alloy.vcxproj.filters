@@ -669,6 +669,12 @@
     <ClCompile Include="..\..\src\segmentation\MultiIsoSurface.cpp">
       <Filter>src\segmentation</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\core\TiffReader.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\core\TiffWriter.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\core\nanovg.h">
@@ -1562,5 +1568,14 @@
     <ClInclude Include="..\..\include\segmentation\MultiIsoSurface.h">
       <Filter>include\segmentation</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\core\TiffReader.h">
+      <Filter>include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\core\TiffWriter.h">
+      <Filter>include\core</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
