@@ -690,6 +690,9 @@
     <ClCompile Include="..\..\src\core\AlloyImageEncoder.cpp">
       <Filter>src\core</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\core\jsonxx.cpp">
+      <Filter>src\core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\include\core\nanovg.h">
@@ -1596,6 +1599,9 @@
       <Filter>include\example</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\core\AlloyImageEncoder.h">
+      <Filter>include\core</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\core\jsonxx.h">
       <Filter>include\core</Filter>
     </ClInclude>
   </ItemGroup>
