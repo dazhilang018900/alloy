@@ -101,6 +101,53 @@
  */
 #include "AlloyImageEncoder.h"
 namespace aly {
+void SANITY_CHECK_VIDEOENCODER() {
+	ImageRGB img;
+	ReadImageFromFile("/home/blake/workspace/studio/alloy/assets/images/sfmarket.png",img);
+	{
+		YUVConverter converter(YUVMatrix::JPEG, YUVFormat::YUV, YUVScale::H2V1,true);
+		std::vector<uint8_t> buffer;
+		converter.evaluate(img,buffer);
+		std::cout<<"Image Size= "<<img.size()*img.typeSize()<<" Buffer Size= "<<buffer.size()<<std::endl;
+	}
+	{
+		YUVConverter converter(YUVMatrix::JPEG, YUVFormat::YUV_INTERLEAVE, YUVScale::H2V1,false);
+		std::vector<uint8_t> buffer;
+		converter.evaluate(img,buffer);
+		std::cout<<"Image Size= "<<img.size()*img.typeSize()<<" Buffer Size= "<<buffer.size()<<std::endl;
+	}
+	{
+		YUVConverter converter(YUVType::I420);
+		std::vector<uint8_t> buffer;
+		converter.evaluate(img,buffer);
+		std::cout<<"I420 Image Size= "<<img.size()*img.typeSize()<<" Buffer Size= "<<buffer.size()<<std::endl;
+	}
+	{
+		YUVConverter converter(YUVType::YV12);
+		std::vector<uint8_t> buffer;
+		converter.evaluate(img,buffer);
+		std::cout<<"YV12 Image Size= "<<img.size()*img.typeSize()<<" Buffer Size= "<<buffer.size()<<std::endl;
+	}
+	{
+		YUVConverter converter(YUVType::NV12);
+		std::vector<uint8_t> buffer;
+		converter.evaluate(img,buffer);
+		std::cout<<"NV12 Image Size= "<<img.size()*img.typeSize()<<" Buffer Size= "<<buffer.size()<<std::endl;
+	}
+	{
+		YUVConverter converter(YUVType::UYVY);
+		std::vector<uint8_t> buffer;
+		converter.evaluate(img,buffer);
+		std::cout<<"UYVY Image Size= "<<img.size()*img.typeSize()<<" Buffer Size= "<<buffer.size()<<std::endl;
+	}
+	{
+		YUVConverter converter(YUVType::YUY2);
+		std::vector<uint8_t> buffer;
+		converter.evaluate(img,buffer);
+		std::cout<<"YUY2 Image Size= "<<img.size()*img.typeSize()<<" Buffer Size= "<<buffer.size()<<std::endl;
+	}
+}
+
 void YUVConverter::setMatrix() {
 	switch (uvMatrix) {
 	case YUVMatrix::JPEG:
@@ -167,10 +214,9 @@ void YUVConverter::evaluate(const ImageRGB& image, std::vector<uint8_t>& out) {
 	uPtr = uPixels.data();
 	vPtr = vPixels.data();
 	out.clear();
-	out.reserve(lumaHeight * lumaWidth + 2 * chromaWidth * chromaHeight);
 	for (y = 0; y < lumaHeight; y++) {
 		for (x = 0; x < lumaWidth; x++) {
-			aly::RGB c = image(x,y);
+			aly::RGB c = image(x, y);
 			Rc = c.x;
 			Gc = c.y;
 			Bc = c.z;
@@ -188,9 +234,10 @@ void YUVConverter::evaluate(const ImageRGB& image, std::vector<uint8_t>& out) {
 	yPtr = yPixels.data();
 	uPtr = uPixels.data();
 	vPtr = vPixels.data();
-	if (yuvFormat == YUVFormat::YUV||yuvFormat == YUVFormat::YUV_INTERLEAVE) {	// Writing planar image
+	if (yuvFormat == YUVFormat::YUV || yuvFormat == YUVFormat::YUV_INTERLEAVE) {// Writing planar image
+		out.reserve(lumaHeight * lumaWidth + 2 * chromaWidth * chromaHeight);
 		out.insert(out.end(), yPixels.begin(), yPixels.end());
-		if (yuvFormat == YUVFormat::YUV_INTERLEAVE) {	// U and V rows should be interleaved after each other
+		if (yuvFormat == YUVFormat::YUV_INTERLEAVE) {// U and V rows should be interleaved after each other
 			while (chromaHeight--) {
 				out.insert(out.end(), uPtr, uPtr + chromaWidth);// Write U line
 				out.insert(out.end(), vPtr, vPtr + chromaWidth);// Write V line
@@ -203,6 +250,7 @@ void YUVConverter::evaluate(const ImageRGB& image, std::vector<uint8_t>& out) {
 			out.insert(out.end(), vPixels.begin(), vPixels.end());
 		}
 	} else if (yuvFormat == YUVFormat::YYUV) {	// Writing planar image
+		out.reserve(lumaHeight * lumaWidth + 2 * chromaWidth * chromaHeight);
 		out.insert(out.end(), yPixels.begin(), yPixels.end());
 		// U and V columns should be interleaved after each other
 		for (uint32_t row = 0; row < chromaHeight; row++) {
@@ -212,6 +260,7 @@ void YUVConverter::evaluate(const ImageRGB& image, std::vector<uint8_t>& out) {
 			}
 		}
 	} else {
+		out.reserve(lumaHeight * (lumaWidth/2));
 		// Writing packed image
 		if (yuvFormat == YUVFormat::YUYV) {
 			for (uint32_t row = 0; row < lumaHeight; row++) {

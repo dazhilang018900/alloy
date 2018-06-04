@@ -33,6 +33,8 @@ Source code is licensed under LGPLv3.
 #define INCLUDE_CORE_ALLOYIMAGEENCODER_H_
 #include <AlloyImage.h>
 namespace aly {
+void SANITY_CHECK_VIDEOENCODER();
+
 enum class YUVFormat
 {
 	YUV,
