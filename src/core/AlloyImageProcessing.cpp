@@ -115,7 +115,7 @@ void Demosaic(const Image1ub& gray, ImageRGB& colorImage,
 		}
 	}
 }
-void Undistort(const ImageRGBf& in, ImageRGBf& out, double fx, double fy,
+void Undistort(const ImageRGBf& in, ImageRGBf& out, double fx, double fy,double cx, double cy,
 		double k1, double k2, double k3, double p1, double p2) {
 	int w = in.width;
 	int h = in.height;
@@ -123,10 +123,8 @@ void Undistort(const ImageRGBf& in, ImageRGBf& out, double fx, double fy,
 #pragma omp parallel for
 	for (int j = 0; j < h; j++) {
 		for (int i = 0; i < w; i++) {
-			double cx = 0.5 * w;
-			double cy = 0.5 * h;
-			double x = (i - cx) / fx;
-			double y = (j - cy) / fy;
+			double x = (i - (0.5f*w+cx)) / fx;
+			double y = (j - (0.5f*h+cy)) / fy;
 			double rs = x * x + y * y;
 			double xp = x * (1 + k1 * rs + k2 * rs * rs + k3 * rs * rs * rs)
 					+ 2 * p1 * x * y + p2 * (rs + 2 * x * x);
@@ -138,7 +136,7 @@ void Undistort(const ImageRGBf& in, ImageRGBf& out, double fx, double fy,
 		}
 	}
 }
-void Undistort(const ImageRGB& in, ImageRGB& out, double fx, double fy,
+void Undistort(const ImageRGB& in, ImageRGB& out, double fx, double fy,double cx,double cy,
 		double k1, double k2, double k3, double p1, double p2) {
 	int w = in.width;
 	int h = in.height;
@@ -146,10 +144,8 @@ void Undistort(const ImageRGB& in, ImageRGB& out, double fx, double fy,
 #pragma omp parallel for
 	for (int j = 0; j < h; j++) {
 		for (int i = 0; i < w; i++) {
-			double cx = 0.5 * w;
-			double cy = 0.5 * h;
-			double x = (i - cx) / fx;
-			double y = (j - cy) / fy;
+			double x = (i - (0.5f*w+cx)) / fx;
+			double y = (j - (0.5f*h+cy)) / fy;
 			double rs = x * x + y * y;
 			double xp = x * (1 + k1 * rs + k2 * rs * rs + k3 * rs * rs * rs)
 					+ 2 * p1 * x * y + p2 * (rs + 2 * x * x);
