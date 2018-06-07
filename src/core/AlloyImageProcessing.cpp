@@ -20,12 +20,13 @@
  */
 #include "AlloyImageProcessing.h"
 namespace aly {
-void Demosaic(const Image1ub& gray, ImageRGB& colorImage,const BayerFilter& filter) {
+void Demosaic(const Image1ub& gray, ImageRGB& colorImage,
+		const BayerFilter& filter) {
 	colorImage.resize(gray.width, gray.height);
-	const int is_rggb = (filter == BayerFilter::RGGB)?1:0;
-	const int is_grbg = (filter == BayerFilter::GRBG)?1:0;
-	const int is_gbrg = (filter == BayerFilter::GBRG)?1:0;
-	const int is_bggr = (filter == BayerFilter::BGGR)?1:0;
+	const int is_rggb = (filter == BayerFilter::RGGB) ? 1 : 0;
+	const int is_grbg = (filter == BayerFilter::GRBG) ? 1 : 0;
+	const int is_gbrg = (filter == BayerFilter::GBRG) ? 1 : 0;
+	const int is_bggr = (filter == BayerFilter::BGGR) ? 1 : 0;
 	const std::function<int(int i, int j)> F = [=](int i,int j) {
 		return (int)gray(i,j).x;
 	};
@@ -114,13 +115,59 @@ void Demosaic(const Image1ub& gray, ImageRGB& colorImage,const BayerFilter& filt
 		}
 	}
 }
-
-void Demosaic(const Image1ub& gray, ImageRGBf& colorImage,const BayerFilter& filter) {
+void Undistort(const ImageRGBf& in, ImageRGBf& out, double fx, double fy,
+		double k1, double k2, double k3, double p1, double p2) {
+	int w = in.width;
+	int h = in.height;
+	out.resize(w, h);
+#pragma omp parallel for
+	for (int j = 0; j < h; j++) {
+		for (int i = 0; i < w; i++) {
+			double cx = 0.5 * w;
+			double cy = 0.5 * h;
+			double x = (i - cx) / fx;
+			double y = (j - cy) / fy;
+			double rs = x * x + y * y;
+			double xp = x * (1 + k1 * rs + k2 * rs * rs + k3 * rs * rs * rs)
+					+ 2 * p1 * x * y + p2 * (rs + 2 * x * x);
+			double yp = y * (1 + k1 * rs + k2 * rs * rs + k3 * rs * rs * rs)
+					+ 2 * p2 * x * y + p1 * (rs + 2 * y * y);
+			x = xp * fx + cx;
+			y = yp * fy + cy;
+			out(i,j)= in((float)x, (float)y);
+		}
+	}
+}
+void Undistort(const ImageRGB& in, ImageRGB& out, double fx, double fy,
+		double k1, double k2, double k3, double p1, double p2) {
+	int w = in.width;
+	int h = in.height;
+	out.resize(w, h);
+#pragma omp parallel for
+	for (int j = 0; j < h; j++) {
+		for (int i = 0; i < w; i++) {
+			double cx = 0.5 * w;
+			double cy = 0.5 * h;
+			double x = (i - cx) / fx;
+			double y = (j - cy) / fy;
+			double rs = x * x + y * y;
+			double xp = x * (1 + k1 * rs + k2 * rs * rs + k3 * rs * rs * rs)
+					+ 2 * p1 * x * y + p2 * (rs + 2 * x * x);
+			double yp = y * (1 + k1 * rs + k2 * rs * rs + k3 * rs * rs * rs)
+					+ 2 * p2 * x * y + p1 * (rs + 2 * y * y);
+			x = xp * fx + cx;
+			y = yp * fy + cy;
+			out(i,j) = aly::ToRGB(in((float)x, (float)y)/255.0f);
+		}
+	}
+}
+void Demosaic(const Image1ub& gray, ImageRGBf& colorImage,
+		const BayerFilter& filter) {
 	colorImage.resize(gray.width, gray.height);
-	const int is_rggb = (filter == BayerFilter::RGGB)?1:0;
-	const int is_grbg = (filter == BayerFilter::GRBG)?1:0;
-	const int is_gbrg = (filter == BayerFilter::GBRG)?1:0;
-	const int is_bggr = (filter == BayerFilter::BGGR)?1:0;
+	const int is_rggb = (filter == BayerFilter::RGGB) ? 1 : 0;
+	const int is_grbg = (filter == BayerFilter::GRBG) ? 1 : 0;
+	const int is_gbrg = (filter == BayerFilter::GBRG) ? 1 : 0;
+	const int is_bggr = (filter == BayerFilter::BGGR) ? 1 : 0;
 	const std::function<int(int i, int j)> F = [=](int i,int j) {
 		return (int)gray(i,j).x;
 	};

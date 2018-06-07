@@ -21,6 +21,7 @@
 #ifndef INCLUDE_ALLOYIMAGEPROCESSING_H_
 #define INCLUDE_ALLOYIMAGEPROCESSING_H_
 #include "AlloyImage.h"
+#include "AlloyCamera.h"
 namespace aly {
 bool SANITY_CHECK_IMAGE_PROCESSING();
 enum BayerFilter {
@@ -28,6 +29,9 @@ enum BayerFilter {
 };
 void Demosaic(const Image1ub& gray, ImageRGB& color,const BayerFilter& filter=BayerFilter::RGGB);
 void Demosaic(const Image1ub& gray, ImageRGBf& color,const BayerFilter& filter=BayerFilter::RGGB);
+void Undistort(const ImageRGBf& in,ImageRGBf& out,double fx,double fy,double k1,double k2,double k3,double p1,double p2);
+void Undistort(const ImageRGB& in,ImageRGB& out,double fx,double fy,double k1,double k2,double k3,double p1,double p2);
+
 template<class T, size_t M, size_t N> void GaussianKernel(T (&kernel)[M][N],
 		T sigmaX = T(0.607902736 * (M - 1) * 0.5),
 		T sigmaY = T(0.607902736 * (N - 1) * 0.5)) {
