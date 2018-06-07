@@ -582,7 +582,8 @@
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
     </ProjectReference>
     <PostBuildEvent>
-      <Command>copy  /Y $(ProjectDir)\..\third_party\bin\Release\$(PlatformName)\glew32.dll $(SolutionDir)\build\$(Configuration)-$(Platform)\glew32.dll</Command>
+      <Command>copy  /Y $(ProjectDir)\..\third_party\bin\Release\$(PlatformName)\glew32.dll $(SolutionDir)\build\$(Configuration)-$(Platform)\glew32.dll
+copy  /Y $(ProjectDir)\..\third_party\lib\$(PlatformName)\*.lib $(SolutionDir)\build\$(Configuration)-$(Platform)\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
