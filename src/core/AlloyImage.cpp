@@ -1045,6 +1045,20 @@ void ConvertImage(const Image1ub& in, Image1us& out){
 		out[index++].x=((unsigned int)b.x)<<8;
 	}
 }
+void ConvertImage(const Image1us& in, Image1f& out){
+	out.resize(in.width,in.height);
+	size_t index=0;
+	for(ushort1& b:in.data){
+		out[index++].x=b.x;
+	}
+}
+void ConvertImage(const Image1f& in, Image1us& out){
+	out.resize(in.width,in.height);
+	size_t index=0;
+	for(float1& b:in.data){
+		out[index++].x=b.x;
+	}
+}
 void ConvertImage(const Image2ub& in, Image2us& out){
 	out.resize(in.width,in.height);
 	size_t index=0;

@@ -144,6 +144,13 @@ void AnisotropicDiffusion(const Image1f& imageIn, Image1f& out, int iterations,
 	const AnisotropicKernel& kernel, float K, float dt) {
 AnisotropicDiffusionT(imageIn, out, iterations, kernel, K, dt);
 }
+void AnisotropicDiffusion(const Image1us& imageIn, Image1us& out, int iterations,
+	const AnisotropicKernel& kernel, float K, float dt) {
+	Image1f tmpIn,tmpOut;
+	ConvertImage(imageIn,tmpIn);
+	AnisotropicDiffusionT(tmpIn, tmpOut, iterations, kernel, K, dt);
+	ConvertImage(tmpOut,out);
+}
 void AnisotropicDiffusion(const Image2f& imageIn, Image2f& out, int iterations,
 	const AnisotropicKernel& kernel, float K, float dt) {
 AnisotropicDiffusionT(imageIn, out, iterations, kernel, K, dt);
