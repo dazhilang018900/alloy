@@ -139,6 +139,56 @@ void ColorPropagation(Image4f& image,int maxDistance) {
 		}
 	}
 }
+void ColorPropagation(Image1f& image,int maxDistance) {
+	using namespace detail;
+	size_t N = image.size();
+	const int nbrX[] = { 0, 0, -1, 1, 1, -1, 1, -1 };
+	const int nbrY[] = { 1, -1, 0, 0, -1, 1, 1, -1 };
+	std::priority_queue<ColorLocation, std::vector<ColorLocation>,
+			CompareColorLocations> queue;
+	for (int j = 0; j < image.height; j++) {
+		for (int i = 0; i < image.width; i++) {
+			float val = image(i, j).x;
+			if (val <= 0) {
+				for (int c = 0; c < 4; c++) {
+					int ii = i + nbrX[c];
+					int jj = j + nbrY[c];
+					if (ii >= 0 && jj >= 0 && jj < image.height
+							&& ii < image.width) {
+						if (image(ii, jj).x > 0) {
+							queue.push(ColorLocation(i, j, 0));
+							break;
+						}
+					}
+				}
+			}
+		}
+	}
+	while (!queue.empty()) {
+		ColorLocation elem = queue.top();
+		queue.pop();
+		float total=0.0f;
+		int count=0;
+		if(image(elem.x,elem.y).x > 0)continue;
+		for (int c = 0; c < 4; c++) {
+			int ii = elem.x + nbrX[c];
+			int jj = elem.y + nbrY[c];
+			if (ii >= 0 && jj >= 0 && jj < image.height && ii < image.width) {
+				float nc = image(ii, jj).x;
+				if (nc > 0) {
+					total+=nc;
+					count++;
+				} else if (elem.value < maxDistance) {
+					queue.push(ColorLocation(ii, jj, elem.value + 1));
+				}
+			}
+		}
+		if (count > 0) {
+			image(elem.x, elem.y).x = total/count;
+		}
+	}
+}
+
 void LaplaceFill(const Image2f& sourceImg, Image2f& targetImg, int iterations,
 		int levels, float lambda,
 		const std::function<bool(int, int)>& iterationMonitor) {
