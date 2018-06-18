@@ -1056,7 +1056,7 @@ void ConvertImage(const Image1f& in, Image1us& out){
 	out.resize(in.width,in.height);
 	size_t index=0;
 	for(float1& b:in.data){
-		out[index++].x=b.x;
+		out[index++].x=clamp((int)b.x,(int)0,(int)65535);
 	}
 }
 void ConvertImage(const Image2ub& in, Image2us& out){

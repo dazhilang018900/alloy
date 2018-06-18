@@ -108,7 +108,7 @@ template<int C> void AnisotropicDiffusionT(
 				vec<float, C> score=imageC(i, j);
 				//vec<float, C> cX=0.5f*(imageC(i+1,j)-imageC(i-1,j));
 				//vec<float, C> cY=0.5f*(imageC(i,j+1)-imageC(i,j-1));
-				out(i, j) = clamp(out(i, j), vec<float, C>(0.0f), vec<float, C>(1.0f));
+				if(C>1)out(i, j) = clamp(out(i, j), vec<float, C>(0.0f), vec<float, C>(1.0f));
 				vec<float, C> cX(0.0f);
 				vec<float, C> cY(0.0f);
 				for (int ii = 0; ii < M; ii++) {
@@ -133,9 +133,11 @@ template<int C> void AnisotropicDiffusionT(
 		b=out.vector;
 		SolveVecCG(b,A,out.vector,32, 1E-16f);
 	}
-	for (int j = 0; j < imageIn.height ; j++) {
-		for (int i = 0; i < imageIn.width ; i++) {
-			out(i, j) = clamp(out(i, j), vec<float, C>(0.0f), vec<float, C>(1.0f));
+	if(C>1){
+		for (int j = 0; j < imageIn.height ; j++) {
+			for (int i = 0; i < imageIn.width ; i++) {
+				out(i, j) = clamp(out(i, j), vec<float, C>(0.0f), vec<float, C>(1.0f));
+			}
 		}
 	}
 }

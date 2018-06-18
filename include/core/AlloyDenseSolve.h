@@ -39,8 +39,8 @@ namespace aly {
 	void LaplaceFill(const Image4f& sourceImg, Image4f& targetImg, int iterations,float lambda = 0.99f , const std::function<bool(int)>& iterationMonitor=nullptr);
 	void LaplaceFill(const Image2f& sourceImg, Image2f& targetImg, int iterations,float lambda = 0.99f, const std::function<bool(int)>& iterationMonitor = nullptr);
 	void LaplaceFill(const Image2f& sourceImg, Image2f& targetImg, int iterations,int levels, float lambda = 0.99f, const std::function<bool(int, int)>& iterationMonitor = nullptr);
-	void ColorPropagation(Image4f& image,int maxDistance);
-	void ColorPropagation(Image1f& image,int maxDistance);
+	void ColorPropagation(Image4f& image,int maxDistance,float threshold=0.5f);
+	void ColorPropagation(Image1f& image,int maxDistance,float threshold=0.0f);
 	/******************************************************************************
 	 * XLISP-STAT 2.1 Copyright (c) 1990, by Luke Tierney
 	 * XLISP version 2.1, Copyright (c) 1989, by David Betz.

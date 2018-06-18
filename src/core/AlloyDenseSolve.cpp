@@ -89,7 +89,7 @@ struct CompareColorLocations {
 	}
 };
 }
-void ColorPropagation(Image4f& image,int maxDistance) {
+void ColorPropagation(Image4f& image,int maxDistance,float threshold) {
 	using namespace detail;
 	size_t N = image.size();
 	const int nbrX[] = { 0, 0, -1, 1, 1, -1, 1, -1 };
@@ -99,13 +99,12 @@ void ColorPropagation(Image4f& image,int maxDistance) {
 	for (int j = 0; j < image.height; j++) {
 		for (int i = 0; i < image.width; i++) {
 			float val = image(i, j).w;
-			if (val < 0.5f) {
+			if (val <threshold) {
 				for (int c = 0; c < 4; c++) {
 					int ii = i + nbrX[c];
 					int jj = j + nbrY[c];
-					if (ii >= 0 && jj >= 0 && jj < image.height
-							&& ii < image.width) {
-						if (image(ii, jj).w >= 0.5) {
+					if (ii >= 0 && jj >= 0 && jj < image.height&& ii < image.width) {
+						if (image(ii, jj).w >= threshold) {
 							queue.push(ColorLocation(i, j, 0));
 							break;
 						}
@@ -118,13 +117,13 @@ void ColorPropagation(Image4f& image,int maxDistance) {
 		ColorLocation elem = queue.top();
 		queue.pop();
 		RGBAf rgba(0.0f);
-		if(image(elem.x,elem.y).w>=0.5f)continue;
+		if(image(elem.x,elem.y).w>=threshold)continue;
 		for (int c = 0; c < 4; c++) {
 			int ii = elem.x + nbrX[c];
 			int jj = elem.y + nbrY[c];
 			if (ii >= 0 && jj >= 0 && jj < image.height && ii < image.width) {
 				RGBAf nc = image(ii, jj);
-				if (nc.w >= 0.5f) {
+				if (nc.w >= threshold) {
 					nc.w=1.0f;
 					rgba += nc;
 				} else if (elem.value < maxDistance) {
@@ -139,7 +138,7 @@ void ColorPropagation(Image4f& image,int maxDistance) {
 		}
 	}
 }
-void ColorPropagation(Image1f& image,int maxDistance) {
+void ColorPropagation(Image1f& image,int maxDistance,float threshold) {
 	using namespace detail;
 	size_t N = image.size();
 	const int nbrX[] = { 0, 0, -1, 1, 1, -1, 1, -1 };
@@ -149,13 +148,12 @@ void ColorPropagation(Image1f& image,int maxDistance) {
 	for (int j = 0; j < image.height; j++) {
 		for (int i = 0; i < image.width; i++) {
 			float val = image(i, j).x;
-			if (val <= 0) {
+			if (val <= threshold) {
 				for (int c = 0; c < 4; c++) {
 					int ii = i + nbrX[c];
 					int jj = j + nbrY[c];
-					if (ii >= 0 && jj >= 0 && jj < image.height
-							&& ii < image.width) {
-						if (image(ii, jj).x > 0) {
+					if (ii >= 0 && jj >= 0 && jj < image.height && ii < image.width) {
+						if (image(ii, jj).x > threshold) {
 							queue.push(ColorLocation(i, j, 0));
 							break;
 						}
@@ -169,13 +167,13 @@ void ColorPropagation(Image1f& image,int maxDistance) {
 		queue.pop();
 		float total=0.0f;
 		int count=0;
-		if(image(elem.x,elem.y).x > 0)continue;
+		if(image(elem.x,elem.y).x > threshold)continue;
 		for (int c = 0; c < 4; c++) {
 			int ii = elem.x + nbrX[c];
 			int jj = elem.y + nbrY[c];
 			if (ii >= 0 && jj >= 0 && jj < image.height && ii < image.width) {
 				float nc = image(ii, jj).x;
-				if (nc > 0) {
+				if (nc > threshold) {
 					total+=nc;
 					count++;
 				} else if (elem.value < maxDistance) {
