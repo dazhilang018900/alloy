@@ -64,9 +64,10 @@ struct CameraParameters {
 		NormalView = transpose(ViewInverse);
 	}
 	float3 transformWorldToScreen(const float3& pt) const;
-
+	bool isVisible(const aly::float2& pt)  const ;
 	float3 transformWorldToNormalizedImage(const float3& pt) const;
 	float3 transformWorldToImage(const float3& pt, int w, int h, bool flip = true) const;
+	float3 transformWorldToImage(const float3& pt, bool flip = true) const;
 	float2x3 differentiateWorldToImage(const float3& pt, int w, int h, bool flip = true) const;
 	float2x3 differentiateCameraToImage(const float3& pt, int w, int h, bool flip = true) const;
 	float2x3 differentiateWorldToScreen(const float3& pt) const;

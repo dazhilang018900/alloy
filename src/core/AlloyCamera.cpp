@@ -25,6 +25,10 @@ Camera& Camera::operator=(const CameraParameters& camParams) {
 	this->changed = true;
 	return *this;
 }
+bool CameraParameters::isVisible(const aly::float2& pt) const {
+	return (pt.x >= 0 && pt.y >= 0 && pt.x < dimensions.x && pt.y < dimensions.y);
+}
+
 float3 CameraParameters::transformWorldToScreen(const float3& pt) const {
 	float4 ptp(pt[0], pt[1], pt[2], 1.0f);
 	float4 p = Projection * ViewModel * ptp;
@@ -37,6 +41,9 @@ float3 CameraParameters::transformWorldToNormalizedImage(
 	float4 p = Projection * ViewModel * ptp;
 	return float3(0.5f * (p[0] / p[3] + 1.0f), 0.5f * (1.0f - p[1] / p[3]),
 			p[2] / p[3]);
+}
+float3 CameraParameters::transformWorldToImage(const float3& pt,bool flip) const {
+		return transformWorldToImage(pt,dimensions.x,dimensions.y,flip);
 }
 float3 CameraParameters::transformWorldToImage(const float3& pt, int w, int h,
 		bool flip) const {
@@ -576,6 +583,9 @@ void Camera::handleScrollEvent(int pos) {
 }
 
 CameraProjector::CameraProjector(const aly::CameraParameters& cam) {
+	if(cam.dimensions.x==0||cam.dimensions.y==0){
+		throw std::runtime_error("Could not convert camera parameters because image dimensions are zero.");
+	}
 	dimensions = cam.dimensions;
 	K = float3x3::identity();
 	K(0, 0) = 0.5f * cam.Projection(0, 0) * cam.dimensions.x;
