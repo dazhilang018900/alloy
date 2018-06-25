@@ -16,7 +16,7 @@ EXOBJS :=$(patsubst %.cpp, %.o, $(call rwildcard, ./src/example/, *.cpp))
 CXXFLAGS:= -DGL_GLEXT_PROTOTYPES=1 -std=gnu++14 -O3 -w -fPIC -MMD -MP -fopenmp -c -g -fmessage-length=0 -I./include/ -I./include/core/ 
 CFLAGS:= -DGL_GLEXT_PROTOTYPES=1 -std=c11 -O3 -w -fPIC -MMD -MP -fopenmp -c -g -fmessage-length=0 -I./include/ -I./include/core/
 LDLIBS =-L./ -L/usr/lib/ -L/usr/local/lib/ -L/usr/local/cuda-9.1/lib64/ -L/usr/lib/x86_64-linux-gnu/ -L./ext/glfw/src/
-LIBS = -lglfw3 -lstdc++ -lgcc -lgomp -lGL -lXext -lGLU -lGLEW -lXi -lXrandr -lX11 -lXxf86vm -lXinerama -lXcursor -lXdamage -lpthread -lm -ldl -ltiff
+LIBS = -lglfw -lstdc++ -lgcc -lgomp -lGL -lXext -lGLU -lGLEW -lXi -lXrandr -lX11 -lXxf86vm -lXinerama -lXcursor -lXdamage -lpthread -lm -ldl -ltiff
 
 HAS_OPENCL=0
 ifneq ($(wildcard /usr/lib/libOpenCL.so /usr/local/cuda-9.1/lib64/libOpenCL.so /usr/lib/x86_64-linux-gnu/libOpenCL.so), "")
