@@ -964,7 +964,7 @@ namespace aly {
 				}
 			}
 			if (group->nodes.size() == 0)
-				return false;
+				return std::shared_ptr<Group>();
 			center /= (float)group->nodes.size();
 			group->setLocation(center);
 			addNodeInternal(group);
