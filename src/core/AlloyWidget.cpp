@@ -1317,8 +1317,8 @@ FileSelector::FileSelector(const std::string& name, const AUnit2D& pos,
 			AlloyApplicationContext()->getGlassPane();
 	fileDialog = std::shared_ptr<FileDialog>(
 			new FileDialog("Open File",
-					CoordPerPX(0.5, 0.5, -350 + 7.5f, -250 - 7.5f),
-					CoordPX(700, 500),
+					CoordPerPX(0.5, 0.5, -450 + 7.5f, -250 - 7.5f),
+					CoordPX(900, 500),
 					directoryInput ?
 							FileDialogType::SelectDirectory :
 							FileDialogType::OpenFile));
