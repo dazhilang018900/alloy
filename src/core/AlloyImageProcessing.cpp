@@ -130,8 +130,8 @@ void Undistort(const ImageRGBf& in, ImageRGBf& out, double fx, double fy,double 
 					+ 2 * p1 * x * y + p2 * (rs + 2 * x * x);
 			double yp = y * (1 + k1 * rs + k2 * rs * rs + k3 * rs * rs * rs)
 					+ 2 * p2 * x * y + p1 * (rs + 2 * y * y);
-			x = xp * fx + cx;
-			y = yp * fy + cy;
+			x = xp * fx + cx+0.5f*w;
+			y = yp * fy + cy+0.5f*h;
 			out(i,j)= in((float)x, (float)y);
 		}
 	}
