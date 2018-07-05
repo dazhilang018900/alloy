@@ -972,6 +972,7 @@ layout(location = 1) in vec2 vt;
 		 vec4 rgba=texture(textureImage,uv);
          rgba.w=rgba.w*alpha;
 		 FragColor=rgba;
+		 gl_FragDepth=0.999;
 		 })");
 	} else if (filter == Filter::SMALL_BLUR) {
 		initialize( { },
@@ -1008,6 +1009,7 @@ layout(location = 1) in vec2 vt;
 				rgba+=weights[7]*textureOffset(textureImage,uv, ivec2( 0, 1));
 				rgba+=weights[8]*textureOffset(textureImage,uv, ivec2( 1, 1));
 				FragColor=rgba/16.0;
+                gl_FragDepth=0.999;
 			 })");
 	} else if (filter == Filter::LARGE_BLUR) {
 		initialize( { },
@@ -1077,7 +1079,8 @@ sum+=256.0;
 					}
 				}
 
-																FragColor=rgba/sum;
+				FragColor=rgba/sum;
+				gl_FragDepth=0.999;
 			 })");
 	} else if (filter == Filter::MEDIUM_BLUR) {
 		initialize( { },
@@ -1139,6 +1142,7 @@ out vec4 FragColor;
 						rgba+=weights[23]*textureOffset(textureImage,uv, ivec2( 1, 2));
 						rgba+=weights[24]*textureOffset(textureImage,uv, ivec2( 2, 2));
 				FragColor=rgba/256.0;
+                gl_FragDepth=0.999;
 			 })");
 	} else if (filter == Filter::FXAA) {
 		initialize( { },
@@ -1233,6 +1237,7 @@ vec4 PostFX(sampler2D tex, float time)
 void main() 
 { 
   FragColor = PostFX(tex0, 0.0);
+  gl_FragDepth=0.999;
 })");
 	}
 }
@@ -3394,8 +3399,10 @@ void main() {
                   + lambertianColor.w* lambert * lambertianColor 
                   + specularColor.w* specular * specularColor);
 	}
-    outColor=outColor/lsum;
-    outColor.w=1.0;
+    if(lsum>0){
+		outColor=outColor/lsum;
+    	outColor.w=1.0;
+	}
 	FragColor=clamp(outColor,vec4(0.0,0.0,0.0,0.0),vec4(1.0,1.0,1.0,1.0));
 	gl_FragDepth=rgba.w;
 })");

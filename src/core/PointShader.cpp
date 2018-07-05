@@ -97,7 +97,7 @@ void main() {
         vec3 xaxis, yaxis;
 		vec2 pos;
 		vec4 vx;
-        vec3 vn=vec3(0,0,1);//normalize((VM*vec4(zaxis,0.0)).xyz);
+        vec3 vn=normalize((VM*vec4(pc[0].norm,0)).xyz);
         if(TWO_SIDED==0&&vn.z<0.0)return;
         vp=VM*(vec4(pt, 1.0));
 		if(-vp.z<=MIN_DEPTH)return;
@@ -253,11 +253,11 @@ void main() {
         } else {
           xaxis=normalize(xaxis);
         }
-        vn=normalize((VM*vec4(zaxis,0.0)).xyz);
+        vn=normalize((VM*vec4(pc[0].norm,0)).xyz);
         if(TWO_SIDED==0&&vn.z<0.0)return;
+		vn=pc[0].norm;
         vp=VM*(vec4(pt, 1.0));
 		if(-vp.z<=MIN_DEPTH)return;
-
         yaxis=cross(zaxis,xaxis);
 		vp=VM*(vec4(pt-xaxis*radius-yaxis*radius, 1.0));
 		vx=ProjMat*vp;
@@ -407,7 +407,7 @@ void main() {
         } else {
           xaxis=normalize(xaxis);
         }
-        vn=normalize((VM*vec4(zaxis,0.0)).xyz);
+		vn=normalize((VM*vec4(pc[0].norm,0)).xyz);
         if(TWO_SIDED==0&&vn.z<0.0)return;
         vp=VM*(vec4(pt, 1.0));
 		if(-vp.z<=MIN_DEPTH)return;

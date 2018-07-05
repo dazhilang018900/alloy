@@ -385,6 +385,13 @@ public:
 				context->getViewport()).draw(imageTexture).end();
 	}
 	template<class T, int C, ImageType I> void draw(
+			const GLTexture<T, C, I>& imageTexture, const box2px& bounds,const box2px& viewport,
+			float alpha = 1.0f, bool flip = false) {
+		begin().set("flip", flip ? 1 : 0).set("textureImage", imageTexture, 0).set(
+				"bounds", bounds).set("alpha", alpha).set("viewport",
+				viewport).draw(imageTexture).end();
+	}
+	template<class T, int C, ImageType I> void draw(
 			const GLTexture<T, C, I>& imageTexture,
 			float alpha = 1.0f, bool flip = false) {
 		begin().set("flip", flip ? 1 : 0).set("textureImage", imageTexture, 0).set(
