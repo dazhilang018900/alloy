@@ -211,7 +211,7 @@ void main(void) {
 		vec4 pos=vp/vp.w;
 		float d=(-pos.z-MIN_DEPTH)/(MAX_DEPTH-MIN_DEPTH);
         if(d<=0.0||d>=1.0)discard;
-		FragColor=vec4(normalize(vn),d);
+		FragColor=vec4(vn,d);
 		gl_FragDepth=d;
 	}
 }
@@ -255,7 +255,9 @@ void main() {
         }
         vn=normalize((VM*vec4(pc[0].norm,0)).xyz);
         if(TWO_SIDED==0&&vn.z<0.0)return;
-		vn=pc[0].norm;
+		if(vn.z<0){
+			vn.z=-vn.z;
+		}
         vp=VM*(vec4(pt, 1.0));
 		if(-vp.z<=MIN_DEPTH)return;
         yaxis=cross(zaxis,xaxis);
