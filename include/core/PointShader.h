@@ -23,6 +23,7 @@
 #ifndef POINTSHADER_H_
 #define POINTSHADER_H_
 #include <GLShader.h>
+#include <GLFrameBuffer.h>
 namespace aly {
 
 class PointColorShader: public GLShader {
@@ -44,6 +45,7 @@ class PointFaceIdShader: public GLShader {
 public:
 	PointFaceIdShader( bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
 	void draw(Mesh* mesh, CameraParameters& camera, const box2px& bounds,const box2px& viewport,float scale=1.0f,bool twoSided=false);
+	void read(GLFrameBuffer& framebuffer,Image1i& faceIdMap);
 };
 } /* namespace intel */
 

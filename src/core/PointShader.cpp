@@ -620,9 +620,30 @@ void main() {
 })");
 
 }
+void PointFaceIdShader::read(GLFrameBuffer& framebuffer,Image1i& faceIdMap) {
+	faceIdMap.resize(framebuffer.getWidth(), framebuffer.getHeight());
+	ImageRGBAf irgba;
+	framebuffer.getTexture().read(irgba);
+	size_t idx = 0;
+	int hash;
+	int oid;
+	for (RGBAf rgbaf : irgba.data) {
+		int3 rgba = int3((int) rgbaf.x, (int) rgbaf.y, (int) rgbaf.z);
+		if (rgbaf.w > 0.0f) {
+			hash = (rgba.x) | (rgba.y << 12) | (rgba.z << 24);
+		} else {
+			hash = -1;
+		}
+		faceIdMap[idx++].x = hash;
+	}
+	FlipVertical(faceIdMap);
+}
 void PointFaceIdShader::draw(Mesh* meshes,CameraParameters& camera, const box2px& bounds, const box2px& viewport,float scale,bool twoSided) {
 	begin();
 	glEnable(GL_SCISSOR_TEST);
+	if(meshes->vertexLocations.size()>(1<<24)){
+		throw std::runtime_error("Too many points for Face ID shader.");
+	}
 	glScissor((int) bounds.position.x,
 			(int) (viewport.dimensions.y - bounds.position.y
 					- bounds.dimensions.y), (int) (bounds.dimensions.x),
