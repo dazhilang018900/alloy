@@ -628,8 +628,8 @@ void PointFaceIdShader::read(GLFrameBuffer& framebuffer,Image1i& faceIdMap) {
 	int hash;
 	int oid;
 	for (RGBAf rgbaf : irgba.data) {
-		int3 rgba = int3((int) rgbaf.x, (int) rgbaf.y, (int) rgbaf.z);
-		if (rgbaf.w > 0.0f) {
+		int4 rgba = int4((int) rgbaf.x, (int) rgbaf.y, (int) rgbaf.z, (int)rgbaf.w);
+		if (rgba.w > 0) {
 			hash = (rgba.x) | (rgba.y << 12) | (rgba.z << 24);
 		} else {
 			hash = -1;
@@ -640,10 +640,9 @@ void PointFaceIdShader::read(GLFrameBuffer& framebuffer,Image1i& faceIdMap) {
 }
 void PointFaceIdShader::draw(Mesh* meshes,CameraParameters& camera, const box2px& bounds, const box2px& viewport,float scale,bool twoSided) {
 	begin();
+	//Not limited to 16M points because channels are float!
 	glEnable(GL_SCISSOR_TEST);
-	if(meshes->vertexLocations.size()>(1<<24)){
-		throw std::runtime_error("Too many points for Face ID shader.");
-	}
+	glDisable(GL_BLEND);
 	glScissor((int) bounds.position.x,
 			(int) (viewport.dimensions.y - bounds.position.y
 					- bounds.dimensions.y), (int) (bounds.dimensions.x),

@@ -1721,9 +1721,7 @@ int FaceIdShader::draw(
 			camera, framebuffer.getViewport());
 	for (std::pair<Mesh*, float4x4> pr : meshes) {
 		int offset = faceIdOffset;
-		if(pr.first->vertexLocations.size()>(1<<24)){
-			throw std::runtime_error("Too many points for Face ID shader.");
-		}
+
 		set("objectId", objectIdOffset).set("PoseMat", pr.second);
 		if (pr.first->triIndexes.size() == 0
 				&& pr.first->quadIndexes.size() == 0) {
@@ -1783,9 +1781,7 @@ int FaceIdShader::draw(const std::list<Mesh*>& meshes,
 			"PoseMat", float4x4::identity()).set(camera,
 			framebuffer.getViewport());
 	for (Mesh* mesh : meshes) {
-		if(mesh->vertexLocations.size()>(1<<24)){
-			throw std::runtime_error("Too many points for Face ID shader.");
-		}
+
 		int offset = faceIdOffset;
 		set("objectId", objectIdOffset);
 		if (mesh->triIndexes.size() == 0 && mesh->quadIndexes.size() == 0) {
