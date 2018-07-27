@@ -78,6 +78,8 @@ public:
 	virtual void draw() const override;
 	virtual void draw(const PrimitiveType& type,bool forceVertexColor) const;
 	virtual void update() override;
+	void updateVertexColors();
+	void updateVertexPositions();
 	GLMesh(Mesh& mesh,bool onScreen,const std::shared_ptr<AlloyContext>& context =
 			AlloyDefaultContext());
 	virtual ~GLMesh();
@@ -144,6 +146,9 @@ public:
 	void transform(const float4x4& M);
 	float estimateVoxelSize(int stride = 1);
 	void update(bool onScreen=true);
+	void updateVertexColors(bool onScreen=true);
+	void updateVertexPositions(bool onScreen=true);
+
 	void clear();
 	void setDirty(bool d) {
 		this->dirtyOnScreen = d;
@@ -163,6 +168,7 @@ public:
 	bool load(const std::string& file);
 	void updateVertexNormals(bool flipSign=false,int SMOOTH_ITERATIONS = 0, float DOT_TOLERANCE =
 			0.75f);
+
 	bool convertQuadsToTriangles();
 	void mapIntoBoundingBox(float voxelSize);
 	void mapOutOfBoundingBox(float voxelSize);

@@ -260,6 +260,41 @@ GLMesh::~GLMesh() {
 		glDeleteVertexArrays(1, &vao);
 	context->end();
 }
+void GLMesh::updateVertexColors(){
+	context->begin(onScreen);
+	if (mesh.vertexColors.size() > 0) {
+		if (glIsBuffer(colorBuffer) == GL_TRUE)
+			glDeleteBuffers(1, &colorBuffer);
+		glGenBuffers(1, &colorBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, colorBuffer);
+		if (glIsBuffer(colorBuffer) == GL_FALSE)
+			throw std::runtime_error("Error: Unable to create color buffer");
+		glBufferData(GL_ARRAY_BUFFER,
+				sizeof(GLfloat) * 4 * mesh.vertexColors.size(),
+				mesh.vertexColors.ptr(), GL_STATIC_DRAW);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		CHECK_GL_ERROR();
+	}
+	context->end();
+}
+void GLMesh::updateVertexPositions(){
+	context->begin(onScreen);
+	if (mesh.vertexLocations.size() > 0) {
+		if (glIsBuffer(vertexBuffer) == GL_TRUE)
+			glDeleteBuffers(1, &vertexBuffer);
+		glGenBuffers(1, &vertexBuffer);
+		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
+		if (glIsBuffer(vertexBuffer) == GL_FALSE)
+			throw std::runtime_error("Error: Unable to create vertex buffer");
+		glBufferData(GL_ARRAY_BUFFER,
+				sizeof(GLfloat) * 3 * mesh.vertexLocations.size(),
+				mesh.vertexLocations.ptr(), GL_STATIC_DRAW);
+		vertexCount = (uint32_t) mesh.vertexLocations.size();
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		CHECK_GL_ERROR();
+	}
+	context->end();
+}
 void GLMesh::update() {
 	if (context.get() == nullptr)
 		return;
@@ -319,7 +354,7 @@ void GLMesh::update() {
 		CHECK_GL_ERROR();
 	}
 	if (mesh.lineIndexes.size() > 0) {
-		int offset = 0;
+		size_t offset = 0;
 		std::vector<float3> lines[2];
 		for (int n = 0; n < 2; n++) {
 			lines[n].resize(mesh.lineIndexes.size());
@@ -346,7 +381,7 @@ void GLMesh::update() {
 		lineIndexCount = (GLuint) mesh.lineIndexes.size();
 	}
 	if (mesh.triIndexes.size() > 0) {
-		int offset = 0;
+		size_t offset = 0;
 		std::vector<float3> tris[3];
 		for (int n = 0; n < 3; n++) {
 			tris[n].resize(mesh.triIndexes.size());
@@ -370,12 +405,11 @@ void GLMesh::update() {
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 		CHECK_GL_ERROR();
-
 		triIndexCount = (GLuint) mesh.triIndexes.size();
 
 	}
 	if (mesh.quadIndexes.size() > 0) {
-		int offset = 0;
+		size_t offset = 0;
 		std::vector<float3> quads[4];
 		for (int n = 0; n < 4; n++) {
 			quads[n].resize(mesh.quadIndexes.size());
@@ -404,7 +438,7 @@ void GLMesh::update() {
 	}
 	if (mesh.vertexNormals.size() > 0) {
 		if (mesh.quadIndexes.size() > 0) {
-			int offset = 0;
+			size_t offset = 0;
 			std::vector<float3> quads[4];
 			for (int n = 0; n < 4; n++) {
 				quads[n].resize(mesh.quadIndexes.size());
@@ -430,8 +464,9 @@ void GLMesh::update() {
 			}
 			CHECK_GL_ERROR();
 		}
+
 		if (mesh.triIndexes.size() > 0) {
-			int offset = 0;
+			size_t offset = 0;
 			std::vector<float3> tris[3];
 			for (int n = 0; n < 3; n++) {
 				tris[n].resize(mesh.triIndexes.size());
@@ -460,7 +495,7 @@ void GLMesh::update() {
 	}
 	if (mesh.textureMap.size() > 0) {
 		if (mesh.quadIndexes.size() > 0) {
-			int offset = 0;
+			size_t offset = 0;
 			size_t idx = 0;
 			std::vector<float2> quads[4];
 			for (int n = 0; n < 4; n++) {
@@ -487,7 +522,7 @@ void GLMesh::update() {
 			CHECK_GL_ERROR();
 		}
 		if (mesh.triIndexes.size() > 0) {
-			int offset = 0;
+			size_t offset = 0;
 			size_t idx = 0;
 			std::vector<float2> tris[3];
 			for (int n = 0; n < 3; n++) {
@@ -517,7 +552,7 @@ void GLMesh::update() {
 
 	if (mesh.vertexColors.size() > 0) {
 		if (mesh.quadIndexes.size() > 0) {
-			int offset = 0;
+			size_t offset = 0;
 			std::vector<float4> quads[4];
 			for (int n = 0; n < 4; n++) {
 				quads[n].resize(mesh.quadIndexes.size());
@@ -544,7 +579,7 @@ void GLMesh::update() {
 			CHECK_GL_ERROR();
 		}
 		if (mesh.triIndexes.size() > 0) {
-			int offset = 0;
+			size_t offset = 0;
 			std::vector<float4> tris[3];
 			for (int n = 0; n < 3; n++) {
 				tris[n].resize(mesh.triIndexes.size());
@@ -580,7 +615,7 @@ void GLMesh::update() {
 			CHECK_GL_ERROR();
 		}
 		if (mesh.lineIndexes.size() > 0) {
-			int offset = 0;
+			size_t offset = 0;
 			std::vector<float4> lines[2];
 			for (int n = 0; n < 2; n++) {
 				lines[n].resize(mesh.lineIndexes.size());
@@ -1206,6 +1241,20 @@ void Mesh::update(bool onScreen) {
 			glOnScreen.reset(new GLMesh(*this, false, AlloyDefaultContext()));
 		}
 		glOffScreen->update();
+	}
+}
+void Mesh::updateVertexColors(bool onScreen){
+	if (onScreen) {
+		glOnScreen->updateVertexColors();
+	} else {
+		glOffScreen->updateVertexColors();
+	}
+}
+void Mesh::updateVertexPositions(bool onScreen){
+	if (onScreen) {
+		glOnScreen->updateVertexPositions();
+	} else {
+		glOffScreen->updateVertexPositions();
 	}
 }
 Mesh::~Mesh() {
