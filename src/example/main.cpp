@@ -80,6 +80,7 @@
 #include "../../include/example/MultiActiveContour2DEx.h"
 #include "../../include/example/MultiActiveContour3DEx.h"
 #include "../../include/example/DictionaryLearningEx.h"
+#include "AlloyCommon.h"
 #include "AlloyImageEncoder.h"
 #include "AlloyOptimization.h"
 #include "AlloyGaussianMixture.h"
@@ -156,7 +157,8 @@ bool SANITY_CHECK() {
 	//SANITY_CHECK_LBFGS();
 	//SANITY_CHECK_GMM();
 	//SANITY_CHECK_SVD();
-	SANITY_CHECK_VIDEOENCODER();
+	//SANITY_CHECK_VIDEOENCODER();
+	SANITY_CHECK_STRINGS();
 	return ret;
 }
 int main(int argc, char *argv[]) {

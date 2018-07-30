@@ -30,6 +30,13 @@
 #include <cctype>
 #include <functional>
 namespace aly {
+void SANITY_CHECK_STRINGS(){
+	std::cout<<"["<<LongestCommonPrefix(std::vector<std::string>{"abra"})<<"]"<<std::endl;
+	std::cout<<"["<<LongestCommonPrefix(std::vector<std::string>{"abra","cadabra"})<<"]"<<std::endl;
+	std::cout<<"["<<LongestCommonPrefix(std::vector<std::string>{"abra","abracadabra"})<<"]"<<std::endl;
+	std::cout<<"["<<LongestCommonPrefix(std::vector<std::string>{"abracadabra","abra","abradoodle"})<<"]"<<std::endl;
+	std::cout<<"["<<LongestCommonPrefix(std::vector<std::string>{"abracadabra","abra","abradoodle","dabra"})<<"]"<<std::endl;
+}
 std::vector<std::string> Tokenize(const std::string& str) {
 	std::stringstream ss;
 	std::vector<std::string> tokens;
@@ -88,6 +95,24 @@ std::vector<std::string> Split(const std::string &str, char delim,bool keepDelim
 	}
 	return elems;
 
+}
+std::string LongestCommonPrefix(const std::vector<std::string>& strs){
+    std::string result;
+    int l=0;
+    int N=strs.size();
+    if(N==0)return "";
+    std::string ref=strs[0];
+    if(N==1)return ref;
+    for(int l=0;l<ref.length();l++){
+    	char pivot=ref[l];
+    	for(int n=1;n<N;n++){
+    		if(l>=strs[n].size()||strs[n][l]!=pivot){
+    			return result;
+    		}
+    	}
+    	result=ref.substr(0,l+1);
+    }
+    return result;
 }
 std::vector<std::string> Split(const std::string &str) {
 	std::stringstream ss;

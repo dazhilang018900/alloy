@@ -34,6 +34,7 @@
 #define ALLOYWARNING(err) std::cerr<<"Warning in "<<std::string(__FILE__)<<" on line "<<__LINE__<<": "<<err;
 
 namespace aly {
+	void SANITY_CHECK_STRINGS();
 	//GCC doesn't have this for some reason.
 	template <typename T, typename... Args> inline std::shared_ptr<T> MakeShared(Args&&... args)
 	{
@@ -70,6 +71,7 @@ namespace aly {
 	std::vector<std::string> Split(const std::string& str, char delim,bool keepDelim=true);
 	std::vector<std::string> Split(const std::string& str);
 	void Trim(std::string& str);
+	std::string LongestCommonPrefix(const std::vector<std::string>& strs);
 	std::vector<std::string> Tokenize(const std::string& str);
 }
 
