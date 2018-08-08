@@ -175,7 +175,7 @@ double GaussianMixture::distanceMahalanobis(const Vec<float>& pt, int g) const {
 double GaussianMixture::distanceEuclidean(const Vec<float>& pt, int g) const {
 	return length(pt - means.getColumn(g));
 }
-GaussianMixture::GaussianMixture() {
+GaussianMixture::GaussianMixture():threshold(0.0f) {
 }
 void GaussianMixture::initializeParameters(const DenseMat<float>& X,
 		float var_floor) {
@@ -501,7 +501,7 @@ bool GaussianMixture::solve(const DenseMat<float>& data, int G, int km_iter,
 	return true;
 }
 
-GaussianMixtureRGB::GaussianMixtureRGB() {
+GaussianMixtureRGB::GaussianMixtureRGB():threshold(0.0f) {
 }
 
 void GaussianMixtureRGB::initializeParameters(const std::vector<float3>& X,

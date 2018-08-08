@@ -1342,6 +1342,14 @@ template<class T, int C, ImageType I> void FlipVertical(Image<T, C, I>& in) {
 		}
 	}
 }
+template<class T, int C, ImageType I> void Transpose(Image<T, C, I>& in) {
+#pragma omp parallel for
+	for (int i = 0; i < in.width; i++) {
+		for (int j = 0; j < in.height / 2; j++) {
+			std::swap(in(i, j), in(in.width- 1 - i, in.height - 1 - j));
+		}
+	}
+}
 template<class T, int C, ImageType I> void FlipHorizontal(Image<T, C, I>& in) {
 #pragma omp parallel for
 	for (int j = 0; j < in.height; j++) {

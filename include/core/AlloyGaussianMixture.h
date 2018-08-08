@@ -37,10 +37,11 @@ protected:
 	void initializeParameters(const DenseMat<float>&X, float var_floor);
 	bool iterateKMeans(const DenseMat<float>& X, int max_iter);
 public:
+	float threshold;
 	template<class Archive> void serialize(Archive & archive) {
 		archive(
 			CEREAL_NVP(means), CEREAL_NVP(sigmas), CEREAL_NVP(invSigmas),
-			CEREAL_NVP(priors), CEREAL_NVP(scaleFactors));
+			CEREAL_NVP(priors), CEREAL_NVP(scaleFactors),CEREAL_NVP(threshold));
 	}
 	double distanceMahalanobis(const Vec<float>& pt, int g) const;
 	double distanceEuclidean(const Vec<float>& pt, int g) const;
@@ -65,13 +66,15 @@ protected:
 	void initializeParameters(const std::vector<float3>& X, float var_floor);
 	bool iterateKMeans(const std::vector<float3>& X, int max_iter);
 public:
+	float threshold;
 	template<class Archive> void serialize(Archive & archive) {
 		archive(
 			CEREAL_NVP(means),
 			CEREAL_NVP(sigmas),
 			cereal::make_nvp("inverse_sigmas",invSigmas),
 			CEREAL_NVP(priors),
-			CEREAL_NVP(scaleFactors));
+			CEREAL_NVP(scaleFactors),
+			CEREAL_NVP(threshold));
 	}
 	GaussianMixtureRGB();
 	double distanceMahalanobis(float3 pt, int g) const;
