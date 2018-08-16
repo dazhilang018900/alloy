@@ -24,15 +24,11 @@
 #include <AlloyVector.h>
 #include <AlloyVolume.h>
 #include <AlloyIsoSurface.h>
-#include <vector>
-#include <list>
-#include <tuple>
-#include <mutex>
 #include "Simulation.h"
 #include "Manifold3D.h"
 #include "ManifoldCache3D.h"
 namespace aly {
-class ActiveContour3D: public Simulation {
+class ActiveManifold3D: public Simulation {
 protected:
 	std::shared_ptr<ManifoldCache3D> cache;
 	IsoSurface isoSurface;
@@ -73,8 +69,8 @@ protected:
 	bool updateSurface();
 	virtual bool stepInternal() override;
 public:
-	ActiveContour3D(const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
-	ActiveContour3D(const std::string& name,const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
+	ActiveManifold3D(const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
+	ActiveManifold3D(const std::string& name,const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
 	float evolve();
 	Volume1f& getPressureImage();
 	const Volume1f& getPressureImage() const;

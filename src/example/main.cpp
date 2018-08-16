@@ -18,8 +18,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#include <example/ActiveContour3DEx.h>
+#include <example/ActiveManifold2DEx.h>
 #include <example/GrabCutEx.h>
-#include <example/MultiActiveContour2DEx.h>
+#include <example/MultiActiveManifold2DEx.h>
 #include <MipavHeaderReaderWriter.h>
 #include "Alloy.h"
 #include "../../include/example/UnitsEx.h"
@@ -70,14 +72,12 @@
 #include "../../include/example/AnisotropicFilterEx.h"
 #include "../../include/example/LevelSetGridEx.h"
 #include "../../include/example/MaxFlowEx.h"
-#include "../../include/example/ActiveContour3DEx.h"
 #include "../../include/example/ProceduralSkyEx.h"
 #include "../../include/example/ShadowCastEx.h"
-#include "../../include/example/ActiveContour2DEx.h"
 #include "../../include/example/FluidSimulationEx.h"
 #include "../../include/example/SuperPixelEx.h"
 #include "../../include/example/MagicPixelEx.h"
-#include "../../include/example/MultiActiveContour2DEx.h"
+#include "../../include/example/MultiActiveManifold2DEx.h"
 #include "../../include/example/MultiActiveContour3DEx.h"
 #include "../../include/example/DictionaryLearningEx.h"
 #include "AlloyCommon.h"
@@ -163,7 +163,7 @@ bool SANITY_CHECK() {
 }
 int main(int argc, char *argv[]) {
 	//change me when adding new example!
-	const int N=59;
+	const int N=63;
 	std::array<ExamplePtr,N> apps = {
 		MAKE_EXAMPLE(UnitsEx), MAKE_EXAMPLE(CompositeEx),MAKE_EXAMPLE(EventsEx), 
 		MAKE_EXAMPLE(DragEx), MAKE_EXAMPLE(TweenEx),MAKE_EXAMPLE(ImageEx), 
@@ -183,8 +183,10 @@ int main(int argc, char *argv[]) {
 		MAKE_EXAMPLE(AnisotropicFilterEx),MAKE_EXAMPLE(LevelSetGridEx),MAKE_EXAMPLE(MaxFlowEx),
 		MAKE_EXAMPLE(GrabCutEx),MAKE_EXAMPLE(ActiveContour3DEx),MAKE_EXAMPLE(ProceduralSkyEx),
 		MAKE_EXAMPLE(ShadowCastEx),MAKE_EXAMPLE(ActiveContour2DEx),MAKE_EXAMPLE(FluidSimulationEx),
-		MAKE_EXAMPLE(SuperPixelEx),MAKE_EXAMPLE(MagicPixelEx),MAKE_EXAMPLE(MultiActiveContour2DEx),MAKE_EXAMPLE(MultiActiveContour3DEx),
-		MAKE_EXAMPLE(DictionaryLearningEx)
+		MAKE_EXAMPLE(SuperPixelEx),MAKE_EXAMPLE(MagicPixelEx),MAKE_EXAMPLE(MultiActiveManifold2DEx),
+		MAKE_EXAMPLE(MultiActiveContour3DEx), MAKE_EXAMPLE(MultiSpringls2DEx),
+		MAKE_EXAMPLE(MultiSpringlsSecondOrder2DEx),MAKE_EXAMPLE(Springls2DEx),
+		MAKE_EXAMPLE(SpringlsSecondOrder2DEx),MAKE_EXAMPLE(DictionaryLearningEx)
 	};
 	std::sort(apps.begin(),apps.end(),[=](const ExamplePtr& a,const ExamplePtr& b){
 		return std::lexicographical_compare(a->name.begin(), a->name.end(), b->name.begin(), b->name.end());

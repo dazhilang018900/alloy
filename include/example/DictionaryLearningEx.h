@@ -22,9 +22,9 @@
 #ifndef DICTIONARYLEARINGEX_H_
 #define DICTIONARYLEARINGEX_H_
 
+#include <segmentation/ActiveManifold2D.h>
 #include "ml/DictionaryLearning.h"
 #include "segmentation/ManifoldCache2D.h"
-#include "segmentation/ActiveContour2D.h"
 #include "AlloyApplication.h"
 #include "AlloyVector.h"
 #include "AlloyWorker.h"

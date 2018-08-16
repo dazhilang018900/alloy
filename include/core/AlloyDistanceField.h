@@ -25,6 +25,7 @@
 #include "AlloyVolume.h"
 #include "grid/EndlessGrid.h"
 namespace aly {
+	class Mesh;
 	bool SANITY_CHECK_DISTANCE_FIELD();
 	class DistanceField3f {
 		typedef Indexable<float, 3> VoxelIndex;
@@ -57,6 +58,10 @@ namespace aly {
 		DistanceField2f() {}
 		void solve(const Image1f& vol, Image1f& out, float maxDistance = 2.5f);
 	};
+	float4x4 MeshToLevelSet(const aly::Mesh& mesh,Volume1f& vol,bool rescale, float narrowBand=2.5f, float voxelScale=0.75f, bool flipSign=false);
+	void RebuildDistanceFieldFast(aly::Volume1f& levelset,float maxDistance = 2.5f);
+	void RebuildDistanceField(aly::Volume1f& levelset,float maxDistance = 2.5f);
+	void FloodFill(aly::Volume1f& levelset,float narrowBand=2.5f, float backgroundValue=std::numeric_limits<float>::max());
 } /* namespace imagesci */
 
 #endif /* DISTANCEFIELD_H_ */

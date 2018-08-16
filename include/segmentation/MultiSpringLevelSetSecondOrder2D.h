@@ -21,8 +21,8 @@
 
 #ifndef INCLUDE_MULTISPRINGLSSECONDORDER_H_
 #define INCLUDE_MULTISPRINGLSSECONDORDER_H_
+#include <segmentation/ActiveManifold2D.h>
 #include <segmentation/ManifoldCache2D.h>
-#include "ActiveContour2D.h"
 #include "Simulation.h"
 #include "ContourShaders.h"
 #include "AlloyLocator.h"

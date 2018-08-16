@@ -18,7 +18,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "../../include/example/MultiActiveContour2DEx.h"
+#include <example/MultiActiveManifold2DEx.h>
 #include "AlloyGradientVectorFlow.h"
 #include "AlloyDistanceField.h"
 #include "AlloyIsoContour.h"
@@ -27,11 +27,10 @@
 #include "segmentation/MultiSpringLevelSetSecondOrder2D.h"
 #include "segmentation/SLIC.h"
 using namespace aly;
-
-MultiActiveContour2DEx::MultiActiveContour2DEx(int example) :
+MultiActiveManifold2DEx::MultiActiveManifold2DEx(int example) :
 	Application(1300, 1000, "Multi-Object Active Contour 2D Example", false), currentIso(0.0f),example(example) {
 }
-void MultiActiveContour2DEx::createTextLevelSet(aly::Image1f& distField, aly::Image1f& gray, int w, int h, const std::string& text, float textSize, float maxDistance) {
+void MultiActiveManifold2DEx::createTextLevelSet(aly::Image1f& distField, aly::Image1f& gray, int w, int h, const std::string& text, float textSize, float maxDistance) {
 	GLFrameBuffer renderBuffer;
 	//Render text to image
 	NVGcontext* nvg = getContext()->nvgContext;
@@ -53,7 +52,7 @@ void MultiActiveContour2DEx::createTextLevelSet(aly::Image1f& distField, aly::Im
 	df.solve(gray, distField, maxDistance);
 	gray = (-gray + float1(0.5f));
 }
-void MultiActiveContour2DEx::createCircleLevelSet(int w, int h,int rows,int cols,  float r, aly::Image1f& levelSet,aly::Image1i& labelImage) {
+void MultiActiveManifold2DEx::createCircleLevelSet(int w, int h,int rows,int cols,  float r, aly::Image1f& levelSet,aly::Image1i& labelImage) {
 	levelSet.resize(w, h);
 	labelImage.resize(w, h);
 	for (int j = 0; j < h; j++) {
@@ -78,7 +77,7 @@ void MultiActiveContour2DEx::createCircleLevelSet(int w, int h,int rows,int cols
 	}
 }
 
-bool MultiActiveContour2DEx::init(Composite& rootNode) {
+bool MultiActiveManifold2DEx::init(Composite& rootNode) {
 	int w = 128;
 	int h = 128;
 	Image1f distField;
@@ -503,7 +502,7 @@ bool MultiActiveContour2DEx::init(Composite& rootNode) {
 	viewRegion->add(resizeableRegion);
 	return true;
 }
-void MultiActiveContour2DEx::draw(AlloyContext* context) {
+void MultiActiveManifold2DEx::draw(AlloyContext* context) {
 	if (running) {
 		if (!simulation->step()) {
 			running = false;

@@ -22,11 +22,11 @@
 #ifndef INCLUDE_EXAMPLE_ACTIVECONTOUR3DEX_H_
 #define INCLUDE_EXAMPLE_ACTIVECONTOUR3DEX_H_
 
+#include <segmentation/ActiveManifold3D.h>
 #include "AlloyApplication.h"
 #include "AlloyWidget.h"
 #include "AlloyTimeline.h"
 #include "CommonShaders.h"
-#include "segmentation/ActiveContour3D.h"
 
 class ActiveContour3DEx: public aly::Application {
 protected:
@@ -38,7 +38,7 @@ protected:
 	aly::MatcapShader matcapShader;
 	aly::ImageShader imageShader;
 	aly::Camera camera;
-	aly::ActiveContour3D simulation;
+	aly::ActiveManifold3D simulation;
 	aly::IconButtonPtr playButton,stopButton;
     std::shared_ptr<aly::TimelineSlider> timelineSlider;
     bool running;

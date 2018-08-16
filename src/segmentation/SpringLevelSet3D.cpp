@@ -18,103 +18,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "segmentation/SpringLevelSet2D.h"
+#include "segmentation/SpringLevelSet3D.h"
 #include "AlloyApplication.h"
+#include "AlloyDistanceField.h"
 namespace aly {
 
-	float SpringLevelSet2D::MIN_ANGLE_TOLERANCE = (float)(ALY_PI * 20 / 180.0f);
-	float SpringLevelSet2D::NEAREST_NEIGHBOR_DISTANCE = std::sqrt(2.0f)*0.5f;
-	float SpringLevelSet2D::PARTICLE_RADIUS = 0.05f;
-	float SpringLevelSet2D::REST_RADIUS = 0.1f;
-	float SpringLevelSet2D::SPRING_CONSTANT = 0.3f;
-	float SpringLevelSet2D::EXTENT = 0.5f;
-	float SpringLevelSet2D::SHARPNESS = 5.0f;
-	void Decompose(const float2x2& m, float& theta, float& phi, float& sx, float& sy)
-	{
-		float E = 0.5f*(m(0, 0) + m(1, 1));
-		float F = 0.5f*(m(0, 0) - m(1, 1));
-		float G = 0.5f*(m(1, 0) + m(0, 1));
-		float H = 0.5f*(m(1, 0) - m(0, 1));
-		float Q = std::sqrt(E*E + H*H);
-		float R = std::sqrt(F*F + G*G);
-		sx = Q + R;
-		sy = Q - R;
-		float a1 = std::atan2(G, F);
-		float a2 = std::atan2(H, E);
-		theta = 0.5f*(a2 - a1);
-		phi = 0.5f*(a2 + a1);
-	}
-	float2x2 MakeRigid(const float2x2& m)
-	{
-		float E = 0.5f*(m(0, 0) + m(1, 1));
-		float F = 0.5f*(m(0, 0) - m(1, 1));
-		float G = 0.5f*(m(1, 0) + m(0, 1));
-		float H = 0.5f*(m(1, 0) - m(0, 1));
+	float SpringLevelSet3D::MIN_ANGLE_TOLERANCE = (float)(ALY_PI * 20 / 180.0f);
+	float SpringLevelSet3D::NEAREST_NEIGHBOR_DISTANCE = std::sqrt(2.0f)*0.5f;
+	float SpringLevelSet3D::PARTICLE_RADIUS = 0.05f;
+	float SpringLevelSet3D::REST_RADIUS = 0.1f;
+	float SpringLevelSet3D::SPRING_CONSTANT = 0.3f;
+	float SpringLevelSet3D::EXTENT = 0.5f;
+	float SpringLevelSet3D::SHARPNESS = 5.0f;
 
-		float a1 = std::atan2(G, F);
-		float a2 = std::atan2(H, E);
-		float theta = 0.5f*(a2 - a1);
-		float phi = 0.5f*(a2 + a1);
-
-		float st = std::sin(theta);
-		float ct = std::cos(theta);
-		float sp = std::sin(phi);
-		float cp = std::cos(phi);
-		float2x2 Vt(float2(ct, st), float2(-st, ct));
-		float2x2 U(float2(cp, sp), float2(-sp, cp));
-		return U*Vt;
+	SpringLevelSet3D::SpringLevelSet3D(const std::shared_ptr<ManifoldCache3D>& cache) :ActiveManifold3D("Spring Level Set 3D", cache), resampleEnabled(true){
 	}
-	float2x2 MakeSimilarity(const float2x2& m)
-	{
-		float E = 0.5f*(m(0, 0) + m(1, 1));
-		float F = 0.5f*(m(0, 0) - m(1, 1));
-		float G = 0.5f*(m(1, 0) + m(0, 1));
-		float H = 0.5f*(m(1, 0) - m(0, 1));
-		float Q = std::sqrt(E*E + H*H);
-		float R = std::sqrt(F*F + G*G);
-		float sx = Q + R;
-		float sy = Q - R;
-		float a1 = std::atan2(G, F);
-		float a2 = std::atan2(H, E);
-		float theta = 0.5f*(a2 - a1);
-		float phi = 0.5f*(a2 + a1);
-
-		float st = std::sin(theta);
-		float ct = std::cos(theta);
-		float sp = std::sin(phi);
-		float cp = std::cos(phi);
-		float2x2 Vt(float2(ct, st), float2(-st, ct));
-		float2x2 U(float2(cp, sp), float2(-sp, cp));
-		float2x2 S(float2(0.5f*(sx+sy), 0.0f), float2(0.0f, 0.5f*(sx + sy)));
-		return U*S*Vt;
-	}
-	float2x2 Compose(const float& theta, const float& phi,const float& sx, const float& sy) {
-		float st = std::sin(theta);
-		float ct = std::cos(theta);
-		float sp = std::sin(phi);
-		float cp = std::cos(phi);
-		float2x2 Vt(float2(ct, st),float2(-st, ct));
-		float2x2 U(float2(cp, sp),float2(-sp, cp));
-		float2x2 S(float2(sx,0.0f),float2(0.0f,sy));
-		return U*S*Vt;
-	}
-	SpringLevelSet2D::SpringLevelSet2D(const std::shared_ptr<ManifoldCache2D>& cache) :ActiveManifold2D("Spring Level Set 2D", cache), resampleEnabled(true){
-	}
-	void SpringLevelSet2D::setSpringls(const Vector2f& particles, const Vector2f& points) {
+	void SpringLevelSet3D::setSpringls(const Vector3f& particles, const Vector3f& points) {
 		contour.particles = particles;
 		contour.correspondence = particles;
-		contour.points = points;
 		contour.updateNormals();
 	}
-	void SpringLevelSet2D::updateUnsignedLevelSet(float maxDistance) {
-		unsignedLevelSet = unsignedShader->solve(contour, maxDistance);
+	void SpringLevelSet3D::updateUnsignedLevelSet(float maxDistance) {
+		//DistanceField3f df;
+		//unsignedLevelSet = unsignedShader->solve(contour, maxDistance);
 	}
-	void SpringLevelSet2D::refineContour(bool signedIso) {
+	void SpringLevelSet3D::refineContour(bool signedIso) {
 		//Optimize location of level set to remove jitter and improve spacing of iso-vertexes.
-		int N = (int)contour.vertexes.size();
+		int N = (int)contour.vertexLocations.size();
 		Vector2f delta(N);
 		float maxDelta;
 		int iter = 0;
+		/*
 		do {
 			maxDelta = 0.0f;
 			for (std::vector<uint32_t> curve : contour.indexes) {
@@ -148,24 +82,27 @@ namespace aly {
 			contour.vertexes += delta;
 			iter++;
 		} while (iter < 10);
+		*/
 		//Add line search to find zero crossing.
 	}
-	float2 SpringLevelSet2D::traceUnsigned(float2 pt) {
+	float3 SpringLevelSet3D::traceUnsigned(float3 pt) {
 		float disp = 0.0f;
 		int iter = 0;
 		const float timeStep = 0.5f;
-		float2 grad;
-		float v11, v21, v12, v10, v01;
+		float3 grad;
+		float v111, v211, v121, v101, v011,v110,v112;
 		do {
-			v21 = unsignedLevelSet(pt.x + 1, pt.y).x;
-			v12 = unsignedLevelSet(pt.x, pt.y + 1).x;
-			v10 = unsignedLevelSet(pt.x, pt.y - 1).x;
-			v01 = unsignedLevelSet(pt.x - 1, pt.y).x;
-			v11 = unsignedLevelSet(pt.x, pt.y).x;
-
-			grad.x = 0.5f*(v21 - v01);
-			grad.y = 0.5f*(v12 - v10);
-			grad *= v11;
+			v211 = unsignedLevelSet(pt.x + 1, pt.y,pt.z).x;
+			v121 = unsignedLevelSet(pt.x, pt.y + 1,pt.z).x;
+			v101 = unsignedLevelSet(pt.x, pt.y - 1,pt.z).x;
+			v011 = unsignedLevelSet(pt.x - 1, pt.y,pt.z).x;
+			v111 = unsignedLevelSet(pt.x, pt.y,pt.z).x;
+			v110 = unsignedLevelSet(pt.x, pt.y,pt.z-1).x;
+			v112 = unsignedLevelSet(pt.x, pt.y,pt.z+1).x;
+			grad.x = 0.5f*(v211 - v011);
+			grad.y = 0.5f*(v121- v101);
+			grad.z = 0.5f*(v112- v110);
+			grad *= v111;
 			disp = length(grad);
 			pt = pt - timeStep*grad;
 			iter++;
@@ -173,37 +110,39 @@ namespace aly {
 		return pt;
 	}
 
-	float2 SpringLevelSet2D::traceInitial(float2 pt) {
+	float3 SpringLevelSet3D::traceInitial(float3 pt) {
 		float disp = 0.0f;
 		int iter = 0;
 		const float timeStep = 0.5f;
-		float2 grad;
-		float v11, v21, v12, v10, v01;
+		float3 grad;
+		float v111, v211, v121, v101, v011,v110,v112;
 		do {
-			v21 = std::abs(initialLevelSet(pt.x + 1, pt.y).x);
-			v12 = std::abs(initialLevelSet(pt.x, pt.y + 1).x);
-			v10 = std::abs(initialLevelSet(pt.x, pt.y - 1).x);
-			v01 = std::abs(initialLevelSet(pt.x - 1, pt.y).x);
-			v11 = std::abs(initialLevelSet(pt.x, pt.y).x);
-
-			grad.x = 0.5f*(v21 - v01);
-			grad.y = 0.5f*(v12 - v10);
-			grad *= v11;
+			v211 = std::abs(initialLevelSet(pt.x + 1, pt.y,pt.z).x);
+			v121 = std::abs(initialLevelSet(pt.x, pt.y + 1,pt.z).x);
+			v101 = std::abs(initialLevelSet(pt.x, pt.y - 1,pt.z).x);
+			v011 = std::abs(initialLevelSet(pt.x - 1, pt.y,pt.z).x);
+			v110 = std::abs(initialLevelSet(pt.x, pt.y, pt.z-1).x);
+			v112 = std::abs(initialLevelSet(pt.x, pt.y, pt.z+1).x);
+			v111 = std::abs(initialLevelSet(pt.x, pt.y, pt.z).x);
+			grad.x = 0.5f*(v211 - v011);
+			grad.y = 0.5f*(v121 - v101);
+			grad.z = 0.5f*(v112 - v110);
+			grad *= v111;
 			disp = length(grad);
 			pt = pt - timeStep*grad;
 			iter++;
 		} while (disp > 1E-5f&&iter < 30);
 		return pt;
 	}
-	void SpringLevelSet2D::updateNearestNeighbors(float maxDistance) {
-		matcher.reset(new Matcher2f(contour.points));
+	void SpringLevelSet3D::updateNearestNeighbors(float maxDistance) {
+		matcher.reset(new Matcher3f(contour.particles));
 		nearestNeighbors.clear();
-		nearestNeighbors.resize(contour.points.size(), std::list<uint32_t>());
-		int N = (int)contour.points.size();
+		nearestNeighbors.resize(contour.particles.size(), std::vector<uint32_t>());
+		int N = (int)contour.particles.size();
 #pragma omp parallel for
-		for (int i = 0;i < N;i += 2) {
-			float2 pt0 = contour.points[i];
-			float2 pt1 = contour.points[i + 1];
+		for (int i = 0;i < N;i += 3) {
+			float3 pt0 = contour.particles[i];
+			float3 pt1 = contour.particles[i + 1];
 			std::vector<std::pair<size_t, float>> result;
 			matcher->closest(pt0, maxDistance, result);
 			for (auto pr : result) {
@@ -221,14 +160,16 @@ namespace aly {
 			}
 		}
 	}
-	int SpringLevelSet2D::fill() {
+	int SpringLevelSet3D::fill() {
 		{
 			std::lock_guard<std::mutex> lockMe(contourLock);
-			isoContour.solve(levelSet, contour.vertexes, contour.indexes, 0.0f, (preserveTopology) ? TopologyRule2D::Connect4 : TopologyRule2D::Unconstrained, Winding::Clockwise);
+			isoSurface.solveQuads(levelSet, activeList, contour.vertexLocations,false,0.0f);
 			refineContour(false);
-			requestUpdateContour = false;
+			requestUpdateSurface = false;
 		}
+
 		int fillCount = 0;
+		/*
 		for (std::vector<uint32_t> curve : contour.indexes) {
 			size_t count = 0;
 			uint32_t first = 0, prev = 0;
@@ -256,15 +197,16 @@ namespace aly {
 				}
 			}
 		}
-
+*/
 		return fillCount;
 	}
-	void SpringLevelSet2D::updateTracking(float maxDistance) {
+	void SpringLevelSet3D::updateTracking(float maxDistance) {
 		int tries = 0;
 		int invalid = 0;
+		/*
 		do {
 			invalid = 0;
-			matcher.reset(new Matcher2f(oldPoints));
+			matcher.reset(new Matcher3f(oldPoints));
 			std::vector<int> retrack;
 			for (size_t i = 0;i < contour.particles.size();i++) {
 				if (std::isinf(contour.correspondence[i].x)) {
@@ -276,13 +218,13 @@ namespace aly {
 				int pid = retrack[i];
 				int eid1 = pid * 2;
 				int eid2 = pid * 2 + 1;
-				float2 pt0 = contour.points[eid1];
-				float2 pt1 = contour.points[eid2];
+				float3 pt0 = contour.points[eid1];
+				float3 pt1 = contour.points[eid2];
 				std::vector<std::pair<size_t, float>> result;
-				float2 q1(std::numeric_limits<float>::infinity());
-				float2 q2(std::numeric_limits<float>::infinity());
+				float3 q1(std::numeric_limits<float>::infinity());
+				float3 q2(std::numeric_limits<float>::infinity());
 				matcher->closest(pt0, maxDistance, result);
-				std::array<float2, 4> velocities;
+				std::array<float3, 4> velocities;
 				for (auto pr : result) {
 					q1 = oldCorrespondences[pr.first / 2];
 					if (!std::isinf(q1.x)) {
@@ -345,17 +287,19 @@ namespace aly {
 			}
 			tries++;
 		} while (invalid > 0 && tries<4);
+		*/
 	}
-	int SpringLevelSet2D::contract() {
+	int SpringLevelSet3D::contract() {
 		int contractCount = 0;
-		Vector2f particles;
-		Vector2f points;
-		Vector2f normals;
-		Vector2f correspondence;
+		Vector3f particles;
+		Vector3f points;
+		Vector3f normals;
+		Vector3f correspondence;
 		std::array<Vector2f, 4> velocities;
 		particles.data.reserve(contour.particles.size());
-		points.data.reserve(contour.points.size());
-		normals.data.reserve(contour.normals.size());
+		points.data.reserve(contour.particles.size());
+		normals.data.reserve(contour.particles.size());
+		/*
 		for (int i = 0;i<(int)contour.particles.size();i++) {
 			float2 pt = contour.particles[i];
 			float d1 = distance(contour.points[2 * i + 1], pt);
@@ -387,15 +331,17 @@ namespace aly {
 			contour.correspondence = correspondence;
 			contour.setDirty(true);
 		}
+		*/
 		return contractCount;
 	}
-	void SpringLevelSet2D::computeForce(size_t idx, float2& f1, float2& f2, float2& f) {
-		f1 = float2(0.0f);
-		f2 = float2(0.0f);
-		f = float2(0.0f);
-		float2 p = contour.particles[idx];
-		float2 p1 = contour.points[2 * idx];
-		float2 p2 = contour.points[2 * idx + 1];
+	void SpringLevelSet3D::computeForce(size_t idx, float3& f1, float3& f2, float3& f) {
+		f1 = float3(0.0f);
+		f2 = float3(0.0f);
+		f = float3(0.0f);
+		float3 p = contour.particles[idx];
+		/*
+		float3 p1 = contour.vertexLocations[2 * idx];
+		float3 p2 = contour.vertexLocations[2 * idx + 1];
 		if (pressureImage.size() > 0&& pressureParam.toFloat()!=0.0f) {
 			float2 v1 = normalize(contour.points[2 * idx + 1] - contour.points[2 * idx]);
 			float2 norm = float2(-v1.y, v1.x);
@@ -437,12 +383,13 @@ namespace aly {
 		float2 correction=v-(v1+dot(t,v-v1)*t);
 		f1 += correction;
 		f2 += correction;
+	*/
 	}
-	void SpringLevelSet2D::updateSignedLevelSet(float maxStep) {
+	void SpringLevelSet3D::updateSignedLevelSet(float maxStep) {
 #pragma omp parallel for
 		for (int i = 0; i < (int)activeList.size(); i++) {
-			int2 pos = activeList[i];
-			distanceFieldMotion(pos.x, pos.y, i);
+			int3 pos = activeList[i];
+			distanceFieldMotion(pos.x, pos.y,pos.z, i);
 		}
 		float timeStep = (float)maxStep;
 		if (!clampSpeed) {
@@ -454,51 +401,41 @@ namespace aly {
 			timeStep = (float)(maxStep * ((maxDelta > maxSpeed) ? (maxSpeed / maxDelta) : maxSpeed));
 		}
 		contourLock.lock();
-		if (preserveTopology) {
-			for (int nn = 0; nn < 4; nn++) {
-#pragma omp parallel for
-				for (int i = 0; i < (int)activeList.size(); i++) {
-					int2 pos = activeList[i];
-					applyForcesTopoRule(pos.x, pos.y, nn, i, timeStep);
-				}
-			}
-		}
-		else {
+
 #pragma omp parallel for
 			for (int i = 0; i < (int)activeList.size(); i++) {
-				int2 pos = activeList[i];
-				applyForces(pos.x, pos.y, i, timeStep);
+				int3 pos = activeList[i];
+				applyForces(pos.x, pos.y,pos.z,i, timeStep);
 			}
-		}
 		for (int band = 1; band <= maxLayers; band++) {
 #pragma omp parallel for
 			for (int i = 0; i < (int)activeList.size(); i++) {
-				int2 pos = activeList[i];
-				updateDistanceField(pos.x, pos.y, band);
+				int3 pos = activeList[i];
+				updateDistanceField(pos.x, pos.y,pos.z, band);
 			}
 		}
 #pragma omp parallel for
 		for (int i = 0; i < (int)activeList.size(); i++) {
-			int2 pos = activeList[i];
-			plugLevelSet(pos.x, pos.y, i);
+			int3 pos = activeList[i];
+			plugLevelSet(pos.x, pos.y, pos.z, i);
 		}
-		requestUpdateContour = true;
+		requestUpdateSurface = true;
 		contourLock.unlock();
 
 #pragma omp parallel for
 		for (int i = 0; i < (int)activeList.size(); i++) {
-			int2 pos = activeList[i];
-			swapLevelSet(pos.x, pos.y) = levelSet(pos.x, pos.y);
+			int3 pos = activeList[i];
+			swapLevelSet(pos.x, pos.y, pos.z) = levelSet(pos.x, pos.y, pos.z);
 		}
 		deleteElements();
 		addElements();
 		deltaLevelSet.clear();
 		deltaLevelSet.resize(activeList.size(), 0.0f);
 	}
-	float SpringLevelSet2D::advect(float maxStep) {
-		Vector2f f(contour.particles.size());
-		Vector2f f1(contour.particles.size());
-		Vector2f f2(contour.particles.size());
+	float SpringLevelSet3D::advect(float maxStep) {
+		Vector3f f(contour.particles.size());
+		Vector3f f1(contour.particles.size());
+		Vector3f f2(contour.particles.size());
 #pragma omp parallel for
 		for (int i = 0;i < (int)f.size();i++) {
 			computeForce(i, f1[i], f2[i], f[i]);
@@ -511,43 +448,43 @@ namespace aly {
 		float timeStep = (maxForce > 1.0f) ? maxStep / (maxForce) : maxStep;
 #pragma omp parallel for
 		for (int i = 0;i < (int)f.size();i++) {
-			contour.points[2 * i] += timeStep*f1[i];
-			contour.points[2 * i + 1] += timeStep*f2[i];
+			contour.particles[2 * i] += timeStep*f1[i];
+			contour.particles[2 * i + 1] += timeStep*f2[i];
 			contour.particles[i] += timeStep*f[i];
 		}
 		contour.updateNormals();
 		contour.setDirty(true);
 		return timeStep;
 	}
-	void SpringLevelSet2D::relax(float timeStep) {
-		Vector2f updates(contour.points.size());
+	void SpringLevelSet3D::relax(float timeStep) {
+		Vector3f updates(contour.vertexLocations.size());
 #pragma omp parallel for
 		for (int i = 0;i < (int)contour.particles.size();i++) {
 			relax(i, timeStep, updates[2 * i], updates[2 * i + 1]);
 		}
-		contour.points = updates;
+		contour.vertexLocations = updates;
 		contour.updateNormals();
 		contour.setDirty(true);
 	}
-	void SpringLevelSet2D::relax(size_t idx, float timeStep, float2& f1, float2& f2) {
+	void SpringLevelSet3D::relax(size_t idx, float timeStep, float3& f1, float3& f2) {
 		const float maxForce = 0.999f;
-		float2 particlePt = contour.particles[idx];
-		float2 tangets[2];
-		float2 motion[2];
-		float springForce[2];
+		float3 particlePt = contour.particles[idx];
+		float3 tangets[3];
+		float3 motion[3];
+		float springForce[3];
 		float len, w, tlen, dotProd;
-		float2 startVelocity;
-		float2 start, dir;
+		float3 startVelocity;
+		float3 start, dir;
 		float resultantMoment = 0.0f;
-		for (int i = 0; i < 2; i++) {
-			size_t eid = idx * 2 + i;
-			start = contour.points[eid];
+		for (int i = 0; i < 3; i++) {
+			size_t eid = idx * 3 + i;
+			start = contour.vertexLocations[eid];
 			tangets[i] = (start - particlePt);
 			tlen = length(tangets[i]);
 			if (tlen > 1E-6f) tangets[i] /= tlen;
-			startVelocity = float2(0, 0);
+			startVelocity = float3(0.0f);
 			for (uint32_t nbr : nearestNeighbors[eid]) {
-				dir = (contour.points[nbr] - start);
+				dir = (contour.vertexLocations[nbr] - start);
 				len = length(dir);
 				w = atanh(maxForce*clamp(((len - 2 * PARTICLE_RADIUS) / (EXTENT + 2 * PARTICLE_RADIUS)), -1.0f, 1.0f));
 				startVelocity += (w * dir);
@@ -560,102 +497,149 @@ namespace aly {
 		float cosa = std::cos(resultantMoment);
 		float sina = std::sin(resultantMoment);
 
-		std::pair<float2, float2> update;
-		start = contour.points[idx * 2] - particlePt;
+		std::pair<float3, float3> update;
+		start = contour.vertexLocations[idx * 2] - particlePt;
 		dotProd = std::max(length(start) + dot(motion[0], tangets[0]) + springForce[0], 0.001f);
 		start = dotProd*tangets[0];
-		f1 = float2(start.x*cosa + start.y*sina, -start.x*sina + start.y*cosa) + particlePt;
+		//f1 = float3(start.x*cosa + start.y*sina, -start.x*sina + start.y*cosa) + particlePt;
 
-		start = contour.points[idx * 2 + 1] - particlePt;
+		start = contour.vertexLocations[idx * 2 + 1] - particlePt;
 		dotProd = std::max(length(start) + dot(motion[1], tangets[1]) + springForce[1], 0.001f);
 		start = dotProd*tangets[1];
-		f2 = float2(start.x*cosa + start.y*sina, -start.x*sina + start.y*cosa) + particlePt;
+		//f2 = float3(start.x*cosa + start.y*sina, -start.x*sina + start.y*cosa) + particlePt;
 	}
-	float2 SpringLevelSet2D::getScaledGradientValue(int i, int j) {
-		float v21 = unsignedLevelSet(i + 1, j).x;
-		float v12 = unsignedLevelSet(i, j + 1).x;
-		float v10 = unsignedLevelSet(i, j - 1).x;
-		float v01 = unsignedLevelSet(i - 1, j).x;
-		float v11 = unsignedLevelSet(i, j).x;
-float2 grad;
-grad.x = 0.5f*(v21 - v01);
-grad.y = 0.5f*(v12 - v10);
-float len = max(1E-6f, length(grad));
-return -(v11*grad / len);
+	float3 SpringLevelSet3D::getScaledGradientValue(int i, int j, int k) {
+		float v211 = unsignedLevelSet(i + 1, j,k).x;
+		float v121 = unsignedLevelSet(i, j + 1,k).x;
+		float v101 = unsignedLevelSet(i, j - 1,k).x;
+		float v011 = unsignedLevelSet(i - 1, j,k).x;
+		float v110 = unsignedLevelSet(i, j, k-1).x;
+		float v112 = unsignedLevelSet(i, j, k+1).x;
+		float v111 = unsignedLevelSet(i, j,k).x;
+		float3 grad;
+		grad.x = 0.5f*(v211 - v011);
+		grad.y = 0.5f*(v121 - v101);
+		grad.z = 0.5f*(v112 - v110);
+		float len = max(1E-6f, length(grad));
+		return -(v111*grad / len);
 	}
-	float2 SpringLevelSet2D::getScaledGradientValue(float i, float j, bool signedIso) {
-		float2 grad;
-		float v21;
-		float v12;
-		float v10;
-		float v01;
-		float v11;
+	float3 SpringLevelSet3D::getScaledGradientValue(float i, float j,float k, bool signedIso) {
+		float3 grad;
+		float v211;
+		float v121;
+		float v101;
+		float v011;
+		float v111;
+		float v110;
+		float v112;
 		if (signedIso) {
-			v21 = std::abs(levelSet(i + 1, j).x);
-			v12 = std::abs(levelSet(i, j + 1).x);
-			v10 = std::abs(levelSet(i, j - 1).x);
-			v01 = std::abs(levelSet(i - 1, j).x);
-			v11 = std::abs(levelSet(i, j).x);
+			v211 = std::abs(levelSet(i + 1, j,k).x);
+			v121 = std::abs(levelSet(i, j + 1,k).x);
+			v101 = std::abs(levelSet(i, j - 1,k).x);
+			v011 = std::abs(levelSet(i - 1, j,k).x);
+			v110 = std::abs(levelSet(i,  j, k-1).x);
+			v112 = std::abs(levelSet(i,  j, k+1).x);
+			v111 = std::abs(levelSet(i,   j,  k).x);
 		}
 		else {
-			v21 = unsignedLevelSet(i + 1, j).x;
-			v12 = unsignedLevelSet(i, j + 1).x;
-			v10 = unsignedLevelSet(i, j - 1).x;
-			v01 = unsignedLevelSet(i - 1, j).x;
-			v11 = unsignedLevelSet(i, j).x;
+			v211 = std::abs(unsignedLevelSet(i + 1, j,k).x);
+			v121 = std::abs(unsignedLevelSet(i, j + 1,k).x);
+			v101 = std::abs(unsignedLevelSet(i, j - 1,k).x);
+			v011 = std::abs(unsignedLevelSet(i - 1, j,k).x);
+			v110 = std::abs(unsignedLevelSet(i,  j, k-1).x);
+			v112 = std::abs(unsignedLevelSet(i,  j, k+1).x);
+			v111 = std::abs(unsignedLevelSet(i,   j,  k).x);
 		}
-		grad.x = 0.5f*(v21 - v01);
-		grad.y = 0.5f*(v12 - v10);
+		grad.x = 0.5f*(v211 - v011);
+		grad.y = 0.5f*(v121 - v101);
+		grad.y = 0.5f*(v112 - v110);
 		float len = max(1E-6f, length(grad));
-		return -(v11*grad / len);
+		return -(v111*grad / len);
 	}
-	void SpringLevelSet2D::distanceFieldMotion(int i, int j, size_t gid) {
-		float v11 = swapLevelSet(i, j).x;
-		float2 grad;
-		if (std::abs(v11) > 0.5f) {
+	void SpringLevelSet3D::distanceFieldMotion(int i, int j,int k, size_t gid) {
+		float v111 = swapLevelSet(i, j, k).x;
+		if (v111 > 0.5f || v111 < -0.5f) {
 			deltaLevelSet[gid] = 0;
 			return;
 		}
-		float v00 = swapLevelSet(i - 1, j - 1).x;
-		float v01 = swapLevelSet(i - 1, j).x;
-		float v10 = swapLevelSet(i, j - 1).x;
-		float v21 = swapLevelSet(i + 1, j).x;
-		float v20 = swapLevelSet(i + 1, j - 1).x;
-		float v22 = swapLevelSet(i + 1, j + 1).x;
-		float v02 = swapLevelSet(i - 1, j + 1).x;
-		float v12 = swapLevelSet(i, j + 1).x;
+		float v010 = swapLevelSet(i - 1, j, k - 1);
+		float v120 = swapLevelSet(i, j + 1, k - 1);
+		float v110 = swapLevelSet(i, j, k - 1);
+		float v100 = swapLevelSet(i, j - 1, k - 1);
+		float v210 = swapLevelSet(i + 1, j, k - 1);
+		float v001 = swapLevelSet(i - 1, j - 1, k);
+		float v011 = swapLevelSet(i - 1, j, k);
+		float v101 = swapLevelSet(i, j - 1, k);
+		float v211 = swapLevelSet(i + 1, j, k);
+		float v201 = swapLevelSet(i + 1, j - 1, k);
+		float v221 = swapLevelSet(i + 1, j + 1, k);
+		float v021 = swapLevelSet(i - 1, j + 1, k);
+		float v121 = swapLevelSet(i, j + 1, k);
+		float v012 = swapLevelSet(i - 1, j, k + 1);
+		float v122 = swapLevelSet(i, j + 1, k + 1);
+		float v112 = swapLevelSet(i, j, k + 1);
+		float v102 = swapLevelSet(i, j - 1, k + 1);
+		float v212 = swapLevelSet(i + 1, j, k + 1);
 
-		float DxNeg = v11 - v01;
-		float DxPos = v21 - v11;
-		float DyNeg = v11 - v10;
-		float DyPos = v12 - v11;
+		float DxNeg = v111 - v011;
+		float DxPos = v211 - v111;
+		float DyNeg = v111 - v101;
+		float DyPos = v121 - v111;
+		float DzNeg = v111 - v110;
+		float DzPos = v112 - v111;
+		float DxNegMin = min(DxNeg, 0.0f);
+		float DxNegMax = max(DxNeg, 0.0f);
+		float DxPosMin = min(DxPos, 0.0f);
+		float DxPosMax = max(DxPos, 0.0f);
+		float DyNegMin = min(DyNeg, 0.0f);
+		float DyNegMax = max(DyNeg, 0.0f);
+		float DyPosMin = min(DyPos, 0.0f);
+		float DyPosMax = max(DyPos, 0.0f);
+		float DzNegMin = min(DzNeg, 0.0f);
+		float DzNegMax = max(DzNeg, 0.0f);
+		float DzPosMin = min(DzPos, 0.0f);
+		float DzPosMax = max(DzPos, 0.0f);
 
-		float DxCtr = 0.5f * (v21 - v01);
-		float DyCtr = 0.5f * (v12 - v10);
+		float GradientSqrPos = DxNegMax * DxNegMax + DxPosMin * DxPosMin
+				+ DyNegMax * DyNegMax + DyPosMin * DyPosMin + DzNegMax * DzNegMax
+				+ DzPosMin * DzPosMin;
+		float GradientSqrNeg = DxPosMax * DxPosMax + DxNegMin * DxNegMin
+				+ DyPosMax * DyPosMax + DyNegMin * DyNegMin + DzPosMax * DzPosMax
+				+ DzNegMin * DzNegMin;
 
-		float DxxCtr = v21 - v11 - v11 + v01;
-		float DyyCtr = v12 - v11 - v11 + v10;
-		float DxyCtr = (v22 - v02 - v20 + v00) * 0.25f;
+		float DxCtr = 0.5f * (v211 - v011);
+		float DyCtr = 0.5f * (v121 - v101);
+		float DzCtr = 0.5f * (v112 - v110);
+		float DxxCtr = v211 - v111 - v111 + v011;
+		float DyyCtr = v121 - v111 - v111 + v101;
+		float DzzCtr = v112 - v111 - v111 + v110;
+		float DxyCtr = (v221 - v021 - v201 + v001) * 0.25f;
+		float DxzCtr = (v212 - v012 - v210 + v010) * 0.25f;
+		float DyzCtr = (v122 - v102 - v120 + v100) * 0.25f;
 
-		float numer = 0.5f * (DyCtr * DyCtr * DxxCtr - 2 * DxCtr * DyCtr
-			* DxyCtr + DxCtr * DxCtr * DyyCtr);
-		float denom = DxCtr * DxCtr + DyCtr * DyCtr;
+		float numer = 0.5f
+				* ((DyyCtr + DzzCtr) * DxCtr * DxCtr
+						+ (DxxCtr + DzzCtr) * DyCtr * DyCtr
+						+ (DxxCtr + DyyCtr) * DzCtr * DzCtr
+						- 2 * DxCtr * DyCtr * DxyCtr - 2 * DxCtr * DzCtr * DxzCtr
+						- 2 * DyCtr * DzCtr * DyzCtr);
+		float denom = DxCtr * DxCtr + DyCtr * DyCtr + DzCtr * DzCtr;
 		float kappa = 0;
-
 		const float maxCurvatureForce = 10.0f;
 		if (std::abs(denom) > 1E-5f) {
 			kappa = curvatureParam.toFloat() * numer / denom;
-		}
-		else {
-			kappa = curvatureParam.toFloat() * numer * sign(denom) * 1E5f;
+		} else {
+			kappa = curvatureParam.toFloat() * numer * sign(denom) * 1E5;
 		}
 		if (kappa < -maxCurvatureForce) {
 			kappa = -maxCurvatureForce;
-		}
-		else if (kappa > maxCurvatureForce) {
+		} else if (kappa > maxCurvatureForce) {
 			kappa = maxCurvatureForce;
 		}
-		grad = getScaledGradientValue(i, j);
+		float pressure = 0;
+		// Level set force should be the opposite sign of advection force so it
+		// moves in the direction of the force.
+		float3 grad = getScaledGradientValue(i, j, k);
 		float advection = 0;
 		// Dot product force with upwind gradient
 		if (grad.x > 0) {
@@ -672,14 +656,13 @@ return -(v11*grad / len);
 		}
 		deltaLevelSet[gid] = -advection + kappa;
 	}
-	bool SpringLevelSet2D::init() {
-		ActiveManifold2D::init();
+	bool SpringLevelSet3D::init() {
+		ActiveManifold3D::init();
 		refineContour(true);
-		contour.points.clear();
 		contour.particles.clear();
-		for(Vector2f& vel:contour.velocities){
-			vel.clear();
-		}
+		/*
+		for(Vector3f& vel:contour.velocities){
+			vel.clear();		}
 		for (std::vector<uint32_t> curve : contour.indexes) {
 			size_t count = 0;
 			uint32_t first = 0, prev = 0;
@@ -687,8 +670,8 @@ return -(v11*grad / len);
 				for (uint32_t idx : curve) {
 					if (count != 0) {
 						contour.particles.push_back(0.5f*(contour.vertexes[prev] + contour.vertexes[idx]));
-						contour.points.push_back(contour.vertexes[prev]);
-						contour.points.push_back(contour.vertexes[idx]);
+						contour.particles.push_back(contour.vertexLocations[prev]);
+						contour.particles.push_back(contour.vertexLocations[idx]);
 						if (idx == first) break;
 					}
 					else {
@@ -699,28 +682,25 @@ return -(v11*grad / len);
 				}
 			}
 		}
-		for (Vector2f& vel : contour.velocities) {
+		*/
+		for (Vector3f& vel : contour.velocities) {
 			vel.resize(contour.particles.size());
 		}
 		contour.correspondence = contour.particles;
 		contour.updateNormals();
 		contour.setDirty(true);
 		if (cache.get() != nullptr) {
-			Manifold2D* contour = getContour();
+			Manifold3D* contour = getSurface();
 			contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR << "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 		}
-		if (unsignedShader.get() == nullptr) {
-			unsignedShader.reset(new UnsignedDistanceShader(true, AlloyApplicationContext()));
-			unsignedShader->init(initialLevelSet.width, initialLevelSet.height);
 
-		}
 		relax();
 		updateNearestNeighbors();
 		updateUnsignedLevelSet();
 		cache->set((int)simulationIteration, contour);
 		return true;
 	}
-	void SpringLevelSet2D::relax() {
+	void SpringLevelSet3D::relax() {
 		const int maxIterations = 4;
 		const float timeStep = 0.1f;
 		updateNearestNeighbors();
@@ -728,10 +708,10 @@ return -(v11*grad / len);
 			relax(timeStep);
 		}
 	}
-	void SpringLevelSet2D::cleanup() {
-		ActiveManifold2D::cleanup();
+	void SpringLevelSet3D::cleanup() {
+		ActiveManifold3D::cleanup();
 	}
-	bool SpringLevelSet2D::stepInternal() {
+	bool SpringLevelSet3D::stepInternal() {
 		double remaining = timeStep;
 		double t = 0.0;
 		const int evolveIterations = 8;
@@ -746,7 +726,7 @@ return -(v11*grad / len);
 				updateSignedLevelSet();
 			}
 			if (resampleEnabled) {
-				oldPoints = contour.points;
+				oldPoints = contour.particles;
 				oldCorrespondences = contour.correspondence;
 				oldVelocities = contour.velocities;
 				contract();
@@ -762,18 +742,18 @@ return -(v11*grad / len);
 				updateTracking();
 			}else {
 				std::lock_guard<std::mutex> lockMe(contourLock);
-				isoContour.solve(levelSet, contour.vertexes, contour.indexes, 0.0f, (preserveTopology) ? TopologyRule2D::Connect4 : TopologyRule2D::Unconstrained, Winding::Clockwise);
+				isoSurface.solveQuads(levelSet, activeList, contour.vertexLocations,true, 0.0f);
 				refineContour(false);
 				contour.updateNormals();
 				contour.setDirty(true);
-				requestUpdateContour = false;
+				requestUpdateSurface = false;
 			}
 			remaining = timeStep - t;
 		} while (remaining > 1E-5f);
 		simulationTime += t;
 		simulationIteration++;
 		if (cache.get() != nullptr) {
-			Manifold2D* contour = getContour();
+			Manifold3D* contour = getSurface();
 			refineContour(false);
 			contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR << "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 			cache->set((int)simulationIteration, *contour);
@@ -781,8 +761,8 @@ return -(v11*grad / len);
 		return (simulationTime < simulationDuration);
 	}
 
-	void SpringLevelSet2D::setup(const aly::ParameterPanePtr& pane) {
-		ActiveManifold2D::setup(pane);
+	void SpringLevelSet3D::setup(const aly::ParameterPanePtr& pane) {
+		ActiveManifold3D::setup(pane);
 		pane->addCheckBox("Re-sampling", resampleEnabled);
 	}
 }

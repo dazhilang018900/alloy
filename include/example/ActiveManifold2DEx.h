@@ -5,20 +5,19 @@
  *      Author: blake
  */
 
-#ifndef INCLUDE_EXAMPLE_ACTIVECONTOUR2DEX_H_
-#define INCLUDE_EXAMPLE_ACTIVECONTOUR2DEX_H_
+#ifndef INCLUDE_EXAMPLE_ACTIVEMANIFOLD2DEX_H_
+#define INCLUDE_EXAMPLE_ACTIVEMANIFOLD2DEX_H_
 
 
+#include <segmentation/ActiveManifold2D.h>
 #include <segmentation/ManifoldCache2D.h>
 #include "AlloyApplication.h"
 #include "AlloyVector.h"
-#include "segmentation/ActiveContour2D.h"
 #include "AlloyWorker.h"
 #include "AlloyTimeline.h"
 #include "segmentation/Simulation.h"
-class ActiveContour2DEx: public aly::Application {
+class ActiveManifold2DEx: public aly::Application {
 protected:
-
 	float currentIso;
 	int example;
 	aly::Image1f gray;
@@ -45,13 +44,27 @@ protected:
 	void createTextLevelSet(aly::Image1f& levelSet,aly::Image1f& gray,int w,int h,const std::string& text,float textSize,float maxDistance);
 public:
 	std::shared_ptr<aly::ManifoldCache2D> cache;
-	ActiveContour2DEx(int example=0);
+	ActiveManifold2DEx(int example=0);
 	virtual void draw(aly::AlloyContext* context) override;
 	bool init(aly::Composite& rootNode);
 
 };
+class ActiveContour2DEx : public ActiveManifold2DEx{
+public:
+	ActiveContour2DEx():ActiveManifold2DEx(0){
+	}
+};
+class Springls2DEx : public ActiveManifold2DEx{
+public:
+	Springls2DEx():ActiveManifold2DEx(1){
+	}
+};
+class SpringlsSecondOrder2DEx : public ActiveManifold2DEx{
+public:
+	SpringlsSecondOrder2DEx():ActiveManifold2DEx(2){
+	}
+};
 
 
 
-
-#endif /* INCLUDE_EXAMPLE_ACTIVECONTOUR2DEX_H_ */
+#endif /* INCLUDE_EXAMPLE_ACTIVEMANIFOLD2DEX_H_ */

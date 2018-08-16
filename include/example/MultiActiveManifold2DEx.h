@@ -29,7 +29,7 @@
 #include "AlloyWorker.h"
 #include "AlloyTimeline.h"
 #include "segmentation/Simulation.h"
-class MultiActiveContour2DEx: public aly::Application {
+class MultiActiveManifold2DEx: public aly::Application {
 protected:
 	float currentIso;
 	int example;
@@ -56,11 +56,24 @@ protected:
 	void createTextLevelSet(aly::Image1f& levelSet,aly::Image1f& gray,int w,int h,const std::string& text,float textSize,float maxDistance);
 public:
 	std::shared_ptr<aly::ManifoldCache2D> cache;
-	MultiActiveContour2DEx(int example=0);
+	MultiActiveManifold2DEx(int example=0);
 	virtual void draw(aly::AlloyContext* context) override;
 	bool init(aly::Composite& rootNode);
-
 };
-
+class MultiActiveContour2DEx : public MultiActiveManifold2DEx{
+public:
+	MultiActiveContour2DEx():MultiActiveManifold2DEx(0){
+	}
+};
+class MultiSpringls2DEx : public MultiActiveManifold2DEx{
+public:
+	MultiSpringls2DEx():MultiActiveManifold2DEx(1){
+	}
+};
+class MultiSpringlsSecondOrder2DEx : public MultiActiveManifold2DEx{
+public:
+	MultiSpringlsSecondOrder2DEx():MultiActiveManifold2DEx(2){
+	}
+};
 #endif
 

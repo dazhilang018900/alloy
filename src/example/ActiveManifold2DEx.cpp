@@ -19,7 +19,7 @@
  * THE SOFTWARE.
  */
 
-#include "../../include/example/ActiveContour2DEx.h"
+#include <example/ActiveManifold2DEx.h>
 #include "AlloyGradientVectorFlow.h"
 #include "AlloyDistanceField.h"
 #include "AlloyIsoContour.h"
@@ -27,10 +27,10 @@
 #include "segmentation/SpringlsSecondOrder.h"
 using namespace aly;
 
-ActiveContour2DEx::ActiveContour2DEx(int example) :
+ActiveManifold2DEx::ActiveManifold2DEx(int example) :
 	Application(1300, 1000, "Active Contour 2D", false), currentIso(0.0f),example(example) {
 }
-void ActiveContour2DEx::createTextLevelSet(aly::Image1f& distField, aly::Image1f& gray, int w, int h, const std::string& text, float textSize, float maxDistance) {
+void ActiveManifold2DEx::createTextLevelSet(aly::Image1f& distField, aly::Image1f& gray, int w, int h, const std::string& text, float textSize, float maxDistance) {
 	GLFrameBuffer renderBuffer;
 	//Render text to image
 	NVGcontext* nvg = getContext()->nvgContext;
@@ -52,7 +52,7 @@ void ActiveContour2DEx::createTextLevelSet(aly::Image1f& distField, aly::Image1f
 	df.solve(gray, distField, maxDistance);
 	gray = (-gray + float1(0.5f));
 }
-aly::Image1f ActiveContour2DEx::createCircleLevelSet(int w, int h, float2 center, float r) {
+aly::Image1f ActiveManifold2DEx::createCircleLevelSet(int w, int h, float2 center, float r) {
 	aly::Image1f levelSet(w, h);
 	for (int j = 0; j < h; j++) {
 		for (int i = 0; i < w; i++) {
@@ -62,7 +62,7 @@ aly::Image1f ActiveContour2DEx::createCircleLevelSet(int w, int h, float2 center
 	}
 	return levelSet;
 }
-void ActiveContour2DEx::createRotationField(aly::Image2f& vecField, int w, int h) {
+void ActiveManifold2DEx::createRotationField(aly::Image2f& vecField, int w, int h) {
 	vecField.resize(w, h);
 	float2 center = float2(0.5f*w, 0.5f*h);
 	float r = std::max(0.5f*w, 0.5f*h);
@@ -73,7 +73,7 @@ void ActiveContour2DEx::createRotationField(aly::Image2f& vecField, int w, int h
 		}
 	}
 }
-bool ActiveContour2DEx::init(Composite& rootNode) {
+bool ActiveManifold2DEx::init(Composite& rootNode) {
 	int w = 128;
 	int h = 128;
 	Image1f distField;
@@ -497,7 +497,7 @@ bool ActiveContour2DEx::init(Composite& rootNode) {
 	viewRegion->add(resizeableRegion);
 	return true;
 }
-void ActiveContour2DEx::draw(AlloyContext* context) {
+void ActiveManifold2DEx::draw(AlloyContext* context) {
 	if (running) {
 		if (!simulation->step()) {
 			running = false;

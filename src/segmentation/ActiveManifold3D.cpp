@@ -18,11 +18,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "segmentation/ActiveContour3D.h"
+#include <segmentation/ActiveManifold3D.h>
 
 namespace aly {
 
-void ActiveContour3D::rebuildNarrowBand() {
+void ActiveManifold3D::rebuildNarrowBand() {
 	activeList.clear();
 	for (int band = 1; band <= maxLayers; band++) {
 #pragma omp parallel for
@@ -43,7 +43,7 @@ void ActiveContour3D::rebuildNarrowBand() {
 	deltaLevelSet.clear();
 	deltaLevelSet.resize(activeList.size(), 0.0f);
 }
-void ActiveContour3D::plugLevelSet(int i, int j, int k, size_t index) {
+void ActiveManifold3D::plugLevelSet(int i, int j, int k, size_t index) {
 	float v111;
 	float v011;
 	float v121;
@@ -66,11 +66,11 @@ void ActiveContour3D::plugLevelSet(int i, int j, int k, size_t index) {
 		levelSet(i, j, k) = sgn * MAX_DISTANCE;
 	}
 }
-void ActiveContour3D::cleanup() {
+void ActiveManifold3D::cleanup() {
 	if (cache.get() != nullptr)
 		cache->clear();
 }
-bool ActiveContour3D::updateSurface() {
+bool ActiveManifold3D::updateSurface() {
 	if (requestUpdateSurface) {
 		std::lock_guard<std::mutex> lockMe(contourLock);
 		Mesh mesh;
@@ -85,16 +85,16 @@ bool ActiveContour3D::updateSurface() {
 	}
 	return false;
 }
-Manifold3D* ActiveContour3D::getSurface() {
+Manifold3D* ActiveManifold3D::getSurface() {
 	return &contour;
 }
-Volume1f& ActiveContour3D::getLevelSet() {
+Volume1f& ActiveManifold3D::getLevelSet() {
 	return levelSet;
 }
-const Volume1f& ActiveContour3D::getLevelSet() const {
+const Volume1f& ActiveManifold3D::getLevelSet() const {
 	return levelSet;
 }
-ActiveContour3D::ActiveContour3D(
+ActiveManifold3D::ActiveManifold3D(
 		const std::shared_ptr<ManifoldCache3D>& cache) :
 		Simulation("Active Contour 3D"), cache(cache), clampSpeed(false), requestUpdateSurface(
 				false) {
@@ -104,7 +104,7 @@ ActiveContour3D::ActiveContour3D(
 	curvatureParam = Float(0.3f);
 }
 
-ActiveContour3D::ActiveContour3D(const std::string& name,
+ActiveManifold3D::ActiveManifold3D(const std::string& name,
 		const std::shared_ptr<ManifoldCache3D>& cache) :
 		Simulation(name), cache(cache), clampSpeed(false), requestUpdateSurface(
 				false) {
@@ -113,17 +113,17 @@ ActiveContour3D::ActiveContour3D(const std::string& name,
 	targetPressureParam = Float(0.5f);
 	curvatureParam = Float(0.3f);
 }
-float ActiveContour3D::evolve() {
+float ActiveManifold3D::evolve() {
 	return evolve(0.5f);
 }
-Volume1f& ActiveContour3D::getPressureImage() {
+Volume1f& ActiveManifold3D::getPressureImage() {
 	return pressureImage;
 }
 
-const Volume1f& ActiveContour3D::getPressureImage() const {
+const Volume1f& ActiveManifold3D::getPressureImage() const {
 	return pressureImage;
 }
-void ActiveContour3D::setup(const aly::ParameterPanePtr& pane) {
+void ActiveManifold3D::setup(const aly::ParameterPanePtr& pane) {
 	pane->addNumberField("Target Pressure", targetPressureParam, Float(0.0f),
 			Float(1.0f));
 	pane->addNumberField("Pressure Weight", pressureParam, Float(-2.0f),
@@ -134,7 +134,7 @@ void ActiveContour3D::setup(const aly::ParameterPanePtr& pane) {
 			Float(4.0f));
 	pane->addCheckBox("Clamp Speed", clampSpeed);
 }
-bool ActiveContour3D::init() {
+bool ActiveManifold3D::init() {
 	int3 dims = initialLevelSet.dimensions();
 	if (dims.x == 0 || dims.y == 0 || dims.z == 0)
 		return false;
@@ -162,7 +162,7 @@ bool ActiveContour3D::init() {
 	}
 	return true;
 }
-void ActiveContour3D::pressureAndAdvectionMotion(int i, int j, int k,
+void ActiveManifold3D::pressureAndAdvectionMotion(int i, int j, int k,
 		size_t gid) {
 	float v111 = swapLevelSet(i, j, k).x;
 	float2 grad;
@@ -234,7 +234,7 @@ void ActiveContour3D::pressureAndAdvectionMotion(int i, int j, int k,
 	float denom = DxCtr * DxCtr + DyCtr * DyCtr + DzCtr * DzCtr;
 	float kappa = 0;
 	const float maxCurvatureForce = 10.0f;
-	if (fabs(denom) > 1E-5f) {
+	if (std::abs(denom) > 1E-5f) {
 		kappa = curvatureParam.toFloat() * numer / denom;
 	} else {
 		kappa = curvatureParam.toFloat() * numer * sign(denom) * 1E5;
@@ -278,7 +278,7 @@ void ActiveContour3D::pressureAndAdvectionMotion(int i, int j, int k,
 	}
 	deltaLevelSet[gid] = -advection + kappa + pressure;
 }
-void ActiveContour3D::advectionMotion(int i, int j, int k, size_t gid) {
+void ActiveManifold3D::advectionMotion(int i, int j, int k, size_t gid) {
 	float v111 = swapLevelSet(i, j, k).x;
 	float2 grad;
 	if (v111 > 0.5f || v111 < -0.5f) {
@@ -371,7 +371,7 @@ void ActiveContour3D::advectionMotion(int i, int j, int k, size_t gid) {
 
 	deltaLevelSet[gid] = -advection + kappa;
 }
-void ActiveContour3D::applyForces(int i, int j, int k, size_t index,
+void ActiveManifold3D::applyForces(int i, int j, int k, size_t index,
 		float timeStep) {
 	float delta;
 	float old = swapLevelSet(i, j, k);
@@ -386,7 +386,7 @@ void ActiveContour3D::applyForces(int i, int j, int k, size_t index,
 	levelSet(i, j, k) = float1(old);
 }
 
-int ActiveContour3D::deleteElements() {
+int ActiveManifold3D::deleteElements() {
 	std::vector<int3> newList;
 	for (int i = 0; i < (int) activeList.size(); i++) {
 		int3 pos = activeList[i];
@@ -403,7 +403,7 @@ int ActiveContour3D::deleteElements() {
 	activeList = newList;
 	return diff;
 }
-int ActiveContour3D::addElements() {
+int ActiveManifold3D::addElements() {
 	const int xNeighborhood[6] = { -1, 1, 0, 0, 0, 0 };
 	const int yNeighborhood[6] = { 0, 0, -1, 1, 0, 0 };
 	const int zNeighborhood[6] = { 0, 0, 0, 0, -1, 1 };
@@ -447,7 +447,7 @@ int ActiveContour3D::addElements() {
 	}
 	return (int) (activeList.size() - sz);
 }
-void ActiveContour3D::pressureMotion(int i, int j, int k, size_t gid) {
+void ActiveManifold3D::pressureMotion(int i, int j, int k, size_t gid) {
 	float v111 = swapLevelSet(i, j, k).x;
 	float3 grad;
 	if (std::abs(v111) > 0.5f) {
@@ -538,7 +538,7 @@ void ActiveContour3D::pressureMotion(int i, int j, int k, size_t gid) {
 	}
 	deltaLevelSet[gid] = kappa + pressure;
 }
-void ActiveContour3D::updateDistanceField(int i, int j, int k, int band) {
+void ActiveManifold3D::updateDistanceField(int i, int j, int k, int band) {
 	float v111;
 	float v011;
 	float v121;
@@ -586,7 +586,7 @@ void ActiveContour3D::updateDistanceField(int i, int j, int k, int band) {
 	}
 }
 
-float ActiveContour3D::evolve(float maxStep) {
+float ActiveManifold3D::evolve(float maxStep) {
 	if (pressureImage.size() > 0) {
 		if (vecFieldImage.size() > 0) {
 #pragma omp parallel for
@@ -650,7 +650,7 @@ float ActiveContour3D::evolve(float maxStep) {
 	deltaLevelSet.resize(activeList.size(), 0.0f);
 	return timeStep;
 }
-bool ActiveContour3D::stepInternal() {
+bool ActiveManifold3D::stepInternal() {
 	double remaining = timeStep;
 	double t = 0.0;
 	do {
@@ -669,7 +669,7 @@ bool ActiveContour3D::stepInternal() {
 	}
 	return (simulationTime < simulationDuration);
 }
-void ActiveContour3D::rescale(aly::Volume1f& pressureForce) {
+void ActiveManifold3D::rescale(aly::Volume1f& pressureForce) {
 	float minValue = 1E30f;
 	float maxValue = -1E30f;
 	if (!std::isnan(targetPressureParam.toFloat())) {

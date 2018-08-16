@@ -130,7 +130,7 @@ namespace aly {
 	void MultiSpringLevelSet2D::updateNearestNeighbors(float maxDistance) {
 		matcher.reset(new Matcher2f(contour.points));
 		nearestNeighbors.clear();
-		nearestNeighbors.resize(contour.points.size(), std::list<uint32_t>());
+		nearestNeighbors.resize(contour.points.size(), std::vector<uint32_t>());
 		int N = (int)contour.points.size();
 #pragma omp parallel for
 		for (int i = 0;i < N;i += 2) {

@@ -43,11 +43,10 @@ namespace aly {
 		aly::Vector2f oldPoints;
 		aly::Vector1i oldLabels;
 		aly::Image1f unsignedLevelSet;
-		std::vector<std::list<uint32_t>> nearestNeighbors;
+		std::vector<std::vector<uint32_t>> nearestNeighbors;
 		virtual bool stepInternal() override;
 		float2 traceInitial(float2 pt);
 		float2 traceUnsigned(float2 pt);
-
 		void refineContour(bool signedIso);
 		void updateNearestNeighbors(float maxDistance = NEAREST_NEIGHBOR_DISTANCE);
 		void updateUnsignedLevelSet(float maxDistance = 4.0f*EXTENT,int label=-1);

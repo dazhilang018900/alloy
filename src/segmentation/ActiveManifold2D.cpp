@@ -18,7 +18,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "segmentation/ActiveContour2D.h"
+#include <segmentation/ActiveManifold2D.h>
 
 namespace aly {
 
@@ -28,7 +28,7 @@ void ActiveManifold2D::rebuildNarrowBand() {
 #pragma omp parallel for
 		for (int i = 0; i < (int) activeList.size(); i++) {
 			int2 pos = activeList[i];
-			updateDistanceField(pos.x, pos.y, band, i);
+			updateDistanceField(pos.x, pos.y, band);
 		}
 	}
 	for (int j = 0; j < swapLevelSet.height; j++) {
@@ -494,8 +494,7 @@ void ActiveManifold2D::pressureMotion(int i, int j, size_t gid) {
 	}
 	deltaLevelSet[gid] = kappa + pressure;
 }
-void ActiveManifold2D::updateDistanceField(int i, int j, int band,
-		size_t index) {
+void ActiveManifold2D::updateDistanceField(int i, int j, int band) {
 	float v11;
 	float v01;
 	float v12;
@@ -586,7 +585,7 @@ float ActiveManifold2D::evolve(float maxStep) {
 #pragma omp parallel for
 		for (int i = 0; i < (int) activeList.size(); i++) {
 			int2 pos = activeList[i];
-			updateDistanceField(pos.x, pos.y, band, i);
+			updateDistanceField(pos.x, pos.y, band);
 		}
 	}
 #pragma omp parallel for

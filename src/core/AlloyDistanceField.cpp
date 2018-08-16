@@ -21,7 +21,10 @@
 
 #include "AlloyDistanceField.h"
 #include "BinaryMinHeap.h"
+#include <AlloyMesh.h>
 #include <list>
+#include <set>
+#include <queue>
 using namespace std;
 namespace aly {
 const ubyte1 DistanceField3f::ALIVE = ubyte1((uint8_t) 1);
@@ -1006,5 +1009,408 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 		}
 	}
 	heap.clear();
+}
+float4x4 MeshToLevelSet(const aly::Mesh& mesh, Volume1f& vol,bool rescale, float narrowBand,
+		float voxelScale, bool flipSign) {
+	const int nbr6X[6] = { 1, -1, 0, 0, 0, 0 };
+	const int nbr6Y[6] = { 0, 0, 1, -1, 0, 0 };
+	const int nbr6Z[6] = { 0, 0, 0, 0, 1, -1 };
+	const int nbr26X[26] = { 1, 0, -1, 1, 0, -1, 1, 0, -1, 1, 0, -1, 1, -1, 1,
+			0, -1, 1, 0, -1, 1, 0, -1, 1, 0, -1 };
+	const int nbr26Y[26] = { 1, 1, 1, 0, 0, 0, -1, -1, -1, 1, 1, 1, 0, 0, -1,
+			-1, -1, 1, 1, 1, 0, 0, 0, -1, -1, -1 };
+	const int nbr26Z[26] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1 };
+	const float trustDistance = 1.25f;
+	narrowBand = std::max(trustDistance + 1.0f, narrowBand);
+	float sgn = ((flipSign) ? -1.0f : 1.0f);
+	float backgroundValue = (narrowBand + 0.5f) * sgn;
+	vol.set(backgroundValue);
+	box3f bbox = mesh.getBoundingBox();
+	std::vector<box3f> splats;
+	splats.reserve(mesh.triIndexes.size());
+	double averageSize = 0;
+	//Calculate average size of triangle to scale mesh to grid accordingly.
+	for (uint3 tri : mesh.triIndexes.data) {
+		float3 v1 = mesh.vertexLocations[tri.x];
+		float3 v2 = mesh.vertexLocations[tri.y];
+		float3 v3 = mesh.vertexLocations[tri.z];
+		averageSize += 0.5f * std::abs(crossMag(v2 - v1, v3 - v1));
+		float3 minPt = aly::min(aly::min(v1, v2), v3);
+		float3 maxPt = aly::max(aly::max(v1, v2), v3);
+		splats.push_back(box3f(minPt, maxPt - minPt));
+	}
+	averageSize /= mesh.triIndexes.size();
+	float res=1.0f;
+	int3 minIndex(0,0,0);
+	float4x4 T=float4x4::identity();
+	if(rescale){
+		res = voxelScale * (float) std::sqrt(averageSize);
+		minIndex = int3(bbox.position / res - narrowBand * 3.0f);
+		T = MakeScale(res) * MakeTranslation(float3(minIndex));
+	}
+	//Splat regions around triangles
+	size_t N = splats.size();
+	for (size_t n = 0; n < N; n++) {
+		box3f box = splats[n];
+		int3 dims = int3(
+				aly::round(box.dimensions / res) + 0.5f + 2 * narrowBand);
+		int3 pos = int3(aly::floor(box.position / res) - 0.25f - narrowBand);
+		uint3 tri = mesh.triIndexes[n];
+		float3 v1 = mesh.vertexLocations[tri.x];
+		float3 v2 = mesh.vertexLocations[tri.y];
+		float3 v3 = mesh.vertexLocations[tri.z];
+		float3 n1 = mesh.vertexNormals[tri.x];
+		float3 n2 = mesh.vertexNormals[tri.y];
+		float3 n3 = mesh.vertexNormals[tri.z];
+		float3 closestPoint;
+		for (int k = 0; k <= dims.z; k++) {
+			for (int j = 0; j <= dims.y; j++) {
+				for (int i = 0; i <= dims.x; i++) {
+					float3 pt = float3(res * (i + pos.x), res * (j + pos.y),
+							res * (k + pos.z));
+					float d = std::sqrt(
+							DistanceToTriangleSqr(pt, v1, v2, v3,
+									&closestPoint)) / res;
+					if (d <= narrowBand) {
+						int3 loc = int3(i + pos.x - minIndex.x,
+								j + pos.y - minIndex.y, k + pos.z - minIndex.z);
+						float& value = vol(loc.x, loc.y, loc.z).x;
+						if (d < std::abs(value)) {
+							if (d <= trustDistance) {
+								//Interpolate normal to compute sign. Addresses cusp issue.
+								value =
+										d * sgn
+												* (int) aly::sign(
+														dot(pt - closestPoint,
+																FromBary(
+																		ToBary(
+																				closestPoint,
+																				v1,
+																				v2,
+																				v3),
+																		n1, n2,
+																		n3)));
+							} else {
+								value = d * sgn;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	splats.clear();
+	//Flood fill leaf nodes with narrowband value.
+	std::queue<int3> posQ;
+	for (int k = 0; k < vol.slices; k++) {
+		for (int j = 0; j < vol.cols; j++) {
+			for (int i = 0; i < vol.rows; i++) {
+				float& val = vol(i, j, k).x;
+				if (val != backgroundValue) {
+					for (int n = 0; n < 26; n++) {
+						int3 nbr = int3(i + nbr26X[n], j + nbr26Y[n],
+								k + nbr26Z[n]);
+						if (vol.contains(nbr)) {
+							float& nval = vol(nbr.x, nbr.y, nbr.z).x;
+							if (nval == backgroundValue) {
+								nval = narrowBand * sgn;
+								posQ.push(nbr);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	while (!posQ.empty()) {
+		int3 pos = posQ.front();
+		posQ.pop();
+		for (int n = 0; n < 6; n++) {
+			int3 nbr = pos + int3(nbr6X[n], nbr6Y[n], nbr6Z[n]);
+			if (vol.contains(nbr)) {
+				float& val = vol(nbr.x, nbr.y, nbr.z).x;
+				if (val == backgroundValue) {
+					val = narrowBand * sgn;
+					posQ.push(nbr);
+				}
+			}
+		}
+	}
+
+	/*
+	std::queue<std::pair<int3, float>> queue;
+	{
+		for (int y = 0; y < vol.cols; y++) {
+			for (int z = 0; z < vol.slices; z++) {
+				int3 pos = int3(vol.rows - 1, y, z);
+				float& value = vol(pos.x, pos.y, pos.z).x;
+					queue.push( { pos, value });
+					value = -value;
+			}
+		}
+	}
+	{
+		for (int x = 0; x < vol.rows; x++) {
+			for (int z = 0; z < vol.slices; z++) {
+				int3 pos = int3(x, vol.cols - 1, z);
+				float& value = vol(pos.x, pos.y, pos.z).x;
+				queue.push( { pos, value });
+				value = -value;
+			}
+		}
+	}
+	{
+		for (int x = 0; x < vol.rows; x++) {
+			for (int y = 0; y < vol.cols; y++) {
+				int3 pos = int3(x, y, vol.slices - 1);
+				float& value = vol(pos.x, pos.y, pos.z).x;
+				queue.push( { pos, value });
+				value = -value;
+			}
+		}
+	}
+	{
+		for (int y = 0; y < vol.cols; y++) {
+			for (int z = 0; z < vol.slices; z++) {
+				int3 pos = int3(0, y, z);
+				float& value = vol(pos.x, pos.y, pos.z).x;
+				queue.push( { pos, value });
+				value = -value;
+			}
+		}
+	}
+	{
+		for (int x = 0; x < vol.rows; x++) {
+			for (int z = 0; z < vol.slices; z++) {
+				int3 pos = int3(x, 0, z);
+				float& value = vol(pos.x, pos.y, pos.z).x;
+				queue.push( { pos, value });
+				value = -value;
+			}
+		}
+	}
+	{
+		for (int x = 0; x < vol.rows; x++) {
+			for (int y = 0; y < vol.cols; y++) {
+				int3 pos = int3(x, y, 0);
+				float& value = vol(pos.x, pos.y, pos.z).x;
+				queue.push( { pos, value });
+				value = -value;
+			}
+		}
+	}
+	while (queue.size() > 0) {
+		std::pair<int3, float> pr = queue.front();
+		float value = pr.second;
+		queue.pop();
+		for (int n = 0; n < 6; n++) {
+			int3 nbr = pr.first + int3(nbr6X[n], nbr6Y[n], nbr6Z[n]);
+			float& nval = vol(nbr.x, nbr.y, nbr.z).x;
+			if (std::abs(nval) > trustDistance && sgn * nval > 0) {
+				queue.push( { nbr, nval });
+				nval = -nval;
+			}
+		}
+	}
+	*/
+	FloodFill(vol, narrowBand, backgroundValue);
+	return T;
+}
+void RebuildDistanceField(aly::Volume1f& levelset, float maxDistance) {
+	DistanceField3f df;
+	aly::Volume1f out;
+	df.solve(levelset, out, maxDistance);
+	levelset = out;
+}
+void RebuildDistanceFieldFast(aly::Volume1f& levelset, float maxDistance) {
+	float nbrs[6];
+	float dist = 0.0f;
+	int i, j, k;
+	int dim;
+	int3 pos;
+	float current, oldVal, extreme;
+	levelset.set(maxDistance + 0.5f);
+	Volume1f storage(levelset.dimensions());
+	storage.set(maxDistance + 0.5f);
+	Volume1f* in = &levelset;
+	Volume1f* out = &storage;
+#pragma om parallel for
+	for (int k = 0; k < levelset.slices; k++) {
+		for (int j = 0; j < levelset.cols; j++) {
+			for (int i = 0; i < levelset.rows; i++) {
+				current = (*in)(i, j, k);
+				nbrs[0] = (*in)(i - 1, j, k);
+				nbrs[1] = (*in)(i, j + 1, k);
+				nbrs[2] = (*in)(i, j - 1, k);
+				nbrs[3] = (*in)(i + 1, j, k);
+				nbrs[4] = (*in)(i, j, k - 1);
+				nbrs[5] = (*in)(i, j, k + 1);
+				extreme = current;
+				if (current > 0) {
+					for (int i = 0; i < 6; i++) {
+						extreme = std::min(extreme, nbrs[i]);
+					}
+					if (extreme <= 0) {
+						dist = current / (current - extreme);
+					} else {
+						dist = 1.5f;
+					}
+				} else {
+					for (int i = 0; i < 6; i++) {
+						extreme = std::max(extreme, nbrs[i]);
+					}
+					if (extreme > 0) {
+						dist = current / (extreme - current);
+					} else {
+						dist = -1.5f;
+					}
+				}
+				(*out)(i, j, k).x = dist;
+			}
+		}
+	}
+	in->set(0.0f);
+	std::swap(in, out);
+	int N = (int) std::ceil(maxDistance);
+	if (N % 2 == 0)
+		N++;
+	for (int b = 0; b < N; b++) {
+#pragma omp parallel for
+		for (int k = 0; k < levelset.slices; k++) {
+			for (int j = 0; j < levelset.cols; j++) {
+				for (int i = 0; i < levelset.rows; i++) {
+					float v211 = (*in)(i + 1, j, k);
+					float v011 = (*in)(i - 1, j, k);
+					float v121 = (*in)(i, j + 1, k);
+					float v101 = (*in)(i, j - 1, k);
+					float v112 = (*in)(i, j, k + 1);
+					float v110 = (*in)(i, j, k - 1);
+					current = oldVal = (*in)(i, j, k).x;
+					if (current < -b + 0.5f) {
+						current = -(1E10);
+						if (v011 <= 1)
+							current = max(v011, current);
+						if (v121 <= 1)
+							current = max(v121, current);
+						if (v101 <= 1)
+							current = max(v101, current);
+						if (v211 <= 1)
+							current = max(v211, current);
+						if (v110 <= 1)
+							current = max(v110, current);
+						if (v112 <= 1)
+							current = max(v112, current);
+						current -= 1.0f;
+					} else if (current > b - 0.5f) {
+						current = (1E10);
+						if (v011 >= -1)
+							current = min(v011, current);
+						if (v121 >= -1)
+							current = min(v121, current);
+						if (v101 >= -1)
+							current = min(v101, current);
+						if (v211 >= -1)
+							current = min(v211, current);
+						if (v110 >= -1)
+							current = min(v110, current);
+						if (v112 >= -1)
+							current = min(v112, current);
+						current += 1.0f;
+					}
+					if (oldVal * current > 0) {
+						(*out)(i, j, k).x = aly::clamp(current, -maxDistance,
+								maxDistance);
+					}
+				}
+			}
+		}
+		std::swap(in, out);
+	}
+}
+void FloodFill(aly::Volume1f& levelset, float narrowBand,
+		float backgroundValue) {
+	const int nbr6X[6] = { 1, -1, 0, 0, 0, 0 };
+	const int nbr6Y[6] = { 0, 0, 1, -1, 0, 0 };
+	const int nbr6Z[6] = { 0, 0, 0, 0, 1, -1 };
+	const int nbr26X[26] = { 1, 0, -1, 1, 0, -1, 1, 0, -1, 1, 0, -1, 1, -1, 1,
+			0, -1, 1, 0, -1, 1, 0, -1, 1, 0, -1 };
+	const int nbr26Y[26] = { 1, 1, 1, 0, 0, 0, -1, -1, -1, 1, 1, 1, 0, 0, -1,
+			-1, -1, 1, 1, 1, 0, 0, 0, -1, -1, -1 };
+	const int nbr26Z[26] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+			-1, -1, -1, -1, -1, -1, -1, -1, -1 };
+	std::queue<int3> posQ, negQ;
+	std::set<int3> posO, negO;
+	for (int k = 0; k < levelset.slices; k++) {
+		for (int j = 0; j < levelset.cols; j++) {
+			for (int i = 0; i < levelset.rows; i++) {
+				float& val = levelset(i, j, k).x;
+				if (val != backgroundValue) {
+					for (int n = 0; n < 26; n++) {
+						int3 nbr = int3(i + nbr26X[n], j + nbr26Y[n],
+								k + nbr26Z[n]);
+						if (levelset.contains(nbr)) {
+							float& nval = levelset(nbr.x, nbr.y, nbr.z).x;
+							if (nval == backgroundValue) {
+								nval = sign(val) * narrowBand;
+								if (nval < 0.0f) {
+									negQ.push(nbr);
+								} else if (nval > 0.0f) {
+									posQ.push(nbr);
+								}
+							}
+						} else {
+							if (val > 0) {
+								posO.insert(nbr);
+							} else if (val < 0) {
+								negO.insert(nbr);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	while (!negQ.empty()) {
+		int3 pos = negQ.front();
+		negQ.pop();
+		for (int n = 0; n < 6; n++) {
+			int3 nbr = pos + int3(nbr6X[n], nbr6Y[n], nbr6Z[n]);
+			if (levelset.contains(nbr)) {
+				float& val = levelset(nbr.x, nbr.y, nbr.z).x;
+				if (val == backgroundValue) {
+					val = -narrowBand;
+					negQ.push(nbr);
+				}
+			}
+		}
+	}
+	while (!posQ.empty()) {
+		int3 pos = posQ.front();
+		posQ.pop();
+		float maxVal = narrowBand * 2;
+		for (int n = 0; n < 6; n++) {
+			int3 nbr = pos + int3(nbr6X[n], nbr6Y[n], nbr6Z[n]);
+			if (levelset.contains(nbr)) {
+				float& val = levelset(nbr.x, nbr.y, nbr.z).x;
+				if (val == backgroundValue) {
+					val = narrowBand;
+					posQ.push(nbr);
+				}
+			}
+		}
+	}
+	for (int3 nbr : posO) {
+		float& nval = levelset(nbr.x, nbr.y, nbr.z).x;
+		if (nval == backgroundValue) {
+			nval = narrowBand;
+		}
+	}
+	for (int3 nbr : negO) {
+		float& nval = levelset(nbr.x, nbr.y, nbr.z).x;
+		if (nval == backgroundValue) {
+			nval = -narrowBand;
+		}
+	}
 }
 }

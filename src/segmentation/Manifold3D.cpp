@@ -25,6 +25,7 @@
 #include <cereal/archives/json.hpp>
 #include <cereal/archives/portable_binary.hpp>
 namespace aly {
+
 void ReadContourFromFile(const std::string& file, Manifold3D& params) {
 	std::string ext = GetFileExtension(file);
 	if (ext == "json") {
@@ -90,6 +91,36 @@ Manifold3D::Manifold3D(const Manifold3D& c) :
 	quadIndexes=c.quadIndexes;
 	file = c.file;
 	particleLabels = c.particleLabels;
+}
+void Manifold3D::updateNormals() {
+	uint32_t sz = (uint32_t) triIndexes.size();
+	if (triIndexes.size() == 0 && quadIndexes.size() == 0)
+		return;
+	float3 pt;
+	vertexNormals.clear();
+	vertexNormals.resize(vertexLocations.size(), float3(0.0f));
+	for (uint32_t i = 0; i < sz; i++) {
+		uint3 verts = triIndexes[i];
+		float3 v1 = vertexLocations[verts.x];
+		float3 v2 = vertexLocations[verts.y];
+		float3 v3 = vertexLocations[verts.z];
+		float3 norm = cross((v3 - v1), (v2 - v1));
+		vertexNormals[verts.x] += norm;
+		vertexNormals[verts.y] += norm;
+		vertexNormals[verts.z] += norm;
+	}
+	sz = (uint32_t) quadIndexes.size();
+	for (uint32_t i = 0; i < sz; i++) {
+		uint4 verts = quadIndexes[i];
+		float3 v1 = vertexLocations[verts.x];
+		float3 v2 = vertexLocations[verts.y];
+		float3 v3 = vertexLocations[verts.z];
+		float3 v4 = vertexLocations[verts.w];
+		vertexNormals[verts.x] += cross((v4 - v1), (v2 - v1));
+		vertexNormals[verts.y] += cross((v1 - v2), (v3 - v2));
+		vertexNormals[verts.z] += cross((v2 - v3), (v4 - v3));
+		vertexNormals[verts.w] += cross((v3 - v4), (v1 - v4));
+	}
 }
 Manifold3D::Manifold3D(bool onScreen,
 		const std::shared_ptr<AlloyContext>& context) :
@@ -171,7 +202,7 @@ void Manifold3D::update() {
 		if (glIsBuffer(labelBuffer) == GL_FALSE)
 			throw std::runtime_error("Error: Unable to create label buffer");
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLint) * particleLabels.size(),
-				particleLabels.ptr(), GL_STATIC_DRAW);
+				particleLabels.data(), GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	} else {
 		if (glIsBuffer(labelBuffer) == GL_TRUE)

@@ -62,7 +62,7 @@ protected:
 	void advectionMotion(int i, int j, size_t index);
 	void applyForces(int i, int j, size_t index, float timeStep);
 	void plugLevelSet(int i, int j, size_t index);
-	void updateDistanceField(int i, int j, int band, size_t index);
+	void updateDistanceField(int i, int j, int band);
 	int deleteElements();
 	int addElements();
 	virtual float evolve(float maxStep);

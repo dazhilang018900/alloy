@@ -248,10 +248,18 @@ public:
 	void solve(const Volume1f& data, const std::vector<int3>& indexList,
 			Mesh& mesh, const MeshType& type = MeshType::Triangle,
 			bool regularize = true, const float& isoLevel = 0);
+	void solveQuads(const Volume1f& data,const std::vector<int3>& indexList,
+			Vector3f& vertexLocations,
+			bool regularize = true, const float& isoLevel = 0);
+	void solveTriangles(const Volume1f& data,const std::vector<int3>& indexList,
+			Vector3f& vertexLocations,
+			bool regularize = true, const float& isoLevel = 0);
 	void solve(const Volume1f& data,
 			Mesh& mesh, const MeshType& type = MeshType::Triangle,
 			bool regularize = true, const float& isoLevel = 0);
-
+	void solve(const Volume1f& data, const std::vector<int3>& indexList,
+			aly::Vector3f vertexes,aly::Vector4ui quadIndexes,
+			bool regularize = true, const float& isoLevel = 0);
 	void solve(const float* data, const int& rows, const int& cols,
 			const int& slices, const std::vector<int3>& indexList, Mesh& mesh,
 			const MeshType& type = MeshType::Triangle, bool regularize = true,

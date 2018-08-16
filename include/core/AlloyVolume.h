@@ -164,6 +164,12 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(const std::strin
 			data.resize(r * c * s);
 
 		}
+		Volume(int3 dims,
+			uint64_t id = 0) :
+			x(0), y(0), z(0),data(vector.data), rows(dims.x), cols(dims.y), slices(dims.z), id(id){
+			data.resize(dims.x * dims.y * dims.z);
+
+		}
 		Volume(T* ptr, int r, int c, int s, int x = 0, int y = 0, int z = 0,
 			uint64_t id = 0) :
 			Volume(r, c, s, x, y, z, id) {

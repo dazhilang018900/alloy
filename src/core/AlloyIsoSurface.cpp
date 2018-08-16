@@ -427,6 +427,11 @@ void IsoSurface::solve(const Volume1f& data, Mesh& mesh, const MeshType& type,
 	}
 	solve(data, narrowBandList, mesh, type, regularize, isoLevel);
 }
+void solve(const Volume1f& data, const std::vector<int3>& indexList,
+		aly::Vector3f vertexes,aly::Vector4ui quadIndexes,
+		bool regularize = true, const float& isoLevel = 0){
+
+}
 void IsoSurface::solve(const Volume1f& data, const std::vector<int3>& indexList,
 		Mesh& mesh, const MeshType& type, bool regularizeTest,
 		const float& isoLevel) {
@@ -462,6 +467,36 @@ void IsoSurface::solve(const EndlessGridFloat& grid, Mesh& mesh,
 	mesh.updateBoundingBox();
 	backgroundValue = oldBg;
 }
+void IsoSurface::solveQuads(const Volume1f& data,const std::vector<int3>& indexList,Vector3f& vertexLocations,bool regularizeTest, const float& isoLevel){
+	Mesh mesh;
+	solveQuad(data.ptr(), data.rows, data.cols, data.slices, indexList,mesh, isoLevel);
+	if (regularizeTest) {
+		regularize(data.ptr(), mesh);
+	}
+	vertexLocations.clear();
+	vertexLocations.data.reserve(mesh.quadIndexes.size()*4);
+	for(uint4& quad:mesh.quadIndexes){
+		vertexLocations.push_back(mesh.vertexLocations[quad.x]);
+		vertexLocations.push_back(mesh.vertexLocations[quad.y]);
+		vertexLocations.push_back(mesh.vertexLocations[quad.z]);
+		vertexLocations.push_back(mesh.vertexLocations[quad.w]);
+	}
+}
+void IsoSurface::solveTriangles(const Volume1f& data,const std::vector<int3>& indexList,Vector3f& vertexLocations,bool regularizeTest, const float& isoLevel){
+	Mesh mesh;
+	solveTri(data.ptr(), data.rows, data.cols, data.slices, indexList,mesh, isoLevel);
+	if (regularizeTest) {
+		regularize(data.ptr(), mesh);
+	}
+	vertexLocations.clear();
+	vertexLocations.data.reserve(mesh.triIndexes.size()*3);
+	for(uint4& tri:mesh.quadIndexes){
+		vertexLocations.push_back(mesh.vertexLocations[tri.x]);
+		vertexLocations.push_back(mesh.vertexLocations[tri.y]);
+		vertexLocations.push_back(mesh.vertexLocations[tri.z]);
+	}
+}
+
 void IsoSurface::regularize(const EndlessGridFloat& grid, Mesh& mesh) {
 	const int TRACE_ITERATIONS = 16;
 	const int REGULARIZE_ITERATIONS = 3;

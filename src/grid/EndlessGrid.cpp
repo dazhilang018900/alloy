@@ -752,8 +752,7 @@ void RebuildDistanceFieldFast(EndlessGrid<float>& grid, float maxDistance) {
 						}
 					}
 					if (std::abs(current) >= 1.5f) {
-						in->setLeafValue(i, j, k, aly::sign(current) * 1.75f,
-								leaf);
+						in->setLeafValue(i, j, k, aly::sign(current) * 1.75f,leaf);
 					}
 					out->getLeafValue(i, j, k) = dist;
 				}
@@ -824,6 +823,7 @@ void RebuildDistanceFieldFast(EndlessGrid<float>& grid, float maxDistance) {
 		std::swap(in, out);
 	}
 }
+
 float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 		float narrowBand, bool flipSign, float voxelScale,
 		const std::function<bool(const std::string& message, float progress)>& monitor) {
@@ -1047,7 +1047,7 @@ float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 		int3 loc = maxZ->location;
 		for (int x = 0; x < dim; x++) {
 			for (int y = 0; y < dim; y++) {
-				int3 pos = int3(loc.x, loc.y + y, loc.z + dim - 1);
+				int3 pos = int3(loc.x + x, loc.y + y, loc.z + dim - 1);
 				float& value = (*maxZ)(x, y, dim - 1);
 				queue.push( { pos, value });
 				value = -value;
@@ -1084,7 +1084,7 @@ float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 		int3 loc = minZ->location;
 		for (int x = 0; x < dim; x++) {
 			for (int y = 0; y < dim; y++) {
-				int3 pos = int3(loc.x, loc.y + y, loc.z);
+				int3 pos = int3(loc.x + x, loc.y + y, loc.z);
 				float& value = (*minZ)(x, y, 0);
 				queue.push( { pos, value });
 				value = -value;

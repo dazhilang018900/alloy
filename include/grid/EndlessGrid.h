@@ -713,7 +713,6 @@ float3 GetNormal(const EndlessGrid<FloatInt>& grid, int i, int j, int k,int l);
 float GetInterpolatedValue(const EndlessGrid<FloatInt>& grid, float x, float y,float z,int l);
 float3 GetInterpolatedNormal(const EndlessGrid<FloatInt>& grid, float x, float y,float z,int l);
 float4 GetNormalAndValue(const EndlessGrid<FloatInt>& grid, int i, int j, int k,int l);
-
 float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 		float narrowBand, bool flipSign = true, float voxelScale = 0.75f,
 		const std::function<bool(const std::string& message, float progress)>& monitor =

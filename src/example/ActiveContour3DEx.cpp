@@ -18,9 +18,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "../../include/example/ActiveContour3DEx.h"
 #include "segmentation/Phantom.h"
 #include <AlloyGradientVectorFlow.h>
+#include <example/ActiveContour3DEx.h>
 using namespace aly;
 ActiveContour3DEx::ActiveContour3DEx() :
 Application(1024, 600, "Acitve Contour 3D"), matcapShader(
