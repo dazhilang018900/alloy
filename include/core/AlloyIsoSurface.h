@@ -243,8 +243,8 @@ public:
 			const EndlessGridFloat& grid,
 			Mesh& mesh,
 			const MeshType& type,
-			bool regularizeTest,
-			const float& isoLevel);
+			bool regularizeTest=true,
+			const float& isoLevel=0.0f);
 	void solve(const Volume1f& data, const std::vector<int3>& indexList,
 			Mesh& mesh, const MeshType& type = MeshType::Triangle,
 			bool regularize = true, const float& isoLevel = 0);

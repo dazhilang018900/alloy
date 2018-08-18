@@ -259,6 +259,7 @@ void LevelSetGridEx::solve() {
 			tmp.transform(T);
 			tmp.updateBoundingBox();
 			tmp.clone(mesh);
+			WriteMeshToFile(MakeDesktopFile("isosurface.ply"),tmp);
 			textLabel->setLabel(MakeString()<<"Elapsed Time: "<<elapsed<<" sec");
 			AlloyApplicationContext()->requestPack();
 	 },

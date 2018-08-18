@@ -80,6 +80,7 @@
 #include "../../include/example/MultiActiveManifold2DEx.h"
 #include "../../include/example/MultiActiveContour3DEx.h"
 #include "../../include/example/DictionaryLearningEx.h"
+#include "../../include/example/Springls3DEx.h"
 #include "AlloyCommon.h"
 #include "AlloyImageEncoder.h"
 #include "AlloyOptimization.h"
@@ -158,12 +159,13 @@ bool SANITY_CHECK() {
 	//SANITY_CHECK_GMM();
 	//SANITY_CHECK_SVD();
 	//SANITY_CHECK_VIDEOENCODER();
-	SANITY_CHECK_STRINGS();
+	//SANITY_CHECK_STRINGS();
 	return ret;
 }
+
 int main(int argc, char *argv[]) {
 	//change me when adding new example!
-	const int N=63;
+	const int N=64;
 	std::array<ExamplePtr,N> apps = {
 		MAKE_EXAMPLE(UnitsEx), MAKE_EXAMPLE(CompositeEx),MAKE_EXAMPLE(EventsEx), 
 		MAKE_EXAMPLE(DragEx), MAKE_EXAMPLE(TweenEx),MAKE_EXAMPLE(ImageEx), 
@@ -186,7 +188,7 @@ int main(int argc, char *argv[]) {
 		MAKE_EXAMPLE(SuperPixelEx),MAKE_EXAMPLE(MagicPixelEx),MAKE_EXAMPLE(MultiActiveManifold2DEx),
 		MAKE_EXAMPLE(MultiActiveContour3DEx), MAKE_EXAMPLE(MultiSpringls2DEx),
 		MAKE_EXAMPLE(MultiSpringlsSecondOrder2DEx),MAKE_EXAMPLE(Springls2DEx),
-		MAKE_EXAMPLE(SpringlsSecondOrder2DEx),MAKE_EXAMPLE(DictionaryLearningEx)
+		MAKE_EXAMPLE(SpringlsSecondOrder2DEx),MAKE_EXAMPLE(DictionaryLearningEx),MAKE_EXAMPLE(Springls3DEx)
 	};
 	std::sort(apps.begin(),apps.end(),[=](const ExamplePtr& a,const ExamplePtr& b){
 		return std::lexicographical_compare(a->name.begin(), a->name.end(), b->name.begin(), b->name.end());

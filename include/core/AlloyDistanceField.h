@@ -58,7 +58,7 @@ namespace aly {
 		DistanceField2f() {}
 		void solve(const Image1f& vol, Image1f& out, float maxDistance = 2.5f);
 	};
-	float4x4 MeshToLevelSet(const aly::Mesh& mesh,Volume1f& vol,bool rescale, float narrowBand=2.5f, float voxelScale=0.75f, bool flipSign=false);
+	float4x4 MeshToLevelSet(const aly::Mesh& mesh,Volume1f& vol,bool rescale, float narrowBand=2.5f,bool flipSign=false,float voxelScale=0.75f);
 	void RebuildDistanceFieldFast(aly::Volume1f& levelset,float maxDistance = 2.5f);
 	void RebuildDistanceField(aly::Volume1f& levelset,float maxDistance = 2.5f);
 	void FloodFill(aly::Volume1f& levelset,float narrowBand=2.5f, float backgroundValue=std::numeric_limits<float>::max());

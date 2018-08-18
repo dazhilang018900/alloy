@@ -197,7 +197,6 @@ void FloodFill(EndlessGrid<float>& grid, float narrowBand) {
 		while (!posQ.empty()) {
 			int3 pos = posQ.front();
 			posQ.pop();
-			float maxVal = narrowBand * 2;
 			for (int n = 0; n < 6; n++) {
 				int3 nbr = pos + int3(nbr6X[n], nbr6Y[n], nbr6Z[n]);
 				if (nbr.x >= 0 && nbr.x < dim && nbr.y >= 0 && nbr.y < dim
@@ -823,7 +822,6 @@ void RebuildDistanceFieldFast(EndlessGrid<float>& grid, float maxDistance) {
 		std::swap(in, out);
 	}
 }
-
 float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 		float narrowBand, bool flipSign, float voxelScale,
 		const std::function<bool(const std::string& message, float progress)>& monitor) {

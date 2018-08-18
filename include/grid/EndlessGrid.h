@@ -717,6 +717,7 @@ float4x4 MeshToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 		float narrowBand, bool flipSign = true, float voxelScale = 0.75f,
 		const std::function<bool(const std::string& message, float progress)>& monitor =
 				nullptr);
+
 float4x4 PointsToLevelSet(const Mesh& mesh, EndlessGrid<float>& grid,
 		float voxelSize, float surfelSize,
 		const std::function<bool(const std::string& message, float progress)>& monitor =

@@ -135,8 +135,9 @@ namespace aly {
 		return pt;
 	}
 	void SpringLevelSet3D::updateNearestNeighbors(float maxDistance) {
-		matcher.reset(new Matcher3f(contour.particles));
 		nearestNeighbors.clear();
+		if(contour.particles.size()==0)return;
+		matcher.reset(new Matcher3f(contour.particles));
 		nearestNeighbors.resize(contour.particles.size(), std::vector<uint32_t>());
 		int N = (int)contour.particles.size();
 #pragma omp parallel for

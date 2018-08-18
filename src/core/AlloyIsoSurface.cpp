@@ -368,7 +368,6 @@ IsoSurface::IsoSurface() :
 				std::numeric_limits<float>::infinity()), skipHidden(true), triangleCount(
 				0) {
 }
-
 IsoSurface::~IsoSurface() {
 }
 void IsoSurface::solveQuad(const float* data, const int& rows, const int& cols,

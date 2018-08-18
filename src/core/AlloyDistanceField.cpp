@@ -1010,8 +1010,8 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 	}
 	heap.clear();
 }
-float4x4 MeshToLevelSet(const aly::Mesh& mesh, Volume1f& vol,bool rescale, float narrowBand,
-		float voxelScale, bool flipSign) {
+float4x4 MeshToLevelSet(const aly::Mesh& mesh, Volume1f& vol, bool rescale,
+		float narrowBand, bool flipSign, float voxelScale) {
 	const int nbr6X[6] = { 1, -1, 0, 0, 0, 0 };
 	const int nbr6Y[6] = { 0, 0, 1, -1, 0, 0 };
 	const int nbr6Z[6] = { 0, 0, 0, 0, 1, -1 };
@@ -1024,8 +1024,6 @@ float4x4 MeshToLevelSet(const aly::Mesh& mesh, Volume1f& vol,bool rescale, float
 	const float trustDistance = 1.25f;
 	narrowBand = std::max(trustDistance + 1.0f, narrowBand);
 	float sgn = ((flipSign) ? -1.0f : 1.0f);
-	float backgroundValue = (narrowBand + 0.5f) * sgn;
-	vol.set(backgroundValue);
 	box3f bbox = mesh.getBoundingBox();
 	std::vector<box3f> splats;
 	splats.reserve(mesh.triIndexes.size());
@@ -1041,16 +1039,23 @@ float4x4 MeshToLevelSet(const aly::Mesh& mesh, Volume1f& vol,bool rescale, float
 		splats.push_back(box3f(minPt, maxPt - minPt));
 	}
 	averageSize /= mesh.triIndexes.size();
-	float res=1.0f;
-	int3 minIndex(0,0,0);
-	float4x4 T=float4x4::identity();
-	if(rescale){
+	float res = 1.0f;
+	int3 minIndex(0, 0, 0);
+	float4x4 T = float4x4::identity();
+	if (rescale) {
 		res = voxelScale * (float) std::sqrt(averageSize);
-		minIndex = int3(bbox.position / res - narrowBand * 3.0f);
-		T = MakeScale(res) * MakeTranslation(float3(minIndex));
+		minIndex = int3(bbox.position / res - narrowBand * 2.0f);
+	} else {
+		res = voxelScale;
+		minIndex = int3(0, 0, 0);
 	}
+	T = MakeScale(res) * MakeTranslation(float3(minIndex));
+	vol.resize(int3(bbox.dimensions / res + narrowBand * 4.0f));
+	float backgroundValue=sgn*narrowBand;
+	vol.set(backgroundValue);
 	//Splat regions around triangles
 	size_t N = splats.size();
+#pragma omp parallel for
 	for (size_t n = 0; n < N; n++) {
 		box3f box = splats[n];
 		int3 dims = int3(
@@ -1073,26 +1078,30 @@ float4x4 MeshToLevelSet(const aly::Mesh& mesh, Volume1f& vol,bool rescale, float
 							DistanceToTriangleSqr(pt, v1, v2, v3,
 									&closestPoint)) / res;
 					if (d <= narrowBand) {
-						int3 loc = int3(i + pos.x - minIndex.x,
-								j + pos.y - minIndex.y, k + pos.z - minIndex.z);
-						float& value = vol(loc.x, loc.y, loc.z).x;
-						if (d < std::abs(value)) {
-							if (d <= trustDistance) {
-								//Interpolate normal to compute sign. Addresses cusp issue.
-								value =
-										d * sgn
-												* (int) aly::sign(
-														dot(pt - closestPoint,
-																FromBary(
-																		ToBary(
-																				closestPoint,
-																				v1,
-																				v2,
-																				v3),
-																		n1, n2,
-																		n3)));
-							} else {
-								value = d * sgn;
+						int3 loc = int3(i, j, k) + pos - minIndex;
+						if (vol.contains(loc)) {
+							float& value = vol(loc.x, loc.y, loc.z).x;
+							if (d < std::abs(value)) {
+								if (d <= trustDistance) {
+									//Interpolate normal to compute sign. Addresses cusp issue.
+									value =
+											d * sgn
+													* (int) aly::sign(
+															dot(
+																	pt
+																			- closestPoint,
+																	FromBary(
+																			ToBary(
+																					closestPoint,
+																					v1,
+																					v2,
+																					v3),
+																			n1,
+																			n2,
+																			n3)));
+								} else {
+									value = d * sgn;
+								}
 							}
 						}
 					}
@@ -1101,52 +1110,14 @@ float4x4 MeshToLevelSet(const aly::Mesh& mesh, Volume1f& vol,bool rescale, float
 		}
 	}
 	splats.clear();
-	//Flood fill leaf nodes with narrowband value.
-	std::queue<int3> posQ;
-	for (int k = 0; k < vol.slices; k++) {
-		for (int j = 0; j < vol.cols; j++) {
-			for (int i = 0; i < vol.rows; i++) {
-				float& val = vol(i, j, k).x;
-				if (val != backgroundValue) {
-					for (int n = 0; n < 26; n++) {
-						int3 nbr = int3(i + nbr26X[n], j + nbr26Y[n],
-								k + nbr26Z[n]);
-						if (vol.contains(nbr)) {
-							float& nval = vol(nbr.x, nbr.y, nbr.z).x;
-							if (nval == backgroundValue) {
-								nval = narrowBand * sgn;
-								posQ.push(nbr);
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-	while (!posQ.empty()) {
-		int3 pos = posQ.front();
-		posQ.pop();
-		for (int n = 0; n < 6; n++) {
-			int3 nbr = pos + int3(nbr6X[n], nbr6Y[n], nbr6Z[n]);
-			if (vol.contains(nbr)) {
-				float& val = vol(nbr.x, nbr.y, nbr.z).x;
-				if (val == backgroundValue) {
-					val = narrowBand * sgn;
-					posQ.push(nbr);
-				}
-			}
-		}
-	}
-
-	/*
-	std::queue<std::pair<int3, float>> queue;
+	std::queue<int3> posQ, negQ;
 	{
 		for (int y = 0; y < vol.cols; y++) {
 			for (int z = 0; z < vol.slices; z++) {
 				int3 pos = int3(vol.rows - 1, y, z);
 				float& value = vol(pos.x, pos.y, pos.z).x;
-					queue.push( { pos, value });
-					value = -value;
+				posQ.push(pos);
+				value = -backgroundValue;
 			}
 		}
 	}
@@ -1155,8 +1126,8 @@ float4x4 MeshToLevelSet(const aly::Mesh& mesh, Volume1f& vol,bool rescale, float
 			for (int z = 0; z < vol.slices; z++) {
 				int3 pos = int3(x, vol.cols - 1, z);
 				float& value = vol(pos.x, pos.y, pos.z).x;
-				queue.push( { pos, value });
-				value = -value;
+				posQ.push(pos);
+				value = -backgroundValue;
 			}
 		}
 	}
@@ -1165,8 +1136,8 @@ float4x4 MeshToLevelSet(const aly::Mesh& mesh, Volume1f& vol,bool rescale, float
 			for (int y = 0; y < vol.cols; y++) {
 				int3 pos = int3(x, y, vol.slices - 1);
 				float& value = vol(pos.x, pos.y, pos.z).x;
-				queue.push( { pos, value });
-				value = -value;
+				posQ.push(pos);
+				value = -backgroundValue;
 			}
 		}
 	}
@@ -1175,8 +1146,8 @@ float4x4 MeshToLevelSet(const aly::Mesh& mesh, Volume1f& vol,bool rescale, float
 			for (int z = 0; z < vol.slices; z++) {
 				int3 pos = int3(0, y, z);
 				float& value = vol(pos.x, pos.y, pos.z).x;
-				queue.push( { pos, value });
-				value = -value;
+				posQ.push(pos);
+				value = -backgroundValue;
 			}
 		}
 	}
@@ -1185,8 +1156,8 @@ float4x4 MeshToLevelSet(const aly::Mesh& mesh, Volume1f& vol,bool rescale, float
 			for (int z = 0; z < vol.slices; z++) {
 				int3 pos = int3(x, 0, z);
 				float& value = vol(pos.x, pos.y, pos.z).x;
-				queue.push( { pos, value });
-				value = -value;
+				posQ.push(pos);
+				value = -backgroundValue;
 			}
 		}
 	}
@@ -1195,26 +1166,26 @@ float4x4 MeshToLevelSet(const aly::Mesh& mesh, Volume1f& vol,bool rescale, float
 			for (int y = 0; y < vol.cols; y++) {
 				int3 pos = int3(x, y, 0);
 				float& value = vol(pos.x, pos.y, pos.z).x;
-				queue.push( { pos, value });
-				value = -value;
+				posQ.push(pos);
+				value = -backgroundValue;
 			}
 		}
 	}
-	while (queue.size() > 0) {
-		std::pair<int3, float> pr = queue.front();
-		float value = pr.second;
-		queue.pop();
-		for (int n = 0; n < 6; n++) {
-			int3 nbr = pr.first + int3(nbr6X[n], nbr6Y[n], nbr6Z[n]);
-			float& nval = vol(nbr.x, nbr.y, nbr.z).x;
-			if (std::abs(nval) > trustDistance && sgn * nval > 0) {
-				queue.push( { nbr, nval });
-				nval = -nval;
+	std::cout<<"Start First Pass "<<posQ.size()<<std::endl;
+	while (!posQ.empty()) {
+		int3 pos = posQ.front();
+		posQ.pop();
+		for (int n = 0; n < 26; n++) {
+			int3 nbr = pos + int3(nbr26X[n], nbr26Y[n], nbr26Z[n]);
+			if (vol.contains(nbr)) {
+				float& val = vol(nbr.x, nbr.y, nbr.z).x;
+				if (std::abs(val)>=trustDistance&&val*sgn>0) {
+					val=-val;
+					posQ.push(nbr);
+				}
 			}
 		}
 	}
-	*/
-	FloodFill(vol, narrowBand, backgroundValue);
 	return T;
 }
 void RebuildDistanceField(aly::Volume1f& levelset, float maxDistance) {
@@ -1388,7 +1359,6 @@ void FloodFill(aly::Volume1f& levelset, float narrowBand,
 	while (!posQ.empty()) {
 		int3 pos = posQ.front();
 		posQ.pop();
-		float maxVal = narrowBand * 2;
 		for (int n = 0; n < 6; n++) {
 			int3 nbr = pos + int3(nbr6X[n], nbr6Y[n], nbr6Z[n]);
 			if (levelset.contains(nbr)) {
