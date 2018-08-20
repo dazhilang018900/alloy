@@ -85,7 +85,7 @@ namespace aly {
 	bool MultiActiveContour2D::updateContour() {
 		if (requestUpdateContour) {
 			//std::lock_guard<std::mutex> lockMe(contourLock);
-			isoContour.solve(levelSet, labelImage, contour.vertexes, contour.vertexLabels, contour.indexes, 0.0f, (preserveTopology) ? TopologyRule2D::Connect4 : TopologyRule2D::Unconstrained, Winding::Clockwise);
+			isoContour.solve(levelSet, labelImage, contour.vertexLocations, contour.vertexLabels, contour.indexes, 0.0f, (preserveTopology) ? TopologyRule2D::Connect4 : TopologyRule2D::Unconstrained, Winding::Clockwise);
 			requestUpdateContour = false;
 			return true;
 		}

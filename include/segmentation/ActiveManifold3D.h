@@ -40,7 +40,6 @@ protected:
 	Number pressureParam;
 	Number curvatureParam;
 	Number targetPressureParam;
-
 	const float MAX_DISTANCE = 3.5f;
 	const int maxLayers = 3;
 	bool requestUpdateSurface;

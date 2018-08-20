@@ -39,7 +39,7 @@ namespace aly {
 		contour.clusterCenters.clear();
 		contour.clusterColors.clear();
 		contour.overlay.set(RGBA(0, 0, 0, 0));
-		contour.vertexes.clear();
+		contour.vertexLocations.clear();
 		contour.indexes.clear();
 
 		superPixels.solve(referenceImage, superPixelCount.toInteger(),superPixelIterations.toInteger());

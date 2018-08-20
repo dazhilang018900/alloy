@@ -61,7 +61,7 @@ void ActiveManifold2D::plugLevelSet(int i, int j, size_t index) {
 bool ActiveManifold2D::updateContour() {
 	if (requestUpdateContour) {
 		std::lock_guard<std::mutex> lockMe(contourLock);
-		isoContour.solve(levelSet, contour.vertexes, contour.indexes, 0.0f,
+		isoContour.solve(levelSet, contour.vertexLocations, contour.indexes, 0.0f,
 				(preserveTopology) ?
 						TopologyRule2D::Connect4 :
 						TopologyRule2D::Unconstrained, Winding::Clockwise);

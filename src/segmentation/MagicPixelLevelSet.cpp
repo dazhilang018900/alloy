@@ -54,7 +54,7 @@ bool MagicPixelLevelSet::init() {
 	contour.clusterCenters.clear();
 	contour.clusterColors.clear();
 	contour.overlay.set(RGBA(0, 0, 0, 0));
-	contour.vertexes.clear();
+	contour.vertexLocations.clear();
 	contour.indexes.clear();
 	Image1i initLabels;
 	magicPixels.solve(initLabels, tileSizeParam.toInteger(),

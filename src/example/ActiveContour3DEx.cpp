@@ -223,6 +223,7 @@ void ActiveContour3DEx::draw(AlloyContext* context) {
 			mesh.vertexLocations = contour->vertexLocations;
 			mesh.vertexNormals = contour->vertexNormals;
 			mesh.triIndexes = contour->triIndexes;
+			mesh.quadIndexes=contour->quadIndexes;
 			mesh.setDirty(true);
 			lastTime = currentTime;
 		}

@@ -355,7 +355,7 @@ bool ActiveManifold2DEx::init(Composite& rootNode) {
 			nvgBeginPath(nvg);
 			bool firstTime = true;
 			for (uint32_t idx : curve) {
-				float2 pt = contour->vertexes[idx] + float2(0.5f);
+				float2 pt = contour->vertexLocations[idx] + float2(0.5f);
 				pt.x = pt.x / (float)img.width;
 				pt.y = pt.y / (float)img.height;
 				pt = pt*bounds.dimensions + bounds.position;
@@ -375,8 +375,8 @@ bool ActiveManifold2DEx::init(Composite& rootNode) {
 		if (0.1f*scale > 0.5f) {
 			nvgStrokeColor(nvg, springlColor);
 			nvgStrokeWidth(nvg, 0.1f*scale);
-			for (int n = 0;n < (int)contour->points.size();n += 2) {
-				float2 pt = contour->points[n] + float2(0.5f);
+			for (int n = 0;n < (int)contour->vertexes.size();n += 2) {
+				float2 pt = contour->vertexes[n] + float2(0.5f);
 				pt.x = pt.x / (float)img.width;
 				pt.y = pt.y / (float)img.height;
 				pt = pt*bounds.dimensions + bounds.position;
@@ -389,7 +389,7 @@ bool ActiveManifold2DEx::init(Composite& rootNode) {
 				pt = pt*bounds.dimensions + bounds.position;
 				nvgLineTo(nvg, pt.x, pt.y);
 
-				pt = contour->points[n + 1] + float2(0.5f);
+				pt = contour->vertexes[n + 1] + float2(0.5f);
 				pt.x = pt.x / (float)img.width;
 				pt.y = pt.y / (float)img.height;
 				pt = pt*bounds.dimensions + bounds.position;
@@ -419,8 +419,8 @@ bool ActiveManifold2DEx::init(Composite& rootNode) {
 		}
 		if (0.05f*scale > 0.5f) {
 			nvgFillColor(nvg, pointColor);
-			for (int n = 0;n < (int)contour->points.size();n++) {
-				float2 pt = contour->points[n] + float2(0.5f);
+			for (int n = 0;n < (int)contour->vertexes.size();n++) {
+				float2 pt = contour->vertexes[n] + float2(0.5f);
 				pt.x = pt.x / (float)img.width;
 				pt.y = pt.y / (float)img.height;
 				pt = pt*bounds.dimensions + bounds.position;

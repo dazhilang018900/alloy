@@ -60,7 +60,7 @@ enum class TopologyRule2D {
 };
 
 enum class MeshType {
-	Triangle, Quad
+	Triangle=3, Quad=4
 };
 enum class MessageOption {
 	YesNo, OkayCancel, Okay

@@ -31,9 +31,9 @@ void Manifold2D::operator=(const Manifold2D &c) {
 	clusterColors = c.clusterColors;
 	clusterCenters = c.clusterCenters;
 	indexes = c.indexes;
-	vertexes = c.vertexes;
+	vertexLocations = c.vertexLocations;
 	particles = c.particles;
-	points = c.points;
+	vertexes = c.vertexes;
 	normals = c.normals;
 	velocities = c.velocities;
 	correspondence = c.correspondence;
@@ -52,9 +52,9 @@ Manifold2D::Manifold2D(const Manifold2D& c) :
 	clusterColors = c.clusterColors;
 	clusterCenters = c.clusterCenters;
 	indexes = c.indexes;
-	vertexes = c.vertexes;
+	vertexLocations = c.vertexLocations;
 	particles = c.particles;
-	points = c.points;
+	vertexes = c.vertexes;
 	normals = c.normals;
 	velocities = c.velocities;
 	correspondence = c.correspondence;
@@ -105,7 +105,7 @@ void Manifold2D::draw() {
 				glBindBuffer(GL_ARRAY_BUFFER, labelBuffer);
 				glVertexAttribPointer(2, 1, GL_INT, GL_FALSE, 0, 0);
 			}
-			glDrawArrays(GL_POINTS, 0, (GLsizei) (points.size() / 2));
+			glDrawArrays(GL_POINTS, 0, (GLsizei) (vertexes.size() / 2));
 			glDisableVertexAttribArray(2);
 			glDisableVertexAttribArray(1);
 			glDisableVertexAttribArray(0);
@@ -119,8 +119,8 @@ void Manifold2D::update() {
 	context->begin(onScreen);
 	if (vao == 0)
 		glGenVertexArrays(1, &vao);
-	if (points.size() > 0) {
-		if (vertexCount != (int) points.size()) {
+	if (vertexes.size() > 0) {
+		if (vertexCount != (int) vertexes.size()) {
 			if (glIsBuffer(vertexBuffer) == GL_TRUE)
 				glDeleteBuffers(1, &vertexBuffer);
 			glGenBuffers(1, &vertexBuffer);
@@ -128,10 +128,10 @@ void Manifold2D::update() {
 		glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer);
 		if (glIsBuffer(vertexBuffer) == GL_FALSE)
 			throw std::runtime_error("Error: Unable to create vertex buffer");
-		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 2 * points.size(),
-				points.ptr(), GL_STATIC_DRAW);
+		glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 2 * vertexes.size(),
+				vertexes.ptr(), GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		vertexCount = (int) points.size();
+		vertexCount = (int) vertexes.size();
 	} else {
 		if (glIsBuffer(vertexBuffer) == GL_TRUE)
 			glDeleteBuffers(1, &vertexBuffer);
@@ -175,10 +175,10 @@ void Manifold2D::update() {
 	dirty = false;
 }
 void Manifold2D::updateNormals() {
-	normals.resize(points.size() / 2);
+	normals.resize(vertexes.size() / 2);
 #pragma omp parallel for
-	for (int i = 0; i < (int) points.size(); i += 2) {
-		float2 norm = normalize(points[i + 1] - points[i]);
+	for (int i = 0; i < (int) vertexes.size(); i += 2) {
+		float2 norm = normalize(vertexes[i + 1] - vertexes[i]);
 		normals[i / 2] = float2(-norm.y, norm.x);
 	}
 }

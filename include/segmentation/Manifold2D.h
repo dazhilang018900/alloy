@@ -44,9 +44,9 @@ namespace aly {
 		int vertexCount;
 	public:
 		std::vector<std::vector<uint32_t>> indexes;
-		Vector2f vertexes;
+		Vector2f vertexLocations;
 		Vector2f particles;
-		Vector2f points;
+		Vector2f vertexes;
 		Vector2f normals;
 		Vector1i particleLabels;
 		Vector1i vertexLabels;
@@ -78,11 +78,11 @@ namespace aly {
 				std::string imageFile = GetFileWithoutExtension(file) + ".png";
 				WriteImageToFile(imageFile, overlay);
 			}
-			archive( CEREAL_NVP(vertexes),CEREAL_NVP(file), CEREAL_NVP(indexes), CEREAL_NVP(particles), CEREAL_NVP(points),  CEREAL_NVP(normals), CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels),CEREAL_NVP(correspondence), CEREAL_NVP(clusterCenters),CEREAL_NVP(clusterColors),CEREAL_NVP(fluidParticles));
+			archive( CEREAL_NVP(vertexLocations),CEREAL_NVP(file), CEREAL_NVP(indexes), CEREAL_NVP(particles), CEREAL_NVP(vertexes),  CEREAL_NVP(normals), CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels),CEREAL_NVP(correspondence), CEREAL_NVP(clusterCenters),CEREAL_NVP(clusterColors),CEREAL_NVP(fluidParticles));
 		}
 		template<class Archive> void load(Archive & archive) 
 		{
-			archive(CEREAL_NVP(vertexes), CEREAL_NVP(file), CEREAL_NVP(indexes), CEREAL_NVP(particles), CEREAL_NVP(points), CEREAL_NVP(normals), CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels), CEREAL_NVP(correspondence),CEREAL_NVP(clusterCenters), CEREAL_NVP(clusterColors),CEREAL_NVP(fluidParticles));
+			archive(CEREAL_NVP(vertexLocations), CEREAL_NVP(file), CEREAL_NVP(indexes), CEREAL_NVP(particles), CEREAL_NVP(vertexes), CEREAL_NVP(normals), CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels), CEREAL_NVP(correspondence),CEREAL_NVP(clusterCenters), CEREAL_NVP(clusterColors),CEREAL_NVP(fluidParticles));
 			std::string imageFile = GetFileWithoutExtension(file) + ".png";
 			if (FileExists(imageFile)) {
 				ReadImageFromFile(imageFile, overlay);

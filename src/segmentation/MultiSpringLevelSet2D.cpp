@@ -35,7 +35,7 @@ namespace aly {
 	void MultiSpringLevelSet2D::setSpringls(const Vector2f& particles, const Vector2f& points) {
 		contour.particles = particles;
 		contour.correspondence = particles;
-		contour.points = points;
+		contour.vertexes = points;
 		contour.updateNormals();
 	}
 	void MultiSpringLevelSet2D::updateUnsignedLevelSet(float maxDistance,int label) {
@@ -43,7 +43,7 @@ namespace aly {
 	}
 	void MultiSpringLevelSet2D::refineContour(bool signedIso) {
 		//Optimize location of level set to remove jitter and improve spacing of iso-vertexes.
-		int N = (int)contour.vertexes.size();
+		int N = (int)contour.vertexLocations.size();
 		Vector2f delta(N);
 		float maxDelta;
 		int iter = 0;
@@ -61,9 +61,9 @@ namespace aly {
 						cur = *curIter;
 						prev = *prevIter;
 						next = *nextIter;
-						float2 curPt = contour.vertexes[cur];
-						float2 nextPt = contour.vertexes[next];
-						float2 prevPt = contour.vertexes[prev];
+						float2 curPt = contour.vertexLocations[cur];
+						float2 nextPt = contour.vertexLocations[next];
+						float2 prevPt = contour.vertexLocations[prev];
 						float2 tan1 = (nextPt - curPt);
 						float d1 = length(tan1);
 						float2 tan2 = (curPt - prevPt);
@@ -77,7 +77,7 @@ namespace aly {
 				}
 			}
 			maxDelta = std::sqrt(maxDelta);
-			contour.vertexes += delta;
+			contour.vertexLocations += delta;
 			iter++;
 		} while (iter < 10);
 		//Add line search to find zero crossing.
@@ -128,14 +128,14 @@ namespace aly {
 		return pt;
 	}
 	void MultiSpringLevelSet2D::updateNearestNeighbors(float maxDistance) {
-		matcher.reset(new Matcher2f(contour.points));
+		matcher.reset(new Matcher2f(contour.vertexes));
 		nearestNeighbors.clear();
-		nearestNeighbors.resize(contour.points.size(), std::vector<uint32_t>());
-		int N = (int)contour.points.size();
+		nearestNeighbors.resize(contour.vertexes.size(), std::vector<uint32_t>());
+		int N = (int)contour.vertexes.size();
 #pragma omp parallel for
 		for (int i = 0;i < N;i += 2) {
-			float2 pt0 = contour.points[i];
-			float2 pt1 = contour.points[i + 1];
+			float2 pt0 = contour.vertexes[i];
+			float2 pt1 = contour.vertexes[i + 1];
 			int l1=contour.particleLabels[i / 2];
 			std::vector<std::pair<size_t, float>> result;
 			matcher->closest(pt0, maxDistance, result);
@@ -165,7 +165,7 @@ namespace aly {
 		updateUnsignedLevelSet();
 		{
 			//std::lock_guard<std::mutex> lockMe(contourLock);
-			isoContour.solve(levelSet, labelImage, contour.vertexes, contour.vertexLabels, contour.indexes, 0.0f, (preserveTopology) ? TopologyRule2D::Connect4 : TopologyRule2D::Unconstrained, Winding::Clockwise);
+			isoContour.solve(levelSet, labelImage, contour.vertexLocations, contour.vertexLabels, contour.indexes, 0.0f, (preserveTopology) ? TopologyRule2D::Connect4 : TopologyRule2D::Unconstrained, Winding::Clockwise);
 			refineContour(false);
 			requestUpdateContour = false;
 		}
@@ -182,7 +182,7 @@ namespace aly {
 						uint32_t first = 0, prev = 0;
 						for (uint32_t idx : curve) {
 							if (count != 0) {
-								float2 pt = 0.5f*(contour.vertexes[prev] + contour.vertexes[idx]);
+								float2 pt = 0.5f*(contour.vertexLocations[prev] + contour.vertexLocations[idx]);
 
 								if (unsignedLevelSet(pt.x, pt.y).x > 0.5f*(NEAREST_NEIGHBOR_DISTANCE + EXTENT)) {
 									contour.particles.push_back(pt);
@@ -190,8 +190,8 @@ namespace aly {
 									for (Vector2f& vel : contour.velocities) {
 										vel.push_back(float2(0.0f));
 									}
-									contour.points.push_back(contour.vertexes[prev]);
-									contour.points.push_back(contour.vertexes[idx]);
+									contour.vertexes.push_back(contour.vertexLocations[prev]);
+									contour.vertexes.push_back(contour.vertexLocations[idx]);
 									contour.correspondence.push_back(float2(std::numeric_limits<float>::infinity()));
 									fillCount++;
 								}
@@ -227,8 +227,8 @@ namespace aly {
 				int eid1 = pid * 2;
 				int eid2 = pid * 2 + 1;
 				int l = contour.particleLabels[pid];
-				float2 pt0 = contour.points[eid1];
-				float2 pt1 = contour.points[eid2];
+				float2 pt0 = contour.vertexes[eid1];
+				float2 pt1 = contour.vertexes[eid2];
 				std::vector<std::pair<size_t, float>> result;
 				float2 q1(std::numeric_limits<float>::infinity());
 				float2 q2(std::numeric_limits<float>::infinity());
@@ -310,14 +310,14 @@ namespace aly {
 		Vector2f correspondence;
 		std::array<Vector2f, 4> velocities;
 		particles.data.reserve(contour.particles.size());
-		points.data.reserve(contour.points.size());
+		points.data.reserve(contour.vertexes.size());
 		normals.data.reserve(contour.normals.size());
-		particleLabels.data.reserve(contour.points.size());
+		particleLabels.data.reserve(contour.vertexes.size());
 		for (int i = 0;i<(int)contour.particles.size();i++) {
 			float2 pt = contour.particles[i];
 			int l = contour.particleLabels[i];
-			float d1 = distance(contour.points[2 * i + 1], pt);
-			float d2 = distance(contour.points[2 * i], pt);
+			float d1 = distance(contour.vertexes[2 * i + 1], pt);
+			float d2 = distance(contour.vertexes[2 * i], pt);
 			if (std::abs(getLevelSetValue(pt.x, pt.y,l)) <= 1.25f*EXTENT
 				&&d1>3.0f*PARTICLE_RADIUS
 				&&d2 > 3.0f*PARTICLE_RADIUS
@@ -326,8 +326,8 @@ namespace aly {
 				) {
 				particles.push_back(pt);
 				particleLabels.push_back(contour.particleLabels[i]);
-				points.push_back(contour.points[2 * i]);
-				points.push_back(contour.points[2 * i + 1]);
+				points.push_back(contour.vertexes[2 * i]);
+				points.push_back(contour.vertexes[2 * i + 1]);
 				normals.push_back(contour.normals[i]);
 				for (int nn = 0;nn < 4;nn++) {
 					velocities[nn].push_back(contour.velocities[nn][i]);
@@ -339,7 +339,7 @@ namespace aly {
 			}
 		}
 		if (contractCount > 0) {
-			contour.points = points;
+			contour.vertexes = points;
 			contour.normals = normals;
 			contour.particles = particles;
 			contour.velocities = velocities;
@@ -354,10 +354,10 @@ namespace aly {
 		f2 = float2(0.0f);
 		f = float2(0.0f);
 		float2 p = contour.particles[idx];
-		float2 p1 = contour.points[2 * idx];
-		float2 p2 = contour.points[2 * idx + 1];
+		float2 p1 = contour.vertexes[2 * idx];
+		float2 p2 = contour.vertexes[2 * idx + 1];
 		if (pressureImage.size() > 0 && pressureParam.toFloat() != 0.0f) {
-			float2 v1 = normalize(contour.points[2 * idx + 1] - contour.points[2 * idx]);
+			float2 v1 = normalize(contour.vertexes[2 * idx + 1] - contour.vertexes[2 * idx]);
 			float2 norm = float2(-v1.y, v1.x);
 			float2 pres = pressureParam.toFloat()*norm*pressureImage(p.x, p.y).x;
 			f = pres;
@@ -491,8 +491,8 @@ namespace aly {
 				tries++;
 			}while(lev > 0.0f&&tries<=4);
 			if (tries <= 4) {
-				contour.points[2 * i] += t*f1[i];
-				contour.points[2 * i + 1] += t*f2[i];
+				contour.vertexes[2 * i] += t*f1[i];
+				contour.vertexes[2 * i + 1] += t*f2[i];
 				contour.particles[i] += t*f[i];
 			}
 		}
@@ -501,12 +501,12 @@ namespace aly {
 		return timeStep;
 	}
 	void MultiSpringLevelSet2D::relax(float timeStep) {
-		Vector2f updates(contour.points.size());
+		Vector2f updates(contour.vertexes.size());
 #pragma omp parallel for
 		for (int i = 0;i < (int)contour.particles.size();i++) {
 			relax(i, timeStep, updates[2 * i], updates[2 * i + 1]);
 		}
-		contour.points = updates;
+		contour.vertexes = updates;
 		contour.updateNormals();
 		contour.setDirty(true);
 	}
@@ -522,13 +522,13 @@ namespace aly {
 		float resultantMoment = 0.0f;
 		for (int i = 0; i < 2; i++) {
 			size_t eid = idx * 2 + i;
-			start = contour.points[eid];
+			start = contour.vertexes[eid];
 			tangets[i] = (start - particlePt);
 			tlen = length(tangets[i]);
 			if (tlen > 1E-6f) tangets[i] /= tlen;
 			startVelocity = float2(0, 0);
 			for (uint32_t nbr : nearestNeighbors[eid]) {
-				dir = (contour.points[nbr] - start);
+				dir = (contour.vertexes[nbr] - start);
 				len = length(dir);
 				w = atanh(maxForce*clamp(((len - 2 * PARTICLE_RADIUS) / (EXTENT + 2 * PARTICLE_RADIUS)), -1.0f, 1.0f));
 				startVelocity += (w * dir);
@@ -540,12 +540,12 @@ namespace aly {
 		float cosa = std::cos(resultantMoment);
 		float sina = std::sin(resultantMoment);
 		std::pair<float2, float2> update;
-		start = contour.points[idx * 2] - particlePt;
+		start = contour.vertexes[idx * 2] - particlePt;
 		dotProd = std::max(length(start) + dot(motion[0], tangets[0]) + springForce[0], 0.001f);
 		start = dotProd*tangets[0];
 		f1 = float2(start.x*cosa + start.y*sina, -start.x*sina + start.y*cosa) + particlePt;
 
-		start = contour.points[idx * 2 + 1] - particlePt;
+		start = contour.vertexes[idx * 2 + 1] - particlePt;
 		dotProd = std::max(length(start) + dot(motion[1], tangets[1]) + springForce[1], 0.001f);
 		start = dotProd*tangets[1];
 		f2 = float2(start.x*cosa + start.y*sina, -start.x*sina + start.y*cosa) + particlePt;
@@ -695,7 +695,7 @@ namespace aly {
 	bool MultiSpringLevelSet2D::init() {
 		MultiActiveContour2D::init();
 		refineContour(true);
-		contour.points.clear();
+		contour.vertexes.clear();
 		contour.particles.clear();
 		contour.particleLabels.clear();
 		for (Vector2f& vel : contour.velocities) {
@@ -707,10 +707,10 @@ namespace aly {
 			if (curve.size() > 1) {
 				for (uint32_t idx : curve) {
 					if (count != 0) {
-						contour.particles.push_back(0.5f*(contour.vertexes[prev] + contour.vertexes[idx]));
+						contour.particles.push_back(0.5f*(contour.vertexLocations[prev] + contour.vertexLocations[idx]));
 						contour.particleLabels.push_back(int1(contour.vertexLabels[idx]));
-						contour.points.push_back(contour.vertexes[prev]);
-						contour.points.push_back(contour.vertexes[idx]);
+						contour.vertexes.push_back(contour.vertexLocations[prev]);
+						contour.vertexes.push_back(contour.vertexLocations[idx]);
 						if (idx == first) break;
 					}
 					else {
@@ -769,7 +769,7 @@ namespace aly {
 				updateSignedLevelSet();
 			}
 			if (resampleEnabled) {
-				oldPoints = contour.points;
+				oldPoints = contour.vertexes;
 				oldCorrespondences = contour.correspondence;
 				oldVelocities = contour.velocities;
 				oldLabels = contour.particleLabels;
@@ -788,7 +788,7 @@ namespace aly {
 			}
 			else {
 				//std::lock_guard<std::mutex> lockMe(contourLock);
-				isoContour.solve(levelSet, labelImage, contour.vertexes, contour.vertexLabels, contour.indexes, 0.0f, (preserveTopology) ? TopologyRule2D::Connect4 : TopologyRule2D::Unconstrained, Winding::Clockwise);
+				isoContour.solve(levelSet, labelImage, contour.vertexLocations, contour.vertexLabels, contour.indexes, 0.0f, (preserveTopology) ? TopologyRule2D::Connect4 : TopologyRule2D::Unconstrained, Winding::Clockwise);
 				refineContour(false);
 				contour.updateNormals();
 				contour.setDirty(true);

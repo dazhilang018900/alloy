@@ -32,10 +32,10 @@ namespace aly {
 		f2 = float2(0.0f);
 		f = float2(0.0f);
 		float2 p = contour.particles[idx];
-		float2 p1 = contour.points[2 * idx];
-		float2 p2 = contour.points[2 * idx + 1];
+		float2 p1 = contour.vertexes[2 * idx];
+		float2 p2 = contour.vertexes[2 * idx + 1];
 		if (pressureImage.size() > 0&& pressureParam.toFloat()!=0.0f) {
-			float2 v1 = normalize(contour.points[2 * idx + 1] - contour.points[2 * idx]);
+			float2 v1 = normalize(contour.vertexes[2 * idx + 1] - contour.vertexes[2 * idx]);
 			float2 norm = float2(-v1.y, v1.x);
 			float2 pres = pressureParam.toFloat()*norm*pressureImage(p.x, p.y).x;
 			f = pres;

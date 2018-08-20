@@ -426,10 +426,14 @@ void IsoSurface::solve(const Volume1f& data, Mesh& mesh, const MeshType& type,
 	}
 	solve(data, narrowBandList, mesh, type, regularize, isoLevel);
 }
-void solve(const Volume1f& data, const std::vector<int3>& indexList,
-		aly::Vector3f vertexes,aly::Vector4ui quadIndexes,
-		bool regularize = true, const float& isoLevel = 0){
-
+void IsoSurface::solve(const Volume1f& data,const std::vector<int3>& indexList,
+		Vector3f& vertexLocations,MeshType type,
+		bool regularize, const float& isoLevel){
+	if(type==MeshType::Quad){
+		solveQuads(data,indexList,vertexLocations,regularize,isoLevel);
+	} else if(type==MeshType::Triangle){
+		solveTriangles(data,indexList,vertexLocations,regularize,isoLevel);
+	}
 }
 void IsoSurface::solve(const Volume1f& data, const std::vector<int3>& indexList,
 		Mesh& mesh, const MeshType& type, bool regularizeTest,
@@ -466,6 +470,7 @@ void IsoSurface::solve(const EndlessGridFloat& grid, Mesh& mesh,
 	mesh.updateBoundingBox();
 	backgroundValue = oldBg;
 }
+
 void IsoSurface::solveQuads(const Volume1f& data,const std::vector<int3>& indexList,Vector3f& vertexLocations,bool regularizeTest, const float& isoLevel){
 	Mesh mesh;
 	solveQuad(data.ptr(), data.rows, data.cols, data.slices, indexList,mesh, isoLevel);

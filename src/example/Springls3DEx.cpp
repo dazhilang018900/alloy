@@ -34,17 +34,18 @@ bool Springls3DEx::init(Composite& rootNode) {
 	box3f renderBBox = box3f(float3(-0.5f, -0.5f, -0.5f),
 			float3(1.0f, 1.0f, 1.0f));
 	lastTime = -1;
-	const int D = 128;
+	/*
 	mesh.load(getFullPath("models/armadillo.ply"));
 	mesh.updateVertexNormals(false);
 	Volume1f vol;
 	MeshToLevelSet(mesh,vol,true,2.5f,true,0.75f);
 	IsoSurface isoSurf;
 	isoSurf.solve(vol,mesh,MeshType::Quad);
-	WriteVolumeToFile(MakeDesktopFile("horse.xml"),vol);
-	WriteMeshToFile(MakeDesktopFile("horse_level.ply"),mesh);
+	RebuildDistanceFieldFast(vol,8.0f);
+	WriteVolumeToFile(MakeDesktopFile("armadillo.xml"),vol);
+	//WriteMeshToFile(MakeDesktopFile("horse_level.ply"),mesh);
 
-	/*
+
 	EndlessGrid<float> vol({32,4,4}, 0.0f);
 	MeshToLevelSet(mesh, vol, 2.5f, false, 0.75f);
 	IsoSurface isoSurf;
@@ -52,8 +53,20 @@ bool Springls3DEx::init(Composite& rootNode) {
 	WriteMeshToFile(MakeDesktopFile("horse_level.ply"),mesh);
 	WriteGridToFile(MakeDesktopFile("horse.xml"),vol);
 */
+	int D=128;
 	{
-		PhantomBubbles bubbles(D, D, D, 4.0f);
+		Volume1f sourceVol;
+		/*
+		PhantomCube cube(D, D, D, 4.0f);
+		cube.setCenter(float3(0.0f));
+		cube.setWidth(1.21);
+		sourceVol= cube.solveDistanceField();
+		*/
+		mesh.load(getFullPath("models/armadillo.ply"));
+		mesh.updateVertexNormals(false);
+		MeshToLevelSet(mesh,sourceVol,true,2.5f,true,1.5f);
+		PhantomBubbles bubbles(sourceVol.rows,sourceVol.cols,sourceVol.slices, 4.0f);
+		D=std::max(std::max(sourceVol.rows,sourceVol.cols),sourceVol.slices);
 		bubbles.setNoiseLevel(0.0f);
 		bubbles.setNumberOfBubbles(12);
 		bubbles.setFuzziness(0.5f);
@@ -66,11 +79,7 @@ bool Springls3DEx::init(Composite& rootNode) {
 		Volume3f vectorField;
 		SolveEdgeFilter(targetVol, edgeVol, 1);
 		SolveGradientVectorFlow(edgeVol, vectorField, 0.1f, 16, true);
-		PhantomCube cube(D, D, D, 4.0f);
-		cube.setCenter(float3(0.0f));
-		cube.setWidth(1.21);
-		Volume1f sourceVol = cube.solveDistanceField();
-		//W
+
 		simulation.setInitialDistanceField(sourceVol);
 		simulation.setPressure(targetVol, 0.4f, 0.5f);
 		simulation.setCurvature(0.25f);
@@ -240,8 +249,8 @@ void Springls3DEx::draw(AlloyContext* context) {
 			} else {
 				contour = simulation.getSurface();
 			}
-			mesh.vertexLocations = contour->vertexLocations;
-			mesh.vertexNormals = contour->vertexNormals;
+			mesh.vertexLocations = contour->vertexes;
+			mesh.vertexNormals = contour->normals;
 			mesh.triIndexes = contour->triIndexes;
 			mesh.setDirty(true);
 			lastTime = currentTime;

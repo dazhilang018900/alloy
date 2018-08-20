@@ -95,18 +95,18 @@ bool MultiActiveContour3D::updateSurface() {
 		std::map<int,std::pair<size_t,size_t>> regions;
 		isoSurface.solve(levelSet, labelImage, mesh, MeshType::Triangle, regions, true);
 		mesh.updateVertexNormals(false, 4);
-		contour.vertexColors.resize(mesh.vertexLocations.size());
+		contour.colors.resize(mesh.vertexLocations.size());
 		contour.vertexLabels.resize(mesh.vertexLocations.size());
 		for(auto pr:regions){
 			int l=pr.first;
 			RGBAf c=objectColors[l].toRGBAf();
 			for(size_t n=pr.second.first;n<pr.second.second;n++){
-				contour.vertexColors[n]=c;
+				contour.colors[n]=c;
 				contour.vertexLabels[n]=l;
 			}
 		}
-		contour.vertexLocations = mesh.vertexLocations;
-		contour.vertexNormals = mesh.vertexNormals;
+		contour.vertexes = mesh.vertexLocations;
+		contour.normals = mesh.vertexNormals;
 		contour.triIndexes = mesh.triIndexes;
 		contour.quadIndexes = mesh.quadIndexes;
 		requestUpdateSurface = false;

@@ -28,6 +28,17 @@
 #include "AlloyLocator.h"
 
 namespace aly {
+	struct SpringlEdge {
+		uint32_t id;
+		int8_t edgeId;
+		float distance;
+		SpringlEdge(uint32_t id = 0, int8_t nbr = -1, float _distance = 0) :id(id), edgeId(nbr), distance(_distance) {
+		}
+		friend bool operator<(const SpringlEdge& first,const SpringlEdge& second) {
+			return (first.distance < second.distance);
+		}
+	};
+
 	void Decompose(const float2x2& M, float& theta, float& phi, float& sx, float& sy);
 	float2x2 Compose(const float& theta,const float& phi,const float& sx,const float& sy);
 	float2x2 MakeRigid(const float2x2& M);
@@ -40,20 +51,21 @@ namespace aly {
 		static float REST_RADIUS;
 		static float EXTENT;
 		static float SPRING_CONSTANT;
+		static float RELAX_TIMESTEP;
 		static float SHARPNESS;
+		static int MAX_NEAREST_NEIGHBORS;
 	protected:
 		std::shared_ptr<Matcher3f> matcher;
 		aly::Vector3f oldCorrespondences;
 		std::array<Vector3f, 4> oldVelocities;
 		aly::Vector3f oldPoints;
 		aly::Volume1f unsignedLevelSet;
-		std::vector<std::vector<uint32_t>> nearestNeighbors;
+		std::vector<std::vector<SpringlEdge>> nearestNeighbors;
 		virtual bool stepInternal() override;
 		float3 traceInitial(float3 pt);
 		float3 traceUnsigned(float3 pt);
-		void refineContour(bool signedIso);
 		void updateNearestNeighbors(float maxDistance = NEAREST_NEIGHBOR_DISTANCE);
-		void updateUnsignedLevelSet(float maxDistance= 4.0f*EXTENT);
+		void updateUnsignedLevelSet(float maxDistance= 3.5f);
 		void relax(float timeStep);
 		void relax();
 		int fill();
@@ -65,7 +77,7 @@ namespace aly {
 		float3 getScaledGradientValue(float i, float j,float k, bool signedIso);
 		void distanceFieldMotion(int i, int j, int k, size_t index);
 		virtual void computeForce(size_t idx, float3& p1, float3& p2, float3& p);
-		void relax(size_t idx, float timeStep, float3& f1, float3& f2);
+		void relax(size_t idx, float timeStep, Vector3f& update);
 		bool resampleEnabled;
 
 	public:

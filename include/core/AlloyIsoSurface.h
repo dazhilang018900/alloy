@@ -251,6 +251,9 @@ public:
 	void solveQuads(const Volume1f& data,const std::vector<int3>& indexList,
 			Vector3f& vertexLocations,
 			bool regularize = true, const float& isoLevel = 0);
+	void solve(const Volume1f& data,const std::vector<int3>& indexList,
+			Vector3f& vertexLocations,MeshType type,
+			bool regularize = true, const float& isoLevel = 0);
 	void solveTriangles(const Volume1f& data,const std::vector<int3>& indexList,
 			Vector3f& vertexLocations,
 			bool regularize = true, const float& isoLevel = 0);

@@ -218,9 +218,9 @@ void MultiActiveContour3DEx::draw(AlloyContext* context) {
 			} else {
 				contour = simulation.getSurface();
 			}
-			mesh.vertexLocations = contour->vertexLocations;
-			mesh.vertexColors=contour->vertexColors;
-			mesh.vertexNormals = contour->vertexNormals;
+			mesh.vertexLocations = contour->vertexes;
+			mesh.vertexColors=contour->colors;
+			mesh.vertexNormals = contour->normals;
 			mesh.triIndexes = contour->triIndexes;
 			mesh.quadIndexes=contour->quadIndexes;
 			mesh.setDirty(true);

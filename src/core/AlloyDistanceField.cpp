@@ -1012,6 +1012,7 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 }
 float4x4 MeshToLevelSet(const aly::Mesh& mesh, Volume1f& vol, bool rescale,
 		float narrowBand, bool flipSign, float voxelScale) {
+
 	const int nbr6X[6] = { 1, -1, 0, 0, 0, 0 };
 	const int nbr6Y[6] = { 0, 0, 1, -1, 0, 0 };
 	const int nbr6Z[6] = { 0, 0, 0, 0, 1, -1 };
@@ -1171,7 +1172,6 @@ float4x4 MeshToLevelSet(const aly::Mesh& mesh, Volume1f& vol, bool rescale,
 			}
 		}
 	}
-	std::cout<<"Start First Pass "<<posQ.size()<<std::endl;
 	while (!posQ.empty()) {
 		int3 pos = posQ.front();
 		posQ.pop();
@@ -1201,7 +1201,6 @@ void RebuildDistanceFieldFast(aly::Volume1f& levelset, float maxDistance) {
 	int dim;
 	int3 pos;
 	float current, oldVal, extreme;
-	levelset.set(maxDistance + 0.5f);
 	Volume1f storage(levelset.dimensions());
 	storage.set(maxDistance + 0.5f);
 	Volume1f* in = &levelset;

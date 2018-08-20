@@ -288,7 +288,7 @@ bool FluidSimulationEx::init(Composite& rootNode) {
 										nvgBeginPath(nvg);
 										bool firstTime = true;
 										for (uint32_t idx : curve) {
-											float2 pt = contour->vertexes[idx]*gridScale;
+											float2 pt = contour->vertexLocations[idx]*gridScale;
 											pt = pt*bounds.dimensions + bounds.position;
 											if (firstTime) {
 												nvgMoveTo(nvg, pt.x, pt.y);

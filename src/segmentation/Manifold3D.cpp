@@ -68,9 +68,9 @@ void Manifold3D::operator=(const Manifold3D &c) {
 	particles = c.particles;
 	correspondence = c.correspondence;
 	vertexLabels = c.vertexLabels;
-	vertexColors=c.vertexColors;
-	vertexLocations=c.vertexLocations;
-	vertexNormals=c.vertexNormals;
+	colors=c.colors;
+	vertexes=c.vertexes;
+	normals=c.normals;
 	triIndexes=c.triIndexes;
 	quadIndexes=c.quadIndexes;
 	file = c.file;
@@ -84,9 +84,9 @@ Manifold3D::Manifold3D(const Manifold3D& c) :
 	particles = c.particles;
 	correspondence = c.correspondence;
 	vertexLabels = c.vertexLabels;
-	vertexColors=c.vertexColors;
-	vertexLocations=c.vertexLocations;
-	vertexNormals=c.vertexNormals;
+	colors=c.colors;
+	vertexes=c.vertexes;
+	normals=c.normals;
 	triIndexes=c.triIndexes;
 	quadIndexes=c.quadIndexes;
 	file = c.file;
@@ -97,35 +97,35 @@ void Manifold3D::updateNormals() {
 	if (triIndexes.size() == 0 && quadIndexes.size() == 0)
 		return;
 	float3 pt;
-	vertexNormals.clear();
-	vertexNormals.resize(vertexLocations.size(), float3(0.0f));
+	normals.clear();
+	normals.resize(vertexes.size(), float3(0.0f));
 	for (uint32_t i = 0; i < sz; i++) {
 		uint3 verts = triIndexes[i];
-		float3 v1 = vertexLocations[verts.x];
-		float3 v2 = vertexLocations[verts.y];
-		float3 v3 = vertexLocations[verts.z];
+		float3 v1 = vertexes[verts.x];
+		float3 v2 = vertexes[verts.y];
+		float3 v3 = vertexes[verts.z];
 		float3 norm = cross((v3 - v1), (v2 - v1));
-		vertexNormals[verts.x] += norm;
-		vertexNormals[verts.y] += norm;
-		vertexNormals[verts.z] += norm;
+		normals[verts.x] += norm;
+		normals[verts.y] += norm;
+		normals[verts.z] += norm;
 	}
 	sz = (uint32_t) quadIndexes.size();
 	for (uint32_t i = 0; i < sz; i++) {
 		uint4 verts = quadIndexes[i];
-		float3 v1 = vertexLocations[verts.x];
-		float3 v2 = vertexLocations[verts.y];
-		float3 v3 = vertexLocations[verts.z];
-		float3 v4 = vertexLocations[verts.w];
-		vertexNormals[verts.x] += cross((v4 - v1), (v2 - v1));
-		vertexNormals[verts.y] += cross((v1 - v2), (v3 - v2));
-		vertexNormals[verts.z] += cross((v2 - v3), (v4 - v3));
-		vertexNormals[verts.w] += cross((v3 - v4), (v1 - v4));
+		float3 v1 = vertexes[verts.x];
+		float3 v2 = vertexes[verts.y];
+		float3 v3 = vertexes[verts.z];
+		float3 v4 = vertexes[verts.w];
+		normals[verts.x] += cross((v4 - v1), (v2 - v1));
+		normals[verts.y] += cross((v1 - v2), (v3 - v2));
+		normals[verts.z] += cross((v2 - v3), (v4 - v3));
+		normals[verts.w] += cross((v3 - v4), (v1 - v4));
 	}
 }
 Manifold3D::Manifold3D(bool onScreen,
 		const std::shared_ptr<AlloyContext>& context) :
 		onScreen(onScreen), context(context), vao(0), vertexBuffer(0), particleBuffer(
-				0), labelBuffer(0), dirty(false), vertexCount(0) {
+				0), labelBuffer(0), dirty(false), vertexCount(0),meshType(MeshType::Triangle) {
 }
 Manifold3D::~Manifold3D() {
 	if (vao != 0) {
@@ -139,6 +139,32 @@ Manifold3D::~Manifold3D() {
 		glDeleteVertexArrays(1, &vao);
 		context->end();
 	}
+}
+void Manifold3D::stashSpringls(const std::string& file){
+	Mesh mesh;
+	size_t N=particles.size();
+	if(meshType==MeshType::Quad){
+		mesh.quadIndexes.resize(N);
+		for(size_t n=0;n<N;n++){
+			mesh.quadIndexes[n]=uint4(n*4,n*4+1,n*4+2,n*4+3);
+		}
+	} else {
+		mesh.triIndexes.resize(N);
+		for(size_t n=0;n<N;n++){
+			mesh.triIndexes[n]=uint3(n*3,n*3+1,n*3+2);
+		}
+	}
+	mesh.vertexLocations=vertexes;
+	std::cout<<"Springls:\n"<<mesh<<std::endl;
+	WriteMeshToFile(file,mesh);
+}
+void Manifold3D::stashIsoSurface(const std::string& file){
+	aly::Mesh mesh;
+	mesh.vertexLocations=vertexLocations;
+	mesh.triIndexes=triIndexes;
+	mesh.quadIndexes=quadIndexes;
+	std::cout<<"Iso-Surface:\n"<<mesh<<std::endl;
+	WriteMeshToFile(file,mesh);
 }
 void Manifold3D::draw() {
 	if (dirty) {

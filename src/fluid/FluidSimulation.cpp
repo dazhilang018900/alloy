@@ -890,9 +890,9 @@ bool FluidSimulation::updateContour() {
 			overlay.set(ColorMapToRGBA(0.5f,ColorMap::FirebrickToBlue));
 		}
 		std::lock_guard<std::mutex> lockMe(contourLock);
-		isoContour.solve(signedLevelSet, contour.vertexes, contour.indexes,
+		isoContour.solve(signedLevelSet, contour.vertexLocations, contour.indexes,
 				0.0f, TopologyRule2D::Unconstrained, Winding::Clockwise);
-		for (float2& pt : contour.vertexes.data) {
+		for (float2& pt : contour.vertexLocations.data) {
 			pt *= fluidVoxelSize * 0.5f;
 		}
 		requestUpdateContour = false;

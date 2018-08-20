@@ -162,7 +162,6 @@ bool SANITY_CHECK() {
 	//SANITY_CHECK_STRINGS();
 	return ret;
 }
-
 int main(int argc, char *argv[]) {
 	//change me when adding new example!
 	const int N=64;

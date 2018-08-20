@@ -236,8 +236,8 @@ bool MagicPixelEx::init(Composite& rootNode) {
 				bool firstTime = true;
 				if(curve.size()>1){
 					for (uint32_t idx : curve) {
-						if(idx>=contour->vertexes.size())continue;
-						float2 pt = contour->vertexes[idx] + float2(0.5f);
+						if(idx>=contour->vertexLocations.size())continue;
+						float2 pt = contour->vertexLocations[idx] + float2(0.5f);
 						pt.x = pt.x / (float)img.width;
 						pt.y = pt.y / (float)img.height;
 						pt = pt*bounds.dimensions + bounds.position;

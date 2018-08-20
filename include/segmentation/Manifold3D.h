@@ -43,16 +43,19 @@ namespace aly {
 		bool dirty;
 		int vertexCount;
 	public:
-		Vector3f vertexLocations;
-		Vector3f vertexNormals;
-		Vector4f vertexColors;
+		Vector3f vertexes;
+		Vector3f normals;
+		Vector4f colors;
 		Vector3f particles;
 		Vector4ui quadIndexes;
 		Vector3ui triIndexes;
+		Vector3f vertexLocations;
+		Vector3f vertexNormals;
 		std::vector<int> particleLabels;
 		std::vector<int> vertexLabels;
 		Vector3f correspondence;
 		std::array<Vector3f,4> velocities;
+		aly::MeshType meshType;
 		void setDirty(bool b) {
 			dirty = b;
 		}
@@ -61,6 +64,8 @@ namespace aly {
 		}
 		void update();
 		void draw();
+		void stashSpringls(const std::string& file);
+		void stashIsoSurface(const std::string& mesh);
 		std::string getFile() const {
 			return file;
 		}
@@ -70,11 +75,11 @@ namespace aly {
 			this->file = file;
 		}
 		template<class Archive> void save(Archive & archive) const {
-			archive(CEREAL_NVP(file),CEREAL_NVP(vertexLocations),CEREAL_NVP(vertexNormals),CEREAL_NVP(vertexColors),CEREAL_NVP(particles),CEREAL_NVP(triIndexes),CEREAL_NVP(quadIndexes),CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels),CEREAL_NVP(correspondence),CEREAL_NVP(velocities));
+			archive(CEREAL_NVP(file),CEREAL_NVP(vertexes),CEREAL_NVP(normals),CEREAL_NVP(colors),CEREAL_NVP(particles),CEREAL_NVP(vertexLocations),CEREAL_NVP(vertexNormals),CEREAL_NVP(triIndexes),CEREAL_NVP(quadIndexes),CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels),CEREAL_NVP(correspondence),CEREAL_NVP(velocities));
 		}
 		template<class Archive> void load(Archive & archive) 
 		{
-			archive(CEREAL_NVP(file),CEREAL_NVP(vertexLocations),CEREAL_NVP(vertexNormals),CEREAL_NVP(vertexColors), CEREAL_NVP(particles),CEREAL_NVP(triIndexes),CEREAL_NVP(quadIndexes),CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels), CEREAL_NVP(correspondence),CEREAL_NVP(velocities));
+			archive(CEREAL_NVP(file),CEREAL_NVP(vertexes),CEREAL_NVP(normals),CEREAL_NVP(colors), CEREAL_NVP(particles),CEREAL_NVP(vertexLocations),CEREAL_NVP(vertexNormals),CEREAL_NVP(triIndexes),CEREAL_NVP(quadIndexes),CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels), CEREAL_NVP(correspondence),CEREAL_NVP(velocities));
 		}
 		void updateNormals();
 		void operator=(const Manifold3D &c);
