@@ -78,6 +78,7 @@ struct CameraParameters {
 	float3 transformScreenDepthToWorld(const float3& pt) const;
 	float3 transformNormalizedImageDepthToWorld(const float3& pt, bool flip = true) const;
 	float3 transformImageDepthToWorld(const float3& pt, int w, int h, bool flip = true) const;
+	aly::float3 getOrigin() const;
 	CameraProjector getProjector() const;
 	virtual void aim(const aly::box2px& bounds = box2px(pixel2(0.0f, 0.0f), pixel2(1.0f, 1.0f)));
 	virtual ~CameraParameters() {

@@ -192,6 +192,10 @@ float3 CameraParameters::transformScreenDepthToWorld(const float3& pt) const {
 	ptp = ViewModelInverse * ptp;
 	return ptp.xyz() / ptp.w;
 }
+float3 CameraParameters::getOrigin() const {
+	float4 w=ViewModelInverse.w;
+	return w.xyz() / w.w;
+}
 float3 CameraParameters::transformNormalizedImageDepthToWorld(const float3& pt,
 		bool flip) const {
 	float4 ptp;

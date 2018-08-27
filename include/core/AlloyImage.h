@@ -137,16 +137,16 @@ public:
 	void set(const vec<T, C>& val) {
 		data.assign(data.size(), val);
 	}
-	inline bool contains(const float2& pt){
+	inline bool contains(const float2& pt) const {
 		return (pt.x>=0&&pt.y>=0&&pt.x<width&&pt.y<height);
 	}
-	inline bool contains(const int2& pt){
+	inline bool contains(const int2& pt) const {
 		return (pt.x>=0&&pt.y>=0&&pt.x<width&&pt.y<height);
 	}
-	inline bool contains(int x,int y){
+	inline bool contains(int x,int y) const {
 		return (x>=0&&y>=0&&x<width&&y<height);
 	}
-	inline bool contains(float x,float y){
+	inline bool contains(float x,float y) const {
 		return (x>=0&&y>=0&&x<width&&y<height);
 	}
 	void set(T* val) {
