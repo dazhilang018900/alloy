@@ -52,14 +52,14 @@ struct InputEvent {
 		pixel2 cursor = pixel2(-1, -1);
 		pixel2 scroll = pixel2(0, 0);
 		uint32_t codepoint = 0;
-		int action = 0;
+		int action = -1;
 		int mods = 0;
 		int scancode = 0;
 		int key = 0;
 		int clicks = 0;
 		int button = -1;
 		inline bool isDown() const {
-			return (action != GLFW_RELEASE);
+			return (action > GLFW_RELEASE);
 		}
 		inline bool isUp() const {
 			return (action == GLFW_RELEASE);
