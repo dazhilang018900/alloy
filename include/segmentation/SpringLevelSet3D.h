@@ -76,7 +76,8 @@ namespace aly {
 		float3 getScaledGradientValue(int i, int j, int k);
 		float3 getScaledGradientValue(float i, float j,float k, bool signedIso);
 		void distanceFieldMotion(int i, int j, int k, size_t index);
-		virtual void computeForce(size_t idx, float3& p1, float3& p2, float3& p);
+		virtual void computeForce(size_t idx, float3& p1, float3& p2, float3& p3, float3& p);
+		virtual void computeForce(size_t idx, float3& p1, float3& p2, float3& p3, float3& p4, float3& p);
 		void relax(size_t idx, float timeStep, Vector3f& update);
 		bool resampleEnabled;
 
