@@ -34,7 +34,7 @@ bool Springls3DEx::init(Composite& rootNode) {
 	box3f renderBBox = box3f(float3(-0.5f, -0.5f, -0.5f),
 			float3(1.0f, 1.0f, 1.0f));
 	lastTime = -1;
-	/*
+/*
 	mesh.load(getFullPath("models/armadillo.ply"));
 	mesh.updateVertexNormals(false);
 	Volume1f vol;
@@ -44,16 +44,18 @@ bool Springls3DEx::init(Composite& rootNode) {
 	RebuildDistanceFieldFast(vol,8.0f);
 	WriteVolumeToFile(MakeDesktopFile("armadillo.xml"),vol);
 	//WriteMeshToFile(MakeDesktopFile("horse_level.ply"),mesh);
-
-
+*/
+/*
 	EndlessGrid<float> vol({32,4,4}, 0.0f);
 	MeshToLevelSet(mesh, vol, 2.5f, false, 0.75f);
 	IsoSurface isoSurf;
 	isoSurf.solve(vol,mesh,MeshType::Quad);
 	WriteMeshToFile(MakeDesktopFile("horse_level.ply"),mesh);
 	WriteGridToFile(MakeDesktopFile("horse.xml"),vol);
-*/
 	int D=128;
+	*/
+
+	int D;
 	{
 		Volume1f sourceVol;
 		/*
@@ -64,7 +66,9 @@ bool Springls3DEx::init(Composite& rootNode) {
 		*/
 		mesh.load(getFullPath("models/armadillo.ply"));
 		mesh.updateVertexNormals(false);
+		std::cout<<"Build Level Set"<<std::endl;
 		MeshToLevelSet(mesh,sourceVol,true,2.5f,true,1.5f);
+		std::cout<<"Done "<<sourceVol.dimensions()<<std::endl;
 		PhantomBubbles bubbles(sourceVol.rows,sourceVol.cols,sourceVol.slices, 4.0f);
 		D=std::max(std::max(sourceVol.rows,sourceVol.cols),sourceVol.slices);
 		bubbles.setNoiseLevel(0.0f);
@@ -74,16 +78,21 @@ bool Springls3DEx::init(Composite& rootNode) {
 		bubbles.setMaxRadius(0.3f);
 		bubbles.setInvertContrast(true);
 		Volume1f targetVol = bubbles.solveLevelSet();
-		WriteVolumeToFile(MakeDesktopFile("bubbles1.xml"), targetVol);
 		Volume1f edgeVol;
 		Volume3f vectorField;
-		SolveEdgeFilter(targetVol, edgeVol, 1);
-		SolveGradientVectorFlow(edgeVol, vectorField, 0.1f, 16, true);
+		//std::cout<<"Solve Edges"<<std::endl;
+		//SolveEdgeFilter(targetVol, edgeVol, 1);
+		//std::cout<<"Solve GVF"<<std::endl;
+		//SolveGradientVectorFlow(edgeVol, vectorField, 0.1f, 16, true);
+		//std::cout<<"Done"<<std::endl;
+		//WriteVolumeToFile(MakeDesktopFile("gvf.xml"),vectorField);
+		//WriteVolumeToFile(MakeDesktopFile("target.xml"),targetVol);
+		//WriteVolumeToFile(MakeDesktopFile("source.xml"),sourceVol);
 
 		simulation.setInitialDistanceField(sourceVol);
 		simulation.setPressure(targetVol, 0.4f, 0.5f);
 		simulation.setCurvature(0.25f);
-		simulation.setVectorField(vectorField, 0.2f);
+		//simulation.setVectorField(vectorField, 0.2f);
 		simulation.init();
 	}
 	simulation.onUpdate =

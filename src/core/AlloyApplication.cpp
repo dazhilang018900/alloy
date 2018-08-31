@@ -97,7 +97,7 @@ void Application::draw() {
 	glClearColor(0.0, 0.0, 0.0, 10);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
-
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glViewport(0, 0, context->getFrameBufferWidth(),
 			context->getFrameBufferHeight());
 	draw(context.get());

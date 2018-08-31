@@ -741,7 +741,6 @@ bool SpringLevelSet3D::init() {
 		int N = (int) contour.quadIndexes.size();
 		contour.particles.resize(N);
 		contour.vertexes.resize(N * 4);
-		std::cout << "Springls " << N << std::endl;
 		for (int n = 0; n < (int) contour.particles.size(); n++) {
 			uint4 quad = contour.quadIndexes[n];
 			float3 v1 = contour.vertexLocations[quad.x];
@@ -760,7 +759,7 @@ bool SpringLevelSet3D::init() {
 		vel.resize(contour.particles.size());
 	}
 	contour.correspondence = contour.particles;
-	std::cout << "update normals" << std::endl;
+	std::cout<<"Update Normals "<<std::endl;
 	contour.updateNormals();
 	contour.setDirty(true);
 	if (cache.get() != nullptr) {
@@ -771,15 +770,16 @@ bool SpringLevelSet3D::init() {
 	}
 	std::cout << "Relax" << std::endl;
 	relax();
-	contour.stashSpringls(MakeDesktopFile("init_springls.ply"));
-	contour.stashIsoSurface(MakeDesktopFile("isosurf.ply"));
+	//contour.stashSpringls(MakeDesktopFile("init_springls.ply"));
+	//contour.stashIsoSurface(MakeDesktopFile("isosurf.ply"));
 	std::cout << "update nearest neighbors" << std::endl;
 	updateNearestNeighbors();
 	std::cout << "Update unsigned" << std::endl;
 	updateUnsignedLevelSet();
-	WriteVolumeToFile(MakeDesktopFile("unsigned.xml"), unsignedLevelSet);
+	//WriteVolumeToFile(MakeDesktopFile("unsigned.xml"), unsignedLevelSet);
 	std::cout << "set cache" << std::endl;
 	cache->set((int) simulationIteration, contour);
+	std::cout<<"Done Init "<<std::endl;
 	return true;
 }
 void SpringLevelSet3D::relax() {
@@ -797,6 +797,7 @@ bool SpringLevelSet3D::stepInternal() {
 	double remaining = timeStep;
 	double t = 0.0;
 	const int evolveIterations = 8;
+	std::cout<<"Step Internal"<<std::endl;
 	do {
 		float timeStep = advect(std::min(0.33333f, (float) remaining));
 		t += (double) timeStep;

@@ -74,7 +74,7 @@ bool ActiveManifold3D::updateSurface() {
 	if (requestUpdateSurface) {
 		std::lock_guard<std::mutex> lockMe(contourLock);
 		Mesh mesh;
-		isoSurface.solve(levelSet, activeList, mesh, MeshType::Triangle, true, 0.0f);
+		isoSurface.solve(levelSet, activeList, mesh, contour.meshType, true, 0.0f);
 		mesh.updateVertexNormals(false, 4);
 		contour.vertexLocations = mesh.vertexLocations;
 		contour.vertexNormals = mesh.vertexNormals;

@@ -93,33 +93,36 @@ Manifold3D::Manifold3D(const Manifold3D& c) :
 	particleLabels = c.particleLabels;
 }
 void Manifold3D::updateNormals() {
-	uint32_t sz = (uint32_t) triIndexes.size();
-	if (triIndexes.size() == 0 && quadIndexes.size() == 0)
-		return;
-	float3 pt;
-	normals.clear();
-	normals.resize(vertexes.size(), float3(0.0f));
-	for (uint32_t i = 0; i < sz; i++) {
-		uint3 verts = triIndexes[i];
-		float3 v1 = vertexes[verts.x];
-		float3 v2 = vertexes[verts.y];
-		float3 v3 = vertexes[verts.z];
-		float3 norm = cross((v3 - v1), (v2 - v1));
-		normals[verts.x] += norm;
-		normals[verts.y] += norm;
-		normals[verts.z] += norm;
-	}
-	sz = (uint32_t) quadIndexes.size();
-	for (uint32_t i = 0; i < sz; i++) {
-		uint4 verts = quadIndexes[i];
-		float3 v1 = vertexes[verts.x];
-		float3 v2 = vertexes[verts.y];
-		float3 v3 = vertexes[verts.z];
-		float3 v4 = vertexes[verts.w];
-		normals[verts.x] += cross((v4 - v1), (v2 - v1));
-		normals[verts.y] += cross((v1 - v2), (v3 - v2));
-		normals[verts.z] += cross((v2 - v3), (v4 - v3));
-		normals[verts.w] += cross((v3 - v4), (v1 - v4));
+	int N=(int)particles.size();
+	normals.resize(particles.size());
+	if(meshType==MeshType::Triangle){
+#pragma omp parallel for
+		for (int i = 0; i < N; i+=3) {
+			float3 norm;
+			float3 v1 = vertexes[i];
+			float3 v2 = vertexes[i+1];
+			float3 v3 = vertexes[i+2];
+			float3 p=particles[i/3];
+			norm=   cross((v1 - p),(v2 - p));
+			norm += cross((v2 - p),(v3 - p));
+			norm += cross((v3 - p),(v1 - p));
+			normals[i/3] = normalize(norm);
+		}
+	} else if(meshType==MeshType::Quad){
+#pragma omp parallel for
+		for (int i = 0; i < N; i+=4) {
+			float3 norm;
+			float3 v1 = vertexes[i];
+			float3 v2 = vertexes[i+1];
+			float3 v3 = vertexes[i+2];
+			float3 v4 = vertexes[i+3];
+			float3 p=particles[i/4];
+			norm=   cross((v1 - p),(v2 - p));
+			norm += cross((v2 - p),(v3 - p));
+			norm += cross((v3 - p),(v4 - p));
+			norm += cross((v4 - p),(v1 - p));
+			normals[i/4] = normalize(norm);
+		}
 	}
 }
 Manifold3D::Manifold3D(bool onScreen,
@@ -155,7 +158,7 @@ void Manifold3D::stashSpringls(const std::string& file){
 		}
 	}
 	mesh.vertexLocations=vertexes;
-	std::cout<<"Springls:\n"<<mesh<<std::endl;
+	//std::cout<<"Springls:\n"<<mesh<<std::endl;
 	WriteMeshToFile(file,mesh);
 }
 void Manifold3D::stashIsoSurface(const std::string& file){
@@ -163,7 +166,7 @@ void Manifold3D::stashIsoSurface(const std::string& file){
 	mesh.vertexLocations=vertexLocations;
 	mesh.triIndexes=triIndexes;
 	mesh.quadIndexes=quadIndexes;
-	std::cout<<"Iso-Surface:\n"<<mesh<<std::endl;
+	//std::cout<<"Iso-Surface:\n"<<mesh<<std::endl;
 	WriteMeshToFile(file,mesh);
 }
 void Manifold3D::draw() {
