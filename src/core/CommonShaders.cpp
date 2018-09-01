@@ -2196,8 +2196,7 @@ void DepthAndNormalShader::draw(
 	frameBuffer.begin(float4(0.0f,0.0f,0.0f,1.0f));
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
-	begin().set("MIN_DEPTH", camera.getNearPlane()).set("IS_FLAT",
-			flatShading ? 1 : 0).set("MAX_DEPTH", camera.getFarPlane()).set(
+	begin().set("MIN_DEPTH", camera.getNearPlane()).set("IS_FLAT",(flatShading||(*meshes.begin())->vertexNormals.size()==0) ? 1 : 0).set("MAX_DEPTH", camera.getFarPlane()).set(
 			camera, frameBuffer.getViewport()).set("PoseMat",
 			float4x4::identity());
 	set("IS_QUAD", 1).draw(meshes, GLMesh::PrimitiveType::QUADS);
@@ -2213,7 +2212,7 @@ void DepthAndNormalShader::draw(Mesh& mesh,
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
 	begin().set("MIN_DEPTH", camera.getNearPlane()).set("IS_FLAT",
-			flatShading ? 1 : 0).set("MAX_DEPTH", camera.getFarPlane()).set(
+			(flatShading||mesh.vertexNormals.size()==0) ? 1 : 0).set("MAX_DEPTH", camera.getFarPlane()).set(
 			camera, bbox).set("PoseMat",
 			float4x4::identity());
 	set("IS_QUAD", 1).draw(mesh, GLMesh::PrimitiveType::QUADS);
@@ -2228,10 +2227,10 @@ void DepthAndNormalShader::draw(
 	frameBuffer.begin(float4(0.0f,0.0f,0.0f,1.0f));
 	glDisable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
-	begin().set("MIN_DEPTH", camera.getNearPlane()).set("IS_FLAT",
-			flatShading ? 1 : 0).set("MAX_DEPTH", camera.getFarPlane()).set(
+	begin().set("MIN_DEPTH", camera.getNearPlane()).set("MAX_DEPTH", camera.getFarPlane()).set(
 			camera, frameBuffer.getViewport());
 	for (std::pair<Mesh*, float4x4> pr : meshes) {
+		set("IS_FLAT",(flatShading||pr.first->vertexNormals.size()==0) ? 1 : 0);
 		if (pr.first->quadIndexes.size() > 0) {
 			set("IS_QUAD", 1).set("PoseMat", pr.second).draw( { pr.first },
 					GLMesh::PrimitiveType::QUADS);

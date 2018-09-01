@@ -70,8 +70,7 @@ void GLMesh::draw(const PrimitiveType& type, bool forceVertexColor) const {
 		glDrawArrays(GL_POINTS, 0, vertexCount);
 	}
 	CHECK_GL_ERROR();
-	if ((type == GLMesh::PrimitiveType::ALL
-			|| type == GLMesh::PrimitiveType::QUADS) && quadIndexCount > 0) {
+	if ((type == GLMesh::PrimitiveType::ALL|| type == GLMesh::PrimitiveType::QUADS) && quadIndexCount > 0) {
 		for (int n = 0; n < 4; n++) {
 			if (quadVertexBuffer[n] > 0) {
 				glEnableVertexAttribArray(3 + n);
@@ -406,7 +405,30 @@ void GLMesh::update() {
 		}
 		CHECK_GL_ERROR();
 		triIndexCount = (GLuint) mesh.triIndexes.size();
-
+	} else if(mesh.type==GLMesh::PrimitiveType::TRIANGLES&&mesh.vertexLocations.size()%3==0){
+		size_t offset = 0;
+		std::vector<float3> tris[3];
+		for (int n = 0; n < 3; n++) {
+			tris[n].resize(mesh.vertexLocations.size()/3);
+			if (glIsBuffer(triVertexBuffer[n]) == GL_TRUE)
+				glDeleteBuffers(1, &triVertexBuffer[n]);
+			glGenBuffers(1, &triVertexBuffer[n]);
+		}
+		for (size_t n = 0; n < mesh.vertexLocations.size(); n++) {
+			tris[n%3][n/3] = mesh.vertexLocations[n];
+		}
+		for (int n = 0; n < 3; n++) {
+			if (glIsBuffer(triVertexBuffer[n]) == GL_TRUE)
+				glDeleteBuffers(1, &triVertexBuffer[n]);
+			glGenBuffers(1, &triVertexBuffer[n]);
+			glBindBuffer(GL_ARRAY_BUFFER, triVertexBuffer[n]);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * tris[n].size(),
+					tris[n].data(), GL_STATIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		}
+		CHECK_GL_ERROR();
+		triIndexCount = (GLuint) (mesh.vertexLocations.size()/3);
+		std::cout<<"Updated Triangle Mesh"<<triIndexCount<<std::endl;
 	}
 	if (mesh.quadIndexes.size() > 0) {
 		size_t offset = 0;
@@ -435,6 +457,28 @@ void GLMesh::update() {
 		CHECK_GL_ERROR();
 
 		quadIndexCount = (GLuint) mesh.quadIndexes.size();
+	} else if(mesh.type==GLMesh::PrimitiveType::QUADS&&mesh.vertexLocations.size()%4==0){
+		size_t offset = 0;
+		std::vector<float3> quads[4];
+		for (int n = 0; n < 4; n++) {
+			quads[n].resize(mesh.vertexLocations.size()/4);
+			if (glIsBuffer(quadVertexBuffer[n]) == GL_TRUE)
+				glDeleteBuffers(1, &quadVertexBuffer[n]);
+			glGenBuffers(1, &quadVertexBuffer[n]);
+		}
+		for (size_t n = 0; n < mesh.vertexLocations.size(); n++) {
+			quads[n%4][n/4] = mesh.vertexLocations[n];
+		}
+		for (int n = 0; n < 4; n++) {
+			if (glIsBuffer(quadVertexBuffer[n]) == GL_TRUE)
+				glDeleteBuffers(1, &quadVertexBuffer[n]);
+			glGenBuffers(1, &quadVertexBuffer[n]);
+			glBindBuffer(GL_ARRAY_BUFFER, quadVertexBuffer[n]);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * quads[n].size(),quads[n].data(), GL_STATIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		}
+		CHECK_GL_ERROR();
+		quadIndexCount = (GLuint) (mesh.vertexLocations.size()/4);
 	}
 	if (mesh.vertexNormals.size() > 0) {
 		if (mesh.quadIndexes.size() > 0) {

@@ -85,7 +85,6 @@
 #include "AlloyImageEncoder.h"
 #include "AlloyOptimization.h"
 #include "AlloyGaussianMixture.h"
-#include <cstring>
 /*
  For simple execution, main method should look like:
  int main(int argc, char *argv[]) {

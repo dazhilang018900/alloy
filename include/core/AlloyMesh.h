@@ -88,6 +88,7 @@ class Mesh {
 private:
 	bool dirtyOnScreen = false;
 	bool dirtyOffScreen = false;
+	GLMesh::PrimitiveType type=GLMesh::PrimitiveType::ALL;
 protected:
 	box3f boundingBox;
 public:
@@ -137,6 +138,12 @@ public:
 	void setContext(const std::shared_ptr<AlloyContext>& context);
 	Mesh(const std::shared_ptr<AlloyContext>& context);
 	Mesh();
+	inline void setType(GLMesh::PrimitiveType type){
+		this->type=type;
+	}
+	inline GLMesh::PrimitiveType getType(){
+		return type;
+	}
 	inline box3f getBoundingBox() const {
 		return boundingBox;
 	}

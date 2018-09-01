@@ -31,7 +31,9 @@
 class Springls3DEx: public aly::Application {
 protected:
 	int lastTime;
-	aly::Mesh mesh;
+	aly::Mesh isosurface;
+	aly::Mesh springls;
+	aly::Mesh particles;
 	aly::RegionPtr renderRegion;
 	aly::GLFrameBuffer depthFrameBuffer;
 	aly::DepthAndNormalShader depthAndNormalShader;
@@ -42,6 +44,11 @@ protected:
 	aly::IconButtonPtr playButton,stopButton;
     std::shared_ptr<aly::TimelineSlider> timelineSlider;
     bool running;
+    bool showParticles;
+    bool showSpringls;
+    bool showIsoSurface;
+    bool showTracking;
+    aly::Color color;
 public:
 	Springls3DEx();
 	bool init(aly::Composite& rootNode);

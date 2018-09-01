@@ -209,7 +209,6 @@ void ActiveContour3DEx::draw(AlloyContext* context) {
 		}
 	}
 	if (camera.isDirty()) {
-
 		int currentTime = timelineSlider->getTimeValue().toInteger();
 		if (currentTime != lastTime) {
 			std::shared_ptr<CacheElement3D> elem = simulation.getCache()->get(
@@ -220,14 +219,14 @@ void ActiveContour3DEx::draw(AlloyContext* context) {
 			} else {
 				contour = simulation.getSurface();
 			}
-			mesh.vertexLocations = contour->vertexLocations;
-			mesh.vertexNormals = contour->vertexNormals;
-			mesh.triIndexes = contour->triIndexes;
-			mesh.quadIndexes=contour->quadIndexes;
-			mesh.setDirty(true);
+			isosurface.vertexLocations = contour->vertexLocations;
+			isosurface.vertexNormals = contour->vertexNormals;
+			isosurface.triIndexes = contour->triIndexes;
+			isosurface.quadIndexes=contour->quadIndexes;
+			isosurface.setDirty(true);
 			lastTime = currentTime;
 		}
-		depthAndNormalShader.draw(mesh, camera, depthFrameBuffer);
+		depthAndNormalShader.draw(isosurface, camera, depthFrameBuffer);
 	}
 
 	glEnable(GL_BLEND);

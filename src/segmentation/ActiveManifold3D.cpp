@@ -72,6 +72,7 @@ void ActiveManifold3D::cleanup() {
 }
 bool ActiveManifold3D::updateSurface() {
 	if (requestUpdateSurface) {
+		std::cout<<"Update Surface"<<std::endl;
 		std::lock_guard<std::mutex> lockMe(contourLock);
 		Mesh mesh;
 		isoSurface.solve(levelSet, activeList, mesh, contour.meshType, true, 0.0f);
@@ -80,6 +81,7 @@ bool ActiveManifold3D::updateSurface() {
 		contour.vertexNormals = mesh.vertexNormals;
 		contour.triIndexes = mesh.triIndexes;
 		contour.quadIndexes=mesh.quadIndexes;
+		std::cout<<"Surface "<<contour.vertexLocations.size()<<" "<<contour.vertexNormals.size()<<std::endl;
 		requestUpdateSurface = false;
 		return true;
 	}

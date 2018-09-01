@@ -214,10 +214,14 @@ namespace aly {
 		cancelButton->setOrigin(Origin::BottomLeft);
 		cancelButton->backgroundColor = MakeColor(COLOR_NONE);
 		cancelButton->borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHTEST);
+		//Color still updates even when canceled!
 		cancelButton->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
 			colorSelectionPanel->setVisible(false);
 			context->getGlassPane()->setVisible(false);
+			if (onSelect) {
+				onSelect(getColor());
+			}
 			return true;
 		};
 		CompositePtr hContainer = MakeComposite("Horizontal Layout",

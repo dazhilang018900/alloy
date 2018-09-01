@@ -29,6 +29,11 @@ Application(1024, 600, "Spring Level Set 3D"), matcapShader(
 		getFullPath("images/JG_Silver.png")), imageShader(
 		ImageShader::Filter::SMALL_BLUR), running(false),
 simulation(std::shared_ptr<ManifoldCache3D>(new ManifoldCache3D())) {
+	showIsoSurface=true;
+	showSpringls=true;
+	showParticles=false;
+	showTracking=false;
+	color=Color(255,0,0);
 }
 bool Springls3DEx::init(Composite& rootNode) {
 	box3f renderBBox = box3f(float3(-0.5f, -0.5f, -0.5f),
@@ -64,10 +69,10 @@ bool Springls3DEx::init(Composite& rootNode) {
 		cube.setWidth(1.21);
 		sourceVol= cube.solveDistanceField();
 		*/
-		mesh.load(getFullPath("models/armadillo.ply"));
-		mesh.updateVertexNormals(false);
+		isosurface.load(getFullPath("models/armadillo.ply"));
+		isosurface.updateVertexNormals(false);
 		std::cout<<"Build Level Set"<<std::endl;
-		MeshToLevelSet(mesh,sourceVol,true,2.5f,true,1.5f);
+		MeshToLevelSet(isosurface,sourceVol,true,2.5f,true,1.5f);
 		std::cout<<"Done "<<sourceVol.dimensions()<<std::endl;
 		PhantomBubbles bubbles(sourceVol.rows,sourceVol.cols,sourceVol.slices, 4.0f);
 		D=std::max(std::max(sourceVol.rows,sourceVol.cols),sourceVol.slices);
@@ -220,7 +225,15 @@ bool Springls3DEx::init(Composite& rootNode) {
 	renderRegion = RegionPtr(
 			new aly::Region("Render Region", CoordPX(400.0f, 0.0f),
 					CoordPerPX(1.0f, 1.0f, -400.0f, -80.0f)));
+
+	controls->addGroup("Simulation", true);
 	simulation.setup(controls);
+	controls->addGroup("Visualization", true);
+	controls->addCheckBox("IsoSurface", showIsoSurface);
+	controls->addCheckBox("Springls", showSpringls);
+	controls->addCheckBox("Particles", showParticles);
+	controls->addCheckBox("Tracking", showTracking);
+	controls->addColorField("Color", color);
 	controls->setAlwaysShowVerticalScrollBar(false);
 	controls->setScrollEnabled(false);
 	controls->backgroundColor = MakeColor(getContext()->theme.DARKER);
@@ -258,13 +271,21 @@ void Springls3DEx::draw(AlloyContext* context) {
 			} else {
 				contour = simulation.getSurface();
 			}
-			mesh.vertexLocations = contour->vertexes;
-			mesh.vertexNormals = contour->normals;
-			mesh.triIndexes = contour->triIndexes;
-			mesh.setDirty(true);
+			isosurface.vertexLocations = contour->vertexLocations;
+			isosurface.vertexNormals = contour->vertexNormals;
+			isosurface.triIndexes = contour->triIndexes;
+			isosurface.quadIndexes = contour->quadIndexes;
+			springls.vertexLocations=contour->vertexes;
+			springls.setType(static_cast<GLMesh::PrimitiveType>(contour->meshType));
+			particles.vertexLocations=contour->particles;
+			particles.vertexNormals=contour->vertexNormals;
+			isosurface.setDirty(true);
+			springls.setDirty(true);
+			particles.setDirty(true);
 			lastTime = currentTime;
 		}
-		depthAndNormalShader.draw(mesh, camera, depthFrameBuffer);
+		//depthAndNormalShader.draw(isosurface, camera, depthFrameBuffer);
+		depthAndNormalShader.draw(springls, camera, depthFrameBuffer);
 	}
 
 	glEnable(GL_BLEND);
