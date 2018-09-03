@@ -99,7 +99,7 @@ Manifold3D::Manifold3D(const Manifold3D& c) :
 	particleLabels = c.particleLabels;
 }
 void Manifold3D::updateNormals() {
-	int N=(int)particles.size();
+	int N=(int)vertexes.size();
 	normals.resize(particles.size());
 	if(meshType==MeshType::Triangle){
 #pragma omp parallel for

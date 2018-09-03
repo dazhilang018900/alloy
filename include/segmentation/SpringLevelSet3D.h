@@ -53,6 +53,8 @@ namespace aly {
 		static float SPRING_CONSTANT;
 		static float RELAX_TIMESTEP;
 		static float SHARPNESS;
+		static float FILL_DISTANCE;
+		static float CONTRACT_DISTANCE;
 		static int MAX_NEAREST_NEIGHBORS;
 	protected:
 		std::shared_ptr<Matcher3f> matcher;
