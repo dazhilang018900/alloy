@@ -75,11 +75,11 @@ namespace aly {
 			this->file = file;
 		}
 		template<class Archive> void save(Archive & archive) const {
-			archive(CEREAL_NVP(file),CEREAL_NVP(vertexes),CEREAL_NVP(normals),CEREAL_NVP(colors),CEREAL_NVP(particles),CEREAL_NVP(vertexLocations),CEREAL_NVP(vertexNormals),CEREAL_NVP(triIndexes),CEREAL_NVP(quadIndexes),CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels),CEREAL_NVP(correspondence),CEREAL_NVP(velocities));
+			archive(CEREAL_NVP(file),CEREAL_NVP(meshType),CEREAL_NVP(vertexes),CEREAL_NVP(normals),CEREAL_NVP(colors),CEREAL_NVP(particles),CEREAL_NVP(vertexLocations),CEREAL_NVP(vertexNormals),CEREAL_NVP(triIndexes),CEREAL_NVP(quadIndexes),CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels),CEREAL_NVP(correspondence),CEREAL_NVP(velocities));
 		}
 		template<class Archive> void load(Archive & archive) 
 		{
-			archive(CEREAL_NVP(file),CEREAL_NVP(vertexes),CEREAL_NVP(normals),CEREAL_NVP(colors), CEREAL_NVP(particles),CEREAL_NVP(vertexLocations),CEREAL_NVP(vertexNormals),CEREAL_NVP(triIndexes),CEREAL_NVP(quadIndexes),CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels), CEREAL_NVP(correspondence),CEREAL_NVP(velocities));
+			archive(CEREAL_NVP(file),CEREAL_NVP(meshType),CEREAL_NVP(vertexes),CEREAL_NVP(normals),CEREAL_NVP(colors), CEREAL_NVP(particles),CEREAL_NVP(vertexLocations),CEREAL_NVP(vertexNormals),CEREAL_NVP(triIndexes),CEREAL_NVP(quadIndexes),CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels), CEREAL_NVP(correspondence),CEREAL_NVP(velocities));
 		}
 		void updateNormals();
 		void operator=(const Manifold3D &c);

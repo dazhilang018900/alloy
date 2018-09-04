@@ -428,7 +428,6 @@ void GLMesh::update() {
 		}
 		CHECK_GL_ERROR();
 		triIndexCount = (GLuint) (mesh.vertexLocations.size()/3);
-		std::cout<<"Updated Triangle Mesh"<<triIndexCount<<std::endl;
 	}
 	if (mesh.quadIndexes.size() > 0) {
 		size_t offset = 0;

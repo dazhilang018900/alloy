@@ -61,7 +61,6 @@ void WriteContourToFile(const std::string& file, Manifold3D& params) {
 	}
 	params.setFile(file);
 }
-
 void Manifold3D::operator=(const Manifold3D &c) {
 	onScreen = c.onScreen;
 	context = c.context;

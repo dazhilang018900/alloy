@@ -96,7 +96,7 @@ bool Springls3DEx::init(Composite& rootNode) {
 
 		simulation.setInitialDistanceField(sourceVol);
 		simulation.setPressure(targetVol, 0.4f, 0.5f);
-		simulation.setCurvature(0.25f);
+		simulation.setCurvature(0.0f);
 		//simulation.setVectorField(vectorField, 0.2f);
 		simulation.init();
 	}

@@ -121,6 +121,7 @@ public:
 		mesh.textureMap = textureMap;
 		mesh.textureImage = textureImage;
 		mesh.pose = pose;
+		mesh.type = type;
 		mesh.dirtyOnScreen = true;
 		mesh.dirtyOffScreen = true;
 
