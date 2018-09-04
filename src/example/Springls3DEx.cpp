@@ -25,57 +25,59 @@
 #include <AlloyDistanceField.h>
 using namespace aly;
 Springls3DEx::Springls3DEx() :
-Application(1024, 600, "Spring Level Set 3D"), matcapShader(
-		getFullPath("images/JG_Silver.png")), imageShader(
-		ImageShader::Filter::SMALL_BLUR), running(false),
-simulation(std::shared_ptr<ManifoldCache3D>(new ManifoldCache3D())) {
-	showIsoSurface=true;
-	showSpringls=true;
-	showParticles=false;
-	showTracking=false;
-	color=Color(255,0,0);
+		Application(1024 * 2, 600 * 2, "Spring Level Set 3D"), matcapShader(
+				getFullPath("images/JG_Silver.png")), imageShader(
+				ImageShader::Filter::SMALL_BLUR), running(false), simulation(
+				std::shared_ptr < ManifoldCache3D > (new ManifoldCache3D())) {
+	showIsoSurface = true;
+	showSpringls = true;
+	showParticles = false;
+	showTracking = false;
+	color = Color(255, 0, 0);
 }
 bool Springls3DEx::init(Composite& rootNode) {
 	box3f renderBBox = box3f(float3(-0.5f, -0.5f, -0.5f),
 			float3(1.0f, 1.0f, 1.0f));
 	lastTime = -1;
-/*
-	mesh.load(getFullPath("models/armadillo.ply"));
-	mesh.updateVertexNormals(false);
-	Volume1f vol;
-	MeshToLevelSet(mesh,vol,true,2.5f,true,0.75f);
-	IsoSurface isoSurf;
-	isoSurf.solve(vol,mesh,MeshType::Quad);
-	RebuildDistanceFieldFast(vol,8.0f);
-	WriteVolumeToFile(MakeDesktopFile("armadillo.xml"),vol);
-	//WriteMeshToFile(MakeDesktopFile("horse_level.ply"),mesh);
-*/
-/*
-	EndlessGrid<float> vol({32,4,4}, 0.0f);
-	MeshToLevelSet(mesh, vol, 2.5f, false, 0.75f);
-	IsoSurface isoSurf;
-	isoSurf.solve(vol,mesh,MeshType::Quad);
-	WriteMeshToFile(MakeDesktopFile("horse_level.ply"),mesh);
-	WriteGridToFile(MakeDesktopFile("horse.xml"),vol);
-	int D=128;
-	*/
+	/*
+	 mesh.load(getFullPath("models/armadillo.ply"));
+	 mesh.updateVertexNormals(false);
+	 Volume1f vol;
+	 MeshToLevelSet(mesh,vol,true,2.5f,true,0.75f);
+	 IsoSurface isoSurf;
+	 isoSurf.solve(vol,mesh,MeshType::Quad);
+	 RebuildDistanceFieldFast(vol,8.0f);
+	 WriteVolumeToFile(MakeDesktopFile("armadillo.xml"),vol);
+	 //WriteMeshToFile(MakeDesktopFile("horse_level.ply"),mesh);
+	 */
+	/*
+	 EndlessGrid<float> vol({32,4,4}, 0.0f);
+	 MeshToLevelSet(mesh, vol, 2.5f, false, 0.75f);
+	 IsoSurface isoSurf;
+	 isoSurf.solve(vol,mesh,MeshType::Quad);
+	 WriteMeshToFile(MakeDesktopFile("horse_level.ply"),mesh);
+	 WriteGridToFile(MakeDesktopFile("horse.xml"),vol);
+	 int D=128;
+	 */
 
 	int D;
 	{
 		Volume1f sourceVol;
 		/*
-		PhantomCube cube(D, D, D, 4.0f);
-		cube.setCenter(float3(0.0f));
-		cube.setWidth(1.21);
-		sourceVol= cube.solveDistanceField();
-		*/
+		 PhantomCube cube(D, D, D, 4.0f);
+		 cube.setCenter(float3(0.0f));
+		 cube.setWidth(1.21);
+		 sourceVol= cube.solveDistanceField();
+		 */
 		isosurface.load(getFullPath("models/armadillo.ply"));
 		isosurface.updateVertexNormals(false);
-		std::cout<<"Build Level Set"<<std::endl;
-		MeshToLevelSet(isosurface,sourceVol,true,2.5f,true,1.5f);
-		std::cout<<"Done "<<sourceVol.dimensions()<<std::endl;
-		PhantomBubbles bubbles(sourceVol.rows,sourceVol.cols,sourceVol.slices, 4.0f);
-		D=std::max(std::max(sourceVol.rows,sourceVol.cols),sourceVol.slices);
+		std::cout << "Build Level Set" << std::endl;
+		MeshToLevelSet(isosurface, sourceVol, true, 2.5f, true, 1.5f);
+		std::cout << "Done " << sourceVol.dimensions() << std::endl;
+		PhantomBubbles bubbles(sourceVol.rows, sourceVol.cols, sourceVol.slices,
+				4.0f);
+		D = std::max(std::max(sourceVol.rows, sourceVol.cols),
+				sourceVol.slices);
 		bubbles.setNoiseLevel(0.0f);
 		bubbles.setNumberOfBubbles(12);
 		bubbles.setFuzziness(0.5f);
@@ -93,10 +95,9 @@ bool Springls3DEx::init(Composite& rootNode) {
 		//WriteVolumeToFile(MakeDesktopFile("gvf.xml"),vectorField);
 		//WriteVolumeToFile(MakeDesktopFile("target.xml"),targetVol);
 		//WriteVolumeToFile(MakeDesktopFile("source.xml"),sourceVol);
-
 		simulation.setInitialDistanceField(sourceVol);
 		simulation.setPressure(targetVol, 0.4f, 0.5f);
-		simulation.setCurvature(0.0f);
+		simulation.setCurvature(0.01f);
 		//simulation.setVectorField(vectorField, 0.2f);
 		simulation.init();
 	}
@@ -125,17 +126,18 @@ bool Springls3DEx::init(Composite& rootNode) {
 	camera.setPose(MakeTransform(box3f(float3(0.0f), float3(D)), renderBBox));
 	//Add listener to respond to mouse manipulations
 	addListener(&camera);
-	setOnResize([this](const int2& dims) {
-		if(!getContext()->hasDeferredTasks()) {
-			getContext()->addDeferredTask([this]() {
-						int w=getContext()->getScreenWidth();
-						int h=getContext()->getScreenHeight();
-						depthFrameBuffer.initialize(w,h);
-						camera.setDirty(true);
-					});
-		}
-	});
-
+	setOnResize(
+			[this](const int2& dims) {
+				if(!getContext()->hasDeferredTasks()) {
+					getContext()->addDeferredTask([this]() {
+								box2f bbox = renderRegion->getBounds();
+								springlsBuffer.initialize(bbox.dimensions.x, bbox.dimensions.y);
+								isosurfBuffer.initialize(bbox.dimensions.x, bbox.dimensions.y);
+								particleBuffer.initialize(bbox.dimensions.x, bbox.dimensions.y);
+								camera.setDirty(true);
+							});
+				}
+			});
 	playButton = IconButtonPtr(
 			new IconButton(0xf144, CoordPerPX(0.5f, 0.5f, -35.0f, -35.0f),
 					CoordPX(70.0f, 70.0f)));
@@ -203,8 +205,8 @@ bool Springls3DEx::init(Composite& rootNode) {
 	timelineSlider->borderWidth = UnitPX(0.0f);
 	timelineSlider->onChangeEvent =
 			[this](const Number& timeValue, const Number& lowerValue, const Number& upperValue) {
-		camera.setDirty(true);
-	};
+				camera.setDirty(true);
+			};
 	timelineSlider->setMajorTick(100);
 	timelineSlider->setMinorTick(10);
 	timelineSlider->setLowerValue(0);
@@ -248,9 +250,11 @@ bool Springls3DEx::init(Composite& rootNode) {
 	return true;
 }
 void Springls3DEx::draw(AlloyContext* context) {
-	if (depthFrameBuffer.getWidth() == 0) {
+	if (springlsBuffer.getWidth() == 0) {
 		box2f bbox = renderRegion->getBounds();
-		depthFrameBuffer.initialize(bbox.dimensions.x, bbox.dimensions.y);
+		springlsBuffer.initialize(bbox.dimensions.x, bbox.dimensions.y);
+		isosurfBuffer.initialize(bbox.dimensions.x, bbox.dimensions.y);
+		particleBuffer.initialize(bbox.dimensions.x, bbox.dimensions.y);
 	}
 	if (running) {
 		if (!simulation.step()) {
@@ -275,24 +279,37 @@ void Springls3DEx::draw(AlloyContext* context) {
 			isosurface.vertexNormals = contour->vertexNormals;
 			isosurface.triIndexes = contour->triIndexes;
 			isosurface.quadIndexes = contour->quadIndexes;
-			springls.vertexLocations=contour->vertexes;
-			springls.setType(static_cast<GLMesh::PrimitiveType>(contour->meshType));
-			particles.vertexLocations=contour->particles;
-			particles.vertexNormals=contour->vertexNormals;
+			springls.vertexLocations = contour->vertexes;
+			springls.setType(
+					static_cast<GLMesh::PrimitiveType>(contour->meshType));
+			particles.vertexLocations = contour->particles;
+			particles.vertexNormals = contour->vertexNormals;
 			isosurface.setDirty(true);
 			springls.setDirty(true);
 			particles.setDirty(true);
 			lastTime = currentTime;
 		}
-		//depthAndNormalShader.draw(isosurface, camera, depthFrameBuffer);
-		depthAndNormalShader.draw(springls, camera, depthFrameBuffer);
+		depthAndNormalShader.draw(isosurface, camera, isosurfBuffer);
+		depthAndNormalShader.draw(springls, camera, springlsBuffer);
+		particleShader.draw(particles,camera,particleBuffer,2*SpringLevelSet3D::PARTICLE_RADIUS);
 	}
-
 	glEnable(GL_BLEND);
-	glDisable(GL_DEPTH_TEST);
-	matcapShader.draw(depthFrameBuffer.getTexture(), camera,
-			renderRegion->getBounds() * context->pixelRatio,
-			context->getViewport(), RGBAf(1.0f));
+	glEnable(GL_DEPTH_TEST);
+	if (showIsoSurface) {
+		matcapShader.draw(isosurfBuffer.getTexture(), camera,
+				renderRegion->getBounds() * context->pixelRatio,
+				context->getViewport(), RGBAf(1.0f));
+	}
+	if (showSpringls) {
+		matcapShader.draw(springlsBuffer.getTexture(), camera,
+				renderRegion->getBounds() * context->pixelRatio,
+				context->getViewport(), RGBAf(1.0f));
+	}
+	if (showParticles) {
+		matcapShader.draw(particleBuffer.getTexture(), camera,
+				renderRegion->getBounds() * context->pixelRatio,
+				context->getViewport(), RGBAf(1.0f));
+	}
 	camera.setDirty(false);
 }
 

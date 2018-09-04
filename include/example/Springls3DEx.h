@@ -35,10 +35,13 @@ protected:
 	aly::Mesh springls;
 	aly::Mesh particles;
 	aly::RegionPtr renderRegion;
-	aly::GLFrameBuffer depthFrameBuffer;
+	aly::GLFrameBuffer springlsBuffer;
+	aly::GLFrameBuffer particleBuffer;
+	aly::GLFrameBuffer isosurfBuffer;
 	aly::DepthAndNormalShader depthAndNormalShader;
 	aly::MatcapShader matcapShader;
 	aly::ImageShader imageShader;
+	aly::ParticleDepthShader particleShader;
 	aly::Camera camera;
 	aly::SpringLevelSet3D simulation;
 	aly::IconButtonPtr playButton,stopButton;

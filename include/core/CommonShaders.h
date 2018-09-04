@@ -271,6 +271,43 @@ public:
 
 	}
 };
+
+class SpringlShader: public GLShader {
+private:
+	GLTextureRGBA matcapTextureIso;
+	GLTextureRGBA matcapTextureSpringls;
+public:
+	SpringlShader(const std::string& textureImage="", bool onScreen = true,
+			const std::shared_ptr<AlloyContext>& context =
+					AlloyDefaultContext());
+	void setTextureImage(const std::string& textureImage);
+	void setTextureImage(const ImageRGBA& textureImage);
+	template<class T, int C, ImageType I> void draw(
+			const GLTexture<T, C, I>& imageTexture, CameraParameters& camera,
+			const box2px& bounds, const box2px& viewport, const RGBAf& tint =
+					RGBAf(1, 1, 1, 1)) {
+		begin().set("matcapTextureIso", matcapTextureIso, 0).set("matcapTextureSpringls", matcapTextureSpringls, 1).set("textureImage",
+				imageTexture, 1).set("depthBufferSize",
+				imageTexture.dimensions()).set("bounds", bounds).set("viewport",
+				viewport).set("tint", tint).draw(imageTexture).end();
+		begin().set("textureImage",
+				imageTexture, 1).set("depthBufferSize",
+				imageTexture.dimensions()).set("bounds", bounds).set("viewport",
+				viewport).set("tint", tint).draw(imageTexture).end();
+
+	}
+	template<class T, int C, ImageType I> void draw(
+			const GLTexture<T, C, I>& imageTexture, CameraParameters& camera,
+			const float2& location, const float2& dimensions,
+			const box2px& viewport, const RGBAf& tint = RGBAf(1, 1, 1, 1)) {
+		begin().set("matcapTextureIso", matcapTextureIso, 0).set("matcapTextureSpringls", matcapTextureIso, 1).set("textureImage",
+				imageTexture, 2).set("depthBufferSize",
+				imageTexture.dimensions()).set("bounds",
+				box2px(location, dimensions)).set("viewport", viewport).set(
+				"tint", tint).draw(imageTexture).end();
+	}
+};
+
 class TextureMeshShader: public GLShader {
 public:
 	TextureMeshShader(bool onScreen = true,

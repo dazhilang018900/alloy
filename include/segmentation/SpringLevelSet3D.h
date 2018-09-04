@@ -55,7 +55,11 @@ namespace aly {
 		static float SHARPNESS;
 		static float FILL_DISTANCE;
 		static float CONTRACT_DISTANCE;
+		static float MIN_AREA;
+		static float MAX_AREA;
+		static float MIN_ASPECT_RATIO;
 		static int MAX_NEAREST_NEIGHBORS;
+
 	protected:
 		std::shared_ptr<Matcher3f> matcher;
 		aly::Vector3f oldCorrespondences;
@@ -66,6 +70,7 @@ namespace aly {
 		virtual bool stepInternal() override;
 		float3 traceInitial(float3 pt);
 		float3 traceUnsigned(float3 pt);
+		void shrinkWrap(aly::Mesh& isosurf,int iterations,float proximity,float stepSize);
 		void updateNearestNeighbors(float maxDistance = NEAREST_NEIGHBOR_DISTANCE);
 		void updateUnsignedLevelSet(float maxDistance= 3.5f);
 		void relax(float timeStep);
