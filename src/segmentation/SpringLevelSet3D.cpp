@@ -28,10 +28,10 @@ float SpringLevelSet3D::NEAREST_NEIGHBOR_DISTANCE = std::sqrt(2.0f) * 0.5f;
 float SpringLevelSet3D::PARTICLE_RADIUS = 0.05f;
 float SpringLevelSet3D::REST_RADIUS = 0.1f;
 float SpringLevelSet3D::SPRING_CONSTANT = 0.3f;
-float SpringLevelSet3D::CONTRACT_DISTANCE = 2 * 0.625f;
+float SpringLevelSet3D::CONTRACT_DISTANCE = 2*0.625f;
 float SpringLevelSet3D::EXTENT = 0.5f;
 float SpringLevelSet3D::SHARPNESS = 5.0f;
-float SpringLevelSet3D::FILL_DISTANCE = 0.6f;
+float SpringLevelSet3D::FILL_DISTANCE = 2*0.3f;
 int SpringLevelSet3D::MAX_NEAREST_NEIGHBORS = 2;
 SpringLevelSet3D::SpringLevelSet3D(
 		const std::shared_ptr<ManifoldCache3D>& cache) :
@@ -224,8 +224,7 @@ int SpringLevelSet3D::fill() {
 	{
 		Mesh tmpMesh;
 		std::lock_guard < std::mutex > lockMe(contourLock);
-		isoSurface.solve(levelSet, activeList, tmpMesh, contour.meshType, false,
-				0.0f);
+		isoSurface.solve(levelSet, activeList, tmpMesh, contour.meshType, true,0.0f);
 		contour.quadIndexes = tmpMesh.quadIndexes;
 		contour.triIndexes = tmpMesh.triIndexes;
 		contour.vertexLocations = tmpMesh.vertexLocations;
@@ -291,6 +290,7 @@ int SpringLevelSet3D::fill() {
 		}
 	}
 	std::cout << "Fill " << fillCount << std::endl;
+	return fillCount;
 }
 void SpringLevelSet3D::updateTracking(float maxDistance) {
 	int tries = 0;
@@ -386,8 +386,8 @@ int SpringLevelSet3D::contract() {
 	int N = (int) contour.particles.size();
 	particles.data.reserve(N);
 	normals.data.reserve(N);
-	const float MAX_EDGE_LENGTH = 10.0f; //1.5f;
-	const float MIN_EDGE_LENGTH = 0.0f; //3.0f * PARTICLE_RADIUS;
+	const float MAX_EDGE_LENGTH = 1.5f;
+	const float MIN_EDGE_LENGTH =3.0f * PARTICLE_RADIUS;
 	if (contour.meshType == MeshType::Triangle) {
 		vertexes.data.reserve(N * 3);
 		for (int i = 0; i < N; i++) {
@@ -990,23 +990,32 @@ bool SpringLevelSet3D::stepInternal() {
 			oldCorrespondences = contour.correspondence;
 			oldVelocities = contour.velocities;
 			contract();
+			contour.stashSpringls(
+					MakeDesktopFile(
+							MakeString() << "contract" << std::setw(4)
+									<< std::setfill('0') << simulationIteration
+									<< ".ply"));
 			updateNearestNeighbors();
 			int fillCount = 0;
-			do {
-				updateUnsignedLevelSet();
+			updateUnsignedLevelSet();
+			//do {
 				fillCount = fill();
+				contour.stashSpringls(
+						MakeDesktopFile(
+								MakeString() << "fill" << std::setw(4)
+										<< std::setfill('0') << simulationIteration
+										<< ".ply"));
 				relax();
-			} while (fillCount > 0); //Continue filling until all gaps are closed
+			//} while (fillCount > 0); //Continue filling until all gaps are closed
 			contour.updateNormals();
 			contour.setDirty(true);
+
 			//updateTracking();
 		} else {
 			std::cout << "Update Iso-Surface" << std::endl;
 			std::lock_guard < std::mutex > lockMe(contourLock);
 			Mesh mesh;
-			isoSurface.solve(levelSet, activeList, mesh, contour.meshType, true,
-					0.0f);
-			mesh.updateVertexNormals(false, 4);
+			isoSurface.solve(levelSet, activeList, mesh, contour.meshType, true,0.0f);
 			contour.vertexLocations = mesh.vertexLocations;
 			contour.vertexNormals = mesh.vertexNormals;
 			contour.triIndexes = mesh.triIndexes;
