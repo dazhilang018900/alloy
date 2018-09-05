@@ -52,6 +52,7 @@ namespace aly {
 		float2 traceUnsigned(float2 pt);
 
 		void refineContour(bool signedIso);
+		void refineContour(int iterations,float proximity,float stepSize);
 		void updateNearestNeighbors(float maxDistance = NEAREST_NEIGHBOR_DISTANCE);
 		void updateUnsignedLevelSet(float maxDistance= 4.0f*EXTENT);
 		void relax(float timeStep);

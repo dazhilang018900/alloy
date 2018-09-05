@@ -222,7 +222,7 @@ void SpringLevelSet3D::updateNearestNeighbors(float maxDistance) {
 				<< std::endl;
 	}
 }
-void SpringLevelSet3D::shrinkWrap(aly::Mesh& isosurf, int iterations,
+void SpringLevelSet3D::refineContour(aly::Mesh& isosurf, int iterations,
 		float proximity, float stepSize) {
 	int N = isosurf.vertexLocations.size();
 	Vector3f& points = isosurf.vertexLocations;
@@ -1138,7 +1138,7 @@ bool SpringLevelSet3D::stepInternal() {
 				Mesh tmpMesh;
 				std::lock_guard < std::mutex > lockMe(contourLock);
 				isoSurface.solve(levelSet, activeList, tmpMesh, contour.meshType, true,0.0f);
-				shrinkWrap(tmpMesh, 4, 2.0f, 0.5f);
+				refineContour(tmpMesh, 4, 2.0f, 0.5f);
 				contour.quadIndexes = tmpMesh.quadIndexes;
 				contour.triIndexes = tmpMesh.triIndexes;
 				contour.vertexLocations = tmpMesh.vertexLocations;

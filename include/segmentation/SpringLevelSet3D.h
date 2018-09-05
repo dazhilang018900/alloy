@@ -70,7 +70,7 @@ namespace aly {
 		virtual bool stepInternal() override;
 		float3 traceInitial(float3 pt);
 		float3 traceUnsigned(float3 pt);
-		void shrinkWrap(aly::Mesh& isosurf,int iterations,float proximity,float stepSize);
+		void refineContour(aly::Mesh& isosurf,int iterations,float proximity,float stepSize);
 		void updateNearestNeighbors(float maxDistance = NEAREST_NEIGHBOR_DISTANCE);
 		void updateUnsignedLevelSet(float maxDistance= 3.5f);
 		void relax(float timeStep);
