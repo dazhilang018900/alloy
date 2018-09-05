@@ -82,6 +82,67 @@ namespace aly {
 		} while (iter < 10);
 		//Add line search to find zero crossing.
 	}
+	void MultiSpringLevelSet2D::refineContour(int iterations,float proximity,float stepSize){
+		//Optimize location of level set to remove jitter and improve spacing of iso-vertexes.
+		int N = (int)contour.vertexLocations.size();
+		Vector2f delta(N);
+		const float planeThreshold = std::cos(ToRadians(80.0f));
+		Matcher2f matcher(contour.particles);
+		for(int iter=0;iter<iterations;iter++){
+			for (std::vector<uint32_t> curve : contour.indexes) {
+				uint32_t cur = 0, prev = 0, next = 0;
+				if (curve.size() > 1) {
+					auto prevIter = curve.begin();
+					auto curIter = prevIter;
+					curIter++;
+					auto nextIter = curIter;
+					nextIter++;
+					for (; nextIter != curve.end();curIter++, nextIter++, prevIter++) {
+						cur = *curIter;
+						prev = *prevIter;
+						next = *nextIter;
+						float2 curPt = contour.vertexLocations[cur];
+						float2 nextPt = contour.vertexLocations[next];
+						float2 prevPt = contour.vertexLocations[prev];
+						float2 tan1 = (nextPt - curPt);
+						float d1 = length(tan1);
+						float2 tan2 = (curPt - prevPt);
+						float d2 = length(tan2);
+						float2 tan = normalize(tan1 + tan2);
+						float2 norm(-tan.y, tan.x);
+						std::vector<size_t> result;
+						bool add = false;
+						float w = 0.0f;
+						delta[cur] = float2(0.0f);
+						matcher.closest(curPt, proximity, result);
+						if (result.size() > 0) {
+							float2 closest = curPt;
+							float2 closestNorm = norm;
+							for (size_t nbr : result) {
+								float2 nnorm = contour.normals[nbr];
+								if (dot(norm, nnorm) > planeThreshold) {
+									closest = contour.particles[nbr];
+									closestNorm = nnorm;
+									add = true;
+									break;
+								}
+							}
+							if (add) {
+								w = 1.0f- clamp((float) distance(curPt, closest) / proximity,0.0f, 1.0f);
+								delta[cur] =  - w * stepSize * dot((curPt - closest), closestNorm) * closestNorm;
+							}
+						}
+						float2 center=0.333333f*(nextPt+curPt+prevPt);
+						float2 delt = center - curPt;
+						float2 pr = dot(delt, norm) * norm;
+						delta[cur] += (w * (delt - pr) + (1 - w) * pr);
+					}
+				}
+			}
+			contour.vertexLocations += delta;
+		}
+		//Add line search to find zero crossing.
+	}
 	float2 MultiSpringLevelSet2D::traceUnsigned(float2 pt) {
 		float disp = 0.0f;
 		int iter = 0;
@@ -166,6 +227,7 @@ namespace aly {
 		{
 			//std::lock_guard<std::mutex> lockMe(contourLock);
 			isoContour.solve(levelSet, labelImage, contour.vertexLocations, contour.vertexLabels, contour.indexes, 0.0f, (preserveTopology) ? TopologyRule2D::Connect4 : TopologyRule2D::Unconstrained, Winding::Clockwise);
+			//refineContour(4,2.0f,0.9f);
 			refineContour(false);
 			requestUpdateContour = false;
 		}
@@ -789,6 +851,7 @@ namespace aly {
 			else {
 				//std::lock_guard<std::mutex> lockMe(contourLock);
 				isoContour.solve(levelSet, labelImage, contour.vertexLocations, contour.vertexLabels, contour.indexes, 0.0f, (preserveTopology) ? TopologyRule2D::Connect4 : TopologyRule2D::Unconstrained, Winding::Clockwise);
+				//refineContour(4,2.0f,0.9f);
 				refineContour(false);
 				contour.updateNormals();
 				contour.setDirty(true);
@@ -800,7 +863,6 @@ namespace aly {
 		simulationIteration++;
 		if (cache.get() != nullptr) {
 			Manifold2D* contour = getContour();
-			refineContour(false);
 			contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR << "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 			cache->set((int)simulationIteration, *contour);
 		}

@@ -109,8 +109,46 @@ namespace aly {
 	void SpringLevelSet2D::updateUnsignedLevelSet(float maxDistance) {
 		unsignedLevelSet = unsignedShader->solve(contour, maxDistance);
 	}
-	void SpringLevelSet2D::refineContour(bool signedLevelSet){
-
+	void SpringLevelSet2D::refineContour(bool signedIso){
+//Optimize location of level set to remove jitter and improve spacing of iso-vertexes.
+		int N = (int)contour.vertexLocations.size();
+		Vector2f delta(N);
+		float maxDelta;
+		int iter = 0;
+		do {
+			maxDelta = 0.0f;
+			for (std::vector<uint32_t> curve : contour.indexes) {
+				uint32_t cur = 0, prev = 0, next = 0;
+				if (curve.size() > 1) {
+					auto prevIter = curve.begin();
+					auto curIter = prevIter;
+					curIter++;
+					auto nextIter = curIter;
+					nextIter++;
+					for (; nextIter != curve.end();curIter++, nextIter++, prevIter++) {
+						cur = *curIter;
+						prev = *prevIter;
+						next = *nextIter;
+						float2 curPt = contour.vertexLocations[cur];
+						float2 nextPt = contour.vertexLocations[next];
+						float2 prevPt = contour.vertexLocations[prev];
+						float2 tan1 = (nextPt - curPt);
+						float d1 = length(tan1);
+						float2 tan2 = (curPt - prevPt);
+						float d2 = length(tan2);
+						float2 tan = normalize(tan1 + tan2);
+						float2 norm(-tan.y, tan.x);
+						float2 d = 0.1f*dot(norm, getScaledGradientValue(curPt.x, curPt.y, signedIso))*norm + 0.5f*tan*(d1 - d2) / (d1 + d2);
+						maxDelta = std::max(lengthSqr(d), maxDelta);
+						delta[cur] = d;
+					}
+				}
+			}
+			maxDelta = std::sqrt(maxDelta);
+			contour.vertexLocations += delta;
+			iter++;
+		} while (iter < 10);
+		//Add line search to find zero crossing.
 	}
 	void SpringLevelSet2D::refineContour(int iterations,float proximity,float stepSize){
 		//Optimize location of level set to remove jitter and improve spacing of iso-vertexes.
@@ -249,7 +287,7 @@ namespace aly {
 		{
 			std::lock_guard<std::mutex> lockMe(contourLock);
 			isoContour.solve(levelSet, contour.vertexLocations, contour.indexes, 0.0f, (preserveTopology) ? TopologyRule2D::Connect4 : TopologyRule2D::Unconstrained, Winding::Clockwise);
-			refineContour(4,2,0.5f);
+			refineContour(4,2,0.9f);
 			requestUpdateContour = false;
 		}
 		int fillCount = 0;
@@ -787,7 +825,7 @@ return -(v11*grad / len);
 			}else {
 				std::lock_guard<std::mutex> lockMe(contourLock);
 				isoContour.solve(levelSet, contour.vertexLocations, contour.indexes, 0.0f, (preserveTopology) ? TopologyRule2D::Connect4 : TopologyRule2D::Unconstrained, Winding::Clockwise);
-				refineContour(4,2,0.5f);
+				refineContour(4,2,0.9f);
 				contour.updateNormals();
 				contour.setDirty(true);
 				requestUpdateContour = false;
@@ -798,7 +836,6 @@ return -(v11*grad / len);
 		simulationIteration++;
 		if (cache.get() != nullptr) {
 			Manifold2D* contour = getContour();
-			refineContour(4,2,0.5f);
 			contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR << "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 			cache->set((int)simulationIteration, *contour);
 		}
