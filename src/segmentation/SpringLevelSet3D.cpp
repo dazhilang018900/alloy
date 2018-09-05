@@ -24,14 +24,14 @@
 namespace aly {
 
 float SpringLevelSet3D::MIN_ANGLE_TOLERANCE = (float) (ALY_PI * 20 / 180.0f);
-float SpringLevelSet3D::NEAREST_NEIGHBOR_DISTANCE = std::sqrt(2.0f)* 0.5f;
+float SpringLevelSet3D::NEAREST_NEIGHBOR_DISTANCE = std::sqrt(2.0f) * 0.5f;
 float SpringLevelSet3D::PARTICLE_RADIUS = 0.05f;
 float SpringLevelSet3D::REST_RADIUS = 0.1f;
 float SpringLevelSet3D::SPRING_CONSTANT = 0.3f;
-float SpringLevelSet3D::CONTRACT_DISTANCE = 2*0.625f;
+float SpringLevelSet3D::CONTRACT_DISTANCE =  0.625f;
 float SpringLevelSet3D::EXTENT = 0.5f;
 float SpringLevelSet3D::SHARPNESS = 5.0f;
-float SpringLevelSet3D::FILL_DISTANCE = 0.5f;
+float SpringLevelSet3D::FILL_DISTANCE = 0.3f;
 float SpringLevelSet3D::MIN_AREA = 0.05f;
 float SpringLevelSet3D::MAX_AREA = 2.0;
 float SpringLevelSet3D::MIN_ASPECT_RATIO = 0.1f;
@@ -258,8 +258,8 @@ void SpringLevelSet3D::shrinkWrap(aly::Mesh& isosurf, int iterations,
 					w = 1.0f
 							- clamp((float) distance(pt, closest) / proximity,
 									0.0f, 1.0f);
-					float err= dot((pt - closest), closestNorm);
-					newPoints[n] = pt - w * stepSize	*err* closestNorm;
+					float err = dot((pt - closest), closestNorm);
+					newPoints[n] = pt - w * stepSize * err * closestNorm;
 //					distanceErrors[n]=std::abs(err);
 				} else {
 //					distanceErrors[n]=1E30f;
@@ -286,29 +286,33 @@ void SpringLevelSet3D::shrinkWrap(aly::Mesh& isosurf, int iterations,
 }
 int SpringLevelSet3D::fill() {
 	//std::vector<float> distanceErrors;
-	{
-		Mesh tmpMesh;
-		std::lock_guard < std::mutex > lockMe(contourLock);
-		isoSurface.solve(levelSet, activeList, tmpMesh, contour.meshType, true,0.0f);
-		shrinkWrap(tmpMesh,4, 2.0f, 0.5f);
-		contour.quadIndexes = tmpMesh.quadIndexes;
-		contour.triIndexes = tmpMesh.triIndexes;
-		contour.vertexLocations = tmpMesh.vertexLocations;
-		contour.vertexNormals=tmpMesh.vertexNormals;
-		requestUpdateSurface = false;
-	}
 	//Add Shrink wrap step to move iso-surface really close to previous point cloud.
-	std::vector<int> histogram(11,0);
+	std::vector<int> histogram(11, 0);
 	int fillCount = 0;
 	float d;
+	Matcher3f matcher(contour.vertexes);
 	if (contour.meshType == MeshType::Triangle) {
-		for (int n=0;n<contour.triIndexes.size();n++) {
-			uint3 tri= contour.triIndexes[n];
+		for (int n = 0; n < contour.triIndexes.size(); n++) {
+			uint3 tri = contour.triIndexes[n];
 			float3 p = 0.333333f
 					* (contour.vertexLocations[tri.x]
 							+ contour.vertexLocations[tri.y]
 							+ contour.vertexLocations[tri.z]);
-			d=unsignedLevelSet(p).x;//aly::max(distanceErrors[tri.x],distanceErrors[tri.y],distanceErrors[tri.z]);
+			std::vector<std::pair<size_t, float>> result;
+			matcher.closest(p,NEAREST_NEIGHBOR_DISTANCE, result);
+			d = 1E30f;
+			float3 q;
+			for (auto pr : result) {
+				uint32_t nn = pr.first / 3;
+				float ds = std::sqrt(
+						DistanceToTriangleSqr(p,
+								contour.vertexes[3 * nn],
+								contour.vertexes[3 * nn + 1],
+								contour.vertexes[3 * nn + 2],&q));
+				if (ds < d) {
+					d = ds;
+				}
+			}
 			if (d > FILL_DISTANCE) {
 
 				contour.particles.push_back(p);
@@ -327,18 +331,33 @@ int SpringLevelSet3D::fill() {
 						float3(std::numeric_limits<float>::infinity()));
 				fillCount++;
 			}
-			histogram[aly::clamp((int)aly::round(d*10),0,10)]++;
+			histogram[aly::clamp((int) aly::round(d * 10), 0, 10)]++;
 		}
 	} else if (contour.meshType == MeshType::Quad) {
-		for (int n=0;n<contour.quadIndexes.size();n++) {
+		for (int n = 0; n < contour.quadIndexes.size(); n++) {
 			uint4 quad = contour.quadIndexes[n];
 
-			float3 v1 =contour.vertexLocations[quad.x];
-			float3 v2 =contour.vertexLocations[quad.y];
-			float3 v3 =contour.vertexLocations[quad.z];
-			float3 v4 =contour.vertexLocations[quad.w];
-			float3 p = 0.25f * (v1+v2+v3+v4);
-			d=aly::min(unsignedLevelSet(v1).x,unsignedLevelSet(v2).x,unsignedLevelSet(v3).x,unsignedLevelSet(v4).x);//aly::max(distanceErrors[quad.x],distanceErrors[quad.y],distanceErrors[quad.z],distanceErrors[quad.w]);
+			float3 v1 = contour.vertexLocations[quad.x];
+			float3 v2 = contour.vertexLocations[quad.y];
+			float3 v3 = contour.vertexLocations[quad.z];
+			float3 v4 = contour.vertexLocations[quad.w];
+			float3 p = 0.25f * (v1 + v2 + v3 + v4);
+			std::vector<std::pair<size_t, float>> result;
+			matcher.closest(p,NEAREST_NEIGHBOR_DISTANCE, result);
+			d = 1E30f;
+			float3 q;
+			for (auto pr : result) {
+				uint32_t nn = pr.first / 4;
+				float ds = std::sqrt(
+						DistanceToQuadSqr(p,
+								contour.vertexes[4 * nn],
+								contour.vertexes[4 * nn + 1],
+								contour.vertexes[4 * nn + 2],
+								contour.vertexes[4 * nn + 3],&q));
+				if (ds < d) {
+					d = ds;
+				}
+			}
 			if (d > FILL_DISTANCE) {
 				contour.particles.push_back(p);
 				for (Vector3f& vel : contour.velocities) {
@@ -353,15 +372,18 @@ int SpringLevelSet3D::fill() {
 				norm += cross((v3 - p), (v4 - p));
 				norm += cross((v4 - p), (v1 - p));
 				contour.normals.push_back(normalize(norm));
-				contour.correspondence.push_back(float3(std::numeric_limits<float>::infinity()));
+				contour.correspondence.push_back(
+						float3(std::numeric_limits<float>::infinity()));
 				fillCount++;
 			}
-			histogram[aly::clamp((int)aly::round(d*10),0,10)]++;
+			histogram[aly::clamp((int) aly::round(d * 10), 0, 10)]++;
 		}
 	}
 	std::cout << "Fill " << fillCount << std::endl;
-	for(int n=0;n<histogram.size();n++){
-		std::cout<<std::setw(4)<<n/10.0f<<":: "<<histogram[n]*100/(float)contour.quadIndexes.size()<<"%"<<std::endl;
+	for (int n = 0; n < histogram.size(); n++) {
+		std::cout << std::setw(4) << n / 10.0f << ":: "
+				<< histogram[n] * 100 / (float) contour.quadIndexes.size()
+				<< "%" << std::endl;
 	}
 	return fillCount;
 }
@@ -1093,7 +1115,7 @@ bool SpringLevelSet3D::stepInternal() {
 	const int evolveIterations = 8;
 	std::cout << "Step Internal " << simulationIteration << std::endl;
 	do {
-		float timeStep = remaining;//advect(std::min(0.33333f, (float) remaining));
+		float timeStep = advect(std::min(0.33333f, (float) remaining));
 		std::cout << "Time Step " << timeStep << std::endl;
 		t += (double) timeStep;
 		if (resampleEnabled) {
@@ -1108,31 +1130,29 @@ bool SpringLevelSet3D::stepInternal() {
 			oldPoints = contour.particles;
 			oldCorrespondences = contour.correspondence;
 			oldVelocities = contour.velocities;
-			contract();
-			/*
-			contour.stashSpringls(
-					MakeDesktopFile(
-							MakeString() << "contract" << std::setw(4)
-									<< std::setfill('0') << simulationIteration
-									<< ".ply"));
-			*/
-			updateNearestNeighbors();
 			updateUnsignedLevelSet();
 			int fillCount = 0;
-			int tries=0;
-			std::cout<<"Start Fill"<<std::endl;
+			int tries = 0;
+			std::cout << "Start Fill" << std::endl;
+			{
+				Mesh tmpMesh;
+				std::lock_guard < std::mutex > lockMe(contourLock);
+				isoSurface.solve(levelSet, activeList, tmpMesh, contour.meshType, true,0.0f);
+				shrinkWrap(tmpMesh, 4, 2.0f, 0.5f);
+				contour.quadIndexes = tmpMesh.quadIndexes;
+				contour.triIndexes = tmpMesh.triIndexes;
+				contour.vertexLocations = tmpMesh.vertexLocations;
+				contour.vertexNormals = tmpMesh.vertexNormals;
+				requestUpdateSurface = false;
+			}
+			fillCount=0;
 			do {
+				contract();
 				fillCount = fill();
-				/*
-				contour.stashSpringls(
-						MakeDesktopFile(
-								MakeString() << "fill" << std::setw(4)
-										<< std::setfill('0') << simulationIteration
-										<< ".ply"));
-				*/
+				//contour.stashSpringls(MakeDesktopFile(MakeString() << "fill" << std::setw(4)<< std::setfill('0')<< simulationIteration << ".ply"));
 				relax();
 				tries++;
-			} while (fillCount > 0&&tries<3); //Continue filling until all gaps are closed
+			} while (fillCount > 0 && tries < 3); //Continue filling until all gaps are closed
 			contour.updateNormals();
 			contour.setDirty(true);
 			//updateTracking();
@@ -1152,7 +1172,6 @@ bool SpringLevelSet3D::stepInternal() {
 		remaining = timeStep - t;
 	} while (remaining > 1E-5f);
 	updateSurface();
-
 	contour.stashSpringls(
 			MakeDesktopFile(
 					MakeString() << "springls" << std::setw(4)
