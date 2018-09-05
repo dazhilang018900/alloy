@@ -827,6 +827,23 @@ float DistanceToEdgeSqr(const float3& pt, const float3& pt1,
 	float3 tmp;
 	return DistanceToEdgeSqr(pt, pt1, pt2, &tmp);
 }
+float DistanceToEdge(const float2& pos,const float2& p0,const float2& p1){
+	float dist=0;
+	float l2 = dot(p1-p0,p1-p0);
+	if (l2<1E-6) {
+		dist=min(distance(pos,p0), distance(pos, p1));
+	} else {
+		float t = dot(pos-p0,p1-p0) / l2;
+		if (t < 0.0) {
+			dist=distance(pos,p0);
+		} else if (t > 1.0) {
+			dist=distance(pos,p1);
+		} else {
+			dist=distance(pos, p0 + t * (p1-p0));
+		}
+	}
+	return dist;
+}
 //Implementation from geometric tools (http://www.geometrictools.com)
 inline float3 parametricTriangle(float3 e0, float3 e1, float s, float t,
 		float3 B) {

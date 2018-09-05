@@ -98,8 +98,7 @@ public:
 	float getTotalFlow() const {
 		return totalFlow;
 	}
-	void solve(
-			const std::function<bool(const std::string& message, float progress)>& monitor);
+	void solve(const std::function<bool(const std::string& message, float progress)>& monitor=nullptr);
 	bool step();
 	void reset();
 	void resize(size_t sz);

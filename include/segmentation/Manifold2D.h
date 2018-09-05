@@ -29,8 +29,53 @@
 #include <cereal/types/vector.hpp>
 #include <cereal/types/list.hpp>
 #include <array>
+#include <AlloyLocator.h>
 namespace aly {
 	class AlloyContext;
+	class Breadcrumbs2D{
+	protected:
+		std::vector<std::vector<float2i>> history;
+	public:
+		template<class Archive> void save(Archive & archive) const {
+			archive(CEREAL_NVP(history));
+		}
+		template<class Archive> void load(Archive & archive) {
+			archive(CEREAL_NVP(history));
+		}
+		const float2i& operator()(const size_t t,const size_t i) const {
+			return history[t][i];
+		}
+		float2i& operator()(const size_t t,const size_t i) {
+			return history[t][i];
+		}
+		std::vector<float2i>& addTime(size_t sz){
+			history.push_back(std::vector<float2i>(sz,float2i(float2(0.0f),-1)));
+			return history.back();
+		}
+		std::vector<float2i>& addTime(const Vector2f& current){
+			std::vector<float2i> next(current.size());
+			for(int i=0;i<current.size();i++){
+				next[i]=float2i(current,i);
+			}
+			history.push_back(next);
+			return history.back();
+		}
+		const std::vector<float2i>& getTime(size_t sz) const {
+			return history[sz];
+		}
+		std::vector<float2i>& getTime(size_t sz){
+			return history[sz];
+		}
+		std::vector<float2i>& getLastTime(){
+			return history.back();
+		}
+		size_t size() const {
+			return history.size();
+		}
+		size_t size(size_t t) const {
+			return history[t].size();
+		}
+	};
 	class Manifold2D {
 	protected:
 		bool onScreen;
@@ -43,6 +88,7 @@ namespace aly {
 		bool dirty;
 		int vertexCount;
 	public:
+		Breadcrumbs2D crumbs;
 		std::vector<std::vector<uint32_t>> indexes;
 		Vector2f vertexLocations;
 		Vector2f particles;

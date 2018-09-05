@@ -475,6 +475,7 @@ float3 FromBary(double3 b, float3 p1, float3 p2, float3 p3);
 float2 FromBary(double3 b, float2 p1, float2 p2, float2 p3);
 float DistanceToEdgeSqr(const float3& pt, const float3& pt1, const float3& pt2,float3* lastClosestSegmentPoint);
 float DistanceToEdgeSqr(const float3& pt, const float3& pt1, const float3& pt2);
+float DistanceToEdge(const float2& pos,const float2& p0,const float2& p1);
 float DistanceToTriangleSqr(const float3& p, const float3& v0, const float3& v1,const float3& v2, float3* closestPoint);
 float DistanceToTriangleSqr(const float2& p, const float2& v0, const float2& v1,const float2& v2, float2* closestPoint);
 float DistanceToQuadSqr(const float3& p, const float3& v0, const float3& v1,
