@@ -900,6 +900,66 @@ FragColor=rgba;
 })");
 
 }
+
+
+
+void SpringlShader::setTextureImage(const std::string& textureImageIso, const std::string& textureImageSpringls){
+	matcapTextureIso.load(textureImageIso, false);
+	matcapTextureSpringls.load(textureImageSpringls, false);
+}
+void SpringlShader::setTextureImage(const ImageRGBA& textureImageIso,const ImageRGBA& textureImageSpringls){
+	matcapTextureIso.load(textureImageIso, false);
+	matcapTextureSpringls.load(textureImageSpringls, false);
+}
+SpringlShader::SpringlShader(const std::string& textureImageIso,const std::string& textureImageSpringls, bool onScreen,const std::shared_ptr<AlloyContext>& context) :
+		GLShader(onScreen, context), matcapTextureIso(onScreen, context) ,matcapTextureSpringls(onScreen, context) {
+	if(textureImageIso.size()>0)matcapTextureIso.load(textureImageIso, false);
+	if(textureImageSpringls.size()>0)matcapTextureSpringls.load(textureImageSpringls, false);
+	initialize( { },
+			R"(
+#version 330
+layout(location = 0) in vec3 vp; 
+layout(location = 1) in vec2 vt; 
+uniform vec4 bounds;
+uniform vec4 viewport;
+out vec2 uv;
+void main() {
+uv=vt;
+vec2 pos=vp.xy*bounds.zw+bounds.xy;
+gl_Position = vec4(2*pos.x/viewport.z-1.0,1.0-2*pos.y/viewport.w,0,1);
+})",
+			R"(
+#version 330
+in vec2 uv;
+out vec4 FragColor;
+uniform ivec2 depthBufferSize;
+const float PI=3.1415926535;
+uniform vec4 tint;
+uniform sampler2D matcapTextureIso;
+uniform sampler2D matcapTextureSpringls;
+uniform sampler2D textureImageFg;
+uniform sampler2D textureImageBg;
+void main() {
+	ivec2 pos=ivec2(uv.x*depthBufferSize.x,uv.y*depthBufferSize.y);
+	vec4 fg=texelFetch(textureImageFg, pos,0);//Do not interpolate depth buffer!
+	vec4 bg=texelFetch(textureImageBg, pos,0);//Do not interpolate depth buffer!
+	vec4 rgba=vec4(0.0,0.0,0.0,0.0);
+	gl_FragDepth=bg.w;
+	if(bg.w<1.0){
+	  vec2 px=bg.xy;
+	  px.x=-px.x;
+	  if(abs(fg.w-bg.w)<0.001){
+		rgba=tint*texture(matcapTextureSpringls,0.5*px.xy+0.5);    
+      } else {
+		rgba=tint*texture(matcapTextureIso,0.5*px.xy+0.5);
+	  }
+	}
+	FragColor=rgba;
+}
+)");
+
+}
+
 TextureMeshShader::TextureMeshShader(bool onScreen,
 		const std::shared_ptr<AlloyContext>& context) :
 		GLShader(onScreen, context) {

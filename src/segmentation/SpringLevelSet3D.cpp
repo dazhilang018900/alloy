@@ -282,6 +282,7 @@ void SpringLevelSet3D::shrinkWrap(aly::Mesh& isosurf, int iterations,
 		}
 		points = newPoints;
 	}
+	isosurf.updateVertexNormals(false);
 }
 int SpringLevelSet3D::fill() {
 	//std::vector<float> distanceErrors;
@@ -293,6 +294,7 @@ int SpringLevelSet3D::fill() {
 		contour.quadIndexes = tmpMesh.quadIndexes;
 		contour.triIndexes = tmpMesh.triIndexes;
 		contour.vertexLocations = tmpMesh.vertexLocations;
+		contour.vertexNormals=tmpMesh.vertexNormals;
 		requestUpdateSurface = false;
 	}
 	//Add Shrink wrap step to move iso-surface really close to previous point cloud.

@@ -85,9 +85,8 @@ bool ActiveContour3DEx::init(Composite& rootNode) {
 	setOnResize([this](const int2& dims) {
 		if(!getContext()->hasDeferredTasks()) {
 			getContext()->addDeferredTask([this]() {
-						int w=getContext()->getScreenWidth();
-						int h=getContext()->getScreenHeight();
-						depthFrameBuffer.initialize(w,h);
+						box2f bbox = renderRegion->getBounds();
+						depthFrameBuffer.initialize(bbox.dimensions.x, bbox.dimensions.y);
 						camera.setDirty(true);
 					});
 		}

@@ -277,34 +277,33 @@ private:
 	GLTextureRGBA matcapTextureIso;
 	GLTextureRGBA matcapTextureSpringls;
 public:
-	SpringlShader(const std::string& textureImage="", bool onScreen = true,
+	SpringlShader(const std::string& textureImageIso="",const std::string& textureImageSpringls="", bool onScreen = true,
 			const std::shared_ptr<AlloyContext>& context =
 					AlloyDefaultContext());
-	void setTextureImage(const std::string& textureImage);
-	void setTextureImage(const ImageRGBA& textureImage);
+	void setTextureImage(const std::string& textureImageIso,const std::string& textureImageSpringls);
+	void setTextureImage(const ImageRGBA& textureImageIso,const ImageRGBA& textureImageSpringls);
 	template<class T, int C, ImageType I> void draw(
-			const GLTexture<T, C, I>& imageTexture, CameraParameters& camera,
+			const GLTexture<T, C, I>& imageTextureFg,
+			const GLTexture<T, C, I>& imageTextureBg, CameraParameters& camera,
 			const box2px& bounds, const box2px& viewport, const RGBAf& tint =
 					RGBAf(1, 1, 1, 1)) {
-		begin().set("matcapTextureIso", matcapTextureIso, 0).set("matcapTextureSpringls", matcapTextureSpringls, 1).set("textureImage",
-				imageTexture, 1).set("depthBufferSize",
-				imageTexture.dimensions()).set("bounds", bounds).set("viewport",
-				viewport).set("tint", tint).draw(imageTexture).end();
-		begin().set("textureImage",
-				imageTexture, 1).set("depthBufferSize",
-				imageTexture.dimensions()).set("bounds", bounds).set("viewport",
-				viewport).set("tint", tint).draw(imageTexture).end();
-
+		begin().set("matcapTextureIso", matcapTextureIso, 0).set("matcapTextureSpringls", matcapTextureSpringls, 1).set("textureImageFg",
+				imageTextureFg, 2).set("textureImageBg",
+						imageTextureBg, 3).set("depthBufferSize",
+				imageTextureFg.dimensions()).set("bounds", bounds).set("viewport",
+				viewport).set("tint", tint).draw(imageTextureFg).end();
 	}
 	template<class T, int C, ImageType I> void draw(
-			const GLTexture<T, C, I>& imageTexture, CameraParameters& camera,
+			const GLTexture<T, C, I>& imageTextureFg,
+			const GLTexture<T, C, I>& imageTextureBg,CameraParameters& camera,
 			const float2& location, const float2& dimensions,
 			const box2px& viewport, const RGBAf& tint = RGBAf(1, 1, 1, 1)) {
-		begin().set("matcapTextureIso", matcapTextureIso, 0).set("matcapTextureSpringls", matcapTextureIso, 1).set("textureImage",
-				imageTexture, 2).set("depthBufferSize",
-				imageTexture.dimensions()).set("bounds",
+		begin().set("matcapTextureIso", matcapTextureIso, 0).set("matcapTextureSpringls", matcapTextureSpringls, 1).set("textureImageFg",
+				imageTextureFg, 2).set("textureImageBg",
+						imageTextureBg, 3).set("depthBufferSize",
+				imageTextureFg.dimensions()).set("bounds",
 				box2px(location, dimensions)).set("viewport", viewport).set(
-				"tint", tint).draw(imageTexture).end();
+				"tint", tint).draw(imageTextureFg).end();
 	}
 };
 

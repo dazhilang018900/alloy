@@ -39,7 +39,10 @@ protected:
 	aly::GLFrameBuffer particleBuffer;
 	aly::GLFrameBuffer isosurfBuffer;
 	aly::DepthAndNormalShader depthAndNormalShader;
-	aly::MatcapShader matcapShader;
+	aly::MatcapShader matcapShaderIso;
+	aly::MatcapShader matcapShaderParticles;
+	aly::MatcapShader matcapShaderSpringls;
+	aly::SpringlShader springlShader;
 	aly::ImageShader imageShader;
 	aly::ParticleDepthShader particleShader;
 	aly::Camera camera;
@@ -51,7 +54,6 @@ protected:
     bool showSpringls;
     bool showIsoSurface;
     bool showTracking;
-    aly::Color color;
 public:
 	Springls3DEx();
 	bool init(aly::Composite& rootNode);

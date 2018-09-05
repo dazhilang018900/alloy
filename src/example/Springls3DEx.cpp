@@ -25,15 +25,16 @@
 #include <AlloyDistanceField.h>
 using namespace aly;
 Springls3DEx::Springls3DEx() :
-		Application(1024 * 2, 600 * 2, "Spring Level Set 3D"), matcapShader(
-				getFullPath("images/JG_Silver.png")), imageShader(
-				ImageShader::Filter::SMALL_BLUR), running(false), simulation(
-				std::shared_ptr < ManifoldCache3D > (new ManifoldCache3D())) {
+		Application(1920,1080, "Spring Level Set 3D"),
+		matcapShaderIso(getFullPath("images/JG_Red.png")),matcapShaderParticles(getFullPath("images/matcap/00005.png")),
+		matcapShaderSpringls(getFullPath("images/JG_Silver.png")),
+		springlShader(getFullPath("images/JG_Red.png"),getFullPath("images/JG_Silver.png")),
+		imageShader(ImageShader::Filter::SMALL_BLUR),
+		running(false), simulation(std::shared_ptr < ManifoldCache3D > (new ManifoldCache3D())) {
 	showIsoSurface = true;
 	showSpringls = true;
-	showParticles = false;
+	showParticles = true;
 	showTracking = false;
-	color = Color(255, 0, 0);
 }
 bool Springls3DEx::init(Composite& rootNode) {
 	box3f renderBBox = box3f(float3(-0.5f, -0.5f, -0.5f),
@@ -235,7 +236,6 @@ bool Springls3DEx::init(Composite& rootNode) {
 	controls->addCheckBox("Springls", showSpringls);
 	controls->addCheckBox("Particles", showParticles);
 	controls->addCheckBox("Tracking", showTracking);
-	controls->addColorField("Color", color);
 	controls->setAlwaysShowVerticalScrollBar(false);
 	controls->setScrollEnabled(false);
 	controls->backgroundColor = MakeColor(getContext()->theme.DARKER);
@@ -295,18 +295,25 @@ void Springls3DEx::draw(AlloyContext* context) {
 	}
 	glEnable(GL_BLEND);
 	glEnable(GL_DEPTH_TEST);
-	if (showIsoSurface) {
-		matcapShader.draw(isosurfBuffer.getTexture(), camera,
+	glClear(GL_DEPTH_BUFFER_BIT|GL_COLOR_BUFFER_BIT);
+	if(showIsoSurface&&showSpringls){
+		springlShader.draw(springlsBuffer.getTexture(),isosurfBuffer.getTexture(), camera,
 				renderRegion->getBounds() * context->pixelRatio,
 				context->getViewport(), RGBAf(1.0f));
-	}
-	if (showSpringls) {
-		matcapShader.draw(springlsBuffer.getTexture(), camera,
-				renderRegion->getBounds() * context->pixelRatio,
-				context->getViewport(), RGBAf(1.0f));
+	} else {
+		if (showIsoSurface) {
+			matcapShaderIso.draw(isosurfBuffer.getTexture(), camera,
+					renderRegion->getBounds() * context->pixelRatio,
+					context->getViewport(), RGBAf(1.0f));
+		}
+		if (showSpringls) {
+			matcapShaderSpringls.draw(springlsBuffer.getTexture(), camera,
+					renderRegion->getBounds() * context->pixelRatio,
+					context->getViewport(), RGBAf(1.0f));
+		}
 	}
 	if (showParticles) {
-		matcapShader.draw(particleBuffer.getTexture(), camera,
+		matcapShaderParticles.draw(particleBuffer.getTexture(), camera,
 				renderRegion->getBounds() * context->pixelRatio,
 				context->getViewport(), RGBAf(1.0f));
 	}
