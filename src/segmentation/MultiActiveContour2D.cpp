@@ -125,6 +125,7 @@ namespace aly {
 	}
 	void MultiActiveContour2D::cleanup() {
 		if (cache.get() != nullptr)cache->clear();
+
 	}
 	void MultiActiveContour2D::setInitial(const Image1i& labels) {
 		this->initialLabels = labels;

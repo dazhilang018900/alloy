@@ -84,6 +84,7 @@ namespace aly {
 		float getSwapLevelSetValue(int i, int j, int l) const;
 
 	public:
+		Breadcrumbs2D crumbs;
 		MultiActiveContour2D(const std::shared_ptr<ManifoldCache2D>& cache=nullptr);
 		MultiActiveContour2D(const std::string& name,const std::shared_ptr<ManifoldCache2D>& cache = nullptr);
 		void setCurvature(float c) {

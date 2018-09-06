@@ -37,10 +37,12 @@ namespace aly {
 		static float SPRING_CONSTANT;
 		static float SHARPNESS;
 	protected:
-		std::shared_ptr<Matcher2f> matcher;
+		std::shared_ptr<Locator2f> locator;
 		aly::Vector2f oldCorrespondences;
 		std::array<Vector2f, 4> oldVelocities;
 		aly::Vector2f oldVertexes;
+		aly::Vector2f oldParticles;
+		aly::Vector2f oldNormals;
 		std::vector<int> oldLabels;
 		aly::Image1f unsignedLevelSet;
 		std::vector<std::vector<uint32_t>> nearestNeighbors;

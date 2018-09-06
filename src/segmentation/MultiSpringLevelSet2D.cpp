@@ -188,7 +188,7 @@ namespace aly {
 		return pt;
 	}
 	void MultiSpringLevelSet2D::updateNearestNeighbors(float maxDistance) {
-		matcher.reset(new Matcher2f(contour.vertexes));
+		locator.reset(new Locator2f(contour.vertexes));
 		nearestNeighbors.clear();
 		nearestNeighbors.resize(contour.vertexes.size(), std::vector<uint32_t>());
 		int N = (int)contour.vertexes.size();
@@ -197,23 +197,23 @@ namespace aly {
 			float2 pt0 = contour.vertexes[i];
 			float2 pt1 = contour.vertexes[i + 1];
 			int l1=contour.particleLabels[i / 2];
-			std::vector<std::pair<size_t, float>> result;
-			matcher->closest(pt0, maxDistance, result);
+			std::vector<float2i> result;
+			locator->closest(pt0, maxDistance, result);
 			for (auto pr : result) {
-				if ((int)pr.first != i && (int)pr.first != i + 1) {
-					int l2 = contour.particleLabels[pr.first / 2];
+				if ((int)pr.index != i && (int)pr.index != i + 1) {
+					int l2 = contour.particleLabels[pr.index / 2];
 					if (l2 == l1) {
-						nearestNeighbors[i].push_back((uint32_t)pr.first);
+						nearestNeighbors[i].push_back((uint32_t)pr.index);
 						break;
 					}
 				}
 			}
-			matcher->closest(pt1, maxDistance, result);
+			locator->closest(pt1, maxDistance, result);
 			for (auto pr : result) {
-				if ((int)pr.first != i && (int)pr.first != i + 1) {
-					int l2 = contour.particleLabels[pr.first / 2];
+				if ((int)pr.index != i && (int)pr.index != i + 1) {
+					int l2 = contour.particleLabels[pr.index / 2];
 					if (l2 == l1) {
-						nearestNeighbors[i + 1].push_back((uint32_t)pr.first);
+						nearestNeighbors[i + 1].push_back((uint32_t)pr.index);
 						break;
 					}
 				}
@@ -247,6 +247,7 @@ namespace aly {
 
 								if (unsignedLevelSet(pt.x, pt.y).x > 0.5f*(NEAREST_NEIGHBOR_DISTANCE + EXTENT)) {
 									contour.particles.push_back(pt);
+									contour.particleTracking.push_back(-1);
 									contour.particleLabels.push_back(int1(l));
 									for (Vector2f& vel : contour.velocities) {
 										vel.push_back(float2(0.0f));
@@ -271,96 +272,122 @@ namespace aly {
 		return fillCount;
 	}
 	void MultiSpringLevelSet2D::updateTracking(float maxDistance) {
-		int tries = 0;
-		int invalid = 0;
-		do {
-			invalid = 0;
-			matcher.reset(new Matcher2f(oldVertexes));
+		//int tries = 0;
+		//int invalid = 0;
+		const int E = 2;
+		const float planeThreshold=std::cos(ToRadians(80.0f));
+		//do {
+			//invalid = 0;
+			locator.reset(new Locator2f(oldVertexes));
 			std::vector<int> retrack;
-			for (size_t i = 0;i < contour.particles.size();i++) {
-				if (std::isinf(contour.correspondence[i].x)) {
-					retrack.push_back((int)i);
+			for (size_t i = 0; i < contour.particles.size(); i++) {
+				if (std::isinf(contour.correspondence[i].x)
+						|| contour.particleTracking[i] < 0) {
+					retrack.push_back((int) i);
 				}
 			}
-			int N = (int)retrack.size();
-			for (int i = 0;i < N;i++) {
+			int N = (int) retrack.size();
+			for (int i = 0; i < N; i++) {
 				int pid = retrack[i];
-				int eid1 = pid * 2;
-				int eid2 = pid * 2 + 1;
+				int eid1 = pid * E;
+				int eid2 = pid * E + 1;
 				int l = contour.particleLabels[pid];
+				float d;
+				float2 pt = contour.particles[pid];
+				float2 norm = contour.normals[pid];
 				float2 pt0 = contour.vertexes[eid1];
 				float2 pt1 = contour.vertexes[eid2];
-				std::vector<std::pair<size_t, float>> result;
+				std::array<float2, 4> velocities;
+				float dmin = 1E30f;
+				int bestMatch = -1;
+				std::vector<float2i> result;
 				float2 q1(std::numeric_limits<float>::infinity());
 				float2 q2(std::numeric_limits<float>::infinity());
-				matcher->closest(pt0, maxDistance, result);
-				std::array<float2, 4> velocities;
+				locator->closest(pt0, maxDistance, result); //Query against vertex ends
 				for (auto pr : result) {
-					q1 = oldCorrespondences[pr.first / 2];
-					if (!std::isinf(q1.x)&&oldLabels[pr.first / 2]==l) {
-						for (int nn = 0;nn < 4;nn++) {
-							velocities[nn] = oldVelocities[nn][pr.first / 2];
+					int qid = pr.index / E;
+					q1 = oldCorrespondences[qid];
+					float2 nnorm = oldNormals[qid];
+					if (dot(norm, nnorm) > planeThreshold) {
+						d = distance(oldParticles[qid], pt);
+						if (d < dmin) {
+							bestMatch = qid;
+							dmin = d;
 						}
-						break;
+
+						if (!std::isinf(q1.x)&&oldLabels[qid]==l) {
+							for (int nn = 0; nn < 4; nn++) {
+								velocities[nn] = oldVelocities[nn][qid];
+							}
+							break;
+						}
 					}
 				}
 				result.clear();
-				matcher->closest(pt1, maxDistance, result);
+				locator->closest(pt1, maxDistance, result);
 				for (auto pr : result) {
-					q2 = oldCorrespondences[pr.first / 2];
-					if (!std::isinf(q2.x) && oldLabels[pr.first / 2] == l) {
-						for (int nn = 0;nn < 4;nn++) {
-							velocities[nn] += oldVelocities[nn][pr.first / 2];
+					int qid = pr.index / E;
+					q2 = oldCorrespondences[qid];
+					float2 nnorm = oldNormals[qid];
+					if (dot(norm, nnorm) > planeThreshold) {
+						d = distance(oldParticles[qid], pt);
+						if (d < dmin) {
+							bestMatch = qid;
+							dmin = d;
 						}
-						break;
+						if (!std::isinf(q2.x)&&oldLabels[qid]==l) {
+							for (int nn = 0; nn < 4; nn++) {
+								velocities[nn] += oldVelocities[nn][qid]; //add velocity from second end
+							}
+							break;
+						}
 					}
 				}
-
+				if ( contour.particleTracking[pid] < 0&& bestMatch >= 0) {
+					contour.particleTracking[pid] = bestMatch;
+				}
 				if (!std::isinf(q1.x)) {
 					if (!std::isinf(q2.x)) {
-						for (int nn = 0;nn < 4;nn++) {
-							contour.velocities[nn][pid] = 0.5f*velocities[nn];
-							oldVelocities[nn].push_back(0.5f*velocities[nn]);
+						for (int nn = 0; nn < 4; nn++) {
+							contour.velocities[nn][pid] = 0.5f * velocities[nn];
+							oldVelocities[nn].push_back(0.5f * velocities[nn]); //Average velocities so that they are not counted twice
 						}
-
-						q1 = traceInitial(0.5f*(q1 + q2));
+						q1 = traceInitial(0.5f * (q1 + q2));
 						contour.correspondence[pid] = q1;
-						oldCorrespondences.push_back(q1);
-
-						oldVertexes.push_back(pt0);
-						oldVertexes.push_back(pt1);
-						oldLabels.push_back(int1(l));
-					}
-					else {
-						for (int nn = 0;nn < 4;nn++) {
+						//oldCorrespondences.push_back(q1);
+						//oldVertexes.push_back(pt0);
+						//oldVertexes.push_back(pt1);
+						//oldParticles.push_back(pt);
+						//oldNormals.push_back(norm);
+					} else {
+						for (int nn = 0; nn < 4; nn++) {
 							contour.velocities[nn][pid] = velocities[nn];
-							oldVelocities[nn].push_back(velocities[nn]);
+							oldVelocities[nn].push_back(velocities[nn]); //Only one velocity sample
 						}
 						contour.correspondence[pid] = q1;
-						oldCorrespondences.push_back(q1);
-						oldVertexes.push_back(pt0);
-						oldVertexes.push_back(pt1);
-						oldLabels.push_back(int1(l));
-
+						//oldCorrespondences.push_back(q1);
+						//oldVertexes.push_back(pt0);
+						//oldVertexes.push_back(pt1);
+						//oldParticles.push_back(pt);
+						//oldNormals.push_back(norm);
 					}
-				}
-				else if (!std::isinf(q2.x)) {
-					for (int nn = 0;nn < 4;nn++) {
+				} else if (!std::isinf(q2.x)) {
+					for (int nn = 0; nn < 4; nn++) {
 						contour.velocities[nn][pid] = velocities[nn];
-						oldVelocities[nn].push_back(velocities[nn]);
+						oldVelocities[nn].push_back(velocities[nn]); //only one velocity sample
 					}
 					contour.correspondence[pid] = q2;
-					oldCorrespondences.push_back(q2);
-					oldLabels.push_back(int1(l));
-					oldVertexes.push_back(pt0);
-					oldVertexes.push_back(pt1);
-				}
-				else {
-					invalid++;
-				}
+					//oldCorrespondences.push_back(q2);
+					//oldVertexes.push_back(pt0);
+					//oldVertexes.push_back(pt1);
+					//oldParticles.push_back(pt);
+					//oldNormals.push_back(norm);
+				}// else {
+				//	invalid++;
+				//}
 			}
-			tries++;
-		} while (invalid > 0 && tries<4);
+		//	tries++;
+		//} while (invalid > 0 && tries < 4);
 	}
 	int MultiSpringLevelSet2D::contract() {
 		int contractCount = 0;
@@ -369,6 +396,7 @@ namespace aly {
 		Vector2f points;
 		Vector2f normals;
 		Vector2f correspondence;
+		std::vector<int> tracking;
 		std::array<Vector2f, 4> velocities;
 		particles.data.reserve(contour.particles.size());
 		points.data.reserve(contour.vertexes.size());
@@ -393,6 +421,7 @@ namespace aly {
 				for (int nn = 0;nn < 4;nn++) {
 					velocities[nn].push_back(contour.velocities[nn][i]);
 				}
+				tracking.push_back(contour.particleTracking[i]);
 				correspondence.push_back(contour.correspondence[i]);
 			}
 			else {
@@ -406,6 +435,7 @@ namespace aly {
 			contour.velocities = velocities;
 			contour.particleLabels = particleLabels;
 			contour.correspondence = correspondence;
+			contour.particleTracking = tracking;
 			contour.setDirty(true);
 		}
 		return contractCount;
@@ -786,10 +816,15 @@ namespace aly {
 			vel.resize(contour.particles.size());
 		}
 		contour.correspondence = contour.particles;
+		contour.particleTracking.resize(contour.particles.size());
+		for (int n = 0; n < contour.particles.size(); n++) {
+			contour.particleTracking[n] = n;
+		}
 		contour.updateNormals();
 		contour.setDirty(true);
 		if (cache.get() != nullptr) {
 			Manifold2D* contour = getManifold();
+			crumbs.addTime(contour->particles);
 			contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR << "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 		}
 		if (unsignedShader.get() == nullptr) {
@@ -814,6 +849,7 @@ namespace aly {
 	}
 	void MultiSpringLevelSet2D::cleanup() {
 		MultiActiveContour2D::cleanup();
+		crumbs.clear();
 	}
 	bool MultiSpringLevelSet2D::stepInternal() {
 		double remaining = timeStep;
@@ -831,9 +867,15 @@ namespace aly {
 			}
 			if (resampleEnabled) {
 				oldVertexes = contour.vertexes;
+				oldParticles = contour.particles;
+				oldNormals = contour.normals;
 				oldCorrespondences = contour.correspondence;
 				oldVelocities = contour.velocities;
 				oldLabels = contour.particleLabels;
+				contour.particleTracking.resize(contour.particles.size());
+				for (int n = 0; n < contour.particleTracking.size(); n++) {
+					contour.particleTracking[n] = n;
+				}
 				contract();
 				updateNearestNeighbors();
 				int fillCount = 0;
@@ -862,6 +904,12 @@ namespace aly {
 		simulationIteration++;
 		if (cache.get() != nullptr) {
 			Manifold2D* contour = getManifold();
+			std::vector<float2i>& old = crumbs.addTime(
+					contour->particleTracking.size());
+			for (int n = 0; n < contour->particleTracking.size(); n++) {
+				int idx = contour->particleTracking[n];
+				old[n] = float2i(contour->particles[n], idx);
+			}
 			contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR << "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 			cache->set((int)simulationIteration, *contour);
 		}

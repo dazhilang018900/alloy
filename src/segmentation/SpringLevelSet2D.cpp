@@ -353,12 +353,12 @@ int SpringLevelSet2D::fill() {
 	return fillCount;
 }
 void SpringLevelSet2D::updateTracking(float maxDistance) {
-	int tries = 0;
-	int invalid = 0;
+	//int tries = 0;
+	//int invalid = 0;
 	const int E = 2;
 	const float planeThreshold=std::cos(ToRadians(80.0f));
-	do {
-		invalid = 0;
+	//do {
+		//invalid = 0;
 		locator.reset(new Locator2f(oldVertexes));
 		std::vector<int> retrack;
 		for (size_t i = 0; i < contour.particles.size(); i++) {
@@ -423,7 +423,7 @@ void SpringLevelSet2D::updateTracking(float maxDistance) {
 					}
 				}
 			}
-			if (tries == 0 && contour.particleTracking[pid] < 0&& bestMatch >= 0) {
+			if ( contour.particleTracking[pid] < 0&& bestMatch >= 0) {
 				contour.particleTracking[pid] = bestMatch;
 			}
 			if (!std::isinf(q1.x)) {
@@ -434,22 +434,22 @@ void SpringLevelSet2D::updateTracking(float maxDistance) {
 					}
 					q1 = traceInitial(0.5f * (q1 + q2));
 					contour.correspondence[pid] = q1;
-					oldCorrespondences.push_back(q1);
-					oldVertexes.push_back(pt0);
-					oldVertexes.push_back(pt1);
-					oldParticles.push_back(pt);
-					oldNormals.push_back(norm);
+					//oldCorrespondences.push_back(q1);
+					//oldVertexes.push_back(pt0);
+					//oldVertexes.push_back(pt1);
+					//oldParticles.push_back(pt);
+					//oldNormals.push_back(norm);
 				} else {
 					for (int nn = 0; nn < 4; nn++) {
 						contour.velocities[nn][pid] = velocities[nn];
 						oldVelocities[nn].push_back(velocities[nn]); //Only one velocity sample
 					}
 					contour.correspondence[pid] = q1;
-					oldCorrespondences.push_back(q1);
-					oldVertexes.push_back(pt0);
-					oldVertexes.push_back(pt1);
-					oldParticles.push_back(pt);
-					oldNormals.push_back(norm);
+					//oldCorrespondences.push_back(q1);
+					//oldVertexes.push_back(pt0);
+					//oldVertexes.push_back(pt1);
+					//oldParticles.push_back(pt);
+					//oldNormals.push_back(norm);
 				}
 			} else if (!std::isinf(q2.x)) {
 				for (int nn = 0; nn < 4; nn++) {
@@ -457,17 +457,17 @@ void SpringLevelSet2D::updateTracking(float maxDistance) {
 					oldVelocities[nn].push_back(velocities[nn]); //only one velocity sample
 				}
 				contour.correspondence[pid] = q2;
-				oldCorrespondences.push_back(q2);
-				oldVertexes.push_back(pt0);
-				oldVertexes.push_back(pt1);
-				oldParticles.push_back(pt);
-				oldNormals.push_back(norm);
-			} else {
-				invalid++;
-			}
+				//oldCorrespondences.push_back(q2);
+				//oldVertexes.push_back(pt0);
+				//oldVertexes.push_back(pt1);
+				//oldParticles.push_back(pt);
+				//oldNormals.push_back(norm);
+			}// else {
+			//	invalid++;
+			//}
 		}
-		tries++;
-	} while (invalid > 0 && tries < 4);
+	//	tries++;
+	//} while (invalid > 0 && tries < 4);
 }
 int SpringLevelSet2D::contract() {
 	int contractCount = 0;
@@ -939,8 +939,7 @@ bool SpringLevelSet2D::stepInternal() {
 			int idx = contour->particleTracking[n];
 			old[n] = float2i(contour->particles[n], idx);
 		}
-		contour->setFile(
-				MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
+		contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 		cache->set((int) simulationIteration, *contour);
 	}
 	return (simulationTime < simulationDuration);

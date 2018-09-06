@@ -167,8 +167,6 @@ void SpringLevelSet3D::updateNearestNeighbors(float maxDistance) {
 	nearestNeighbors.clear();
 	if (contour.vertexes.size() == 0)
 		return;
-	std::cout << "Update Neartest Neighbors " << maxDistance << " "
-			<< contour.vertexes.size() << std::endl;
 	locator.reset(new Locator3f(contour.vertexes));
 	nearestNeighbors.resize(contour.vertexes.size(),
 			std::vector<SpringlEdge>());
@@ -211,6 +209,7 @@ void SpringLevelSet3D::updateNearestNeighbors(float maxDistance) {
 			}
 		}
 	}
+	/*
 	std::vector<int> histogram(MAX_NEAREST_NEIGHBORS + 1, 0);
 	for (auto nbrs : nearestNeighbors) {
 		int sz = nbrs.size();
@@ -221,6 +220,7 @@ void SpringLevelSet3D::updateNearestNeighbors(float maxDistance) {
 				<< histogram[b] * 100 / (float) nearestNeighbors.size() << "%"
 				<< std::endl;
 	}
+	*/
 }
 void SpringLevelSet3D::refineContour(aly::Mesh& isosurf, int iterations,
 		float proximity, float stepSize) {
@@ -292,7 +292,7 @@ void SpringLevelSet3D::refineContour(aly::Mesh& isosurf, int iterations,
 int SpringLevelSet3D::fill() {
 	//std::vector<float> distanceErrors;
 	//Add Shrink wrap step to move iso-surface really close to previous point cloud.
-	std::vector<int> histogram(11, 0);
+	//std::vector<int> histogram(11, 0);
 	int fillCount = 0;
 	float d;
 	Locator3f matcher(contour.vertexes);
@@ -335,7 +335,7 @@ int SpringLevelSet3D::fill() {
 						float3(std::numeric_limits<float>::infinity()));
 				fillCount++;
 			}
-			histogram[aly::clamp((int) aly::round(d * 10), 0, 10)]++;
+			//histogram[aly::clamp((int) aly::round(d * 10), 0, 10)]++;
 		}
 	} else if (contour.meshType == MeshType::Quad) {
 		for (int n = 0; n < contour.quadIndexes.size(); n++) {
@@ -380,25 +380,26 @@ int SpringLevelSet3D::fill() {
 						float3(std::numeric_limits<float>::infinity()));
 				fillCount++;
 			}
-			histogram[aly::clamp((int) aly::round(d * 10), 0, 10)]++;
+			//histogram[aly::clamp((int) aly::round(d * 10), 0, 10)]++;
 		}
 	}
 	std::cout << "Fill " << fillCount << std::endl;
+	/*
 	for (int n = 0; n < histogram.size(); n++) {
 		std::cout << std::setw(4) << n / 10.0f << ":: "
 				<< histogram[n] * 100 / (float) contour.quadIndexes.size()
 				<< "%" << std::endl;
 	}
+	*/
 	return fillCount;
 }
 void SpringLevelSet3D::updateTracking(float maxDistance) {
-	int tries = 0;
-	int invalid = 0;
+	//int tries = 0;
+	//int invalid = 0;
 	const int E = (contour.meshType == MeshType::Triangle) ? 3 : 4;
-
 	const float planeThreshold = std::cos(ToRadians(80.0f));
-	do {
-		invalid = 0;
+	//do {
+		//invalid = 0;
 		locator.reset(new Locator3f(oldVertexes));
 		std::vector<int> retrack;
 		for (size_t i = 0; i < contour.particles.size(); i++) {
@@ -408,7 +409,6 @@ void SpringLevelSet3D::updateTracking(float maxDistance) {
 			}
 		}
 		int N = (int) retrack.size();
-		std::cout << "Update tracking "<<N << std::endl;
 		for (int i = 0; i < N; i++) {
 			int pid = retrack[i];
 			float d;
@@ -447,7 +447,7 @@ void SpringLevelSet3D::updateTracking(float maxDistance) {
 				}
 				result.clear();
 			}
-			if (tries == 0 && contour.particleTracking[pid] < 0&& bestMatch >= 0) {
+			if ( contour.particleTracking[pid] < 0 && bestMatch >= 0) {
 				contour.particleTracking[pid] = bestMatch;
 			}
 			float count = q.w;
@@ -456,22 +456,24 @@ void SpringLevelSet3D::updateTracking(float maxDistance) {
 				for (int nn = 0; nn < 4; nn++) {
 					v = velocities[nn] / count;
 					contour.velocities[nn][pid] = v;
-					oldVelocities[nn].push_back(v); //Average velocities so that they are not counted twice
+					//oldVelocities[nn].push_back(v); //Average velocities so that they are not counted twice
 				}
 				q = float4(traceInitial(q.xyz()), 1.0f);
 				contour.correspondence[pid] = q.xyz();
+				/*
 				oldCorrespondences.push_back(q.xyz());
 				for (int e = 0; e < E; e++) {
 					oldVertexes.push_back(contour.vertexes[pid * E + e]);
 				}
 				oldParticles.push_back(pt);
 				oldNormals.push_back(norm);
-			} else {
-				invalid++;
-			}
+				*/
+			}// else {
+			//	invalid++;
+			//}
 		}
-		tries++;
-	} while (invalid > 0 && tries < 4);
+		//tries++;
+	//} while (invalid > 0 && tries < 4);
 }
 int SpringLevelSet3D::contract() {
 	int contractCount = 0;
@@ -779,7 +781,6 @@ float SpringLevelSet3D::advect(float maxStep) {
 	Vector3f f2(N);
 	Vector3f f3(N);
 	Vector3f f4(N);
-	std::cout << "Advect " << maxStep << " " << N << std::endl;
 	if (contour.meshType == MeshType::Triangle) {
 #pragma omp parallel for
 		for (int i = 0; i < N; i++) {
@@ -1110,7 +1111,6 @@ bool SpringLevelSet3D::init() {
 void SpringLevelSet3D::relax() {
 	const int maxIterations = 8;
 	const float timeStep = 0.1f;
-	std::cout << "Relax" << std::endl;
 	updateNearestNeighbors();
 	for (int i = 0; i < maxIterations; i++) {
 		relax(timeStep);
@@ -1123,10 +1123,8 @@ bool SpringLevelSet3D::stepInternal() {
 	double remaining = timeStep;
 	double t = 0.0;
 	const int evolveIterations = 8;
-	std::cout << "Step Internal " << simulationIteration << std::endl;
 	do {
 		float timeStep = advect(std::min(0.33333f, (float) remaining));
-		std::cout << "Time Step " << timeStep << std::endl;
 		t += (double) timeStep;
 		if (resampleEnabled) {
 			relax();
@@ -1184,6 +1182,7 @@ bool SpringLevelSet3D::stepInternal() {
 		remaining = timeStep - t;
 	} while (remaining > 1E-5f);
 	updateSurface();
+	/*
 	contour.stashSpringls(
 			MakeDesktopFile(
 					MakeString() << "springls" << std::setw(4)
@@ -1200,6 +1199,7 @@ bool SpringLevelSet3D::stepInternal() {
 					MakeString() << "correspondence" << std::setw(4)
 							<< std::setfill('0') << simulationIteration
 							<< ".ply"));
+	*/
 	//WriteVolumeToFile(MakeDesktopFile(MakeString()<<"unsigned"<<std::setw(4)<<std::setfill('0')<<simulationIteration<<".xml"),unsignedLevelSet);
 	//WriteVolumeToFile(MakeDesktopFile(MakeString()<<"signed"<<std::setw(4)<<std::setfill('0')<<simulationIteration<<".xml"),levelSet);
 	simulationTime += t;

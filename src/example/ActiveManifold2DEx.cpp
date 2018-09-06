@@ -356,49 +356,6 @@ bool ActiveManifold2DEx::init(Composite& rootNode) {
 									nvgStroke(nvg);
 								}
 
-								if (0.02f*scale > 0.5f&&simulation->crumbs.size()>0) {
-									Breadcrumbs2D& crumbs=simulation->crumbs;
-									int T=std::min((int)crumbs.size(),timelineSlider->getTimeValue().toInteger());
-									nvgFillColor(nvg, Color(220,220,220));
-									nvgStrokeColor(nvg, Color(200,200,200));
-									nvgStrokeWidth(nvg, 0.02f*scale);
-									for(int t=1;t<T;t++) {
-										int N=crumbs.size(t);
-										for (int n = 0;n < N;n++) {
-											float2i qt = crumbs(t,n);
-											if (qt.index>=0) {
-												float2 pt = qt + float2(0.5f);
-												pt.x = pt.x / (float)img.width;
-												pt.y = pt.y / (float)img.height;
-												pt = pt*bounds.dimensions + bounds.position;
-												nvgBeginPath(nvg);
-												nvgMoveTo(nvg, pt.x, pt.y);
-												qt = crumbs(t-1,qt.index);
-												pt = qt + float2(0.5f);
-												pt.x = pt.x / (float)img.width;
-												pt.y = pt.y / (float)img.height;
-												pt = pt*bounds.dimensions + bounds.position;
-												nvgLineTo(nvg, pt.x, pt.y);
-												nvgStroke(nvg);
-											}
-										}
-									}
-									for(int t=0;t<T;t++) {
-										int N=crumbs.size(t);
-										for (int n = 0;n < N;n++) {
-											float2i qt = crumbs(t,n);
-											if (qt.index>=0) {
-												float2 pt = qt + float2(0.5f);
-												pt.x = pt.x / (float)img.width;
-												pt.y = pt.y / (float)img.height;
-												pt = pt*bounds.dimensions + bounds.position;
-												nvgBeginPath(nvg);
-												nvgRect(nvg, pt.x-0.025f*scale, pt.y-0.025f*scale, 0.04f*scale, 0.04f*scale);
-												nvgFill(nvg);
-											}
-										}
-									}
-								}
 								if (0.04f*scale > 0.5f&&contour->particles.size()== contour->correspondence.size()) {
 									nvgStrokeColor(nvg, matchColor);
 									nvgStrokeWidth(nvg, 0.04f*scale);
@@ -420,6 +377,7 @@ bool ActiveManifold2DEx::init(Composite& rootNode) {
 										}
 									}
 								}
+
 								nvgFillColor(nvg, lineColor.toSemiTransparent(0.5f));
 								nvgStrokeColor(nvg, lineColor);
 								nvgStrokeWidth(nvg, lineWidth.toFloat());
@@ -444,6 +402,49 @@ bool ActiveManifold2DEx::init(Composite& rootNode) {
 									nvgClosePath(nvg);
 									nvgFill(nvg);
 									nvgStroke(nvg);
+								}
+								if (0.04f*scale > 0.5f&&simulation->crumbs.size()>0) {
+									Breadcrumbs2D& crumbs=simulation->crumbs;
+									int T=std::min((int)crumbs.size(),timelineSlider->getTimeValue().toInteger()+1);
+									nvgFillColor(nvg, Color(220,220,220));
+									nvgStrokeColor(nvg, Color(200,200,200));
+									nvgStrokeWidth(nvg, 0.03f*scale);
+									for(int t=std::max(1,T-8);t<T;t++) {
+										int N=crumbs.size(t);
+										for (int n = 0; n < N; n++) {
+											float2i qt = crumbs(t,n);
+											if (qt.index>=0) {
+												float2 pt = qt + float2(0.5f);
+												pt.x = pt.x / (float)img.width;
+												pt.y = pt.y / (float)img.height;
+												pt = pt*bounds.dimensions + bounds.position;
+												nvgBeginPath(nvg);
+												nvgMoveTo(nvg, pt.x, pt.y);
+												qt = crumbs(t-1,qt.index);
+												pt = qt + float2(0.5f);
+												pt.x = pt.x / (float)img.width;
+												pt.y = pt.y / (float)img.height;
+												pt = pt*bounds.dimensions + bounds.position;
+												nvgLineTo(nvg, pt.x, pt.y);
+												nvgStroke(nvg);
+											}
+										}
+									}
+									for(int t=std::max(0,T-8);t<T;t++) {
+										int N=crumbs.size(t);
+										for (int n = 0;n < N;n++) {
+											float2i qt = crumbs(t,n);
+											if (qt.index>=0) {
+												float2 pt = qt + float2(0.5f);
+												pt.x = pt.x / (float)img.width;
+												pt.y = pt.y / (float)img.height;
+												pt = pt*bounds.dimensions + bounds.position;
+												nvgBeginPath(nvg);
+												nvgRect(nvg, pt.x-0.02f*scale, pt.y-0.02f*scale, 0.04f*scale, 0.04f*scale);
+												nvgFill(nvg);
+											}
+										}
+									}
 								}
 								if (0.1f*scale > 0.5f) {
 									nvgStrokeColor(nvg, springlColor);
