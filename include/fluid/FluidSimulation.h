@@ -116,7 +116,7 @@ protected:
 	void addSimulationObject(SimulationObject* obj);
 	virtual bool stepInternal() override;
 public:
-	Manifold2D* getContour();
+	Manifold2D* getManifold();
 	inline float getFluidVoxelSize() const {
 		return fluidVoxelSize;
 	}

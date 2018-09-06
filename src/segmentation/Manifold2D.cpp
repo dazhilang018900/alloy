@@ -25,6 +25,33 @@
 #include <cereal/archives/json.hpp>
 #include <cereal/archives/portable_binary.hpp>
 namespace aly {
+std::vector<float2i>& Breadcrumbs2D::addTime(size_t sz){
+			history.push_back(std::vector<float2i>(sz,float2i(float2(0.0f),-1)));
+			return history.back();
+		}
+		std::vector<float2i>& Breadcrumbs2D::addTime(const Vector2f& current){
+			std::vector<float2i> next(current.size());
+			for(int i=0;i<current.size();i++){
+				next[i]=float2i(current[i],i);
+			}
+			history.push_back(next);
+			return history.back();
+		}
+		const std::vector<float2i>& Breadcrumbs2D::getTime(size_t sz) const {
+			return history[sz];
+		}
+		std::vector<float2i>& Breadcrumbs2D::getTime(size_t sz){
+			return history[sz];
+		}
+		std::vector<float2i>& Breadcrumbs2D::getLastTime(){
+			return history.back();
+		}
+		size_t Breadcrumbs2D::size() const {
+			return history.size();
+		}
+		size_t Breadcrumbs2D::size(size_t t) const {
+			return history[t].size();
+		}
 void Manifold2D::operator=(const Manifold2D &c) {
 	onScreen = c.onScreen;
 	context = c.context;
@@ -165,7 +192,7 @@ void Manifold2D::update() {
 		if (glIsBuffer(labelBuffer) == GL_FALSE)
 			throw std::runtime_error("Error: Unable to create label buffer");
 		glBufferData(GL_ARRAY_BUFFER, sizeof(GLint) * particleLabels.size(),
-				particleLabels.ptr(), GL_STATIC_DRAW);
+				particleLabels.data(), GL_STATIC_DRAW);
 		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	} else {
 		if (glIsBuffer(labelBuffer) == GL_TRUE)
@@ -174,6 +201,7 @@ void Manifold2D::update() {
 	context->end();
 	dirty = false;
 }
+
 void Manifold2D::updateNormals() {
 	normals.resize(vertexes.size() / 2);
 #pragma omp parallel for

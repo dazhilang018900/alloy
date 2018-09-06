@@ -216,7 +216,7 @@ void ActiveContour3DEx::draw(AlloyContext* context) {
 			if (elem.get() != nullptr) {
 				contour = elem->getContour().get();
 			} else {
-				contour = simulation.getSurface();
+				contour = simulation.getManifold();
 			}
 			isosurface.vertexLocations = contour->vertexLocations;
 			isosurface.vertexNormals = contour->vertexNormals;

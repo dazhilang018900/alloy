@@ -29,7 +29,6 @@ namespace aly {
 	float MultiSpringLevelSet2D::SPRING_CONSTANT = 0.3f;
 	float MultiSpringLevelSet2D::EXTENT = 0.5f;
 	float MultiSpringLevelSet2D::SHARPNESS = 5.0f;
-	
 	MultiSpringLevelSet2D::MultiSpringLevelSet2D(const std::shared_ptr<ManifoldCache2D>& cache) :MultiActiveContour2D("Multi Spring Level Set 2D", cache), resampleEnabled(true) {
 	}
 	void MultiSpringLevelSet2D::setSpringls(const Vector2f& particles, const Vector2f& points) {
@@ -276,7 +275,7 @@ namespace aly {
 		int invalid = 0;
 		do {
 			invalid = 0;
-			matcher.reset(new Matcher2f(oldPoints));
+			matcher.reset(new Matcher2f(oldVertexes));
 			std::vector<int> retrack;
 			for (size_t i = 0;i < contour.particles.size();i++) {
 				if (std::isinf(contour.correspondence[i].x)) {
@@ -328,8 +327,8 @@ namespace aly {
 						contour.correspondence[pid] = q1;
 						oldCorrespondences.push_back(q1);
 
-						oldPoints.push_back(pt0);
-						oldPoints.push_back(pt1);
+						oldVertexes.push_back(pt0);
+						oldVertexes.push_back(pt1);
 						oldLabels.push_back(int1(l));
 					}
 					else {
@@ -339,8 +338,8 @@ namespace aly {
 						}
 						contour.correspondence[pid] = q1;
 						oldCorrespondences.push_back(q1);
-						oldPoints.push_back(pt0);
-						oldPoints.push_back(pt1);
+						oldVertexes.push_back(pt0);
+						oldVertexes.push_back(pt1);
 						oldLabels.push_back(int1(l));
 
 					}
@@ -353,8 +352,8 @@ namespace aly {
 					contour.correspondence[pid] = q2;
 					oldCorrespondences.push_back(q2);
 					oldLabels.push_back(int1(l));
-					oldPoints.push_back(pt0);
-					oldPoints.push_back(pt1);
+					oldVertexes.push_back(pt0);
+					oldVertexes.push_back(pt1);
 				}
 				else {
 					invalid++;
@@ -366,7 +365,7 @@ namespace aly {
 	int MultiSpringLevelSet2D::contract() {
 		int contractCount = 0;
 		Vector2f particles;
-		Vector1i particleLabels;
+		std::vector<int> particleLabels;
 		Vector2f points;
 		Vector2f normals;
 		Vector2f correspondence;
@@ -374,7 +373,7 @@ namespace aly {
 		particles.data.reserve(contour.particles.size());
 		points.data.reserve(contour.vertexes.size());
 		normals.data.reserve(contour.normals.size());
-		particleLabels.data.reserve(contour.vertexes.size());
+		particleLabels.reserve(contour.vertexes.size());
 		for (int i = 0;i<(int)contour.particles.size();i++) {
 			float2 pt = contour.particles[i];
 			int l = contour.particleLabels[i];
@@ -790,7 +789,7 @@ namespace aly {
 		contour.updateNormals();
 		contour.setDirty(true);
 		if (cache.get() != nullptr) {
-			Manifold2D* contour = getContour();
+			Manifold2D* contour = getManifold();
 			contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR << "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 		}
 		if (unsignedShader.get() == nullptr) {
@@ -831,7 +830,7 @@ namespace aly {
 				updateSignedLevelSet();
 			}
 			if (resampleEnabled) {
-				oldPoints = contour.vertexes;
+				oldVertexes = contour.vertexes;
 				oldCorrespondences = contour.correspondence;
 				oldVelocities = contour.velocities;
 				oldLabels = contour.particleLabels;
@@ -862,7 +861,7 @@ namespace aly {
 		simulationTime += t;
 		simulationIteration++;
 		if (cache.get() != nullptr) {
-			Manifold2D* contour = getContour();
+			Manifold2D* contour = getManifold();
 			contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR << "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 			cache->set((int)simulationIteration, *contour);
 		}

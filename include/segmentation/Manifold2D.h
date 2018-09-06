@@ -42,39 +42,16 @@ namespace aly {
 		template<class Archive> void load(Archive & archive) {
 			archive(CEREAL_NVP(history));
 		}
-		const float2i& operator()(const size_t t,const size_t i) const {
-			return history[t][i];
-		}
-		float2i& operator()(const size_t t,const size_t i) {
-			return history[t][i];
-		}
-		std::vector<float2i>& addTime(size_t sz){
-			history.push_back(std::vector<float2i>(sz,float2i(float2(0.0f),-1)));
-			return history.back();
-		}
-		std::vector<float2i>& addTime(const Vector2f& current){
-			std::vector<float2i> next(current.size());
-			for(int i=0;i<current.size();i++){
-				next[i]=float2i(current,i);
-			}
-			history.push_back(next);
-			return history.back();
-		}
-		const std::vector<float2i>& getTime(size_t sz) const {
-			return history[sz];
-		}
-		std::vector<float2i>& getTime(size_t sz){
-			return history[sz];
-		}
-		std::vector<float2i>& getLastTime(){
-			return history.back();
-		}
-		size_t size() const {
-			return history.size();
-		}
-		size_t size(size_t t) const {
-			return history[t].size();
-		}
+		const float2i& operator()(const size_t t,const size_t i) const ;
+		float2i& operator()(const size_t t,const size_t i);
+		void clear();
+		std::vector<float2i>& addTime(size_t sz);
+		std::vector<float2i>& addTime(const Vector2f& current);
+		const std::vector<float2i>& getTime(size_t sz) const;
+		std::vector<float2i>& getTime(size_t sz);
+		std::vector<float2i>& getLastTime();
+		size_t size() const;
+		size_t size(size_t t) const;
 	};
 	class Manifold2D {
 	protected:
@@ -88,14 +65,14 @@ namespace aly {
 		bool dirty;
 		int vertexCount;
 	public:
-		Breadcrumbs2D crumbs;
 		std::vector<std::vector<uint32_t>> indexes;
 		Vector2f vertexLocations;
 		Vector2f particles;
 		Vector2f vertexes;
 		Vector2f normals;
-		Vector1i particleLabels;
-		Vector1i vertexLabels;
+		std::vector<int> particleLabels;
+		std::vector<int> vertexLabels;
+		std::vector<int> particleTracking;
 		ImageRGBA overlay;
 		FluidParticles2D fluidParticles;
 		std::array<Vector2f,4> velocities;
@@ -124,11 +101,11 @@ namespace aly {
 				std::string imageFile = GetFileWithoutExtension(file) + ".png";
 				WriteImageToFile(imageFile, overlay);
 			}
-			archive( CEREAL_NVP(vertexLocations),CEREAL_NVP(file), CEREAL_NVP(indexes), CEREAL_NVP(particles), CEREAL_NVP(vertexes),  CEREAL_NVP(normals), CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels),CEREAL_NVP(correspondence), CEREAL_NVP(clusterCenters),CEREAL_NVP(clusterColors),CEREAL_NVP(fluidParticles));
+			archive( CEREAL_NVP(vertexLocations),CEREAL_NVP(file), CEREAL_NVP(indexes), CEREAL_NVP(particles), CEREAL_NVP(vertexes),  CEREAL_NVP(normals), CEREAL_NVP(vertexLabels),CEREAL_NVP(particleTracking), CEREAL_NVP(particleLabels),CEREAL_NVP(correspondence), CEREAL_NVP(clusterCenters),CEREAL_NVP(clusterColors),CEREAL_NVP(fluidParticles));
 		}
 		template<class Archive> void load(Archive & archive) 
 		{
-			archive(CEREAL_NVP(vertexLocations), CEREAL_NVP(file), CEREAL_NVP(indexes), CEREAL_NVP(particles), CEREAL_NVP(vertexes), CEREAL_NVP(normals), CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels), CEREAL_NVP(correspondence),CEREAL_NVP(clusterCenters), CEREAL_NVP(clusterColors),CEREAL_NVP(fluidParticles));
+			archive(CEREAL_NVP(vertexLocations), CEREAL_NVP(file), CEREAL_NVP(indexes), CEREAL_NVP(particles), CEREAL_NVP(vertexes), CEREAL_NVP(normals), CEREAL_NVP(vertexLabels), CEREAL_NVP(particleTracking), CEREAL_NVP(particleLabels), CEREAL_NVP(correspondence),CEREAL_NVP(clusterCenters), CEREAL_NVP(clusterColors),CEREAL_NVP(fluidParticles));
 			std::string imageFile = GetFileWithoutExtension(file) + ".png";
 			if (FileExists(imageFile)) {
 				ReadImageFromFile(imageFile, overlay);

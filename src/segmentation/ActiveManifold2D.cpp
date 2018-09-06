@@ -70,7 +70,7 @@ bool ActiveManifold2D::updateContour() {
 	}
 	return false;
 }
-Manifold2D* ActiveManifold2D::getContour() {
+Manifold2D* ActiveManifold2D::getManifold() {
 	return &contour;
 }
 Image1f& ActiveManifold2D::getLevelSet() {

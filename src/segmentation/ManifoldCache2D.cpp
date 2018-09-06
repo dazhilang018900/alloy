@@ -48,7 +48,7 @@ void CacheElement2D::set(const Manifold2D& springl) {
 	contourFile = springl.getFile();
 	loaded = true;
 }
-std::shared_ptr<Manifold2D> CacheElement2D::getContour() {
+std::shared_ptr<Manifold2D> CacheElement2D::getManifold() {
 	load();
 	return contour;
 }

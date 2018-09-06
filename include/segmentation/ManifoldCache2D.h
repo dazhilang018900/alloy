@@ -48,7 +48,7 @@ namespace aly {
 		void load();
 		void unload();
 		void set(const Manifold2D& springl);
-		std::shared_ptr<Manifold2D> getContour();
+		std::shared_ptr<Manifold2D> getManifold();
 	};
 	struct CacheCompare2D {
 		inline bool operator() (const std::pair<uint64_t, int>& lhs, const std::pair<uint64_t, int>& rhs) const {

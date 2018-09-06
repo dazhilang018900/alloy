@@ -40,8 +40,8 @@ namespace aly {
 		std::shared_ptr<Matcher2f> matcher;
 		aly::Vector2f oldCorrespondences;
 		std::array<Vector2f, 4> oldVelocities;
-		aly::Vector2f oldPoints;
-		aly::Vector1i oldLabels;
+		aly::Vector2f oldVertexes;
+		std::vector<int> oldLabels;
 		aly::Image1f unsignedLevelSet;
 		std::vector<std::vector<uint32_t>> nearestNeighbors;
 		virtual bool stepInternal() override;

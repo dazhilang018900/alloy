@@ -872,7 +872,7 @@ void FluidSimulation::mapParticlesToGrid() {
 		}
 	}
 }
-Manifold2D * FluidSimulation::getContour() {
+Manifold2D * FluidSimulation::getManifold() {
 	return &contour;
 }
 bool FluidSimulation::updateContour() {

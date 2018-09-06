@@ -85,7 +85,7 @@ bool ActiveManifold3D::updateSurface() {
 	}
 	return false;
 }
-Manifold3D* ActiveManifold3D::getSurface() {
+Manifold3D* ActiveManifold3D::getManifold() {
 	return &contour;
 }
 Volume1f& ActiveManifold3D::getLevelSet() {

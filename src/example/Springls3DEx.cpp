@@ -24,6 +24,7 @@
 #include <example/Springls3DEx.h>
 #include <AlloyDistanceField.h>
 using namespace aly;
+
 Springls3DEx::Springls3DEx() :
 		Application(1920,1080, "Spring Level Set 3D"),
 		matcapShaderIso(getFullPath("images/JG_Red.png")),matcapShaderParticles(getFullPath("images/matcap/00005.png")),
@@ -273,7 +274,7 @@ void Springls3DEx::draw(AlloyContext* context) {
 			if (elem.get() != nullptr) {
 				contour = elem->getContour().get();
 			} else {
-				contour = simulation.getSurface();
+				contour = simulation.getManifold();
 			}
 			isosurface.vertexLocations = contour->vertexLocations;
 			isosurface.vertexNormals = contour->vertexNormals;

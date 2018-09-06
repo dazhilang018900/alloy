@@ -240,10 +240,10 @@ bool ActiveManifold2DEx::init(Composite& rootNode) {
 		std::shared_ptr<CacheElement2D> elem = this->cache->get(timelineSlider->getTimeValue().toInteger());
 		Manifold2D* contour;
 		if (elem.get() != nullptr) {
-			contour = elem->getContour().get();
+			contour = elem->getManifold().get();
 		}
 		else {
-			contour = simulation->getContour();
+			contour = simulation->getManifold();
 
 		}
 		NVGcontext* nvg = context->nvgContext;

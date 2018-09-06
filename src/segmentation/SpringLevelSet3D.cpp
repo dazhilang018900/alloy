@@ -1086,7 +1086,7 @@ bool SpringLevelSet3D::init() {
 	contour.updateNormals();
 	contour.setDirty(true);
 	if (cache.get() != nullptr) {
-		Manifold3D* contour = getSurface();
+		Manifold3D* contour = getManifold();
 		contour->setFile(
 				MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 	}
@@ -1188,7 +1188,7 @@ bool SpringLevelSet3D::stepInternal() {
 	simulationTime += t;
 	simulationIteration++;
 	if (cache.get() != nullptr) {
-		Manifold3D* contour = getSurface();
+		Manifold3D* contour = getManifold();
 		contour->setFile(
 				MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 		cache->set((int) simulationIteration, *contour);

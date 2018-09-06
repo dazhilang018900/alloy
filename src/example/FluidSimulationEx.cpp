@@ -188,7 +188,7 @@ bool FluidSimulationEx::init(Composite& rootNode) {
 					CoordPX(img.width * downScale, img.height * downScale)));
 	Application::addListener(resizeableRegion.get());
 	overlayGlyph = AlloyApplicationContext()->createImageGlyph(
-			simulation->getContour()->overlay, false);
+			simulation->getManifold()->overlay, false);
 	DrawPtr drawContour =
 			DrawPtr(
 					new Draw("Contour Draw", CoordPX(0.0f, 0.0f),
@@ -198,10 +198,10 @@ bool FluidSimulationEx::init(Composite& rootNode) {
 								std::shared_ptr<CacheElement2D> elem = this->cache->get(currentTime);
 								Manifold2D* contour;
 								if (elem.get() != nullptr) {
-									contour = elem->getContour().get();
+									contour = elem->getManifold().get();
 								}
 								else {
-									contour = simulation->getContour();
+									contour = simulation->getManifold();
 								}
 								if (currentTime != lastSimTime&&contour->overlay.size()>0) {
 									overlayGlyph->set(contour->overlay, context);

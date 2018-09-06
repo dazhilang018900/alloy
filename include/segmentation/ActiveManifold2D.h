@@ -113,7 +113,7 @@ public:
 	void setAdvection(float c) {
 		advectionParam.setValue(c);
 	}
-	Manifold2D* getContour();
+	Manifold2D* getManifold();
 	Image1f& getLevelSet();
 	const Image1f& getLevelSet() const;
 	virtual bool init() override;

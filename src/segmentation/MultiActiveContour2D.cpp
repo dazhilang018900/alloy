@@ -85,6 +85,7 @@ namespace aly {
 	bool MultiActiveContour2D::updateContour() {
 		if (requestUpdateContour) {
 			//std::lock_guard<std::mutex> lockMe(contourLock);
+
 			isoContour.solve(levelSet, labelImage, contour.vertexLocations, contour.vertexLabels, contour.indexes, 0.0f, (preserveTopology) ? TopologyRule2D::Connect4 : TopologyRule2D::Unconstrained, Winding::Clockwise);
 			requestUpdateContour = false;
 			return true;
@@ -93,7 +94,7 @@ namespace aly {
 			return false;
 		}
 	}
-	Manifold2D* MultiActiveContour2D::getContour() {
+	Manifold2D* MultiActiveContour2D::getManifold() {
 		return &contour;
 	}
 	MultiActiveContour2D::MultiActiveContour2D(const std::shared_ptr<ManifoldCache2D>& cache) :Simulation("Active Contour 2D"),

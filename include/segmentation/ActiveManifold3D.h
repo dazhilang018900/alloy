@@ -107,7 +107,7 @@ public:
 	void setAdvection(float c) {
 		advectionParam.setValue(c);
 	}
-	Manifold3D* getSurface();
+	Manifold3D* getManifold();
 	Volume1f& getLevelSet();
 	const Volume1f& getLevelSet() const;
 	virtual bool init() override;

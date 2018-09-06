@@ -241,11 +241,11 @@ bool MultiActiveManifold2DEx::init(Composite& rootNode) {
 		std::shared_ptr<CacheElement2D> elem = this->cache->get(timelineSlider->getTimeValue().toInteger());
 		Manifold2D* contour;
 		if (elem.get() != nullptr) {
-			contour = elem->getContour().get();
+			contour = elem->getManifold().get();
 			
 		}
 		else {
-			contour = simulation->getContour();
+			contour = simulation->getManifold();
 		}
 
 		NVGcontext* nvg = context->nvgContext;
@@ -357,7 +357,7 @@ bool MultiActiveManifold2DEx::init(Composite& rootNode) {
 			bool firstTime = true;
 			for (uint32_t idx : curve) {
 				if (firstTime) {
-					int l = contour->vertexLabels[idx].x;
+					int l = contour->vertexLabels[idx];
 					nvgFillColor(nvg, simulation->getColor(l).toSemiTransparent(0.5f));
 					nvgStrokeColor(nvg, simulation->getColor(l));
 				}
@@ -442,7 +442,7 @@ bool MultiActiveManifold2DEx::init(Composite& rootNode) {
 				pt.x = pt.x / (float)img.width;
 				pt.y = pt.y / (float)img.height;
 				pt = pt*bounds.dimensions + bounds.position;
-				nvgFillColor(nvg, simulation->getColor(contour->particleLabels[n].x));
+				nvgFillColor(nvg, simulation->getColor(contour->particleLabels[n]));
 				nvgBeginPath(nvg);
 				nvgEllipse(nvg, pt.x, pt.y, 0.1f*scale, 0.1f*scale);
 				nvgFill(nvg);

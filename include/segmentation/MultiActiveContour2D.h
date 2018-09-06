@@ -129,7 +129,7 @@ namespace aly {
 			advectionParam.setValue(f);
 			vecFieldImage = img;
 		}
-		Manifold2D* getContour();
+		Manifold2D* getManifold();
 		int getNumLabels() const {
 			return (int)labelList.size();
 		}

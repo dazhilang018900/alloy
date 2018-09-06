@@ -149,17 +149,18 @@ bool MagicPixelEx::init(Composite& rootNode) {
 			CoordPX(img.width * downScale, img.height * downScale)));
 	Application::addListener(resizeableRegion.get());
 	ImageGlyphPtr imageGlyph = AlloyApplicationContext()->createImageGlyph(img, false);
-	overlayGlyph = AlloyApplicationContext()->createImageGlyph(simulation->getContour()->overlay, false);
+	overlayGlyph = AlloyApplicationContext()->createImageGlyph(simulation->getManifold()->overlay, false);
 	DrawPtr drawContour = DrawPtr(new Draw("Contour Draw", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f), [this](AlloyContext* context, const box2px& bounds) {
 		int currentTime = timelineSlider->getTimeValue().toInteger();
 		std::shared_ptr<CacheElement2D> elem = this->cache->get(currentTime);
 		Manifold2D* contour;
 		if (elem.get() != nullptr) {
-			contour = elem->getContour().get();
+			contour = elem->getManifold().get();
 		}
 		else {
-			contour = simulation->getContour();
+			contour = simulation->getManifold();
 		}
+
 		if (currentTime != lastSimTime) {
 			overlayGlyph->set(contour->overlay, context);
 			lastSimTime = currentTime;
