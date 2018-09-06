@@ -240,18 +240,23 @@ void SpringLevelSet3D::refineContour(aly::Mesh& isosurf, int iterations,
 			std::vector < size_t > result;
 			bool add = false;
 			float w = 0.0f;
+			float d;
 			newPoints[n] = pt;
 			matcher.closest(pt, proximity, result);
 			if (result.size() > 0) {
 				float3 closest = pt;
 				float3 closestNorm = norm;
+				float dmin = 1E30f;
 				for (size_t nbr : result) {
 					float3 nnorm = contour.normals[nbr];
 					if (dot(norm, nnorm) > planeThreshold) {
-						closest = contour.particles[nbr];
-						closestNorm = nnorm;
-						add = true;
-						break;
+						d = distance(contour.particles[nbr],pt);
+						if (d < dmin) {
+							closest = contour.particles[nbr];
+							closestNorm = nnorm;
+							add = true;
+							dmin = d;
+						}
 					}
 				}
 				if (add) {

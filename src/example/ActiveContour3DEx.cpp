@@ -18,6 +18,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 #include "segmentation/Phantom.h"
 #include <AlloyGradientVectorFlow.h>
 #include <example/ActiveContour3DEx.h>

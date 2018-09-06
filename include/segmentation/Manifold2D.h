@@ -32,6 +32,13 @@
 #include <AlloyLocator.h>
 namespace aly {
 	class AlloyContext;
+	struct Orphan2D {
+		float2 particle;
+		float2 normal;
+		float2 correspondence;
+		Orphan2D(float2 pt,float2 norm,float2 correspondence):particle(pt),normal(norm),correspondence(correspondence){
+		}
+	};
 	class Breadcrumbs2D{
 	protected:
 		std::vector<std::vector<float2i>> history;

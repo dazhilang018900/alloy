@@ -35,7 +35,6 @@ std::vector<float2i>& Breadcrumbs2D::addTime(size_t sz) {
 	history.push_back(std::vector < float2i > (sz, float2i(float2(0.0f), -1)));
 	return history.back();
 }
-
 std::vector<float2i>& Breadcrumbs2D::addTime(const Vector2f& current) {
 	std::vector<float2i> next(current.size());
 	for (int i = 0; i < current.size(); i++) {
