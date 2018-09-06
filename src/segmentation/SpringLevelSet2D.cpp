@@ -307,6 +307,7 @@ namespace aly {
 							contour.vertexes.push_back(contour.vertexLocations[prev]);
 							contour.vertexes.push_back(contour.vertexLocations[idx]);
 							contour.correspondence.push_back(float2(std::numeric_limits<float>::infinity()));
+							contour.particleTracking.push_back(-1);
 							fillCount++;
 						}
 						if (idx == first) break;
@@ -322,72 +323,10 @@ namespace aly {
 
 		return fillCount;
 	}
-	/*
 	void SpringLevelSet2D::updateTracking(float maxDistance) {
 		int tries = 0;
 		int invalid = 0;
-		const float planeThreshold = std::cos(ToRadians(80.0f));
-		MaxFlow graph(oldParticles.size()+contour.particles.size());
-		int offset=oldParticles.size();
-		float sinkCap=1.0f;
-		float sourceCap=1.0f;
-		//Matcher2f matcherTarget(contour.particles);
-		Matcher2f matcherSource(oldParticles);
-		std::vector<float2i>& crumbs=contour.crumbs.getTime();
-		for (int n = 0;n < offset;n++) {
-
-			float2 p=oldParticles[n];
-			std::vector<std::pair<size_t, float>> result;
-			matcherTarget.closest(p, maxDistance, result);
-			for (auto pr : result) {
-				int nn=pr.first;
-				if(dot(contour.normals[nn],oldNormals[n])>planeThreshold&&!std::isinf(oldCorrespondences[n].x)){
-					float d=clamp(distance(p,contour.particles[nn])/maxDistance,0.0f,1.0f);
-					graph.addEdge(int2(n, nn+offset),d,0);
-				}
-			}
-
-			graph.addSourceCapacity(n,sourceCap);
-		}
-		for(int n=0;n<contour.particles.size();n++){
-			float2 p=contour.particles[n];
-			if(std::isinf(contour.correspondence[n].x)){
-
-				crumbs[n]=float2i(p,-1);
-				std::vector<std::pair<size_t, float>> result;
-				matcherSource.closest(p, maxDistance, result);
-				for (auto pr : result) {
-					int nn=pr.first;
-					if(!std::isinf(oldCorrespondences[nn].x)){
-						float d=clamp(distance(p,oldParticles[nn])/maxDistance,0.0f,1.0f);
-						graph.addEdge(int2(nn, n+offset),d,d);
-					}
-				}
-
-			} else {
-				graph.addEdge(int2(n, n+offset),0,0);
-			}
-			graph.addSinkCapacity(n+offset,sinkCap);
-		}
-		graph.solve();
-		for (std::shared_ptr<MaxFlow::Edge> edge : graph.getEdges()) {
-			if (edge->forwardCapacity <= MaxFlow::ZERO_TOLERANCE || edge->reverseCapacity <= MaxFlow::ZERO_TOLERANCE) {
-				int tid=edge->target->id-offset;
-				int sid=edge->source->id;
-				std::cout<<"SOURCE "<<sid<<" "<<tid<<std::endl;
-				for(int k=0;k<4;k++){
-					contour.velocities[k][tid]=oldVelocities[k][sid];
-				}
-				contour.correspondence[tid]=oldCorrespondences[sid];
-				crumbs[tid].index=sid;
-			}
-		}
-	}
-	*/
-	void SpringLevelSet2D::updateTracking(float maxDistance) {
-		int tries = 0;
-		int invalid = 0;
-		//Matcher2f particleMatcher(oldParticles);
+		Matcher2f particleMatcher(oldParticles);
 		do {
 			invalid = 0;
 			Matcher2f vertexMatcher(oldVertexes);
@@ -406,12 +345,10 @@ namespace aly {
 				float2 pt0 = contour.vertexes[eid1];
 				float2 pt1 = contour.vertexes[eid2];
 				std::vector<std::pair<size_t, float>> result;
-				/*
 				size_t idx=particleMatcher.closest(contour.particles[pid]);
 				if(idx!=Matcher2f::NO_POINT_FOUND){
 					contour.particleTracking[pid]=idx;
 				}
-				*/
 				float2 q1(std::numeric_limits<float>::infinity());
 				float2 q2(std::numeric_limits<float>::infinity());
 				vertexMatcher.closest(pt0, maxDistance, result);//Query against vertex ends
@@ -484,6 +421,7 @@ namespace aly {
 		Vector2f points;
 		Vector2f normals;
 		Vector2f correspondence;
+		std::vector<int> tracking;
 		std::array<Vector2f, 4> velocities;
 		particles.data.reserve(contour.particles.size());
 		points.data.reserve(contour.vertexes.size());
@@ -506,6 +444,7 @@ namespace aly {
 					velocities[nn].push_back(contour.velocities[nn][i]);
 				}
 				correspondence.push_back(contour.correspondence[i]);
+				tracking.push_back(contour.particleTracking[i]);
 			}
 			else {
 				contractCount++;
@@ -517,6 +456,7 @@ namespace aly {
 			contour.particles = particles;
 			contour.velocities = velocities;
 			contour.correspondence = correspondence;
+			contour.particleTracking=tracking;
 			contour.setDirty(true);
 		}
 		return contractCount;
@@ -835,10 +775,15 @@ return -(v11*grad / len);
 			vel.resize(contour.particles.size());
 		}
 		contour.correspondence = contour.particles;
+		contour.particleTracking.resize(contour.particles.size());
+		for(int n=0;n<contour.particles.size();n++){
+			contour.particleTracking[n]=n;
+		}
 		contour.updateNormals();
 		contour.setDirty(true);
 		if (cache.get() != nullptr) {
 			Manifold2D* contour = getManifold();
+			crumbs.addTime(contour->particles);
 			contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR << "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 		}
 		if (unsignedShader.get() == nullptr) {
@@ -907,6 +852,13 @@ return -(v11*grad / len);
 		simulationIteration++;
 		if (cache.get() != nullptr) {
 			Manifold2D* contour = getManifold();
+			std::vector<float2i>& old=crumbs.addTime(contour->particleTracking.size());
+			for(int n=0;n<contour->particleTracking.size();n++){
+				int idx=contour->particleTracking[n];
+				if(idx>=0){
+					old[n]=float2i(oldParticles[idx],idx);
+				}
+			}
 			contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR << "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 			cache->set((int)simulationIteration, *contour);
 		}
