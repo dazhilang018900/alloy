@@ -61,10 +61,12 @@ namespace aly {
 		static int MAX_NEAREST_NEIGHBORS;
 
 	protected:
-		std::shared_ptr<Matcher3f> matcher;
+		std::shared_ptr<Locator3f> locator;
 		aly::Vector3f oldCorrespondences;
+		aly::Vector3f oldParticles;
+		aly::Vector3f oldNormals;
+		aly::Vector3f oldVertexes;
 		std::array<Vector3f, 4> oldVelocities;
-		aly::Vector3f oldPoints;
 		aly::Volume1f unsignedLevelSet;
 		std::vector<std::vector<SpringlEdge>> nearestNeighbors;
 		virtual bool stepInternal() override;

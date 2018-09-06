@@ -61,6 +61,42 @@ void WriteContourToFile(const std::string& file, Manifold3D& params) {
 	}
 	params.setFile(file);
 }
+const float3i& Breadcrumbs3D::operator()(const size_t t,const size_t i) const {
+	return history[t][i];
+}
+float3i& Breadcrumbs3D::operator()(const size_t t,const size_t i){
+	return history[t][i];
+}
+std::vector<float3i>& Breadcrumbs3D::addTime(size_t sz) {
+	history.push_back(std::vector < float3i > (sz, float3i(float3(0.0f), -1)));
+	return history.back();
+}
+std::vector<float3i>& Breadcrumbs3D::addTime(const Vector3f& current) {
+	std::vector<float3i> next(current.size());
+	for (int i = 0; i < current.size(); i++) {
+		next[i] = float3i(current[i], i);
+	}
+	history.push_back(next);
+	return history.back();
+}
+void Breadcrumbs3D::clear(){
+	history.clear();
+}
+const std::vector<float3i>& Breadcrumbs3D::getTime(size_t sz) const {
+	return history[sz];
+}
+std::vector<float3i>& Breadcrumbs3D::getTime(size_t sz) {
+	return history[sz];
+}
+std::vector<float3i>& Breadcrumbs3D::getLastTime() {
+	return history.back();
+}
+size_t Breadcrumbs3D::size() const {
+	return history.size();
+}
+size_t Breadcrumbs3D::size(size_t t) const {
+	return history[t].size();
+}
 void Manifold3D::operator=(const Manifold3D &c) {
 	onScreen = c.onScreen;
 	context = c.context;
@@ -75,6 +111,7 @@ void Manifold3D::operator=(const Manifold3D &c) {
 	normals=c.normals;
 	triIndexes=c.triIndexes;
 	quadIndexes=c.quadIndexes;
+	particleTracking=c.particleTracking;
 	file = c.file;
 	particleLabels = c.particleLabels;
 }
@@ -94,6 +131,7 @@ Manifold3D::Manifold3D(const Manifold3D& c) :
 	meshType=c.meshType;
 	triIndexes=c.triIndexes;
 	quadIndexes=c.quadIndexes;
+	particleTracking=c.particleTracking;
 	file = c.file;
 	particleLabels = c.particleLabels;
 }
@@ -147,6 +185,11 @@ Manifold3D::~Manifold3D() {
 		glDeleteVertexArrays(1, &vao);
 		context->end();
 	}
+}
+void Manifold3D::stashCorrespondence(const std::string& file){
+	Mesh mesh;
+	mesh.vertexLocations=correspondence;
+	WriteMeshToFile(file,mesh);
 }
 void Manifold3D::stashSpringls(const std::string& file){
 	Mesh mesh;

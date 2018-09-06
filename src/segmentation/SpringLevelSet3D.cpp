@@ -28,7 +28,7 @@ float SpringLevelSet3D::NEAREST_NEIGHBOR_DISTANCE = std::sqrt(2.0f) * 0.5f;
 float SpringLevelSet3D::PARTICLE_RADIUS = 0.05f;
 float SpringLevelSet3D::REST_RADIUS = 0.1f;
 float SpringLevelSet3D::SPRING_CONSTANT = 0.3f;
-float SpringLevelSet3D::CONTRACT_DISTANCE =  0.625f;
+float SpringLevelSet3D::CONTRACT_DISTANCE = 0.625f;
 float SpringLevelSet3D::EXTENT = 0.5f;
 float SpringLevelSet3D::SHARPNESS = 5.0f;
 float SpringLevelSet3D::FILL_DISTANCE = 0.3f;
@@ -169,7 +169,7 @@ void SpringLevelSet3D::updateNearestNeighbors(float maxDistance) {
 		return;
 	std::cout << "Update Neartest Neighbors " << maxDistance << " "
 			<< contour.vertexes.size() << std::endl;
-	matcher.reset(new Matcher3f(contour.vertexes));
+	locator.reset(new Locator3f(contour.vertexes));
 	nearestNeighbors.resize(contour.vertexes.size(),
 			std::vector<SpringlEdge>());
 	int N = (int) contour.particles.size();
@@ -177,18 +177,18 @@ void SpringLevelSet3D::updateNearestNeighbors(float maxDistance) {
 #pragma omp parallel for
 	for (int n = 0; n < N; n++) {
 		for (int k = 0; k < K; k++) {
-			std::vector<std::pair<size_t, float>> result;
+			std::vector<float3i> result;
 			size_t index = ((size_t) n) * K + k;
 			float3 q = contour.vertexes[index];
-			matcher->closest(q, maxDistance, result);
+			locator->closest(q, maxDistance, result);
 			std::vector<SpringlEdge>& edges = nearestNeighbors[index];
 			std::map<uint32_t, SpringlEdge> nMap;
 			for (auto pr : result) {
-				uint32_t nn = pr.first / K;
+				uint32_t nn = pr.index / K;
 				if (nn != n) {
-					int kk = pr.first - K * nn;
+					int kk = pr.index - K * nn;
 					SpringlEdge edge(nn, kk,
-							DistanceToEdgeSqr(q, contour.vertexes[pr.first],
+							DistanceToEdgeSqr(q, pr,
 									contour.vertexes[nn * K + (kk + 1) % K]));
 					auto pos = nMap.find(nn);
 					if (pos != nMap.end()) {
@@ -227,7 +227,7 @@ void SpringLevelSet3D::refineContour(aly::Mesh& isosurf, int iterations,
 	int N = isosurf.vertexLocations.size();
 	Vector3f& points = isosurf.vertexLocations;
 	Vector3f& normals = isosurf.vertexNormals;
-	Matcher3f matcher(contour.particles);
+	Locator3f matcher(contour.particles);
 	Vector3f newPoints = points;
 	const float planeThreshold = std::cos(ToRadians(80.0f));
 	std::vector < std::unordered_set < uint32_t >> nbrTable;
@@ -237,7 +237,7 @@ void SpringLevelSet3D::refineContour(aly::Mesh& isosurf, int iterations,
 		for (int n = 0; n < N; n++) {
 			float3 pt = points[n];
 			float3 norm = normals[n];
-			std::vector < size_t > result;
+			std::vector<float3i> result;
 			bool add = false;
 			float w = 0.0f;
 			float d;
@@ -247,12 +247,12 @@ void SpringLevelSet3D::refineContour(aly::Mesh& isosurf, int iterations,
 				float3 closest = pt;
 				float3 closestNorm = norm;
 				float dmin = 1E30f;
-				for (size_t nbr : result) {
-					float3 nnorm = contour.normals[nbr];
+				for (float3i nbr : result) {
+					float3 nnorm = contour.normals[nbr.index];
 					if (dot(norm, nnorm) > planeThreshold) {
-						d = distance(contour.particles[nbr],pt);
+						d = distance(nbr, pt);
 						if (d < dmin) {
-							closest = contour.particles[nbr];
+							closest = nbr;
 							closestNorm = nnorm;
 							add = true;
 							dmin = d;
@@ -295,7 +295,7 @@ int SpringLevelSet3D::fill() {
 	std::vector<int> histogram(11, 0);
 	int fillCount = 0;
 	float d;
-	Matcher3f matcher(contour.vertexes);
+	Locator3f matcher(contour.vertexes);
 	if (contour.meshType == MeshType::Triangle) {
 		for (int n = 0; n < contour.triIndexes.size(); n++) {
 			uint3 tri = contour.triIndexes[n];
@@ -303,24 +303,23 @@ int SpringLevelSet3D::fill() {
 					* (contour.vertexLocations[tri.x]
 							+ contour.vertexLocations[tri.y]
 							+ contour.vertexLocations[tri.z]);
-			std::vector<std::pair<size_t, float>> result;
-			matcher.closest(p,NEAREST_NEIGHBOR_DISTANCE, result);
+			std::vector<float3i> result;
+			matcher.closest(p, NEAREST_NEIGHBOR_DISTANCE, result);
 			d = 1E30f;
 			float3 q;
 			for (auto pr : result) {
-				uint32_t nn = pr.first / 3;
+				uint32_t nn = pr.index / 3;
 				float ds = std::sqrt(
-						DistanceToTriangleSqr(p,
-								contour.vertexes[3 * nn],
+						DistanceToTriangleSqr(p, contour.vertexes[3 * nn],
 								contour.vertexes[3 * nn + 1],
-								contour.vertexes[3 * nn + 2],&q));
+								contour.vertexes[3 * nn + 2], &q));
 				if (ds < d) {
 					d = ds;
 				}
 			}
 			if (d > FILL_DISTANCE) {
-
 				contour.particles.push_back(p);
+				contour.particleTracking.push_back(-1);
 				for (Vector3f& vel : contour.velocities) {
 					vel.push_back(float3(0.0f));
 				}
@@ -347,24 +346,24 @@ int SpringLevelSet3D::fill() {
 			float3 v3 = contour.vertexLocations[quad.z];
 			float3 v4 = contour.vertexLocations[quad.w];
 			float3 p = 0.25f * (v1 + v2 + v3 + v4);
-			std::vector<std::pair<size_t, float>> result;
-			matcher.closest(p,NEAREST_NEIGHBOR_DISTANCE, result);
+			std::vector<float3i> result;
+			matcher.closest(p, NEAREST_NEIGHBOR_DISTANCE, result);
 			d = 1E30f;
 			float3 q;
 			for (auto pr : result) {
-				uint32_t nn = pr.first / 4;
+				uint32_t nn = pr.index / 4;
 				float ds = std::sqrt(
-						DistanceToQuadSqr(p,
-								contour.vertexes[4 * nn],
+						DistanceToQuadSqr(p, contour.vertexes[4 * nn],
 								contour.vertexes[4 * nn + 1],
 								contour.vertexes[4 * nn + 2],
-								contour.vertexes[4 * nn + 3],&q));
+								contour.vertexes[4 * nn + 3], &q));
 				if (ds < d) {
 					d = ds;
 				}
 			}
 			if (d > FILL_DISTANCE) {
 				contour.particles.push_back(p);
+				contour.particleTracking.push_back(-1);
 				for (Vector3f& vel : contour.velocities) {
 					vel.push_back(float3(0.0f));
 				}
@@ -395,86 +394,84 @@ int SpringLevelSet3D::fill() {
 void SpringLevelSet3D::updateTracking(float maxDistance) {
 	int tries = 0;
 	int invalid = 0;
-	std::cout << "Update tracking" << std::endl;
+	const int E = (contour.meshType == MeshType::Triangle) ? 3 : 4;
+
+	const float planeThreshold = std::cos(ToRadians(80.0f));
 	do {
 		invalid = 0;
-		matcher.reset(new Matcher3f(oldPoints));
+		locator.reset(new Locator3f(oldVertexes));
 		std::vector<int> retrack;
 		for (size_t i = 0; i < contour.particles.size(); i++) {
-			if (std::isinf(contour.correspondence[i].x)) {
+			if (std::isinf(contour.correspondence[i].x)
+					|| contour.particleTracking[i] < 0) {
 				retrack.push_back((int) i);
 			}
 		}
 		int N = (int) retrack.size();
+		std::cout << "Update tracking "<<N << std::endl;
 		for (int i = 0; i < N; i++) {
 			int pid = retrack[i];
-			float3 pt0 = contour.vertexes[pid * 3];
-			float3 pt1 = contour.vertexes[pid * 3 + 1];
-			float3 pt2 = contour.vertexes[pid * 3 + 2];
-			std::vector<std::pair<size_t, float>> result;
-			float3 q1(std::numeric_limits<float>::infinity());
-			float3 q2(std::numeric_limits<float>::infinity());
-			float3 q3(std::numeric_limits<float>::infinity());
-			matcher->closest(pt0, maxDistance, result);
+			float d;
+			float3 pt = contour.particles[pid];
+			float3 norm = contour.normals[pid];
 			std::array<float3, 4> velocities;
-			for (auto pr : result) {
-				q1 = oldCorrespondences[pr.first / 3];
-				if (!std::isinf(q1.x)) {
-					for (int nn = 0; nn < 4; nn++) {
-						velocities[nn] = oldVelocities[nn][pr.first / 3];
-					}
-					break;
-				}
+			for (int nn = 0; nn < 4; nn++) {
+				velocities[nn]=float3(0.0f);
 			}
-			result.clear();
-			matcher->closest(pt1, maxDistance, result);
-			for (auto pr : result) {
-				q2 = oldCorrespondences[pr.first / 2];
-				if (!std::isinf(q2.x)) {
-					for (int nn = 0; nn < 4; nn++) {
-						velocities[nn] += oldVelocities[nn][pr.first / 3];
+			float3 v;
+			float dmin = 1E30f;
+			int bestMatch = -1;
+			std::vector<float3i> result;
+			float4 q(0.0f);
+			for (int e = 0; e < E; e++) {
+				v = contour.vertexes[pid * E + e];
+				locator->closest(v, maxDistance, result); //Query against vertex ends
+				for (auto pr : result) {
+					int qid = pr.index / E;
+					float3 oldQ = oldCorrespondences[qid];
+					float3 nnorm = oldNormals[qid];
+					if (dot(norm, nnorm) > planeThreshold) {
+						d = distance(oldParticles[qid], pt);
+						if (d < dmin) {
+							bestMatch = qid;
+							dmin = d;
+						}
+						if (!std::isinf(oldQ.x)) {
+							q += float4(oldQ, 1.0f);
+							for (int nn = 0; nn < 4; nn++) {
+								velocities[nn] += oldVelocities[nn][qid];
+							}
+							break;
+						}
 					}
-					break;
 				}
+				result.clear();
 			}
-			/*
-			 if (!std::isinf(q1.x)) {
-			 if (!std::isinf(q2.x) && !std::isinf(q2.x)) {
-			 for (int nn = 0; nn < 4; nn++) {
-			 contour.velocities[nn][pid] = 0.5f * velocities[nn];
-			 oldVelocities[nn].push_back(0.5f * velocities[nn]);
-			 }
-			 q1 = traceInitial(0.33333f * (q1 + q2 + q3));
-			 contour.correspondence[pid] = q1;
-			 oldCorrespondences.push_back(q1);
-			 oldPoints.push_back(pt0);
-			 oldPoints.push_back(pt1);
-			 } else {
-			 for (int nn = 0; nn < 4; nn++) {
-			 contour.velocities[nn][pid] = velocities[nn];
-			 oldVelocities[nn].push_back(velocities[nn]);
-			 }
-			 contour.correspondence[pid] = q1;
-			 oldCorrespondences.push_back(q1);
-			 oldPoints.push_back(pt0);
-			 oldPoints.push_back(pt1);
-			 }
-			 } else if (!std::isinf(q2.x)) {
-			 for (int nn = 0; nn < 4; nn++) {
-			 contour.velocities[nn][pid] = velocities[nn];
-			 oldVelocities[nn].push_back(velocities[nn]);
-			 }
-			 contour.correspondence[pid] = q2;
-			 oldCorrespondences.push_back(q2);
-			 oldPoints.push_back(pt0);
-			 oldPoints.push_back(pt1);
-			 } else {
-			 invalid++;
-			 }*/
+			if (tries == 0 && contour.particleTracking[pid] < 0&& bestMatch >= 0) {
+				contour.particleTracking[pid] = bestMatch;
+			}
+			float count = q.w;
+			if (count > 0) {
+				q = q / count;
+				for (int nn = 0; nn < 4; nn++) {
+					v = velocities[nn] / count;
+					contour.velocities[nn][pid] = v;
+					oldVelocities[nn].push_back(v); //Average velocities so that they are not counted twice
+				}
+				q = float4(traceInitial(q.xyz()), 1.0f);
+				contour.correspondence[pid] = q.xyz();
+				oldCorrespondences.push_back(q.xyz());
+				for (int e = 0; e < E; e++) {
+					oldVertexes.push_back(contour.vertexes[pid * E + e]);
+				}
+				oldParticles.push_back(pt);
+				oldNormals.push_back(norm);
+			} else {
+				invalid++;
+			}
 		}
 		tries++;
 	} while (invalid > 0 && tries < 4);
-
 }
 int SpringLevelSet3D::contract() {
 	int contractCount = 0;
@@ -482,6 +479,7 @@ int SpringLevelSet3D::contract() {
 	Vector3f vertexes;
 	Vector3f normals;
 	Vector3f correspondence;
+	std::vector<int> tracking;
 	std::array<Vector3f, 4> velocities;
 	int N = (int) contour.particles.size();
 	particles.data.reserve(N);
@@ -528,6 +526,7 @@ int SpringLevelSet3D::contract() {
 						velocities[nn].push_back(contour.velocities[nn][i]);
 					}
 					correspondence.push_back(contour.correspondence[i]);
+					tracking.push_back(contour.particleTracking[i]);
 				} else {
 					contractCount++;
 				}
@@ -576,6 +575,7 @@ int SpringLevelSet3D::contract() {
 						velocities[nn].push_back(contour.velocities[nn][i]);
 					}
 					correspondence.push_back(contour.correspondence[i]);
+					tracking.push_back(contour.particleTracking[i]);
 				} else {
 					contractCount++;
 				}
@@ -590,6 +590,7 @@ int SpringLevelSet3D::contract() {
 		contour.particles = particles;
 		contour.velocities = velocities;
 		contour.correspondence = correspondence;
+		contour.particleTracking = tracking;
 		contour.setDirty(true);
 	}
 	std::cout << "Contract " << contractCount << std::endl;
@@ -625,25 +626,25 @@ void SpringLevelSet3D::computeForce(size_t idx, float3& f1, float3& f2,
 		f4 += vecFieldImage(p4.x, p4.y, p4.z) * w;
 		f += vecFieldImage(p.x, p.y, p.z) * w;
 	}
-	/*
-	 float3 k1, k2, k3, k4;
-	 k4 = contour.velocities[2][idx];
-	 k3 = contour.velocities[1][idx];
-	 k2 = contour.velocities[0][idx];
-	 k1 = f;
-	 contour.velocities[3][idx] = k4;
-	 contour.velocities[2][idx] = k3;
-	 contour.velocities[1][idx] = k2;
-	 contour.velocities[0][idx] = k1;
-	 if (simulationIteration >= 4) {
-	 f = (1.0f / 6.0f) * (k1 + 2.0f * k2 + 2.0f * k3 + k4);
-	 } else if (simulationIteration == 3) {
-	 f = (1.0f / 4.0f) * (k1 + 2.0f * k2 + k3);
-	 }
-	 if (simulationIteration == 2) {
-	 f = (1.0f / 2.0f) * (k1 + k2);
-	 }
-	 */
+
+	float3 k1, k2, k3, k4;
+	k4 = contour.velocities[2][idx];
+	k3 = contour.velocities[1][idx];
+	k2 = contour.velocities[0][idx];
+	k1 = f;
+	contour.velocities[3][idx] = k4;
+	contour.velocities[2][idx] = k3;
+	contour.velocities[1][idx] = k2;
+	contour.velocities[0][idx] = k1;
+	if (simulationIteration >= 4) {
+		f = (1.0f / 6.0f) * (k1 + 2.0f * k2 + 2.0f * k3 + k4);
+	} else if (simulationIteration == 3) {
+		f = (1.0f / 4.0f) * (k1 + 2.0f * k2 + k3);
+	}
+	if (simulationIteration == 2) {
+		f = (1.0f / 2.0f) * (k1 + k2);
+	}
+
 	float3 v1 = p1 + f1;
 	float3 v2 = p2 + f2;
 	float3 v3 = p3 + f3;
@@ -688,25 +689,25 @@ void SpringLevelSet3D::computeForce(size_t idx, float3& f1, float3& f2,
 		f3 += vecFieldImage(p3.x, p3.y, p3.z) * w;
 		f += vecFieldImage(p.x, p.y, p.z) * w;
 	}
-	/*
-	 float3 k1, k2, k3, k4;
-	 k4 = contour.velocities[2][idx];
-	 k3 = contour.velocities[1][idx];
-	 k2 = contour.velocities[0][idx];
-	 k1 = f;
-	 contour.velocities[3][idx] = k4;
-	 contour.velocities[2][idx] = k3;
-	 contour.velocities[1][idx] = k2;
-	 contour.velocities[0][idx] = k1;
-	 if (simulationIteration >= 4) {
-	 f = (1.0f / 6.0f) * (k1 + 2.0f * k2 + 2.0f * k3 + k4);
-	 } else if (simulationIteration == 3) {
-	 f = (1.0f / 4.0f) * (k1 + 2.0f * k2 + k3);
-	 }
-	 if (simulationIteration == 2) {
-	 f = (1.0f / 2.0f) * (k1 + k2);
-	 }
-	 */
+
+	float3 k1, k2, k3, k4;
+	k4 = contour.velocities[2][idx];
+	k3 = contour.velocities[1][idx];
+	k2 = contour.velocities[0][idx];
+	k1 = f;
+	contour.velocities[3][idx] = k4;
+	contour.velocities[2][idx] = k3;
+	contour.velocities[1][idx] = k2;
+	contour.velocities[0][idx] = k1;
+	if (simulationIteration >= 4) {
+		f = (1.0f / 6.0f) * (k1 + 2.0f * k2 + 2.0f * k3 + k4);
+	} else if (simulationIteration == 3) {
+		f = (1.0f / 4.0f) * (k1 + 2.0f * k2 + k3);
+	}
+	if (simulationIteration == 2) {
+		f = (1.0f / 2.0f) * (k1 + k2);
+	}
+
 	float3 v1 = p1 + f1;
 	float3 v2 = p2 + f2;
 	float3 v3 = p3 + f3;
@@ -1088,6 +1089,10 @@ bool SpringLevelSet3D::init() {
 		vel.resize(contour.particles.size());
 	}
 	contour.correspondence = contour.particles;
+	contour.particleTracking.resize(contour.particles.size());
+	for (int n = 0; n < contour.particles.size(); n++) {
+		contour.particleTracking[n] = n;
+	}
 	contour.updateNormals();
 	contour.setDirty(true);
 	if (cache.get() != nullptr) {
@@ -1132,17 +1137,19 @@ bool SpringLevelSet3D::stepInternal() {
 		}
 
 		if (resampleEnabled) {
-			oldPoints = contour.particles;
+			oldParticles = contour.particles;
+			oldVertexes = contour.vertexes;
+			oldNormals = contour.normals;
 			oldCorrespondences = contour.correspondence;
 			oldVelocities = contour.velocities;
 			updateUnsignedLevelSet();
 			int fillCount = 0;
 			int tries = 0;
-			std::cout << "Start Fill" << std::endl;
 			{
 				Mesh tmpMesh;
 				std::lock_guard < std::mutex > lockMe(contourLock);
-				isoSurface.solve(levelSet, activeList, tmpMesh, contour.meshType, true,0.0f);
+				isoSurface.solve(levelSet, activeList, tmpMesh,
+						contour.meshType, true, 0.0f);
 				refineContour(tmpMesh, 4, 2.0f, 0.5f);
 				contour.quadIndexes = tmpMesh.quadIndexes;
 				contour.triIndexes = tmpMesh.triIndexes;
@@ -1150,7 +1157,7 @@ bool SpringLevelSet3D::stepInternal() {
 				contour.vertexNormals = tmpMesh.vertexNormals;
 				requestUpdateSurface = false;
 			}
-			fillCount=0;
+			fillCount = 0;
 			do {
 				contract();
 				fillCount = fill();
@@ -1160,7 +1167,7 @@ bool SpringLevelSet3D::stepInternal() {
 			} while (fillCount > 0 && tries < 3); //Continue filling until all gaps are closed
 			contour.updateNormals();
 			contour.setDirty(true);
-			//updateTracking();
+			updateTracking(3*NEAREST_NEIGHBOR_DISTANCE);
 		} else {
 			std::cout << "Update Iso-Surface" << std::endl;
 			std::lock_guard < std::mutex > lockMe(contourLock);
@@ -1186,6 +1193,11 @@ bool SpringLevelSet3D::stepInternal() {
 	contour.stashIsoSurface(
 			MakeDesktopFile(
 					MakeString() << "isosurface" << std::setw(4)
+							<< std::setfill('0') << simulationIteration
+							<< ".ply"));
+	contour.stashCorrespondence(
+			MakeDesktopFile(
+					MakeString() << "correspondence" << std::setw(4)
 							<< std::setfill('0') << simulationIteration
 							<< ".ply"));
 	//WriteVolumeToFile(MakeDesktopFile(MakeString()<<"unsigned"<<std::setw(4)<<std::setfill('0')<<simulationIteration<<".xml"),unsignedLevelSet);
