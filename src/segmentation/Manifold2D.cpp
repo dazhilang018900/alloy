@@ -25,33 +25,43 @@
 #include <cereal/archives/json.hpp>
 #include <cereal/archives/portable_binary.hpp>
 namespace aly {
-std::vector<float2i>& Breadcrumbs2D::addTime(size_t sz){
-			history.push_back(std::vector<float2i>(sz,float2i(float2(0.0f),-1)));
-			return history.back();
-		}
-		std::vector<float2i>& Breadcrumbs2D::addTime(const Vector2f& current){
-			std::vector<float2i> next(current.size());
-			for(int i=0;i<current.size();i++){
-				next[i]=float2i(current[i],i);
-			}
-			history.push_back(next);
-			return history.back();
-		}
-		const std::vector<float2i>& Breadcrumbs2D::getTime(size_t sz) const {
-			return history[sz];
-		}
-		std::vector<float2i>& Breadcrumbs2D::getTime(size_t sz){
-			return history[sz];
-		}
-		std::vector<float2i>& Breadcrumbs2D::getLastTime(){
-			return history.back();
-		}
-		size_t Breadcrumbs2D::size() const {
-			return history.size();
-		}
-		size_t Breadcrumbs2D::size(size_t t) const {
-			return history[t].size();
-		}
+const float2i& Breadcrumbs2D::operator()(const size_t t,const size_t i) const {
+	return history[t][i];
+}
+float2i& Breadcrumbs2D::operator()(const size_t t,const size_t i){
+	return history[t][i];
+}
+std::vector<float2i>& Breadcrumbs2D::addTime(size_t sz) {
+	history.push_back(std::vector < float2i > (sz, float2i(float2(0.0f), -1)));
+	return history.back();
+}
+
+std::vector<float2i>& Breadcrumbs2D::addTime(const Vector2f& current) {
+	std::vector<float2i> next(current.size());
+	for (int i = 0; i < current.size(); i++) {
+		next[i] = float2i(current[i], i);
+	}
+	history.push_back(next);
+	return history.back();
+}
+void Breadcrumbs2D::clear(){
+	history.clear();
+}
+const std::vector<float2i>& Breadcrumbs2D::getTime(size_t sz) const {
+	return history[sz];
+}
+std::vector<float2i>& Breadcrumbs2D::getTime(size_t sz) {
+	return history[sz];
+}
+std::vector<float2i>& Breadcrumbs2D::getLastTime() {
+	return history.back();
+}
+size_t Breadcrumbs2D::size() const {
+	return history.size();
+}
+size_t Breadcrumbs2D::size(size_t t) const {
+	return history[t].size();
+}
 void Manifold2D::operator=(const Manifold2D &c) {
 	onScreen = c.onScreen;
 	context = c.context;

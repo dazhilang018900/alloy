@@ -301,13 +301,13 @@ namespace aly {
 						float2 pt = 0.5f*(contour.vertexLocations[prev] + contour.vertexLocations[idx]);
 						if (unsignedLevelSet(pt.x, pt.y).x > 0.5f*(NEAREST_NEIGHBOR_DISTANCE+EXTENT)) {
 							contour.particles.push_back(pt);
+							contour.particleTracking.push_back(-1);
 							for (Vector2f& vel : contour.velocities) {
 								vel.push_back(float2(0.0f));
 							}
 							contour.vertexes.push_back(contour.vertexLocations[prev]);
 							contour.vertexes.push_back(contour.vertexLocations[idx]);
 							contour.correspondence.push_back(float2(std::numeric_limits<float>::infinity()));
-							contour.particleTracking.push_back(-1);
 							fillCount++;
 						}
 						if (idx == first) break;
@@ -345,10 +345,12 @@ namespace aly {
 				float2 pt0 = contour.vertexes[eid1];
 				float2 pt1 = contour.vertexes[eid2];
 				std::vector<std::pair<size_t, float>> result;
+				/*
 				size_t idx=particleMatcher.closest(contour.particles[pid]);
 				if(idx!=Matcher2f::NO_POINT_FOUND){
 					contour.particleTracking[pid]=idx;
 				}
+				*/
 				float2 q1(std::numeric_limits<float>::infinity());
 				float2 q2(std::numeric_limits<float>::infinity());
 				vertexMatcher.closest(pt0, maxDistance, result);//Query against vertex ends
@@ -855,9 +857,7 @@ return -(v11*grad / len);
 			std::vector<float2i>& old=crumbs.addTime(contour->particleTracking.size());
 			for(int n=0;n<contour->particleTracking.size();n++){
 				int idx=contour->particleTracking[n];
-				if(idx>=0){
-					old[n]=float2i(oldParticles[idx],idx);
-				}
+				old[n]=float2i(contour->particles[n],idx);
 			}
 			contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR << "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 			cache->set((int)simulationIteration, *contour);

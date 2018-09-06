@@ -122,6 +122,7 @@ void ActiveManifold2D::setup(const aly::ParameterPanePtr& pane) {
 void ActiveManifold2D::cleanup() {
 	if (cache.get() != nullptr)
 		cache->clear();
+	crumbs.clear();
 }
 bool ActiveManifold2D::init() {
 	int2 dims = initialLevelSet.dimensions();
@@ -305,7 +306,6 @@ void ActiveManifold2D::advectionMotion(int i, int j, size_t gid) {
 	} else if (forceY < 0) {
 		advection += forceY * DyPos;
 	}
-
 	deltaLevelSet[gid] = -advection + kappa;
 }
 void ActiveManifold2D::applyForces(int i, int j, size_t index, float timeStep) {

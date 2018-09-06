@@ -98,7 +98,6 @@
 	 }
  }
  */
-
 #ifndef EXAMPLE_NAME
 #define EXAMPLE_NAME ""
 #endif

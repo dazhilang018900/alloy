@@ -43,7 +43,6 @@ protected:
 	Number pressureParam;
 	Number curvatureParam;
 	Number targetPressureParam;
-
 	const float MAX_DISTANCE = 3.5f;
 	const int maxLayers = 3;
 	bool requestUpdateContour;
@@ -67,12 +66,12 @@ protected:
 	int addElements();
 	virtual float evolve(float maxStep);
 	void rebuildNarrowBand();
-
 	bool updateContour();
 	void applyForcesTopoRule(int i, int j, int offset, size_t index,
 			float timeStep);
 	virtual bool stepInternal() override;
 public:
+	aly::Breadcrumbs2D crumbs;
 	ActiveManifold2D(const std::shared_ptr<ManifoldCache2D>& cache = nullptr);
 	ActiveManifold2D(const std::string& name,
 			const std::shared_ptr<ManifoldCache2D>& cache = nullptr);

@@ -48,7 +48,6 @@ namespace aly {
 		aly::Vector2f oldParticles;
 		aly::Image1f unsignedLevelSet;
 		std::vector<std::list<uint32_t>> nearestNeighbors;
-		aly::Breadcrumbs2D crumbs;
 		virtual bool stepInternal() override;
 		float2 traceInitial(float2 pt);
 		float2 traceUnsigned(float2 pt);
