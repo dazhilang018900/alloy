@@ -497,7 +497,7 @@ int SpringLevelSet2D::contract() {
 			correspondence.push_back(contour.correspondence[i]);
 			tracking.push_back(contour.particleTracking[i]);
 		} else {
-			orphans.push_back(Orphan2D(pt,contour.normals[i],contour.correspondence[i]));
+			//orphans.push_back(Orphan2D(pt,contour.normals[i],contour.correspondence[i]));
 			contractCount++;
 		}
 	}
