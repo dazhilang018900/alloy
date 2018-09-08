@@ -46,7 +46,7 @@ FluidSimulation::FluidSimulation(const int2& dims, float voxelSize,
 	srand(52372143L);
 	maxLevelSet=2.5f;
 	requestUpdateContour = false;
-	timeStep = 0.5 * fluidVoxelSize;
+	simulationTimeStep = 0.5 * fluidVoxelSize;
 	domainSize = float2(dims[0] * fluidVoxelSize, dims[1] * fluidVoxelSize);
 	simulationDuration = 4.0f;
 }
@@ -373,7 +373,7 @@ void FluidSimulation::pourWater(int limit, float maxDensity) {
 										* fluidVoxelSize);
 				p->mVelocity = float2(0.0,
 						-0.5 * fluidVoxelSize * fluidParticleDiameter
-								/ timeStep);
+								/ simulationTimeStep);
 				p->mNormal = float2(0.0);
 				p->mObjectType = ObjectType::FLUID;
 				p->mDensity = maxDensity;
@@ -385,7 +385,7 @@ void FluidSimulation::pourWater(int limit, float maxDensity) {
 	}
 }
 void FluidSimulation::addExternalForce() {
-	float velocity = timeStep * GRAVITY;
+	float velocity = simulationTimeStep * GRAVITY;
 //Add gravity acceleration to all particles
 	int count = 0;
 #pragma omp parallel for
@@ -409,7 +409,7 @@ void FluidSimulation::advectParticles() {
 	for (int n = 0; n < (int) particles.size(); n++) {
 		FluidParticlePtr& p = particles[n];
 		if (p->mObjectType == ObjectType::FLUID) {
-			p->mLocation += ((float) timeStep)
+			p->mLocation += ((float) simulationTimeStep)
 					* interpolate(contour.fluidParticles.velocityImage, p->mLocation);
 		}
 	}
@@ -508,10 +508,10 @@ bool FluidSimulation::stepInternal() {
 	addExternalForce();
 	solvePicFlip();
 	advectParticles();
-	correctParticles(particles, timeStep, fluidParticleDiameter * fluidVoxelSize);
+	correctParticles(particles, simulationTimeStep, fluidParticleDiameter * fluidVoxelSize);
 	createLevelSet();
 	simulationIteration++;
-	simulationTime = simulationIteration * timeStep;
+	simulationTime = simulationIteration * simulationTimeStep;
 	if (cache.get() != nullptr) {
 		updateContour();
 		contour.setFile(

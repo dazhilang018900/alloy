@@ -26,6 +26,12 @@
 SimulationListener::~SimulationListener(){
 
 }
+void Simulation::setSimulationDuration(double time){
+	simulationDuration=time;
+}
+void Simulation::setTimeStep(double ts){
+	simulationTimeStep=ts;
+}
 bool Simulation::step() {
 	uint64_t iter = simulationIteration;
 	bool ret = stepInternal();
@@ -43,7 +49,7 @@ RecurrentTask(
 		computeTimeSeconds(0.0),
 		name(name),
 		isInitialized(false),
-		timeStep(0),
+		simulationTimeStep(0),
 		simulationDuration(0),
 		simulationTime(0),
 		simulationIteration(0) {

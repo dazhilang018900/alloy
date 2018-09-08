@@ -25,7 +25,7 @@
 #include <AlloyDistanceField.h>
 using namespace aly;
 
-Springls3DEx::Springls3DEx() :
+Springls3DEx::Springls3DEx(int exampleIndex) :
 		Application(1920,1080, "Spring Level Set 3D"),
 		matcapShaderIso(getFullPath("images/JG_Red.png")),matcapShaderParticles(getFullPath("images/matcap/00005.png")),
 		matcapShaderSpringls(getFullPath("images/JG_Silver.png")),
@@ -36,6 +36,7 @@ Springls3DEx::Springls3DEx() :
 	showSpringls = true;
 	showParticles = true;
 	showTracking = false;
+	example=exampleIndex;
 }
 bool Springls3DEx::init(Composite& rootNode) {
 	box3f renderBBox = box3f(float3(-0.5f, -0.5f, -0.5f),
@@ -63,23 +64,13 @@ bool Springls3DEx::init(Composite& rootNode) {
 	 */
 
 	int D;
-	{
+	if(example==0){
 		Volume1f sourceVol;
-		/*
-		 PhantomCube cube(D, D, D, 4.0f);
-		 cube.setCenter(float3(0.0f));
-		 cube.setWidth(1.21);
-		 sourceVol= cube.solveDistanceField();
-		 */
 		isosurface.load(getFullPath("models/armadillo.ply"));
 		isosurface.updateVertexNormals(false);
-		std::cout << "Build Level Set" << std::endl;
 		MeshToLevelSet(isosurface, sourceVol, true, 2.5f, true, 1.5f);
-		std::cout << "Done " << sourceVol.dimensions() << std::endl;
-		PhantomBubbles bubbles(sourceVol.rows, sourceVol.cols, sourceVol.slices,
-				4.0f);
-		D = std::max(std::max(sourceVol.rows, sourceVol.cols),
-				sourceVol.slices);
+		PhantomBubbles bubbles(sourceVol.rows, sourceVol.cols, sourceVol.slices,4.0f);
+		D = std::max(std::max(sourceVol.rows, sourceVol.cols),sourceVol.slices);
 		bubbles.setNoiseLevel(0.0f);
 		bubbles.setNumberOfBubbles(12);
 		bubbles.setFuzziness(0.5f);
@@ -89,19 +80,23 @@ bool Springls3DEx::init(Composite& rootNode) {
 		Volume1f targetVol = bubbles.solveLevelSet();
 		Volume1f edgeVol;
 		Volume3f vectorField;
-		//std::cout<<"Solve Edges"<<std::endl;
-		//SolveEdgeFilter(targetVol, edgeVol, 1);
-		//std::cout<<"Solve GVF"<<std::endl;
-		//SolveGradientVectorFlow(edgeVol, vectorField, 0.1f, 16, true);
-		//std::cout<<"Done"<<std::endl;
-		//WriteVolumeToFile(MakeDesktopFile("gvf.xml"),vectorField);
-		//WriteVolumeToFile(MakeDesktopFile("target.xml"),targetVol);
-		//WriteVolumeToFile(MakeDesktopFile("source.xml"),sourceVol);
 		simulation.setInitialDistanceField(sourceVol);
 		simulation.setPressure(targetVol, 0.4f, 0.5f);
 		simulation.setCurvature(0.01f);
-		//simulation.setVectorField(vectorField, 0.2f);
 		simulation.init();
+	} else if(example==1){
+		D=256;
+		PhantomSphere sphereGen(D,D,D);
+		const float radius = 0.15f;
+		sphereGen.setCenter(float3(0.35f, 0.35f, 0.35f)*2.0f-float3(1.0f));
+		sphereGen.setRadius(radius*2);
+		Volume1f sourceVol=sphereGen.solveDistanceField();
+		simulation.setInitialDistanceField(sourceVol);
+		simulation.setAdvection(SpringLevelSet3D::ENRIGHT_FUNCTION);
+		simulation.setCurvature(0.01f);
+		simulation.init();
+		simulation.setTimeStep(0.32f);
+		simulation.setSimulationDuration(D*3.0f);
 	}
 	simulation.onUpdate =
 			[this](uint64_t iteration, bool lastIteration) {

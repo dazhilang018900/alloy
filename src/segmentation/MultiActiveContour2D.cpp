@@ -170,7 +170,7 @@ namespace aly {
 		simulationDuration = std::max(dims.x, dims.y)*1.5;
 		simulationIteration = 0;
 		simulationTime = 0;
-		timeStep = 1.0f;
+		simulationTimeStep = 1.0f;
 		levelSet.resize(dims.x, dims.y);
 		labelImage.resize(dims.x, dims.y);
 		swapLevelSet.resize(dims.x, dims.y);
@@ -875,7 +875,7 @@ namespace aly {
 		return timeStep;
 	}
 	bool MultiActiveContour2D::stepInternal() {
-		double remaining = timeStep;
+		double remaining = simulationTimeStep;
 		double t = 0.0;
 		do {
 			float timeStep = evolve(std::min(0.5f, (float)remaining));

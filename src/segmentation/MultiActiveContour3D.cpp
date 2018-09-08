@@ -213,7 +213,7 @@ bool MultiActiveContour3D::init() {
 	simulationDuration = std::max(std::max(dims.x, dims.y), dims.z) * 1.75f;
 	simulationIteration = 0;
 	simulationTime = 0;
-	timeStep = 1.0f;
+	simulationTimeStep = 1.0f;
 	levelSet.resize(dims.x, dims.y, dims.z);
 	swapLevelSet.resize(dims.x, dims.y, dims.z);
 	labelImage.resize(dims.x, dims.y, dims.z);
@@ -915,7 +915,7 @@ float MultiActiveContour3D::evolve(float maxStep) {
 	return timeStep;
 }
 bool MultiActiveContour3D::stepInternal() {
-	double remaining = timeStep;
+	double remaining = simulationTimeStep;
 	double t = 0.0;
 	do {
 		float timeStep = evolve(std::min(0.5f, (float) remaining));

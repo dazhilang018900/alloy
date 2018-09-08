@@ -38,7 +38,7 @@ protected:
 	double computeTimeSeconds;
 	std::string name;
 	bool isInitialized;
-	double timeStep;
+	double simulationTimeStep;
 	double simulationDuration;
 	double simulationTime;
 	std::string outputDirectory;
@@ -59,7 +59,9 @@ public:
 	inline double getSimulationDuration() const {return simulationDuration;}
 	inline uint64_t getSimulationIteration()const {return simulationIteration;}
 	inline double getComputeTimePerFrame() const {return computeTimeSeconds;}
-	inline double getTimeStep() const {return timeStep;}
+	inline double getTimeStep() const {return simulationTimeStep;}
+	void setSimulationDuration(double time);
+	void setTimeStep(double ts);
 	virtual ~Simulation(){};
 };
 

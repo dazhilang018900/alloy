@@ -852,7 +852,7 @@ namespace aly {
 		crumbs.clear();
 	}
 	bool MultiSpringLevelSet2D::stepInternal() {
-		double remaining = timeStep;
+		double remaining = simulationTimeStep;
 		double t = 0.0;
 		const int evolveIterations = 8;
 		do {

@@ -86,6 +86,7 @@ ActiveManifold2D::ActiveManifold2D(const std::shared_ptr<ManifoldCache2D>& cache
 	pressureParam = Float(0.0f);
 	targetPressureParam = Float(0.5f);
 	curvatureParam = Float(0.3f);
+	simulationTimeStep = 1.0f;
 }
 
 ActiveManifold2D::ActiveManifold2D(const std::string& name,
@@ -128,10 +129,12 @@ bool ActiveManifold2D::init() {
 	int2 dims = initialLevelSet.dimensions();
 	if (dims.x == 0 || dims.y == 0)
 		return false;
-	simulationDuration = std::max(dims.x, dims.y);
+	if(simulationDuration<=0){
+		simulationDuration = std::max(dims.x, dims.y);
+	}
 	simulationIteration = 0;
 	simulationTime = 0;
-	timeStep = 1.0f;
+
 	levelSet.resize(dims.x, dims.y);
 	swapLevelSet.resize(dims.x, dims.y);
 #pragma omp parallel for
@@ -608,7 +611,7 @@ float ActiveManifold2D::evolve(float maxStep) {
 	return timeStep;
 }
 bool ActiveManifold2D::stepInternal() {
-	double remaining = timeStep;
+	double remaining = simulationTimeStep;
 	double t = 0.0;
 	do {
 		float timeStep = evolve(std::min(0.5f, (float) remaining));

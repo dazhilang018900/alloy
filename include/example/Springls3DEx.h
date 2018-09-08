@@ -54,12 +54,24 @@ protected:
     bool showSpringls;
     bool showIsoSurface;
     bool showTracking;
+    int example;
 public:
-	Springls3DEx();
+	Springls3DEx(int exampleIndex);
 	bool init(aly::Composite& rootNode);
 	void draw(aly::AlloyContext* context);
 };
 
+class SpringlsSegmentation3DEx: public Springls3DEx {
+public:
+	SpringlsSegmentation3DEx():Springls3DEx(0){
+	}
+};
 
+
+class Enright3DEx: public Springls3DEx {
+public:
+	Enright3DEx():Springls3DEx(1){
+	}
+};
 
 #endif /* INCLUDE_EXAMPLE_SPRINGLS3DEX_H_ */

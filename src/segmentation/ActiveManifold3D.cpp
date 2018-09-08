@@ -75,7 +75,7 @@ bool ActiveManifold3D::updateSurface() {
 		std::lock_guard<std::mutex> lockMe(contourLock);
 		Mesh mesh;
 		isoSurface.solve(levelSet, activeList, mesh, contour.meshType, true, 0.0f);
-		mesh.updateVertexNormals(false, 4);
+		mesh.updateVertexNormals(false);
 		contour.vertexLocations = mesh.vertexLocations;
 		contour.vertexNormals = mesh.vertexNormals;
 		contour.triIndexes = mesh.triIndexes;
@@ -102,6 +102,7 @@ ActiveManifold3D::ActiveManifold3D(
 	pressureParam = Float(0.0f);
 	targetPressureParam = Float(0.5f);
 	curvatureParam = Float(0.3f);
+	simulationTimeStep = 1.0f;
 }
 
 ActiveManifold3D::ActiveManifold3D(const std::string& name,
@@ -112,6 +113,7 @@ ActiveManifold3D::ActiveManifold3D(const std::string& name,
 	pressureParam = Float(0.0f);
 	targetPressureParam = Float(0.5f);
 	curvatureParam = Float(0.3f);
+	simulationTimeStep = 1.0f;
 }
 float ActiveManifold3D::evolve() {
 	return evolve(0.5f);
@@ -138,10 +140,11 @@ bool ActiveManifold3D::init() {
 	int3 dims = initialLevelSet.dimensions();
 	if (dims.x == 0 || dims.y == 0 || dims.z == 0)
 		return false;
-	simulationDuration = std::max(std::max(dims.x, dims.y), dims.z) * 1.75f;
+	if(simulationDuration<=0){
+		simulationDuration = std::max(std::max(dims.x, dims.y), dims.z) * 1.75f;
+	}
 	simulationIteration = 0;
 	simulationTime = 0;
-	timeStep = 1.0f;
 	levelSet.resize(dims.x, dims.y, dims.z);
 	swapLevelSet.resize(dims.x, dims.y, dims.z);
 #pragma omp parallel for
@@ -650,7 +653,7 @@ float ActiveManifold3D::evolve(float maxStep) {
 	return timeStep;
 }
 bool ActiveManifold3D::stepInternal() {
-	double remaining = timeStep;
+	double remaining = simulationTimeStep;
 	double t = 0.0;
 	do {
 		float timeStep = evolve(std::min(0.5f, (float) remaining));

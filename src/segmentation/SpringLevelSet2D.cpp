@@ -881,11 +881,11 @@ void SpringLevelSet2D::cleanup() {
 	orphans.clear();
 }
 bool SpringLevelSet2D::stepInternal() {
-	double remaining = timeStep;
+	double remaining = simulationTimeStep;
 	double t = 0.0;
 	const int evolveIterations = 8;
 	do {
-		float timeStep = advect(std::min(0.33333f, (float) remaining));
+		float timeStep = advect(std::min(0.5f, (float) remaining));
 		t += (double) timeStep;
 		if (resampleEnabled) {
 			relax();

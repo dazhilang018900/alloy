@@ -45,21 +45,21 @@ namespace aly {
 	float2x2 MakeSimilarity(const float2x2& M);
 	class SpringLevelSet3D : public ActiveManifold3D {
 	public:
-		static float MIN_ANGLE_TOLERANCE;
-		static float NEAREST_NEIGHBOR_DISTANCE;
-		static float PARTICLE_RADIUS;
-		static float REST_RADIUS;
-		static float EXTENT;
-		static float SPRING_CONSTANT;
-		static float RELAX_TIMESTEP;
-		static float SHARPNESS;
-		static float FILL_DISTANCE;
-		static float CONTRACT_DISTANCE;
-		static float MIN_AREA;
-		static float MAX_AREA;
-		static float MIN_ASPECT_RATIO;
-		static int MAX_NEAREST_NEIGHBORS;
-
+		static const float MIN_ANGLE_TOLERANCE;
+		static const float NEAREST_NEIGHBOR_DISTANCE;
+		static const float PARTICLE_RADIUS;
+		static const float REST_RADIUS;
+		static const float EXTENT;
+		static const float SPRING_CONSTANT;
+		static const float RELAX_TIMESTEP;
+		static const float SHARPNESS;
+		static const float FILL_DISTANCE;
+		static const float CONTRACT_DISTANCE;
+		static const float MIN_AREA;
+		static const float MAX_AREA;
+		static const float MIN_ASPECT_RATIO;
+		static const int MAX_NEAREST_NEIGHBORS;
+		static const std::function<float3(float3,float,double)> ENRIGHT_FUNCTION;
 	protected:
 		std::shared_ptr<Locator3f> locator;
 		aly::Vector3f oldCorrespondences;
@@ -69,6 +69,7 @@ namespace aly {
 		std::array<Vector3f, 4> oldVelocities;
 		aly::Volume1f unsignedLevelSet;
 		std::vector<std::vector<SpringlEdge>> nearestNeighbors;
+		std::function<aly::float3(aly::float3 in,float voxelSize,double time)> advectionFunc;
 		virtual bool stepInternal() override;
 		float3 traceInitial(float3 pt);
 		float3 traceUnsigned(float3 pt);
@@ -85,13 +86,13 @@ namespace aly {
 		float3 getScaledGradientValue(int i, int j, int k);
 		float3 getScaledGradientValue(float i, float j,float k, bool signedIso);
 		void distanceFieldMotion(int i, int j, int k, size_t index);
-		virtual void computeForce(size_t idx, float3& p1, float3& p2, float3& p3, float3& p);
-		virtual void computeForce(size_t idx, float3& p1, float3& p2, float3& p3, float3& p4, float3& p);
+		virtual void computeForce(size_t idx,float timeStep, float3& p1, float3& p2, float3& p3, float3& p);
+		virtual void computeForce(size_t idx,float timeStep, float3& p1, float3& p2, float3& p3, float3& p4, float3& p);
 		void relax(size_t idx, float timeStep, Vector3f& update);
 		bool resampleEnabled;
 
 	public:
-
+		void setAdvection(const std::function<aly::float3(aly::float3,float,double)>& func);
 		SpringLevelSet3D(const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
 		void setSpringls(const Vector3f& particles, const Vector3f& points);
 		virtual bool init() override;
