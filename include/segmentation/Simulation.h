@@ -33,8 +33,13 @@ public:
 	virtual ~SimulationListener();
 };
 class Simulation: public aly::RecurrentTask {
+public:
+	enum TemporalScheme {
+		FirstOrder, RK4
+	};
 protected:
 	bool paused;
+	TemporalScheme temporalScheme;
 	double computeTimeSeconds;
 	std::string name;
 	bool isInitialized;
@@ -53,6 +58,9 @@ public:
 	virtual void cleanup()=0;
 	virtual void setup(const aly::ParameterPanePtr& pane)=0;
 	Simulation(const std::string& name);
+	void setTemporalScheme(TemporalScheme scheme){
+		temporalScheme=scheme;
+	}
 	inline const std::string& getName()const {return name;}
 	inline void setName(const std::string& name){this->name=name;}
 	inline double getSimulationTime()const {return simulationTime;}

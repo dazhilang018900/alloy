@@ -69,6 +69,7 @@ void ActiveManifold3D::plugLevelSet(int i, int j, int k, size_t index) {
 void ActiveManifold3D::cleanup() {
 	if (cache.get() != nullptr)
 		cache->clear();
+	crumbs.clear();
 }
 bool ActiveManifold3D::updateSurface() {
 	if (requestUpdateSurface) {
@@ -143,6 +144,7 @@ bool ActiveManifold3D::init() {
 	if(simulationDuration<=0){
 		simulationDuration = std::max(std::max(dims.x, dims.y), dims.z) * 1.75f;
 	}
+	crumbs.clear();
 	simulationIteration = 0;
 	simulationTime = 0;
 	levelSet.resize(dims.x, dims.y, dims.z);

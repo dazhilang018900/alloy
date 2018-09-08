@@ -35,34 +35,13 @@ Springls3DEx::Springls3DEx(int exampleIndex) :
 	showIsoSurface = true;
 	showSpringls = true;
 	showParticles = true;
-	showTracking = false;
+	showTracking = true;
 	example=exampleIndex;
 }
 bool Springls3DEx::init(Composite& rootNode) {
 	box3f renderBBox = box3f(float3(-0.5f, -0.5f, -0.5f),
 			float3(1.0f, 1.0f, 1.0f));
 	lastTime = -1;
-	/*
-	 mesh.load(getFullPath("models/armadillo.ply"));
-	 mesh.updateVertexNormals(false);
-	 Volume1f vol;
-	 MeshToLevelSet(mesh,vol,true,2.5f,true,0.75f);
-	 IsoSurface isoSurf;
-	 isoSurf.solve(vol,mesh,MeshType::Quad);
-	 RebuildDistanceFieldFast(vol,8.0f);
-	 WriteVolumeToFile(MakeDesktopFile("armadillo.xml"),vol);
-	 //WriteMeshToFile(MakeDesktopFile("horse_level.ply"),mesh);
-	 */
-	/*
-	 EndlessGrid<float> vol({32,4,4}, 0.0f);
-	 MeshToLevelSet(mesh, vol, 2.5f, false, 0.75f);
-	 IsoSurface isoSurf;
-	 isoSurf.solve(vol,mesh,MeshType::Quad);
-	 WriteMeshToFile(MakeDesktopFile("horse_level.ply"),mesh);
-	 WriteGridToFile(MakeDesktopFile("horse.xml"),vol);
-	 int D=128;
-	 */
-
 	int D;
 	if(example==0){
 		Volume1f sourceVol;
@@ -83,9 +62,11 @@ bool Springls3DEx::init(Composite& rootNode) {
 		simulation.setInitialDistanceField(sourceVol);
 		simulation.setPressure(targetVol, 0.4f, 0.5f);
 		simulation.setCurvature(0.01f);
+		simulation.setTemporalScheme(SpringLevelSet3D::TemporalScheme::FirstOrder);
+		simulation.setSimulationDuration((3*D)/2);
 		simulation.init();
 	} else if(example==1){
-		D=256;
+		D=128;
 		PhantomSphere sphereGen(D,D,D);
 		const float radius = 0.15f;
 		sphereGen.setCenter(float3(0.35f, 0.35f, 0.35f)*2.0f-float3(1.0f));
@@ -94,9 +75,10 @@ bool Springls3DEx::init(Composite& rootNode) {
 		simulation.setInitialDistanceField(sourceVol);
 		simulation.setAdvection(SpringLevelSet3D::ENRIGHT_FUNCTION);
 		simulation.setCurvature(0.01f);
-		simulation.init();
+		simulation.setResamplingEnabled(false);
 		simulation.setTimeStep(0.32f);
-		simulation.setSimulationDuration(D*3.0f);
+		simulation.setSimulationDuration(D*SpringLevelSet3D::ENRIGHT_PERIOD);
+		simulation.init();
 	}
 	simulation.onUpdate =
 			[this](uint64_t iteration, bool lastIteration) {
@@ -160,7 +142,6 @@ bool Springls3DEx::init(Composite& rootNode) {
 					timelineSlider->setTimeValue(0);
 					timelineSlider->setMaxValue(maxIteration);
 					timelineSlider->setVisible(true);
-
 					context->addDeferredTask([this]() {
 								simulation.init();
 								running = true;
@@ -242,7 +223,6 @@ bool Springls3DEx::init(Composite& rootNode) {
 	rootNode.add(infoComposite);
 	rootNode.add(timelineSlider);
 	camera.setActiveRegion(renderRegion.get());
-
 	return true;
 }
 void Springls3DEx::draw(AlloyContext* context) {
@@ -260,7 +240,6 @@ void Springls3DEx::draw(AlloyContext* context) {
 		}
 	}
 	if (camera.isDirty()) {
-
 		int currentTime = timelineSlider->getTimeValue().toInteger();
 		if (currentTime != lastTime) {
 			std::shared_ptr<CacheElement3D> elem = simulation.getCache()->get(
@@ -280,6 +259,22 @@ void Springls3DEx::draw(AlloyContext* context) {
 					static_cast<GLMesh::PrimitiveType>(contour->meshType));
 			particles.vertexLocations = contour->particles;
 			particles.vertexNormals = contour->vertexNormals;
+			Breadcrumbs3D& crumbs=simulation.crumbs;
+			int T=std::min((int)crumbs.size(),timelineSlider->getTimeValue().toInteger()+1);
+			trails.vertexLocations.clear();
+			for(int t=std::max(1,T-8);t<T;t++) {
+				int N=crumbs.size(t);
+				for (int n = 0; n < N; n++) {
+					float3i p1 = crumbs(t,n);
+					if(p1.index>=0){
+						float3i p2 = crumbs(t-1,p1.index);
+						trails.vertexLocations.push_back(p1);
+						trails.vertexLocations.push_back(p2);
+					}
+				}
+			}
+			trails.setType(aly::GLMesh::PrimitiveType::LINES);
+			trails.setDirty(true);
 			isosurface.setDirty(true);
 			springls.setDirty(true);
 			particles.setDirty(true);
@@ -307,6 +302,14 @@ void Springls3DEx::draw(AlloyContext* context) {
 					renderRegion->getBounds() * context->pixelRatio,
 					context->getViewport(), RGBAf(1.0f));
 		}
+	}
+	if(showTracking){
+		box2px bbox=context->getViewport();
+		box2px rbbox=renderRegion->getBounds();
+		glViewport((int)rbbox.position.x,(int) (bbox.dimensions.y - rbbox.position.y
+				- rbbox.dimensions.y),(int)rbbox.dimensions.x,(int)rbbox.dimensions.y);
+		lineShader.draw(trails,camera,isosurfBuffer.getViewport(),1.5f,Color(153, 204, 255));
+		glViewport(0,0,(int)bbox.dimensions.x,(int)bbox.dimensions.y);
 	}
 	if (showParticles) {
 		matcapShaderParticles.draw(particleBuffer.getTexture(), camera,

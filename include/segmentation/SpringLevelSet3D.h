@@ -59,7 +59,8 @@ namespace aly {
 		static const float MAX_AREA;
 		static const float MIN_ASPECT_RATIO;
 		static const int MAX_NEAREST_NEIGHBORS;
-		static const std::function<float3(float3,float,double)> ENRIGHT_FUNCTION;
+		static double ENRIGHT_PERIOD;
+		static const std::function<double3(double3,double,double)> ENRIGHT_FUNCTION;
 	protected:
 		std::shared_ptr<Locator3f> locator;
 		aly::Vector3f oldCorrespondences;
@@ -69,7 +70,7 @@ namespace aly {
 		std::array<Vector3f, 4> oldVelocities;
 		aly::Volume1f unsignedLevelSet;
 		std::vector<std::vector<SpringlEdge>> nearestNeighbors;
-		std::function<aly::float3(aly::float3 in,float voxelSize,double time)> advectionFunc;
+		std::function<aly::double3(aly::double3 in,double voxelSize,double time)> advectionFunc;
 		virtual bool stepInternal() override;
 		float3 traceInitial(float3 pt);
 		float3 traceUnsigned(float3 pt);
@@ -90,9 +91,11 @@ namespace aly {
 		virtual void computeForce(size_t idx,float timeStep, float3& p1, float3& p2, float3& p3, float3& p4, float3& p);
 		void relax(size_t idx, float timeStep, Vector3f& update);
 		bool resampleEnabled;
-
 	public:
-		void setAdvection(const std::function<aly::float3(aly::float3,float,double)>& func);
+		void setResamplingEnabled(bool e){
+			resampleEnabled=e;
+		}
+		void setAdvection(const std::function<aly::double3(aly::double3,double,double)>& func);
 		SpringLevelSet3D(const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
 		void setSpringls(const Vector3f& particles, const Vector3f& points);
 		virtual bool init() override;

@@ -74,7 +74,9 @@ namespace aly {
 		bool resampleEnabled;
 
 	public:
-
+		void setResamplingEnabled(bool e){
+			resampleEnabled=e;
+		}
 		SpringLevelSet2D(const std::shared_ptr<ManifoldCache2D>& cache = nullptr);
 		void setSpringls(const Vector2f& particles, const Vector2f& points);
 		virtual bool init() override;

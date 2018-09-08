@@ -378,6 +378,28 @@ void GLMesh::update() {
 		}
 		CHECK_GL_ERROR();
 		lineIndexCount = (GLuint) mesh.lineIndexes.size();
+	} else if(mesh.type==GLMesh::PrimitiveType::LINES&&mesh.vertexLocations.size()%2==0){
+		size_t offset = 0;
+		std::vector<float3> lines[2];
+		for (int n = 0; n < 2; n++) {
+			lines[n].resize(mesh.vertexLocations.size()/2);
+			if (glIsBuffer(lineVertexBuffer[n]) == GL_TRUE)
+				glDeleteBuffers(1, &lineVertexBuffer[n]);
+			glGenBuffers(1, &lineVertexBuffer[n]);
+		}
+		for (size_t n = 0; n < mesh.vertexLocations.size(); n++) {
+			lines[n%2][n/2] = mesh.vertexLocations[n];
+		}
+		for (int n = 0; n < 2; n++) {
+			if (glIsBuffer(lineVertexBuffer[n]) == GL_TRUE)
+				glDeleteBuffers(1, &lineVertexBuffer[n]);
+			glGenBuffers(1, &lineVertexBuffer[n]);
+			glBindBuffer(GL_ARRAY_BUFFER, lineVertexBuffer[n]);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * lines[n].size(),lines[n].data(), GL_STATIC_DRAW);
+			glBindBuffer(GL_ARRAY_BUFFER, 0);
+		}
+		CHECK_GL_ERROR();
+		lineIndexCount = (GLuint) (mesh.vertexLocations.size()/2);
 	}
 	if (mesh.triIndexes.size() > 0) {
 		size_t offset = 0;

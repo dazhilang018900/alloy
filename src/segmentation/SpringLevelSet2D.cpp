@@ -356,116 +356,116 @@ void SpringLevelSet2D::updateTracking(float maxDistance) {
 	//int tries = 0;
 	//int invalid = 0;
 	const int E = 2;
-	const float planeThreshold=std::cos(ToRadians(80.0f));
+	const float planeThreshold = std::cos(ToRadians(80.0f));
 	//do {
-		//invalid = 0;
-		locator.reset(new Locator2f(oldVertexes));
-		std::vector<int> retrack;
-		for (size_t i = 0; i < contour.particles.size(); i++) {
-			if (std::isinf(contour.correspondence[i].x)
-					|| contour.particleTracking[i] < 0) {
-				retrack.push_back((int) i);
+	//invalid = 0;
+	locator.reset(new Locator2f(oldVertexes));
+	std::vector<int> retrack;
+	for (size_t i = 0; i < contour.particles.size(); i++) {
+		if (std::isinf(contour.correspondence[i].x)
+				|| contour.particleTracking[i] < 0) {
+			retrack.push_back((int) i);
+		}
+	}
+	int N = (int) retrack.size();
+	for (int i = 0; i < N; i++) {
+		int pid = retrack[i];
+		int eid1 = pid * E;
+		int eid2 = pid * E + 1;
+		float d;
+		float2 pt = contour.particles[pid];
+		float2 norm = contour.normals[pid];
+		float2 pt0 = contour.vertexes[eid1];
+		float2 pt1 = contour.vertexes[eid2];
+		std::array<float2, 4> velocities;
+		float dmin = 1E30f;
+		int bestMatch = -1;
+		std::vector<float2i> result;
+		float2 q1(std::numeric_limits<float>::infinity());
+		float2 q2(std::numeric_limits<float>::infinity());
+		locator->closest(pt0, maxDistance, result); //Query against vertex ends
+		for (auto pr : result) {
+			int qid = pr.index / E;
+			q1 = oldCorrespondences[qid];
+			float2 nnorm = oldNormals[qid];
+			if (dot(norm, nnorm) > planeThreshold) {
+				d = distance(oldParticles[qid], pt);
+				if (d < dmin) {
+					bestMatch = qid;
+					dmin = d;
+				}
+
+				if (!std::isinf(q1.x)) {
+					for (int nn = 0; nn < 4; nn++) {
+						velocities[nn] = oldVelocities[nn][qid];
+					}
+					break;
+				}
 			}
 		}
-		int N = (int) retrack.size();
-		for (int i = 0; i < N; i++) {
-			int pid = retrack[i];
-			int eid1 = pid * E;
-			int eid2 = pid * E + 1;
-			float d;
-			float2 pt = contour.particles[pid];
-			float2 norm = contour.normals[pid];
-			float2 pt0 = contour.vertexes[eid1];
-			float2 pt1 = contour.vertexes[eid2];
-			std::array<float2, 4> velocities;
-			float dmin = 1E30f;
-			int bestMatch = -1;
-			std::vector<float2i> result;
-			float2 q1(std::numeric_limits<float>::infinity());
-			float2 q2(std::numeric_limits<float>::infinity());
-			locator->closest(pt0, maxDistance, result); //Query against vertex ends
-			for (auto pr : result) {
-				int qid = pr.index / E;
-				q1 = oldCorrespondences[qid];
-				float2 nnorm = oldNormals[qid];
-				if (dot(norm, nnorm) > planeThreshold) {
-					d = distance(oldParticles[qid], pt);
-					if (d < dmin) {
-						bestMatch = qid;
-						dmin = d;
-					}
-
-					if (!std::isinf(q1.x)) {
-						for (int nn = 0; nn < 4; nn++) {
-							velocities[nn] = oldVelocities[nn][qid];
-						}
-						break;
-					}
+		result.clear();
+		locator->closest(pt1, maxDistance, result);
+		for (auto pr : result) {
+			int qid = pr.index / E;
+			q2 = oldCorrespondences[qid];
+			float2 nnorm = oldNormals[qid];
+			if (dot(norm, nnorm) > planeThreshold) {
+				d = distance(oldParticles[qid], pt);
+				if (d < dmin) {
+					bestMatch = qid;
+					dmin = d;
 				}
-			}
-			result.clear();
-			locator->closest(pt1, maxDistance, result);
-			for (auto pr : result) {
-				int qid = pr.index / E;
-				q2 = oldCorrespondences[qid];
-				float2 nnorm = oldNormals[qid];
-				if (dot(norm, nnorm) > planeThreshold) {
-					d = distance(oldParticles[qid], pt);
-					if (d < dmin) {
-						bestMatch = qid;
-						dmin = d;
-					}
-					if (!std::isinf(q2.x)) {
-						for (int nn = 0; nn < 4; nn++) {
-							velocities[nn] += oldVelocities[nn][qid]; //add velocity from second end
-						}
-						break;
-					}
-				}
-			}
-			if ( contour.particleTracking[pid] < 0&& bestMatch >= 0) {
-				contour.particleTracking[pid] = bestMatch;
-			}
-			if (!std::isinf(q1.x)) {
 				if (!std::isinf(q2.x)) {
 					for (int nn = 0; nn < 4; nn++) {
-						contour.velocities[nn][pid] = 0.5f * velocities[nn];
-						oldVelocities[nn].push_back(0.5f * velocities[nn]); //Average velocities so that they are not counted twice
+						velocities[nn] += oldVelocities[nn][qid]; //add velocity from second end
 					}
-					q1 = traceInitial(0.5f * (q1 + q2));
-					contour.correspondence[pid] = q1;
-					//oldCorrespondences.push_back(q1);
-					//oldVertexes.push_back(pt0);
-					//oldVertexes.push_back(pt1);
-					//oldParticles.push_back(pt);
-					//oldNormals.push_back(norm);
-				} else {
-					for (int nn = 0; nn < 4; nn++) {
-						contour.velocities[nn][pid] = velocities[nn];
-						oldVelocities[nn].push_back(velocities[nn]); //Only one velocity sample
-					}
-					contour.correspondence[pid] = q1;
-					//oldCorrespondences.push_back(q1);
-					//oldVertexes.push_back(pt0);
-					//oldVertexes.push_back(pt1);
-					//oldParticles.push_back(pt);
-					//oldNormals.push_back(norm);
+					break;
 				}
-			} else if (!std::isinf(q2.x)) {
+			}
+		}
+		if (contour.particleTracking[pid] < 0 && bestMatch >= 0) {
+			contour.particleTracking[pid] = bestMatch;
+		}
+		if (!std::isinf(q1.x)) {
+			if (!std::isinf(q2.x)) {
 				for (int nn = 0; nn < 4; nn++) {
-					contour.velocities[nn][pid] = velocities[nn];
-					oldVelocities[nn].push_back(velocities[nn]); //only one velocity sample
+					contour.velocities[nn][pid] = 0.5f * velocities[nn];
+					oldVelocities[nn].push_back(0.5f * velocities[nn]); //Average velocities so that they are not counted twice
 				}
-				contour.correspondence[pid] = q2;
-				//oldCorrespondences.push_back(q2);
+				q1 = traceInitial(0.5f * (q1 + q2));
+				contour.correspondence[pid] = q1;
+				//oldCorrespondences.push_back(q1);
 				//oldVertexes.push_back(pt0);
 				//oldVertexes.push_back(pt1);
 				//oldParticles.push_back(pt);
 				//oldNormals.push_back(norm);
-			}// else {
-			//	invalid++;
-			//}
-		}
+			} else {
+				for (int nn = 0; nn < 4; nn++) {
+					contour.velocities[nn][pid] = velocities[nn];
+					oldVelocities[nn].push_back(velocities[nn]); //Only one velocity sample
+				}
+				contour.correspondence[pid] = q1;
+				//oldCorrespondences.push_back(q1);
+				//oldVertexes.push_back(pt0);
+				//oldVertexes.push_back(pt1);
+				//oldParticles.push_back(pt);
+				//oldNormals.push_back(norm);
+			}
+		} else if (!std::isinf(q2.x)) {
+			for (int nn = 0; nn < 4; nn++) {
+				contour.velocities[nn][pid] = velocities[nn];
+				oldVelocities[nn].push_back(velocities[nn]); //only one velocity sample
+			}
+			contour.correspondence[pid] = q2;
+			//oldCorrespondences.push_back(q2);
+			//oldVertexes.push_back(pt0);
+			//oldVertexes.push_back(pt1);
+			//oldParticles.push_back(pt);
+			//oldNormals.push_back(norm);
+		}				// else {
+						//	invalid++;
+						//}
+	}
 	//	tries++;
 	//} while (invalid > 0 && tries < 4);
 }
@@ -517,53 +517,72 @@ void SpringLevelSet2D::computeForce(size_t idx, float2& f1, float2& f2,
 	f1 = float2(0.0f);
 	f2 = float2(0.0f);
 	f = float2(0.0f);
+
 	float2 p = contour.particles[idx];
 	float2 p1 = contour.vertexes[2 * idx];
 	float2 p2 = contour.vertexes[2 * idx + 1];
-	if (pressureImage.size() > 0 && pressureParam.toFloat() != 0.0f) {
-		float2 v1 = normalize(
-				contour.vertexes[2 * idx + 1] - contour.vertexes[2 * idx]);
-		float2 norm = float2(-v1.y, v1.x);
-		float2 pres = pressureParam.toFloat() * norm
-				* pressureImage(p.x, p.y).x;
-		f = pres;
-		f1 = f;
-		f2 = f;
-	}
+	if (temporalScheme == TemporalScheme::FirstOrder) {
+		if (pressureImage.size() > 0 && pressureParam.toFloat() != 0.0f) {
+			float2 v1 = normalize(
+					contour.vertexes[2 * idx + 1] - contour.vertexes[2 * idx]);
+			float2 norm = float2(-v1.y, v1.x);
+			float2 pres = pressureParam.toFloat() * norm
+					* pressureImage(p.x, p.y).x;
+			f = pres;
+			f1 = f;
+			f2 = f;
+		}
+		float2x2 M, A;
+		if (vecFieldImage.size() > 0 && advectionParam.toFloat() != 0.0f) {
+			float w = advectionParam.toFloat();
+			f1 += vecFieldImage(p1.x, p1.y) * w;
+			f2 += vecFieldImage(p2.x, p2.y) * w;
+			f += vecFieldImage(p.x, p.y) * w;
+		}
+	} else if (temporalScheme == TemporalScheme::RK4) {
+		if (pressureImage.size() > 0 && pressureParam.toFloat() != 0.0f) {
+			float2 v1 = normalize(
+					contour.vertexes[2 * idx + 1] - contour.vertexes[2 * idx]);
+			float2 norm = float2(-v1.y, v1.x);
+			float2 pres = pressureParam.toFloat() * norm
+					* pressureImage(p.x, p.y).x;
+			f = pres;
+			f1 = f;
+			f2 = f;
+		}
+		if (vecFieldImage.size() > 0 && advectionParam.toFloat() != 0.0f) {
+			float w = advectionParam.toFloat();
+			f1 += vecFieldImage(p1.x, p1.y) * w;
+			f2 += vecFieldImage(p2.x, p2.y) * w;
+			f += vecFieldImage(p.x, p.y) * w;
+		}
+		float2 k1, k2, k3, k4;
+		k4 = contour.velocities[2][idx];
+		k3 = contour.velocities[1][idx];
+		k2 = contour.velocities[0][idx];
+		k1 = f;
 
-	float2x2 M, A;
-	if (vecFieldImage.size() > 0 && advectionParam.toFloat() != 0.0f) {
-		float w = advectionParam.toFloat();
-		f1 += vecFieldImage(p1.x, p1.y) * w;
-		f2 += vecFieldImage(p2.x, p2.y) * w;
-		f += vecFieldImage(p.x, p.y) * w;
+		contour.velocities[3][idx] = k4;
+		contour.velocities[2][idx] = k3;
+		contour.velocities[1][idx] = k2;
+		contour.velocities[0][idx] = k1;
+		if (simulationIteration >= 4) {
+			f = (1.0f / 6.0f) * (k1 + 2.0f * k2 + 2.0f * k3 + k4);
+		} else if (simulationIteration == 3) {
+			f = (1.0f / 4.0f) * (k1 + 2.0f * k2 + k3);
+		}
+		if (simulationIteration == 2) {
+			f = (1.0f / 2.0f) * (k1 + k2);
+		}
+		float2 v1 = p1 + f1;
+		float2 v2 = p2 + f2;
+		float2 v = p + f;
+		//Correction keeps particle and points on same line segment
+		float2 t = normalize(v2 - v1);
+		float2 correction = v - (v1 + dot(t, v - v1) * t);
+		f1 += correction;
+		f2 += correction;
 	}
-	float2 k1, k2, k3, k4;
-	k4 = contour.velocities[2][idx];
-	k3 = contour.velocities[1][idx];
-	k2 = contour.velocities[0][idx];
-	k1 = f;
-
-	contour.velocities[3][idx] = k4;
-	contour.velocities[2][idx] = k3;
-	contour.velocities[1][idx] = k2;
-	contour.velocities[0][idx] = k1;
-	if (simulationIteration >= 4) {
-		f = (1.0f / 6.0f) * (k1 + 2.0f * k2 + 2.0f * k3 + k4);
-	} else if (simulationIteration == 3) {
-		f = (1.0f / 4.0f) * (k1 + 2.0f * k2 + k3);
-	}
-	if (simulationIteration == 2) {
-		f = (1.0f / 2.0f) * (k1 + k2);
-	}
-	float2 v1 = p1 + f1;
-	float2 v2 = p2 + f2;
-	float2 v = p + f;
-	//Correction keeps particle and points on same line segment
-	float2 t = normalize(v2 - v1);
-	float2 correction = v - (v1 + dot(t, v - v1) * t);
-	f1 += correction;
-	f2 += correction;
 }
 void SpringLevelSet2D::updateSignedLevelSet(float maxStep) {
 #pragma omp parallel for
@@ -885,7 +904,7 @@ bool SpringLevelSet2D::stepInternal() {
 	double t = 0.0;
 	const int evolveIterations = 8;
 	do {
-		float timeStep = advect(std::min(0.5f, (float) remaining));
+		float timeStep = advect(std::min(0.333333f, (float) remaining));
 		t += (double) timeStep;
 		if (resampleEnabled) {
 			relax();
@@ -914,7 +933,7 @@ bool SpringLevelSet2D::stepInternal() {
 			} while (fillCount > 0); //Continue filling until all gaps are closed
 			contour.updateNormals();
 			contour.setDirty(true);
-			updateTracking(3*NEAREST_NEIGHBOR_DISTANCE);
+			updateTracking(3 * NEAREST_NEIGHBOR_DISTANCE);
 		} else {
 			std::lock_guard < std::mutex > lockMe(contourLock);
 			isoContour.solve(levelSet, contour.vertexLocations, contour.indexes,
@@ -939,7 +958,8 @@ bool SpringLevelSet2D::stepInternal() {
 			int idx = contour->particleTracking[n];
 			old[n] = float2i(contour->particles[n], idx);
 		}
-		contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
+		contour->setFile(
+				MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 		cache->set((int) simulationIteration, *contour);
 	}
 	return (simulationTime < simulationDuration);

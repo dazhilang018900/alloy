@@ -34,11 +34,13 @@ protected:
 	aly::Mesh isosurface;
 	aly::Mesh springls;
 	aly::Mesh particles;
+	aly::Mesh trails;
 	aly::RegionPtr renderRegion;
 	aly::GLFrameBuffer springlsBuffer;
 	aly::GLFrameBuffer particleBuffer;
 	aly::GLFrameBuffer isosurfBuffer;
 	aly::DepthAndNormalShader depthAndNormalShader;
+	aly::LineShader lineShader;
 	aly::MatcapShader matcapShaderIso;
 	aly::MatcapShader matcapShaderParticles;
 	aly::MatcapShader matcapShaderSpringls;

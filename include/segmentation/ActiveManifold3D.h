@@ -68,6 +68,7 @@ protected:
 	bool updateSurface();
 	virtual bool stepInternal() override;
 public:
+	aly::Breadcrumbs3D crumbs;
 	ActiveManifold3D(const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
 	ActiveManifold3D(const std::string& name,const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
 	float evolve();

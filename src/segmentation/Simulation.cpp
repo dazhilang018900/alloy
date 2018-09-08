@@ -46,6 +46,7 @@ RecurrentTask(
 	return step();
 },5),
 		paused(false),
+		temporalScheme(TemporalScheme::RK4),
 		computeTimeSeconds(0.0),
 		name(name),
 		isInitialized(false),

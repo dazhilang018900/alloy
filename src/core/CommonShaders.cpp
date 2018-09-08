@@ -3970,26 +3970,27 @@ LineShader::LineShader(bool onScreen,const std::shared_ptr<AlloyContext>& contex
 						  vec3 v1 = (VM*vec4(p1,1)).xyz;
                           vec4 pt0=PVM*vec4(p0,1);
                           vec4 pt1=PVM*vec4(p1,1);
-                          pt0=pt0/pt0.w;
-                          pt1=pt1/pt1.w;
-                          vec2 dir=normalize(pt1.xy-pt0.xy);
+                          vec2 dir=normalize(pt1.xy/pt1.w-pt0.xy/pt0.w);
                           vec4 off=lineWidth*vec4(-dir.y,dir.x,0.0f,0.0f);
                          
 		    if(-v0.z>MIN_DEPTH&&-v1.z>MIN_DEPTH){
-			vert = v0;
-			vertColor=line[0].c0;
-			gl_Position=pt0+off;
-			EmitVertex();
-			gl_Position=pt0-off;
-			EmitVertex();
-	
-			vert = v1;
-			vertColor=line[0].c1;
-			gl_Position=pt1-off;
-			EmitVertex();
-			gl_Position=pt1+off;
-			EmitVertex();
-			EndPrimitive();
+				vert = v0;
+				vertColor=line[0].c0;
+				gl_Position=pt0+off;
+				EmitVertex();
+				gl_Position=pt0-off;
+				EmitVertex();
+		
+				vert = v1;
+
+				gl_Position=pt1+off;
+				EmitVertex();
+
+				vertColor=line[0].c1;
+				gl_Position=pt1-off;
+				EmitVertex();
+
+				EndPrimitive();
             }
 
 })");
@@ -4048,6 +4049,7 @@ void LineShader::draw(const std::list<Mesh*>& meshes, CameraParameters& camera, 
 	}
 	end();
 }
+
 void LineShader::draw(const std::list<std::pair<Mesh*, float4x4>>& meshes,CameraParameters& camera, const box2px& bounds, float lineWidth, const aly::Color& color){
 	begin()
 	.set("MIN_DEPTH", camera.getNearPlane())
