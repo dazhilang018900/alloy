@@ -1218,11 +1218,15 @@ bool SpringLevelSet3D::stepInternal() {
 	double remaining = simulationTimeStep;
 	double t = 0.0;
 	const int evolveIterations = 8;
+	contour.particleTracking.resize(contour.particles.size());
+	for(int n=0;n<contour.particleTracking.size();n++){
+		contour.particleTracking[n]=n;
+	}
 	do {
 		float effectiveTimeStep = advect(
 				std::min(0.333333f, (float) remaining));
 		t += (double) effectiveTimeStep;
-		if (resampleEnabled && !advectionFunc) {//trust advection to handle expansion. don't relax.
+		if (resampleEnabled) {//trust advection to handle expansion. don't relax.
 			relax();
 		}
 		updateUnsignedLevelSet();
@@ -1235,6 +1239,7 @@ bool SpringLevelSet3D::stepInternal() {
 			oldNormals = contour.normals;
 			oldCorrespondences = contour.correspondence;
 			oldVelocities = contour.velocities;
+
 			updateUnsignedLevelSet();
 			int fillCount = 0;
 			int tries = 0;

@@ -903,6 +903,10 @@ bool SpringLevelSet2D::stepInternal() {
 	double remaining = simulationTimeStep;
 	double t = 0.0;
 	const int evolveIterations = 8;
+	contour.particleTracking.resize(contour.particles.size());
+	for(int n=0;n<contour.particleTracking.size();n++){
+		contour.particleTracking[n]=n;
+	}
 	do {
 		float timeStep = advect(std::min(0.333333f, (float) remaining));
 		t += (double) timeStep;

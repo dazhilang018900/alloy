@@ -50,8 +50,8 @@ RecurrentTask(
 		computeTimeSeconds(0.0),
 		name(name),
 		isInitialized(false),
-		simulationTimeStep(0),
-		simulationDuration(0),
+		simulationTimeStep(1.0),
+		simulationDuration(-1),
 		simulationTime(0),
 		simulationIteration(0) {
 
