@@ -1161,7 +1161,7 @@ bool SpringLevelSet3D::stepInternal() {
 	do {
 		float effectiveTimeStep = advect(std::min(0.5f, (float) remaining));
 		t += (double) effectiveTimeStep;
-		if (resampleEnabled) {
+		if (resampleEnabled&&!advectionFunc) {//trust advection to handle expansion. don't relax.
 			relax();
 		}
 		updateUnsignedLevelSet();
