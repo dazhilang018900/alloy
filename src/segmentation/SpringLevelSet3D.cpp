@@ -1014,7 +1014,7 @@ float3 SpringLevelSet3D::getGradientValue(float i, float j, float k) {
 	grad.y = 0.5f * (v121 - v101);
 	grad.z = 0.5f * (v112 - v110);
 	float len = max(1E-6f, length(grad));
-	return (v111 * grad / len);
+	return grad / len;
 }
 float3 SpringLevelSet3D::getScaledGradientValue(float i, float j, float k,
 		bool signedIso) {
