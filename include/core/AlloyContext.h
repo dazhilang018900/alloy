@@ -336,12 +336,12 @@ namespace aly {
 		inline int2 screenDimensions() const {
 			return screenSize;
 		}
-		inline const char* getFontName(FontType type) {
+		inline const char* getFontName(FontType type) const {
 			if (fonts[static_cast<int>(type)].get() == nullptr)
 				throw std::runtime_error("Font type not found.");
 			return fonts[static_cast<int>(type)]->name.c_str();
 		}
-		inline int getFontHandle(FontType type) {
+		inline int getFontHandle(FontType type) const {
 			if (fonts[static_cast<int>(type)].get() == nullptr)
 				throw std::runtime_error("Font type not found.");
 			return fonts[static_cast<int>(type)]->handle;

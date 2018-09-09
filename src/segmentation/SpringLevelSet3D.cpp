@@ -1247,7 +1247,7 @@ void SpringLevelSet3D::fixNormals() {
 bool SpringLevelSet3D::stepInternal() {
 	double remaining = simulationTimeStep;
 	double t = 0.0;
-	const int evolveIterations = 12;
+	const int evolveIterations = 8;
 	contour.particleTracking.resize(contour.particles.size());
 	for (int n = 0; n < contour.particleTracking.size(); n++) {
 		contour.particleTracking[n] = n;

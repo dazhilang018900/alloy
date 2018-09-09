@@ -53,7 +53,6 @@ bool SplineEx::init(Composite& rootNode) {
 	draw = DrawPtr(new Draw("B-Spline", CoordPX(0.0f,0.0f), CoordPercent(1.0f, 1.0f)));
 	draw->setAspectRule(AspectRule::FixedHeight);
 	draw->setAspectRatio(1.0f);
-
 	draw->onDraw = [this](const AlloyContext* context, const box2px& bounds) {
 		NVGcontext* nvg = context->nvgContext;
 		nvgStrokeWidth(nvg, 3.0f);
