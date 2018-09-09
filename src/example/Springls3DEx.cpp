@@ -26,7 +26,7 @@
 using namespace aly;
 
 Springls3DEx::Springls3DEx(int exampleIndex) :
-		Application(1920,1080, "Spring Level Set 3D"),
+		Application(1280,720, "Spring Level Set 3D"),
 		matcapShaderIso(getFullPath("images/JG_Red.png")),matcapShaderParticles(getFullPath("images/matcap/00005.png")),
 		matcapShaderSpringls(getFullPath("images/JG_Silver.png")),
 		springlShader(getFullPath("images/JG_Red.png"),getFullPath("images/JG_Silver.png")),

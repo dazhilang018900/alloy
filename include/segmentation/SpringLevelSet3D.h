@@ -74,6 +74,7 @@ namespace aly {
 		virtual bool stepInternal() override;
 		float3 traceInitial(float3 pt);
 		float3 traceUnsigned(float3 pt);
+		void fixNormals();
 		void refineContour(aly::Mesh& isosurf,int iterations,float proximity,float stepSize);
 		void updateNearestNeighbors(float maxDistance = NEAREST_NEIGHBOR_DISTANCE);
 		void updateUnsignedLevelSet(float maxDistance= 3.5f);
@@ -85,6 +86,7 @@ namespace aly {
 		float advect(float maxStep=0.33333f);
 		void updateSignedLevelSet(float maxStep=0.5f);
 		float3 getScaledGradientValue(int i, int j, int k);
+		float3 getGradientValue(float i,float j,float k);
 		float3 getScaledGradientValue(float i, float j,float k, bool signedIso);
 		void distanceFieldMotion(int i, int j, int k, size_t index);
 		virtual void computeForce(size_t idx,float timeStep, float3& p1, float3& p2, float3& p3, float3& p);
