@@ -101,6 +101,7 @@ float2x2 Compose(const float& theta, const float& phi, const float& sx,
 SpringLevelSet2D::SpringLevelSet2D(
 		const std::shared_ptr<ManifoldCache2D>& cache) :
 		ActiveManifold2D("Spring Level Set 2D", cache), resampleEnabled(true) {
+	clampSpeed=true;
 }
 void SpringLevelSet2D::setSpringls(const Vector2f& particles,
 		const Vector2f& points) {

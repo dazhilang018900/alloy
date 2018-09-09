@@ -25,8 +25,7 @@ namespace aly {
 
 const float SpringLevelSet3D::MIN_ANGLE_TOLERANCE = (float) (ALY_PI * 20
 		/ 180.0f);
-const float SpringLevelSet3D::NEAREST_NEIGHBOR_DISTANCE = std::sqrt(2.0f)
-		* 0.5f;
+const float SpringLevelSet3D::NEAREST_NEIGHBOR_DISTANCE = std::sqrt(2.0f)* 0.5f;
 const float SpringLevelSet3D::PARTICLE_RADIUS = 0.05f;
 const float SpringLevelSet3D::REST_RADIUS = 0.1f;
 const float SpringLevelSet3D::SPRING_CONSTANT = 0.3f;
@@ -35,7 +34,7 @@ const float SpringLevelSet3D::EXTENT = 0.5f;
 const float SpringLevelSet3D::SHARPNESS = 5.0f;
 const float SpringLevelSet3D::FILL_DISTANCE = 0.3f;
 const float SpringLevelSet3D::MIN_AREA = 0.05f;
-const float SpringLevelSet3D::MAX_AREA = 2.0;
+const float SpringLevelSet3D::MAX_AREA = 4.0;
 const float SpringLevelSet3D::MIN_ASPECT_RATIO = 0.1f;
 const int SpringLevelSet3D::MAX_NEAREST_NEIGHBORS = 2;
 double SpringLevelSet3D::ENRIGHT_PERIOD=2.75;
@@ -55,6 +54,7 @@ SpringLevelSet3D::SpringLevelSet3D(
 		const std::shared_ptr<ManifoldCache3D>& cache) :
 		ActiveManifold3D("Spring Level Set 3D", cache), resampleEnabled(true) {
 	contour.meshType = MeshType::Quad;
+	clampSpeed=true;
 	simulationTimeStep = 1.0f;
 }
 void SpringLevelSet3D::setSpringls(const Vector3f& particles,
@@ -69,7 +69,7 @@ void SpringLevelSet3D::updateUnsignedLevelSet(float narrowBand) {
 	unsignedLevelSet.resize(levelSet.rows, levelSet.cols, levelSet.slices);
 	unsignedLevelSet.set(narrowBand);
 	if (contour.meshType == MeshType::Triangle) {
-#pragma omp parallel for
+//#pragma omp parallel for
 		for (size_t n = 0; n < N; n++) {
 			float3 v1 = contour.vertexes[n * 3];
 			float3 v2 = contour.vertexes[n * 3 + 1];
@@ -399,14 +399,6 @@ int SpringLevelSet3D::fill() {
 			//histogram[aly::clamp((int) aly::round(d * 10), 0, 10)]++;
 		}
 	}
-	std::cout << "Fill " << fillCount << std::endl;
-	/*
-	 for (int n = 0; n < histogram.size(); n++) {
-	 std::cout << std::setw(4) << n / 10.0f << ":: "
-	 << histogram[n] * 100 / (float) contour.quadIndexes.size()
-	 << "%" << std::endl;
-	 }
-	 */
 	return fillCount;
 }
 void SpringLevelSet3D::updateTracking(float maxDistance) {
@@ -611,7 +603,6 @@ int SpringLevelSet3D::contract() {
 		contour.particleTracking = tracking;
 		contour.setDirty(true);
 	}
-	std::cout << "Contract " << contractCount << std::endl;
 	return contractCount;
 }
 void SpringLevelSet3D::setAdvection(
@@ -1217,7 +1208,7 @@ void SpringLevelSet3D::cleanup() {
 bool SpringLevelSet3D::stepInternal() {
 	double remaining = simulationTimeStep;
 	double t = 0.0;
-	const int evolveIterations = 8;
+	const int evolveIterations = 12;
 	contour.particleTracking.resize(contour.particles.size());
 	for(int n=0;n<contour.particleTracking.size();n++){
 		contour.particleTracking[n]=n;
@@ -1246,8 +1237,7 @@ bool SpringLevelSet3D::stepInternal() {
 			{
 				Mesh tmpMesh;
 				std::lock_guard < std::mutex > lockMe(contourLock);
-				isoSurface.solve(levelSet, activeList, tmpMesh,
-						contour.meshType, true, 0.0f);
+				isoSurface.solve(levelSet, activeList, tmpMesh,contour.meshType, false, 0.0f);
 				tmpMesh.updateVertexNormals(false);
 				refineContour(tmpMesh, 4, 2.0f, 0.5f);
 				contour.quadIndexes = tmpMesh.quadIndexes;
@@ -1260,8 +1250,10 @@ bool SpringLevelSet3D::stepInternal() {
 			do {
 				contract();
 				fillCount = fill();
-				//contour.stashSpringls(MakeDesktopFile(MakeString() << "fill" << std::setw(4)<< std::setfill('0')<< simulationIteration << ".ply"));
-				relax();
+				if(fillCount>0){
+					//contour.stashSpringls(MakeDesktopFile(MakeString() << "fill" << std::setw(4)<< std::setfill('0')<< simulationIteration << ".ply"));
+					relax();
+				}
 				tries++;
 			} while (fillCount > 0 && tries < 3); //Continue filling until all gaps are closed
 			contour.updateNormals();
@@ -1270,8 +1262,7 @@ bool SpringLevelSet3D::stepInternal() {
 		} else {
 			std::lock_guard < std::mutex > lockMe(contourLock);
 			Mesh mesh;
-			isoSurface.solve(levelSet, activeList, mesh, contour.meshType, true,
-					0.0f);
+			isoSurface.solve(levelSet, activeList, mesh, contour.meshType, false,0.0f);
 			mesh.updateVertexNormals(false);
 			refineContour(mesh, 4, 2.0f, 0.5f);
 			contour.vertexLocations = mesh.vertexLocations;
