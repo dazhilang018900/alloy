@@ -730,6 +730,10 @@ template<class C, class R> std::basic_ostream<C, R> & operator <<(
 }
 Vec<float> Solve(const DenseMat<float>& A, const Vec<float>& b,
 		const MatrixFactorization& factor = MatrixFactorization::SVD);
+
+Vec<float> SolveNonNegative(const DenseMat<float>& A, const Vec<float>& b,
+		const MatrixFactorization& factor = MatrixFactorization::SVD);
+
 Vec<double> Solve(const DenseMat<double>& A, const Vec<double>& b,
 		const MatrixFactorization& factor = MatrixFactorization::SVD);
 
