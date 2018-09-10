@@ -76,7 +76,7 @@ bool NonNegativeLeastSquaresEx::init(Composite& rootNode) {
 		nvgTextAlign(nvg,NVG_ALIGN_TOP|NVG_ALIGN_LEFT);
 		nvgFontFaceId(nvg,context->getFontHandle(FontType::Normal));
 		nvgFontSize(nvg,20);
-		drawText(nvg,bounds.position+float2(bounds.dimensions.x-120,2),MakeString()<<"Error="<<std::setw(6)<<std::setprecision(6)<<error,FontStyle::Normal,Color(128,128,128),Color(10,10,10));
+		drawText(nvg,bounds.position+float2(bounds.dimensions.x-115,2),MakeString()<<"Error="<<std::setw(6)<<std::setprecision(6)<<error,FontStyle::Normal,Color(128,128,128),Color(10,10,10));
 
 		float r;
 		nvgStrokeColor(nvg,Color(192,192,192));
