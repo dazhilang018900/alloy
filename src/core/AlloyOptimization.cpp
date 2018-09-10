@@ -334,7 +334,7 @@ Vec<double> Solve(const DenseMat<double>& A, const Vec<double>& b,
 }
 Vec<float> SolveNonNegative(const DenseMat<float>& A, const Vec<float>& b,
 		const MatrixFactorization& factor) {
-	const float ZERO_TOLERANCE = 1E-10f;
+	const float ZERO_TOLERANCE = 1E-16f;
 	int N = A.cols;
 	int P = 0;
 	float maxW;
@@ -382,26 +382,24 @@ Vec<float> SolveNonNegative(const DenseMat<float>& A, const Vec<float>& b,
 				s[n] = 0;
 			}
 		}
-		//int count=0;
 		while (minS <= 0) {
 			alpha = std::numeric_limits<float>::max();
-			//count++;
 			for (int p = 0; p < P; p++) {
 				int n = passiveSet[p];
 				if(s[n]<=0&&x[n]!=s[n]){
 					alpha = std::min(alpha, double(x[n]) / (double(x[n]) - double(s[n])));
 				}
 			}
-			if(alpha==0){
-				s=x;
-				//std::cout<<"Zero Alpha "<<count<<std::endl;//What does this mean!?
-				break;
-			}
 			x += float(alpha) * (s - x);
 			for (int n = 0; n < N; n++) {
-				if (activeMask[n] && x[n] < 0) {
-					passiveSet.push_back(n);//currently in active set, move to passive.
-					activeMask[n] = false;
+				if (!activeMask[n] && x[n]== 0) {
+					for(int i=0;i<passiveSet.size();i++){
+						if(passiveSet[i]==n){
+							passiveSet.erase(passiveSet.begin()+i);
+							break;
+						}
+					}
+					activeMask[n] = true;
 				}
 			}
 			P=passiveSet.size();
@@ -431,6 +429,116 @@ Vec<float> SolveNonNegative(const DenseMat<float>& A, const Vec<float>& b,
 		x=s;
 		w = At * (b - A * x);
 		maxW = std::numeric_limits<float>::min();
+		j = -1;
+		for (int n = 0; n < N; n++) {
+			if (w[n] > maxW) {
+				maxW = w[n];
+				if(activeMask[n]){
+					j = n;
+				}
+			}
+		}
+	}
+	return x;
+}
+
+Vec<double> SolveNonNegative(const DenseMat<double>& A, const Vec<double>& b,
+		const MatrixFactorization& factor) {
+	const double ZERO_TOLERANCE = 1E-16f;
+	int N = A.cols;
+	int P = 0;
+	double maxW;
+	double minS;
+	double alpha;
+	int j;
+	DenseMat<double> At=A.transpose();
+	std::vector<int> passiveSet;
+	std::vector<bool> activeMask(N, true);
+	Vec<double> x(N, 0.0f);
+	Vec<double> w = At * b;
+	Vec<double> s(N, 0.0f);
+	Vec<double> sp;
+	maxW = w[0];
+	j = 0;
+	for (int n = 1; n < N; n++) {
+		if (w[n] > maxW) {
+			maxW = w[n];
+			j = n;
+		}
+	}
+	while (P < N && j!=-1&& maxW > ZERO_TOLERANCE) {
+		passiveSet.push_back(j);
+		activeMask[j] = false;
+		P = passiveSet.size();
+		{
+			DenseMat<double> Ap(A.rows,P);
+			for (int p = 0; p < P; p++) {
+				int n = passiveSet[p];
+				VecMap<double> tcol = Ap.getColumn(p);
+				VecMap<double> scol = A.getColumn(n);
+				for (int r = 0; r < A.rows; r++) {
+					tcol[r] = scol[r];
+				}
+			}
+			sp = Solve(Ap, b, factor);
+		}
+		minS = std::numeric_limits<double>::max();
+		for (int p = 0; p < P; p++) {
+			s[passiveSet[p]] = sp[p];
+			minS = std::min(sp[p], minS);
+		}
+		for (int n = 0; n < N; n++) {
+			if (activeMask[n]) {
+				s[n] = 0;
+			}
+		}
+		while (minS <= 0) {
+			alpha = std::numeric_limits<double>::max();
+			for (int p = 0; p < P; p++) {
+				int n = passiveSet[p];
+				if(s[n]<=0&&x[n]!=s[n]){
+					alpha = std::min(alpha,x[n] / (x[n] - s[n]));
+				}
+			}
+			x += double(alpha) * (s - x);
+			for (int n = 0; n < N; n++) {
+				if (!activeMask[n] && x[n]== 0) {
+					for(int i=0;i<passiveSet.size();i++){
+						if(passiveSet[i]==n){
+							passiveSet.erase(passiveSet.begin()+i);
+							break;
+						}
+					}
+					activeMask[n] = true;
+				}
+			}
+			P=passiveSet.size();
+			{
+				DenseMat<double> Ap(A.rows,P);
+				for (int p = 0; p < P; p++) {
+					int n = passiveSet[p];
+					VecMap<double> tcol = Ap.getColumn(p);
+					VecMap<double> scol = A.getColumn(n);
+					for (int r = 0; r < A.rows; r++) {
+						tcol[r] = scol[r];
+					}
+				}
+				sp = Solve(Ap, b, factor);
+			}
+			minS = std::numeric_limits<double>::max();
+			for (int p = 0; p < P; p++) {
+				s[passiveSet[p]] = sp[p];
+				minS = std::min(sp[p], minS);
+			}
+			for (int n = 0; n < N; n++) {
+				if (activeMask[n]) {
+					s[n] = 0;
+				}
+			}
+		}
+		x=s;
+		w = At * (b - A * x);
+		maxW = std::numeric_limits<double>::min();
 		j = -1;
 		for (int n = 0; n < N; n++) {
 			if (w[n] > maxW) {

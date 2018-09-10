@@ -737,6 +737,9 @@ Vec<float> SolveNonNegative(const DenseMat<float>& A, const Vec<float>& b,
 Vec<double> Solve(const DenseMat<double>& A, const Vec<double>& b,
 		const MatrixFactorization& factor = MatrixFactorization::SVD);
 
+Vec<double> SolveNonNegative(const DenseMat<double>& A, const Vec<double>& b,
+		const MatrixFactorization& factor = MatrixFactorization::SVD);
+
 void SolveCG(const Vec<float>& b, const SparseMat<float>& A, Vec<float>& x,
 		int iters = 100, double tolerance = 1E-6,
 		const std::function<bool(int, double)>& iterationMonitor = nullptr);
