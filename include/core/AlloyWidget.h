@@ -533,6 +533,9 @@ public:
 	void update();
 	bool removeSelected();
 	bool removeAll();
+	bool addVerticalScrollPosition(int c);
+	virtual void scrollToTop() override;
+	virtual void scrollToBottom() override;
 	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp) override;
 	box2px getDragBox() const {
 		return dragBox;

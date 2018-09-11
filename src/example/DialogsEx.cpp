@@ -23,7 +23,7 @@
 #include "../../include/example/DialogsEx.h"
 using namespace aly;
 DialogsEx::DialogsEx() :
-		Application(800, 600, "Dialog Example") {
+		Application(1024, 600, "Dialog Example") {
 }
 bool DialogsEx::init(Composite& rootNode) {
 	FileButtonPtr saveButton=FileButtonPtr(new FileButton("Save File", CoordPerPX(0.2f, 0.0f, 0.0f, 5.0f),CoordPX(40, 40), FileDialogType::SaveFile));

@@ -1486,7 +1486,7 @@ FileButton::FileButton(const std::string& name, const AUnit2D& pos,
 			AlloyApplicationContext()->getGlassPane();
 	fileDialog = std::shared_ptr<FileDialog>(
 			new FileDialog("File Dialog",
-					CoordPerPX(0.5, 0.5, -350 + 7.5f, -250 - 7.5f),
+					CoordPerPX(0.5, 0.5, -450 + 7.5f, -250 - 7.5f),
 					CoordPX(700, 500), type));
 	fileDialog->setVisible(false);
 	glassPanel->add(fileDialog);
@@ -2035,6 +2035,49 @@ bool ListBox::removeAll() {
 	}
 	return false;
 }
+bool ListBox::addVerticalScrollPosition(int c) {
+	if(listEntries.size()>0){
+		float t=c*(cellSpacing.y+listEntries.front()->entryHeight)*(this->verticalScrollTrack->getBoundsDimensionsY()-this->verticalScrollHandle->getBoundsDimensionsY())/std::max(1E-6f,extents.dimensions.y - bounds.dimensions.y);
+		if (verticalScrollHandle->addDragOffset(pixel2(0.0f, t))) {
+			this->scrollPosition.y =
+					(this->verticalScrollHandle->getBoundsPositionY()
+							- this->verticalScrollTrack->getBoundsPositionY())
+							/ std::max(1.0f,
+									(float) this->verticalScrollTrack->getBoundsDimensionsY()
+											- (float) this->verticalScrollHandle->getBoundsDimensionsY());
+			updateExtents();
+			AlloyApplicationContext()->requestPack();
+			return true;
+		}
+	}
+	return false;
+}
+void ListBox::scrollToBottom() {
+	float t =this->verticalScrollTrack->getBoundsPositionY()+ std::max(0.0f,this->verticalScrollTrack->getBoundsDimensionsY()- (float) this->verticalScrollHandle->getBoundsDimensionsY());
+	if (verticalScrollHandle.get()!=nullptr&&verticalScrollHandle->addDragOffset(pixel2(0.0f, t))) {
+		this->scrollPosition.y =
+				(this->verticalScrollHandle->getBoundsPositionY()
+						- this->verticalScrollTrack->getBoundsPositionY())
+						/ std::max(1.0f,
+								(float) this->verticalScrollTrack->getBoundsDimensionsY()
+										- (float) this->verticalScrollHandle->getBoundsDimensionsY());
+		updateExtents();
+		AlloyApplicationContext()->requestPack();
+	}
+}
+void ListBox::scrollToTop() {
+	if (verticalScrollHandle.get()!=nullptr) {
+		verticalScrollHandle->setDragOffset(pixel2(0.0f, 0.0f));
+		this->scrollPosition.y =
+				(this->verticalScrollHandle->getBoundsPositionY()
+						- this->verticalScrollTrack->getBoundsPositionY())
+						/ std::max(1.0f,
+								(float) this->verticalScrollTrack->getBoundsDimensionsY()
+										- (float) this->verticalScrollHandle->getBoundsDimensionsY());
+		updateExtents();
+		AlloyApplicationContext()->requestPack();
+	}
+}
 bool ListBox::removeSelected() {
 	if (!enableDelete) {
 		std::cerr << "Could not delete from list box [" << getName()
@@ -2113,6 +2156,21 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			} else {
 				removeSelected();
 			}
+		}
+		if(e.key==GLFW_KEY_DOWN&&e.isDown()){
+			return addVerticalScrollPosition(1);
+		}  else if(e.key==GLFW_KEY_UP&&e.isDown()){
+			return addVerticalScrollPosition(-1);
+		} else if(e.key==GLFW_KEY_PAGE_DOWN&&e.isDown()){
+			return addVerticalScrollPosition(5);
+		}  else if(e.key==GLFW_KEY_PAGE_UP&&e.isDown()){
+			return addVerticalScrollPosition(-5);
+		}  else if(e.key==GLFW_KEY_HOME&&e.isDown()){
+			scrollToTop();
+			return true;
+		} else if(e.key==GLFW_KEY_END&&e.isDown()){
+			scrollToBottom();
+			return true;
 		}
 	}
 	if (e.type == InputType::Cursor || e.type == InputType::MouseButton) {
@@ -2409,25 +2467,27 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	northRegion->add(fileLocation);
 	northRegion->add(upDirButton);
 
+	std::vector<std::string> drives = GetDrives();
+	float offset=(drives.size()>6)?Composite::scrollBarSize+2.0f:2.0f;
 	directoryTree = std::shared_ptr<Composite>(
 			new Composite("Container", CoordPX(10, 0),
 					CoordPerPX(1.0, 1.0, -10, 0)));
 
 	TextIconButtonPtr homeDir = TextIconButtonPtr(
 			new TextIconButton("Home", 0xf015, CoordPX(1.0f, 0.0f),
-					CoordPerPX(1.0f, 0.0f, -2.0f, 30.0f),
+					CoordPerPX(1.0f, 0.0f, -offset, 30.0f),
 					HorizontalAlignment::Left));
 	TextIconButtonPtr docsDir = TextIconButtonPtr(
 			new TextIconButton("Documents", 0xf115, CoordPX(1.0f, 0.0f),
-					CoordPerPX(1.0f, 0.0f, -2.0f, 30.0f),
+					CoordPerPX(1.0f, 0.0f, -offset, 30.0f),
 					HorizontalAlignment::Left));
 	TextIconButtonPtr downloadDir = TextIconButtonPtr(
 			new TextIconButton("Downloads", 0xf019, CoordPX(1.0f, 0.0f),
-					CoordPerPX(1.0f, 0.0f, -2.0f, 30.0f),
+					CoordPerPX(1.0f, 0.0f, -offset, 30.0f),
 					HorizontalAlignment::Left));
 	TextIconButtonPtr desktopDir = TextIconButtonPtr(
 			new TextIconButton("Desktop", 0xf108, CoordPX(1.0f, 0.0f),
-					CoordPerPX(1.0f, 0.0f, -2.0f, 30.0f),
+					CoordPerPX(1.0f, 0.0f, -offset, 30.0f),
 					HorizontalAlignment::Left));
 	homeDir->setRoundCorners(true);
 	docsDir->setRoundCorners(true);
@@ -2469,14 +2529,13 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 			};
 	directoryTree->add(desktopDir);
 
-	std::vector<std::string> drives = GetDrives();
 	for (std::string file : drives) {
 		TextIconButtonPtr diskDir = TextIconButtonPtr(
 				new TextIconButton(
 						GetFileName(
 								RemoveTrailingSlash(file)) + ALY_PATH_SEPARATOR,
 						0xf0a0, CoordPX(1.0f, 0.0f),
-						CoordPerPX(1.0f, 0.0f, -2.0f, 30.0f),
+						CoordPerPX(1.0f, 0.0f, -offset, 30.0f),
 						HorizontalAlignment::Left));
 		diskDir->onMouseDown =
 				[this, file](AlloyContext* context, const InputEvent& e) {

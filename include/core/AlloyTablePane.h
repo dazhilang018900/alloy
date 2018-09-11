@@ -189,6 +189,9 @@ namespace aly {
 	protected:
 		float entryHeight;
 	public:
+		bool addVerticalScrollPosition(int c);
+		virtual void scrollToTop() override;
+		virtual void scrollToBottom() override;
 		LazyTableComposite(const std::string& name, const AUnit2D& pos,const AUnit2D& dims,float entryHeight);
 		virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 			double pixelRatio, bool clamp) override;
