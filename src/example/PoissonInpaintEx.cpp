@@ -20,8 +20,8 @@
  */
 
 #include "Alloy.h"
-#include "AlloyDenseSolve.h"
-#include "../../include/example/PoissonInpaintEx.h"
+#include "math/AlloyDenseSolve.h"
+#include "example/PoissonInpaintEx.h"
 using namespace aly;
 PoissonInpaintEx::PoissonInpaintEx() :
 		Application(800, 600, "Poisson Inpaint Example") {

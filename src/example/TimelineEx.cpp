@@ -19,8 +19,8 @@
  * THE SOFTWARE.
  */
 
-#include "AlloyTimeline.h"
-#include "../../include/example/TimelineEx.h"
+#include "ui/AlloyTimeline.h"
+#include "example/TimelineEx.h"
 using namespace aly;
 TimelineEx::TimelineEx() :
 		Application(800, 300, "Timeline Example",false) {

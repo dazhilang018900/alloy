@@ -20,7 +20,7 @@
  */
 
 #include "ocl/ocl_runtime_error.h"
-#include <AlloyCommon.h>
+#include "common/AlloyCommon.h"
 #include <CL/cl.h>
 namespace aly {
 	void PrintCLError(int iErr) {

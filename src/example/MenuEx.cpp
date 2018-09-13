@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/MenuEx.h"
+#include "example/MenuEx.h"
 using namespace aly;
 MenuEx::MenuEx() :
 		Application(800, 600, "Menu Example") {

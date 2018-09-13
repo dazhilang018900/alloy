@@ -20,8 +20,8 @@
  */
 
 #include "Alloy.h"
-#include "AlloyExpandBar.h"
-#include "../../include/example/ForceDirectedGraphEx.h"
+#include "ui/AlloyExpandBar.h"
+#include "example/ForceDirectedGraphEx.h"
 using namespace aly;
 using namespace aly::dataflow;
 ForceDirectedGraphEx::ForceDirectedGraphEx() :

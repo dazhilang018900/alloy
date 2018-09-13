@@ -20,8 +20,8 @@
  */
 
 #include "Alloy.h"
-#include "AlloyDenseSolve.h"
-#include "../../include/example/PoissonBlendEx.h"
+#include "math/AlloyDenseSolve.h"
+#include "example/PoissonBlendEx.h"
 using namespace aly;
 PoissonBlendEx::PoissonBlendEx() :
 		Application(800, 600, "Poisson Blend Example") {

@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/ProceduralSkyEx.h"
+#include "example/ProceduralSkyEx.h"
 using namespace aly;
 ProceduralSkyEx::ProceduralSkyEx() :
 		Application(960, 540, "Procedural Sky Example"), hosekShader(1.0f), preethamShader(

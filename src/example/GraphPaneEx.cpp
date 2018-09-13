@@ -20,8 +20,8 @@
  */
 
 #include "Alloy.h"
-#include "AlloyGraphPane.h"
-#include "../../include/example/GraphPaneEx.h"
+#include "ui/AlloyGraphPane.h"
+#include "example/GraphPaneEx.h"
 using namespace aly;
 GraphPaneEx::GraphPaneEx() :
 		Application(800, 600, "GraphPane Example") {

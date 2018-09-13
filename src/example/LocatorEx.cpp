@@ -19,8 +19,8 @@
  * THE SOFTWARE.
  */
 #include "Alloy.h"
-#include "AlloyDelaunay.h"
-#include "../../include/example/LocatorEx.h"
+#include "graphics/AlloyDelaunay.h"
+#include "example/LocatorEx.h"
 using namespace aly;
 LocatorEx::LocatorEx() :
 	Application(800, 800, "Point Locator Example") {

@@ -19,13 +19,13 @@
  * THE SOFTWARE.
  */
 #include <example/MultiActiveManifold2DEx.h>
-#include "AlloyGradientVectorFlow.h"
-#include "AlloyDistanceField.h"
-#include "AlloyIsoContour.h"
-#include "segmentation/SpringlsSecondOrder.h"
-#include "segmentation/MultiSpringLevelSet2D.h"
-#include "segmentation/MultiSpringLevelSetSecondOrder2D.h"
-#include "segmentation/SLIC.h"
+#include "image/AlloyGradientVectorFlow.h"
+#include "image/AlloyDistanceField.h"
+#include "graphics/AlloyIsoContour.h"
+#include "vision/SpringlsSecondOrder.h"
+#include "vision/MultiSpringLevelSet2D.h"
+#include "vision/MultiSpringLevelSetSecondOrder2D.h"
+#include "vision/SLIC.h"
 using namespace aly;
 MultiActiveManifold2DEx::MultiActiveManifold2DEx(int example) :
 		Application(1300, 1000, "Multi-Object Active Contour 2D Example",

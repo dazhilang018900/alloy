@@ -20,9 +20,9 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/DistanceFieldEx.h"
-#include "AlloyDistanceField.h"
-#include "AlloyIsoContour.h"
+#include "example/DistanceFieldEx.h"
+#include "image/AlloyDistanceField.h"
+#include "graphics/AlloyIsoContour.h"
 using namespace aly;
 DistanceFieldEx::DistanceFieldEx() :
 		Application(800, 400, "Distance Field Example"),currentIso(0.0f) {

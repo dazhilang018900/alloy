@@ -20,8 +20,8 @@
  */
 
 #include "Alloy.h"
-#include "AlloyMeshPrimitives.h"
-#include "../../include/example/MeshPrimitivesEx.h"
+#include "graphics/AlloyMeshPrimitives.h"
+#include "example/MeshPrimitivesEx.h"
 using namespace aly;
 MeshPrimitivesEx::MeshPrimitivesEx() :
 		Application(800, 600, "Mesh Primitives Example"), phongShader(1), imageShader(

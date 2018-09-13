@@ -19,7 +19,7 @@
  * THE SOFTWARE.
  */
 
-#include "../../include/example/WindowPaneEx.h"
+#include "example/WindowPaneEx.h"
 
 #include "Alloy.h"
 using namespace aly;

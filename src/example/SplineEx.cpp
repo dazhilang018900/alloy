@@ -20,8 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/SplineEx.h"
-
+#include "example/SplineEx.h"
 using namespace aly;
 SplineEx::SplineEx() :
 	Application(600, 600, "Spline Example") {

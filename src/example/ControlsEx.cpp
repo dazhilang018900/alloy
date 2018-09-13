@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/ControlsEx.h"
+#include "example/ControlsEx.h"
 using namespace aly;
 ControlsEx::ControlsEx() :
 		Application(800, 600, "Controls Example") {

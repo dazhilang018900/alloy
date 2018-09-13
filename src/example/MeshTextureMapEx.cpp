@@ -21,8 +21,8 @@
 
 #include "Alloy.h"
 #include "example/MeshTextureMapEx.h"
-#include "AlloyLocator.h"
-#include "AlloyMeshTextureMap.h"
+#include "graphics/AlloyLocator.h"
+#include "graphics/AlloyMeshTextureMap.h"
 using namespace aly;
 
 MeshTextureMapEx::MeshTextureMapEx() :

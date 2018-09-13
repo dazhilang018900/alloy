@@ -18,9 +18,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#include "example/AnisotropicFilterEx.h"
 #include "Alloy.h"
-#include "AlloyAnisotropicFilter.h"
-#include "../../include/example/AnisotropicFilterEx.h"
+#include "image/AlloyAnisotropicFilter.h"
 using namespace aly;
 AnisotropicFilterEx::AnisotropicFilterEx() :
 		Application(970, 550, "Anisotropic Filter Example"){

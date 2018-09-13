@@ -19,8 +19,8 @@
  * THE SOFTWARE.
  */
 
-#include <example/ShadowCastEx.h>
-#include <AlloyMeshPrimitives.h>
+#include "example/ShadowCastEx.h"
+#include "graphics/AlloyMeshPrimitives.h"
 #include "Alloy.h"
 using namespace aly;
 ShadowCastEx::ShadowCastEx() :

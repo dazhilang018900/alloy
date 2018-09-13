@@ -19,13 +19,14 @@
  * THE SOFTWARE.
  */
 
-#include <MeshDecimation.h>
 #include "Alloy.h"
-#include "AlloyReconstruction.h"
-#include "AlloyVolume.h"
-#include "AlloyIsoSurface.h"
-#include "grid/EndlessGrid.h"
-#include "../../include/example/LevelSetGridEx.h"
+#include "graphics/MeshDecimation.h"
+#include "image/AlloyVolume.h"
+#include "graphics/AlloyIsoSurface.h"
+#include "graphics/EndlessGrid.h"
+#include "example/LevelSetGridEx.h"
+
+#include "graphics/AlloyReconstruction.h"
 using namespace aly;
 LevelSetGridEx::LevelSetGridEx() :
 		Application(1200, 800, "Endless Grid Example") {

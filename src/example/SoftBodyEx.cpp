@@ -20,9 +20,10 @@
 */
 
 #include "Alloy.h"
-#include "AlloyReconstruction.h"
-#include "AlloyMeshPrimitives.h"
-#include "../../include/example/SoftBodyEx.h"
+#include "graphics/AlloyMeshPrimitives.h"
+#include "example/SoftBodyEx.h"
+
+#include "graphics/AlloyReconstruction.h"
 using namespace aly;
 using namespace aly::softbody;
 SoftBodyEx::SoftBodyEx() : Application(1200, 800, "Soft Body Physics Example"),phongShader(1) {

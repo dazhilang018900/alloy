@@ -22,7 +22,7 @@
 #include "ocl/Image2dCL.h"
 #include "ocl/ocl_runtime_error.h"
 #include "ocl/ComputeCL.h"
-#include <AlloyCommon.h>
+#include "common/AlloyCommon.h"
 namespace aly {
 	Image2dCL::Image2dCL() :
 			MemoryCL(), height(0), width(0), channels(0), typeSize(0) {

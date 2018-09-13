@@ -18,9 +18,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "../../include/example/MultiActiveContour3DEx.h"
-#include "segmentation/Phantom.h"
-#include <AlloyGradientVectorFlow.h>
+#include "example/MultiActiveContour3DEx.h"
+#include "vision/Phantom.h"
+#include "image/AlloyGradientVectorFlow.h"
 using namespace aly;
 MultiActiveContour3DEx::MultiActiveContour3DEx() :
 Application(1024, 600, "Multi-Object Active Contour 3D Example"), matcapShader(

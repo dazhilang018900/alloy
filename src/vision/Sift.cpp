@@ -10,7 +10,7 @@
 #include <iostream>
 #include <fstream>
 #include <stdexcept>
-#include <AlloyImageProcessing.h>
+#include "image/AlloyImageProcessing.h"
 #include <omp.h>
 #include "vision/Sift.h"
 #define MATH_POW2(x) ((x)*(x))

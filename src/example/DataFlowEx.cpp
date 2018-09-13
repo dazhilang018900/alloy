@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/DataFlowEx.h"
+#include "example/DataFlowEx.h"
 using namespace aly;
 using namespace aly::dataflow;
 DataFlowEx::DataFlowEx() :

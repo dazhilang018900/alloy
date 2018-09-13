@@ -18,14 +18,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include <AlloyGradientVectorFlow.h>
-#include "Alloy.h"
-#include "AlloyDistanceField.h"
-#include "AlloyIsoContour.h"
+#include "image/AlloyGradientVectorFlow.h"
+#include "image/AlloyDistanceField.h"
+#include "graphics/AlloyIsoContour.h"
 #include "example/DictionaryLearningEx.h"
-#include "ml/DictionaryLearning.h"
-#include "segmentation/SpringLevelSet2D.h"
-#include "segmentation/SpringlsSecondOrder.h"
+#include "vision/DictionaryLearning.h"
+#include "vision/SpringLevelSet2D.h"
+#include "vision/SpringlsSecondOrder.h"
 using namespace aly;
 DictionaryLearningEx::DictionaryLearningEx() :
 		Application(1200, 1000, "Learning Toy", false) {

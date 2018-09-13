@@ -19,10 +19,9 @@
  * THE SOFTWARE.
  */
 
-
-#include <AlloyContext.h>
-#include <AlloyMath.h>
-#include <AlloyVector.h>
+#include "ui/AlloyContext.h"
+#include "math/AlloyVecMath.h"
+#include "math/AlloyVector.h"
 #include "ocl/ComputeCL.h"
 #include "ocl/ProgramCL.h"
 #include "ocl/BufferCL.h"

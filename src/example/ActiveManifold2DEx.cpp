@@ -19,12 +19,12 @@
  * THE SOFTWARE.
  */
 
-#include <example/ActiveManifold2DEx.h>
-#include "AlloyGradientVectorFlow.h"
-#include "AlloyDistanceField.h"
-#include "AlloyIsoContour.h"
-#include "segmentation/SpringLevelSet2D.h"
-#include "segmentation/SpringlsSecondOrder.h"
+#include "example/ActiveManifold2DEx.h"
+#include "image/AlloyGradientVectorFlow.h"
+#include "image/AlloyDistanceField.h"
+#include "graphics/AlloyIsoContour.h"
+#include "vision/SpringLevelSet2D.h"
+#include "vision/SpringlsSecondOrder.h"
 using namespace aly;
 
 ActiveManifold2DEx::ActiveManifold2DEx(int example) :

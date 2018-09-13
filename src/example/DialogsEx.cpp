@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/DialogsEx.h"
+#include "example/DialogsEx.h"
 using namespace aly;
 DialogsEx::DialogsEx() :
 		Application(1024, 600, "Dialog Example") {

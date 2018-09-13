@@ -19,11 +19,11 @@
  * THE SOFTWARE.
  */
 
-#include <example/GrabCutEx.h>
 #include "Alloy.h"
-#include "AlloyGaussianMixture.h"
-#include "AlloyMaxFlow.h"
-#include "AlloyMath.h"
+#include "example/GrabCutEx.h"
+#include "vision/AlloyGaussianMixture.h"
+#include "vision/AlloyMaxFlow.h"
+#include "math/AlloyVecMath.h"
 using namespace aly;
 GrabCutEx::GrabCutEx() :
 		Application(900, 600, "Grab Cut Example") {

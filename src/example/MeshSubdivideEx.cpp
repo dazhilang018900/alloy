@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/MeshSubdivideEx.h"
+#include "example/MeshSubdivideEx.h"
 using namespace aly;
 MeshSubdivideEx::MeshSubdivideEx() :
 		Application(800, 600, "Mesh Sub-Division Example"), matcapShader(

@@ -21,10 +21,10 @@
 
 #include "ocl/ocl_runtime_error.h"
 #include "ocl/ProgramCL.h"
+#include "common/AlloyCommon.h"
 #include <iostream>
 #include <vector>
 #include <array>
-#include <AlloyCommon.h>
 namespace aly {
 	ProgramCL::ProgramCL(const cl_program& program, const std::string& name) :
 			handle(program), name(name) {

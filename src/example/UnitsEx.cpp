@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/UnitsEx.h"
+#include "example/UnitsEx.h"
 using namespace aly;
 UnitsEx::UnitsEx() :
 		Application(800, 600, "Units Example") {

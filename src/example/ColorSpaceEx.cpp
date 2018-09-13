@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/ColorSpaceEx.h"
+#include "example/ColorSpaceEx.h"
 using namespace aly;
 ColorSpaceEx::ColorSpaceEx() :
 	Application(800, 600, "Color Space Example"), particleMatcapShader(getFullPath("images/JG_Silver.png")) {

@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/MeshPhongEx.h"
+#include "example/MeshPhongEx.h"
 using namespace aly;
 MeshPhongEx::MeshPhongEx() :
 		Application(800, 600, "Mesh with Phong Shading Example"), phongShader(1) {

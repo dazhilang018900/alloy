@@ -18,11 +18,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "segmentation/Phantom.h"
-#include "grid/EndlessGrid.h"
-#include <AlloyGradientVectorFlow.h>
-#include <example/Springls3DEx.h>
-#include <AlloyDistanceField.h>
+#include "vision/Phantom.h"
+#include "graphics/EndlessGrid.h"
+#include "image/AlloyGradientVectorFlow.h"
+#include "example/Springls3DEx.h"
+#include "image/AlloyDistanceField.h"
 using namespace aly;
 
 Springls3DEx::Springls3DEx(int exampleIndex) :

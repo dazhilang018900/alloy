@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/MeshTextureEx.h"
+#include "example/MeshTextureEx.h"
 using namespace aly;
 MeshTextureEx::MeshTextureEx() :
 		Application(800, 600, "Mesh with Texture Example") {

@@ -20,8 +20,9 @@
 */
 
 #include "Alloy.h"
-#include "AlloyReconstruction.h"
-#include "../../include/example/MeshReconstructionEx.h"
+#include "example/MeshReconstructionEx.h"
+
+#include "graphics/AlloyReconstruction.h"
 using namespace aly;
 MeshReconstructionEx::MeshReconstructionEx() : Application(1200, 800, "Mesh Reconstruction Example") {
 

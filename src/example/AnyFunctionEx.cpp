@@ -1,6 +1,6 @@
-#include "AlloyAnyFunction.h"
+#include "system/AlloyAnyFunction.h"
 #define CATCH_CONFIG_RUNNER
-#include "catch.h"
+#include "system/catch.h"
 
 using namespace aly;
 template<class T> void test_type_capture(const std::type_info & info, bool is_lvalue_reference, bool is_rvalue_reference, bool is_const, bool is_volatile)

@@ -22,7 +22,7 @@
 #include "ocl/Image3dCL.h"
 #include "ocl/ocl_runtime_error.h"
 #include "ocl/ComputeCL.h"
-#include <AlloyCommon.h>
+#include "common/AlloyCommon.h"
 namespace aly {
 	Image3dCL::Image3dCL() :
 			MemoryCL(), width(0), height(0), depth(0), channels(0), typeSize(0) {

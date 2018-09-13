@@ -20,10 +20,9 @@
  */
 
 #include "Alloy.h"
-#include "AlloySparseSolve.h"
-#include "AlloyOptimization.h"
-#include "../../include/example/MeshOptimizationEx.h"
-
+#include "math/AlloySparseSolve.h"
+#include "math/AlloyOptimization.h"
+#include "example/MeshOptimizationEx.h"
 using namespace aly;
 MeshOptimizationEx::MeshOptimizationEx() :
 		Application(1200, 600, "Mesh Optimization Example"), matcapShader(getFullPath("images/JG_Silver.png")) {

@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/MeshPickerEx.h"
+#include "example/MeshPickerEx.h"
 using namespace aly;
 MeshPickerEx::MeshPickerEx() :
 		Application(800, 600, "Mesh Picker Example"),matcapShader(getFullPath("images/JG_Silver.png")) {

@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/TweenEx.h"
+#include "example/TweenEx.h"
 using namespace aly;
 TweenEx::TweenEx() :
 		Application(800, 600, "Tween Example") {

@@ -18,9 +18,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 #include "Alloy.h"
-#include "../../include/example/CompositeEx.h"
+#include "example/CompositeEx.h"
 using namespace aly;
 CompositeEx::CompositeEx() :
 		Application(800, 600, "Composite Example") {

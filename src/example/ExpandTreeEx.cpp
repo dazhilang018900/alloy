@@ -18,10 +18,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
-#include "../../include/example/ExpandTreeEx.h"
-
 #include "Alloy.h"
+#include "example/ExpandTreeEx.h"
 using namespace aly;
 ExpandTreeEx::ExpandTreeEx() :
 		Application(800, 600, "Expand Tree Example") {

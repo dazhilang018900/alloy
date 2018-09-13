@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/MeshVertexColorEx.h"
+#include "example/MeshVertexColorEx.h"
 using namespace aly;
 MeshVertexColorEx::MeshVertexColorEx() :
 		Application(800, 600, "Mesh with Vertex Color Example"), matcapShader(

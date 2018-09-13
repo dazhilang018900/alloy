@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/DragEx.h"
+#include "example/DragEx.h"
 using namespace aly;
 DragEx::DragEx() :
 		Application(800, 600, "Drag Example") {

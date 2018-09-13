@@ -19,8 +19,8 @@
  * THE SOFTWARE.
  */
 #include "Alloy.h"
-#include "AlloyDelaunay.h"
-#include "../../include/example/MaxFlowEx.h"
+#include "graphics/AlloyDelaunay.h"
+#include "example/MaxFlowEx.h"
 using namespace aly;
 MaxFlowEx::MaxFlowEx() :
 		Application(1000, 1000, "Max-Flow Example"), srcId(-1), sinkId(-1) {

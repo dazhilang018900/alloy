@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/ImageEx.h"
+#include "example/ImageEx.h"
 using namespace aly;
 ImageEx::ImageEx() :
 		Application(800, 600, "Image Example"){

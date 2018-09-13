@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/MeshParticleEx.h"
+#include "example/MeshParticleEx.h"
 using namespace aly;
 MeshParticleEx::MeshParticleEx() :
 		Application(800, 600, "Particles with Matcap Shading Example"),particleMatcapShader(getFullPath("images/JG_Silver.png")),

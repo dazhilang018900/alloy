@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/MeshWireframeEx.h"
+#include "example/MeshWireframeEx.h"
 using namespace aly;
 MeshWireframeEx::MeshWireframeEx() :
 		Application(800, 600, "Mesh with Wireframe Example"), matcapShader(

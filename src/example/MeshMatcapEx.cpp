@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/MeshMatcapEx.h"
+#include "example/MeshMatcapEx.h"
 using namespace aly;
 MeshMatcapEx::MeshMatcapEx() :
 		Application(800, 600, "Mesh with Matcap Shading Example"),matcapShader(getFullPath("images/JG_Gold.png")) {

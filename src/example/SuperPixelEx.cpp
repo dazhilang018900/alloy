@@ -18,13 +18,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "../../include/example/SuperPixelEx.h"
-#include "AlloyGradientVectorFlow.h"
-#include "AlloyDistanceField.h"
-#include "AlloyIsoContour.h"
-#include "segmentation/SpringlsSecondOrder.h"
-#include "segmentation/SLIC.h"
-#include "AlloyAnisotropicFilter.h"
+#include "example/SuperPixelEx.h"
+#include "image/AlloyGradientVectorFlow.h"
+#include "image/AlloyDistanceField.h"
+#include "graphics/AlloyIsoContour.h"
+#include "vision/SpringlsSecondOrder.h"
+#include "vision/SLIC.h"
+#include "image/AlloyAnisotropicFilter.h"
 using namespace aly;
 
 SuperPixelEx::SuperPixelEx(int example) :

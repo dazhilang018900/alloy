@@ -20,8 +20,8 @@
  */
 
 #include "Alloy.h"
-#include "AlloyParameterPane.h"
-#include "../../include/example/ParameterPaneEx.h"
+#include "ui/AlloyParameterPane.h"
+#include "example/ParameterPaneEx.h"
 using namespace aly;
 ParameterPaneEx::ParameterPaneEx() :
 		Application(800, 600, "Parameter Pane Example") {

@@ -18,10 +18,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
-#include "../../include/example/IntersectorEx.h"
-
 #include "Alloy.h"
+#include "example/IntersectorEx.h"
 using namespace aly;
 IntersectorEx::IntersectorEx() :
 		Application(768, 512, "Mesh Intersector Example"),matcapShader(getFullPath("images/JG_Gold.png")) {

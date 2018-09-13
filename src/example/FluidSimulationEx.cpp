@@ -18,12 +18,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "../../include/example/FluidSimulationEx.h"
-#include "AlloyGradientVectorFlow.h"
-#include "AlloyDistanceField.h"
-#include "AlloyIsoContour.h"
-#include "segmentation/SpringLevelSet2D.h"
-#include "segmentation/SpringlsSecondOrder.h"
+#include "example/FluidSimulationEx.h"
+#include "image/AlloyGradientVectorFlow.h"
+#include "image/AlloyDistanceField.h"
+#include "graphics/AlloyIsoContour.h"
+#include "vision/SpringLevelSet2D.h"
+#include "vision/SpringlsSecondOrder.h"
 using namespace aly;
 FluidSimulationEx::FluidSimulationEx(int width,int height) :Application(1200, 800, "Fluid Simulation", false), simWidth(width),simHeight(height),parametersDirty(true),frameBuffersDirty(true) {
 }

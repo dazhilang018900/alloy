@@ -20,8 +20,8 @@
  */
 
 #include "Alloy.h"
-#include "AlloyTablePane.h"
-#include "../../include/example/TablePaneEx.h"
+#include "ui/AlloyTablePane.h"
+#include "example/TablePaneEx.h"
 using namespace aly;
 TablePaneEx::TablePaneEx() :
 		Application(1024, 600, "Table Pane Example") {

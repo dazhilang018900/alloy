@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/MeshDepthEx.h"
+#include "example/MeshDepthEx.h"
 using namespace aly;
 const int RENDER_WIDTH = 256;
 const int RENDER_HEIGHT = 256;

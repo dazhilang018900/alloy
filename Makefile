@@ -1,20 +1,20 @@
 rwildcard=$(foreach d,$(wildcard $1*),$(call rwildcard,$d/,$2) $(filter $(subst *,%,$2),$d))
 
-SRC := $(call rwildcard, ./src/core/, *.cpp)
+SRC := $(call rwildcard, ./src/common/, *.cpp)
 SRC += $(call rwildcard, ./src/physics/, *.cpp)
-SRC += $(call rwildcard, ./src/poisson/, *.cpp)
-SRC += $(call rwildcard, ./src/segmentation/, *.cpp)
-SRC += $(call rwildcard, ./src/grid/, *.cpp)
-SRC += $(call rwildcard, ./src/fluid/, *.cpp)
+SRC += $(call rwildcard, ./src/graphics/, *.cpp)
+SRC += $(call rwildcard, ./src/image/, *.cpp)
+SRC += $(call rwildcard, ./src/math/, *.cpp)
+SRC += $(call rwildcard, ./src/ui/, *.cpp)
+SRC += $(call rwildcard, ./src/system/, *.cpp)
 SRC += $(call rwildcard, ./src/vision/, *.cpp)
-SRC += $(call rwildcard, ./src/ml/, *.cpp)
-# SRC += $(call rwildcard, ./src/tiger/, *.cpp)
 CXX = g++
 CC = gcc
+EXOBJS := ./src/main.o
+EXOBJS +=$(patsubst %.cpp, %.o, $(call rwildcard, ./src/example/, *.cpp))
 
-EXOBJS :=$(patsubst %.cpp, %.o, $(call rwildcard, ./src/example/, *.cpp))
-CXXFLAGS:= -DGL_GLEXT_PROTOTYPES=1 -std=gnu++14 -O3 -w -fPIC -MMD -MP -fopenmp -c -g -fmessage-length=0 -I./include/ -I./include/core/ 
-CFLAGS:= -DGL_GLEXT_PROTOTYPES=1 -std=c11 -O3 -w -fPIC -MMD -MP -fopenmp -c -g -fmessage-length=0 -I./include/ -I./include/core/
+CXXFLAGS:= -DGL_GLEXT_PROTOTYPES=1 -std=gnu++14 -O3 -w -fPIC -MMD -MP -fopenmp -c -g -fmessage-length=0 -I./src/
+CFLAGS:= -DGL_GLEXT_PROTOTYPES=1 -std=c11 -O3 -w -fPIC -MMD -MP -fopenmp -c -g -fmessage-length=0 -I./src/
 LDLIBS =-L./ -L/usr/lib/ -L/usr/local/lib/ -L/usr/local/cuda-9.1/lib64/ -L/usr/lib/x86_64-linux-gnu/ -L./ext/glfw/src/
 LIBS = -lglfw -lstdc++ -lgcc -lgomp -lGL -lXext -lGLU -lGLEW -lXi -lXrandr -lX11 -lXxf86vm -lXinerama -lXcursor -lXdamage -lpthread -lm -ldl -ltiff
 

@@ -23,9 +23,9 @@
 #include "ocl/ComputeCL.h"
 #include "ocl/ProgramCL.h"
 #include <CL/cl_gl.h>
-#include <AlloyCommon.h>
-#include <AlloyFileUtil.h>
-#include <AlloyContext.h>
+#include "common/AlloyCommon.h"
+#include "system/AlloyFileUtil.h"
+#include "ui/AlloyContext.h"
 #include <iostream>
 #include <fstream>
 #include <streambuf>

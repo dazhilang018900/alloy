@@ -20,9 +20,9 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/NonNegativeLeastSquaresEx.h"
-#include "AlloyDrawUtil.h"
-#include "AlloyOptimization.h"
+#include "example/NonNegativeLeastSquaresEx.h"
+#include "ui/AlloyDrawUtil.h"
+#include "math/AlloyOptimization.h"
 using namespace aly;
 NonNegativeLeastSquaresEx::NonNegativeLeastSquaresEx() :
 	Application(600, 600, "Non-Negative Least Squares") {

@@ -22,11 +22,11 @@
 #include "ocl/ocl_runtime_error.h"
 #include "ocl/Image2dCLGL.h"
 #include "ocl/ComputeCL.h"
-#include  <GLTexture.h>
+#include  "graphics/GLTexture.h"
 //#include <GL/glew.h>
 #include <CL/cl.h>
 #include <CL/cl_gl.h>
-#include <AlloyCommon.h>
+#include "common/AlloyCommon.h"
 namespace aly {
 	Image2dCLGL::Image2dCLGL() :
 			Image2dCL(), imageType(ImageType::UNKNOWN) {

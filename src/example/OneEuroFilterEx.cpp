@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/OneEuroFilterEx.h"
+#include "example/OneEuroFilterEx.h"
 using namespace aly;
 OneEuroFilterEx::OneEuroFilterEx() :
 	Application(800, 800, "One Euro Filter Example",false) {

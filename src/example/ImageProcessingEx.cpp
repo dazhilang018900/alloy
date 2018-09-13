@@ -20,8 +20,8 @@
  */
 
 #include "Alloy.h"
-#include "AlloyImageProcessing.h"
-#include "../../include/example/ImageProcessingEx.h"
+#include "image/AlloyImageProcessing.h"
+#include "example/ImageProcessingEx.h"
 using namespace aly;
 ImageProcessingEx::ImageProcessingEx() :
 		Application(800, 800, "Image Processing Example") {

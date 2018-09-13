@@ -18,9 +18,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "../../include/example/MagicPixelEx.h"
-#include "segmentation/MagicPixels.h"
-#include "AlloyAnisotropicFilter.h"
+#include "example/MagicPixelEx.h"
+#include "vision/MagicPixels.h"
+#include "image/AlloyAnisotropicFilter.h"
 using namespace aly;
 MagicPixelEx::MagicPixelEx(int example) :
 	Application(1600, 800, "Magic Pixel Segmentation Example", false), showCenters(true),showContours(true),example(example), lastSimTime(-1){

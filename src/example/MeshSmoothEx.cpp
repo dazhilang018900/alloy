@@ -20,8 +20,8 @@
  */
 
 #include "Alloy.h"
-#include "AlloySparseSolve.h"
-#include "../../include/example/MeshSmoothEx.h"
+#include "math/AlloySparseSolve.h"
+#include "example/MeshSmoothEx.h"
 using namespace aly;
 MeshSmoothEx::MeshSmoothEx() :
 		Application(800, 600, "Mesh Smoothing Example"), matcapShader(

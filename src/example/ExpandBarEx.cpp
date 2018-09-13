@@ -19,10 +19,10 @@
  * THE SOFTWARE.
  */
 
-#include "../../include/example/ExpandBarEx.h"
+#include "example/ExpandBarEx.h"
 
 #include "Alloy.h"
-#include "AlloyExpandBar.h"
+#include "ui/AlloyExpandBar.h"
 using namespace aly;
 ExpandBarEx::ExpandBarEx() :
 		Application(800, 600, "Expand Bar Example") {

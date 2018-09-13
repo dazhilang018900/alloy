@@ -20,9 +20,9 @@
  */
 
 #include "Alloy.h"
-#include "AlloyDenseSolve.h"
-#include "AlloyImageFeatures.h"
-#include "../../include/example/ImageFeaturesEx.h"
+#include "math/AlloyDenseSolve.h"
+#include "vision/AlloyImageFeatures.h"
+#include "example/ImageFeaturesEx.h"
 using namespace aly;
 ImageFeaturesEx::ImageFeaturesEx() :
 		Application(800, 600, "Image Features Example") {

@@ -20,7 +20,7 @@
  */
 
 #include "Alloy.h"
-#include "../../include/example/EventsEx.h"
+#include "example/EventsEx.h"
 using namespace aly;
 EventsEx::EventsEx() :
 		Application(800, 600, "Events Example") {
