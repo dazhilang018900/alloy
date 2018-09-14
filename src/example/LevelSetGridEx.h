@@ -23,6 +23,7 @@
 #define LEVELSETGRID_EX_H_
 
 #include "ui/AlloyApplication.h"
+#include "ui/AlloyParameterPane.h"
 #include "graphics/shaders/CommonShaders.h"
 class LevelSetGridEx : public aly::Application {
 protected:

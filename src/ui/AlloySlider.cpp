@@ -5,7 +5,7 @@
  *      Author: blake
  */
 
-#include "ui/AlloySliderWidget.h"
+#include "ui/AlloySlider.h"
 #include "ui/AlloyApplication.h"
 #include "ui/AlloyDrawUtil.h"
 namespace aly{

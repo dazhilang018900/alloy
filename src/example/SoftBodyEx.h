@@ -24,6 +24,7 @@
 
 #include "physics/softbody/Body.h"
 #include "ui/AlloyApplication.h"
+#include "ui/AlloyParameterPane.h"
 #include "graphics/AlloyMesh.h"
 #include "graphics/shaders/CommonShaders.h"
 #include "graphics/GLFrameBuffer.h"

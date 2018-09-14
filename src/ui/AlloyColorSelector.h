@@ -20,7 +20,10 @@
 */
 #ifndef ALLOYCOLORSELECTOR_H_
 #define ALLOYCOLORSELECTOR_H_
-#include "AlloyUI.h"
+#include "ui/AlloyComposite.h"
+#include "ui/AlloySlider.h"
+#include "ui/AlloyTextWidget.h"
+#include "ui/AlloyGlyph.h"
 namespace aly {
 
 	struct ColorWheel : public Composite {

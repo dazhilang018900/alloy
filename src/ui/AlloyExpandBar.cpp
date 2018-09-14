@@ -21,6 +21,7 @@
 #include "AlloyExpandBar.h"
 #include "AlloyApplication.h"
 #include "AlloyDrawUtil.h"
+
 namespace aly {
 	void ExpandRegion::setExpanded(bool expanded) {
 		contentRegion->setVisible(expanded);

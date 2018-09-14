@@ -117,7 +117,7 @@ namespace aly {
 				Float(0.5)));
 		redSlider->setLabelFormatter(
 			[](const Number& value) {
-			std::string str = MakeString() << (int)std::floor(100.0f*value.toFloat()) << "%";
+			std::string str = MakeString() << (int)aly::round(255.0f*value.toFloat());
 			return str;
 		});
 		redSlider->setOnChangeEvent([this](const Number& value) {
@@ -143,7 +143,7 @@ namespace aly {
 		});
 		greenSlider->setLabelFormatter(
 			[](const Number& value) {
-			string str = MakeString() << (int)std::floor(100.0f*value.toFloat()) << "%";
+			string str = MakeString() << (int)aly::round(255.0f*value.toFloat());
 			return str;
 		});
 		blueSlider = std::shared_ptr<VerticalSlider>(
@@ -160,7 +160,7 @@ namespace aly {
 		});
 		blueSlider->setLabelFormatter(
 			[](const Number& value) {
-			string str = MakeString() << (int)std::floor(100.0f*value.toFloat()) << "%";
+			string str = MakeString() << (int)aly::round(255.0f*value.toFloat());
 			return str;
 		});
 		lumSlider = std::shared_ptr<VerticalSlider>(
@@ -169,7 +169,7 @@ namespace aly {
 				Float(0.5)));
 		lumSlider->setLabelFormatter(
 			[](const Number& value) {
-			string str = MakeString() << (int)std::floor(100.0f*value.toFloat()) << "%";
+			string str = MakeString() << (int)aly::round(255.0f*value.toFloat());
 			return str;
 		});
 		lumSlider->setOnChangeEvent([this](const Number& value) {
@@ -190,7 +190,7 @@ namespace aly {
 				Float(0.5)));
 		alphaSlider->setLabelFormatter(
 			[](const Number& value) {
-			string str = MakeString() << (int)std::floor(100.0f*value.toFloat()) << "%";
+			string str = MakeString() << (int)aly::round(255.0f*value.toFloat());
 			return str;
 		});
 		alphaSlider->setOnChangeEvent([this](const Number& value) {

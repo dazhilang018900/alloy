@@ -25,7 +25,6 @@
 #include "graphics/AlloyIsoSurface.h"
 #include "graphics/EndlessGrid.h"
 #include "example/LevelSetGridEx.h"
-
 #include "graphics/AlloyReconstruction.h"
 using namespace aly;
 LevelSetGridEx::LevelSetGridEx() :

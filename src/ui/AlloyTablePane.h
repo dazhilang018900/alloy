@@ -22,8 +22,13 @@
 #define ALLOYTablePane_H_
 
 #include "common/AlloyAny.h"
-#include "ui/AlloyUI.h"
+#include "ui/AlloyComposite.h"
 #include "ui/AlloyColorSelector.h"
+#include "ui/AlloyNumberWidget.h"
+#include "ui/AlloyTextWidget.h"
+#include "ui/AlloySelectionBox.h"
+#include "ui/AlloyToggleWidget.h"
+#include "ui/AlloyProgressBar.h"
 #include <string>
 #include <vector>
 namespace aly {

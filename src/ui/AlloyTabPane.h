@@ -21,7 +21,9 @@
 
 #ifndef ALLOYTABPANE_H_
 #define ALLOYTABPANE_H_
-#include "AlloyUI.h"
+#include "ui/AlloyComposite.h"
+#include "ui/AlloyTextWidget.h"
+#include "ui/AlloySelectionBox.h"
 namespace aly {
 	class TabBar;
 	struct TabPane;

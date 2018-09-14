@@ -20,7 +20,8 @@
 */
 #ifndef ALLOYEXPANDBAR_H_
 #define ALLOYEXPANDBAR_H_
-#include "AlloyUI.h"
+#include "ui/AlloyComposite.h"
+#include "ui/AlloyTextWidget.h"
 namespace aly {
 	class ExpandRegion : public Composite {
 	private:

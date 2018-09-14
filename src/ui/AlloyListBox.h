@@ -25,7 +25,7 @@
 #include "ui/AlloyTextWidget.h"
 #include "ui/AlloyNumberWidget.h"
 #include "ui/AlloyButton.h"
-#include "ui/AlloySliderWidget.h"
+#include "ui/AlloySlider.h"
 #include "ui/AlloyBorderComposite.h"
 namespace aly{
 class ListBox;

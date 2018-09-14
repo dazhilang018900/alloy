@@ -22,7 +22,6 @@
 #include "Alloy.h"
 #include "graphics/AlloyMeshPrimitives.h"
 #include "example/SoftBodyEx.h"
-
 #include "graphics/AlloyReconstruction.h"
 using namespace aly;
 using namespace aly::softbody;

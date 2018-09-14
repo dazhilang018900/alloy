@@ -22,8 +22,8 @@
 #ifndef ALLOYTOGGLEWIDGET_H_
 #define ALLOYTOGGLEWIDGET_H_
 
-#include "ui/AlloyUI.h"
-#include "ui/AlloyListBox.h"
+#include "ui/AlloyComposite.h"
+#include "ui/AlloyTextWidget.h"
 namespace aly {
 
 class CheckBox: public Composite {

@@ -21,8 +21,6 @@
 #ifndef ALLOYPARAMETERPANE_H_
 #define ALLOYPARAMETERPANE_H_
 #include "ui/AlloyUI.h"
-#include "ui/AlloyExpandBar.h"
-#include "ui/AlloyColorSelector.h"
 #include "common/AlloyAny.h"
 #include <string>
 #include <vector>

@@ -35,12 +35,11 @@
 #include "ui/AlloyFileWidget.h"
 #include "ui/AlloyToggleWidget.h"
 #include "ui/AlloyProgressBar.h"
-#include "ui/AlloyParameterPane.h"
 #include "ui/AlloyGraphPane.h"
 #include "ui/AlloyTabPane.h"
 #include "ui/AlloyTablePane.h"
 #include "ui/AlloyColorSelector.h"
 #include "ui/AlloyTimeline.h"
-
+#include "ui/AlloyExpandBar.h"
 bool SANITY_CHECK_UI();
 #endif /* ALLOYUI_H_ */

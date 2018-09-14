@@ -8,11 +8,9 @@
 #include "ui/AlloyComposite.h"
 #include "ui/AlloyApplication.h"
 #include "ui/AlloyDrawUtil.h"
-#include "ui/AlloySliderWidget.h"
+#include "ui/AlloySlider.h"
 namespace aly{
-
 const float Composite::scrollBarSize = 15.0f;
-
 std::shared_ptr<Composite> MakeComposite(const std::string& name,
 		const AUnit2D& position, const AUnit2D& dimensions,
 		const Color& bgColor, const Color& borderColor,
