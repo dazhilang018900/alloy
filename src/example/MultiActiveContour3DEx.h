@@ -23,7 +23,6 @@
 #define INCLUDE_EXAMPLE_MULTIACTIVECONTOUR3DEx_H_
 
 #include "ui/AlloyApplication.h"
-#include "ui/AlloyWidget.h"
 #include "ui/AlloyTimeline.h"
 #include "graphics/shaders/CommonShaders.h"
 #include "vision/MultiActiveContour3D.h"

@@ -1,5 +1,5 @@
 /*
- * Copyright(C) 2015, Blake C. Lucas, Ph.D. (img.science@gmail.com)
+ * Copyright(C) 2018, Blake C. Lucas, Ph.D. (img.science@gmail.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,30 +19,31 @@
  * THE SOFTWARE.
  */
 
-#ifndef ALLOY_H_
-#define ALLOY_H_
+#ifndef SRC_UI_ALLOYWINDOWPANE_H_
+#define SRC_UI_ALLOYWINDOWPANE_H_
+#include "ui/AlloyAdjustableComposite.h"
+#include "ui/AlloyButton.h"
+#include "ui/AlloyTextWidget.h"
+namespace aly {
 
-#include "graphics/AlloyIntersector.h"
-#include "graphics/AlloyLocator.h"
-#include "ui/AlloyDrawUtil.h"
-#include "graphics/AlloyCamera.h"
-#include "common/AlloyAny.h"
-#include "system/AlloyFileUtil.h"
-#include "image/AlloyImage.h"
-#include "math/AlloyNumber.h"
-#include "image/AlloyImage.h"
-#include "math/AlloyArray.h"
-#include "ui/AlloyUI.h"
+class WindowPane: public AdjustableComposite {
+protected:
+	CompositePtr titleRegion;
+	CompositePtr contentRegion;
+	bool maximized;
+	bool dragging;
+	std::shared_ptr<IconButton> maximizeIcon;
+	TextLabelPtr label;
+public:
+	void setMaximize(bool max);
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+			override;
+	WindowPane(const RegionPtr& content);
+	virtual void draw(AlloyContext* context) override;
+};
 
-#include "graphics/GLShader.h"
-#include "graphics/GLTexture.h"
-#include "graphics/GLFrameBuffer.h"
-#include "ui/AlloyContext.h"
-#include "ui/AlloyApplication.h"
-#include "ui/AlloyWorker.h"
-#include "graphics/AlloyMesh.h"
-#include "math/AlloySparseMatrix.h"
-#include "math/AlloyDenseMatrix.h"
-#include "math/AlloyVecMath.h"
-#include "graphics/shaders/CommonShaders.h"
-#endif /* ALLOY_H_ */
+typedef std::shared_ptr<WindowPane> WindowPanePtr;
+
+} /* namespace aly */
+
+#endif /* SRC_UI_ALLOYWINDOWPANE_H_ */

@@ -21,7 +21,6 @@
 #ifndef ALLOYEXPANDBAR_H_
 #define ALLOYEXPANDBAR_H_
 #include "AlloyUI.h"
-#include "AlloyWidget.h"
 namespace aly {
 	class ExpandRegion : public Composite {
 	private:

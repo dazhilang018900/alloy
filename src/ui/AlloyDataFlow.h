@@ -24,7 +24,6 @@
 #include "ui/AlloyUI.h"
 #include "graphics/AvoidanceRouting.h"
 #include "ui/AlloyUndoRedo.h"
-#include "ui/AlloyWidget.h"
 #include <string>
 #include <vector>
 #include <memory>

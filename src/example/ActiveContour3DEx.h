@@ -24,8 +24,7 @@
 
 #include "vision/ActiveManifold3D.h"
 #include "ui/AlloyApplication.h"
-#include "ui/AlloyWidget.h"
-#include "ui/AlloyTimeline.h"
+#include "ui/AlloyUI.h"
 #include "graphics/shaders/CommonShaders.h"
 
 class ActiveContour3DEx: public aly::Application {

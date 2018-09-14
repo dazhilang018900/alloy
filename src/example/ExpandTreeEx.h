@@ -23,7 +23,7 @@
 #define EXPANDTREE_EX_H_
 
 #include "ui/AlloyApplication.h"
-#include "ui/AlloyWidget.h"
+#include "ui/AlloyUI.h"
 #include "ui/AlloyExpandTree.h"
 class ExpandTreeEx: public aly::Application {
 protected:

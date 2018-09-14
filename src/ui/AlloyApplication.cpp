@@ -21,7 +21,7 @@
 
 #include "ui/AlloyApplication.h"
 #include "system/AlloyFileUtil.h"
-#include "ui/AlloyWidget.h"
+#include "ui/AlloyUI.h"
 #include "ui/AlloyDrawUtil.h"
 #include <thread>
 #include <chrono>

@@ -25,7 +25,6 @@
 
 #include "vision/SpringLevelSet3D.h"
 #include "ui/AlloyApplication.h"
-#include "ui/AlloyWidget.h"
 #include "ui/AlloyTimeline.h"
 #include "graphics/shaders/CommonShaders.h"
 class Springls3DEx: public aly::Application {

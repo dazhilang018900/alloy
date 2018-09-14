@@ -21,7 +21,6 @@
 #ifndef ALLOYGRAPHPANE_H_
 #define ALLOYGRAPHPANE_H_
 #include "AlloyUI.h"
-#include "AlloyWidget.h"
 namespace aly {
 	struct GraphData {
 		std::string name;

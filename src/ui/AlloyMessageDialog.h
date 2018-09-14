@@ -1,5 +1,5 @@
 /*
- * Copyright(C) 2015, Blake C. Lucas, Ph.D. (img.science@gmail.com)
+ * Copyright(C) 2018, Blake C. Lucas, Ph.D. (img.science@gmail.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -18,27 +18,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#ifndef SRC_UI_ALLOYMESSAGEDIALOG_H_
+#define SRC_UI_ALLOYMESSAGEDIALOG_H_
 
-#ifndef PROCEDURALSKY_EX_H_
-#define PROCEDURALSKY_EX_H_
-#include "ui/AlloyApplication.h"
-#include "graphics/shaders/SkyShader.h"
-class ProceduralSkyEx: public aly::Application {
+#include "AlloyComposite.h"
+#include "AlloyTextWidget.h"
+namespace aly {
+
+
+class MessageDialog: public Composite {
 protected:
-	aly::Number sunPitch,sunAngle,albedo,strength,turbidity;
-	aly::HorizontalSliderPtr albedoSlider;
-	aly::HorizontalSliderPtr turbiditySlider;
-	aly::HorizontalSliderPtr strengthSlider;
-	aly::HorizontalSliderPtr pitchSlider;
-	aly::HorizontalSliderPtr angleSlider;
-	aly::SelectionPtr methodSelection;
-	aly::CompositePtr renderRegion;
-	aly::HosekProceduralSky hosekShader;
-	aly::PreethamProceduralSky preethamShader;
-	aly::Camera camera;
+	bool returnValue = false;
+	MessageOption option;
+	MessageType type;
+	std::shared_ptr<Composite> containerRegion;
+	std::shared_ptr<TextLabel> textLabel;
 public:
-	ProceduralSkyEx();
-	bool init(aly::Composite& rootNode);
-	void draw(aly::AlloyContext* context);
+	bool getValue() const {
+		return returnValue;
+	}
+	void setMessage(const std::string& message);
+        std::string getMessage() const;
+	void setVisible(bool visible);
+	MessageDialog(const std::string& name, const AUnit2D& pos,
+			const AUnit2D& dims, bool wrap, const MessageOption& option,
+			const MessageType& type);
+	MessageDialog(const std::string& name, bool wrap,
+			const MessageOption& option, const MessageType& type);
+	virtual void draw(AlloyContext* context) override;
+	std::function<void(MessageDialog* dialog)> onSelect;
 };
-#endif 
+
+typedef std::shared_ptr<MessageDialog> MessageDialogPtr;
+} /* namespace aly */
+
+#endif /* SRC_UI_ALLOYMESSAGEDIALOG_H_ */

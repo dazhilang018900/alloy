@@ -1,5 +1,5 @@
 /*
- * Copyright(C) 2015, Blake C. Lucas, Ph.D. (img.science@gmail.com)
+ * Copyright(C) 2018, Blake C. Lucas, Ph.D. (img.science@gmail.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -19,30 +19,42 @@
  * THE SOFTWARE.
  */
 
-#ifndef ALLOY_H_
-#define ALLOY_H_
+#ifndef SRC_UI_ALLOYPROGRESSBAR_H_
+#define SRC_UI_ALLOYPROGRESSBAR_H_
+#include "ui/AlloyComposite.h"
+#include "ui/AlloyTextWidget.h"
+namespace aly {
 
-#include "graphics/AlloyIntersector.h"
-#include "graphics/AlloyLocator.h"
-#include "ui/AlloyDrawUtil.h"
-#include "graphics/AlloyCamera.h"
-#include "common/AlloyAny.h"
-#include "system/AlloyFileUtil.h"
-#include "image/AlloyImage.h"
-#include "math/AlloyNumber.h"
-#include "image/AlloyImage.h"
-#include "math/AlloyArray.h"
-#include "ui/AlloyUI.h"
 
-#include "graphics/GLShader.h"
-#include "graphics/GLTexture.h"
-#include "graphics/GLFrameBuffer.h"
-#include "ui/AlloyContext.h"
-#include "ui/AlloyApplication.h"
-#include "ui/AlloyWorker.h"
-#include "graphics/AlloyMesh.h"
-#include "math/AlloySparseMatrix.h"
-#include "math/AlloyDenseMatrix.h"
-#include "math/AlloyVecMath.h"
-#include "graphics/shaders/CommonShaders.h"
-#endif /* ALLOY_H_ */
+class ProgressBar: public Composite {
+private:
+	TextLabelPtr textLabel;
+	float value;
+	std::string label;
+public:
+	virtual void draw(AlloyContext* context) override;
+	inline void setValue(float p) {
+		value = clamp(p, 0.0f, 1.0f);
+	}
+	inline float getValue() const {
+		return value;
+	}
+	inline std::string getLabel() const {
+		return label;
+	}
+	inline void setValue(const std::string& l) {
+		label = l;
+	}
+	inline void setValue(const std::string& l, float p) {
+		label = l;
+		value = clamp(p, 0.0f, 1.0f);
+	}
+	ProgressBar(const std::string& name, const AUnit2D& pt,
+			const AUnit2D& dims);
+};
+
+
+typedef std::shared_ptr<ProgressBar> ProgressBarPtr;
+} /* namespace aly */
+
+#endif /* SRC_UI_ALLOYPROGRESSBAR_H_ */

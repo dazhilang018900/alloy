@@ -22,7 +22,6 @@
 #ifndef ALLOYTIMELINE_H_
 #define ALLOYTIMELINE_H_
 #include "AlloyUI.h"
-#include "AlloyWidget.h"
 namespace aly {
 	class TimelineSlider : public Composite {
 	protected:

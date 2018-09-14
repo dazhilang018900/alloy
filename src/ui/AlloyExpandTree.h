@@ -21,7 +21,6 @@
 #ifndef ALLOYEXPANDTREE_H_
 #define ALLOYEXPANDTREE_H_
 #include "AlloyUI.h"
-#include "AlloyWidget.h"
 namespace aly {
 
 	class ExpandTree;

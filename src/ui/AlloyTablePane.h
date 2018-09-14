@@ -20,9 +20,9 @@
 */
 #ifndef ALLOYTablePane_H_
 #define ALLOYTablePane_H_
-#include "ui/AlloyUI.h"
-#include "ui/AlloyWidget.h"
+
 #include "common/AlloyAny.h"
+#include "ui/AlloyUI.h"
 #include "ui/AlloyColorSelector.h"
 #include <string>
 #include <vector>

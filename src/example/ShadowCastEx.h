@@ -24,7 +24,6 @@
 
 #include "ui/AlloyApplication.h"
 #include "graphics/shaders/CommonShaders.h"
-#include "ui/AlloyWidget.h"
 #include "graphics/shaders/ShadowCastShader.h"
 class ShadowCastEx: public aly::Application {
 protected:
