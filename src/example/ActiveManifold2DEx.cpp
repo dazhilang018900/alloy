@@ -25,8 +25,8 @@
 #include "graphics/AlloyIsoContour.h"
 #include "vision/SpringLevelSet2D.h"
 #include "vision/SpringlsSecondOrder.h"
+#include "ui/AlloyDrawUtil.h"
 using namespace aly;
-
 ActiveManifold2DEx::ActiveManifold2DEx(int example) :
 		Application(1300, 1000, "Active Contour 2D", false), currentIso(0.0f), example(
 				example) {
