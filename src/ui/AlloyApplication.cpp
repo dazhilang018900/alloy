@@ -33,10 +33,11 @@ std::shared_ptr<AlloyContext>& Application::context =
 void Application::initInternal() {
 	rootRegion.setBounds(CoordPercent(0.0f, 0.0f), CoordPercent(1.0f, 1.0f));
 	context->addAssetDirectory("assets/");
-	context->addAssetDirectory("assets/");
 	context->addAssetDirectory("data/assets/");
 	context->addAssetDirectory("../assets/");
 	context->addAssetDirectory("../../assets/");
+	context->addAssetDirectory("../../../assets/");
+	context->addAssetDirectory("../../../../assets/");
 	glfwSetWindowUserPointer(context->window, this);
 	glfwSetWindowRefreshCallback(context->window,
 			[](GLFWwindow * window ) {Application* app = (Application *)(glfwGetWindowUserPointer(window)); try {app->onWindowRefresh();} catch(...) {app->throwException(std::current_exception());}});
