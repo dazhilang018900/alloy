@@ -30,8 +30,9 @@
 #ifndef CEREAL_TYPES_LIST_HPP_
 #define CEREAL_TYPES_LIST_HPP_
 
-#include "common/cereal/cereal.hpp"
+#include "cereal/cereal.hpp"
 #include <list>
+
 namespace cereal
 {
   //! Saving for std::list

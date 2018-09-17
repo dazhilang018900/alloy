@@ -29,7 +29,7 @@
 #ifndef CEREAL_ARCHIVES_PORTABLE_BINARY_HPP_
 #define CEREAL_ARCHIVES_PORTABLE_BINARY_HPP_
 
-#include "common/cereal/cereal.hpp"
+#include "cereal/cereal.hpp"
 #include <sstream>
 #include <limits>
 
@@ -124,6 +124,8 @@ namespace cereal
       {
         this->operator()( options.is_little_endian() );
       }
+
+      ~PortableBinaryOutputArchive() CEREAL_NOEXCEPT = default;
 
       //! Writes size bytes of data to the output stream
       template <std::size_t DataSize> inline
@@ -226,6 +228,8 @@ namespace cereal
         this->operator()( streamLittleEndian );
         itsConvertEndianness = options.is_little_endian() ^ streamLittleEndian;
       }
+
+      ~PortableBinaryInputArchive() CEREAL_NOEXCEPT = default;
 
       //! Reads size bytes of data from the input stream
       /*! @param data The data to save

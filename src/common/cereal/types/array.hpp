@@ -30,7 +30,7 @@
 #ifndef CEREAL_TYPES_ARRAY_HPP_
 #define CEREAL_TYPES_ARRAY_HPP_
 
-#include "common/cereal/cereal.hpp"
+#include "cereal/cereal.hpp"
 #include <array>
 
 namespace cereal

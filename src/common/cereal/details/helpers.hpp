@@ -37,32 +37,8 @@
 #include <unordered_map>
 #include <stdexcept>
 
-#include "common/cereal/macros.hpp"
-#include "common/cereal/details/static_object.hpp"
-
-//! Defines the CEREAL_NOEXCEPT macro to use instead of noexcept
-/*! If a compiler we support does not support noexcept, this macro
-    will detect this and define CEREAL_NOEXCEPT as a no-op */
-#if !defined(CEREAL_HAS_NOEXCEPT)
-  #if defined(__clang__)
-    #if __has_feature(cxx_noexcept)
-      #define CEREAL_HAS_NOEXCEPT
-    #endif
-  #else // NOT clang
-    #if defined(__GXX_EXPERIMENTAL_CXX0X__) && __GNUC__ * 10 + __GNUC_MINOR__ >= 46 || \
-        defined(_MSC_FULL_VER) && _MSC_FULL_VER >= 190023026
-      #define CEREAL_HAS_NOEXCEPT
-    #endif // end GCC/MSVC check
-  #endif // end NOT clang block
-
-  #ifndef CEREAL_NOEXCEPT
-    #ifdef CEREAL_HAS_NOEXCEPT
-      #define CEREAL_NOEXCEPT noexcept
-    #else
-      #define CEREAL_NOEXCEPT
-    #endif // end CEREAL_HAS_NOEXCEPT
-  #endif // end !defined(CEREAL_HAS_NOEXCEPT)
-#endif // ifndef CEREAL_NOEXCEPT
+#include "cereal/macros.hpp"
+#include "cereal/details/static_object.hpp"
 
 namespace cereal
 {
@@ -79,8 +55,10 @@ namespace cereal
   //! The size type used by cereal
   /*! To ensure compatability between 32, 64, etc bit machines, we need to use
       a fixed size type instead of size_t, which may vary from machine to
-      machine. */
-  using size_type = uint64_t;
+      machine.
+
+      The default value for CEREAL_SIZE_TYPE is specified in cereal/macros.hpp */
+  using size_type = CEREAL_SIZE_TYPE;
 
   // forward decls
   class BinaryOutputArchive;
