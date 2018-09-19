@@ -85,7 +85,7 @@ struct Argument {
 };
 class ArgumentParser {
 public:
-	static std::string delimit(const std::string& name) ;
+	static std::string delimit(const std::string& name);
 	static std::string strip(const std::string& name) ;
 	static std::string upper(const std::string& in);
 	static std::string escape(const std::string& in) ;
@@ -118,15 +118,18 @@ private:
 	std::string final_name_;
 	ArgumentVector arguments_;
 	AnyVector variables_;
-
-public:
-	ArgumentParser() :
-			ignore_first_(true), use_exceptions_(false), required_(0) {
+	template<typename T> T get(const std::string& name) {
+		if (index_.count(delimit(name)) == 0)
+			throw std::out_of_range("Key not found");
+		size_t N = index_[delimit(name)];
+		return AnyCast<T>(variables_[N]);
 	}
+public:
+	ArgumentParser();
 	// --------------------------------------------------------------------------
 	// addArgument
 	// --------------------------------------------------------------------------
-	void appName(const std::string& name) ;
+	void setAppName(const std::string& name) ;
 	void addArgument(const std::string& name, char nargs = 0, bool optional = true);
 	void addArgument(const std::string& short_name, const std::string& name, char nargs =0, bool optional = true);
 	void addFinalArgument(const std::string& name, char nargs = 1, bool optional =false) ;
@@ -137,18 +140,13 @@ public:
 	// --------------------------------------------------------------------------
 	void parse(size_t argc, const char** argv);
 	void parse(const StringVector& argv) ;
+	int getInt(const std::string& name);
+	float getFloat(const std::string& name);
+	std::string getString(const std::string& name);
 
-	// --------------------------------------------------------------------------
-	// Retrieve
-	// --------------------------------------------------------------------------
-	template<typename T>
-	T& retrieve(const std::string& name) {
-		if (index_.count(delimit(name)) == 0)
-			throw std::out_of_range("Key not found");
-		size_t N = index_[delimit(name)];
-		return AnyCast<T>(variables_[N]);
-	}
-
+	std::vector<int> getIntVector(const std::string& name);
+	std::vector<float> getFloatVector(const std::string& name);
+	std::vector<std::string> getStringVector(const std::string& name);
 	// --------------------------------------------------------------------------
 	// Properties
 	// --------------------------------------------------------------------------
@@ -156,6 +154,7 @@ public:
 	void useExceptions(bool state);
 	bool empty() const;
 	void clear();
+	bool has(const std::string& name);
 	bool exists(const std::string& name) const;
 	size_t count(const std::string& name);
 };
