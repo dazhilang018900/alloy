@@ -102,9 +102,6 @@ void ArgumentParser::insertArgument(const Argument& arg) {
 }
 ArgumentParser::ArgumentParser() :
 		ignore_first_(true), use_exceptions_(false), required_(0) {
-#ifdef ALY_WINDOWS
-	ignoreFirstArgument(false);
-#endif
 }
 
 void ArgumentParser::setAppName(const std::string& name) {
@@ -156,7 +153,7 @@ int ArgumentParser::getInt(const std::string& name) {
 	return std::atoi(get<std::string>(name).c_str());
 }
 float ArgumentParser::getFloat(const std::string& name) {
-	return std::atof(get<std::string>(name).c_str());
+	return (float)std::atof(get<std::string>(name).c_str());
 }
 std::string ArgumentParser::getString(const std::string& name) {
 	return get<std::string>(name);
