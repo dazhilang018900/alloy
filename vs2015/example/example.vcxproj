@@ -15,61 +15,70 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\example\ActiveContour3DEx.h" />
-    <ClInclude Include="..\..\include\example\AnisotropicFilterEx.h" />
-    <ClInclude Include="..\..\include\example\ColorSpaceEx.h" />
-    <ClInclude Include="..\..\include\example\CompositeEx.h" />
-    <ClInclude Include="..\..\include\example\ControlsEx.h" />
-    <ClInclude Include="..\..\include\example\DataFlowEx.h" />
-    <ClInclude Include="..\..\include\example\DialogsEx.h" />
-    <ClInclude Include="..\..\include\example\DistanceFieldEx.h" />
-    <ClInclude Include="..\..\include\example\DragEx.h" />
-    <ClInclude Include="..\..\include\example\EventsEx.h" />
-    <ClInclude Include="..\..\include\example\ExpandBarEx.h" />
-    <ClInclude Include="..\..\include\example\ExpandTreeEx.h" />
-    <ClInclude Include="..\..\include\example\ForceDirectedGraphEx.h" />
-    <ClInclude Include="..\..\include\example\GrabCutEx.h" />
-    <ClInclude Include="..\..\include\example\GraphPaneEx.h" />
-    <ClInclude Include="..\..\include\example\ImageEx.h" />
-    <ClInclude Include="..\..\include\example\ImageFeaturesEx.h" />
-    <ClInclude Include="..\..\include\example\ImageProcessingEx.h" />
-    <ClInclude Include="..\..\include\example\IntersectorEx.h" />
-    <ClInclude Include="..\..\include\example\LaplaceFillEx.h" />
-    <ClInclude Include="..\..\include\example\LevelSetGridEx.h" />
-    <ClInclude Include="..\..\include\example\LocatorEx.h" />
-    <ClInclude Include="..\..\include\example\MaxFlowEx.h" />
-    <ClInclude Include="..\..\include\example\MenuEx.h" />
-    <ClInclude Include="..\..\include\example\MeshDepthEx.h" />
-    <ClInclude Include="..\..\include\example\MeshMatcapEx.h" />
-    <ClInclude Include="..\..\include\example\MeshOptimizationEx.h" />
-    <ClInclude Include="..\..\include\example\MeshParticleEx.h" />
-    <ClInclude Include="..\..\include\example\MeshPhongEx.h" />
-    <ClInclude Include="..\..\include\example\MeshPickerEx.h" />
-    <ClInclude Include="..\..\include\example\MeshPrimitivesEx.h" />
-    <ClInclude Include="..\..\include\example\MeshReconstructionEx.h" />
-    <ClInclude Include="..\..\include\example\MeshSmoothEx.h" />
-    <ClInclude Include="..\..\include\example\MeshSubdivideEx.h" />
-    <ClInclude Include="..\..\include\example\MeshTextureEx.h" />
-    <ClInclude Include="..\..\include\example\MeshTextureMapEx.h" />
-    <ClInclude Include="..\..\include\example\MeshVertexColorEx.h" />
-    <ClInclude Include="..\..\include\example\MeshWireframeEx.h" />
-    <ClInclude Include="..\..\include\example\OneEuroFilterEx.h" />
-    <ClInclude Include="..\..\include\example\ParameterPaneEx.h" />
-    <ClInclude Include="..\..\include\example\PoissonBlendEx.h" />
-    <ClInclude Include="..\..\include\example\PoissonInpaintEx.h" />
-    <ClInclude Include="..\..\include\example\ProceduralSkyEx.h" />
-    <ClInclude Include="..\..\include\example\ShadowCastEx.h" />
-    <ClInclude Include="..\..\include\example\SoftBodyEx.h" />
-    <ClInclude Include="..\..\include\example\SplineEx.h" />
-    <ClInclude Include="..\..\include\example\TablePaneEx.h" />
-    <ClInclude Include="..\..\include\example\TabPaneEx.h" />
-    <ClInclude Include="..\..\include\example\TimelineEx.h" />
-    <ClInclude Include="..\..\include\example\TweenEx.h" />
-    <ClInclude Include="..\..\include\example\UnitsEx.h" />
-    <ClInclude Include="..\..\include\example\WindowPaneEx.h" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <ClInclude Include="..\..\src\example\ActiveContour3DEx.h" />
+    <ClInclude Include="..\..\src\example\ActiveManifold2DEx.h" />
+    <ClInclude Include="..\..\src\example\AnisotropicFilterEx.h" />
+    <ClInclude Include="..\..\src\example\ColorSpaceEx.h" />
+    <ClInclude Include="..\..\src\example\CompositeEx.h" />
+    <ClInclude Include="..\..\src\example\ControlsEx.h" />
+    <ClInclude Include="..\..\src\example\DataFlowEx.h" />
+    <ClInclude Include="..\..\src\example\DialogsEx.h" />
+    <ClInclude Include="..\..\src\example\DictionaryLearningEx.h" />
+    <ClInclude Include="..\..\src\example\DistanceFieldEx.h" />
+    <ClInclude Include="..\..\src\example\DragEx.h" />
+    <ClInclude Include="..\..\src\example\EventsEx.h" />
+    <ClInclude Include="..\..\src\example\ExpandBarEx.h" />
+    <ClInclude Include="..\..\src\example\ExpandTreeEx.h" />
+    <ClInclude Include="..\..\src\example\FluidSimulationEx.h" />
+    <ClInclude Include="..\..\src\example\ForceDirectedGraphEx.h" />
+    <ClInclude Include="..\..\src\example\GrabCutEx.h" />
+    <ClInclude Include="..\..\src\example\GraphPaneEx.h" />
+    <ClInclude Include="..\..\src\example\ImageEx.h" />
+    <ClInclude Include="..\..\src\example\ImageFeaturesEx.h" />
+    <ClInclude Include="..\..\src\example\ImageProcessingEx.h" />
+    <ClInclude Include="..\..\src\example\IntersectorEx.h" />
+    <ClInclude Include="..\..\src\example\LaplaceFillEx.h" />
+    <ClInclude Include="..\..\src\example\LevelSetGridEx.h" />
+    <ClInclude Include="..\..\src\example\LocatorEx.h" />
+    <ClInclude Include="..\..\src\example\MagicPixelEx.h" />
+    <ClInclude Include="..\..\src\example\MaxFlowEx.h" />
+    <ClInclude Include="..\..\src\example\MenuEx.h" />
+    <ClInclude Include="..\..\src\example\MeshDepthEx.h" />
+    <ClInclude Include="..\..\src\example\MeshMatcapEx.h" />
+    <ClInclude Include="..\..\src\example\MeshOptimizationEx.h" />
+    <ClInclude Include="..\..\src\example\MeshParticleEx.h" />
+    <ClInclude Include="..\..\src\example\MeshPhongEx.h" />
+    <ClInclude Include="..\..\src\example\MeshPickerEx.h" />
+    <ClInclude Include="..\..\src\example\MeshPrimitivesEx.h" />
+    <ClInclude Include="..\..\src\example\MeshReconstructionEx.h" />
+    <ClInclude Include="..\..\src\example\MeshSmoothEx.h" />
+    <ClInclude Include="..\..\src\example\MeshSubdivideEx.h" />
+    <ClInclude Include="..\..\src\example\MeshTextureEx.h" />
+    <ClInclude Include="..\..\src\example\MeshTextureMapEx.h" />
+    <ClInclude Include="..\..\src\example\MeshVertexColorEx.h" />
+    <ClInclude Include="..\..\src\example\MeshWireframeEx.h" />
+    <ClInclude Include="..\..\src\example\MultiActiveContour3DEx.h" />
+    <ClInclude Include="..\..\src\example\MultiActiveManifold2DEx.h" />
+    <ClInclude Include="..\..\src\example\NonNegativeLeastSquaresEx.h" />
+    <ClInclude Include="..\..\src\example\OneEuroFilterEx.h" />
+    <ClInclude Include="..\..\src\example\ParameterPaneEx.h" />
+    <ClInclude Include="..\..\src\example\PoissonBlendEx.h" />
+    <ClInclude Include="..\..\src\example\PoissonInpaintEx.h" />
+    <ClInclude Include="..\..\src\example\ProceduralSkyEx.h" />
+    <ClInclude Include="..\..\src\example\ShadowCastEx.h" />
+    <ClInclude Include="..\..\src\example\SoftBodyEx.h" />
+    <ClInclude Include="..\..\src\example\SplineEx.h" />
+    <ClInclude Include="..\..\src\example\Springls3DEx.h" />
+    <ClInclude Include="..\..\src\example\SuperPixelEx.h" />
+    <ClInclude Include="..\..\src\example\TablePaneEx.h" />
+    <ClInclude Include="..\..\src\example\TabPaneEx.h" />
+    <ClInclude Include="..\..\src\example\TimelineEx.h" />
+    <ClInclude Include="..\..\src\example\TweenEx.h" />
+    <ClInclude Include="..\..\src\example\UnitsEx.h" />
+    <ClInclude Include="..\..\src\example\WindowPaneEx.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{1A38C9F0-BB5B-4871-AEB2-B1B0DDF1FF14}</ProjectGuid>
@@ -107,7 +116,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NOMINMAX;WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\include\core;..\..\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <MinimalRebuild>true</MinimalRebuild>

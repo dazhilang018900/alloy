@@ -4,13 +4,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
   <ItemDefinitionGroup>
-    <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\third_party\include\;$(CUDA_PATH)\include\;$(INTELOCLSDKROOT)\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    <ClCompile> <AdditionalIncludeDirectories>$(ProjectDir)\src\;$(ProjectDir)\src\common\;$(SolutionDir)\..\src\;$(SolutionDir)\..\src\common\;$(SolutionDir)\third_party\include\;$(CUDA_PATH)\include\;$(INTELOCLSDKROOT)\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalLibraryDirectories>$(SolutionDir)\third_party\lib\$(PlatformName)\;$(CUDA_PATH)\lib\;$(INTELOCLSDKROOT)\lib\$(PlatformName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>glfw3.lib;opengl32.lib;glew32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>glfw3.lib;opengl32.lib;glew32.lib;tiff.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup />

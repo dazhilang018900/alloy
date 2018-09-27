@@ -103,7 +103,7 @@ void ArgumentParser::insertArgument(const Argument& arg) {
 ArgumentParser::ArgumentParser() :
 		ignore_first_(true), use_exceptions_(false), required_(0) {
 #ifdef ALY_WINDOWS
-	parser.ignoreFirstArgument(false);
+	ignoreFirstArgument(false);
 #endif
 }
 

@@ -1057,7 +1057,7 @@ float4x4 MeshToLevelSet(const aly::Mesh& mesh, Volume1f& vol, bool rescale,
 	//Splat regions around triangles
 	size_t N = splats.size();
 #pragma omp parallel for
-	for (size_t n = 0; n < N; n++) {
+	for (int n = 0; n < N; n++) {
 		box3f box = splats[n];
 		int3 dims = int3(
 				aly::round(box.dimensions / res) + 0.5f + 2 * narrowBand);

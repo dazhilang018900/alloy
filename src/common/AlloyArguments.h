@@ -27,16 +27,9 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef ARGPARSE_HPP_
-#define ARGPARSE_HPP_
+#ifndef ALLOYARGPARSE_H_
+#define ALLOYARGPARSE_H_
 #include "common/AlloyAny.h"
-#if __cplusplus >= 201103L
-#include <unordered_map>
-typedef std::unordered_map<std::string, size_t> IndexMap;
-#else
-#include <map>
-typedef std::map<std::string, size_t> IndexMap;
-#endif
 #include <string>
 #include <vector>
 #include <typeinfo>
@@ -45,7 +38,15 @@ typedef std::map<std::string, size_t> IndexMap;
 #include <iostream>
 #include <cassert>
 #include <algorithm>
+#if __cplusplus >= 201103L
+#include <unordered_map>
+typedef std::unordered_map<std::string, size_t> IndexMap;
+#else
+#include <map>
+typedef std::map<std::string, size_t> IndexMap;
+#endif
 namespace aly {
+
 /*! @class ArgumentParser
  *  @brief A simple command-line argument parser based on the design of
  *  python's parser of the same name.
@@ -93,7 +94,7 @@ public:
 private:
 	class PlaceHolder;
 	class Holder;
-	typedef std::vector<Any> AnyVector;
+	typedef std::vector<aly::Any> AnyVector;
 	typedef std::vector<std::string> StringVector;
 	typedef std::vector<Argument> ArgumentVector;
 	// --------------------------------------------------------------------------

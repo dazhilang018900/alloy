@@ -101,7 +101,7 @@ void SpringLevelSet3D::updateUnsignedLevelSet(float narrowBand) {
 		}
 	} else {
 #pragma omp parallel for
-		for (size_t n = 0; n < N; n++) {
+		for (int n = 0; n < N; n++) {
 			float3 v1 = contour.vertexes[n * 4];
 			float3 v2 = contour.vertexes[n * 4 + 1];
 			float3 v3 = contour.vertexes[n * 4 + 2];

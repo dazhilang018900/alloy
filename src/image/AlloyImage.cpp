@@ -110,7 +110,7 @@ void ConvertImage(const Image1ub& in, ImageRGBA& out) {
 #pragma omp parallel for
 	for (int i = 0; i < N; i++) {
 		ubyte lum = in[i].x;
-		out[i] = RGBA(lum, lum, lum, 255);
+		out[i] = aly::RGBA(lum, lum, lum, 255);
 	}
 }
 void ConvertImage(const Image1ub& in, ImageRGB& out) {
@@ -121,7 +121,7 @@ void ConvertImage(const Image1ub& in, ImageRGB& out) {
 #pragma omp parallel for
 	for (int i = 0; i < N; i++) {
 		ubyte lum = in[i].x;
-		out[i] = RGB(lum, lum, lum);
+		out[i] = aly::ubyte3(lum, lum, lum);
 	}
 }
 
@@ -158,7 +158,7 @@ void ConvertImage(const Image2ub& in, ImageRGBA& out) {
 #pragma omp parallel for
 	for (int i = 0; i < N; i++) {
 		ubyte lum = in[i].x;
-		out[i] = RGBA(lum, lum, lum, in[i].y);
+		out[i] = aly::RGBA(lum, lum, lum, in[i].y);
 	}
 }
 void ConvertImage(const Image2ub& in, ImageRGB& out) {
@@ -169,7 +169,7 @@ void ConvertImage(const Image2ub& in, ImageRGB& out) {
 #pragma omp parallel for
 	for (int i = 0; i < N; i++) {
 		ubyte lum = in[i].x;
-		out[i] = RGB(lum, lum, lum);
+		out[i] = aly::ubyte3(lum, lum, lum);
 	}
 }
 
@@ -204,7 +204,7 @@ void ConvertImage(const Image1f& in, ImageRGB& out) {
 #pragma omp parallel for
 	for (int i = 0; i < N; i++) {
 		ubyte lum = (ubyte) clamp(255.0 * in[i].x, 0.0, 255.0);
-		out[i] = RGB(lum, lum, lum);
+		out[i] = aly::ubyte3(lum, lum, lum);
 	}
 }
 void ConvertImage(const Image2f& in, ImageRGB& out) {
@@ -215,7 +215,7 @@ void ConvertImage(const Image2f& in, ImageRGB& out) {
 #pragma omp parallel for
 	for (int i = 0; i < N; i++) {
 		ubyte lum = (ubyte) clamp(255.0 * in[i].x, 0.0, 255.0);
-		out[i] = RGB(lum, lum, lum);
+		out[i] = aly::ubyte3(lum, lum, lum);
 	}
 }
 void ConvertImage(const ImageRGBA& in, Image1f& out, bool sRGB) {
@@ -1006,7 +1006,7 @@ void WriteImageToFile(const std::string& file, const ImageRGBf& img) {
 		rgb.setPosition(img.position());
 		size_t index = 0;
 		for (const RGBf& ct : img.data) {
-			rgb[index++] = RGB(clamp((int) (ct.x * 255.0f), 0, 255),
+			rgb[index++] = aly::ubyte3(clamp((int) (ct.x * 255.0f), 0, 255),
 					clamp((int) (ct.y * 255.0f), 0, 255),
 					clamp((int) (ct.z * 255.0f), 0, 255));
 		}
@@ -1020,7 +1020,7 @@ void ConvertImage(const ImageRGBAf& in, ImageRGB& out) {
 	out.setPosition(in.position());
 	size_t index = 0;
 	for (const RGBAf& ct : in.data) {
-		out[index++] = RGB(clamp((int) (ct.x * 255.0f), 0, 255),
+		out[index++] = aly::ubyte3(clamp((int) (ct.x * 255.0f), 0, 255),
 				clamp((int) (ct.y * 255.0f), 0, 255),
 				clamp((int) (ct.z * 255.0f), 0, 255));
 	}
@@ -1108,7 +1108,7 @@ void ConvertImage(const ImageRGBf& in, ImageRGB& out) {
 	out.setPosition(in.position());
 	size_t index = 0;
 	for (const RGBf& ct : in.data) {
-		out[index++] = RGB(clamp((int) (ct.x * 255.0f), 0, 255),
+		out[index++] = aly::ubyte3(clamp((int) (ct.x * 255.0f), 0, 255),
 				clamp((int) (ct.y * 255.0f), 0, 255),
 				clamp((int) (ct.z * 255.0f), 0, 255));
 	}

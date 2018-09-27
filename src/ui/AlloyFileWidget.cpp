@@ -21,6 +21,7 @@
 #include "ui/AlloyFileWidget.h"
 #include "ui/AlloyApplication.h"
 #include "ui/AlloyDrawUtil.h"
+#include <cctype>
 namespace aly{
 bool ListEntry::onEventHandler(AlloyContext* context, const InputEvent& event) {
 	return Composite::onEventHandler(context, event);
@@ -1096,7 +1097,7 @@ bool FileFilterRule::accept(const std::string& file) {
 		return true;
 	std::string ext = GetFileExtension(file);
 	for (char& c : ext) {
-		c = std::tolower(c);
+		c = tolower(c);
 	}
 	for (std::string extension : extensions) {
 		if (ext == extension)

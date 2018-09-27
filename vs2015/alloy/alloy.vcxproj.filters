@@ -7,1605 +7,1797 @@
     <Filter Include="include">
       <UniqueIdentifier>{c88f3dc1-aa2d-4af6-aaea-34d4dba4356e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="thirdparty">
-      <UniqueIdentifier>{953a8390-a595-44d1-a5c1-71a51ced5d3a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\core">
-      <UniqueIdentifier>{8b3c8587-e75d-48a8-8714-26709be0adc7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\example">
-      <UniqueIdentifier>{04f875c5-5c9b-4c66-ae29-04b4f28b4944}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\core">
-      <UniqueIdentifier>{9620a2d4-714d-4201-9aff-e42b2cc92f95}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\core\libkdtree">
-      <UniqueIdentifier>{5ea90006-fc9d-4e2e-a60a-62f062376fe7}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\example">
-      <UniqueIdentifier>{0af0aa1b-3c67-4214-aac0-3e5b5057e4a0}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\cereal">
-      <UniqueIdentifier>{45ae0b41-1376-4320-9da5-fce2f2a9ce90}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\poisson">
-      <UniqueIdentifier>{ba637f1a-6aac-403b-8d68-84c13f998f0c}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\poisson">
-      <UniqueIdentifier>{e50e397f-31a1-46a3-8133-223df8d35121}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\physics">
-      <UniqueIdentifier>{2f1ba29c-2d50-4eda-8e5f-60638d29282d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\physics">
-      <UniqueIdentifier>{5f9eeea6-2130-41f2-98f4-775ab70fc580}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\ocl">
-      <UniqueIdentifier>{7b115515-77e1-4dae-b2f2-acc1607f5aa9}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\ocl">
-      <UniqueIdentifier>{c15f7605-e99f-411c-baa3-e7373dba1644}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\segmentation">
-      <UniqueIdentifier>{0db5ab61-5c76-493f-a74c-5cd42ada0322}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\segmentation">
-      <UniqueIdentifier>{684c4845-3e47-4a78-9dd6-ccda12e54224}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\cereal\types">
-      <UniqueIdentifier>{a4698d45-450f-4c95-a92a-981b27baecad}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\cereal\details">
-      <UniqueIdentifier>{8db7f101-5742-4cc7-b5d9-f7179b75b971}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\cereal\archives">
-      <UniqueIdentifier>{0bff333c-53f6-4a58-98ee-3b5a2dc86fb5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\grid">
-      <UniqueIdentifier>{18073f64-a355-4c6d-b8d8-c65ece47bc8e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\grid">
-      <UniqueIdentifier>{02d42770-2d42-4e6b-99f6-9c80770c0b1d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\vision">
-      <UniqueIdentifier>{244a18cd-99ef-4598-9885-a7f9ac110bdc}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\vision">
-      <UniqueIdentifier>{d37acdbb-76f5-41bb-82ac-09e5056dca48}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\fluid">
-      <UniqueIdentifier>{125cee82-d608-4c4a-b44d-0a3b788c0e4e}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\fluid">
-      <UniqueIdentifier>{7c389d5b-37eb-47fb-9449-b88e172c616a}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="include\ml">
-      <UniqueIdentifier>{c002dc08-ff15-48d4-bd92-84ba5fffc8a3}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="src\ml">
-      <UniqueIdentifier>{79d40b0e-aa7c-48d3-83da-aeb1cd2b8139}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\src\core\nanovg.cpp">
-      <Filter>thirdparty</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\poisson\ArgumentParser.cpp">
-      <Filter>src\poisson</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\poisson\Factor.cpp">
-      <Filter>src\poisson</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\poisson\Geometry.cpp">
-      <Filter>src\poisson</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\poisson\MarchingCubes.cpp">
-      <Filter>src\poisson</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\physics\Cell.cpp">
-      <Filter>src\physics</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\physics\CellVertex.cpp">
-      <Filter>src\physics</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\physics\stdafx.cpp">
-      <Filter>src\physics</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\physics\Summation.cpp">
-      <Filter>src\physics</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\physics\Body.cpp">
-      <Filter>src\physics</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\physics\LatticeLocation.cpp">
-      <Filter>src\physics</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyAnimator.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyAnisotropicFilter.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyAny.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyApplication.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyCamera.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyColorSelector.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyCommon.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyContext.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyCursorLocator.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyDataFlow.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyDelaunay.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyDenseMatrix.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyDenseSolve.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyDistanceField.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyDrawUtil.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyExpandBar.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyExpandTree.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyFileUtil.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyGradientVectorFlow.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyGraphPane.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyImage.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyImageFeatures.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyImageProcessing.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyIntersector.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyIsoContour.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyMath.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyMesh.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyMeshPrimitives.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyMeshTextureMap.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyNumber.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyOptimization.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyParameterPane.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyPLY.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyReconstruction.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloySimulation.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloySparseBitSet.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloySparseMatrix.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloySparseSolve.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyTablePane.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyTabPane.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyTensor.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyTimeline.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyUI.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyUndoRedo.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyUnits.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyVector.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyVolume.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyWidget.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyWorker.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AvoidanceRouting.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\CameraShader.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\CommonShaders.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\ForceDirectedGraph.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\GLComponent.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\GLFrameBuffer.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\GLShader.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\GLTexture.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\MipavHeaderReaderWriter.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\PerlinNoise.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\process_unix.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\process_win.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\SanityChecks.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\sha1.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\sha2.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\tiny_obj_loader.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\tinyexr.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\tinyprocess.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\tinyspline.c">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\tinysplinecpp.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\tinyxml2.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\AnisotropicFilterEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\AnyFunctionEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\ColorSpaceEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\CompositeEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\ControlsEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\DataFlowEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\DialogsEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\DistanceFieldEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\DragEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\EventsEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\ExpandBarEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\ExpandTreeEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\ForceDirectedGraphEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\GraphPaneEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\ImageEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\ImageFeaturesEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\ImageProcessingEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\IntersectorEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\LaplaceFillEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\LocatorEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\main.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\MenuEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\MeshDepthEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\MeshMatcapEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\MeshOptimizationEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\MeshParticleEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\MeshPhongEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\MeshPickerEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\MeshPrimitivesEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\MeshReconstructionEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\MeshSmoothEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\MeshSubdivideEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\MeshTextureEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\MeshTextureMapEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\MeshVertexColorEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\MeshWireframeEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\OneEuroFilterEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\ParameterPaneEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\PoissonBlendEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\PoissonInpaintEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\SoftBodyEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\SplineEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\TablePaneEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\TabPaneEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\TimelineEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\TweenEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\UnitsEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\WindowPaneEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\ocl\BufferCL.cpp">
-      <Filter>src\ocl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\ocl\BufferCLGL.cpp">
-      <Filter>src\ocl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\ocl\ComputeCL.cpp">
-      <Filter>src\ocl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\ocl\FunctionCL.cpp">
-      <Filter>src\ocl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\ocl\Image2dCL.cpp">
-      <Filter>src\ocl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\ocl\Image2dCLGL.cpp">
-      <Filter>src\ocl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\ocl\Image3dCL.cpp">
-      <Filter>src\ocl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\ocl\ImageArray2dCL.cpp">
-      <Filter>src\ocl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\ocl\MemoryCL.cpp">
-      <Filter>src\ocl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\ocl\ocl_runtime_error.cpp">
-      <Filter>src\ocl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\ocl\ProgramCL.cpp">
-      <Filter>src\ocl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\ocl\TestCL.cpp">
-      <Filter>src\ocl</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\ActiveContour2D.cpp">
-      <Filter>src\segmentation</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\ContourShaders.cpp">
-      <Filter>src\segmentation</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\FluidParticles2D.cpp">
-      <Filter>src\segmentation</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\Manifold2D.cpp">
-      <Filter>src\segmentation</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\MultiActiveContour2D.cpp">
-      <Filter>src\segmentation</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\MultiIsoContour.cpp">
-      <Filter>src\segmentation</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\MultiSpringLevelSet2D.cpp">
-      <Filter>src\segmentation</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\MultiSpringLevelSetSecondOrder2D.cpp">
-      <Filter>src\segmentation</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\Simulation.cpp">
-      <Filter>src\segmentation</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\SLIC.cpp">
-      <Filter>src\segmentation</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\ManifoldCache2D.cpp">
-      <Filter>src\segmentation</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\SpringLevelSet2D.cpp">
-      <Filter>src\segmentation</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\SpringlsSecondOrder.cpp">
-      <Filter>src\segmentation</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyLBFGS.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyMemMappedFile.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyGaussianMixture.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\stb_dxt.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\svd3.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyIsoSurface.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\PointShader.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\TextureMapLocator.cpp">
-      <Filter>src\core</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\grid\EndlessGrid.cpp">
-      <Filter>src\grid</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\grid\EndlessNode.cpp">
-      <Filter>src\grid</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\example\LevelSetGridEx.cpp">
-      <Filter>src\example</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\core\MeshDecimation.cpp">
-      <Filter>src\core</Filter>
+    <ClCompile Include="..\..\src\vision\SpringlsSecondOrder.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vision\SuperPixelLevelSet.cpp">
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\vision\Sift.cpp">
-      <Filter>src\vision</Filter>
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyMaxFlow.cpp">
-      <Filter>src\core</Filter>
+    <ClCompile Include="..\..\src\vision\SLIC.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\example\GrabCutEx.cpp">
-      <Filter>src\example</Filter>
+    <ClCompile Include="..\..\src\vision\SpringLevelSet2D.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\example\MaxFlowEx.cpp">
-      <Filter>src\example</Filter>
+    <ClCompile Include="..\..\src\vision\SpringLevelSet3D.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\ActiveContour3D.cpp">
-      <Filter>src\segmentation</Filter>
+    <ClCompile Include="..\..\src\vision\MultiActiveContour3D.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\Phantom.cpp">
-      <Filter>src\segmentation</Filter>
+    <ClCompile Include="..\..\src\vision\MultiIsoContour.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\example\ActiveContour3DEx.cpp">
-      <Filter>src\example</Filter>
+    <ClCompile Include="..\..\src\vision\MultiIsoSurface.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\example\ProceduralSkyEx.cpp">
-      <Filter>src\example</Filter>
+    <ClCompile Include="..\..\src\vision\MultiSpringLevelSet2D.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\example\ShadowCastEx.cpp">
-      <Filter>src\example</Filter>
+    <ClCompile Include="..\..\src\vision\MultiSpringLevelSetSecondOrder2D.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyMathBase.cpp">
-      <Filter>src\core</Filter>
+    <ClCompile Include="..\..\src\vision\Phantom.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\core\ShadowCastShader.cpp">
-      <Filter>src\core</Filter>
+    <ClCompile Include="..\..\src\vision\Manifold3D.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\core\SkyShader.cpp">
-      <Filter>src\core</Filter>
+    <ClCompile Include="..\..\src\vision\ManifoldCache2D.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\Manifold3D.cpp">
-      <Filter>src\segmentation</Filter>
+    <ClCompile Include="..\..\src\vision\ManifoldCache3D.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\vision\Epnp.cpp">
-      <Filter>src\vision</Filter>
+    <ClCompile Include="..\..\src\vision\MultiActiveContour2D.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\MagicPixelLevelSet.cpp">
-      <Filter>src\segmentation</Filter>
+    <ClCompile Include="..\..\src\vision\AlloyMaxFlow.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\MagicPixels.cpp">
-      <Filter>src\segmentation</Filter>
+    <ClCompile Include="..\..\src\vision\DictionaryLearning.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\ManifoldCache3D.cpp">
-      <Filter>src\segmentation</Filter>
+    <ClCompile Include="..\..\src\vision\MagicPixelLevelSet.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\SuperPixelLevelSet.cpp">
-      <Filter>src\segmentation</Filter>
+    <ClCompile Include="..\..\src\vision\MagicPixels.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\example\ActiveContour2DEx.cpp">
-      <Filter>src\example</Filter>
+    <ClCompile Include="..\..\src\vision\Manifold2D.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\example\FluidSimulationEx.cpp">
-      <Filter>src\example</Filter>
+    <ClCompile Include="..\..\src\vision\ActiveManifold2D.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\example\MagicPixelEx.cpp">
-      <Filter>src\example</Filter>
+    <ClCompile Include="..\..\src\vision\ActiveManifold3D.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vision\AlloyGaussianMixture.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vision\AlloyImageFeatures.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyWorker.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyTimeline.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyToggleWidget.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyUI.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyUndoRedo.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyWindowPane.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloySelectionBox.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloySimulation.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloySlider.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyTablePane.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyTabPane.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyTextWidget.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyMenubar.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyMessageDialog.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyNumberWidget.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyParameterPane.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyProgressBar.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyRegion.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyField.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyFileWidget.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyGlyph.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyGraphPane.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyListBox.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyDataFlow.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyDrawUtil.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyExpandBar.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyExpandTree.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyButton.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyColorSelector.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyComposite.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyContext.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyCursorLocator.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyAdjustableComposite.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyAnimator.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyApplication.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ui\AlloyBorderComposite.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\system\tinyxml2.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\system\process_win.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\system\sha1.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\system\sha2.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\system\tinyprocess.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\system\AlloyMemMappedFile.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\system\jsonxx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\system\process_unix.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\system\AlloyFileUtil.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\physics\softbody\latticelocation.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\physics\softbody\stdafx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\physics\softbody\Summation.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\physics\softbody\Body.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\physics\softbody\Cell.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\physics\softbody\CellVertex.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\physics\fluid\FluidParticles2D.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\physics\fluid\FluidSimulation.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\physics\fluid\LaplaceSolver.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\physics\fluid\ParticleLocator.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\physics\fluid\SimulationObjects.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ocl\ImageArray2dCL.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ocl\ocl_runtime_error.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ocl\ProgramCL.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ocl\TestCL.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ocl\ComputeCL.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ocl\Image2dCL.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ocl\Image2dCLGL.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ocl\Image3dCL.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\math\svd3.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\math\tinyspline.c">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\math\tinysplinecpp.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\math\AlloySparseMatrix.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\math\AlloySparseSolve.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\math\AlloyTensor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\math\AlloyVecMath.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\math\AlloyVector.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\math\AlloyMathBase.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\math\AlloyNumber.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\math\AlloyOptimization.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\math\AlloySparseBitSet.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\math\AlloyDenseMatrix.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\math\AlloyDenseSolve.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\math\AlloyLBFGS.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\main.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\image\tinytiffwriter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\image\tinyexr.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\image\tinytiffhighrestimer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\image\tinytiffreader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\image\stb_dxt.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\image\TiffReader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\image\TiffWriter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\image\AlloyImage.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\image\AlloyImageEncoder.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\image\AlloyImageProcessing.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\image\AlloyMinHeap.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\image\AlloyVolume.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\image\MipavHeaderReaderWriter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\image\AlloyGradientVectorFlow.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\image\AlloyDistanceField.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\image\AlloyAnisotropicFilter.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\shaders\ShadowCastShader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\shaders\SkyShader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\tiny_obj_loader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\shaders\CameraShader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\shaders\CommonShaders.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\shaders\ContourShaders.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\shaders\PointShader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\poisson\Geometry.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\poisson\MarchingCubes.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\poisson\ArgumentParser.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\poisson\Factor.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\TextureMapLocator.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\GLComponent.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\GLFrameBuffer.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\GLShader.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\GLTexture.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\MeshDecimation.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\PerlinNoise.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\AlloyReconstruction.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\AvoidanceRouting.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\EndlessGrid.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\EndlessNode.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\ForceDirectedGraph.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\AlloyMesh.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\AlloyMeshPrimitives.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\AlloyMeshTextureMap.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\AlloyPLY.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\AlloyDelaunay.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\AlloyIntersector.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\AlloyIsoContour.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\AlloyIsoSurface.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\graphics\AlloyCamera.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\TimelineEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\TweenEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\UnitsEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\WindowPaneEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\Springls3DEx.cpp">
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\example\SuperPixelEx.cpp">
-      <Filter>src\example</Filter>
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\fluid\FluidSimulation.cpp">
-      <Filter>src\fluid</Filter>
+    <ClCompile Include="..\..\src\example\TablePaneEx.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\fluid\LaplaceSolver.cpp">
-      <Filter>src\fluid</Filter>
+    <ClCompile Include="..\..\src\example\TabPaneEx.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\fluid\ParticleLocator.cpp">
-      <Filter>src\fluid</Filter>
+    <ClCompile Include="..\..\src\example\SanityChecks.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\fluid\SimulationObjects.cpp">
-      <Filter>src\fluid</Filter>
+    <ClCompile Include="..\..\src\example\ShadowCastEx.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\MultiActiveContour3D.cpp">
-      <Filter>src\segmentation</Filter>
+    <ClCompile Include="..\..\src\example\SoftBodyEx.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\example\MultiActiveContour2DEx.cpp">
-      <Filter>src\example</Filter>
+    <ClCompile Include="..\..\src\example\SplineEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\OneEuroFilterEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\ParameterPaneEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\PoissonBlendEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\PoissonInpaintEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\ProceduralSkyEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\MeshVertexColorEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\MeshWireframeEx.cpp">
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\example\MultiActiveContour3DEx.cpp">
-      <Filter>src\example</Filter>
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\segmentation\MultiIsoSurface.cpp">
-      <Filter>src\segmentation</Filter>
+    <ClCompile Include="..\..\src\example\MultiActiveManifold2DEx.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\core\TiffReader.cpp">
-      <Filter>src\core</Filter>
+    <ClCompile Include="..\..\src\example\NonNegativeLeastSquaresEx.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\core\TiffWriter.cpp">
-      <Filter>src\core</Filter>
+    <ClCompile Include="..\..\src\example\MeshSubdivideEx.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\ml\DictionaryLearning.cpp">
-      <Filter>src\ml</Filter>
+    <ClCompile Include="..\..\src\example\MeshTextureEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\MeshTextureMapEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\MeshPickerEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\MeshPrimitivesEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\MeshReconstructionEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\MeshSmoothEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\MeshMatcapEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\MeshOptimizationEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\MeshParticleEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\MeshPhongEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\MagicPixelEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\MaxFlowEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\MenuEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\MeshDepthEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\IntersectorEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\LaplaceFillEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\LevelSetGridEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\LocatorEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\GrabCutEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\GraphPaneEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\ImageEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\ImageFeaturesEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\ImageProcessingEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\ExpandBarEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\ExpandTreeEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\FluidSimulationEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\ForceDirectedGraphEx.cpp">
+      <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\example\DictionaryLearningEx.cpp">
-      <Filter>src\example</Filter>
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\core\AlloyImageEncoder.cpp">
-      <Filter>src\core</Filter>
+    <ClCompile Include="..\..\src\example\DistanceFieldEx.cpp">
+      <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\core\jsonxx.cpp">
-      <Filter>src\core</Filter>
+    <ClCompile Include="..\..\src\example\DragEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\EventsEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\ColorSpaceEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\CompositeEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\ControlsEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\DataFlowEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\DialogsEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\ActiveContour3DEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\ActiveManifold2DEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\AnisotropicFilterEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\example\AnyFunctionEx.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\nanovg.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\AlloyAny.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\AlloyArguments.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\AlloyCommon.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\common\AlloyUnits.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\vision\Epnp.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ocl\MemoryCL.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ocl\BufferCL.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ocl\BufferCLGL.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\ocl\FunctionCL.cpp">
+      <Filter>src</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\include\core\nanovg.h">
-      <Filter>thirdparty</Filter>
+    <ClInclude Include="..\..\src\vision\SpringlsSecondOrder.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\nanovg_gl.h">
-      <Filter>thirdparty</Filter>
+    <ClInclude Include="..\..\src\vision\SuperPixelLevelSet.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\nanovg_gl_utils.h">
-      <Filter>thirdparty</Filter>
+    <ClInclude Include="..\..\src\vision\Phantom.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\stb_image.h">
-      <Filter>thirdparty</Filter>
+    <ClInclude Include="..\..\src\vision\Sift.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\stb_truetype.h">
-      <Filter>thirdparty</Filter>
+    <ClInclude Include="..\..\src\vision\SLIC.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\stb_image_write.h">
-      <Filter>thirdparty</Filter>
+    <ClInclude Include="..\..\src\vision\SpringLevelSet2D.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\libkdtree\allocator.h">
-      <Filter>include\core\libkdtree</Filter>
+    <ClInclude Include="..\..\src\vision\SpringLevelSet3D.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\libkdtree\function.h">
-      <Filter>include\core\libkdtree</Filter>
+    <ClInclude Include="..\..\src\vision\MultiActiveContour3D.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\libkdtree\iterator.h">
-      <Filter>include\core\libkdtree</Filter>
+    <ClInclude Include="..\..\src\vision\MultiIsoContour.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\libkdtree\node.h">
-      <Filter>include\core\libkdtree</Filter>
+    <ClInclude Include="..\..\src\vision\MultiIsoSurface.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\libkdtree\region.h">
-      <Filter>include\core\libkdtree</Filter>
+    <ClInclude Include="..\..\src\vision\MultiSpringLevelSet2D.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\libkdtree\kdtree.h">
-      <Filter>include\core\libkdtree</Filter>
+    <ClInclude Include="..\..\src\vision\MultiSpringLevelSetSecondOrder2D.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\access.hpp">
-      <Filter>include\cereal</Filter>
+    <ClInclude Include="..\..\src\vision\Manifold2D.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\cereal.hpp">
-      <Filter>include\cereal</Filter>
+    <ClInclude Include="..\..\src\vision\Manifold3D.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\macros.hpp">
-      <Filter>include\cereal</Filter>
+    <ClInclude Include="..\..\src\vision\ManifoldCache2D.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\Allocator.h">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\vision\ManifoldCache3D.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\ArgumentParser.h">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\vision\MultiActiveContour2D.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\Array.h">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\vision\AlloyImageFeatures.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\BinaryNode.h">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\vision\AlloyMaxFlow.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\BSplineData.h">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\vision\DictionaryLearning.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\Factor.h">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\vision\Epnp.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\FunctionData.h">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\vision\MagicPixelLevelSet.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\Geometry.h">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\vision\MagicPixels.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\MarchingCubes.h">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\vision\ActiveManifold2D.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\MAT.h">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\vision\ActiveManifold3D.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\MemoryUsage.h">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\vision\AlloyGaussianMixture.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\MultiGridOctreeData.h">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyWorker.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\MyTime.h">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyTextWidget.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\Octree.h">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyTimeline.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\PointStream.h">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyToggleWidget.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\Polynomial.h">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyUI.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\PPolynomial.h">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyUndoRedo.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\SparseMatrix.h">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyWindowPane.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\Trimmer.h">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloySelectionBox.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\ArgumentParser.hpp">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloySimulation.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\Array.hpp">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloySlider.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\BSplineData.hpp">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyTablePane.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\FunctionData.hpp">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyTabPane.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\Geometry.hpp">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyMenubar.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\MAT.hpp">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyMessageDialog.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\MultiGridOctreeData.Evaluation.hpp">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyNumberWidget.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\MultiGridOctreeData.hpp">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyParameterPane.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\MultiGridOctreeData.IsoSurface.hpp">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyProgressBar.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\MultiGridOctreeData.System.hpp">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyRegion.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\MultiGridOctreeData.WeightedSamples.hpp">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyField.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\Octree.hpp">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyFileWidget.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\PointStream.hpp">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyGlyph.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\Polynomial.hpp">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyGraphPane.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\PPolynomial.hpp">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyListBox.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\poisson\SparseMatrix.hpp">
-      <Filter>include\poisson</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyDataFlow.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\physics\Body.h">
-      <Filter>include\physics</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyDrawUtil.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\physics\BrokenConnection.h">
-      <Filter>include\physics</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyEnum.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\physics\Cell.h">
-      <Filter>include\physics</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyEvent.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\physics\CellVertex.h">
-      <Filter>include\physics</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyExpandBar.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\physics\FastLSM.h">
-      <Filter>include\physics</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyExpandTree.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\physics\LatticeLocation.h">
-      <Filter>include\physics</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyBorderComposite.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\physics\LpAndCost.h">
-      <Filter>include\physics</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyButton.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\physics\Particle.h">
-      <Filter>include\physics</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyColorSelector.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\physics\Region.h">
-      <Filter>include\physics</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyComposite.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\physics\SumData.h">
-      <Filter>include\physics</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyContext.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\physics\Summation.h">
-      <Filter>include\physics</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyCursorLocator.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\physics\stdafx.h">
-      <Filter>include\physics</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyAdjustableComposite.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlignedAllocator.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyAnimator.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\Alloy.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\ui\AlloyApplication.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyAnimator.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\system\tinyxml2.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyAnisotropicFilter.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\system\process_unix.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyAny.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\system\process_win.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyAnyFunction.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\system\sha1.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyApplication.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\system\sha2.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyArray.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\system\tinyformat.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyCamera.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\system\tinyprocess.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyColorSelector.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\system\AlloyFilesystem.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyCommon.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\system\AlloyMemMappedFile.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyContext.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\system\catch.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyCursorLocator.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\system\jsonxx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyDataFlow.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\system\AlignedAllocator.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyDelaunay.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\system\AlloyAnyFunction.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyDenseMatrix.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\system\AlloyFileUtil.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyDenseSolve.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\physics\softbody\stdafx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyDistanceField.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\physics\softbody\Summation.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyDrawUtil.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\physics\softbody\Body.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyEnum.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\physics\softbody\BrokenConnection.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyEvent.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\physics\softbody\Cell.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyExpandBar.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\physics\softbody\CellVertex.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyExpandTree.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\physics\softbody\FastLSM.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyFilesystem.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\physics\softbody\LatticeLocation.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyFileUtil.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\physics\softbody\LatticePointAndCost.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyGradientVectorFlow.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\physics\softbody\Particle.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyGraphPane.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\physics\softbody\Region.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyImage.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\physics\softbody\SumData.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyImageFeatures.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\physics\fluid\FluidParticles2D.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyImageProcessing.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\physics\fluid\FluidSimulation.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyIntersector.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\physics\fluid\LaplaceSolver.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyIsoContour.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\physics\fluid\ParticleLocator.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyLocator.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\physics\fluid\SimulationObjects.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyMath.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\ocl\ImageArray2dCL.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyMesh.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\ocl\MemoryCL.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyMeshPrimitives.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\ocl\ocl_runtime_error.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyMeshTextureMap.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\ocl\ProgramCL.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyNumber.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\ocl\ComputeCL.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyOptimization.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\ocl\FunctionCL.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyOptimizationMath.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\ocl\Image2dCL.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyParameterPane.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\ocl\Image2dCLGL.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyPLY.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\ocl\Image3dCL.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyReconstruction.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\AlloyVector.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloySimulation.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\ocl\BufferCL.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloySparseBitSet.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\ocl\BufferCLGL.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloySparseMatrix.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\OneEuroFilter.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloySparseSolve.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\svd3.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloySpline.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\tinyspline.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyTablePane.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\tinysplinecpp.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyTabPane.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\AlloySparseMatrix.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyTimeline.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\AlloySparseSolve.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyUI.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\AlloySpline.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyUndoRedo.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\AlloyTensor2.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyUnits.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\AlloyTensor3.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyVector.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\AlloyVecMath.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyVolume.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\AlloyLBFGS.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyWidget.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\AlloyMath.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyWorker.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\AlloyMathBase.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AvoidanceRouting.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\AlloyNumber.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\BinaryMinHeap.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\AlloyOptimization.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\CameraShader.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\AlloyOptimizationMath.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\catch.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\AlloySparseBitSet.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\CommonShaders.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\AlloyArray.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\fontstash.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\AlloyDenseMatrix.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\ForceDirectedGraph.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\math\AlloyDenseSolve.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\GLComponent.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\image\tinytiffwriter.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\GLFrameBuffer.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\image\stb_image_write.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\GLShader.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\image\tinyexr.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\GLTexture.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\image\tinytiffhighrestimer.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\MipavHeaderReaderWriter.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\image\tinytiffreader.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\nanoflann.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\image\MipavHeaderReaderWriter.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\OneEuroFilter.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\image\stb_dxt.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\PerlinNoise.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\image\stb_image.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\process_unix.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\image\TiffReader.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\process_win.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\image\TiffWriter.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\sha1.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\image\AlloyImage.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\sha2.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\image\AlloyImageEncoder.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\tiny_obj_loader.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\image\AlloyImageProcessing.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\tinyexr.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\image\AlloyMinHeap.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\tinyformat.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\image\AlloyVolume.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\tinyprocess.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\image\AlloyGradientVectorFlow.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\tinyspline.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\image\AlloyDistanceField.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\tinysplinecpp.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\image\AlloyAnisotropicFilter.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\tinyxml2.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\graphics\shaders\PointShader.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\AnisotropicFilterEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\shaders\ShadowCastShader.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\ColorSpaceEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\shaders\SkyShader.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\CompositeEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\stb_perlin.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\ControlsEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\stb_rect_pack.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\DataFlowEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\tiny_obj_loader.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\DialogsEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\shaders\CameraShader.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\DistanceFieldEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\shaders\CommonShaders.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\DragEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\shaders\ContourShaders.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\EventsEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\Trimmer.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\ExpandBarEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\Octree.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\ExpandTreeEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\Octree.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\ForceDirectedGraphEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\PointStream.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\GraphPaneEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\PointStream.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\ImageEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\Polynomial.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\ImageFeaturesEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\Polynomial.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\ImageProcessingEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\PPolynomial.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\IntersectorEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\PPolynomial.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\LaplaceFillEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\SparseMatrix.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\LocatorEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\SparseMatrix.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\MenuEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\MultiGridOctreeData.Evaluation.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\MeshDepthEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\MultiGridOctreeData.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\MeshMatcapEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\MultiGridOctreeData.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\MeshOptimizationEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\MultiGridOctreeData.IsoSurface.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\MeshParticleEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\MultiGridOctreeData.System.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\MeshPhongEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\MultiGridOctreeData.WeightedSamples.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\MeshPickerEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\MyTime.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\MeshPrimitivesEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\FunctionData.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\MeshReconstructionEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\FunctionData.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\MeshSmoothEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\Geometry.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\MeshSubdivideEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\Geometry.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\MeshTextureEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\MarchingCubes.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\MeshTextureMapEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\MAT.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\MeshVertexColorEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\MAT.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\MeshWireframeEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\MemoryUsage.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\OneEuroFilterEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\Allocator.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\ParameterPaneEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\ArgumentParser.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\PoissonBlendEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\ArgumentParser.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\PoissonInpaintEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\Array.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\SoftBodyEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\Array.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\SplineEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\BinaryNode.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\TablePaneEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\BSplineData.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\TabPaneEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\BSplineData.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\TimelineEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\poisson\Factor.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\TweenEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\libkdtree\allocator.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\UnitsEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\libkdtree\function.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\WindowPaneEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\graphics\libkdtree\iterator.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ocl\BufferCL.h">
-      <Filter>include\ocl</Filter>
+    <ClInclude Include="..\..\src\graphics\libkdtree\kdtree.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ocl\BufferCLGL.h">
-      <Filter>include\ocl</Filter>
+    <ClInclude Include="..\..\src\graphics\nanoflann.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ocl\ComputeCL.h">
-      <Filter>include\ocl</Filter>
+    <ClInclude Include="..\..\src\graphics\libkdtree\node.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ocl\FunctionCL.h">
-      <Filter>include\ocl</Filter>
+    <ClInclude Include="..\..\src\graphics\libkdtree\region.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ocl\Image2dCL.h">
-      <Filter>include\ocl</Filter>
+    <ClInclude Include="..\..\src\graphics\TextureMapLocator.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ocl\Image2dCLGL.h">
-      <Filter>include\ocl</Filter>
+    <ClInclude Include="..\..\src\graphics\GLComponent.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ocl\Image3dCL.h">
-      <Filter>include\ocl</Filter>
+    <ClInclude Include="..\..\src\graphics\GLFrameBuffer.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ocl\ImageArray2dCL.h">
-      <Filter>include\ocl</Filter>
+    <ClInclude Include="..\..\src\graphics\GLShader.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ocl\MemoryCL.h">
-      <Filter>include\ocl</Filter>
+    <ClInclude Include="..\..\src\graphics\GLTexture.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ocl\ocl_runtime_error.h">
-      <Filter>include\ocl</Filter>
+    <ClInclude Include="..\..\src\graphics\MeshDecimation.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ocl\ProgramCL.h">
-      <Filter>include\ocl</Filter>
+    <ClInclude Include="..\..\src\graphics\PerlinNoise.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\ActiveContour2D.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\graphics\AlloyPLY.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\ContourShaders.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\graphics\AlloyReconstruction.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\FluidParticles2D.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\graphics\AvoidanceRouting.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\Manifold2D.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\graphics\EndlessGrid.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\MultiActiveContour2D.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\graphics\EndlessNode.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\MultiIsoContour.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\graphics\ForceDirectedGraph.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\MultiSpringLevelSet2D.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\graphics\AlloyLocator.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\MultiSpringLevelSetSecondOrder2D.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\graphics\AlloyMesh.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\Simulation.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\graphics\AlloyMeshPrimitives.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\SLIC.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\graphics\AlloyMeshTextureMap.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\ManifoldCache2D.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\graphics\AlloyCamera.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\SpringLevelSet2D.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\graphics\AlloyDelaunay.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\SpringlsSecondOrder.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\graphics\AlloyIntersector.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyLBFGS.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\graphics\AlloyIsoContour.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyMemMappedFile.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\graphics\AlloyIsoSurface.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyTensor2.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\example\TimelineEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyTensor3.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\example\TweenEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyGaussianMixture.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\example\UnitsEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\stb_dxt.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\example\WindowPaneEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\svd3.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\example\Springls3DEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\array.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\SuperPixelEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\base_class.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\TablePaneEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\bitset.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\TabPaneEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\boost_variant.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\ProceduralSkyEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\chrono.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\ShadowCastEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\common.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\SoftBodyEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\complex.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\SplineEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\deque.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\OneEuroFilterEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\forward_list.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\ParameterPaneEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\functional.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\PoissonBlendEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\list.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\PoissonInpaintEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\map.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\MeshVertexColorEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\memory.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\MeshWireframeEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\polymorphic.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\MultiActiveContour3DEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\queue.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\MultiActiveManifold2DEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\set.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\NonNegativeLeastSquaresEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\stack.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\MeshSubdivideEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\string.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\MeshTextureEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\tuple.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\MeshTextureMapEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\unordered_map.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\MeshPhongEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\unordered_set.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\MeshPickerEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\utility.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\MeshPrimitivesEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\valarray.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\MeshReconstructionEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\types\vector.hpp">
-      <Filter>include\cereal\types</Filter>
+    <ClInclude Include="..\..\src\example\MeshSmoothEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\details\helpers.hpp">
-      <Filter>include\cereal\details</Filter>
+    <ClInclude Include="..\..\src\example\MeshMatcapEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\details\polymorphic_impl.hpp">
-      <Filter>include\cereal\details</Filter>
+    <ClInclude Include="..\..\src\example\MeshOptimizationEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\details\polymorphic_impl_fwd.hpp">
-      <Filter>include\cereal\details</Filter>
+    <ClInclude Include="..\..\src\example\MeshParticleEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\details\static_object.hpp">
-      <Filter>include\cereal\details</Filter>
+    <ClInclude Include="..\..\src\example\MagicPixelEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\details\traits.hpp">
-      <Filter>include\cereal\details</Filter>
+    <ClInclude Include="..\..\src\example\MaxFlowEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\details\util.hpp">
-      <Filter>include\cereal\details</Filter>
+    <ClInclude Include="..\..\src\example\MenuEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\archives\adapters.hpp">
-      <Filter>include\cereal\archives</Filter>
+    <ClInclude Include="..\..\src\example\MeshDepthEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\archives\binary.hpp">
-      <Filter>include\cereal\archives</Filter>
+    <ClInclude Include="..\..\src\example\IntersectorEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\archives\json.hpp">
-      <Filter>include\cereal\archives</Filter>
+    <ClInclude Include="..\..\src\example\LaplaceFillEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\archives\portable_binary.hpp">
-      <Filter>include\cereal\archives</Filter>
+    <ClInclude Include="..\..\src\example\LevelSetGridEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\cereal\archives\xml.hpp">
-      <Filter>include\cereal\archives</Filter>
+    <ClInclude Include="..\..\src\example\LocatorEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\grid\EndlessGrid.h">
-      <Filter>include\grid</Filter>
+    <ClInclude Include="..\..\src\example\GrabCutEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\grid\EndlessNode.h">
-      <Filter>include\grid</Filter>
+    <ClInclude Include="..\..\src\example\GraphPaneEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyIsoSurface.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\example\ImageEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\PointShader.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\example\ImageFeaturesEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\TextureMapLocator.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\example\ImageProcessingEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\LevelSetGridEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\example\ExpandBarEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\MeshDecimation.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\example\ExpandTreeEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\vision\Sift.h">
-      <Filter>include\vision</Filter>
+    <ClInclude Include="..\..\src\example\FluidSimulationEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyMaxFlow.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\example\ForceDirectedGraphEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\GrabCutEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\example\DialogsEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\MaxFlowEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\example\DictionaryLearningEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\ActiveContour3D.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\example\DistanceFieldEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\Phantom.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\example\DragEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\ActiveContour3DEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\example\EventsEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyMathBase.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\example\ColorSpaceEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\ShadowCastShader.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\example\CompositeEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\SkyShader.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\example\ControlsEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\stb_perlin.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\example\DataFlowEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\stb_rect_pack.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\example\ActiveContour3DEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\Manifold3D.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\example\ActiveManifold2DEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\ProceduralSkyEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\example\AnisotropicFilterEx.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\ShadowCastEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\common\fontstash.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\vision\Epnp.h">
-      <Filter>include\vision</Filter>
+    <ClInclude Include="..\..\src\common\nanovg.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\MagicPixelLevelSet.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\common\nanovg_gl.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\MagicPixels.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\common\nanovg_gl_utils.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\ManifoldCache3D.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\common\stb_truetype.h">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\SuperPixelLevelSet.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\common\cereal\types\utility.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\ActiveContour2DEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\common\cereal\types\valarray.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\FluidSimulationEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\common\cereal\types\vector.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\MagicPixelEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\common\cereal\types\forward_list.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\SuperPixelEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\common\cereal\types\functional.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\fluid\FluidSimulation.h">
-      <Filter>include\fluid</Filter>
+    <ClInclude Include="..\..\src\common\cereal\types\list.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\fluid\LaplaceSolver.h">
-      <Filter>include\fluid</Filter>
+    <ClInclude Include="..\..\src\common\cereal\types\map.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\fluid\ParticleLocator.h">
-      <Filter>include\fluid</Filter>
+    <ClInclude Include="..\..\src\common\cereal\types\memory.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\fluid\SimulationObjects.h">
-      <Filter>include\fluid</Filter>
+    <ClInclude Include="..\..\src\common\cereal\types\polymorphic.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\MultiActiveContour3D.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\common\cereal\types\queue.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\MultiActiveContour2DEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\common\cereal\types\set.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\MultiActiveContour3DEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\common\cereal\types\stack.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\segmentation\MultiIsoSurface.h">
-      <Filter>include\segmentation</Filter>
+    <ClInclude Include="..\..\src\common\cereal\types\string.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\TiffReader.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\common\cereal\types\tuple.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\TiffWriter.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\common\cereal\types\unordered_map.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\ml\DictionaryLearning.h">
-      <Filter>include\ml</Filter>
+    <ClInclude Include="..\..\src\common\cereal\types\unordered_set.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\example\DictionaryLearningEx.h">
-      <Filter>include\example</Filter>
+    <ClInclude Include="..\..\src\common\cereal\types\array.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\AlloyImageEncoder.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\common\cereal\types\base_class.hpp">
+      <Filter>include</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\core\jsonxx.h">
-      <Filter>include\core</Filter>
+    <ClInclude Include="..\..\src\common\cereal\types\bitset.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\types\boost_variant.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\types\chrono.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\types\common.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\types\complex.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\types\deque.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\types\concepts\pair_associative_container.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\macros.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidxml\rapidxml.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidxml\rapidxml_iterators.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidxml\rapidxml_print.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidxml\rapidxml_utils.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\writer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\ostreamwrapper.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\pointer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\prettywriter.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\rapidjson.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\reader.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\schema.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\msinttypes\stdint.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\stream.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\stringbuffer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\msinttypes\inttypes.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\istreamwrapper.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\memorybuffer.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\memorystream.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\internal\pow10.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\internal\regex.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\internal\stack.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\internal\strfunc.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\internal\strtod.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\internal\swap.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\internal\biginteger.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\internal\diyfp.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\internal\dtoa.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\filereadstream.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\filewritestream.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\fwd.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\internal\ieee754.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\internal\itoa.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\internal\meta.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\allocators.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\base64.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\document.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\error\en.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\encodedstream.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\encodings.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\external\rapidjson\error\error.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\details\helpers.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\details\polymorphic_impl.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\details\polymorphic_impl_fwd.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\details\static_object.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\details\traits.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\details\util.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\access.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\archives\adapters.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\archives\binary.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\cereal.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\archives\json.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\archives\portable_binary.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\cereal\archives\xml.hpp">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\AlloyUnits.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Alloy.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\AlloyAny.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\AlloyArguments.h">
+      <Filter>include</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\common\AlloyCommon.h">
+      <Filter>include</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="..\..\src\common\cereal\external\rapidxml\manual.html">
+      <Filter>include</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -7,7 +7,8 @@
       http://mozilla.org/MPL/2.0/.
  */
 #include "system/AlloyMemMappedFile.h"
-#ifdef ALYWINDOWS
+#include "system/AlloyFileUtil.h"
+#ifdef ALY_WINDOWS
 	#include <windows.h>
 #else
 	#include <fcntl.h>

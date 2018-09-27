@@ -32,7 +32,7 @@ namespace aly {
 struct FloatInt:public std::pair<float,int>{
 	FloatInt(float x,int i):std::pair<float,int>(x,i){
 	}
-	FloatInt():std::pair<float,int>(0,-1){
+	FloatInt():std::pair<float,int>(0.0f,-1){
 	}
 	FloatInt(const FloatInt& val):std::pair<float,int>(val.first,val.second){
 	}
