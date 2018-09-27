@@ -4,7 +4,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />
   <ItemDefinitionGroup>
-    <ClCompile> <AdditionalIncludeDirectories>$(ProjectDir)\src\;$(ProjectDir)\src\common\;$(SolutionDir)\..\src\;$(SolutionDir)\..\src\common\;$(SolutionDir)\third_party\include\;$(CUDA_PATH)\include\;$(INTELOCLSDKROOT)\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    <ClCompile> <AdditionalIncludeDirectories>$(ProjectDir)\src\;$(ProjectDir)\src\common\;$(SolutionDir)\..\src\;$(SolutionDir)\..\alloy\src\common\;$(SolutionDir)\..\alloy\src\;$(SolutionDir)\..\src\common\;$(SolutionDir)\third_party\include\;$(CUDA_PATH)\include\;$(INTELOCLSDKROOT)\include\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
