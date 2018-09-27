@@ -1,0 +1,134 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\alloy\alloy.vcxproj">
+      <Project>{e990bb2d-d073-48a2-841a-8231a304f580}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\src\example\ActiveContour3DEx.h" />
+    <ClInclude Include="..\..\src\example\ActiveManifold2DEx.h" />
+    <ClInclude Include="..\..\src\example\AnisotropicFilterEx.h" />
+    <ClInclude Include="..\..\src\example\ColorSpaceEx.h" />
+    <ClInclude Include="..\..\src\example\CompositeEx.h" />
+    <ClInclude Include="..\..\src\example\ControlsEx.h" />
+    <ClInclude Include="..\..\src\example\DataFlowEx.h" />
+    <ClInclude Include="..\..\src\example\DialogsEx.h" />
+    <ClInclude Include="..\..\src\example\DictionaryLearningEx.h" />
+    <ClInclude Include="..\..\src\example\DistanceFieldEx.h" />
+    <ClInclude Include="..\..\src\example\DragEx.h" />
+    <ClInclude Include="..\..\src\example\EventsEx.h" />
+    <ClInclude Include="..\..\src\example\ExpandBarEx.h" />
+    <ClInclude Include="..\..\src\example\ExpandTreeEx.h" />
+    <ClInclude Include="..\..\src\example\FluidSimulationEx.h" />
+    <ClInclude Include="..\..\src\example\ForceDirectedGraphEx.h" />
+    <ClInclude Include="..\..\src\example\GrabCutEx.h" />
+    <ClInclude Include="..\..\src\example\GraphPaneEx.h" />
+    <ClInclude Include="..\..\src\example\ImageEx.h" />
+    <ClInclude Include="..\..\src\example\ImageFeaturesEx.h" />
+    <ClInclude Include="..\..\src\example\ImageProcessingEx.h" />
+    <ClInclude Include="..\..\src\example\IntersectorEx.h" />
+    <ClInclude Include="..\..\src\example\LaplaceFillEx.h" />
+    <ClInclude Include="..\..\src\example\LevelSetGridEx.h" />
+    <ClInclude Include="..\..\src\example\LocatorEx.h" />
+    <ClInclude Include="..\..\src\example\MagicPixelEx.h" />
+    <ClInclude Include="..\..\src\example\MaxFlowEx.h" />
+    <ClInclude Include="..\..\src\example\MenuEx.h" />
+    <ClInclude Include="..\..\src\example\MeshDepthEx.h" />
+    <ClInclude Include="..\..\src\example\MeshMatcapEx.h" />
+    <ClInclude Include="..\..\src\example\MeshOptimizationEx.h" />
+    <ClInclude Include="..\..\src\example\MeshParticleEx.h" />
+    <ClInclude Include="..\..\src\example\MeshPhongEx.h" />
+    <ClInclude Include="..\..\src\example\MeshPickerEx.h" />
+    <ClInclude Include="..\..\src\example\MeshPrimitivesEx.h" />
+    <ClInclude Include="..\..\src\example\MeshReconstructionEx.h" />
+    <ClInclude Include="..\..\src\example\MeshSmoothEx.h" />
+    <ClInclude Include="..\..\src\example\MeshSubdivideEx.h" />
+    <ClInclude Include="..\..\src\example\MeshTextureEx.h" />
+    <ClInclude Include="..\..\src\example\MeshTextureMapEx.h" />
+    <ClInclude Include="..\..\src\example\MeshVertexColorEx.h" />
+    <ClInclude Include="..\..\src\example\MeshWireframeEx.h" />
+    <ClInclude Include="..\..\src\example\MultiActiveContour3DEx.h" />
+    <ClInclude Include="..\..\src\example\MultiActiveManifold2DEx.h" />
+    <ClInclude Include="..\..\src\example\NonNegativeLeastSquaresEx.h" />
+    <ClInclude Include="..\..\src\example\OneEuroFilterEx.h" />
+    <ClInclude Include="..\..\src\example\ParameterPaneEx.h" />
+    <ClInclude Include="..\..\src\example\PoissonBlendEx.h" />
+    <ClInclude Include="..\..\src\example\PoissonInpaintEx.h" />
+    <ClInclude Include="..\..\src\example\ProceduralSkyEx.h" />
+    <ClInclude Include="..\..\src\example\ShadowCastEx.h" />
+    <ClInclude Include="..\..\src\example\SoftBodyEx.h" />
+    <ClInclude Include="..\..\src\example\SplineEx.h" />
+    <ClInclude Include="..\..\src\example\Springls3DEx.h" />
+    <ClInclude Include="..\..\src\example\SuperPixelEx.h" />
+    <ClInclude Include="..\..\src\example\TablePaneEx.h" />
+    <ClInclude Include="..\..\src\example\TabPaneEx.h" />
+    <ClInclude Include="..\..\src\example\TimelineEx.h" />
+    <ClInclude Include="..\..\src\example\TweenEx.h" />
+    <ClInclude Include="..\..\src\example\UnitsEx.h" />
+    <ClInclude Include="..\..\src\example\WindowPaneEx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\src\main.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{1A38C9F0-BB5B-4871-AEB2-B1B0DDF1FF14}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>example</RootNamespace>
+    <ProjectName>ExampleUI</ProjectName>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\props\Alloy.props" />
+  </ImportGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <IntDir>$(SolutionDir)\build\$(Configuration)-$(Platform)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>$(SolutionDir)\build\$(Configuration)-$(Platform)\</OutDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NOMINMAX;WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OpenMPSupport>true</OpenMPSupport>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <MinimalRebuild>true</MinimalRebuild>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>alloy.lib;glu32.lib;opengl32.lib;tiff.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(ProjectDir)\..\third_party\lib\$(PlatformName)\;$(SolutionDir)\third_party\lib\$(PlatformName)\;$(SolutionDir)\build\$(Configuration)-$(Platform)\;$(CUDA_PATH)\lib\$(PlatformName)\;$(INTELOCLSDKROOT)\lib\$(PlatformName)\;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+</Project>
