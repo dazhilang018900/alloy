@@ -13,7 +13,7 @@ CC = gcc
 EXOBJS := ./src/main.o
 EXOBJS +=$(patsubst %.cpp, %.o, $(call rwildcard, ./src/example/, *.cpp))
 
-CXXFLAGS:= -DGL_GLEXT_PROTOTYPES=1 -std=gnu++14 -O3 -w -fPIC -MMD -MP -fopenmp -c -g -fmessage-length=0 -I./src/ -I./src/common/
+CXXFLAGS:= -DGL_GLEXT_PROTOTYPES=1 -std=c++11 -O3 -w -fPIC -MMD -MP -fopenmp -c -g -fmessage-length=0 -I./src/ -I./src/common/
 CFLAGS:= -DGL_GLEXT_PROTOTYPES=1 -std=c11 -O3 -w -fPIC -MMD -MP -fopenmp -c -g -fmessage-length=0 -I./src/ -I./src/common/
 LDLIBS =-L./ -L/usr/lib64 -L/usr/lib/ -L/usr/local/lib/ -L/usr/local/cuda-9.1/lib64/ -L/usr/lib/x86_64-linux-gnu/ -L./ext/glfw/src/
 LIBS = -lglfw -lstdc++ -lgcc -lgomp -lGL -lXext -lGLU -lGLEW -lXi -lXrandr -lX11 -lXxf86vm -lXinerama -lXcursor -lXdamage -lpthread -lm -ldl -ltiff
@@ -37,6 +37,7 @@ release: $(LIBOBJS)
 	$(CXX) -shared -o "Release/libAlloy.so" $(LIBOBJS) $(LDLIBS) $(LIBS) -Wl,-rpath="/usr/lib64/:/usr/local/lib/:/usr/lib/x86_64-linux-gnu/"
 
 examples: $(LIBOBJS) $(EXOBJS)
+	mkdir -p ./Release
 	$(CXX) -o ./Release/examples $(EXOBJS) $(LIBOBJS) $(LDLIBS) $(LIBS) -Wl,-rpath="/usr/lib64/:/usr/local/lib/:/usr/lib/x86_64-linux-gnu/"
 
 all: examples
