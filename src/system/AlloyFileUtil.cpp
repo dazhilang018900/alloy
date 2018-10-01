@@ -576,6 +576,14 @@ std::string GetCurrentWorkingDirectory() {
 		return "";
 	}
 }
+bool SetCurrentWorkingDirectory(const std::string& pathname){
+#ifdef ALY_WINDOWS
+    return ::_chdir(pathname.c_str()) >= 0;
+#else
+    return ::chdir(pathname.c_str()) >= 0;
+#endif
+}
+
 std::string GetUserNameString() {
 	struct passwd *pw;
 	uid_t uid;

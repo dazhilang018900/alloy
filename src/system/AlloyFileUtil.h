@@ -127,6 +127,7 @@ namespace aly {
 	std::string FormatDateAndTime(const std::time_t& time);
 	std::string FormatSize(size_t size);
 	std::string GetCurrentWorkingDirectory();
+	bool SetCurrentWorkingDirectory(const std::string& pathname);
 	std::string GetHomeDirectory();
 	std::string GetDownloadsDirectory();
 	std::string GetDesktopDirectory();
