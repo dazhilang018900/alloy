@@ -70,7 +70,7 @@ namespace aly {
 	bool ContainsIgnoreCase(const std::string& str, const std::string& pattern);
 	std::vector<std::string> Split(const std::string& str, char delim,bool keepDelim=true);
 	std::vector<std::string> Split(const std::string& str);
-	void Trim(std::string& str);
+	std::string& Trim(std::string& str);
 	std::string LongestCommonPrefix(const std::vector<std::string>& strs);
 	std::vector<std::string> Tokenize(const std::string& str);
 }

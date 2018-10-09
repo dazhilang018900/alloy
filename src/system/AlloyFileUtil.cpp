@@ -437,7 +437,6 @@ std::string GetParentDirectory(const std::string& file) {
 		return GetFileDirectoryPath(file) + ALY_PATH_SEPARATOR;
 	}
 }
-
 #ifndef ALY_WINDOWS
 std::vector<std::string> GetDirectoryFileListing(const std::string& dirName, const std::string& ext, const std::string& mask) {
 	std::vector<std::string> files;
@@ -447,10 +446,12 @@ std::vector<std::string> GetDirectoryFileListing(const std::string& dirName, con
 	if(dirp){
 		while ((dp = readdir(dirp)) != NULL) {
 			string fileName(dp->d_name);
-			if (dp->d_type == DT_REG) {
-				if (ext.length() == 0 || GetFileExtension(fileName) == ext) {
-					if (mask.length() == 0 || (mask.length() > 0 && fileName.find(mask) < fileName.length()))
-						files.push_back(cleanPath + fileName);
+			if (fileName != ".." && fileName != ".") {
+				if (dp->d_type == DT_REG) {
+					if (ext.length() == 0 || GetFileExtension(fileName) == ext) {
+						if (mask.length() == 0 || (mask.length() > 0 && fileName.find(mask) < fileName.length()))
+							files.push_back(cleanPath + fileName);
+					}
 				}
 			}
 		}
