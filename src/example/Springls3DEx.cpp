@@ -25,7 +25,7 @@
 #include "image/AlloyDistanceField.h"
 using namespace aly;
 
-TrackingVisualize::TrackingVisualize(int exampleIndex) :
+Springls3DEx::Springls3DEx(int exampleIndex) :
 		Application(1280,720, "Spring Level Set 3D"),
 		matcapShaderIso(getFullPath("images/JG_Red.png")),matcapShaderParticles(getFullPath("images/matcap/00005.png")),
 		matcapShaderSpringls(getFullPath("images/JG_Silver.png")),
@@ -38,7 +38,7 @@ TrackingVisualize::TrackingVisualize(int exampleIndex) :
 	showTracking = true;
 	example=exampleIndex;
 }
-bool TrackingVisualize::init(Composite& rootNode) {
+bool Springls3DEx::init(Composite& rootNode) {
 	box3f renderBBox = box3f(float3(-0.5f, -0.5f, -0.5f),
 			float3(1.0f, 1.0f, 1.0f));
 	lastTime = -1;
@@ -225,7 +225,7 @@ bool TrackingVisualize::init(Composite& rootNode) {
 	camera.setActiveRegion(renderRegion.get());
 	return true;
 }
-void TrackingVisualize::draw(AlloyContext* context) {
+void Springls3DEx::draw(AlloyContext* context) {
 	if (springlsBuffer.getWidth() == 0) {
 		box2f bbox = renderRegion->getBounds();
 		springlsBuffer.initialize(bbox.dimensions.x, bbox.dimensions.y);
