@@ -67,6 +67,13 @@
 #include <stdexcept>
 using namespace std;
 namespace aly {
+bool SetCurrentWorkingDirectory(const std::string& pathname){
+#ifdef ALY_WINDOWS
+    return ::_chdir(pathname.c_str()) >= 0;
+#else
+    return ::chdir(pathname.c_str()) >= 0;
+#endif
+}
 bool MakeDirectoryInternal(const std::string& dir);
 std::string CodePointToUTF8(int cp) {
 	int n = 0;
@@ -576,13 +583,6 @@ std::string GetCurrentWorkingDirectory() {
 	} else {
 		return "";
 	}
-}
-bool SetCurrentWorkingDirectory(const std::string& pathname){
-#ifdef ALY_WINDOWS
-    return ::_chdir(pathname.c_str()) >= 0;
-#else
-    return ::chdir(pathname.c_str()) >= 0;
-#endif
 }
 
 std::string GetUserNameString() {
