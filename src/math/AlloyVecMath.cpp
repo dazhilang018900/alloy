@@ -822,6 +822,25 @@ float DistanceToEdgeSqr(const float3& pt, const float3& pt1, const float3& pt2,
 	}
 	return lengthSqr(pt - (*lastClosestSegmentPoint));
 }
+float DistanceToCapsule(const float3& pt, const float3& pt1, const float3& pt2,float r1,float r2){
+	float3 dir = pt2 - pt1;
+	float len = length(dir);
+	dir = normalize(dir);
+	float3 diff = pt - pt1;
+	float3 closestPt;
+	float mSegmentParameter = dot(dir, diff);
+	float r=mix(r1,r2,clamp(mSegmentParameter/len,0.0f,1.0f));
+	if (0 < mSegmentParameter) {
+		if (mSegmentParameter < len) {
+			closestPt = dir * mSegmentParameter + pt1;
+		} else {
+			closestPt = pt2;
+		}
+	} else {
+		closestPt = pt1;
+	}
+	return length(pt - closestPt)-r;
+}
 float DistanceToEdgeSqr(const float3& pt, const float3& pt1,
 		const float3& pt2) {
 	float3 tmp;

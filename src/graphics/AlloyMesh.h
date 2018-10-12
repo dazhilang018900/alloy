@@ -210,9 +210,18 @@ void WriteObjMeshToFile(const std::string& file,const Mesh& mesh);
 typedef std::vector<std::unordered_set<uint32_t>> MeshSetNeighborTable;
 typedef std::vector<std::list<uint32_t>> MeshListNeighborTable;
 void CreateVertexNeighborTable(const Mesh& mesh, MeshSetNeighborTable& vertNbrs);
-void CreateOrderedVertexNeighborTable(const Mesh& mesh,
-	MeshListNeighborTable& vertNbrs, bool leaveTail = false);
+void CreateOrderedVertexNeighborTable(const Mesh& mesh,MeshListNeighborTable& vertNbrs, bool leaveTail = false);
 void CreateFaceNeighborTable(const Mesh& mesh, MeshListNeighborTable& faceNbrs);
+//This is the canonical way to describe methods
+inline void MakeVertexNeighborTable(const Mesh& mesh, MeshSetNeighborTable& vertNbrs){
+	CreateVertexNeighborTable(mesh,vertNbrs);
+}
+inline void MakeOrderedVertexNeighborTable(const Mesh& mesh,MeshListNeighborTable& vertNbrs, bool leaveTail = false){
+	CreateOrderedVertexNeighborTable(mesh,vertNbrs,leaveTail);
+}
+inline void MakeFaceNeighborTable(const Mesh& mesh, MeshListNeighborTable& faceNbrs){
+	CreateFaceNeighborTable(mesh,faceNbrs);
+}
 void Subdivide(Mesh& mesh, SubDivisionScheme type= SubDivisionScheme::CatmullClark);
 }
 #endif /* MESH_H_ */
