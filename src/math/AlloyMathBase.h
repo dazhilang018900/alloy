@@ -1990,6 +1990,7 @@ template<class T> vec<T, 4> qmul(const vec<T, 4> & a, const vec<T, 4> & b) {
 template<class T> matrix<T, 3, 3> q2matrix(const vec<T, 4> & q) {
 	return {qrotate_x(q), qrotate_y(q), qrotate_z(q)};
 }
+
 // Compute spatial rotations of 3D vectors via the quaternion product qvq*
 template<class T> vec<T, 3> qrotate_x(const vec<T, 4> & q) {
 	return {q.w*q.w+q.x*q.x-q.y*q.y-q.z*q.z, (q.x*q.y+q.z*q.w)*2, (q.z*q.x-q.y*q.w)*2};
@@ -2013,6 +2014,29 @@ template<class T> vec<T, 2> Rotate(const vec<T, 2>& v, T angle) {
 	T cs = cos(angle);
 	T sn = sin(angle);
 	return vec<T, 2>(cs * v[0] + sn * v[1], -sn * v[0] + cs * v[1]);
+}
+template<class T> matrix<T, 4, 4> MakeRotation(const vec<T, 4> & q) {
+	return { vec<T,4>(qrotate_x(q),0), vec<T,4>(qrotate_y(q),0), vec<T,4>(qrotate_z(q),0), vec<T,4>(0,0,0,1)};
+}
+template<class T> vec<T,4> slerp(vec<T,4> q1,vec<T,4> q2,T lambda){
+	T dotproduct = q1.x * q2.x + q1.y * q2.y + q1.z * q2.z + q1.w * q2.w;
+	T theta, st, sut, sout, coeff1, coeff2;
+	// algorithm adapted from Shoemake's paper
+	lambda=lambda/T(2);
+	theta = std::acos(dotproduct);
+	if (theta<0) theta=-theta;
+	st = std::sin(theta);
+	sut = std::sin(lambda*theta);
+	sout = std::sin((1-lambda)*theta);
+	coeff1 = sout/st;
+	coeff2 = sut/st;
+	vec<T, 4> qr;
+	qr.x = coeff1*q1.x + coeff2*q2.x;
+	qr.y = coeff1*q1.y + coeff2*q2.y;
+	qr.z = coeff1*q1.z + coeff2*q2.z;
+	qr.w = coeff1*q1.w + coeff2*q2.w;
+	qr=normalize(qr);
+	return qr;
 }
 template<class T> matrix<T, 4, 4> MakeRotationX(T angle) {
 	return MakeRotation(vec<T, 3>(1, 0, 0), angle);
@@ -2101,7 +2125,38 @@ template<class T> matrix<T, 4, 4> MakeTransform(const matrix<T, 3, 3>& R,
 	M.w = vec<T, 4>(t, T(1));
 	return M;
 }
-
+template<class T> vec<T, 4> MakeQuaternion(const matrix<T, 3, 3>& a) {
+	vec<T, 4> q;
+	T trace = a(0, 0) + a(1, 1) + a(2, 2);
+	if (trace > 0) { // I changed M_EPSILON to 0
+		float s = T(0.5) / std::sqrt(trace + 1.0);
+		q.w = T(0.25) / s;
+		q.x = (a(2, 1) - a(1, 2)) * s;
+		q.y = (a(0, 2) - a(2, 0)) * s;
+		q.z = (a(1, 0) - a(0, 1)) * s;
+	} else {
+		if (a(0, 0) > a(1, 1) && a(0, 0) > a(2, 2)) {
+			T s = T(2) * std::sqrt(1.0f + a(0, 0) - a(1, 1) - a(2, 2));
+			q.w = (a(2, 1) - a(1, 2)) / s;
+			q.x = T(0.25) * s;
+			q.y = (a(0, 1) + a(1, 0)) / s;
+			q.z = (a(0, 2) + a(2, 0)) / s;
+		} else if (a(1, 1) > a(2, 2)) {
+			T s = T(2)* std::sqrt(1.0f + a(1, 1) - a(0, 0) - a(2, 2));
+			q.w = (a(0, 2) - a(2, 0)) / s;
+			q.x = (a(0, 1) + a(1, 0)) / s;
+			q.y = T(0.25) * s;
+			q.z = (a(1, 2) + a(2, 1)) / s;
+		} else {
+			T s = T(2) * std::sqrt(1.0f + a(2, 2) - a(0, 0) - a(1, 1));
+			q.w = (a(1, 0) - a(0, 1)) / s;
+			q.x = (a(0, 2) + a(2, 0)) / s;
+			q.y = (a(1, 2) + a(2, 1)) / s;
+			q.z =T(0.25) * s;
+		}
+	}
+	return q;
+}
 matrix<float, 4, 4> MakeRotation(const vec<float, 3>& axis, float angle);
 matrix<double, 4, 4> MakeRotation(const vec<double, 3>& axis, double angle);
 
