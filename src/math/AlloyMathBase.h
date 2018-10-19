@@ -286,6 +286,9 @@ template<class T> struct vec<T, 4> {
 	vec<T, 3> xyz() const {
 		return vec<T, 3>(x, y, z);
 	}
+	vec<T, 3> yzw() const {
+		return vec<T, 3>(y, z, w);
+	}
 	vec<T, 2> xy() const {
 		return vec<T, 2>(x, y);
 	}
@@ -2016,7 +2019,23 @@ template<class T> vec<T, 2> Rotate(const vec<T, 2>& v, T angle) {
 	return vec<T, 2>(cs * v[0] + sn * v[1], -sn * v[0] + cs * v[1]);
 }
 template<class T> matrix<T, 4, 4> MakeRotation(const vec<T, 4> & q) {
-	return { vec<T,4>(qrotate_x(q),0), vec<T,4>(qrotate_y(q),0), vec<T,4>(qrotate_z(q),0), vec<T,4>(0,0,0,1)};
+	matrix<T, 4, 4> A;
+	T s=T(1)/dot(q,q);
+	A.x=vec<T,4>(
+		 T(1)-2*s*(q.y*q.y+q.z*q.z),
+			  2*s*(q.x*q.y+q.z*q.w),
+			  2*s*(q.x*q.z-q.y*q.w),0);
+	A.y=vec<T,4>(
+			  2*s*(q.x*q.y-q.z*q.w),
+		 T(1)-2*s*(q.x*q.x+q.z*q.z),
+			  2*s*(q.y*q.z+q.x*q.w),0);
+	A.z=vec<T,4>(
+			  2*s*(q.x*q.z+q.y*q.w),
+			  2*s*(q.y*q.z-q.x*q.w),
+		 T(1)-2*s*(q.x*q.x+q.y*q.y),0);
+	A.w=vec<T,4>(0,0,0,1);
+	return A;
+	//return { vec<T,4>(qrotate_x(q),0), vec<T,4>(qrotate_y(q),0), vec<T,4>(qrotate_z(q),0), vec<T,4>(0,0,0,1)};
 }
 template<class T> vec<T,4> slerp(vec<T,4> q1,vec<T,4> q2,T lambda){
 	T dotproduct = q1.x * q2.x + q1.y * q2.y + q1.z * q2.z + q1.w * q2.w;
