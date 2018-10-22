@@ -85,7 +85,7 @@ typedef unsigned int u16;
 //
 //
 namespace aly {
-unsigned int lzfCompress(const void * const in_data, unsigned int in_len,
+unsigned int CompressLZF(const void * const in_data, unsigned int in_len,
 		void *out_data, unsigned int out_len) {
 	LZF_STATE htab;
 	const unsigned char *ip = static_cast<const unsigned char *>(in_data);
@@ -305,7 +305,7 @@ unsigned int lzfCompress(const void * const in_data, unsigned int in_len,
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////
-unsigned int lzfDecompress(const void * const in_data, unsigned int in_len,
+unsigned int DecompressLZF(const void * const in_data, unsigned int in_len,
 		void *out_data, unsigned int out_len) {
 	unsigned char const *ip = static_cast<const unsigned char *>(in_data);
 	unsigned char *op = static_cast<unsigned char *>(out_data);

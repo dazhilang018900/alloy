@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 #include "image/tinyexr.h"
-#include "miniz.h"
+#include "common/miniz.h"
 #ifdef _OPENMP
 #include <omp.h>
 #endif
@@ -321,114 +321,7 @@ for (size_t c = 0; c < channels.size(); c++) {
 (*p) = '\0';
 }
 
-void CompressZip(unsigned char *dst, unsigned long long &compressedSize,
-	const unsigned char *src, unsigned long srcSize) {
 
-std::vector<unsigned char> tmpBuf(srcSize);
-
-//
-// Apply EXR-specific? postprocess. Grabbed from OpenEXR's
-// ImfZipCompressor.cpp
-//
-
-//
-// Reorder the pixel data.
-//
-
-{
-	char *t1 = (char *) &tmpBuf.at(0);
-	char *t2 = (char *) &tmpBuf.at(0) + (srcSize + 1) / 2;
-	const char *stop = (const char *) src + srcSize;
-
-	while (true) {
-		if ((const char *) src < stop)
-			*(t1++) = *(src++);
-		else
-			break;
-
-		if ((const char *) src < stop)
-			*(t2++) = *(src++);
-		else
-			break;
-	}
-}
-
-//
-// Predictor.
-//
-
-{
-	unsigned char *t = &tmpBuf.at(0) + 1;
-	unsigned char *stop = &tmpBuf.at(0) + srcSize;
-	int p = t[-1];
-
-	while (t < stop) {
-		int d = int(t[0]) - p + (128 + 256);
-		p = t[0];
-		t[0] = d;
-		++t;
-	}
-}
-
-//
-// Compress the data using miniz
-//
-
-miniz::mz_ulong outSize = miniz::mz_compressBound(srcSize);
-int ret = miniz::mz_compress(dst, &outSize,
-		(const unsigned char *) &tmpBuf.at(0), srcSize);
-assert(ret == miniz::MZ_OK);
-(void) ret;
-
-compressedSize = outSize;
-}
-
-void DecompressZip(unsigned char *dst, unsigned long &uncompressedSize,
-	const unsigned char *src, unsigned long srcSize) {
-std::vector<unsigned char> tmpBuf(uncompressedSize);
-
-int ret = miniz::mz_uncompress(&tmpBuf.at(0), &uncompressedSize, src, srcSize);
-assert(ret == miniz::MZ_OK);
-(void) ret;
-
-//
-// Apply EXR-specific? postprocess. Grabbed from OpenEXR's
-// ImfZipCompressor.cpp
-//
-
-// Predictor.
-{
-	unsigned char *t = &tmpBuf.at(0) + 1;
-	unsigned char *stop = &tmpBuf.at(0) + uncompressedSize;
-
-	while (t < stop) {
-		int d = int(t[-1]) + int(t[0]) - 128;
-		t[0] = d;
-		++t;
-	}
-}
-
-// Reorder the pixel data.
-{
-	const char *t1 = reinterpret_cast<const char *>(&tmpBuf.at(0));
-	const char *t2 = reinterpret_cast<const char *>(&tmpBuf.at(0))
-			+ (uncompressedSize + 1) / 2;
-	char *s = reinterpret_cast<char *>(dst);
-	char *stop = s + uncompressedSize;
-
-	while (true) {
-		if (s < stop)
-			*(s++) = *(t1++);
-		else
-			break;
-
-		if (s < stop)
-			*(s++) = *(t2++);
-		else
-			break;
-	}
-}
-}
 
 //
 // PIZ compress/uncompress, based on OpenEXR's ImfPizCompressor.cpp
@@ -2627,8 +2520,7 @@ for (int y = 0; y < numBlocks; y++) {
 		std::vector<unsigned char> outBuf(dataWidth * numLines * pixelDataSize);
 
 		unsigned long dstLen = (unsigned long)outBuf.size();
-		DecompressZip(reinterpret_cast<unsigned char *>(&outBuf.at(0)), dstLen,
-				dataPtr + 8, dataLen);
+		aly::DecompressZip(reinterpret_cast<unsigned char *>(&outBuf.at(0)), dstLen,dataPtr + 8, dataLen);
 
 		bool isBigEndian = IsBigEndian();
 
@@ -3013,10 +2905,10 @@ for (int i = 0; i < numBlocks; i++) {
 		}
 	}
 
-	int bound = miniz::mz_compressBound(buf.size() * sizeof(unsigned short));
+	int bound = mz_compressBound(buf.size() * sizeof(unsigned short));
 
 	std::vector<unsigned char> block(
-			miniz::mz_compressBound(buf.size() * sizeof(unsigned short)));
+			mz_compressBound(buf.size() * sizeof(unsigned short)));
 	unsigned long long outSize = block.size();
 
 	CompressZip(&block.at(0), outSize,
@@ -3321,10 +3213,10 @@ for (int i = 0; i < numBlocks; i++) {
 		}
 	}
 
-	std::vector<unsigned char> block(miniz::mz_compressBound(::miniz::mz_ulong(buf.size())));
+	std::vector<unsigned char> block(mz_compressBound(::mz_ulong(buf.size())));
 	unsigned long long outSize = (unsigned long long)block.size();
 
-	CompressZip(&block.at(0), outSize,
+	aly::CompressZip(&block.at(0), outSize,
 			reinterpret_cast<const unsigned char *>(&buf.at(0)), (unsigned long)buf.size());
 
 	// 4 byte: scan line
@@ -3650,7 +3542,7 @@ for (int y = 0; y < numBlocks; y++) {
 	// decode pixel offset table.
 	{
 		unsigned long dstLen = (unsigned long )(pixelOffsetTable.size() * sizeof(int));
-		DecompressZip(
+		aly::DecompressZip(
 				reinterpret_cast<unsigned char *>(&pixelOffsetTable.at(0)),
 				dstLen, dataPtr + 28, (unsigned long)packedOffsetTableSize);
 
@@ -3665,7 +3557,7 @@ for (int y = 0; y < numBlocks; y++) {
 	// decode sample data.
 	{
 		unsigned long dstLen = (unsigned long)unpackedSampleDataSize;
-		DecompressZip(reinterpret_cast<unsigned char *>(&sampleData.at(0)),
+		aly::DecompressZip(reinterpret_cast<unsigned char *>(&sampleData.at(0)),
 				dstLen, dataPtr + 28 + packedOffsetTableSize,
 			(unsigned long)packedSampleDataSize);
 		assert(dstLen == (unsigned long )unpackedSampleDataSize);
@@ -3837,7 +3729,7 @@ std::vector<long long> offsets(numBlocks);
 
 	assert(dstLen == pixelOffsetTable.size() * sizeof(int));
 	//      int ret =
-	//          miniz::mz_uncompress(reinterpret_cast<unsigned char
+	//          mz_uncompress(reinterpret_cast<unsigned char
 	//          *>(&pixelOffsetTable.at(0)), &dstLen, dataPtr + 28,
 	//          packedOffsetTableSize);
 	//      printf("ret = %d, dstLen = %d\n", ret, (int)dstLen);
@@ -3893,7 +3785,7 @@ for (int y = 0; y < numBlocks; y++) {
 
 		assert(dstLen == pixelOffsetTable.size() * sizeof(int));
 		//      int ret =
-		//          miniz::mz_uncompress(reinterpret_cast<unsigned char
+		//          mz_uncompress(reinterpret_cast<unsigned char
 		//          *>(&pixelOffsetTable.at(0)), &dstLen, dataPtr + 28,
 		//          packedOffsetTableSize);
 		//      printf("ret = %d, dstLen = %d\n", ret, (int)dstLen);

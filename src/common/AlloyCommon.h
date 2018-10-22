@@ -22,6 +22,8 @@
 #ifndef ALLOYCOMMON_H_
 #define ALLOYCOMMON_H_
 #include "system/tinyformat.h"
+#include "common/lzf.h"
+#include "common/miniz.h"
 #include <iostream>
 #include <string>
 #include <sstream>

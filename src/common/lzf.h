@@ -60,7 +60,7 @@ namespace aly
     * \param[out] out_len the length of the output buffer
     *
     */
-  unsigned int lzfCompress (const void *const in_data,  unsigned int in_len,
+  unsigned int CompressLZF (const void *const in_data,  unsigned int in_len,
                void             *out_data, unsigned int out_len);
 
   /** \brief Decompress data compressed with the \a lzfCompress function and
@@ -82,7 +82,7 @@ namespace aly
     * \param[out] out_len the length of the output buffer
     */
   unsigned int
-  lzfDecompress (const void *const in_data,  unsigned int in_len,
+  DecompressLZF (const void *const in_data,  unsigned int in_len,
                  void             *out_data, unsigned int out_len);
 }
 
