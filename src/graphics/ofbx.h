@@ -21,7 +21,7 @@ SOFTWARE.
  */
 #ifndef OFBX_HEADER_H_
 #define OFBX_HEADER_H_
-#include <AlloyMathBase.h>
+#include "math/AlloyMathBase.h"
 #include <string>
 #include <map>
 #include <vector>
