@@ -644,6 +644,11 @@ void CameraProjector::setFocalLength(float fx, float fy) {
 	K(1, 1) = fy;
 	Kinv = inverse(K);
 }
+void CameraProjector::setCameraCenter(float cx, float cy) {
+	K(0, 2) = cx;
+	K(1, 2) = cy;
+	Kinv = inverse(K);
+}
 bool CameraProjector::isVisible(const aly::float3& pt,
 		const aly::float3& normal, float tol) const {
 	float3 ct = (R * pt + T);

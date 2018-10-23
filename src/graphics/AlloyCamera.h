@@ -272,6 +272,7 @@ struct CameraProjector {
 	void setPose(const aly::float4x4& P);
 	void setIntrinsics(const aly::float3x3& K);
 	void setFocalLength(float fx,float fy) ;
+	void setCameraCenter(float cx, float cy);
 	bool isVisible(const aly::float3& pt,const aly::float3& normal,float tol=0.0f)  const ;
 	bool isVisible(const aly::float3& pt)  const ;
 	bool isVisible(const aly::float2& pt)  const ;
