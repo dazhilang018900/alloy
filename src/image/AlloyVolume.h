@@ -335,6 +335,9 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(const std::strin
 		template<class K> inline vec<K, C> operator()(const vec<K, 3>& pt) {
 			return operator()(pt.x, pt.y, pt.z);
 		}
+		template<class K> inline vec<K, C> operator()(const vec<K, 3>& pt) const {
+			return operator()(pt.x, pt.y, pt.z);
+		}
 		template<class F> void apply(F f) {
 			size_t sz = size();
 #pragma omp parallel for
