@@ -27,13 +27,13 @@
 #include <queue>
 using namespace std;
 namespace aly {
-const ubyte1 DistanceField3f::ALIVE = ubyte1((uint8_t) 1);
+const ubyte1 DistanceField3f::ACTIVE = ubyte1((uint8_t) 1);
 const ubyte1 DistanceField3f::NARROW_BAND = ubyte1((uint8_t) 2);
 const ubyte1 DistanceField3f::FAR_AWAY = ubyte1((uint8_t) 3);
 const float DistanceField3f::DISTANCE_UNDEFINED =
 		std::numeric_limits<float>::max();
 
-const ubyte1 DistanceField2f::ALIVE = ubyte1((uint8_t) 1);
+const ubyte1 DistanceField2f::ACTIVE = ubyte1((uint8_t) 1);
 const ubyte1 DistanceField2f::NARROW_BAND = ubyte1((uint8_t) 2);
 const ubyte1 DistanceField2f::FAR_AWAY = ubyte1((uint8_t) 3);
 const float DistanceField2f::DISTANCE_UNDEFINED =
@@ -62,44 +62,44 @@ float DistanceField3f::march(float IMv, float IPv, float JMv, float JPv,
 	s = 0;
 	s2 = 0;
 	count = 0;
-	if (IMl == ALIVE && IPl == ALIVE) {
+	if (IMl == ACTIVE && IPl == ACTIVE) {
 		tmp = std::min(IMv, IPv);
 		s += tmp;
 		s2 += tmp * tmp;
 		count++;
-	} else if (IMl == ALIVE) {
+	} else if (IMl == ACTIVE) {
 		s += IMv;
 		s2 += IMv * IMv;
 		count++;
-	} else if (IPl == ALIVE) {
+	} else if (IPl == ACTIVE) {
 		s += IPv;
 		s2 += IPv * IPv;
 		count++;
 	}
-	if (JMl == ALIVE && JPl == ALIVE) {
+	if (JMl == ACTIVE && JPl == ACTIVE) {
 		tmp = std::min(JMv, JPv);
 		s += tmp;
 		s2 += tmp * tmp;
 		count++;
-	} else if (JMl == ALIVE) {
+	} else if (JMl == ACTIVE) {
 		s += JMv;
 		s2 += JMv * JMv;
 		count++;
-	} else if (JPl == ALIVE) {
+	} else if (JPl == ACTIVE) {
 		s += JPv;
 		s2 += JPv * JPv;
 		count++;
 	}
-	if (KMl == ALIVE && KPl == ALIVE) {
+	if (KMl == ACTIVE && KPl == ACTIVE) {
 		tmp = std::min(KMv, KPv);
 		s += tmp;
 		s2 += tmp * tmp;
 		count++;
-	} else if (KMl == ALIVE) {
+	} else if (KMl == ACTIVE) {
 		s += KMv;
 		s2 += KMv * KMv;
 		count++;
-	} else if (KPl == ALIVE) {
+	} else if (KPl == ACTIVE) {
 		s += KPv;
 		s2 += KPv * KPv;
 		count++;
@@ -138,7 +138,7 @@ void DistanceField3f::solve(const Volume1f& vol, Volume1f& distVol,
 				if (Cv == 0) {
 					signVol(i, j, k).x = 0;
 					distVol(i, j, k).x = 0;
-					labelVol(i, j, k) = ALIVE;
+					labelVol(i, j, k) = ACTIVE;
 #pragma omp atomic
 					countAlive++;
 				} else {
@@ -217,7 +217,7 @@ void DistanceField3f::solve(const Volume1f& vol, Volume1f& distVol,
 						} else {
 #pragma omp atomic
 							countAlive++;
-							labelVol(i, j, k) = ALIVE;
+							labelVol(i, j, k) = ACTIVE;
 							result = std::sqrt(result);
 							distVol(i, j, k).x = (float) (1.0 / result);
 						}
@@ -244,7 +244,7 @@ void DistanceField3f::solve(const Volume1f& vol, Volume1f& distVol,
 		for (int k = 0; k < slices; k++) {
 			for (int j = 0; j < cols; j++) {
 				for (int i = 0; i < rows; i++) {
-					if (labelVol(i, j, k) != ALIVE) {
+					if (labelVol(i, j, k) != ACTIVE) {
 						continue;
 					}
 					for (koff = 0; koff < 6; koff++) {
@@ -330,7 +330,7 @@ void DistanceField3f::solve(const Volume1f& vol, Volume1f& distVol,
 				break;
 			}
 			distVol(i, j, k).x = (he->value);
-			labelVol(i, j, k) = ALIVE;
+			labelVol(i, j, k) = ACTIVE;
 			for (koff = 0; koff < 6; koff++) {
 				ni = i + neighborsX[koff];
 				nj = j + neighborsY[koff];
@@ -340,7 +340,7 @@ void DistanceField3f::solve(const Volume1f& vol, Volume1f& distVol,
 					continue;
 				}
 				ubyte1& label = labelVol(ni, nj, nk);
-				if (label == ALIVE) {
+				if (label == ACTIVE) {
 					continue;
 				}
 				if (nj > 0) {
@@ -417,7 +417,7 @@ void DistanceField3f::solve(const Volume1f& vol, Volume1f& distVol,
 		for (int j = 0; j < cols; j++) {
 			for (int i = 0; i < rows; i++) {
 				int8_t s = signVol(i, j, k).x;
-				if (labelVol(i, j, k) != ALIVE) {
+				if (labelVol(i, j, k) != ACTIVE) {
 					distVol(i, j, k).x = maxDistance
 							* aly::sign(vol(i, j, k).x);
 				} else {
@@ -463,7 +463,7 @@ void DistanceField3f::solve(EndlessGridFloat& vol, float maxDistance) {
 						DfElem& elem = distVol.getLeafValue(i, j, k);
 						elem.dist = 0;
 						elem.sign = 0;
-						elem.label = ALIVE;
+						elem.label = ACTIVE;
 						countAlive++;
 					} else {
 						DfElem& elem = distVol.getLeafValue(i, j, k);
@@ -534,7 +534,7 @@ void DistanceField3f::solve(EndlessGridFloat& vol, float maxDistance) {
 								elem.dist = 0;
 							} else {
 								countAlive++;
-								elem.label = ALIVE;
+								elem.label = ACTIVE;
 								result = std::sqrt(result);
 								elem.dist = (float) (1.0f / result);
 							}
@@ -573,7 +573,7 @@ void DistanceField3f::solve(EndlessGridFloat& vol, float maxDistance) {
 					j = pos.y + jj;
 					k = pos.z + kk;
 					DfElem& elem = distVol.getLeafValue(i, j, k);
-					if (elem.label != ALIVE) {
+					if (elem.label != ACTIVE) {
 						continue;
 					}
 					for (koff = 0; koff < 6; koff++) {
@@ -644,14 +644,14 @@ void DistanceField3f::solve(EndlessGridFloat& vol, float maxDistance) {
 		EndlessNode<DfElem>* leaf = nullptr;
 		distVol.getLeafValue(i, j, k, leaf, elem);
 		elem.dist = he->value;
-		elem.label = ALIVE;
+		elem.label = ACTIVE;
 		distVol.setLeafValue(i, j, k, elem, leaf);
 		for (koff = 0; koff < 6; koff++) {
 			ni = i + neighborsX[koff];
 			nj = j + neighborsY[koff];
 			nk = k + neighborsZ[koff];
 			DfElem& nelem = distVol.getLeafValue(ni, nj, nk);
-			if (nelem.label == ALIVE) {
+			if (nelem.label == ACTIVE) {
 				continue;
 			}
 			DfElem JM = distVol.getLeafValue(ni, nj - 1, nk, leaf);
@@ -709,7 +709,7 @@ void DistanceField3f::solve(EndlessGridFloat& vol, float maxDistance) {
 					j = pos.y + jj;
 					k = pos.z + kk;
 					DfElem* elem = distVol.getLeafValuePtr(i, j, k, leaf);
-					if (elem->label == ALIVE) {
+					if (elem->label == ACTIVE) {
 						vol.getLeafValue(i, j, k) = elem->dist * elem->sign;
 					}
 				}
@@ -725,30 +725,30 @@ float DistanceField2f::march(float IMv, float IPv, float JMv, float JPv,
 	s = 0;
 	s2 = 0;
 	count = 0;
-	if (IMl == ALIVE && IPl == ALIVE) {
+	if (IMl == ACTIVE && IPl == ACTIVE) {
 		tmp = std::min(IMv, IPv);
 		s += tmp;
 		s2 += tmp * tmp;
 		count++;
-	} else if (IMl == ALIVE) {
+	} else if (IMl == ACTIVE) {
 		s += IMv;
 		s2 += IMv * IMv;
 		count++;
-	} else if (IPl == ALIVE) {
+	} else if (IPl == ACTIVE) {
 		s += IPv;
 		s2 += IPv * IPv;
 		count++;
 	}
-	if (JMl == ALIVE && JPl == ALIVE) {
+	if (JMl == ACTIVE && JPl == ACTIVE) {
 		tmp = std::min(JMv, JPv);
 		s += tmp;
 		s2 += tmp * tmp;
 		count++;
-	} else if (JMl == ALIVE) {
+	} else if (JMl == ACTIVE) {
 		s += JMv;
 		s2 += JMv * JMv;
 		count++;
-	} else if (JPl == ALIVE) {
+	} else if (JPl == ACTIVE) {
 		s += JPv;
 		s2 += JPv * JPv;
 		count++;
@@ -785,7 +785,7 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 			if (Cv == 0) {
 				signVol(i, j).x = 0;
 				distVol(i, j).x = 0;
-				labelVol(i, j) = ALIVE;
+				labelVol(i, j) = ACTIVE;
 #pragma omp atomic
 				countAlive++;
 			} else {
@@ -842,7 +842,7 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 					} else {
 #pragma omp atomic
 						countAlive++;
-						labelVol(i, j) = ALIVE;
+						labelVol(i, j) = ACTIVE;
 						result = std::sqrt(result);
 						distVol(i, j).x = (float) (1.0 / result);
 					}
@@ -866,7 +866,7 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 		ubyte1 IPl = ubyte1((uint8_t) 0);
 		for (int j = 0; j < height; j++) {
 			for (int i = 0; i < width; i++) {
-				if (labelVol(i, j) != ALIVE) {
+				if (labelVol(i, j) != ACTIVE) {
 					continue;
 				}
 				for (koff = 0; koff < 4; koff++) {
@@ -934,7 +934,7 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 				break;
 			}
 			distVol(i, j).x = (he->value);
-			labelVol(i, j) = ALIVE;
+			labelVol(i, j) = ACTIVE;
 			for (koff = 0; koff < 4; koff++) {
 				ni = i + neighborsX[koff];
 				nj = j + neighborsY[koff];
@@ -942,7 +942,7 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 					continue;
 				}
 				ubyte1& label = labelVol(ni, nj);
-				if (label == ALIVE) {
+				if (label == ACTIVE) {
 					continue;
 				}
 				if (nj > 0) {
@@ -1000,7 +1000,7 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {
 			int8_t s = signVol(i, j).x;
-			if (labelVol(i, j) != ALIVE) {
+			if (labelVol(i, j) != ACTIVE) {
 				distVol(i, j).x = maxDistance * aly::sign(vol(i, j).x);
 			} else {
 				distVol(i, j).x *= s;
