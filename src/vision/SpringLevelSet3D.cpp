@@ -1207,13 +1207,12 @@ bool SpringLevelSet3D::init() {
 	if (cache.get() != nullptr) {
 		Manifold3D* contour = getManifold();
 		crumbs.addTime(contour->particles);
-		contour->setFile(
-				MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
+		contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 	}
 	relax();
 	updateNearestNeighbors();
 	updateUnsignedLevelSet();
-	cache->set((int) simulationIteration, contour);
+	if(cache.get()!=nullptr)cache->set((int) simulationIteration, contour);
 	return true;
 }
 void SpringLevelSet3D::relax() {
