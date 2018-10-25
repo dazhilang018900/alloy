@@ -247,7 +247,7 @@ void SpringLevelSet3D::refineContour(aly::Mesh& isosurf, int iterations,
 	Locator3f matcher(contour.particles);
 	Vector3f newPoints = points;
 	const float planeThreshold = std::cos(ToRadians(80.0f));
-	std::vector < std::unordered_set < uint32_t >> nbrTable;
+	std::vector<std::unordered_set<uint32_t>> nbrTable;
 	CreateVertexNeighborTable(isosurf, nbrTable);
 	for (int iter = 0; iter <= iterations; iter++) {
 #pragma omp parallel for
@@ -1159,9 +1159,19 @@ void SpringLevelSet3D::distanceFieldMotion(int i, int j, int k, size_t gid) {
 	}
 	deltaLevelSet[gid] = -advection + kappa;
 }
+void SpringLevelSet3D::setSpringls(const aly::Mesh& mesh) {
+	contour.vertexLocations = mesh.vertexLocations;
+	contour.triIndexes = mesh.triIndexes;
+	contour.vertexNormals = mesh.vertexNormals;
+	contour.quadIndexes = mesh.quadIndexes;
+	if (mesh.triIndexes.size() > 0) {
+		contour.meshType = MeshType::Triangle;
+	} else if (mesh.quadIndexes.size() > 0) {
+		contour.meshType = MeshType::Quad;
+	}
+}
 bool SpringLevelSet3D::init() {
 	ActiveManifold3D::init();
-
 	if (contour.meshType == MeshType::Triangle) {
 		int N = (int) contour.triIndexes.size();
 		contour.particles.resize(N);
@@ -1207,12 +1217,14 @@ bool SpringLevelSet3D::init() {
 	if (cache.get() != nullptr) {
 		Manifold3D* contour = getManifold();
 		crumbs.addTime(contour->particles);
-		contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
+		contour->setFile(
+				MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 	}
 	relax();
 	updateNearestNeighbors();
 	updateUnsignedLevelSet();
-	if(cache.get()!=nullptr)cache->set((int) simulationIteration, contour);
+	if (cache.get() != nullptr)
+		cache->set((int) simulationIteration, contour);
 	return true;
 }
 void SpringLevelSet3D::relax() {
@@ -1274,7 +1286,7 @@ bool SpringLevelSet3D::stepInternal() {
 			int tries = 0;
 			{
 				Mesh tmpMesh;
-				std::lock_guard < std::mutex > lockMe(contourLock);
+				std::lock_guard<std::mutex> lockMe(contourLock);
 				isoSurface.solve(levelSet, activeList, tmpMesh,
 						contour.meshType, false, 0.0f);
 				tmpMesh.updateVertexNormals(false);
@@ -1300,7 +1312,7 @@ bool SpringLevelSet3D::stepInternal() {
 			contour.setDirty(true);
 			updateTracking(3 * NEAREST_NEIGHBOR_DISTANCE);
 		} else {
-			std::lock_guard < std::mutex > lockMe(contourLock);
+			std::lock_guard<std::mutex> lockMe(contourLock);
 			Mesh mesh;
 			isoSurface.solve(levelSet, activeList, mesh, contour.meshType,
 					false, 0.0f);

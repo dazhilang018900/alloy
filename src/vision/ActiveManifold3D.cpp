@@ -157,9 +157,9 @@ bool ActiveManifold3D::init() {
 	}
 	rebuildNarrowBand();
 	requestUpdateSurface = true;
+	if(contour.vertexLocations.size()==0)updateSurface();
 	if (cache.get() != nullptr) {
 		cache->clear();
-		updateSurface();
 		contour.setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "surface" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 		cache->set((int) simulationIteration, contour);
 	}

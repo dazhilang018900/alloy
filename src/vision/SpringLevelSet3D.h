@@ -77,6 +77,7 @@ namespace aly {
 		void refineContour(aly::Mesh& isosurf,int iterations,float proximity,float stepSize);
 		void updateNearestNeighbors(float maxDistance = NEAREST_NEIGHBOR_DISTANCE);
 		void updateUnsignedLevelSet(float maxDistance= 3.5f);
+
 		void relax(float timeStep);
 		void relax();
 		int fill();
@@ -96,6 +97,7 @@ namespace aly {
 		void setResamplingEnabled(bool e){
 			resampleEnabled=e;
 		}
+		void setSpringls(const aly::Mesh& mesh);
 		void setAdvection(const std::function<aly::double3(aly::double3,double,double)>& func);
 		SpringLevelSet3D(const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
 		void setSpringls(const Vector3f& particles, const Vector3f& points);
