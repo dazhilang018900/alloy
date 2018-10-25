@@ -533,7 +533,7 @@ int SpringLevelSet3D::contract() {
 					vertexes.push_back(contour.vertexes[off + 1]);
 					vertexes.push_back(contour.vertexes[off + 2]);
 					normals.push_back(contour.normals[i]);
-					for (int nn = 0; nn < 3; nn++) {
+					for (int nn = 0; nn < 4; nn++) {
 						velocities[nn].push_back(contour.velocities[nn][i]);
 					}
 					correspondence.push_back(contour.correspondence[i]);
@@ -1280,15 +1280,13 @@ bool SpringLevelSet3D::stepInternal() {
 			oldNormals = contour.normals;
 			oldCorrespondences = contour.correspondence;
 			oldVelocities = contour.velocities;
-
 			updateUnsignedLevelSet();
 			int fillCount = 0;
 			int tries = 0;
 			{
 				Mesh tmpMesh;
 				std::lock_guard<std::mutex> lockMe(contourLock);
-				isoSurface.solve(levelSet, activeList, tmpMesh,
-						contour.meshType, false, 0.0f);
+				isoSurface.solve(levelSet, activeList, tmpMesh,contour.meshType, false, 0.0f);
 				tmpMesh.updateVertexNormals(false);
 				refineContour(tmpMesh, 4, 2.0f, 0.5f);
 				contour.quadIndexes = tmpMesh.quadIndexes;
@@ -1299,7 +1297,7 @@ bool SpringLevelSet3D::stepInternal() {
 			}
 			fillCount = 0;
 			do {
-				contract();
+				int contractCount=contract();
 				fillCount = fill();
 				if (fillCount > 0) {
 					//contour.stashSpringls(MakeDesktopFile(MakeString() << "fill" << std::setw(4)<< std::setfill('0')<< simulationIteration << ".ply"));
@@ -1354,14 +1352,12 @@ bool SpringLevelSet3D::stepInternal() {
 	simulationIteration++;
 	if (cache.get() != nullptr) {
 		Manifold3D* contour = getManifold();
-		std::vector<float3i>& old = crumbs.addTime(
-				contour->particleTracking.size());
+		std::vector<float3i>& old = crumbs.addTime(contour->particleTracking.size());
 		for (int n = 0; n < contour->particleTracking.size(); n++) {
 			int idx = contour->particleTracking[n];
 			old[n] = float3i(contour->particles[n], idx);
 		}
-		contour->setFile(
-				MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
+		contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 		cache->set((int) simulationIteration, *contour);
 	}
 	return (simulationTime < simulationDuration);

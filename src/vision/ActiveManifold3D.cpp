@@ -156,8 +156,13 @@ bool ActiveManifold3D::init() {
 		swapLevelSet[i] = val;
 	}
 	rebuildNarrowBand();
-	requestUpdateSurface = true;
-	if(contour.vertexLocations.size()==0)updateSurface();
+	//Only rebuild first contour if it doesn't exist yet!
+	if(contour.vertexLocations.size()==0){
+		requestUpdateSurface = true;
+		updateSurface();
+	} else {
+		requestUpdateSurface = false;
+	}
 	if (cache.get() != nullptr) {
 		cache->clear();
 		contour.setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<< "surface" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
