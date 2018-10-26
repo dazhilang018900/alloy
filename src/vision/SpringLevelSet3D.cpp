@@ -1255,6 +1255,24 @@ void SpringLevelSet3D::fixNormals() {
 		}
 	}
 }
+void SpringLevelSet3D::resample(int T,bool fixNorms){
+	int fillCount = 0;
+	int tries=0;
+	do {
+		int contractCount=contract();
+		std::cout<<"Removed "<<contractCount<<std::endl;
+		fillCount = fill();
+		std::cout<<"Added "<<fillCount<<std::endl;
+		if (fillCount > 0) {
+			relax();
+		}
+		tries++;
+	} while (fillCount > 0 && tries < T); //Continue filling until all gaps are closed
+	contour.updateNormals();
+	if(fixNorms)fixNormals();
+	contour.setDirty(true);
+	updateTracking(3 * NEAREST_NEIGHBOR_DISTANCE);
+}
 bool SpringLevelSet3D::stepInternal() {
 	double remaining = simulationTimeStep;
 	double t = 0.0;

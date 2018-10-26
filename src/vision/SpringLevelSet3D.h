@@ -101,6 +101,7 @@ namespace aly {
 		void setAdvection(const std::function<aly::double3(aly::double3,double,double)>& func);
 		SpringLevelSet3D(const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
 		void setSpringls(const Vector3f& particles, const Vector3f& points);
+		void resample(int T=3,bool fixNorms=true);
 		virtual bool init() override;
 		virtual void cleanup() override;
 		virtual void setup(const aly::ParameterPanePtr& pane) override;
