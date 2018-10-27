@@ -258,7 +258,7 @@ void Springls3DEx::draw(AlloyContext* context) {
 			springls.setType(
 					static_cast<GLMesh::PrimitiveType>(contour->meshType));
 			particles.vertexLocations = contour->particles;
-			particles.vertexNormals = contour->vertexNormals;
+			particles.vertexNormals = contour->normals;
 			Breadcrumbs3D& crumbs=simulation.crumbs;
 			int T=std::min((int)crumbs.size(),timelineSlider->getTimeValue().toInteger()+1);
 			trails.vertexLocations.clear();
