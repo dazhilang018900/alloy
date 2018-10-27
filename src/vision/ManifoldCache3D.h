@@ -66,7 +66,9 @@ namespace aly {
 		ManifoldCache3D(int elem=32):maxElements(elem),counter(0){
 
 		}
-
+		void setMaxElements(int e){
+			maxElements=e;
+		}
 		std::shared_ptr<CacheElement3D> set(int frame, const Manifold3D& springl);
 		std::shared_ptr<CacheElement3D> get(int frame);
 		int unload();

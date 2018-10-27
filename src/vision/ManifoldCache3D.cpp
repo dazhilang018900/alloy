@@ -73,6 +73,7 @@ std::shared_ptr<CacheElement3D> ManifoldCache3D::set(int frame,
 	}
 	return elem;
 }
+
 int ManifoldCache3D::unload() {
 	int sz = (int)loadedList.size();
 	for(auto pr:loadedList){
