@@ -44,7 +44,7 @@ void ReadManifoldFromFile(const std::string& file, Manifold3D& params) {
 	}
 }
 
-void WriteManifoldToFile(const std::string& file,Manifold3D& params) {
+void WriteManifoldToFile(const std::string& file,const Manifold3D& params) {
 
 	std::string ext = GetFileExtension(file);
 	if (ext == "json") {
@@ -63,7 +63,7 @@ void WriteManifoldToFile(const std::string& file,Manifold3D& params) {
 }
 
 
-void ReadmanifoldsFromFile(const std::string& file, std::vector<Manifold3D>& params) {
+void ReadManifoldsFromFile(const std::string& file, std::vector<Manifold3D>& params) {
 	std::string ext = GetFileExtension(file);
 	if (ext == "json") {
 		std::ifstream os(file);
@@ -80,7 +80,7 @@ void ReadmanifoldsFromFile(const std::string& file, std::vector<Manifold3D>& par
 	}
 }
 
-void WritemanifoldsToFile(const std::string& file,const std::vector<Manifold3D>& params) {
+void WriteManifoldsToFile(const std::string& file,const std::vector<Manifold3D>& params) {
 	std::string ext = GetFileExtension(file);
 	if (ext == "json") {
 		std::ofstream os(file);
