@@ -24,6 +24,23 @@
 #include "common/cereal/archives/xml.hpp"
 #include <fstream>
 namespace aly {
+template<class T> void WriteVectorToFileInternal(const std::string& file, const std::vector<T>& vector) {
+	std::string ext = GetFileExtension(file);
+	if (ext == "json") {
+		std::ofstream os(file);
+		cereal::JSONOutputArchive archive(os);
+		archive(cereal::make_nvp("vector", vector));
+	} else if (ext == "xml") {
+		std::ofstream os(file);
+		cereal::XMLOutputArchive archive(os);
+		archive(cereal::make_nvp("vector", vector));
+	} else {
+		uint64_t sz = vector.size();
+		std::ofstream os(file, std::ios::binary);
+		os.write((const char*) &sz, sizeof(uint64_t));
+		os.write((const char*) vector.data(), (std::streamsize) (sz * sizeof(T)));
+	}
+}
 template<class T, int C> void WriteVectorToFileInternal(const std::string& file, const Vector<T, C>& vector) {
 	std::string ext = GetFileExtension(file);
 	if (ext == "json") {
@@ -58,6 +75,48 @@ template<class T, int C> void ReadVectorFromFileInternal(const std::string& file
 		vector.resize(sz);
 		os.read((char*) vector.ptr(), (std::streamsize) (sz * vector.typeSize()));
 	}
+}
+template<class T> void ReadVectorFromFileInternal(const std::string& file, std::vector<T>& vector) {
+	std::string ext = GetFileExtension(file);
+	if (ext == "json") {
+		std::ifstream os(file);
+		cereal::JSONInputArchive archive(os);
+		archive(cereal::make_nvp("vector", vector));
+	} else if (ext == "xml") {
+		std::ifstream os(file);
+		cereal::XMLInputArchive archive(os);
+		archive(cereal::make_nvp("vector", vector));
+	} else {
+		std::ifstream os(file, std::ios::binary);
+		uint64_t sz = 0;
+		os.read((char*) &sz, sizeof(uint64_t));
+		vector.resize(sz);
+		os.read((char*) vector.data(), (std::streamsize) (sz * sizeof(T)));
+	}
+}
+void WriteVectorToFile(const std::string& file, const std::vector<float>& vector){
+	WriteVectorToFileInternal(file,vector);
+}
+void ReadVectorFromFile(const std::string& file, std::vector<float>& vector){
+	ReadVectorFromFileInternal(file,vector);
+}
+void WriteVectorToFile(const std::string& file, const std::vector<double>& vector){
+	WriteVectorToFileInternal(file,vector);
+}
+void ReadVectorFromFile(const std::string& file, std::vector<double>& vector){
+	ReadVectorFromFileInternal(file,vector);
+}
+void WriteVectorToFile(const std::string& file, const std::vector<int>& vector){
+	WriteVectorToFileInternal(file,vector);
+}
+void ReadVectorFromFile(const std::string& file, std::vector<int>& vector){
+	ReadVectorFromFileInternal(file,vector);
+}
+void WriteVectorToFile(const std::string& file, const std::vector<uint32_t>& vector){
+	WriteVectorToFileInternal(file,vector);
+}
+void ReadVectorFromFile(const std::string& file, std::vector<uint32_t>& vector){
+	ReadVectorFromFileInternal(file,vector);
 }
 void WriteVectorToFile(const std::string& file, const Vector<float, 4>& vector) {
 	WriteVectorToFileInternal(file, vector);

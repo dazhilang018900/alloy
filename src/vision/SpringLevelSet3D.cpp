@@ -1214,12 +1214,7 @@ bool SpringLevelSet3D::init() {
 		vel.resize(contour.particles.size());
 	}
 	contour.correspondence = contour.particles;
-	if(contour.particleTracking.size()==0){
-		contour.particleTracking.resize(contour.particles.size());
-		for (int n = 0; n < contour.particles.size(); n++) {
-			contour.particleTracking[n] = n;
-		}
-	}
+	contour.initTracking();
 	contour.updateNormals();
 	contour.setDirty(true);
 	if (cache.get() != nullptr) {
@@ -1279,16 +1274,12 @@ void SpringLevelSet3D::resample(int T,bool fixNorms){
 	contour.updateNormals();
 	if(fixNorms)fixNormals();
 	contour.setDirty(true);
-	updateTracking(3 * NEAREST_NEIGHBOR_DISTANCE);
 }
 bool SpringLevelSet3D::stepInternal() {
 	double remaining = simulationTimeStep;
 	double t = 0.0;
 	const int evolveIterations = 8;
-	contour.particleTracking.resize(contour.particles.size());
-	for (int n = 0; n < contour.particleTracking.size(); n++) {
-		contour.particleTracking[n] = n;
-	}
+	contour.initTracking();
 	do {
 		float effectiveTimeStep = advect(
 				std::min(0.333333f, (float) remaining));

@@ -361,6 +361,19 @@ public:
 		return {avg,vec<T, C>(aly::sqrt(var))};
 	}
 };
+
+void WriteVectorToFile(const std::string& file, const std::vector<float>& vector);
+void ReadVectorFromFile(const std::string& file, const std::vector<float>& vector);
+
+void WriteVectorToFile(const std::string& file, const std::vector<double>& vector);
+void ReadVectorFromFile(const std::string& file, const std::vector<double>& vector);
+
+void WriteVectorToFile(const std::string& file, const std::vector<int>& vector);
+void ReadVectorFromFile(const std::string& file, const std::vector<int>& vector);
+
+void WriteVectorToFile(const std::string& file, const std::vector<uint32_t>& vector);
+void ReadVectorFromFile(const std::string& file, const std::vector<uint32_t>& vector);
+
 void WriteVectorToFile(const std::string& file, const Vector<float, 4>& vector);
 void ReadVectorFromFile(const std::string& file, Vector<float, 4>& vector);
 
