@@ -1170,37 +1170,43 @@ void SpringLevelSet3D::setSpringls(const aly::Mesh& mesh) {
 		contour.meshType = MeshType::Quad;
 	}
 }
+void SpringLevelSet3D::setSpringls(const aly::Manifold3D& manifold) {
+	contour=manifold;
+}
+
 bool SpringLevelSet3D::init() {
 	ActiveManifold3D::init();
-	if (contour.meshType == MeshType::Triangle) {
-		int N = (int) contour.triIndexes.size();
-		contour.particles.resize(N);
-		contour.vertexes.resize(N * 3);
-		for (int n = 0; n < N; n++) {
-			uint3 tri = contour.triIndexes[n];
-			float3 v1 = contour.vertexLocations[tri.x];
-			float3 v2 = contour.vertexLocations[tri.y];
-			float3 v3 = contour.vertexLocations[tri.z];
-			contour.particles[n] = 0.33333f * (v1 + v2 + v3);
-			contour.vertexes[n * 3] = v1;
-			contour.vertexes[n * 3 + 1] = v2;
-			contour.vertexes[n * 3 + 2] = v3;
-		}
-	} else if (contour.meshType == MeshType::Quad) {
-		int N = (int) contour.quadIndexes.size();
-		contour.particles.resize(N);
-		contour.vertexes.resize(N * 4);
-		for (int n = 0; n < (int) contour.particles.size(); n++) {
-			uint4 quad = contour.quadIndexes[n];
-			float3 v1 = contour.vertexLocations[quad.x];
-			float3 v2 = contour.vertexLocations[quad.y];
-			float3 v3 = contour.vertexLocations[quad.z];
-			float3 v4 = contour.vertexLocations[quad.w];
-			contour.particles[n] = 0.25f * (v1 + v2 + v3 + v4);
-			contour.vertexes[n * 4] = v1;
-			contour.vertexes[n * 4 + 1] = v2;
-			contour.vertexes[n * 4 + 2] = v3;
-			contour.vertexes[n * 4 + 3] = v4;
+	if(contour.particles.size()==0||contour.vertexes.size()==0){
+		if (contour.meshType == MeshType::Triangle) {
+			int N = (int) contour.triIndexes.size();
+			contour.particles.resize(N);
+			contour.vertexes.resize(N * 3);
+			for (int n = 0; n < N; n++) {
+				uint3 tri = contour.triIndexes[n];
+				float3 v1 = contour.vertexLocations[tri.x];
+				float3 v2 = contour.vertexLocations[tri.y];
+				float3 v3 = contour.vertexLocations[tri.z];
+				contour.particles[n] = 0.33333f * (v1 + v2 + v3);
+				contour.vertexes[n * 3] = v1;
+				contour.vertexes[n * 3 + 1] = v2;
+				contour.vertexes[n * 3 + 2] = v3;
+			}
+		} else if (contour.meshType == MeshType::Quad) {
+			int N = (int) contour.quadIndexes.size();
+			contour.particles.resize(N);
+			contour.vertexes.resize(N * 4);
+			for (int n = 0; n < (int) contour.particles.size(); n++) {
+				uint4 quad = contour.quadIndexes[n];
+				float3 v1 = contour.vertexLocations[quad.x];
+				float3 v2 = contour.vertexLocations[quad.y];
+				float3 v3 = contour.vertexLocations[quad.z];
+				float3 v4 = contour.vertexLocations[quad.w];
+				contour.particles[n] = 0.25f * (v1 + v2 + v3 + v4);
+				contour.vertexes[n * 4] = v1;
+				contour.vertexes[n * 4 + 1] = v2;
+				contour.vertexes[n * 4 + 2] = v3;
+				contour.vertexes[n * 4 + 3] = v4;
+			}
 		}
 	}
 	for (Vector3f& vel : contour.velocities) {
@@ -1208,9 +1214,11 @@ bool SpringLevelSet3D::init() {
 		vel.resize(contour.particles.size());
 	}
 	contour.correspondence = contour.particles;
-	contour.particleTracking.resize(contour.particles.size());
-	for (int n = 0; n < contour.particles.size(); n++) {
-		contour.particleTracking[n] = n;
+	if(contour.particleTracking.size()==0){
+		contour.particleTracking.resize(contour.particles.size());
+		for (int n = 0; n < contour.particles.size(); n++) {
+			contour.particleTracking[n] = n;
+		}
 	}
 	contour.updateNormals();
 	contour.setDirty(true);

@@ -2532,6 +2532,7 @@ template<class T> vec<T, 3> TransformNormal(const matrix<T, 4, 4>& M,
 		const vec<T, 3>& v) {
 	return normalize((M * vec<T, 4>(v, T(0))).xyz());
 }
+
 float RandomUniform(float min, float max);
 int RandomUniform(int min, int max);
 double RandomUniform(double min, double max);

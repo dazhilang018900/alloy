@@ -97,6 +97,7 @@ namespace aly {
 		void stashSpringls(const std::string& file);
 		void stashCorrespondence(const std::string& file);
 		void stashIsoSurface(const std::string& mesh);
+		void stashPointCloud(const std::string& file);
 		std::string getFile() const {
 			return file;
 		}
@@ -113,6 +114,8 @@ namespace aly {
 			archive(CEREAL_NVP(file),CEREAL_NVP(meshType),CEREAL_NVP(vertexes),CEREAL_NVP(normals),CEREAL_NVP(colors), CEREAL_NVP(particles),CEREAL_NVP(particleTracking),CEREAL_NVP(vertexLocations),CEREAL_NVP(vertexNormals),CEREAL_NVP(triIndexes),CEREAL_NVP(quadIndexes),CEREAL_NVP(vertexLabels), CEREAL_NVP(particleLabels), CEREAL_NVP(correspondence),CEREAL_NVP(velocities));
 		}
 		void updateNormals();
+		void updateParticles();
+		void initTracking();
 		void operator=(const Manifold3D &c);
 		Manifold3D(const Manifold3D& c);
 	};

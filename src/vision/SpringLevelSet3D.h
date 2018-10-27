@@ -98,6 +98,7 @@ namespace aly {
 			resampleEnabled=e;
 		}
 		void setSpringls(const aly::Mesh& mesh);
+		void setSpringls(const aly::Manifold3D& manifold);
 		void setAdvection(const std::function<aly::double3(aly::double3,double,double)>& func);
 		SpringLevelSet3D(const std::shared_ptr<ManifoldCache3D>& cache = nullptr);
 		void setSpringls(const Vector3f& particles, const Vector3f& points);

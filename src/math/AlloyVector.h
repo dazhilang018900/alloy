@@ -397,6 +397,7 @@ void ReadVectorFromFile(const std::string& file, Vector<double, 2>& vector);
 void WriteVectorToFile(const std::string& file, const Vector<double, 1>& vector);
 void ReadVectorFromFile(const std::string& file, Vector<double, 1>& vector);
 
+
 template<class T, int C> void Transform(Vector<T, C>& im1, Vector<T, C>& im2,
 		const std::function<void(vec<T, C>&, vec<T, C>&)>& func) {
 	if (im1.size() != im2.size())

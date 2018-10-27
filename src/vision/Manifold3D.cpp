@@ -136,6 +136,35 @@ Manifold3D::Manifold3D(const Manifold3D& c) :
 	file = c.file;
 	particleLabels = c.particleLabels;
 }
+void Manifold3D::initTracking(){
+	particleTracking.resize(particles.size());
+	for (int n = 0; n < particles.size(); n++) {
+		particleTracking[n] = n;
+	}
+}
+void Manifold3D::updateParticles(){
+	int N=(int)vertexes.size();
+	if(meshType==MeshType::Triangle){
+		particles.resize(N/3);
+#pragma omp parallel for
+		for (int i = 0; i < N; i+=3) {
+			float3 v1 = vertexes[i];
+			float3 v2 = vertexes[i+1];
+			float3 v3 = vertexes[i+2];
+			particles[i/3]=0.333333f*(v1+v2+v3);
+		}
+	} else if(meshType==MeshType::Quad){
+		particles.resize(N/4);
+#pragma omp parallel for
+		for (int i = 0; i < N; i+=4) {
+			float3 v1 = vertexes[i];
+			float3 v2 = vertexes[i+1];
+			float3 v3 = vertexes[i+2];
+			float3 v4 = vertexes[i+3];
+			particles[i/4]=0.333333f*(v1+v2+v3+v4);
+		}
+	}
+}
 void Manifold3D::updateNormals() {
 	int N=(int)vertexes.size();
 	normals.resize(particles.size());
@@ -190,6 +219,26 @@ Manifold3D::~Manifold3D() {
 void Manifold3D::stashCorrespondence(const std::string& file){
 	Mesh mesh;
 	mesh.vertexLocations=correspondence;
+	WriteMeshToFile(file,mesh);
+}
+void Manifold3D::stashPointCloud(const std::string& file){
+	Mesh mesh;
+	mesh.vertexLocations=particles;
+	mesh.vertexColors.resize(particleTracking.size());
+	mesh.vertexNormals.resize(particleTracking.size());
+	for(int n=0;n<particleTracking.size();n++){
+		int vertId=particleTracking[n];
+		if(vertId>=0){
+			int r=uint(vertId) & uint(0x00000FFF);
+			int g=(uint(vertId) & uint(0x00FFF000)) >> uint(12);
+			int b=(uint(vertId) & uint(0xFF000000)) >> uint(24);
+			mesh.vertexNormals[n]=float3(r,g,b);
+			mesh.vertexColors[n]=HSVAtoRGBAf(HSVA((vertId%1024)/1024.0f,0.4f+0.6f*(vertId%128)/128.0f,0.25f+0.75f*(vertId%4)/4.0f,1.0f));
+		} else {
+			mesh.vertexNormals[n]=float3(0,0,0);
+			mesh.vertexColors[n]=RGBAf(1.0f);
+		}
+	}
 	WriteMeshToFile(file,mesh);
 }
 void Manifold3D::stashSpringls(const std::string& file){
