@@ -25,7 +25,7 @@ void CacheElement3D::load() {
 	std::lock_guard<std::mutex> lockMe(accessLock);
 	if (!loaded) {
 		contour.reset(new Manifold3D());
-		ReadContourFromFile(contourFile, *contour);
+		ReadManifoldFromFile(contourFile, *contour);
 		//std::cout << "Load: " << contour->getFile() << std::endl;
 		loaded = true;
 	}
@@ -34,7 +34,7 @@ void CacheElement3D::unload() {
 	std::lock_guard<std::mutex> lockMe(accessLock);
 	if (loaded) {
 		if (writeOnce) {
-			WriteContourToFile(contour->getFile(), *contour);
+			WriteManifoldToFile(contour->getFile(), *contour);
 			//std::cout<<"Unload: "<<contour->getFile()<<std::endl;
 			writeOnce = false;
 		}

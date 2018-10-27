@@ -27,40 +27,74 @@
 
 namespace aly {
 
-void ReadContourFromFile(const std::string& file, Manifold3D& params) {
+void ReadManifoldFromFile(const std::string& file, Manifold3D& params) {
 	std::string ext = GetFileExtension(file);
 	if (ext == "json") {
 		std::ifstream os(file);
 		cereal::JSONInputArchive archive(os);
-		archive(cereal::make_nvp("surface", params));
+		archive(cereal::make_nvp("manifold", params));
 	} else if (ext == "xml") {
 		std::ifstream os(file);
 		cereal::XMLInputArchive archive(os);
-		archive(cereal::make_nvp("surface", params));
+		archive(cereal::make_nvp("manifold", params));
 	} else {
 		std::ifstream os(file, std::ios::binary);
 		cereal::PortableBinaryInputArchive archive(os);
-		archive(cereal::make_nvp("surface", params));
+		archive(cereal::make_nvp("manifold", params));
 	}
 }
 
-void WriteContourToFile(const std::string& file, Manifold3D& params) {
-	params.setFile(file);
+void WriteManifoldToFile(const std::string& file,Manifold3D& params) {
+
 	std::string ext = GetFileExtension(file);
 	if (ext == "json") {
 		std::ofstream os(file);
 		cereal::JSONOutputArchive archive(os);
-		archive(cereal::make_nvp("surface", params));
+		archive(cereal::make_nvp("manifold", params));
 	} else if (ext == "xml") {
 		std::ofstream os(file);
 		cereal::XMLOutputArchive archive(os);
-		archive(cereal::make_nvp("surface", params));
+		archive(cereal::make_nvp("manifold", params));
 	} else {
 		std::ofstream os(file, std::ios::binary);
 		cereal::PortableBinaryOutputArchive archive(os);
-		archive(cereal::make_nvp("surface", params));
+		archive(cereal::make_nvp("manifold", params));
 	}
-	params.setFile(file);
+}
+
+
+void ReadmanifoldsFromFile(const std::string& file, std::vector<Manifold3D>& params) {
+	std::string ext = GetFileExtension(file);
+	if (ext == "json") {
+		std::ifstream os(file);
+		cereal::JSONInputArchive archive(os);
+		archive(cereal::make_nvp("manifolds", params));
+	} else if (ext == "xml") {
+		std::ifstream os(file);
+		cereal::XMLInputArchive archive(os);
+		archive(cereal::make_nvp("manifolds", params));
+	} else {
+		std::ifstream os(file, std::ios::binary);
+		cereal::PortableBinaryInputArchive archive(os);
+		archive(cereal::make_nvp("manifolds", params));
+	}
+}
+
+void WritemanifoldsToFile(const std::string& file,const std::vector<Manifold3D>& params) {
+	std::string ext = GetFileExtension(file);
+	if (ext == "json") {
+		std::ofstream os(file);
+		cereal::JSONOutputArchive archive(os);
+		archive(cereal::make_nvp("manifolds", params));
+	} else if (ext == "xml") {
+		std::ofstream os(file);
+		cereal::XMLOutputArchive archive(os);
+		archive(cereal::make_nvp("manifolds", params));
+	} else {
+		std::ofstream os(file, std::ios::binary);
+		cereal::PortableBinaryOutputArchive archive(os);
+		archive(cereal::make_nvp("manifolds", params));
+	}
 }
 const float3i& Breadcrumbs3D::operator()(const size_t t,const size_t i) const {
 	return history[t][i];

@@ -119,8 +119,10 @@ namespace aly {
 		void operator=(const Manifold3D &c);
 		Manifold3D(const Manifold3D& c);
 	};
-	void ReadContourFromFile(const std::string& file, Manifold3D& contour);
-	void WriteContourToFile(const std::string& file, Manifold3D& contour);
+	void ReadManifoldFromFile(const std::string& file, Manifold3D& contour);
+	void WriteManifoldToFile(const std::string& file,const Manifold3D& contour);
+	void ReadManifoldsFromFile(const std::string& file, std::vector<Manifold3D>& contour);
+	void WriteManifoldsToFile(const std::string& file,const std::vector<Manifold3D>& contour);
 
 }
 #endif
