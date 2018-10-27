@@ -642,6 +642,29 @@ void GLMesh::update() {
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 			}
 			CHECK_GL_ERROR();
+		}  else if(mesh.type==GLMesh::PrimitiveType::QUADS&&mesh.vertexColors.size()%4==0){
+			size_t offset = 0;
+			std::vector<float4> quads[4];
+			for (int n = 0; n < 4; n++) {
+				quads[n].resize(mesh.vertexColors.size()/4);
+				if (glIsBuffer(quadColorBuffer[n]) == GL_TRUE)
+					glDeleteBuffers(1, &quadColorBuffer[n]);
+				glGenBuffers(1, &quadColorBuffer[n]);
+			}
+			for (size_t n = 0; n < mesh.vertexColors.size(); n++) {
+				quads[n%4][n/4] = mesh.vertexColors[n];
+			}
+			for (int n = 0; n < 4; n++) {
+				if (glIsBuffer(quadColorBuffer[n]) == GL_TRUE)
+					glDeleteBuffers(1, &quadColorBuffer[n]);
+				glGenBuffers(1, &quadColorBuffer[n]);
+				glBindBuffer(GL_ARRAY_BUFFER, quadColorBuffer[n]);
+				glBufferData(GL_ARRAY_BUFFER,
+						sizeof(GLfloat) * 4 * quads[n].size(), quads[n].data(),
+						GL_STATIC_DRAW);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+			}
+			CHECK_GL_ERROR();
 		}
 		if (mesh.triIndexes.size() > 0) {
 			size_t offset = 0;
@@ -678,6 +701,30 @@ void GLMesh::update() {
 				glBindBuffer(GL_ARRAY_BUFFER, 0);
 			}
 			CHECK_GL_ERROR();
+		} else if(mesh.type==GLMesh::PrimitiveType::TRIANGLES&&mesh.vertexColors.size()%3==0){
+			size_t offset = 0;
+			std::vector<float4> tris[3];
+			for (int n = 0; n < 3; n++) {
+				tris[n].resize(mesh.vertexColors.size()/3);
+				if (glIsBuffer(triColorBuffer[n]) == GL_TRUE)
+					glDeleteBuffers(1, &triColorBuffer[n]);
+				glGenBuffers(1, &triColorBuffer[n]);
+			}
+			for (size_t n = 0; n < mesh.vertexColors.size(); n++) {
+				tris[n%3][n/3] = mesh.vertexColors[n];
+			}
+			for (int n = 0; n < 3; n++) {
+				if (glIsBuffer(triColorBuffer[n]) == GL_TRUE)
+					glDeleteBuffers(1, &triColorBuffer[n]);
+				glGenBuffers(1, &triColorBuffer[n]);
+				glBindBuffer(GL_ARRAY_BUFFER, triColorBuffer[n]);
+				glBufferData(GL_ARRAY_BUFFER,
+						sizeof(GLfloat) * 4 * tris[n].size(), tris[n].data(),
+						GL_STATIC_DRAW);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+			}
+			CHECK_GL_ERROR();
+			triIndexCount = (GLuint) (mesh.vertexLocations.size()/3);
 		}
 		if (mesh.lineIndexes.size() > 0) {
 			size_t offset = 0;
@@ -702,6 +749,29 @@ void GLMesh::update() {
 						lines[n][offset] = mesh.vertexColors[offset * 2 + n];
 					}
 				}
+			}
+			for (int n = 0; n < 2; n++) {
+				if (glIsBuffer(lineColorBuffer[n]) == GL_TRUE)
+					glDeleteBuffers(1, &lineColorBuffer[n]);
+				glGenBuffers(1, &lineColorBuffer[n]);
+				glBindBuffer(GL_ARRAY_BUFFER, lineColorBuffer[n]);
+				glBufferData(GL_ARRAY_BUFFER,
+						sizeof(GLfloat) * 4 * lines[n].size(), lines[n].data(),
+						GL_STATIC_DRAW);
+				glBindBuffer(GL_ARRAY_BUFFER, 0);
+			}
+			CHECK_GL_ERROR();
+		} else if(mesh.type==GLMesh::PrimitiveType::LINES&&mesh.vertexColors.size()%2==0){
+			size_t offset = 0;
+			std::vector<float4> lines[2];
+			for (int n = 0; n < 2; n++) {
+				lines[n].resize(mesh.vertexColors.size()/2);
+				if (glIsBuffer(lineColorBuffer[n]) == GL_TRUE)
+					glDeleteBuffers(1, &lineColorBuffer[n]);
+				glGenBuffers(1, &lineColorBuffer[n]);
+			}
+			for (size_t n = 0; n < mesh.vertexColors.size(); n++) {
+				lines[n%2][n/2] = mesh.vertexColors[n];
 			}
 			for (int n = 0; n < 2; n++) {
 				if (glIsBuffer(lineColorBuffer[n]) == GL_TRUE)
