@@ -29,6 +29,7 @@ namespace aly {
 	class CacheElement3D {
 	protected:
 		bool loaded;
+		bool deleteOnExit;
 		bool writeOnce;
 		std::string contourFile;
 		std::shared_ptr<Manifold3D> contour;
@@ -39,7 +40,7 @@ namespace aly {
 			std::lock_guard<std::mutex> lockMe(accessLock);
 			return loaded;
 		}
-		CacheElement3D():loaded(false), writeOnce(true){
+		CacheElement3D():loaded(false),deleteOnExit(true), writeOnce(true){
 		}
 		~CacheElement3D();
 		std::string getFile() const {
@@ -47,8 +48,9 @@ namespace aly {
 		}
 		void load();
 		void unload();
-		void set(const Manifold3D& springl);
-		std::shared_ptr<Manifold3D> getContour();
+		void set(const std::string& file);
+		void set(const Manifold3D& springl,const std::string& file);
+		std::shared_ptr<Manifold3D> getManifold();
 	};
 	struct CacheCompare3D {
 		inline bool operator() (const std::pair<uint64_t, int>& lhs, const std::pair<uint64_t, int>& rhs) const {
@@ -69,12 +71,63 @@ namespace aly {
 		void setMaxElements(int e){
 			maxElements=e;
 		}
+		std::shared_ptr<CacheElement3D> set(int frame, const std::string& file);
 		std::shared_ptr<CacheElement3D> set(int frame, const Manifold3D& springl);
 		std::shared_ptr<CacheElement3D> get(int frame);
 		int unload();
 		void clear();
 	};
 
+
+	class CacheCollectionElement3D {
+		protected:
+			bool loaded;
+			bool deleteOnExit;
+			bool writeOnce;
+			std::string contourFile;
+			std::shared_ptr<std::vector<Manifold3D>> contour;
+			std::mutex accessLock;
+		public:
+			bool isLoaded() {
+				std::lock_guard<std::mutex> lockMe(accessLock);
+				return loaded;
+			}
+			CacheCollectionElement3D():loaded(false),deleteOnExit(true), writeOnce(true){
+			}
+			~CacheCollectionElement3D();
+			std::string getFile() const {
+				return contourFile;
+			}
+			void load();
+			void unload();
+			void set(const std::string& file);
+			void set(const std::vector<Manifold3D>& springl,const std::string& file);
+			std::shared_ptr<std::vector<Manifold3D>> getManifold();
+		};
+		struct CacheCollectionCompare3D {
+			inline bool operator() (const std::pair<uint64_t, int>& lhs, const std::pair<uint64_t, int>& rhs) const {
+				return lhs.first < rhs.first;
+			}
+		};
+		class ManifoldCollectionCache3D {
+		protected:
+			std::map<int, std::shared_ptr<CacheCollectionElement3D>> cache;
+			std::set<std::pair<uint64_t, int>, CacheCollectionCompare3D> loadedList;
+			std::mutex accessLock;
+			int maxElements;
+			uint64_t counter;
+		public:
+			ManifoldCollectionCache3D(int elem=32):maxElements(elem),counter(0){
+			}
+			void setMaxElements(int e){
+				maxElements=e;
+			}
+			std::shared_ptr<CacheCollectionElement3D> set(int frame, const std::vector<Manifold3D>& springl);
+			std::shared_ptr<CacheCollectionElement3D> set(int frame, const std::string& file);
+			std::shared_ptr<CacheCollectionElement3D> get(int frame);
+			int unload();
+			void clear();
+		};
 }
 
 #endif /* INCLUDE_SpringlCache_H_ */

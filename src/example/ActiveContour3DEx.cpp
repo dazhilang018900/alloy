@@ -215,7 +215,7 @@ void ActiveContour3DEx::draw(AlloyContext* context) {
 					currentTime);
 			Manifold3D* contour;
 			if (elem.get() != nullptr) {
-				contour = elem->getContour().get();
+				contour = elem->getManifold().get();
 			} else {
 				contour = simulation.getManifold();
 			}

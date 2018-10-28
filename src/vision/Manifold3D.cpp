@@ -43,9 +43,7 @@ void ReadManifoldFromFile(const std::string& file, Manifold3D& params) {
 		archive(cereal::make_nvp("manifold", params));
 	}
 }
-
 void WriteManifoldToFile(const std::string& file,const Manifold3D& params) {
-
 	std::string ext = GetFileExtension(file);
 	if (ext == "json") {
 		std::ofstream os(file);
@@ -61,8 +59,6 @@ void WriteManifoldToFile(const std::string& file,const Manifold3D& params) {
 		archive(cereal::make_nvp("manifold", params));
 	}
 }
-
-
 void ReadManifoldsFromFile(const std::string& file, std::vector<Manifold3D>& params) {
 	std::string ext = GetFileExtension(file);
 	if (ext == "json") {
@@ -257,8 +253,8 @@ void Manifold3D::stashCorrespondence(const std::string& file){
 }
 void Manifold3D::stashPointCloud(const std::string& file){
 	Mesh mesh;
-	mesh.vertexLocations=particles;
-	mesh.vertexColors.resize(particleTracking.size());
+	mesh.vertexLocations = particles;
+	mesh.vertexColors = colors;
 	mesh.vertexNormals.resize(particleTracking.size());
 	for(int n=0;n<particleTracking.size();n++){
 		int vertId=particleTracking[n];
@@ -267,10 +263,8 @@ void Manifold3D::stashPointCloud(const std::string& file){
 			int g=(uint(vertId) & uint(0x00FFF000)) >> uint(12);
 			int b=(uint(vertId) & uint(0xFF000000)) >> uint(24);
 			mesh.vertexNormals[n]=float3(r,g,b);
-			mesh.vertexColors[n]=HSVAtoRGBAf(HSVA((vertId%1024)/1024.0f,0.4f+0.6f*(vertId%128)/128.0f,0.25f+0.75f*(vertId%4)/4.0f,1.0f));
 		} else {
-			mesh.vertexNormals[n]=float3(0,0,0);
-			mesh.vertexColors[n]=RGBAf(1.0f);
+			mesh.vertexNormals[n]=float3(-1,-1,-1);
 		}
 	}
 	WriteMeshToFile(file,mesh);

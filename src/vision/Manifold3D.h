@@ -94,13 +94,13 @@ namespace aly {
 		}
 		void update();
 		void draw();
+		std::string getFile() const {
+			return file;
+		}
 		void stashSpringls(const std::string& file);
 		void stashCorrespondence(const std::string& file);
 		void stashIsoSurface(const std::string& mesh);
 		void stashPointCloud(const std::string& file);
-		std::string getFile() const {
-			return file;
-		}
 		~Manifold3D();
 		Manifold3D(bool onScreen=true,const std::shared_ptr<AlloyContext>& context=AlloyDefaultContext());
 		void setFile(const std::string& file) {

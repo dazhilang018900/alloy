@@ -26,7 +26,6 @@ void CacheElement3D::load() {
 	if (!loaded) {
 		contour.reset(new Manifold3D());
 		ReadManifoldFromFile(contourFile, *contour);
-		//std::cout << "Load: " << contour->getFile() << std::endl;
 		loaded = true;
 	}
 }
@@ -34,21 +33,28 @@ void CacheElement3D::unload() {
 	std::lock_guard<std::mutex> lockMe(accessLock);
 	if (loaded) {
 		if (writeOnce) {
-			WriteManifoldToFile(contour->getFile(), *contour);
-			//std::cout<<"Unload: "<<contour->getFile()<<std::endl;
+			WriteManifoldToFile(contourFile, *contour);
 			writeOnce = false;
 		}
 		contour.reset();
 		loaded = false;
 	}
 }
-void CacheElement3D::set(const Manifold3D& springl) {
+void CacheElement3D::set(const Manifold3D& springl,const std::string& file) {
 	contour.reset(new Manifold3D());
 	*contour = springl;
-	contourFile = springl.getFile();
+	contourFile = file;
 	loaded = true;
+	deleteOnExit=true;
 }
-std::shared_ptr<Manifold3D> CacheElement3D::getContour() {
+void CacheElement3D::set(const std::string& file) {
+	contour.reset(new Manifold3D());
+	contourFile = file;
+	loaded = false;
+	writeOnce=false;
+	deleteOnExit=false;
+}
+std::shared_ptr<Manifold3D> CacheElement3D::getManifold() {
 	load();
 	return contour;
 }
@@ -63,7 +69,7 @@ std::shared_ptr<CacheElement3D> ManifoldCache3D::set(int frame,
 		elem = std::shared_ptr<CacheElement3D>(new CacheElement3D());
 		cache[frame] = elem;
 	}
-	elem->set(springl);
+	elem->set(springl,MakeWorkingDirectoryFile(MakeString()<<"manifold"<<std::setw(5)<<std::setfill('0')<<frame<<".cache"));
 	if (elem->isLoaded()) {
 		while ((int) loadedList.size() >= maxElements) {
 			cache[loadedList.begin()->second]->unload();
@@ -74,6 +80,27 @@ std::shared_ptr<CacheElement3D> ManifoldCache3D::set(int frame,
 	return elem;
 }
 
+
+std::shared_ptr<CacheElement3D> ManifoldCache3D::set(int frame,const std::string& file) {
+	std::lock_guard<std::mutex> lockMe(accessLock);
+	auto iter = cache.find(frame);
+	std::shared_ptr<CacheElement3D> elem;
+	if (iter != cache.end()) {
+		elem = iter->second;
+	} else {
+		elem = std::shared_ptr<CacheElement3D>(new CacheElement3D());
+		cache[frame] = elem;
+	}
+	elem->set(file);
+	if (elem->isLoaded()) {
+		while ((int) loadedList.size() >= maxElements) {
+			cache[loadedList.begin()->second]->unload();
+			loadedList.erase(loadedList.begin());
+		}
+		loadedList.insert(std::pair<uint64_t, int>(counter++, frame));
+	}
+	return elem;
+}
 int ManifoldCache3D::unload() {
 	int sz = (int)loadedList.size();
 	for(auto pr:loadedList){
@@ -101,7 +128,7 @@ std::shared_ptr<CacheElement3D> ManifoldCache3D::get(int frame) {
 	}
 }
 CacheElement3D::~CacheElement3D() {
-	if (FileExists(contourFile)) {
+	if (deleteOnExit&&FileExists(contourFile)) {
 		RemoveFile(contourFile);
 		std::string imageFile = GetFileWithoutExtension(contourFile) + ".png";
 		if (FileExists(imageFile))
@@ -109,6 +136,123 @@ CacheElement3D::~CacheElement3D() {
 	}
 }
 void ManifoldCache3D::clear() {
+	std::lock_guard<std::mutex> lockMe(accessLock);
+	counter = 0;
+	loadedList.clear();
+	cache.clear();
+
+}
+
+
+
+
+void CacheCollectionElement3D::load() {
+	std::lock_guard<std::mutex> lockMe(accessLock);
+	if (!loaded) {
+		contour.reset(new std::vector<Manifold3D>());
+		ReadManifoldsFromFile(contourFile, *contour);
+		loaded = true;
+	}
+}
+void CacheCollectionElement3D::unload() {
+	std::lock_guard<std::mutex> lockMe(accessLock);
+	if (loaded) {
+		if (writeOnce) {
+			WriteManifoldsToFile(contourFile, *contour);
+			writeOnce = false;
+		}
+		contour.reset();
+		loaded = false;
+	}
+}
+void CacheCollectionElement3D::set(const std::vector<Manifold3D>& springl, const std::string& file) {
+	contour.reset(new std::vector<Manifold3D>());
+	*contour = springl;
+	contourFile = file;
+	deleteOnExit=true;
+	loaded = true;
+}
+void CacheCollectionElement3D::set(const std::string& file) {
+	contour.reset(new std::vector<Manifold3D>());
+	contourFile = file;
+	writeOnce=false;
+	deleteOnExit=false;
+	loaded = false;
+}
+std::shared_ptr<std::vector<Manifold3D>> CacheCollectionElement3D::getManifold() {
+	load();
+	return contour;
+}
+std::shared_ptr<CacheCollectionElement3D> ManifoldCollectionCache3D::set(int frame,const std::string& file) {
+	std::lock_guard<std::mutex> lockMe(accessLock);
+	auto iter = cache.find(frame);
+	std::shared_ptr<CacheCollectionElement3D> elem;
+	if (iter != cache.end()) {
+		elem = iter->second;
+	} else {
+		elem = std::shared_ptr<CacheCollectionElement3D>(new CacheCollectionElement3D());
+		cache[frame] = elem;
+	}
+	elem->set(file);
+	return elem;
+}
+std::shared_ptr<CacheCollectionElement3D> ManifoldCollectionCache3D::set(int frame,
+		const std::vector<Manifold3D>& springl) {
+	std::lock_guard<std::mutex> lockMe(accessLock);
+	auto iter = cache.find(frame);
+	std::shared_ptr<CacheCollectionElement3D> elem;
+	if (iter != cache.end()) {
+		elem = iter->second;
+	} else {
+		elem = std::shared_ptr<CacheCollectionElement3D>(new CacheCollectionElement3D());
+		cache[frame] = elem;
+	}
+	elem->set(springl,MakeWorkingDirectoryFile(MakeString()<<"manifold"<<std::setw(5)<<std::setfill('0')<<frame<<".cache"));
+	if (elem->isLoaded()) {
+		while ((int) loadedList.size() >= maxElements) {
+			cache[loadedList.begin()->second]->unload();
+			loadedList.erase(loadedList.begin());
+		}
+		loadedList.insert(std::pair<uint64_t, int>(counter++, frame));
+	}
+	return elem;
+}
+
+int ManifoldCollectionCache3D::unload() {
+	int sz = (int)loadedList.size();
+	for(auto pr:loadedList){
+		cache[pr.second]->unload();
+	}
+	loadedList.clear();
+	return sz;
+}
+std::shared_ptr<CacheCollectionElement3D> ManifoldCollectionCache3D::get(int frame) {
+	std::lock_guard<std::mutex> lockMe(accessLock);
+	auto iter = cache.find(frame);
+	if (iter != cache.end()) {
+		std::shared_ptr<CacheCollectionElement3D> elem = iter->second;
+		if (!elem->isLoaded()) {
+			while ((int) loadedList.size() >= maxElements) {
+				cache[loadedList.begin()->second]->unload();
+				loadedList.erase(loadedList.begin());
+			}
+			elem->load();
+			loadedList.insert(std::pair<uint64_t, int>(counter++, frame));
+		}
+		return elem;
+	} else {
+		return std::shared_ptr<CacheCollectionElement3D>();
+	}
+}
+CacheCollectionElement3D::~CacheCollectionElement3D() {
+	if (deleteOnExit&&FileExists(contourFile)) {
+		RemoveFile(contourFile);
+		std::string imageFile = GetFileWithoutExtension(contourFile) + ".png";
+		if (FileExists(imageFile))
+			RemoveFile(imageFile);
+	}
+}
+void ManifoldCollectionCache3D::clear() {
 	std::lock_guard<std::mutex> lockMe(accessLock);
 	counter = 0;
 	loadedList.clear();
