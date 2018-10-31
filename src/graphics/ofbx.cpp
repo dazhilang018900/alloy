@@ -517,12 +517,12 @@ static bool decompress(const u8* in, size_t in_size, u8* out, size_t out_size) {
 	stream.avail_out = (int) out_size;
 	stream.next_out = out;
 
-	int status = mz_inflate(&stream, Z_SYNC_FLUSH);
+	int status = mz_inflate(&stream, MZ_SYNC_FLUSH);
 
-	if (status != Z_STREAM_END)
+	if (status != MZ_STREAM_END)
 		return false;
 
-	return mz_inflateEnd(&stream) == Z_OK;
+	return mz_inflateEnd(&stream) == MZ_OK;
 }
 
 template<typename T> static OptionalError<T> read(Cursor* cursor) {
