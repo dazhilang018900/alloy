@@ -2520,7 +2520,7 @@ for (int y = 0; y < numBlocks; y++) {
 		std::vector<unsigned char> outBuf(dataWidth * numLines * pixelDataSize);
 
 		unsigned long dstLen = (unsigned long)outBuf.size();
-		aly::DecompressZip(reinterpret_cast<unsigned char *>(&outBuf.at(0)), dstLen,dataPtr + 8, dataLen);
+		aly::DecompressZipEXR(reinterpret_cast<unsigned char *>(&outBuf.at(0)), dstLen,dataPtr + 8, dataLen);
 
 		bool isBigEndian = IsBigEndian();
 
@@ -2911,7 +2911,7 @@ for (int i = 0; i < numBlocks; i++) {
 			mz_compressBound(buf.size() * sizeof(unsigned short)));
 	unsigned long long outSize = block.size();
 
-	CompressZip(&block.at(0), outSize,
+	aly::CompressZipEXR(&block.at(0), outSize,
 			reinterpret_cast<const unsigned char *>(&buf.at(0)),
 			buf.size() * sizeof(unsigned short));
 
@@ -3216,7 +3216,7 @@ for (int i = 0; i < numBlocks; i++) {
 	std::vector<unsigned char> block(mz_compressBound(::mz_ulong(buf.size())));
 	unsigned long long outSize = (unsigned long long)block.size();
 
-	aly::CompressZip(&block.at(0), outSize,
+	aly::CompressZipEXR(&block.at(0), outSize,
 			reinterpret_cast<const unsigned char *>(&buf.at(0)), (unsigned long)buf.size());
 
 	// 4 byte: scan line
@@ -3542,7 +3542,7 @@ for (int y = 0; y < numBlocks; y++) {
 	// decode pixel offset table.
 	{
 		unsigned long dstLen = (unsigned long )(pixelOffsetTable.size() * sizeof(int));
-		aly::DecompressZip(
+		aly::DecompressZipEXR(
 				reinterpret_cast<unsigned char *>(&pixelOffsetTable.at(0)),
 				dstLen, dataPtr + 28, (unsigned long)packedOffsetTableSize);
 
@@ -3557,7 +3557,7 @@ for (int y = 0; y < numBlocks; y++) {
 	// decode sample data.
 	{
 		unsigned long dstLen = (unsigned long)unpackedSampleDataSize;
-		aly::DecompressZip(reinterpret_cast<unsigned char *>(&sampleData.at(0)),
+		aly::DecompressZipEXR(reinterpret_cast<unsigned char *>(&sampleData.at(0)),
 				dstLen, dataPtr + 28 + packedOffsetTableSize,
 			(unsigned long)packedSampleDataSize);
 		assert(dstLen == (unsigned long )unpackedSampleDataSize);
@@ -3780,7 +3780,7 @@ for (int y = 0; y < numBlocks; y++) {
 	// decode pixel offset table.
 	{
 		unsigned long dstLen = pixelOffsetTable.size() * sizeof(int);
-		DecompressZip(reinterpret_cast<unsigned char *>(&pixelOffsetTable.at(0)),
+		aly::DecompressZipEXR(reinterpret_cast<unsigned char *>(&pixelOffsetTable.at(0)),
 				dstLen, dataPtr + 28, packedOffsetTableSize);
 
 		assert(dstLen == pixelOffsetTable.size() * sizeof(int));
@@ -3803,7 +3803,7 @@ for (int y = 0; y < numBlocks; y++) {
 		unsigned long dstLen = unpackedSampleDataSize;
 		// printf("dstLen = %d\n", dstLen);
 		// printf("srcLen = %d\n", packedSampleDataSize);
-		DecompressZip(reinterpret_cast<unsigned char *>(&sampleData.at(0)),
+		aly::DecompressZipEXR(reinterpret_cast<unsigned char *>(&sampleData.at(0)),
 				dstLen, dataPtr + 28 + packedOffsetTableSize,
 				packedSampleDataSize);
 		assert(dstLen == unpackedSampleDataSize);

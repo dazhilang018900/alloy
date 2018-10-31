@@ -112,11 +112,18 @@
  */
 #ifndef __MINIZ_H__
 #define __MINIZ_H__
+
+#include <stddef.h>
+#include <stdint.h>
 namespace aly {
-void DecompressZip(unsigned char *dst, unsigned long &uncompressedSize,
-		const unsigned char *src, unsigned long srcSize);
-void CompressZip(unsigned char *dst, unsigned long long &compressedSize,
-		const unsigned char *src, unsigned long srcSize);
+void DecompressZip(unsigned char *dst, uint32_t &uncompressedSize,
+		const unsigned char *src, uint32_t srcSize);
+void CompressZip(unsigned char *dst, uint32_t &compressedSize,
+		const unsigned char *src, uint32_t srcSize);
+void CompressZipEXR(unsigned char *dst, unsigned long long &compressedSize,
+	const unsigned char *src, unsigned long srcSize);
+void DecompressZipEXR(unsigned char *dst, unsigned long &uncompressedSize,
+	const unsigned char *src, unsigned long srcSize) ;
 }
 
 /* Defines to completely disable specific portions of miniz.c: 
@@ -153,7 +160,6 @@ void CompressZip(unsigned char *dst, unsigned long long &compressedSize,
 #define MINIZ_NO_TIME
 #endif
 
-#include <stddef.h>
 
 #if !defined(MINIZ_NO_TIME) && !defined(MINIZ_NO_ARCHIVE_APIS)
 #include <time.h>

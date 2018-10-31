@@ -342,7 +342,7 @@ int mz_compress2(unsigned char *pDest, mz_ulong *pDest_len,
 int mz_compress(unsigned char *pDest, mz_ulong *pDest_len,
 		const unsigned char *pSource, mz_ulong source_len) {
 	return mz_compress2(pDest, pDest_len, pSource, source_len,
-			MZ_DEFAULT_COMPRESSION);
+			MZ_BEST_COMPRESSION);
 }
 
 mz_ulong mz_compressBound(mz_ulong source_len) {
@@ -7468,9 +7468,23 @@ return MZ_FALSE;
 
 #include <vector>
 #include <stdint.h>
-
 namespace aly {
-void CompressZip(unsigned char *dst, unsigned long long &compressedSize,
+void CompressZip(unsigned char *dst, uint32_t &compressedSize,
+	const unsigned char *src, uint32_t srcSize) {
+	mz_ulong outSize = mz_compressBound(srcSize);
+	int ret = mz_compress(dst, &outSize, (const unsigned char *) src, srcSize);
+	assert(ret == MZ_OK);
+	compressedSize = outSize;
+}
+void DecompressZip(unsigned char *dst, uint32_t &uncompressedSize,
+	const unsigned char *src, uint32_t srcSize) {
+	mz_ulong inSize=uncompressedSize;
+	int ret = mz_uncompress(dst, &inSize, src, srcSize);
+	uncompressedSize=inSize;
+	assert(ret == MZ_OK);
+}
+
+void CompressZipEXR(unsigned char *dst, unsigned long long &compressedSize,
 	const unsigned char *src, unsigned long srcSize) {
 std::vector<unsigned char> tmpBuf(srcSize);
 
@@ -7531,7 +7545,7 @@ assert(ret == MZ_OK);
 compressedSize = outSize;
 }
 
-void DecompressZip(unsigned char *dst, unsigned long &uncompressedSize,
+void DecompressZipEXR(unsigned char *dst, unsigned long &uncompressedSize,
 	const unsigned char *src, unsigned long srcSize) {
 std::vector<unsigned char> tmpBuf(uncompressedSize);
 int ret = mz_uncompress(&tmpBuf.at(0), &uncompressedSize, src, srcSize);
