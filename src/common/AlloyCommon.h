@@ -22,8 +22,6 @@
 #ifndef ALLOYCOMMON_H_
 #define ALLOYCOMMON_H_
 #include "system/tinyformat.h"
-#include "common/lzf.h"
-#include "common/miniz.h"
 #include <iostream>
 #include <string>
 #include <sstream>
@@ -32,6 +30,7 @@
 #include <vector>
 #include <locale>
 #include <memory>
+#include <AlloyCompression.h>
 #define ALLOYERROR(err) throw std::runtime_error(aly::MakeString()<<"Runtime error in "<<std::string(__FILE__)<<" on line "<<__LINE__<<": "<<err);
 #define ALLOYWARNING(err) std::cerr<<"Warning in "<<std::string(__FILE__)<<" on line "<<__LINE__<<": "<<err;
 
