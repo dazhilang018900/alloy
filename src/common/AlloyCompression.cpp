@@ -50,7 +50,7 @@ size_t Compress(const unsigned char* input, size_t input_sz,
 		return 0;
 	}
 }
-void Decompress(unsigned const char* input, size_t input_sz,
+void Decompress(const unsigned char* input, size_t input_sz,
 		unsigned char* output, size_t output_sz, CompressionType type) {
 	switch (type) {
 		case CompressionType::ZIP:
@@ -73,7 +73,6 @@ void Decompress(unsigned const char* input, size_t input_sz,
 			break;
 	}
 }
-
 size_t Compress(const std::string& input,std::string& output,CompressionType type){
 	size_t est=EstimateOutputSize(input.size(),type);
 	output.resize(est);
