@@ -85,6 +85,10 @@ typedef unsigned int u16;
 //
 //
 namespace aly {
+unsigned int EstimateLZF(size_t inSize){
+	unsigned int outSize = static_cast<unsigned int>((inSize * 3) / 2 + 8);
+	return outSize;
+}
 unsigned int CompressLZF(const void * const in_data, unsigned int in_len,
 		void *out_data, unsigned int out_len) {
 	LZF_STATE htab;

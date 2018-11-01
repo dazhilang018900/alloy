@@ -38,7 +38,7 @@
 
 #ifndef LZF_H
 #define LZF_H
-
+#include <stddef.h>
 namespace aly
 {
   /** \brief Compress in_len bytes stored at the memory block starting at
@@ -60,6 +60,7 @@ namespace aly
     * \param[out] out_len the length of the output buffer
     *
     */
+  unsigned int EstimateLZF(size_t inSize);
   unsigned int CompressLZF (const void *const in_data,  unsigned int in_len,
                void             *out_data, unsigned int out_len);
 
