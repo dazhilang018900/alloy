@@ -10,6 +10,7 @@
 #include "miniz.h"
 #include "lz4/lz4.h"
 #include "zstd.h"
+#include <cstring>
 #include <exception>
 #include <stdexcept>
 namespace aly {
@@ -46,8 +47,10 @@ size_t Compress(const unsigned char* input, size_t input_sz,
 		return LZ4_compress_fast((const char*) input, (char*) output, input_sz,
 				output_sz, 1);
 	}
+	case CompressionType::NONE:
 	default:
-		return 0;
+		std::memcpy(output,input,input_sz);
+		return input_sz;
 	}
 }
 void Decompress(const unsigned char* input, size_t input_sz,
@@ -69,7 +72,9 @@ void Decompress(const unsigned char* input, size_t input_sz,
 		case CompressionType::LZ4:
 			LZ4_decompress_fast((const char*) input, (char*) output, output_sz);
 			break;
+		case CompressionType::NONE:
 		default:
+			std::memcpy(output,input,input_sz);
 			break;
 	}
 }
