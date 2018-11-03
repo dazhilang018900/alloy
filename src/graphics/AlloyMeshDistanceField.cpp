@@ -1,18 +1,52 @@
 /*
- * AlloyMeshDistanceField.cpp
+ * Copyright(C) 2018, Blake C. Lucas, Ph.D. (img.science@gmail.com)
  *
- *  Created on: Nov 2, 2018
- *      Author: blake
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
-
+/*
+ Sethian, J. A. (1999). Level set methods and fast marching methods: evolving interfaces
+ in computational geometry, fluid mechanics, computer vision, and materials science (Vol. 3).
+ Cambridge university press.
+ */
 #include "AlloyMeshDistanceField.h"
 namespace aly {
 const uint8_t AlloyMeshDistanceField::ACTIVE = 1;
 const uint8_t AlloyMeshDistanceField::NARROW_BAND = 2;
 const uint8_t AlloyMeshDistanceField::FAR_AWAY = 3;
 const float AlloyMeshDistanceField::MAX_VALUE = 1E30f;
-
-void AlloyMeshDistanceField::solve(const aly::Mesh& mesh,
+void SANITY_CHECK_MESHDISTANCEFIELD(){
+	aly::Mesh mesh;
+	ReadMeshFromFile("/home/blake/workspace/studio/alloy/assets/models/armadillo.ply",mesh);
+	box3f box= mesh.getBoundingBox();
+	AlloyMeshDistanceField df;
+	int N=mesh.vertexLocations.size();
+	std::vector<size_t> zeroSet={N/8,N/2};
+	std::vector<float> distanceField;
+	float maxDist=df.solve(mesh,zeroSet,distanceField,50);
+	Vector4f& colors=mesh.vertexColors;
+	colors.resize(distanceField.size());
+	for(size_t i=0;i<colors.size();i++){
+		float d=clamp(distanceField[i]/maxDist,0.0f,1.0f);
+		colors[i]=HSVAtoRGBAf(HSVA(0.98f*d,0.7f,(1.0f-d)*0.75f+0.25f,1.0f));
+	}
+	WriteMeshToFile(MakeDesktopFile("df_mesh.ply"),mesh);
+}
+float AlloyMeshDistanceField::solve(const aly::Mesh& mesh,
 		const std::vector<size_t>& zeroIndexes,
 		std::vector<float>& distanceField, float maxDistance) {
 	MakeOrderedVertexNeighborTable(mesh, nbrTable, false);
@@ -27,37 +61,36 @@ void AlloyMeshDistanceField::solve(const aly::Mesh& mesh,
 	size_t NN, NN1, NN2, n0, n1;
 	uint32_t VId, neighVId;
 	VN = nbrTable.size();
-	std::vector<uint8_t> label(VN);
-	indexes.resize(VN);
+	std::vector<uint8_t> labels(VN);
 	for (i = 0; i < VN; i++) {
-		label[i] = FAR_AWAY;
+		labels[i] = FAR_AWAY;
 		distanceField[i] = MAX_VALUE;
-		indexes[i].index=i;
 	}
 	for (i = 0; i < zeroIndexes.size(); i++) {
-		label[zeroIndexes[i]] = ACTIVE; /* all vertices on contour are alive */
+		labels[zeroIndexes[i]] = ACTIVE; /* all vertices on contour are alive */
 		distanceField[zeroIndexes[i]] = 0; /* all vertices on contour have distance zero */
 	}
-	BinaryMinHeapPtr<float> heap(VN);
+	float actualMaxDistance=0.0f;
+	BinaryMinHeap<float> heap(VN);
 	for (i = 0; i < VN; i++) {
-		if (label[i] == ACTIVE) {
+		if (labels[i] == ACTIVE) {
 			for (uint32_t neighVId : nbrTable[i]) {
-				if (label[neighVId] == FAR_AWAY) {
-					label[neighVId] = NARROW_BAND;
-					std::vector<uint32_t> nbrs(nbrTable[neighVId].begin(),nbrTable[neighVId].end());
+				if (labels[neighVId] == FAR_AWAY) {
+					labels[neighVId] = NARROW_BAND;
+					auto nbrs=nbrTable[neighVId];
 					newValue = MAX_VALUE;
 					NN2 = nbrs.size();
 					for (k = 0; k < NN2; k++) {
 						n0 = nbrs[k];
 						n1 = nbrs[(k + 1) % NN2];
 						tmpValue = ComputeDistance(neighVId, n0, n1, mesh,
-								distanceField, label, currentF, heap);
+								distanceField, labels, currentF, heap);
 						if (tmpValue < newValue)
 							newValue = tmpValue;
 					}
 					distanceField[neighVId] = newValue;
-					VertexIndexed* vox =&indexes[neighVId];
-					vox->value=newValue;
+					indexes.push_back(VertexIndexed(newValue));
+					VertexIndexed* vox =&indexes.back();
 					vox->index = neighVId;
 					heap.add(vox);
 
@@ -67,30 +100,31 @@ void AlloyMeshDistanceField::solve(const aly::Mesh& mesh,
 	}
 	while (!heap.isEmpty()) {
 		he = heap.remove();
+		if(maxDistance>0&&he->value>maxDistance)break;
 		VId = he->index;
 		distanceField[VId] = he->value;
-		label[VId] = ACTIVE;
+		labels[VId] = ACTIVE;
+		actualMaxDistance=std::max(actualMaxDistance,he->value);
 		for (uint32_t neighVId : nbrTable[VId]) {
-			if (label[neighVId] != ACTIVE) {
-				std::vector<uint32_t> nbrs(nbrTable[neighVId].begin(),nbrTable[neighVId].end());
-				NN2 = nbrs.size();
+			if (labels[neighVId] != ACTIVE) {
 				newValue = MAX_VALUE;
+				auto nbrs=nbrTable[neighVId];
+				NN2 = nbrs.size();
 				for (j = 0; j < NN2; j++) {
 					n0 = nbrs[j];
 					n1 = nbrs[(j + 1) % NN2];
-					tmpValue = ComputeDistance(neighVId, n0, n1, mesh,
-							distanceField, label, currentF, heap);
+					tmpValue = ComputeDistance(neighVId, n0, n1, mesh,distanceField, labels, currentF, heap);
 					if (tmpValue < newValue)
 						newValue = tmpValue;
 				}
-
-				VertexIndexed* vox =&indexes[neighVId];
-				vox->value=newValue;
-				if (label[neighVId] == NARROW_BAND)
+				indexes.push_back(VertexIndexed(newValue));
+				VertexIndexed* vox =&indexes.back();
+				vox->index=neighVId;
+				if (labels[neighVId] == NARROW_BAND)
 					heap.change(neighVId, vox);
 				else {
 					heap.add(vox);
-					label[neighVId] = NARROW_BAND;
+					labels[neighVId] = NARROW_BAND;
 				}
 
 			}
@@ -100,31 +134,35 @@ void AlloyMeshDistanceField::solve(const aly::Mesh& mesh,
 		if (distanceField[VId] == MAX_VALUE) {
 			newValue = MAX_VALUE;
 			for (uint32_t neighVId : nbrTable[VId]) {
-				std::vector<uint32_t> nbrs(nbrTable[VId].begin(),
-						nbrTable[VId].end());
+				auto nbrs=nbrTable[VId];
 				NN2 = nbrs.size();
 				for (j = 0; j < NN2; j++) {
 					n0 = nbrs[j];
 					n1 = nbrs[(j + 1) % NN2];
 					tmpValue = ComputeDistance(neighVId, n0, n1, mesh,
-							distanceField, label, currentF, heap);
+							distanceField, labels, currentF, heap);
 					if (tmpValue < newValue)
 						newValue = tmpValue;
 				}
 			}
-			distanceField[VId] = newValue;
+			if(maxDistance>0){
+				distanceField[VId] = std::min(newValue,maxDistance);
+			} else {
+				distanceField[VId] = newValue;
+			}
 		}
 	}
 	indexes.clear();
 	nbrTable.clear();
+	return actualMaxDistance;
 }
 
-float AlloyMeshDistanceField::ComputeDistance(int vIDc, int vIDa, int vIDb,
+float AlloyMeshDistanceField::ComputeDistance(size_t vIDc, size_t vIDa, size_t vIDb,
 		const aly::Mesh& mesh, std::vector<float>& distanceField,
-		std::vector<uint8_t>& label, float Fc, BinaryMinHeapPtr<float>& heap) {
+		std::vector<uint8_t>& label, float Fc, BinaryMinHeap<float>& heap) {
 	float u, a, b, c;
 	float3 Va, Vb, Vc;
-	byte la, lb;
+	uint8_t la, lb;
 	float Ta, Tb;
 	float t1, t2, t;
 	int tmpint;
@@ -133,8 +171,9 @@ float AlloyMeshDistanceField::ComputeDistance(int vIDc, int vIDa, int vIDb,
 	int tmpvIDa;
 	float tmpa;
 	float tmpTa;
-	byte tmpla;
-	int NN, neighVId, i, UNotID, UID = 0, P1ID, P2ID;
+	uint8_t tmpla;
+	size_t NN,  i, UNotID, UID = 0, P1ID, P2ID;
+	uint32_t neighVId;
 	float P1A, P1B, P1C, P2A, P2B, P2C, UA, UB, UC, P1P2, P1U, P2U;
 	float cos12A, sin12A, cos12B, sin12B, cos12C, sin12C, cos12U, sin12U;
 	float AC, BC, AB;
@@ -230,7 +269,7 @@ float AlloyMeshDistanceField::ComputeDistance(int vIDc, int vIDa, int vIDb,
 	iters = 0;
 	const int MAX_UNFOLD_ITERS=128;
 	while (iters < MAX_UNFOLD_ITERS) {
-		std::vector<uint32_t> nbrs(nbrTable[P1ID].begin(),nbrTable[P1ID].end());
+		auto nbrs=nbrTable[P1ID];
 		NN = nbrs.size();
 		for (uint32_t i = 0; i < NN; i++) {
 			neighVId = nbrs[i];
@@ -249,7 +288,6 @@ float AlloyMeshDistanceField::ComputeDistance(int vIDc, int vIDa, int vIDb,
 		P1 = mesh.vertexLocations[P1ID];
 		P2 = mesh.vertexLocations[P2ID];
 		U = mesh.vertexLocations[UID];
-
 		vP1U = P1 - U;
 		vP2U = P2 - U;
 
@@ -294,8 +332,8 @@ float AlloyMeshDistanceField::ComputeDistance(int vIDc, int vIDa, int vIDb,
 					t1 = ComputeDistanceForAcute(Ta, distanceField[UID], UC, b, UA,
 							Fc);
 					if (t1 < Ta) { /* Reset A to NBAND and put into Heap */
-						VertexIndexed* vox =&indexes[vIDa];
-						vox->value=Ta;
+						indexes.push_back(VertexIndexed(Ta));
+						VertexIndexed* vox =&indexes.back();
 						vox->index = vIDa;
 						heap.add(vox);
 						label[vIDa] = NARROW_BAND;
@@ -306,8 +344,8 @@ float AlloyMeshDistanceField::ComputeDistance(int vIDc, int vIDa, int vIDb,
 					t2 = ComputeDistanceForAcute(Tb, distanceField[UID], UC, a, UB,
 							Fc);
 					if (t2 < Tb) { /* Reset B to NBAND and put into Heap */
-						VertexIndexed* vox =&indexes[vIDb];
-						vox->value=Tb;
+						indexes.push_back(VertexIndexed(Tb));
+						VertexIndexed* vox =&indexes.back();
 						vox->index = vIDb;
 						heap.add(vox);
 						label[vIDb] = NARROW_BAND;

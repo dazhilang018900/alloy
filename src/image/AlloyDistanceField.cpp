@@ -112,7 +112,7 @@ void DistanceField3f::solve(const Volume1f& vol, Volume1f& distVol,
 	const int rows = vol.rows;
 	const int cols = vol.cols;
 	const int slices = vol.slices;
-	BinaryMinHeap<float, 3> heap;
+	BinaryMinHeapVec<float, 3> heap;
 	distVol.resize(rows, cols, slices);
 	distVol.set(float1(DISTANCE_UNDEFINED));
 
@@ -431,7 +431,7 @@ void DistanceField3f::solve(const Volume1f& vol, Volume1f& distVol,
 }
 
 void DistanceField3f::solve(EndlessGridFloat& vol, float maxDistance) {
-	BinaryMinHeap<float, 3> heap;
+	BinaryMinHeapVec<float, 3> heap;
 	float BG_VALUE = maxDistance + 0.5f;
 	EndlessGrid<DfElem> distVol(vol.getLevelSizes(),
 			DfElem(BG_VALUE, FAR_AWAY, 0));
@@ -761,7 +761,7 @@ void DistanceField2f::solve(const Image1f& vol, Image1f& distVol,
 		float maxDistance) {
 	const int width = vol.width;
 	const int height = vol.height;
-	BinaryMinHeap<float, 2> heap;
+	BinaryMinHeapVec<float, 2> heap;
 	distVol.resize(width, height);
 	distVol.set(float1(DISTANCE_UNDEFINED));
 

@@ -83,8 +83,10 @@
 #include "example/NonNegativeLeastSquaresEx.h"
 #include "common/AlloyCommon.h"
 #include "image/AlloyImageEncoder.h"
+#include "graphics/AlloyMeshDistanceField.h"
 #include "math/AlloyOptimization.h"
 #include "vision/AlloyGaussianMixture.h"
+#include "example/MeshDistanceFieldEx.h"
 /*
  For simple execution, main method should look like:
  int main(int argc, char *argv[]) {
@@ -159,11 +161,12 @@ bool SANITY_CHECK() {
 	//SANITY_CHECK_SVD();
 	//SANITY_CHECK_VIDEOENCODER();
 	//SANITY_CHECK_STRINGS();
+	SANITY_CHECK_MESHDISTANCEFIELD();
 	return ret;
 }
 int main(int argc, char *argv[]) {
 	//change me when adding new example!
-	const int N=66;
+	const int N=67;
 	std::array<ExamplePtr,N> apps = {
 		MAKE_EXAMPLE(UnitsEx), MAKE_EXAMPLE(CompositeEx),MAKE_EXAMPLE(EventsEx), 
 		MAKE_EXAMPLE(DragEx), MAKE_EXAMPLE(TweenEx),MAKE_EXAMPLE(ImageEx), 
@@ -191,7 +194,8 @@ int main(int argc, char *argv[]) {
 		MAKE_EXAMPLE(DictionaryLearningEx),
 		MAKE_EXAMPLE(SpringlsSegmentation3DEx),
 		MAKE_EXAMPLE(Enright3DEx),
-		MAKE_EXAMPLE(NonNegativeLeastSquaresEx)
+		MAKE_EXAMPLE(NonNegativeLeastSquaresEx),
+		MAKE_EXAMPLE(MeshDistanceFieldEx)
 	};
 	std::sort(apps.begin(),apps.end(),[=](const ExamplePtr& a,const ExamplePtr& b){
 		return std::lexicographical_compare(a->name.begin(), a->name.end(), b->name.begin(), b->name.end());

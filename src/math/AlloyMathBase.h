@@ -762,6 +762,26 @@ inline uint64_t sqr(const uint64_t& v) {
 inline uint32_t sqr(const uint32_t& v) {
 	return v * v;
 }
+
+
+inline float cube(const float& v) {
+	return v * v* v;
+}
+inline double cube(const double& v) {
+	return v * v* v;
+}
+inline int cube(const int& v) {
+	return v * v* v;
+}
+inline int64_t cube(const int64_t& v) {
+	return v * v* v;
+}
+inline uint64_t cube(const uint64_t& v) {
+	return v * v* v;
+}
+inline uint32_t cube(const uint32_t& v) {
+	return v * v * v;
+}
 inline float ToDegrees(float angle) {
 	return (float) (angle * 180.0f / ALY_PI);
 }

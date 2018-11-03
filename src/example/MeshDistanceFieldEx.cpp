@@ -1,5 +1,5 @@
 /*
- * Copyright(C) 2015, Blake C. Lucas, Ph.D. (img.science@gmail.com)
+ * Copyright(C) 2018, Blake C. Lucas, Ph.D. (img.science@gmail.com)
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -20,20 +20,42 @@
  */
 
 #include "Alloy.h"
-#include "example/MeshMatcapEx.h"
+#include "example/MeshDistanceFieldEx.h"
+#include "graphics/AlloyMeshDistanceField.h"
 using namespace aly;
-MeshMatcapEx::MeshMatcapEx() :
-		Application(800, 600, "Distance Fields are Mesh Example"),matcapShader(getFullPath("images/JG_Gold.png")) {
+MeshDistanceFieldEx::MeshDistanceFieldEx() :
+		Application(800, 600, "Mesh Surface Distance Field Example"), matcapShader(
+				getFullPath("images/JG_Silver.png")) {
 }
-bool MeshMatcapEx::init(Composite& rootNode) {
-	box3f renderBBox = box3f(float3(-0.5f, -0.5f, -0.5f),float3(1.0f, 1.0f, 1.0f));
+bool MeshDistanceFieldEx::init(Composite& rootNode) {
+	box3f renderBBox = box3f(float3(-0.5f, -0.5f, -0.5f),
+			float3(1.0f, 1.0f, 1.0f));
 
 	mesh.load(getFullPath("models/armadillo.ply"));
+	size_t N=mesh.vertexLocations.size();
+	{
+		AlloyMeshDistanceField df;
+		std::vector<size_t> zeroSet(4);
+		for(size_t& index:zeroSet){
+			index=RandomUniform((int)0,(int)N);
+		}
+		std::vector<float> distanceField;
+		float maxDist=df.solve(mesh,zeroSet,distanceField);
+		Vector4f& colors=mesh.vertexColors;
+		colors.resize(distanceField.size());
+		for(size_t i=0;i<colors.size();i++){
+			float d=clamp(distanceField[i]/maxDist,0.0f,1.0f);
+			colors[i]=HSVAtoRGBAf(HSVA(0.98f*d,0.7f,aly::sqr(1.0f-d)*0.75f+0.25f,1.0f));
+		}
+	}
 	mesh.updateVertexNormals();
+	box3f box = mesh.getBoundingBox();
 	//Make region on screen to render 3d view
-	renderRegion=MakeRegion("Render View",CoordPerPX(0.5f,0.5f,-256,-256),CoordPX(512,512),COLOR_NONE,COLOR_WHITE,UnitPX(1.0f));
+	renderRegion = MakeRegion("Render View", CoordPerPX(0.5f, 0.5f, -400, -300),
+			CoordPX(800, 600), COLOR_NONE, COLOR_WHITE, UnitPX(1.0f));
 	//Initialize depth buffer to store the render
-	depthFrameBuffer.initialize(512,512);
+	depthFrameBuffer.initialize(800,600);
+	colorFrameBuffer.initialize(800,600);
 	//Set up camera
 	camera.setNearFarPlanes(-2.0f, 2.0f);
 	camera.setZoom(0.75f);
@@ -47,13 +69,17 @@ bool MeshMatcapEx::init(Composite& rootNode) {
 	rootNode.add(renderRegion);
 	return true;
 }
-void MeshMatcapEx::draw(AlloyContext* context){
+void MeshDistanceFieldEx::draw(AlloyContext* context) {
 	if (camera.isDirty()) {
 		//Compute depth and normals only when camera view changes.
 		depthAndNormalShader.draw(mesh, camera, depthFrameBuffer);
+		colorVertexShader.draw(mesh,camera,colorFrameBuffer);
 	}
 	//Recompute lighting at every draw pass.
-	matcapShader.draw(depthFrameBuffer.getTexture(),camera, context->pixelRatio*renderRegion->getBounds(),context->getViewport(),RGBAf(1.0f));
+	glEnable(GL_BLEND);
+	glDisable(GL_DEPTH_TEST);
+	matcapShader.draw(depthFrameBuffer.getTexture(), camera, context->pixelRatio*renderRegion->getBounds(), context->getViewport(), RGBAf(1.0f));
+	imageShader.draw(colorFrameBuffer.getTexture(), context->pixelRatio*renderRegion->getBounds(), 0.5f, false);
 	camera.setDirty(false);
 }
 

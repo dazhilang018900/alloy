@@ -1812,7 +1812,7 @@ inline uint64_t faceHashCode(const uint2& val) {
 	return ((uint64_t) val.y) << 32 | ((uint64_t) val.x);
 }
 void CreateOrderedVertexNeighborTable(const Mesh& mesh,
-		std::vector<std::list<uint32_t>>& vertNbrsOut, bool leaveTail) {
+		std::vector<std::vector<uint32_t>>& vertNbrsOut, bool leaveTail) {
 	//Leave tail means to not remove the duplicate vertex neighbor at the end of the neighbor list.
 	//Non-manifold vertexes will not have a tail, so the tail can be used to detect them in simple (common) cases.
 	vertNbrsOut.resize(mesh.vertexLocations.size());
@@ -1846,7 +1846,7 @@ void CreateOrderedVertexNeighborTable(const Mesh& mesh,
 		if (nbrs.size() > 0) {
 			vertNbrsOut[n].clear();
 			bool found;
-			std::list<uint32_t> chain;
+			std::vector<uint32_t> chain;
 			chain.push_back(nbrs[0]);
 			chain.push_back(nbrs[1]);
 			nbrs[0] = -1;
@@ -1866,7 +1866,7 @@ void CreateOrderedVertexNeighborTable(const Mesh& mesh,
 				if (!found) {
 					for (int i = 1; i < (int) nbrs.size(); i += 2) {
 						if (nbrs[i] == front) {
-							chain.push_front(nbrs[i - 1]);
+							chain.insert(chain.begin(),nbrs[i - 1]);
 							nbrs[i - 1] = -1;
 							found = true;
 							break;

@@ -144,7 +144,7 @@ void MeshOptimizationEx::detailTransfer(aly::Mesh& src, const aly::Mesh& tar, bo
 	Vec<float> b(N);
 	Vec<float> X(N);
 	index = 0;
-	for (std::list<uint32_t>& nbrs : nbrTable) {
+	for (std::vector<uint32_t>& nbrs : nbrTable) {
 		int K = (int)nbrs.size();
 		float3 pt = src.vertexLocations[index];
 		X[3 * index] = pt.x;
@@ -183,7 +183,6 @@ void MeshOptimizationEx::detailTransfer(aly::Mesh& src, const aly::Mesh& tar, bo
 	src.updateVertexNormals();
 	sourceMesh.setDirty(true);
 	camera.setDirty(true);
-
 }
 aly::Vector3f MeshOptimizationEx::computeLaplacian(const aly::Mesh& mesh) {
 	aly::Vector3f out(mesh.vertexLocations.size());
@@ -192,7 +191,7 @@ aly::Vector3f MeshOptimizationEx::computeLaplacian(const aly::Mesh& mesh) {
 	int index = 0;
 	std::vector<float> angles;
 	std::vector<float> weights;
-	for (std::list<uint32_t>& nbrs : nbrTable) {
+	for (std::vector<uint32_t>& nbrs : nbrTable) {
 		int K = (int)nbrs.size();
 		float3 Laplacian = mesh.vertexLocations[index];
 		float w = 1.0f / K;
@@ -214,7 +213,7 @@ void MeshOptimizationEx::smooth(aly::Mesh& mesh) {
 	SparseMat<float> A(N, N);
 	Vec<float> b(N);
 	Vec<float> X(N);
-	for (std::list<uint32_t>& nbrs : nbrTable) {
+	for (std::vector<uint32_t>& nbrs : nbrTable) {
 		int K = (int) nbrs.size() - 1;
 		float3 pt = mesh.vertexLocations[index];
 		X[3 * index] = pt.x;

@@ -90,6 +90,7 @@ bool MeshSmoothEx::init(Composite& rootNode) {
 			};
 	return true;
 }
+
 void MeshSmoothEx::smooth() {
 	static MeshListNeighborTable nbrTable;
 	if(nbrTable.size()==0){
@@ -103,7 +104,7 @@ void MeshSmoothEx::smooth() {
 	int N = (int) mesh.vertexLocations.size();
 	SparseMatrix1f A(N, N);
 	Vector3f b(N);
-	for (std::list<uint32_t>& nbrs : nbrTable) {
+	for (std::vector<uint32_t>& nbrs : nbrTable) {
 		int K = (int) nbrs.size() - 1;
 		float3 pt = mesh.vertexLocations[index];
 		angles.resize(K);

@@ -15,7 +15,7 @@ namespace aly {
 struct DeadTriangle;
 struct DeadVertex;
 
-struct DeadVertex: public IndexablePtr<float> {
+struct DeadVertex: public Indexable<float> {
 protected:
 	bool valid;
 public:
@@ -82,7 +82,7 @@ protected:
 	static const int MAX_VALENCE = 9;
 	std::vector<DeadTriangle> triangles;
 	std::vector<DeadVertex> vertexes;
-	BinaryMinHeapPtr<float> heap;
+	BinaryMinHeap<float> heap;
 	size_t decimateInternal(Mesh& mesh, float threshold, int totalCount,int targetCount,const std::function<bool(const std::string& message, float progress)>& monitor=nullptr);
 	bool collapseEdge(Mesh& mesh, DeadVertex *u, DeadVertex *v);
 	void computeEdgeCostAtVertex(Mesh& mesh, DeadVertex *v);

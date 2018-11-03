@@ -28,7 +28,7 @@ namespace aly {
 	class Mesh;
 	bool SANITY_CHECK_DISTANCE_FIELD();
 	class DistanceField3f {
-		typedef Indexable<float, 3> VoxelIndex;
+		typedef IndexableVec<float, 3> VoxelIndex;
 		typedef vec<int, 3> Coord;
 	private:
 
@@ -44,7 +44,7 @@ namespace aly {
 		void solve(EndlessGridFloat& vol,float maxDistance=2.5f);
 	};
 	class DistanceField2f {
-		typedef Indexable<float, 2> PixelIndex;
+		typedef IndexableVec<float, 2> PixelIndex;
 		typedef vec<int, 2> Coord;
 	private:
 
