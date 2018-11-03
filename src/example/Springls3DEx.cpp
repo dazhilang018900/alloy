@@ -143,6 +143,7 @@ bool Springls3DEx::init(Composite& rootNode) {
 					timelineSlider->setMaxValue(maxIteration);
 					timelineSlider->setVisible(true);
 					context->addDeferredTask([this]() {
+								simulation.cleanup();
 								simulation.init();
 								running = true;
 							});

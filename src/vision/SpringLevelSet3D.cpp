@@ -1240,6 +1240,7 @@ void SpringLevelSet3D::relax() {
 }
 void SpringLevelSet3D::cleanup() {
 	ActiveManifold3D::cleanup();
+	contour=Manifold3D();
 }
 void SpringLevelSet3D::fixNormals() {
 #pragma omp parallel for
