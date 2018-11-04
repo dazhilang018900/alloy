@@ -21,7 +21,7 @@
 
 /*
 
-Contains implementation of:
+ Contains implementation of:
 
  Aharon, Michal, Michael Elad, and Alfred Bruckstein. "K-SVD: An algorithm for designing overcomplete
  dictionaries for sparse representation." IEEE Transactions on signal processing 54.11 (2006): 4311.
@@ -369,14 +369,21 @@ std::vector<int> DictionaryLearning::solveOrthoMatchingPursuit(int sparsity,
 	}
 	return order;
 }
-void DictionaryLearning::optimizeDictionary(float errorThreshold,int maxIterations) {
+void DictionaryLearning::optimizeDictionary(float errorThreshold,
+		int maxIterations) {
 	std::vector<size_t> activeSet;
 	DenseMat<float> E, U, D, Vt;
 	int M = patches[0].data.size();
 	int W = filterBanks.size();
-	double lastError=error();
+	double lastError = error();
+	std::vector<int> order(W);
+	for (int k = 0; k < W; k++) {
+		order[k] = k;
+	}
 	for (int iter = 0; iter < maxIterations; iter++) {
-		for (int k = 0; k < W; k++) {
+		Shuffle(order);
+		for (int kidx = 0; kidx < W; kidx++) {
+			int k = order[kidx];
 			activeSet.clear();
 			//Find set of atoms with non-zero entries
 			for (int idx = 0; idx < (int) patches.size(); idx++) {
@@ -385,7 +392,8 @@ void DictionaryLearning::optimizeDictionary(float errorThreshold,int maxIteratio
 					activeSet.push_back(idx);
 				}
 			}
-			if(activeSet.size()==0)break;
+			if (activeSet.size() == 0)
+				break;
 			size_t A = activeSet.size();
 			E.resize(A, M);
 #pragma omp parallel for
@@ -410,7 +418,7 @@ void DictionaryLearning::optimizeDictionary(float errorThreshold,int maxIteratio
 			for (size_t m = 0; m < M; m++) {
 				filterBanks[k][m] = u[m];
 			}
-			double largestLambda = std::sqrt((double)D(0, 0));
+			double largestLambda = std::sqrt((double) D(0, 0));
 			//Compute D inverse
 			for (int i = 0; i < D.rows; i++) {
 				double lam = std::sqrt((double) D(i, i));
@@ -424,12 +432,13 @@ void DictionaryLearning::optimizeDictionary(float errorThreshold,int maxIteratio
 				p.weights[k] = E(idx, 0);
 			}
 		}
-		if(errorThreshold>0){
-			double er=error();
-			if(std::abs(er-lastError)<errorThreshold)break;
-			lastError=er;
+		if (errorThreshold > 0) {
+			double er = error();
+			if (std::abs(er - lastError) < errorThreshold)
+				break;
+			lastError = er;
 
-			std::cout <<iter<< ") Error " << er<<std::endl;
+			std::cout << iter << ") Error " << er << std::endl;
 		}
 	}
 }
@@ -696,7 +705,7 @@ void DictionaryLearning::train(const std::vector<ImageRGB>& images,
 	float var = fuzz * fuzz;
 	//float var2 = 0.4f * 0.4f;
 	//float var3 = 0.5f * 0.5f;
-	std::vector<float> shifts = { -fuzz, -fuzz * 0.5f, 0.0f, fuzz * 0.5f,fuzz };
+	std::vector<float> shifts = { -fuzz, -fuzz * 0.5f, 0.0f, fuzz * 0.5f, fuzz };
 	std::vector<float> angles;
 	for (int a = -180; a < 180; a += 20) {
 		angles.push_back(a);
@@ -719,7 +728,8 @@ void DictionaryLearning::train(const std::vector<ImageRGB>& images,
 			for (int sh = 0; sh < shifts.size(); sh++) {
 				float r = std::cos(ToRadians(angles[a])) * s
 						+ std::sin(ToRadians(angles[a])) * t + shifts[sh];
-				filterBanks[idx++].data[k] = 0.5f- 1.0f / (1 + std::exp(r / var));
+				filterBanks[idx++].data[k] = 0.5f
+						- 1.0f / (1 + std::exp(r / var));
 				//filterBanks[idx++].data[k] = std::exp(-0.5f * r * r / var);
 			}
 		}
