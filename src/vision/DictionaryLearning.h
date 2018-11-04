@@ -1,9 +1,24 @@
 /*
- * FilterBankLearning.h
+ * Copyright(C) 2018, Blake C. Lucas, Ph.D. (img.science@gmail.com)
  *
- *  Created on: Aug 27, 2017
- *      Author: blake
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
+
 
 #ifndef INCLUDE_DICTIONARYLEARNING_H_
 #define INCLUDE_DICTIONARYLEARNING_H_
@@ -23,6 +38,21 @@ struct FilterBank {
 	float shift;
 	FilterType type;
 	std::vector<float> data;
+	size_t size() const {
+		return data.size();
+	}
+	inline const float& operator[](const size_t& sz) const {
+		if(sz>=data.size()){
+			throw std::runtime_error("Filter bank index out of bounds.");
+		}
+		return data[sz];
+	}
+	inline float& operator[](const size_t& sz) {
+		if(sz>=data.size()){
+			throw std::runtime_error("Filter bank index out of bounds.");
+		}
+		return data[sz];
+	}
 	FilterBank(int width=0, int height=0) :
 			data(width * height), width(width), height(height), type(FilterType::Unknown),angle(0),shift(0) {
 	}
@@ -72,6 +102,7 @@ protected:
 	void add(const FilterBank& banks);
 	std::set<int> optimizeFilters(int start);
 	void optimizeWeights(int t);
+	void optimizeDictionary(float errorThreshold=1E-6f,int maxIterations=128);
 	double error();
 	double score(std::vector<std::pair<int, double>>& scores);
 public:

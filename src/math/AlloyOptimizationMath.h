@@ -78,9 +78,9 @@ public:
 	size_t size() const override {
 		return sz;
 	}
-	inline void setZero(){
-		for(size_t i=0;i<sz;i++){
-			ptr[i * stride]=T(0);
+	inline void setZero() {
+		for (size_t i = 0; i < sz; i++) {
+			ptr[i * stride] = T(0);
 		}
 	}
 	VecMap<T>& operator=(const Vec<T>& rhs);
@@ -196,7 +196,7 @@ public:
 	}
 	inline static Vec<float> zero(int d) {
 		Vec<float> v(d);
-		v.data.assign(v.size(),0);
+		v.data.assign(v.size(), 0);
 		return v;
 	}
 	inline void clear() {
@@ -291,11 +291,11 @@ template<class T> void Transform(VecType<T>& im1, VecType<T>& im2,
 }
 template<class T, class L, class R> std::basic_ostream<L, R> & operator <<(
 		std::basic_ostream<L, R> & ss, const VecType<T> & A) {
-	ss<<"[";
+	ss << "[";
 	for (size_t index = 0; index < A.size(); index++) {
-		ss << A[index] << ((index<A.size()-1)?",":"");
+		ss << A[index] << ((index < A.size() - 1) ? "," : "");
 	}
-	ss<<"]";
+	ss << "]";
 	return ss;
 }
 template<class T> Vec<T> operator+(const T& scalar, const VecType<T>& img) {
@@ -459,7 +459,6 @@ template<class T> VecMap<T>& operator/=(VecMap<T>& out, const T& scalar) {
 	return out;
 }
 
-
 template<class T> Vec<T>& operator+=(Vec<T>& out, const VecType<T>& img) {
 	std::function<void(T&, const T&)> f =
 			[=](T& val1, const T& val2) {val1 += val2;};
@@ -592,11 +591,13 @@ public:
 		return &data[cols * i];
 	}
 	aly::dim2 dimensions() const {
-		return aly::dim2(rows,cols);
+		return aly::dim2(rows, cols);
 	}
-	DenseMat() : rows(0), cols(0) {
+	DenseMat() :
+			rows(0), cols(0) {
 	}
-	DenseMat(int rows, int cols): rows(rows), cols(cols) {
+	DenseMat(int rows, int cols) :
+			rows(rows), cols(cols) {
 		data.resize(rows * (size_t) cols);
 	}
 	void resize(int rows, int cols) {
@@ -623,18 +624,24 @@ public:
 		return data[cols * i + j];
 	}
 	inline VecMap<T> getRow(size_t i) const {
-		if(i>=rows)throw std::runtime_error(MakeString()<<"Row index "<<i<<"/"<<rows<<" out of bounds.");
-		return VecMap<T>((T*)(&data[cols * i]), cols, 1);//forces const ptr to regular ptr
+		if (i >= rows)
+			throw std::runtime_error(
+					MakeString() << "Row index " << i << "/" << rows
+							<< " out of bounds.");
+		return VecMap<T>((T*) (&data[cols * i]), cols, 1); //forces const ptr to regular ptr
 	}
 	inline VecMap<T> getColumn(size_t j) const {
-		if(j>=cols)throw std::runtime_error(MakeString()<<"Column index "<<j<<"/"<<cols<<" out of bounds.");
-		return VecMap<T>((T*)(&data[j]), rows, cols);//forces const ptr to regular ptr
+		if (j >= cols)
+			throw std::runtime_error(
+					MakeString() << "Column index " << j << "/" << cols
+							<< " out of bounds.");
+		return VecMap<T>((T*) (&data[j]), rows, cols); //forces const ptr to regular ptr
 	}
 
-	inline void set(const DenseMat<T>& mat){
-		rows=mat.rows;
-		cols=mat.cols;
-		data=mat.data;
+	inline void set(const DenseMat<T>& mat) {
+		rows = mat.rows;
+		cols = mat.cols;
+		data = mat.data;
 	}
 	inline void setRow(const VecType<T>& vec, size_t i) {
 		if (vec.size() != cols) {
@@ -669,6 +676,23 @@ public:
 		}
 		return M;
 	}
+	inline DenseMat<T> square() const {
+		//Computes AtA
+		DenseMat<T> A(cols, cols);
+		A.setZero();
+		for (int i = 0; i < cols; i++) {
+			for (int j = 0; j <=i; j++) {
+				T sum = 0;
+				for (int k = 0; k < rows; k++) {
+					sum += operator()(k, i) * operator()(k, j);
+
+				}
+				A(i, j) = sum;
+				if(j!=i)A(j, i) = sum;
+			}
+		}
+		return A;
+	}
 	inline static DenseMat<T> identity(size_t M, size_t N) {
 		DenseMat<T> A(M, N);
 		for (int i = 0; i < M; i++) {
@@ -700,21 +724,21 @@ public:
 		if (this == &rhs) {
 			return *this;
 		}
-		resize(rhs.rows,rhs.cols);
-		data=rhs.data;
+		resize(rhs.rows, rhs.cols);
+		data = rhs.data;
 		return *this;
 	}
 };
 template<class A, class B, class T> std::basic_ostream<A, B> & operator <<(
 		std::basic_ostream<A, B> & ss, const DenseMat<T>& M) {
 	ss << "\n";
-		for (int i = 0; i < M.rows; i++) {
-			ss << "[";
-			for (int j = 0; j < M.cols; j++) {
-				ss << std::setprecision(10) << std::setw(16) << M(i, j)
-						<< ((j < M.cols - 1) ? "," : "]\n");
-			}
+	for (int i = 0; i < M.rows; i++) {
+		ss << "[";
+		for (int j = 0; j < M.cols; j++) {
+			ss << std::setprecision(10) << std::setw(16) << M(i, j)
+					<< ((j < M.cols - 1) ? "," : "]\n");
 		}
+	}
 	return ss;
 }
 
@@ -1498,11 +1522,11 @@ public:
 	void set(const std::vector<T>& val) {
 		data = val;
 	}
-	inline void set(const DenseVol<T>& vol){
-		rows=vol.rows;
-		cols=vol.cols;
-		slices=vol.slices;
-		data=vol.data;
+	inline void set(const DenseVol<T>& vol) {
+		rows = vol.rows;
+		cols = vol.cols;
+		slices = vol.slices;
+		data = vol.data;
 	}
 	void set(T* val) {
 		if (val == nullptr)
@@ -1530,20 +1554,25 @@ public:
 		data = rhs.data;
 		return *this;
 	}
-	DenseVol(int r, int c, int s) :rows(r), cols(c), slices(s) {
+	DenseVol(int r, int c, int s) :
+			rows(r), cols(c), slices(s) {
 		data.resize(r * c * s);
 	}
-	DenseVol(T* ptr, int r, int c, int s) :rows(r), cols(c), slices(s) {
+	DenseVol(T* ptr, int r, int c, int s) :
+			rows(r), cols(c), slices(s) {
 		set(ptr);
 	}
-	DenseVol(const T* ptr, int r, int c, int s) : rows(r), cols(c), slices(s) {
+	DenseVol(const T* ptr, int r, int c, int s) :
+			rows(r), cols(c), slices(s) {
 		set(ptr);
 	}
 
-	DenseVol(const std::vector<T>& ref, int r, int c, int s) :rows(r), cols(c), slices(s) {
+	DenseVol(const std::vector<T>& ref, int r, int c, int s) :
+			rows(r), cols(c), slices(s) {
 		data = ref;
 	}
-	DenseVol() :rows(0), cols(0), slices(0) {
+	DenseVol() :
+			rows(0), cols(0), slices(0) {
 	}
 	DenseVol(const DenseVol<T>& img) :
 			DenseVol(img.rows, img.cols, img.slices) {

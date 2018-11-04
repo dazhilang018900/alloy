@@ -108,6 +108,9 @@ public:
 			this->cols=cols;
 		}
 	}
+	void setZero() {
+		data.assign(data.size(), vec<T,C>(0));
+	}
 	void set(size_t i, size_t j, const vec<T, C>& value) {
 		if (i >= (size_t)rows || j >=(size_t) cols || i < 0 || j < 0)
 		throw std::runtime_error(
@@ -152,6 +155,23 @@ public:
 			}
 		}
 		return M;
+	}
+	inline DenseMatrix<T,C> square() const {
+		//Computes AtA
+		DenseMatrix<T,C> A(cols, cols);
+		A.setZero();
+		for (int i = 0; i < cols; i++) {
+			for (int j = 0; j <=i; j++) {
+				vec<T,C> sum(T(0));
+				for (int k = 0; k < rows; k++) {
+					sum += operator()(k, i) * operator()(k, j);
+
+				}
+				A(i, j) = sum;
+				if(j!=i)A(j, i) = sum;
+			}
+		}
+		return A;
 	}
 	inline static DenseMatrix<T, C> identity(size_t M, size_t N) {
 		DenseMatrix<T, C> A(M, N);

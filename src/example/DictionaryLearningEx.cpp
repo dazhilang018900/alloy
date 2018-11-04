@@ -219,7 +219,6 @@ bool DictionaryLearningEx::init(Composite& rootNode) {
 					CoordPerPX(0.5, 0.5, -img.width * downScale * 0.5f,
 							-img.height * downScale * 0.5f),
 					CoordPX(img.width * downScale, img.height * downScale)));
-
 	Application::addListener(resizeableRegion.get());
 	ImageGlyphPtr imageGlyph;// = AlloyApplicationContext()->createImageGlyph(img,false);
 	DrawPtr drawContour =
