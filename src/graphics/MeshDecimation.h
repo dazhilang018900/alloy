@@ -24,7 +24,7 @@ public:
 	std::set<DeadTriangle*> faces;    	// adjacent triangles
 	DeadVertex *collapse;					// candidate vertex for collapse
 	size_t id;
-	DeadVertex(size_t id = -1) : IndexablePtr<float>(0.0f), collapse(nullptr), id(id), valid(true) {
+	DeadVertex(size_t id = -1) : Indexable<float>(0.0f), collapse(nullptr), id(id), valid(true) {
 	}
 	virtual ~DeadVertex(){}
 	inline bool isValid() const {
