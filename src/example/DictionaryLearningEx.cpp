@@ -30,183 +30,30 @@ DictionaryLearningEx::DictionaryLearningEx() :
 		Application(1200, 1000, "Learning Toy", false) {
 }
 bool DictionaryLearningEx::init(Composite& rootNode) {
-	ReadImageFromFile(getFullPath("images/stereo_left.png"), img);
-	int patchSize = 8;
-	int subsample = 8;
-	int filters = 3;
-	int sparsity =4;
-	/*
-	ImageRGBA tmp;
-	*/
-	/*
-	std::vector<std::string> outputFiles = GetDirectoryFileListing(
-			"/home/blake/Downloads/gt_training_lowres", "png","GT02");
-	std::vector<std::string> imageFiles = GetDirectoryFileListing(
-			"/home/blake/Downloads/input_training_lowres", "png","GT02");
-	std::string outputFilterFile = MakeString() << GetDesktopDirectory()
-			<< ALY_PATH_SEPARATOR<<"alpha_filterbanks.xml";
-	std::string inputFilterFile = MakeString() << GetDesktopDirectory()
-			<< ALY_PATH_SEPARATOR<<"image_filterbanks.xml";
-*/
-	 /*
-	 std::vector<ImageRGBA> pyramid(5);
-	 ReadImageFromFile(getFullPath("images/blake.png"),pyramid[0]);
-	 for(int p=1;p<pyramid.size();p++){
-	 DownSample3x3(pyramid[p-1],pyramid[p]);
-	 }
-
-	std::vector<ImageRGBA> outputImages(outputFiles.size());
-	std::vector<ImageRGBA> inputImages(inputFilterFile.size());
-	int n = 0;
-	for (std::string imgFile : outputFiles) {
-		ReadImageFromFile(imgFile, outputImages[n]);
-		n++;
-	}
-	n = 0;
-	for (std::string imgFile : imageFiles) {
-		ReadImageFromFile(imgFile, inputImages[n]);
-		n++;
-	}
-	std::cout << "Segmentation Images " << outputImages.size() << std::endl;
-
-	std::vector<FilterBank> inputFilters,outputFilters;
-	if (!FileExists(outputFilterFile)) {
-		learning.train(outputImages, filters, subsample, patchSize, patchSize);
-		learning.writeFilterBanks(
-				MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"output_filters.png");
-		outputFilters=learning.filterBanks;
-	} else {
-		ReadFilterBanksFromFile(outputFilterFile,outputFilters);
-	}
-	if (!FileExists(inputFilterFile)) {
-		learning.train(inputImages, filters, subsample, patchSize, patchSize);
-		learning.writeFilterBanks(
-				MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"input_filters.png");
-		inputFilters=learning.filterBanks;
-		learning.write(inputFilterFile);
-	} else {
-		ReadFilterBanksFromFile(inputFilterFile,inputFilters);
-	}
-*/
-
-	//learning.writeEstimatedPatches(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"reconstruction.png",samples[0].width/patchSize,samples[0].height/patchSize);
-
-	 learning.train({img},filters,subsample,patchSize,patchSize,sparsity);
-	 learning.writeFilterBanks(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"filters1.png");
-	 learning.stash(img, 1);
-	 learning.writeEstimatedPatches(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"reconstruction.png",img.width/subsample,img.height/subsample);
-
-	 /*
-	 DownSample3x3(img,tmp);
-	 learning.train({tmp},32,patchSize,patchSize,patchSize);
-	 learning.writeFilterBanks(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"filters2.png");
-	 learning.writeEstimatedPatches(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"reconstruction2.png",tmp.width/patchSize,tmp.height/patchSize);
-
-	 DownSample3x3(tmp,img);
-	 learning.train({img},32,patchSize,patchSize,patchSize);
-	 learning.writeFilterBanks(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"filters3.png");
-	 learning.writeEstimatedPatches(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"reconstruction3.png",img.width/patchSize,img.height/patchSize);
-
-	 DownSample3x3(img,tmp);
-	 learning.train({tmp},32,patchSize,patchSize,patchSize);
-	 learning.writeFilterBanks(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"filters4.png");
-	 learning.writeEstimatedPatches(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"reconstruction4.png",tmp.width/patchSize,tmp.height/patchSize);
-
-	 DownSample3x3(tmp,img);
-	 learning.train({img},32,patchSize,patchSize,patchSize);
-	 learning.writeFilterBanks(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"filters5.png");
-	 learning.writeEstimatedPatches(MakeString()<<GetDesktopDirectory()<<ALY_PATH_SEPARATOR<<"reconstruction5.png",img.width/patchSize,img.height/patchSize);
-	 */
-	 std::exit(0);
-	parametersDirty = true;
+	ReadImageFromFile(getFullPath("images/matting/gnome.png"), img);
+	int patchSize = 16;
+	int subsample = 16;
+	int sparsity = 4;
+	learning.initializeFilters(patchSize,patchSize,8);
+	learning.setTrainingData( { img },subsample);
+	learning.optimizeWeights(sparsity);
+	learning.optimizeDictionary(1E-6f, 128);
+	learning.writeFilterBanks(MakeDesktopFile("filterbanks.png"));
+	ImageRGB est;
+	learning.estimate(img,est,sparsity);
+	WriteImageToFile(MakeDesktopFile("estimate.png"),est);
+	img=est;
 	frameBuffersDirty = true;
-
 	BorderCompositePtr layout = BorderCompositePtr(
 			new BorderComposite("UI Layout", CoordPX(0.0f, 0.0f),
 					CoordPercent(1.0f, 1.0f), false));
-	ParameterPanePtr controls = ParameterPanePtr(
-			new ParameterPane("Controls", CoordPX(0.0f, 0.0f),
-					CoordPercent(1.0f, 1.0f)));
-	BorderCompositePtr controlLayout = BorderCompositePtr(
-			new BorderComposite("Control Layout", CoordPX(0.0f, 0.0f),
-					CoordPercent(1.0f, 1.0f), true));
-	controls->onChange =
-			[this](const std::string& label, const AnyInterface& value) {
-
-				parametersDirty = true;
-			};
-
-	lineWidth = Float(1.0f);
-	particleSize = Float(0.2f);
-
-	lineColor = Color(0.0f, 0.2f, 0.5f, 1.0f);
-	pointColor = Color(1.0f, 0.0f, 0.0f, 1.0f);
-	springlColor = Color(0.5f, 0.5f, 0.5f, 1.0f);
-	matchColor = Color(0.5f, 0.5f, 1.0f, 0.75f);
-	particleColor = Color(0.6f, 0.0f, 0.0f, 1.0f);
-	normalColor = Color(0.0f, 0.8f, 0.0f, 1.0f);
-	vecfieldColor = Color(0.8f, 0.4f, 0.8f, 0.5f);
-	controls->setAlwaysShowVerticalScrollBar(false);
-	controls->setScrollEnabled(false);
-	controls->backgroundColor = MakeColor(getContext()->theme.DARKER);
-	controls->borderColor = MakeColor(getContext()->theme.DARK);
-	controls->borderWidth = UnitPX(1.0f);
-
-	controlLayout->backgroundColor = MakeColor(getContext()->theme.DARKER);
-	controlLayout->borderWidth = UnitPX(0.0f);
-	layout->setWest(controlLayout, UnitPX(400.0f));
-	controlLayout->setCenter(controls);
 	CompositePtr infoComposite = CompositePtr(
 			new Composite("Info", CoordPX(0.0f, 0.0f),
 					CoordPercent(1.0f, 1.0f)));
 	infoComposite->backgroundColor = MakeColor(getContext()->theme.DARKER);
 	infoComposite->borderColor = MakeColor(getContext()->theme.DARK);
 	infoComposite->borderWidth = UnitPX(0.0f);
-	playButton = IconButtonPtr(
-			new IconButton(0xf144, CoordPerPX(0.5f, 0.5f, -35.0f, -35.0f),
-					CoordPX(70.0f, 70.0f)));
-	stopButton = IconButtonPtr(
-			new IconButton(0xf28d, CoordPerPX(0.5f, 0.5f, -35.0f, -35.0f),
-					CoordPX(70.0f, 70.0f)));
-	playButton->borderWidth = UnitPX(0.0f);
-	stopButton->borderWidth = UnitPX(0.0f);
-	playButton->backgroundColor = MakeColor(getContext()->theme.DARKER);
-	stopButton->backgroundColor = MakeColor(getContext()->theme.DARKER);
-	playButton->foregroundColor = MakeColor(0, 0, 0, 0);
-	stopButton->foregroundColor = MakeColor(0, 0, 0, 0);
-	playButton->iconColor = MakeColor(getContext()->theme.LIGHTER);
-	stopButton->iconColor = MakeColor(getContext()->theme.LIGHTER);
-	playButton->borderColor = MakeColor(getContext()->theme.LIGHTEST);
-	stopButton->borderColor = MakeColor(getContext()->theme.LIGHTEST);
-	playButton->onMouseDown =
-			[this](AlloyContext* context, const InputEvent& e) {
-				if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
-					stopButton->setVisible(true);
-					playButton->setVisible(false);
-					return true;
-				}
-				return false;
-			};
-	stopButton->onMouseDown =
-			[this](AlloyContext* context, const InputEvent& e) {
-				if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
-					stopButton->setVisible(false);
-					playButton->setVisible(true);
-					running = false;
-					return true;
-				}
-				return false;
-			};
-	stopButton->setVisible(false);
-	infoComposite->add(playButton);
-	infoComposite->add(stopButton);
-	controlLayout->setSouth(infoComposite, UnitPX(80.0f));
 	rootNode.add(layout);
-
-	controls->addGroup("Simulation", true);
-	controls->addGroup("Visualization", true);
-	controls->addNumberField("Line Width", lineWidth, Float(1.0f), Float(20.0f),
-			6.0f);
 	CompositePtr viewRegion = CompositePtr(
 			new Composite("View", CoordPX(0.0f, 0.0f),
 					CoordPercent(1.0f, 1.0f)));
@@ -220,12 +67,13 @@ bool DictionaryLearningEx::init(Composite& rootNode) {
 							-img.height * downScale * 0.5f),
 					CoordPX(img.width * downScale, img.height * downScale)));
 	Application::addListener(resizeableRegion.get());
-	ImageGlyphPtr imageGlyph;// = AlloyApplicationContext()->createImageGlyph(img,false);
+	ImageGlyphPtr imageGlyph = AlloyApplicationContext()->createImageGlyph(img,false);
 	DrawPtr drawContour =
 			DrawPtr(
 					new Draw("Contour Draw", CoordPX(0.0f, 0.0f),
 							CoordPercent(1.0f, 1.0f),
 							[this](AlloyContext* context, const box2px& bounds) {
+		/*
 								NVGcontext* nvg = context->nvgContext;
 								nvgLineCap(nvg, NVG_ROUND);
 								nvgLineJoin(nvg,NVG_ROUND);
@@ -292,7 +140,7 @@ bool DictionaryLearningEx::init(Composite& rootNode) {
 									nvgStroke(nvg);
 								}
 
-								const std::vector<SamplePatch>& banks=learning.patches;
+								const std::vector<SamplePatch>& banks=learning.getSamplePatch();
 								if(lineWidth.toFloat()*0.1f*scale>0.5f) {
 									nvgStrokeColor(nvg, lineColor);
 									nvgStrokeWidth(nvg, lineWidth.toFloat()*0.1f*scale);
@@ -354,6 +202,7 @@ bool DictionaryLearningEx::init(Composite& rootNode) {
 										nvgFill(nvg);
 									}
 								}
+								*/
 							}));
 	GlyphRegionPtr glyphRegion = GlyphRegionPtr(
 			new GlyphRegion("Image Region", imageGlyph, CoordPX(0.0f, 0.0f),

@@ -247,8 +247,8 @@ public:
 		this->set(rhs.data);
 		return *this;
 	}
-	int2 dimensions() const {
-		return int2(width, height);
+	dim2 dimensions() const {
+		return dim2(width, height);
 	}
 	int2 position() const {
 		return int2(x, y);
@@ -1202,7 +1202,9 @@ void ConvertImage(const Image3ub& in, Image3us& out);
 void ConvertImage(const Image4ub& in, Image4us& out);
 
 void ConvertImage(const Image1us& in, Image1f& out);
+void ConvertImage(const Image1ub& in, Image1f& out);
 void ConvertImage(const Image1f& in, Image1us& out);
+void ConvertImage(const Image1f& in, Image1ub& out);
 
 inline void ConvertImage(const Image1f& in, Image1f& out){out=in;}
 inline void ConvertImage(const ImageRGB& in, ImageRGB& out){out=in;}

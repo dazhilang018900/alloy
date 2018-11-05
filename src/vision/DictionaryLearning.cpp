@@ -50,6 +50,25 @@ void SamplePatch::sample(const aly::Image1f& gray) {
 		}
 	}
 }
+void SamplePatch::sample(const aly::Image3f& colors,int c) {
+	data.resize(width * height);
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width; i++) {
+			float2 pix(width * (i / (float) (width - 1) - 0.5f),
+					height * (j / (float) (height - 1) - 0.5f));
+			data[i + j * width] = colors(position.x + pix.x, position.y + pix.y)[c];
+		}
+	}
+}
+void SamplePatch::sample(const aly::ImageRGB& colors,int c) {
+	data.resize(width * height);
+	for (int j = 0; j < height; j++) {
+		for (int i = 0; i < width; i++) {
+			float2 pix(width * (i / (float) (width - 1) - 0.5f),height * (j / (float) (height - 1) - 0.5f));
+			data[i + j * width] = colors(position.x + pix.x, position.y + pix.y)[c]/255.0f;
+		}
+	}
+}
 float SamplePatch::error(const std::vector<FilterBank>& banks,
 		bool correlation) {
 	int N = (int) data.size();
@@ -561,50 +580,32 @@ void WritePatchesToFile(const std::string& file,
 	Tile(tiles, out, N, M);
 	WriteImageToFile(file, out);
 }
-void DictionaryLearning::writeEstimatedPatches(const std::string& outImage,
-		int M, int N) {
-	//int M=std::ceil(std::sqrt(patches.size()));
-	//int N=(patches.size()%M==0)?(patches.size()/M):(1+patches.size()/M);
-	std::vector<ImageRGB> tiles(patches.size());
-	std::vector<double> scores(patches.size());
-	double maxError = 0;
-	for (int n = 0; n < patches.size(); n++) {
-		scores[n] = patches[n].error(filterBanks, false);
-		if (scores[n] > maxError) {
-			maxError = scores[n];
-		}
-	}
-
-	for (size_t idx = 0; idx < patches.size(); idx++) {
-		SamplePatch& p = patches[idx];
-		std::vector<float> tmp;
-		p.synthesize(filterBanks, tmp);
-		ImageRGB& tile = tiles[idx];
-		tile.resize(p.width, p.height);
-		int count = 0;
-		float cw = scores[idx] / maxError;
-		for (int j = 0; j < tile.height; j++) {
-			for (int i = 0; i < tile.width; i++) {
-				float val = tmp[count];
-				tile[count] = ToRGB(float3(val));
-				/*
-				 if (val < 0) {
-				 tile[count] = aly::RGB(0, 0, 0);
-				 } else {
-
-				 float err = std::abs(tmp[count] - p.data[count]);
-				 tile[count] = ToRGB(
-				 HSVtoRGBf(HSV(1.0f - 0.9f * cw, cw, val)));
-				 }
-				 */
-				count++;
+void DictionaryLearning::estimate(const aly::ImageRGB& img,aly::ImageRGB& out,int sparsity) {
+	int width = filterBanks[0].width;
+	int height = filterBanks[0].height;
+	out.resize( width*(img.width/width), height*(img.height/height));
+	out.set(aly::RGB(0, 0, 0));
+	size_t index = 0;
+#pragma omp parallel for
+	for (int j = 0; j < out.height; j += height) {
+		for (int i = 0; i < out.width; i += width) {
+			std::vector<float> tmp;
+			float2 center = float2(i + width * 0.5f,j + height * 0.5f);
+			SamplePatch p(center,width,height);
+			for(int c=0;c<3;c++){
+				p.sample(img,c);
+				solveOrthoMatchingPursuit(sparsity,p);
+				p.synthesize(filterBanks, tmp);
+				int count = 0;
+				for (int jj = 0; jj < height; jj++) {
+					for (int ii = 0; ii < width; ii++) {
+						float val = tmp[count++];
+						out(ii + i, jj + j)[c] = clamp((int)(val*255.0f),0,255);
+					}
+				}
 			}
 		}
 	}
-	std::cout << "Tiles " << tiles.size() << std::endl;
-	ImageRGB out;
-	Tile(tiles, out, N, M);
-	WriteImageToFile(outImage, out);
 }
 double DictionaryLearning::score(std::vector<std::pair<int, double>>& scores) {
 	scores.resize(patches.size());
@@ -620,6 +621,7 @@ double DictionaryLearning::score(std::vector<std::pair<int, double>>& scores) {
 void DictionaryLearning::writeFilterBanks(const std::string& outImage) {
 	int patchWidth = filterBanks.front().width;
 	int patchHeight = filterBanks.front().height;
+	std::cout << "Filter Banks " << filterBanks.size() << std::endl;
 	ImageRGB filters(patchWidth * filterBanks.size(), patchHeight);
 	for (int n = 0; n < filterBanks.size(); n++) {
 		FilterBank& b = filterBanks[n];
@@ -675,40 +677,17 @@ void DictionaryLearning::stash(const ImageRGB& img, int subsample) {
 	WriteImageToRawFile(MakeDesktopFile("orients.xml"), orientation);
 
 }
-void DictionaryLearning::train(const std::vector<ImageRGB>& images,
-		int targetFilterBankSize, int subsample, int patchWidth,
-		int patchHeight, int sparsity) {
-	aly::Image1f gray;
-	patches.clear();
-	std::cout << "Start Learning " << patches.size() << "..." << std::endl;
-	for (int nn = 0; nn < images.size(); nn++) {
-		const ImageRGB& img = images[nn];
-		ConvertImage(img, gray);
-		int N = img.height / subsample;
-		int M = img.width / subsample;
-		for (int n = 0; n < N; n++) {
-			for (int m = 0; m < M; m++) {
-				float2 center = float2(m * subsample + subsample * 0.5f,
-						n * subsample + subsample * 0.5f);
-				SamplePatch p(center, patchWidth, patchHeight);
-				p.sample(gray);
-				patches.push_back(p);
-			}
-		}
-	}
-	std::cout << "Patches " << patches.size() << " " << patchWidth << " "
-			<< patchHeight << std::endl;
-	WritePatchesToFile(MakeDesktopFile("tiles.png"), patches);
+void DictionaryLearning::initializeFilters(int patchWidth, int patchHeight,
+		int angleSamples) {
 	filterBanks.clear();
 	size_t K = patchWidth * patchHeight;
 	float fuzz = 0.5f;
 	float var = fuzz * fuzz;
-	//float var2 = 0.4f * 0.4f;
-	//float var3 = 0.5f * 0.5f;
 	std::vector<float> shifts = { -fuzz, -fuzz * 0.5f, 0.0f, fuzz * 0.5f, fuzz };
-	std::vector<float> angles;
-	for (int a = -180; a < 180; a += 20) {
-		angles.push_back(a);
+	std::vector<float> angles(angleSamples);
+	float angleDelta = 180.0f / (float) (angleSamples);
+	for (int a = 0; a < angleSamples; a++) {
+		angles[a] =  angleDelta * a;
 	}
 	int initFilterBanks = 3 + angles.size() * shifts.size();
 	filterBanks.reserve(initFilterBanks);
@@ -730,7 +709,6 @@ void DictionaryLearning::train(const std::vector<ImageRGB>& images,
 						+ std::sin(ToRadians(angles[a])) * t + shifts[sh];
 				filterBanks[idx++].data[k] = 0.5f
 						- 1.0f / (1 + std::exp(r / var));
-				//filterBanks[idx++].data[k] = std::exp(-0.5f * r * r / var);
 			}
 		}
 	}
@@ -739,24 +717,16 @@ void DictionaryLearning::train(const std::vector<ImageRGB>& images,
 
 	filterBanks[1].type = FilterType::Shading;
 	filterBanks[1].angle = 0;
-	;
 
 	filterBanks[2].type = FilterType::Shading;
 	filterBanks[2].angle = 90;
 	int idx = 3;
 	for (int a = 0; a < angles.size(); a++) {
 		for (int sh = 0; sh < shifts.size(); sh++) {
-
 			filterBanks[idx].angle = angles[a];
 			filterBanks[idx].shift = shifts[sh];
 			filterBanks[idx].type = FilterType::Edge;
 			idx++;
-			/*
-			 filterBanks[idx].angle=angles[a];
-			 filterBanks[idx].shift=shifts[sh];
-			 filterBanks[idx].type=FilterType::Line;
-			 idx++;
-			 */
 		}
 	}
 	int KK = filterBanks.size() * 4;
@@ -766,10 +736,53 @@ void DictionaryLearning::train(const std::vector<ImageRGB>& images,
 	for (int n = 0; n < filterBanks.size(); n++) {
 		filterBanks[n].normalize();
 	}
-	writeFilterBanks(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"filters0.png");
-	optimizeWeights(sparsity);
-	optimizeDictionary(1E-6f, 128);
-	writeFilterBanks(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR<<"filters1.png");
+}
+void DictionaryLearning::setTrainingData(const std::vector<Image1ub>& images,
+		int subsample) {
+	int patchWidth = filterBanks[0].width;
+	int patchHeight = filterBanks[0].height;
+	patches.clear();
+	Image1f gray;
+	for (int nn = 0; nn < images.size(); nn++) {
+		const Image1ub& img = images[nn];
+		ConvertImage(img, gray);
+		int N = img.height / subsample;
+		int M = img.width / subsample;
+
+		for (int n = 0; n < N; n++) {
+			for (int m = 0; m < M; m++) {
+				float2 center = float2(m * subsample + subsample * 0.5f,
+						n * subsample + subsample * 0.5f);
+				SamplePatch p(center, patchWidth, patchHeight);
+				p.sample(gray);
+				patches.push_back(p);
+			}
+		}
+	}
+	std::cout << "Patches " << patches.size() << std::endl;
+}
+void DictionaryLearning::setTrainingData(const std::vector<ImageRGB>& images,
+		int subsample) {
+	int patchWidth = filterBanks[0].width;
+	int patchHeight = filterBanks[0].height;
+	aly::Image1f gray;
+	patches.clear();
+	for (int nn = 0; nn < images.size(); nn++) {
+		const ImageRGB& img = images[nn];
+		ConvertImage(img, gray);
+		int N = img.height / subsample;
+		int M = img.width / subsample;
+		for (int n = 0; n < N; n++) {
+			for (int m = 0; m < M; m++) {
+				float2 center = float2(m * subsample + subsample * 0.5f,
+						n * subsample + subsample * 0.5f);
+				SamplePatch p(center, patchWidth, patchHeight);
+				p.sample(gray);
+				patches.push_back(p);
+			}
+		}
+	}
+	std::cout << "Patches " << patches.size() << std::endl;
 }
 }
 

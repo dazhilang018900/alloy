@@ -33,21 +33,9 @@
 class DictionaryLearningEx: public aly::Application {
 protected:
 	aly::ImageRGB img;
-	bool parametersDirty;
 	bool frameBuffersDirty;
 	bool running = false;
-	aly::Image2f vecField;
-	aly::Number lineWidth;
-	aly::Number particleSize;
-	aly::Color lineColor;
-	aly::Color pointColor;
-	aly::Color particleColor;
-	aly::Color normalColor;
-	aly::Color springlColor;
-	aly::Color matchColor;
-	aly::Color vecfieldColor;
 	aly::AdjustableCompositePtr resizeableRegion;
-	aly::IconButtonPtr playButton,stopButton;
 	aly::DictionaryLearning learning;
 public:
 	DictionaryLearningEx();

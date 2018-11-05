@@ -351,6 +351,9 @@ namespace aly {
 		inline std::shared_ptr<ImageGlyph> createImageGlyph(const ImageRGBA& img, bool mipmap = false) {
 			return std::shared_ptr<ImageGlyph>(new ImageGlyph(img, this));
 		}
+		inline std::shared_ptr<ImageGlyph> createImageGlyph(const ImageRGB& img, bool mipmap = false) {
+			return std::shared_ptr<ImageGlyph>(new ImageGlyph(img, this));
+		}
 		inline std::shared_ptr<AwesomeGlyph> createAwesomeGlyph(int codePoint, const FontStyle& style = FontStyle::Normal, pixel height = 32) {
 			std::shared_ptr<AwesomeGlyph> g = std::shared_ptr<AwesomeGlyph>(new AwesomeGlyph(codePoint, this, style, height));
 			return g;

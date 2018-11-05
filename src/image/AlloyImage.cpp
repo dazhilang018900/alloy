@@ -1049,6 +1049,20 @@ void ConvertImage(const Image1us& in, Image1f& out){
 		out[index++].x=b.x;
 	}
 }
+void ConvertImage(const Image1ub& in, Image1f& out){
+	out.resize(in.width,in.height);
+	size_t index=0;
+	for(ubyte1& b:in.data){
+		out[index++].x=b.x/255.0f;
+	}
+}
+void ConvertImage(const Image1f& in, Image1ub& out){
+	out.resize(in.width,in.height);
+	size_t index=0;
+	for(float1& b:in.data){
+		out[index++].x=clamp((int)(b.x*255.0f),0,255);
+	}
+}
 void ConvertImage(const Image1f& in, Image1us& out){
 	out.resize(in.width,in.height);
 	size_t index=0;

@@ -75,6 +75,18 @@ struct SamplePatch {
 	float2 position;
 	std::vector<float> data;
 	std::vector<float> weights;
+	size_t size() const {
+		return data.size();
+	}
+	inline float getWeight(const size_t& sz) const {
+		return weights[sz];
+	}
+	inline const float& operator()(size_t i,size_t j) const {
+		return data[i+j*width];
+	}
+	inline float& operator()(size_t i,size_t j){
+		return data[i+j*width];
+	}
 	template<class Archive>
 	void save(Archive & archive) const {
 		archive(CEREAL_NVP(width), CEREAL_NVP(height), CEREAL_NVP(position),CEREAL_NVP(data), CEREAL_NVP(weights));
@@ -89,6 +101,8 @@ struct SamplePatch {
 		data.resize(patchWidth * patchHeight);
 	}
 	void sample(const aly::Image1f& gray);
+	void sample(const aly::ImageRGBf& gray,int c);
+	void sample(const aly::ImageRGB& gray,int c);
 	float error(const std::vector<FilterBank>& banks,bool correlation);
 	float synthesize(const std::vector<FilterBank>& banks,std::vector<float>& sample);
 	void resize(int w, int h);
@@ -101,23 +115,36 @@ protected:
 	void add(const std::vector<FilterBank>& banks);
 	void add(const FilterBank& banks);
 	std::set<int> optimizeFilters(int start);
-	void optimizeWeights(int t);
-	void optimizeDictionary(float errorThreshold=1E-6f,int maxIterations=128);
 	double error();
 	double score(std::vector<std::pair<int, double>>& scores);
-public:
 	std::vector<FilterBank> filterBanks;
 	std::vector<SamplePatch> patches;
+public:
 	DictionaryLearning();
+	std::vector<SamplePatch>& getSamplePatch() {
+		return patches;
+	}
+	const std::vector<SamplePatch>& getSamplePatch() const {
+		return patches;
+	}
+	std::vector<FilterBank>& getFilterBanks() {
+		return filterBanks;
+	}
+	const std::vector<FilterBank>& getFilterBanks() const {
+		return filterBanks;
+	}
+	void optimizeWeights(int sparsity);
+	void optimizeDictionary(float errorThreshold=1E-6f,int maxIterations=128);
 	void write(const std::string& outFile);
 	void read(const std::string& outFile);
 	void stash(const ImageRGB& img,int subsample);
-	void writeEstimatedPatches(const std::string& outImage,int M,int N);
+	void initializeFilters(int patchWidth,int patchHeight, int angleSamples);
+	void estimate(const aly::ImageRGB& img,ImageRGB& out,int sparsity);
 	void writeFilterBanks(const std::string& outImage);
 	virtual ~DictionaryLearning() {
 	}
-	void train(const std::vector<ImageRGB>& img, int targetFilterBankSize = 32,
-			int subsample = 8, int patchWidth = 16, int patchHeight = 8,int sparsity=4);
+	void setTrainingData(const std::vector<ImageRGB>& img, int subsample = 8);
+	void setTrainingData(const std::vector<Image1ub>& img, int subsample = 8);
 };
 void WritePatchesToFile(const std::string& file,const std::vector<SamplePatch>& patches);
 void WriteFilterBanksToFile(const std::string& file,
