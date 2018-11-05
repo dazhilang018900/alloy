@@ -69,7 +69,7 @@ void SamplePatch::sample(const aly::ImageRGB& colors,int c) {
 		}
 	}
 }
-float SamplePatch::error(const std::vector<FilterBank>& banks,
+float SamplePatch::residual(const std::vector<FilterBank>& banks,
 		bool correlation) {
 	int N = (int) data.size();
 	int M = (int) weights.size();
@@ -394,11 +394,13 @@ void DictionaryLearning::optimizeDictionary(float errorThreshold,
 	DenseMat<float> E, U, D, Vt;
 	int M = patches[0].data.size();
 	int W = filterBanks.size();
-	double lastError = error();
+	double lastError = residual();
 	std::vector<int> order(W);
 	for (int k = 0; k < W; k++) {
 		order[k] = k;
 	}
+
+	std::cout << "Initial Error " << lastError << std::endl;
 	for (int iter = 0; iter < maxIterations; iter++) {
 		Shuffle(order);
 		for (int kidx = 0; kidx < W; kidx++) {
@@ -434,11 +436,13 @@ void DictionaryLearning::optimizeDictionary(float errorThreshold,
 			//SVD on EtE
 			SVD(E.square(), U, D, Vt);
 			VecMap<float> u = U.getColumn(0);
+#pragma omp parallel for
 			for (size_t m = 0; m < M; m++) {
 				filterBanks[k][m] = u[m];
 			}
 			double largestLambda = std::sqrt((double) D(0, 0));
 			//Compute D inverse
+#pragma omp parallel for
 			for (int i = 0; i < D.rows; i++) {
 				double lam = std::sqrt((double) D(i, i));
 				D(i, i) = (float) (largestLambda / std::max(1E-10, lam));
@@ -452,7 +456,7 @@ void DictionaryLearning::optimizeDictionary(float errorThreshold,
 			}
 		}
 		if (errorThreshold > 0) {
-			double er = error();
+			double er = residual();
 			if (std::abs(er - lastError) < errorThreshold)
 				break;
 			lastError = er;
@@ -462,20 +466,43 @@ void DictionaryLearning::optimizeDictionary(float errorThreshold,
 	}
 }
 void DictionaryLearning::optimizeWeights(int t) {
-	std::cout << "Optimize weights for sparsity " << t << std::endl;
 #pragma omp parallel for
 	for (int idx = 0; idx < (int) patches.size(); idx++) {
 		SamplePatch& p = patches[idx];
 		solveOrthoMatchingPursuit(t, p);
 	}
 }
-double DictionaryLearning::error() {
+double DictionaryLearning::residual() {
 	double err = 0;
-	for (SamplePatch& p : patches) {
-		err += p.error(filterBanks, false);
+#pragma omp parallel reduction (+ : err)
+	for (int n=0;n<(int)patches.size();n++) {
+		double r=patches[n].residual(filterBanks, false);
+		err += r;
 	}
 	err /= patches.size();
 	return err;
+}
+void DictionaryLearning::addFilters(int filters){
+	std::vector<std::pair<float,size_t>> scores(patches.size());
+#pragma omp parallel for
+	for (int n=0;n<patches.size();n++) {
+		scores[n]={patches[n].residual(filterBanks, false), n };
+	}
+	std::sort(scores.begin(),scores.end());
+	for(int n=scores.size()-1;n>=std::max(0,(int)scores.size()-filters);n--){
+		FilterBank b;
+		SamplePatch& p=patches[scores[n].second];
+		b.data=p.data;
+		b.angle=0;
+		b.width=p.width;
+		b.height=p.height;
+		b.type=FilterType::Unknown;
+		b.normalize();
+		filterBanks.push_back(b);
+		for (int nn = 0; nn < patches.size(); nn++) {
+			patches[nn].weights.push_back(0.0f);
+		}
+	}
 }
 void DictionaryLearning::add(const std::vector<FilterBank>& banks) {
 	for (int b = 0; b < banks.size(); b++) {
@@ -610,7 +637,7 @@ void DictionaryLearning::estimate(const aly::ImageRGB& img,aly::ImageRGB& out,in
 double DictionaryLearning::score(std::vector<std::pair<int, double>>& scores) {
 	scores.resize(patches.size());
 	for (int n = 0; n < patches.size(); n++) {
-		scores[n]= {n,patches[n].error(filterBanks,false)};
+		scores[n]= {n,patches[n].residual(filterBanks,false)};
 	}
 	std::sort(scores.begin(), scores.end(),
 			[=](const std::pair<int,double>& a,const std::pair<int,double>& b) {
@@ -736,6 +763,7 @@ void DictionaryLearning::initializeFilters(int patchWidth, int patchHeight,
 	for (int n = 0; n < filterBanks.size(); n++) {
 		filterBanks[n].normalize();
 	}
+	std::cout<<"Filters "<<filterBanks.size()<<std::endl;
 }
 void DictionaryLearning::setTrainingData(const std::vector<Image1ub>& images,
 		int subsample) {
@@ -755,7 +783,9 @@ void DictionaryLearning::setTrainingData(const std::vector<Image1ub>& images,
 						n * subsample + subsample * 0.5f);
 				SamplePatch p(center, patchWidth, patchHeight);
 				p.sample(gray);
+				p.weights.resize(filterBanks.size(),0.0f);
 				patches.push_back(p);
+
 			}
 		}
 	}

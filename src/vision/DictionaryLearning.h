@@ -103,7 +103,7 @@ struct SamplePatch {
 	void sample(const aly::Image1f& gray);
 	void sample(const aly::ImageRGBf& gray,int c);
 	void sample(const aly::ImageRGB& gray,int c);
-	float error(const std::vector<FilterBank>& banks,bool correlation);
+	float residual(const std::vector<FilterBank>& banks,bool correlation);
 	float synthesize(const std::vector<FilterBank>& banks,std::vector<float>& sample);
 	void resize(int w, int h);
 };
@@ -115,7 +115,7 @@ protected:
 	void add(const std::vector<FilterBank>& banks);
 	void add(const FilterBank& banks);
 	std::set<int> optimizeFilters(int start);
-	double error();
+	double residual();
 	double score(std::vector<std::pair<int, double>>& scores);
 	std::vector<FilterBank> filterBanks;
 	std::vector<SamplePatch> patches;
@@ -133,8 +133,12 @@ public:
 	const std::vector<FilterBank>& getFilterBanks() const {
 		return filterBanks;
 	}
+	size_t getFilterCount() const {
+		return filterBanks.size();
+	}
 	void optimizeWeights(int sparsity);
 	void optimizeDictionary(float errorThreshold=1E-6f,int maxIterations=128);
+	void addFilters(int n);
 	void write(const std::string& outFile);
 	void read(const std::string& outFile);
 	void stash(const ImageRGB& img,int subsample);

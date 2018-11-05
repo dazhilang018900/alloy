@@ -34,11 +34,17 @@ bool DictionaryLearningEx::init(Composite& rootNode) {
 	int patchSize = 16;
 	int subsample = 16;
 	int sparsity = 4;
-	learning.initializeFilters(patchSize,patchSize,8);
+	int angleSamples=8;
+	learning.initializeFilters(patchSize,patchSize,angleSamples);//creates 43 filters
 	learning.setTrainingData( { img },subsample);
 	learning.optimizeWeights(sparsity);
-	learning.optimizeDictionary(1E-6f, 128);
-	learning.writeFilterBanks(MakeDesktopFile("filterbanks.png"));
+	while(learning.getFilterCount()<64){//43 is an awkward number, make it 64
+		learning.addFilters(1);
+		learning.optimizeWeights(sparsity);
+	}
+	learning.writeFilterBanks(MakeDesktopFile("filterbanks_before.png"));
+	learning.optimizeDictionary(1E-5f, 128);
+	learning.writeFilterBanks(MakeDesktopFile("filterbanks_after.png"));
 	ImageRGB est;
 	learning.estimate(img,est,sparsity);
 	WriteImageToFile(MakeDesktopFile("estimate.png"),est);
