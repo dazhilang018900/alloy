@@ -78,7 +78,6 @@ float SamplePatch::residual(const std::vector<FilterBank>& banks,
 				MakeString() << "Weight vector doesn't match filter banks "
 						<< weights.size() << " " << banks.size());
 	}
-
 	double err = 0;
 	if (correlation) {
 		double length1 = 0;
@@ -474,7 +473,6 @@ void DictionaryLearning::optimizeWeights(int t) {
 }
 double DictionaryLearning::residual() {
 	double err = 0;
-#pragma omp parallel reduction (+ : err)
 	for (int n=0;n<(int)patches.size();n++) {
 		double r=patches[n].residual(filterBanks, false);
 		err += r;

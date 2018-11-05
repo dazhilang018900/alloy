@@ -30,7 +30,7 @@ DictionaryLearningEx::DictionaryLearningEx() :
 		Application(1200, 1000, "Learning Toy", false) {
 }
 bool DictionaryLearningEx::init(Composite& rootNode) {
-	ReadImageFromFile(getFullPath("images/matting/gnome.png"), img);
+	ReadImageFromFile(getFullPath("images/matting/gnome_matte.png"), img);
 	int patchSize = 16;
 	int subsample = 16;
 	int sparsity = 4;
