@@ -61,6 +61,8 @@ SupportVectorMachine::SupportVectorMachine() :model(nullptr) {
 	param.nr_weight = 0;
 	param.weight_label = nullptr;
 	param.weight = nullptr;
+	problem.x=nullptr;
+	problem.y=nullptr;
 
 }
 double SupportVectorMachine::evaluate(int index, double value,
@@ -98,14 +100,15 @@ void SupportVectorMachine::train(const std::vector<std::vector<int>>& index,cons
 		auto indexArray=index[n];
 		auto xArray=x[n];
 		struct svm_node node;
+		std::vector<struct svm_node>& in=inputs[n];
 		for(int k=0;k<indexArray.size();k++){
 			node={indexArray[k],xArray[k]};
-			inputs[n].push_back(node);
+			in.push_back(node);
 			max_index=std::max(indexArray[k],max_index);
 		}
 		node={-1,0};//indicate end of feature
-		inputs[n].push_back(node);
-		problem.x[n]=inputs[n].data();
+		in.push_back(node);
+		problem.x[n]=in.data();
 	}
 	if (param.gamma == 0 && max_index > 0) {
 		param.gamma = 1.0 / max_index;
