@@ -34,7 +34,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #define _LIBSVM_H
 
 #define LIBSVM_VERSION 323
-
+#include <stddef.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -49,7 +49,7 @@ struct svm_node
 
 struct svm_problem
 {
-	int l;
+	size_t l;
 	double *y;
 	struct svm_node **x;
 };
