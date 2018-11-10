@@ -181,6 +181,34 @@ bool EndsWith(const std::string& str, const std::string& pattern) {
 		return (str == pattern);
 	}
 }
+std::vector<int> ExtractFrameRanges(const std::string& str){
+	//List should be comma separated
+	std::vector<std::string> tokens=Split(str,',',false);
+	std::vector<int> frames;
+	for(std::string str:tokens){
+		//first try split on '-', should be no negative frames
+		std::vector<std::string> split=Split(Trim(str),'-',false);
+		if(split.size()==1){//try split again on ':'
+			split=Split(Trim(str),':',false);
+		}
+		if(split.size()==2){
+			//works, 17-20, 30, 1, 40:47
+			int st=std::atoi(Trim(split[0]).c_str());
+			int ed=std::atoi(Trim(split[1]).c_str());
+			if(st>ed)std::swap(st,ed);//force range to be increasing
+			for(int n=st;n<=ed;n++){
+				frames.push_back(n);
+			}
+		} else if(split.size()==1){
+			//works, -2,-1,0,1,2
+			frames.push_back(atoi(Trim(str).c_str()));
+		}
+	}
+	//Sort increasing and remove duplicated numbers
+	std::sort(frames.begin(),frames.end());
+	frames.erase(std::unique(frames.begin(),frames.end()),frames.end());
+	return frames;
+}
 std::vector<int> ExtractIntegers(const std::string& str) {
 	std::vector<int> buffer;
 	std::string current;
