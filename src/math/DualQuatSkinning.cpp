@@ -36,47 +36,44 @@
 */
 
 namespace aly {
+
+
 // input: unit quaternion 'q0', translation vector 't'
 // output: unit dual quaternion 'dq'
-void QuatTrans2UDQ(const float q0[4], const float t[3],
-                  float dq[2][4])
-{
+float2x4 MakeDualQuat(const float4& q0, const float3& t){
+   float2x4 dq;
    // non-dual part (just copy q0):
-   for (int i=0; i<4; i++) dq[0][i] = q0[i];
+   for (int i=0; i<4; i++) dq(0,i) = q0[i];
    // dual part:
-   dq[1][0] = -0.5*(t[0]*q0[1] + t[1]*q0[2] + t[2]*q0[3]);
-   dq[1][1] = 0.5*( t[0]*q0[0] + t[1]*q0[3] - t[2]*q0[2]);
-   dq[1][2] = 0.5*(-t[0]*q0[3] + t[1]*q0[0] + t[2]*q0[1]);
-   dq[1][3] = 0.5*( t[0]*q0[2] - t[1]*q0[1] + t[2]*q0[0]);
+   dq(1,0) = -0.5*(t[0]*q0[1] + t[1]*q0[2] + t[2]*q0[3]);
+   dq(1,1) = 0.5*( t[0]*q0[0] + t[1]*q0[3] - t[2]*q0[2]);
+   dq(1,2) = 0.5*(-t[0]*q0[3] + t[1]*q0[0] + t[2]*q0[1]);
+   dq(1,3) = 0.5*( t[0]*q0[2] - t[1]*q0[1] + t[2]*q0[0]);
+   return dq;
 }
 
 // input: unit dual quaternion 'dq'
 // output: unit quaternion 'q0', translation vector 't'
-void UDQ2QuatTrans(const float dq[2][4],
-                  float q0[4], float t[3])
-{
+void DqToRotAndTrans(const float2x4 dq,float4& q0, float3& t){
    // regular quaternion (just copy the non-dual part):
-   for (int i=0; i<4; i++) q0[i] = dq[0][i];
+   for (int i=0; i<4; i++) q0[i] = dq(0,i) ;
    // translation vector:
-   t[0] = 2.0*(-dq[1][0]*dq[0][1] + dq[1][1]*dq[0][0] - dq[1][2]*dq[0][3] + dq[1][3]*dq[0][2]);
-   t[1] = 2.0*(-dq[1][0]*dq[0][2] + dq[1][1]*dq[0][3] + dq[1][2]*dq[0][0] - dq[1][3]*dq[0][1]);
-   t[2] = 2.0*(-dq[1][0]*dq[0][3] - dq[1][1]*dq[0][2] + dq[1][2]*dq[0][1] + dq[1][3]*dq[0][0]);
+   t[0] = 2.0*(-dq(1,0)*dq(0,1) + dq(1,1)*dq(0,0) - dq(1,2)*dq(0,3) + dq(1,3)*dq(0,2));
+   t[1] = 2.0*(-dq(1,0)*dq(0,2) + dq(1,1)*dq(0,3) + dq(1,2)*dq(0,0) - dq(1,3)*dq(0,1));
+   t[2] = 2.0*(-dq(1,0)*dq(0,3) - dq(1,1)*dq(0,2) + dq(1,2)*dq(0,1) + dq(1,3)*dq(0,0));
 }
 
 // input: dual quat. 'dq' with non-zero non-dual part
 // output: unit quaternion 'q0', translation vector 't'
-void DQ2QuatTrans(const float dq[2][4],
-                  float q0[4], float t[3])
-{
+void DqToUnitRotAndTrans(const float2x4& dq,float4& q0, float3& t){
    float len = 0.0;
-   for (int i=0; i<4; i++) len += dq[0][i] * dq[0][i];
-   len = sqrt(len);
-   for (int i=0; i<4; i++) q0[i] = dq[0][i] / len;
-   t[0] = 2.0*(-dq[1][0]*dq[0][1] + dq[1][1]*dq[0][0] - dq[1][2]*dq[0][3] + dq[1][3]*dq[0][2]) / len;
-   t[1] = 2.0*(-dq[1][0]*dq[0][2] + dq[1][1]*dq[0][3] + dq[1][2]*dq[0][0] - dq[1][3]*dq[0][1]) / len;
-   t[2] = 2.0*(-dq[1][0]*dq[0][3] - dq[1][1]*dq[0][2] + dq[1][2]*dq[0][1] + dq[1][3]*dq[0][0]) / len;
+   for (int i=0; i<4; i++) len += aly::sqr(dq(0,i));
+   len = std::sqrt(len);
+   for (int i=0; i<4; i++) q0[i] = dq(0,i) / len;
+   t[0] = 2.0*(-dq(1,0)*dq(0,1) + dq(1,1)*dq(0,0) - dq(1,2)*dq(0,3) + dq(1,3)*dq(0,2)) / len;
+   t[1] = 2.0*(-dq(1,0)*dq(0,2) + dq(1,1)*dq(0,3) + dq(1,2)*dq(0,0) - dq(1,3)*dq(0,1)) / len;
+   t[2] = 2.0*(-dq(1,0)*dq(0,3) - dq(1,1)*dq(0,2) + dq(1,2)*dq(0,1) + dq(1,3)*dq(0,0)) / len;
 }
-
 
 /* dqs.cg
 
@@ -107,154 +104,122 @@ void DQ2QuatTrans(const float dq[2][4],
 
 */
 
-struct inputs
-{
-	float4 position;
-	float4 normal;
-	float4 weights;
-	int4 matrixIndices;
-};
 
-struct outputs
+float4x4 DqToMatrix(float4 Qn, float4 Qd)
 {
-	float4 hPosition;
-	float4 hNormal;
-};
-
-float3x4 DQToMatrix(float4 Qn, float4 Qd)
-{
-	float3x4 M;
+	float4x4 M=float4x4::identity();
 	float len2 = dot(Qn, Qn);
 	float w = Qn.x, x = Qn.y, y = Qn.z, z = Qn.w;
 	float t0 = Qd.x, t1 = Qd.y, t2 = Qd.z, t3 = Qd.w;
+	M(0,0) = w*w + x*x - y*y - z*z; M(0,1) = 2*x*y - 2*w*z; M(0,2) = 2*x*z + 2*w*y;
+	M(1,0) = 2*x*y + 2*w*z; M(1,1) = w*w + y*y - x*x - z*z; M(1,2) = 2*y*z - 2*w*x;
+	M(2,0) = 2*x*z - 2*w*y; M(2,1) = 2*y*z + 2*w*x; M(2,2) = w*w + z*z - x*x - y*y;
 
-	M[0][0] = w*w + x*x - y*y - z*z; M[0][1] = 2*x*y - 2*w*z; M[0][2] = 2*x*z + 2*w*y;
-	M[1][0] = 2*x*y + 2*w*z; M[1][1] = w*w + y*y - x*x - z*z; M[1][2] = 2*y*z - 2*w*x;
-	M[2][0] = 2*x*z - 2*w*y; M[2][1] = 2*y*z + 2*w*x; M[2][2] = w*w + z*z - x*x - y*y;
-
-	M[0][3] = -2*t0*x + 2*w*t1 - 2*t2*z + 2*y*t3;
-	M[1][3] = -2*t0*y + 2*t1*z - 2*x*t3 + 2*w*t2;
-	M[2][3] = -2*t0*z + 2*x*t2 + 2*w*t3 - 2*t1*y;
-
+	M(0,3) = -2*t0*x + 2*w*t1 - 2*t2*z + 2*y*t3;
+	M(1,3) = -2*t0*y + 2*t1*z - 2*x*t3 + 2*w*t2;
+	M(2,3) = -2*t0*z + 2*x*t2 + 2*w*t3 - 2*t1*y;
 	M /= len2;
-
 	return M;
 }
 
 // basic dual quaternion skinning:
-outputs dqs(inputs IN,
+QuatOutputs DqSkinning(QuatInputs qin,
 			float4x4 modelViewProj,
 			float4x4 modelViewIT,
-			float2x4 boneDQ[100])
+			const std::vector<float2x4>& boneDQ)
 {
-	outputs OUT;
-
-	float2x4 blendDQ = IN.weights.x*boneDQ[IN.matrixIndices.x];
-	blendDQ += IN.weights.y*boneDQ[IN.matrixIndices.y];
-	blendDQ += IN.weights.z*boneDQ[IN.matrixIndices.z];
-	blendDQ += IN.weights.w*boneDQ[IN.matrixIndices.w];
-
-	float3x4 M = DQToMatrix(blendDQ.row(0), blendDQ.row(1));
-	float3 position = mul(M, IN.position);
-	float3 normal = mul(M, IN.normal);
-
-	OUT.hPosition = mul(modelViewProj, float4(position, 1.0));
-	OUT.hNormal = mul(modelViewIT, float4(normal, 0.0));
-
-	return OUT;
+	QuatOutputs qout;
+	float2x4 blendDQ = qin.weights[0]*boneDQ[qin.indexes[0]];
+	blendDQ += qin.weights[1]*boneDQ[qin.indexes[1]];
+	blendDQ += qin.weights[2]*boneDQ[qin.indexes[2]];
+	blendDQ += qin.weights[3]*boneDQ[qin.indexes[3]];
+	float4x4 M = DqToMatrix(blendDQ.row(0), blendDQ.row(1));
+	float3 position = Transform(M, qin.position);
+	float3 normal =Transform(M, qin.normal);
+	qout.position = mul(modelViewProj, float4(position, 1.0));
+	qout.normal = mul(modelViewIT, float4(normal, 0.0));
+	return qout;
 }
 
 // per-vertex antipodality handling (this is the most robust, but not the most efficient way):
-outputs dqsAntipod(inputs IN,
+QuatOutputs DqAntipod(QuatInputs IN,
 			float4x4 modelViewProj,
 			float4x4 modelViewIT,
-			float2x4 boneDQ[100])
+			const std::vector<float2x4>& boneDQ)
 {
-	outputs OUT;
+	QuatOutputs OUT;
 
-	float2x4 dq0 = boneDQ[IN.matrixIndices.x];
-	float2x4 dq1 = boneDQ[IN.matrixIndices.y];
-	float2x4 dq2 = boneDQ[IN.matrixIndices.z];
-	float2x4 dq3 = boneDQ[IN.matrixIndices.w];
-
+	float2x4 dq0 = boneDQ[IN.indexes[0]];
+	float2x4 dq1 = boneDQ[IN.indexes[1]];
+	float2x4 dq2 = boneDQ[IN.indexes[2]];
+	float2x4 dq3 = boneDQ[IN.indexes[3]];
 	if (dot(dq0.row(0), dq1.row(0)) < 0.0) dq1 *= -1.0f;
 	if (dot(dq0.row(0), dq2.row(0)) < 0.0) dq2 *= -1.0f;
 	if (dot(dq0.row(0), dq3.row(0)) < 0.0) dq3 *= -1.0f;
+	float2x4 blendDQ = IN.weights[0]*dq0;
+	blendDQ += IN.weights[1]*dq1;
+	blendDQ += IN.weights[2]*dq2;
+	blendDQ += IN.weights[3]*dq3;
 
-	float2x4 blendDQ = IN.weights.x*dq0;
-	blendDQ += IN.weights.y*dq1;
-	blendDQ += IN.weights.z*dq2;
-	blendDQ += IN.weights.w*dq3;
+	float4x4 M = DqToMatrix(blendDQ.row(0), blendDQ.row(1));
+	float3 position = Transform(M, IN.position);
+	float3 normal = Transform(M, IN.normal);
 
-	float3x4 M = DQToMatrix(blendDQ.row(0), blendDQ.row(1));
-	float3 position = mul(M, IN.position);
-	float3 normal = mul(M, IN.normal);
-
-	OUT.hPosition = mul(modelViewProj, float4(position, 1.0));
-	OUT.hNormal = mul(modelViewIT, float4(normal, 0.0));
+	OUT.position = mul(modelViewProj, float4(position, 1.0));
+	OUT.normal = mul(modelViewIT, float4(normal, 0.0));
 
 	return OUT;
 }
 
 // optimized version (avoids dual quaternion - matrix conversion):
-outputs dqsFast(inputs IN,
+QuatOutputs DqFast(QuatInputs IN,
 			float4x4 modelViewProj,
 			float4x4 modelViewIT,
-			float2x4 boneDQ[100])
+			const std::vector<float2x4>& boneDQ)
 {
-	outputs OUT;
+	QuatOutputs OUT;
 
-	float2x4 blendDQ = IN.weights.x*boneDQ[IN.matrixIndices.x];
-	blendDQ += IN.weights.y*boneDQ[IN.matrixIndices.y];
-	blendDQ += IN.weights.z*boneDQ[IN.matrixIndices.z];
-	blendDQ += IN.weights.w*boneDQ[IN.matrixIndices.w];
+	float2x4 blendDQ = IN.weights[0]*boneDQ[IN.indexes[0]];
+	blendDQ += IN.weights[1]*boneDQ[IN.indexes[1]];
+	blendDQ += IN.weights[2]*boneDQ[IN.indexes[2]];
+	blendDQ += IN.weights[3]*boneDQ[IN.indexes[3]];
 
 	float len = length(blendDQ[0]);
 	blendDQ /= len;
 
-	float3 position = IN.position.xyz() + 2.0f*cross(blendDQ.row(0).yzw(), cross(blendDQ.row(0).yzw(), IN.position.xyz()) + blendDQ[0].x*IN.position.xyz());
+	float3 position = IN.position + 2.0f*cross(blendDQ.row(0).yzw(), cross(blendDQ.row(0).yzw(), IN.position) + blendDQ[0].x*IN.position);
 	float3 trans = 2.0f*(blendDQ.row(0).x*blendDQ.row(1).yzw() - blendDQ.row(1).x*blendDQ.row(0).yzw() + cross(blendDQ.row(0).yzw(), blendDQ.row(1).yzw()));
 	position += trans;
-
-	float3 inpNormal = IN.normal.xyz();
+	float3 inpNormal = IN.normal;
 	float3 normal = inpNormal + 2.0f*cross(blendDQ.row(0).yzw(), cross(blendDQ.row(0).yzw(), inpNormal) + blendDQ[0].x*inpNormal);
-
-	OUT.hPosition = modelViewProj* float4(position, 1.0);
-	OUT.hNormal = modelViewIT* float4(normal, 0.0);
+	OUT.position = modelViewProj* float4(position, 1.0);
+	OUT.normal = modelViewIT* float4(normal, 0.0);
 
 	return OUT;
 }
 
-float3x3 adjointTransposeMatrix(float3x3 M)
-{
-	return aly::adjugate(M);
-}
-
 // two-phase skinning: dqsFast combined with scale/shear transformations:
-outputs dqsScale(inputs IN,
+QuatOutputs DqScale(QuatInputs IN,
 			float4x4 modelViewProj,
 			float4x4 modelViewIT,
-			float2x4 boneDQ[100],
-			float3x4 scaleM[100])
+			const std::vector<float2x4>& boneDQ,
+			const std::vector<float4x4>& scaleM)
 {
-	outputs OUT;
-
+	QuatOutputs OUT;
 	// first pass:
-	float3x4 blendS = IN.weights.x*scaleM[IN.matrixIndices.x];
-	blendS += IN.weights.y*scaleM[IN.matrixIndices.y];
-	blendS += IN.weights.z*scaleM[IN.matrixIndices.z];
-	blendS += IN.weights.w*scaleM[IN.matrixIndices.w];
+	float4x4 blendS = IN.weights[0]*scaleM[IN.indexes[0]];
+	blendS += IN.weights[1]*scaleM[IN.indexes[1]];
+	blendS += IN.weights[2]*scaleM[IN.indexes[2]];
+	blendS += IN.weights[3]*scaleM[IN.indexes[3]];
 
-	float3 pass1_position = mul(blendS, IN.position);
-	float3x3 blendSrotAT = adjointTransposeMatrix(SubColMatrix(blendS));
-	float3 pass1_normal = normalize(blendSrotAT* IN.normal.xyz());
-
+	float3 pass1_position = Transform(blendS, IN.position);
+	float3x3 blendSrotAT = adjugate(SubMatrix(blendS));
+	float3 pass1_normal = normalize(blendSrotAT* IN.normal);
 	// second pass:
-	float2x4 blendDQ = IN.weights.x*boneDQ[IN.matrixIndices.x];
-	blendDQ += IN.weights.y*boneDQ[IN.matrixIndices.y];
-	blendDQ += IN.weights.z*boneDQ[IN.matrixIndices.z];
-	blendDQ += IN.weights.w*boneDQ[IN.matrixIndices.w];
-
+	float2x4 blendDQ = IN.weights[0]*boneDQ[IN.indexes[0]];
+	blendDQ += IN.weights[1]*boneDQ[IN.indexes[1]];
+	blendDQ += IN.weights[2]*boneDQ[IN.indexes[2]];
+	blendDQ += IN.weights[3]*boneDQ[IN.indexes[3]];
 	float len = length(blendDQ[0]);
 	blendDQ /= len;
 
@@ -262,8 +227,8 @@ outputs dqsScale(inputs IN,
 	float3 trans = 2.0f*(blendDQ.row(0).x*blendDQ.row(1).yzw() - blendDQ.row(1).x*blendDQ.row(0).yzw() + cross(blendDQ.row(0).yzw(), blendDQ.row(1).yzw()));
 	position += trans;
 	float3 normal = pass1_normal + 2.0f*cross(blendDQ.row(0).yzw(), cross(blendDQ.row(0).yzw(), pass1_normal) + blendDQ.row(0).x*pass1_normal);
-	OUT.hPosition = modelViewProj* float4(position, 1.0);
-	OUT.hNormal = modelViewIT* float4(normal, 0.0);
+	OUT.position = modelViewProj* float4(position, 1.0);
+	OUT.normal = modelViewIT* float4(normal, 0.0);
 	return OUT;
 }
 

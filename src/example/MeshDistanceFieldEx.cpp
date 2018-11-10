@@ -22,6 +22,7 @@
 #include "Alloy.h"
 #include "example/MeshDistanceFieldEx.h"
 #include "graphics/AlloyMeshDistanceField.h"
+#include "graphics/MeshDecimation.h"
 using namespace aly;
 MeshDistanceFieldEx::MeshDistanceFieldEx() :
 		Application(800, 600, "Mesh Surface Distance Field Example"), matcapShader(
@@ -32,6 +33,11 @@ bool MeshDistanceFieldEx::init(Composite& rootNode) {
 			float3(1.0f, 1.0f, 1.0f));
 
 	mesh.load(getFullPath("models/armadillo.ply"));
+	{
+		MeshDecimation decimate;
+		decimate.solve(mesh,0.3f);
+		mesh.updateVertexNormals();
+	}
 	size_t N=mesh.vertexLocations.size();
 	{
 		AlloyMeshDistanceField df;
@@ -48,7 +54,6 @@ bool MeshDistanceFieldEx::init(Composite& rootNode) {
 			colors[i]=HSVAtoRGBAf(HSVA(0.98f*d,0.7f,aly::sqr(1.0f-d)*0.75f+0.25f,1.0f));
 		}
 	}
-	mesh.updateVertexNormals();
 	box3f box = mesh.getBoundingBox();
 	//Make region on screen to render 3d view
 	renderRegion = MakeRegion("Render View", CoordPerPX(0.5f, 0.5f, -400, -300),
