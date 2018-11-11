@@ -204,7 +204,7 @@ namespace aly {
 		void setCursor(const Cursor* cursor) {
 			this->cursor = cursor;
 		}
-
+		void forceDestroy();
 		const Cursor* getCursor() const {
 			return cursor;
 		}

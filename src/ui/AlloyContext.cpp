@@ -782,6 +782,9 @@ void AlloyContext::update(Composite& rootNode) {
 void AlloyContext::makeCurrent() {
 	glfwMakeContextCurrent(window);
 }
+void AlloyContext::forceDestroy(){
+	window = nullptr;
+}
 AlloyContext::~AlloyContext() {
 	if (window) {
 		glfwMakeContextCurrent(window);
@@ -794,28 +797,11 @@ AlloyContext::~AlloyContext() {
 		if (vaoImageOnScreen.positionBuffer) {
 			glDeleteBuffers(1, &vaoImageOnScreen.positionBuffer);
 		}
+		nvgDeleteGL3(nvgContext);
+		glfwDestroyWindow(window);
 		window = nullptr;
+		glfwTerminate();
 	}
-	/*
-	 //Windows throws error on exit when switching context, so don't destroy.
-	 if (offscreenWindow) {
-	 glfwMakeContextCurrent(offscreenWindow);
-	 if (vaoImageOffScreen.vao) {
-	 glDeleteVertexArrays(1, &vaoImageOffScreen.vao);
-	 }
-	 if (vaoImageOffScreen.uvBuffer) {
-	 glDeleteBuffers(1, &vaoImageOffScreen.uvBuffer);
-	 }
-	 if (vaoImageOffScreen.positionBuffer) {
-	 glDeleteBuffers(1, &vaoImageOffScreen.positionBuffer);
-	 offscreenWindow = nullptr;
-	 }
-	 }
-	 */
-	nvgDeleteGL3(nvgContext);
-	glfwDestroyWindow(window);
-	glfwTerminate();
-
 }
 }
 
