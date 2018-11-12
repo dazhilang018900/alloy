@@ -267,3 +267,53 @@ Automatic Mesh Texture Map Example
 One Euro Filter Example
 -------------------------
 [![OneEuroFilterEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0035.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/OneEuroFilterEx.cpp)
+
+Actuve Contour 2D
+-------------------------
+[![MeshSurfaceDistanceEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/levelset_toy1.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/ActiveManifold2DEx.cpp)
+
+Spring Level Set 2D
+-------------------------
+[![MeshSurfaceDistanceEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/levelset_toy3.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/ActiveManifold2DEx.cpp)
+
+Multi-Object Spring Level Set 2D
+-------------------------
+[![MeshSurfaceDistanceEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/levelset_toy7.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/MultiActiveManifold2DEx.cpp)
+
+Multi-Object Level Set 2D
+-------------------------
+[![MeshSurfaceDistanceEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/levelset_toy5.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/MultiActiveManifold2DEx.cpp)
+
+Super Pixel Segmentation 2D
+-------------------------
+[![MeshSurfaceDistanceEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/levelset_toy6.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/SuperPixelEx.cpp)
+
+Magic Pixel Segmentation 2D
+-------------------------
+[![MeshSurfaceDistanceEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/levelset_toy8.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/MagicPixelEx.cpp)
+
+Active Contour 3D
+-------------------------
+[![ActiveContour3DEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/activecontour3d.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/ActiveContour3DEx.cpp)
+
+Multi-Object Active Contour 3D
+-------------------------
+[![MultiObjectActiveContour3DEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/multiobjectlevelset.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/MultiActiveContour3DEx.cpp)
+
+Non-Negative Least Squares
+-------------------------
+[![NonNegativeEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/nonnegative.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/NonNegativeLeastSquaresEx.cpp)
+
+Spring Level Set 3D
+-------------------------
+[![Springls3DEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/springls3d.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/Springls3DEx.cpp)
+
+Enright Springls Test
+-------------------------
+[![EnrightEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/enright.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/Springls3DEx.cpp)
+
+Mesh Suface Distance
+-------------------------
+[![MeshSurfaceDistanceEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/meshdistance.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/MeshDistanceFieldEx.cpp)
+
+
