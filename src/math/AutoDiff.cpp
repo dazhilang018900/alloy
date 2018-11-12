@@ -398,7 +398,7 @@ void TestCopy() {
     NearEqualAssert(dydxx, Real(2.0));
 }
 
-int main(int argc, char *argv[]) {
+void SANITY_CHECK_AUTODIFF() {
     TestAdd();
     TestMinus();
     TestMultiply();
@@ -413,6 +413,4 @@ int main(int argc, char *argv[]) {
     TestASin();
     TestACos();
     TestCopy();
-    
-    return 0;
 }

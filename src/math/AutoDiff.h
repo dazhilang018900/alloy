@@ -46,6 +46,7 @@
 #endif
 #include <algorithm>
 namespace aly {
+void SANITY_CHECK_AUTODIFF();
 // Change the following line if you want to use single precision floats
 typedef double Real; 
 typedef size_t VertexId;
