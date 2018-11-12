@@ -56,7 +56,7 @@ struct AReal;
 
 extern threadDefine ADGraph* g_ADGraph;
 // Declare this in your .cpp source
-#define DECLARE_ADGRAPH() namespace had { threadDefine ADGraph* g_ADGraph = 0; }
+#define DECLARE_ADGRAPH() namespace aly { threadDefine ADGraph* g_ADGraph = 0; }
 
 AReal NewAReal(const Real val);
 

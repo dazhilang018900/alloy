@@ -42,7 +42,6 @@ void TestAdd() {
     NearEqualAssert(dydx1x2, Real(0.0));
     NearEqualAssert(dydx2x2, Real(0.0));
 }
-
 void TestMinus() {
     ADGraph adGraph;
 
