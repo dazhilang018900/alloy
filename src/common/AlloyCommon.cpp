@@ -181,15 +181,27 @@ bool EndsWith(const std::string& str, const std::string& pattern) {
 		return (str == pattern);
 	}
 }
-std::vector<int> ExtractFrameRanges(const std::string& str){
+std::string ZeroPad(int num,int width){
+	return MakeString()<<std::setw(width)<<std::setfill('0')<<num;
+}
+std::string ZeroPad(int64_t num,int width){
+	return MakeString()<<std::setw(width)<<std::setfill('0')<<num;
+}
+std::string ZeroPad(uint64_t num,int width){
+	return MakeString()<<std::setw(width)<<std::setfill('0')<<num;
+}
+std::string ZeroPad(uint32_t num,int width){
+	return MakeString()<<std::setw(width)<<std::setfill('0')<<num;
+}
+std::vector<int> ExtractIntegerRange(const std::string& str){
 	//List should be comma separated
 	std::vector<std::string> tokens=Split(str,',',false);
 	std::vector<int> frames;
 	for(std::string str:tokens){
 		//first try split on '-', should be no negative frames
-		std::vector<std::string> split=Split(Trim(str),'-',false);
-		if(split.size()==1){//try split again on ':'
-			split=Split(Trim(str),':',false);
+		std::vector<std::string> split=Split(Trim(str),':',false);
+		if(split.size()<=1){//try split again on '-'. Colon is preferred to correctly handle negative numbers
+			split=Split(Trim(str),'-',false);
 		}
 		if(split.size()==2){
 			//works, 17-20, 30, 1, 40:47

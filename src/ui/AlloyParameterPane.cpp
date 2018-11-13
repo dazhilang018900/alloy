@@ -446,11 +446,11 @@ namespace aly {
 		}
 		valueRegion->textColor = MakeColor(AlloyDefaultContext()->theme.DARKER);
 		valueRegion->setValue(initialRange);
-		value=aly::ExtractFrameRanges(initialRange);
+		value=aly::ExtractIntegerRange(initialRange);
 		std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(new AnyValue<std::vector<int>*>(&value));
 		values.push_back(ref);
 		valueRegion->onTextEntered = [=](TextField* field) {
-			*(ref->getValue<std::vector<int>*>()) = aly::ExtractFrameRanges(field->getValue());
+			*(ref->getValue<std::vector<int>*>()) = aly::ExtractIntegerRange(field->getValue());
 		};
 		setCommonParameters(comp, labelRegion, valueRegion);
 		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
