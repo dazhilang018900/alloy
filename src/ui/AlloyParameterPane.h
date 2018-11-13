@@ -163,6 +163,7 @@ public:
 	std::pair<ModifiableNumberPtr, ModifiableNumberPtr> addRangeField(const std::string& label, Number& lowerValue, Number& upperValue, const Number& minValue,
 			const Number& maxValue, float aspect = 9.0f);
 	TextFieldPtr addTextField(const std::string& label, std::string& value, float aspect = 3.0f);
+	TextFieldPtr addRangeField(const std::string& label, std::vector<int>& value,const std::string& initialRange="", float aspect = 4.0f);
 	ModifiableNumberPtr addNumberField(const std::string& label, Number& value, const Number& minValue, const Number& maxValue, float aspect = 7.0f);
 	SelectionPtr addSelectionField(const std::string& label, int& selectedIndex, const std::vector<std::string>& options, float aspect = 4.0f);
 	ToggleBoxPtr addToggleBox(const std::string& label, bool& value, float aspect = 2.1f);

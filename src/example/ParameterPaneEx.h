@@ -28,6 +28,7 @@ protected:
 	aly::Number paramInt1;
 	aly::Number paramFloat2;
 	aly::Number paramLow;
+	std::vector<int> numList;
 	aly::Number paramHi;
 	aly::Number paramTweenLo;
 	aly::Number paramTweenHi;

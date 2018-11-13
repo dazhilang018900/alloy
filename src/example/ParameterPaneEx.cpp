@@ -61,9 +61,9 @@ bool ParameterPaneEx::init(Composite& rootNode) {
 		paramPane->addNumberField("Float", paramFloat1);
 		paramPane->addNumberField("Integer", paramInt1);
 		paramPane->addRangeField("Range", paramLow,paramHi);
+		paramPane->addRangeField("Number List",numList,"1, 2, 5-10");
 		paramPane->addRangeField("Range Tween", paramTweenLo, paramTweenHi, Integer(1001), Integer(1100));
 		paramPane->addTextField("String", paramString);
-
 		
 	paramPane->addGroup("Group 2",true);
 		paramPane->addMultiFileSelector("Multi-File", paramMultiFile);

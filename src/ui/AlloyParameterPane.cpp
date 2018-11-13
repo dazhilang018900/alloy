@@ -430,7 +430,34 @@ namespace aly {
 		estimatedHeight += entryHeight + SPACING;
 		return valueRegion;
 	}
-
+	TextFieldPtr ParameterPane::addRangeField(const std::string& label, std::vector<int>& value,const std::string& initialRange, float aspect) {
+		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+		TextFieldPtr valueRegion = TextFieldPtr(
+				new TextField("Range Text", CoordPerPX(1.0f, 0.0f, -aspect * entryHeight, 0.0f), CoordPX(aspect * entryHeight, entryHeight)));
+		if (aspect <= 0) {
+			pixel2 labelBounds = labelRegion->getTextDimensions(AlloyDefaultContext().get());
+			labelBounds.x += 10;
+			valueRegion->position = CoordPX(labelBounds.x, 0.0f);
+			valueRegion->dimensions = CoordPerPX(1.0f, 0.0f, -labelBounds.x, entryHeight);
+		} else {
+			labelRegion->position = CoordPX(0.0f, 0.0f);
+			labelRegion->dimensions = CoordPerPX(1.0f, 0.0f, -aspect * entryHeight, entryHeight);
+		}
+		valueRegion->textColor = MakeColor(AlloyDefaultContext()->theme.DARKER);
+		valueRegion->setValue(initialRange);
+		value=aly::ExtractFrameRanges(initialRange);
+		std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(new AnyValue<std::vector<int>*>(&value));
+		values.push_back(ref);
+		valueRegion->onTextEntered = [=](TextField* field) {
+			*(ref->getValue<std::vector<int>*>()) = aly::ExtractFrameRanges(field->getValue());
+		};
+		setCommonParameters(comp, labelRegion, valueRegion);
+		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
+		valueRegion->setRoundCorners(true);
+		estimatedHeight += entryHeight + SPACING;
+		return valueRegion;
+	}
 	ColorSelectorPtr ParameterPane::addColorField(const std::string& label, Color& value, float aspect) {
 		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
 		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
