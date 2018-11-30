@@ -24,13 +24,15 @@
 #define INCLUDE_DICTIONARYLEARNING_H_
 
 #include "image/AlloyImage.h"
+#include "image/AlloyVolume.h"
 #include <set>
 namespace aly {
 enum FilterType{
-	Unknown=0,
+	Flat=0,
 	Shading=1,
 	Edge=2,
-	Line=3
+	Line=3,
+	Texture=4
 };
 struct FilterBank {
 	int width, height;
@@ -41,6 +43,8 @@ struct FilterBank {
 	size_t size() const {
 		return data.size();
 	}
+	void score(const aly::Image1f& image,aly::Image1f& out);
+	void score(const aly::ImageRGB& image,aly::Image3f& out);
 	inline const float& operator[](const size_t& sz) const {
 		if(sz>=data.size()){
 			throw std::runtime_error("Filter bank index out of bounds.");
@@ -54,10 +58,10 @@ struct FilterBank {
 		return data[sz];
 	}
 	FilterBank(int width=0, int height=0) :
-			data(width * height), width(width), height(height), type(FilterType::Unknown),angle(0),shift(0) {
+			data(width * height), width(width), height(height), type(FilterType::Flat),angle(0),shift(0) {
 	}
 	FilterBank(const std::vector<float>& data, int width, int height) :
-			data(data), width(width), height(height), type(FilterType::Unknown),angle(0),shift(0) {
+			data(data), width(width), height(height), type(FilterType::Flat),angle(0),shift(0) {
 	}
 	template<class Archive>
 	void save(Archive & archive) const {
@@ -105,6 +109,7 @@ struct SamplePatch {
 	void sample(const aly::ImageRGB& gray,int c);
 	float residual(const std::vector<FilterBank>& banks,bool correlation);
 	float synthesize(const std::vector<FilterBank>& banks,std::vector<float>& sample);
+	std::vector<float> getLabelWeights(const std::vector<FilterBank>& banks);
 	void resize(int w, int h);
 };
 class DictionaryLearning {
@@ -121,6 +126,8 @@ protected:
 	std::vector<SamplePatch> patches;
 public:
 	DictionaryLearning();
+	void maxPool(const aly::Image3f& image,aly::Image3f& out,int size);
+	void normalize(aly::Image3f& image,float percent,int stride=16);
 	std::vector<SamplePatch>& getSamplePatch() {
 		return patches;
 	}
@@ -137,13 +144,13 @@ public:
 		return filterBanks.size();
 	}
 	void optimizeWeights(int sparsity);
-	void optimizeDictionary(float errorThreshold=1E-6f,int maxIterations=128);
+	void optimizeDictionary(float errorThreshold=1E-6f,int maxIterations=128,int startIndex=0);
 	void addFilters(int n);
 	void write(const std::string& outFile);
 	void read(const std::string& outFile);
 	void stash(const ImageRGB& img,int subsample);
 	void initializeFilters(int patchWidth,int patchHeight, int angleSamples);
-	void estimate(const aly::ImageRGB& img,ImageRGB& out,int sparsity);
+	void estimate(const aly::ImageRGB& img,ImageRGB& out,aly::Volume3f& labels,int sparsity);
 	void writeFilterBanks(const std::string& outImage);
 	virtual ~DictionaryLearning() {
 	}

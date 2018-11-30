@@ -30,25 +30,45 @@ DictionaryLearningEx::DictionaryLearningEx() :
 		Application(1200, 1000, "Learning Toy", false) {
 }
 bool DictionaryLearningEx::init(Composite& rootNode) {
-	ReadImageFromFile(getFullPath("images/matting/gnome_matte.png"), img);
-	int patchSize = 16;
-	int subsample = 16;
-	int sparsity = 4;
-	int angleSamples=8;
-	learning.initializeFilters(patchSize,patchSize,angleSamples);//creates 43 filters
-	learning.setTrainingData( { img },subsample);
+	ReadImageFromFile(getFullPath("images/mountains.jpg"), img);
+	int patchSize = 11;
+	int subsample = 11;
+	int sparsity = 3;
+	int angleSamples = 8;
+	learning.initializeFilters(patchSize, patchSize, angleSamples); //creates 43 filters
+	learning.setTrainingData( { img }, subsample);
+
 	learning.optimizeWeights(sparsity);
-	while(learning.getFilterCount()<64){//43 is an awkward number, make it 64
+	learning.writeFilterBanks(MakeDesktopFile("filterbanks_before.png"));
+	while (learning.getFilterCount() < 64) {
 		learning.addFilters(1);
 		learning.optimizeWeights(sparsity);
 	}
-	learning.writeFilterBanks(MakeDesktopFile("filterbanks_before.png"));
-	learning.optimizeDictionary(1E-5f, 128);
+	learning.optimizeDictionary(1E-5f, 128, 3);
 	learning.writeFilterBanks(MakeDesktopFile("filterbanks_after.png"));
 	ImageRGB est;
-	learning.estimate(img,est,sparsity);
-	WriteImageToFile(MakeDesktopFile("estimate.png"),est);
-	img=est;
+	aly::Volume3f weights;
+	learning.estimate(img, est, weights, sparsity);
+	WriteImageToFile(MakeDesktopFile("estimate.png"), est);
+	WriteVolumeToFile(MakeDesktopFile("weights.xml"), weights);
+	{
+		aly::Image3f scores;
+		aly::Image3f pool;
+		int count = 0;
+		for (FilterBank& b : learning.getFilterBanks()) {
+			std::cout << "Writing Filter Bank " << count << std::endl;
+			b.score(img, scores);
+			learning.normalize(scores,0.05f);
+			learning.maxPool(scores,pool,2);
+			WriteImageToFile(
+					MakeDesktopFile(
+							MakeString() << "image_filtered_"
+									<< ZeroPad(count, 3) << ".png"), pool);
+			count++;
+		}
+	}
+
+	img = est;
 	frameBuffersDirty = true;
 	BorderCompositePtr layout = BorderCompositePtr(
 			new BorderComposite("UI Layout", CoordPX(0.0f, 0.0f),
@@ -73,143 +93,143 @@ bool DictionaryLearningEx::init(Composite& rootNode) {
 							-img.height * downScale * 0.5f),
 					CoordPX(img.width * downScale, img.height * downScale)));
 	Application::addListener(resizeableRegion.get());
-	ImageGlyphPtr imageGlyph = AlloyApplicationContext()->createImageGlyph(img,false);
-	DrawPtr drawContour =
-			DrawPtr(
-					new Draw("Contour Draw", CoordPX(0.0f, 0.0f),
-							CoordPercent(1.0f, 1.0f),
-							[this](AlloyContext* context, const box2px& bounds) {
-		/*
-								NVGcontext* nvg = context->nvgContext;
-								nvgLineCap(nvg, NVG_ROUND);
-								nvgLineJoin(nvg,NVG_ROUND);
+	ImageGlyphPtr imageGlyph = AlloyApplicationContext()->createImageGlyph(img,
+			false);
+	DrawPtr drawContour = DrawPtr(
+			new Draw("Contour Draw", CoordPX(0.0f, 0.0f),
+					CoordPercent(1.0f, 1.0f),
+					[this](AlloyContext* context, const box2px& bounds) {
+						/*
+						 NVGcontext* nvg = context->nvgContext;
+						 nvgLineCap(nvg, NVG_ROUND);
+						 nvgLineJoin(nvg,NVG_ROUND);
 
-								float scale = bounds.dimensions.x / (float)img.width;
-								if (0.05f*scale > 0.5f) {
-									nvgFillColor(nvg, vecfieldColor);
-									nvgStrokeWidth(nvg, 0.05f*scale);
-									const float aH=0.5f*std::sqrt(2.0f);
-									const float aW= 0.25f*std::sqrt(2.0f);
-									for (int i = 0;i < vecField.width;i++) {
-										for (int j = 0;j < vecField.height;j++) {
-											float2 v = vecField(i, j);
-											float2 pt1 = float2(i + 0.5f + 0.7f*aH*v.x, j + 0.5f + 0.7f*aH*v.y);
-											float2 pt2 = float2(i + 0.5f - 0.5f*aW*v.y - 0.3f*aH*v.x, j + 0.5f + 0.5f*aW*v.x- 0.3f*aH*v.y);
-											float2 pt3 = float2(i + 0.5f + 0.5f*aW*v.y - 0.3f*aH*v.x, j + 0.5f - 0.5f*aW*v.x - 0.3f*aH*v.y);
+						 float scale = bounds.dimensions.x / (float)img.width;
+						 if (0.05f*scale > 0.5f) {
+						 nvgFillColor(nvg, vecfieldColor);
+						 nvgStrokeWidth(nvg, 0.05f*scale);
+						 const float aH=0.5f*std::sqrt(2.0f);
+						 const float aW= 0.25f*std::sqrt(2.0f);
+						 for (int i = 0;i < vecField.width;i++) {
+						 for (int j = 0;j < vecField.height;j++) {
+						 float2 v = vecField(i, j);
+						 float2 pt1 = float2(i + 0.5f + 0.7f*aH*v.x, j + 0.5f + 0.7f*aH*v.y);
+						 float2 pt2 = float2(i + 0.5f - 0.5f*aW*v.y - 0.3f*aH*v.x, j + 0.5f + 0.5f*aW*v.x- 0.3f*aH*v.y);
+						 float2 pt3 = float2(i + 0.5f + 0.5f*aW*v.y - 0.3f*aH*v.x, j + 0.5f - 0.5f*aW*v.x - 0.3f*aH*v.y);
 
-											pt1.x = pt1.x / (float)img.width;
-											pt1.y = pt1.y / (float)img.height;
-											pt1 = pt1*bounds.dimensions + bounds.position;
+						 pt1.x = pt1.x / (float)img.width;
+						 pt1.y = pt1.y / (float)img.height;
+						 pt1 = pt1*bounds.dimensions + bounds.position;
 
-											pt2.x = pt2.x / (float)img.width;
-											pt2.y = pt2.y / (float)img.height;
-											pt2 = pt2*bounds.dimensions + bounds.position;
+						 pt2.x = pt2.x / (float)img.width;
+						 pt2.y = pt2.y / (float)img.height;
+						 pt2 = pt2*bounds.dimensions + bounds.position;
 
-											pt3.x = pt3.x / (float)img.width;
-											pt3.y = pt3.y / (float)img.height;
-											pt3 = pt3*bounds.dimensions + bounds.position;
+						 pt3.x = pt3.x / (float)img.width;
+						 pt3.y = pt3.y / (float)img.height;
+						 pt3 = pt3*bounds.dimensions + bounds.position;
 
-											nvgBeginPath(nvg);
-											nvgMoveTo(nvg, pt1.x, pt1.y);
-											nvgLineTo(nvg, pt2.x, pt2.y);
-											nvgLineTo(nvg, pt3.x, pt3.y);
-											nvgClosePath(nvg);
-											nvgFill(nvg);
-										}
-									}
-									nvgStrokeColor(nvg, Color(0.4f, 0.4f, 0.4f, 0.5f));
-									nvgBeginPath(nvg);
-									for (int i = 0;i < img.width;i++) {
-										float2 pt = float2(0.5f + i, 0.5f);
-										pt.x = pt.x / (float)img.width;
-										pt.y = pt.y / (float)img.height;
-										pt = pt*bounds.dimensions + bounds.position;
-										nvgMoveTo(nvg, pt.x, pt.y);
-										pt = float2(0.5f + i, 0.5f + img.height - 1.0f);
-										pt.x = pt.x / (float)img.width;
-										pt.y = pt.y / (float)img.height;
-										pt = pt*bounds.dimensions + bounds.position;
-										nvgLineTo(nvg, pt.x, pt.y);
-									}
-									for (int j = 0;j < img.height;j++) {
-										float2 pt = float2(0.5f, 0.5f + j);
-										pt.x = pt.x / (float)img.width;
-										pt.y = pt.y / (float)img.height;
-										pt = pt*bounds.dimensions + bounds.position;
-										nvgMoveTo(nvg, pt.x, pt.y);
-										pt = float2(0.5f + img.width - 1.0f, 0.5f + j);
-										pt.x = pt.x / (float)img.width;
-										pt.y = pt.y / (float)img.height;
-										pt = pt*bounds.dimensions + bounds.position;
-										nvgLineTo(nvg, pt.x, pt.y);
-									}
-									nvgStroke(nvg);
-								}
+						 nvgBeginPath(nvg);
+						 nvgMoveTo(nvg, pt1.x, pt1.y);
+						 nvgLineTo(nvg, pt2.x, pt2.y);
+						 nvgLineTo(nvg, pt3.x, pt3.y);
+						 nvgClosePath(nvg);
+						 nvgFill(nvg);
+						 }
+						 }
+						 nvgStrokeColor(nvg, Color(0.4f, 0.4f, 0.4f, 0.5f));
+						 nvgBeginPath(nvg);
+						 for (int i = 0;i < img.width;i++) {
+						 float2 pt = float2(0.5f + i, 0.5f);
+						 pt.x = pt.x / (float)img.width;
+						 pt.y = pt.y / (float)img.height;
+						 pt = pt*bounds.dimensions + bounds.position;
+						 nvgMoveTo(nvg, pt.x, pt.y);
+						 pt = float2(0.5f + i, 0.5f + img.height - 1.0f);
+						 pt.x = pt.x / (float)img.width;
+						 pt.y = pt.y / (float)img.height;
+						 pt = pt*bounds.dimensions + bounds.position;
+						 nvgLineTo(nvg, pt.x, pt.y);
+						 }
+						 for (int j = 0;j < img.height;j++) {
+						 float2 pt = float2(0.5f, 0.5f + j);
+						 pt.x = pt.x / (float)img.width;
+						 pt.y = pt.y / (float)img.height;
+						 pt = pt*bounds.dimensions + bounds.position;
+						 nvgMoveTo(nvg, pt.x, pt.y);
+						 pt = float2(0.5f + img.width - 1.0f, 0.5f + j);
+						 pt.x = pt.x / (float)img.width;
+						 pt.y = pt.y / (float)img.height;
+						 pt = pt*bounds.dimensions + bounds.position;
+						 nvgLineTo(nvg, pt.x, pt.y);
+						 }
+						 nvgStroke(nvg);
+						 }
 
-								const std::vector<SamplePatch>& banks=learning.getSamplePatch();
-								if(lineWidth.toFloat()*0.1f*scale>0.5f) {
-									nvgStrokeColor(nvg, lineColor);
-									nvgStrokeWidth(nvg, lineWidth.toFloat()*0.1f*scale);
-									for(size_t idx=0;idx<banks.size();idx++) {
-										const SamplePatch& bank=banks[idx];
-										float2 u(1.0f,0.0f);
-										float2 v(0.0f,1.0f);
-										nvgBeginPath(nvg);
+						 const std::vector<SamplePatch>& banks=learning.getSamplePatch();
+						 if(lineWidth.toFloat()*0.1f*scale>0.5f) {
+						 nvgStrokeColor(nvg, lineColor);
+						 nvgStrokeWidth(nvg, lineWidth.toFloat()*0.1f*scale);
+						 for(size_t idx=0;idx<banks.size();idx++) {
+						 const SamplePatch& bank=banks[idx];
+						 float2 u(1.0f,0.0f);
+						 float2 v(0.0f,1.0f);
+						 nvgBeginPath(nvg);
 
-										float2 pt = bank.position+u+v;
-										pt.x = pt.x / (float)img.width;
-										pt.y = pt.y / (float)img.height;
-										pt = pt*bounds.dimensions + bounds.position;
-										nvgMoveTo(nvg, pt.x, pt.y);
+						 float2 pt = bank.position+u+v;
+						 pt.x = pt.x / (float)img.width;
+						 pt.y = pt.y / (float)img.height;
+						 pt = pt*bounds.dimensions + bounds.position;
+						 nvgMoveTo(nvg, pt.x, pt.y);
 
-										pt = bank.position+u-v;
-										pt.x = pt.x / (float)img.width;
-										pt.y = pt.y / (float)img.height;
-										pt = pt*bounds.dimensions + bounds.position;
-										nvgLineTo(nvg, pt.x, pt.y);
+						 pt = bank.position+u-v;
+						 pt.x = pt.x / (float)img.width;
+						 pt.y = pt.y / (float)img.height;
+						 pt = pt*bounds.dimensions + bounds.position;
+						 nvgLineTo(nvg, pt.x, pt.y);
 
-										pt = bank.position-u-v;
-										pt.x = pt.x / (float)img.width;
-										pt.y = pt.y / (float)img.height;
-										pt = pt*bounds.dimensions + bounds.position;
-										nvgLineTo(nvg, pt.x, pt.y);
+						 pt = bank.position-u-v;
+						 pt.x = pt.x / (float)img.width;
+						 pt.y = pt.y / (float)img.height;
+						 pt = pt*bounds.dimensions + bounds.position;
+						 nvgLineTo(nvg, pt.x, pt.y);
 
-										pt = bank.position-u+v;
-										pt.x = pt.x / (float)img.width;
-										pt.y = pt.y / (float)img.height;
-										pt = pt*bounds.dimensions + bounds.position;
-										nvgLineTo(nvg, pt.x, pt.y);
-										nvgClosePath(nvg);
-										nvgStroke(nvg);
-									}
-								}
-								if(scale*0.1f>0.5f) {
-									nvgStrokeColor(nvg, normalColor);
-									nvgStrokeWidth(nvg, scale*0.1f);
-									for(size_t idx=0;idx<banks.size();idx++) {
-										const SamplePatch& bank=banks[idx];
-										float2 pt = bank.position;
-										pt.x = pt.x / (float)img.width;
-										pt.y = pt.y / (float)img.height;
-										pt = pt*bounds.dimensions + bounds.position;
-									}
-								}
-								float r=scale*0.5f;
-								if(r>0.5f) {
-									nvgFillColor(nvg, pointColor);
-									for(size_t idx=0;idx<banks.size();idx++) {
-										const SamplePatch& bank=banks[idx];
-										float2 pt =bank.position;
-										pt.x = pt.x / (float)img.width;
-										pt.y = pt.y / (float)img.height;
-										pt = pt*bounds.dimensions + bounds.position;
-										nvgBeginPath(nvg);
-										nvgCircle(nvg,pt.x,pt.y,r);
-										nvgFill(nvg);
-									}
-								}
-								*/
-							}));
+						 pt = bank.position-u+v;
+						 pt.x = pt.x / (float)img.width;
+						 pt.y = pt.y / (float)img.height;
+						 pt = pt*bounds.dimensions + bounds.position;
+						 nvgLineTo(nvg, pt.x, pt.y);
+						 nvgClosePath(nvg);
+						 nvgStroke(nvg);
+						 }
+						 }
+						 if(scale*0.1f>0.5f) {
+						 nvgStrokeColor(nvg, normalColor);
+						 nvgStrokeWidth(nvg, scale*0.1f);
+						 for(size_t idx=0;idx<banks.size();idx++) {
+						 const SamplePatch& bank=banks[idx];
+						 float2 pt = bank.position;
+						 pt.x = pt.x / (float)img.width;
+						 pt.y = pt.y / (float)img.height;
+						 pt = pt*bounds.dimensions + bounds.position;
+						 }
+						 }
+						 float r=scale*0.5f;
+						 if(r>0.5f) {
+						 nvgFillColor(nvg, pointColor);
+						 for(size_t idx=0;idx<banks.size();idx++) {
+						 const SamplePatch& bank=banks[idx];
+						 float2 pt =bank.position;
+						 pt.x = pt.x / (float)img.width;
+						 pt.y = pt.y / (float)img.height;
+						 pt = pt*bounds.dimensions + bounds.position;
+						 nvgBeginPath(nvg);
+						 nvgCircle(nvg,pt.x,pt.y,r);
+						 nvgFill(nvg);
+						 }
+						 }
+						 */
+					}));
 	GlyphRegionPtr glyphRegion = GlyphRegionPtr(
 			new GlyphRegion("Image Region", imageGlyph, CoordPX(0.0f, 0.0f),
 					CoordPercent(1.0f, 1.0f)));
