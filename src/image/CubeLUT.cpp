@@ -12,6 +12,17 @@ void ReadCubeFromFile(const std::string& f, CubeLUT& lut) {
 		throw std::runtime_error(MakeString()<<"Failed to load cube file. Error "<<static_cast<int>(status));
 	}
 }
+
+void WriteCubeFromFile(const std::string& f,const CubeLUT& lut){
+	std::ofstream out(f);
+	if (!out.is_open()) {
+		throw std::runtime_error("ERROR: Impossible to write cube file.");
+	}
+	CubeLUT::LUTState status=lut.SaveCubeFile(out);
+	if(status!=CubeLUT::LUTState::OK){
+		throw std::runtime_error(MakeString()<<"Failed to save cube file. Error "<<static_cast<int>(status));
+	}
+}
 float3 CubeLUT::operator()(float x, float y, float z) const {
 	int i = static_cast<int>(std::floor(x));
 	int j = static_cast<int>(std::floor(y));
@@ -187,7 +198,7 @@ CubeLUT::LUTState CubeLUT::LoadCubeFile(std::ifstream & infile) {
 	}
 	return status;
 } // LoadCubeFile
-CubeLUT::LUTState CubeLUT::SaveCubeFile(std::ofstream & outfile) {
+CubeLUT::LUTState CubeLUT::SaveCubeFile(std::ofstream & outfile) const {
 	if (status != LUTState::OK)
 		return status; // Write only good Cubes
 	// Write keywords

@@ -25,7 +25,7 @@ public:
 	int rows,cols,slices;
 	CubeLUT(void):rows(0),cols(0),slices(0) { status = LUTState::NotInitialized; };
 	LUTState LoadCubeFile(std::ifstream & infile);
-	LUTState SaveCubeFile(std::ofstream & outfile);
+	LUTState SaveCubeFile(std::ofstream & outfile) const;
 	float3 operator()(float x, float y, float z) const;
 	float3 operator()(int i, int j, int k) const;
 private:
@@ -33,6 +33,7 @@ private:
 	float3 ParseTableRow(const std::string & lineOfText);
 };
 void ReadCubeFromFile(const std::string& f, CubeLUT& lut);
+void WriteCubeFromFile(const std::string& f,const CubeLUT& lut);
 
 }
 
