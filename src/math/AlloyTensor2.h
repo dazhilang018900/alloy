@@ -282,7 +282,7 @@ template<class T, ImageType I> struct Tensor2 {
 				<< im1.dimensions() << "!=" << im2.dimensions());
 		size_t sz = im1.size();
 #pragma omp parallel for
-		for (int offset = 0; offset < (int)sz; offset++) {
+		for (size_t offset = 0; offset < sz; offset++) {
 			func(im1.data[offset], im2.data[offset]);
 		}
 	}
@@ -298,7 +298,7 @@ template<class T, ImageType I> struct Tensor2 {
 				<< im1.dimensions() << "!=" << im2.dimensions());
 		size_t sz = im1.size();
 #pragma omp parallel for
-		for (int offset = 0; offset < (int)sz; offset++) {
+		for (size_t offset = 0; offset < sz; offset++) {
 			func(im1.data[offset], im2.data[offset], im3.data[offset],
 				im4.data[offset]);
 		}
@@ -307,7 +307,7 @@ template<class T, ImageType I> struct Tensor2 {
 		const std::function<void(T&)>& func) {
 		size_t sz = im1.size();
 #pragma omp parallel for
-		for (int offset = 0; offset < (int)sz; offset++) {
+		for (size_t offset = 0; offset < sz; offset++) {
 			func(im1.data[offset]);
 		}
 	}
@@ -320,7 +320,7 @@ template<class T, ImageType I> struct Tensor2 {
 				<< im1.dimensions() << "!=" << im2.dimensions());
 		size_t sz = im1.size();
 #pragma omp parallel for
-		for (int offset = 0; offset < (int)sz; offset++) {
+		for (size_t offset = 0; offset < sz; offset++) {
 			func(im1.data[offset], im2.data[offset]);
 		}
 	}
@@ -333,7 +333,7 @@ template<class T, ImageType I> struct Tensor2 {
 				<< im1.dimensions() << "!=" << im2.dimensions());
 		size_t sz = im1.size();
 #pragma omp parallel for
-		for (int offset = 0; offset < (int)sz; offset++) {
+		for (size_t offset = 0; offset < sz; offset++) {
 			func(im1.data[offset], im2.data[offset], im3.data[offset]);
 		}
 	}
@@ -365,7 +365,7 @@ template<class T, ImageType I> struct Tensor2 {
 				<< im1.dimensions() << "!=" << im2.dimensions());
 		size_t sz = im1.size();
 #pragma omp parallel for
-		for (int offset = 0; offset < (int)sz; offset++) {
+		for (size_t offset = 0; offset < sz; offset++) {
 			func(offset, im1.data[offset], im2.data[offset]);
 		}
 	}

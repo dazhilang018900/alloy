@@ -22,6 +22,7 @@
 #ifndef INCLUDE_CORE_ALLOYOPTIMIZATIONMATH_H_
 #define INCLUDE_CORE_ALLOYOPTIMIZATIONMATH_H_
 #include "math/AlloyVector.h"
+#include "image/AlloyImage.h"
 #include "system/AlignedAllocator.h"
 #include "common/cereal/types/list.hpp"
 #include "common/cereal/types/vector.hpp"
@@ -235,7 +236,7 @@ template<class T> void Transform(VecType<T>& im1,
 		const std::function<void(T&)>& func) {
 	size_t sz = im1.size();
 #pragma omp parallel for
-	for (int offset = 0; offset < (int) sz; offset++) {
+	for (size_t offset = 0; offset < sz; offset++) {
 		func(im1[offset]);
 	}
 }
@@ -247,7 +248,7 @@ template<class T> void Transform(VecType<T>& im1, const VecType<T>& im2,
 						<< "!=" << im2.size());
 	size_t sz = im1.size();
 #pragma omp parallel for
-	for (int offset = 0; offset < (int) sz; offset++) {
+	for (size_t offset = 0; offset < sz; offset++) {
 		func(im1[offset], im2[offset]);
 	}
 }
@@ -260,7 +261,7 @@ template<class T> void Transform(VecType<T>& im1, const VecType<T>& im2,
 						<< "!=" << im2.size());
 	size_t sz = im1.size();
 #pragma omp parallel for
-	for (int offset = 0; offset < (int) sz; offset++) {
+	for (size_t offset = 0; offset < sz; offset++) {
 		func(im1[offset], im2[offset], im3[offset], im4[offset]);
 	}
 }
@@ -273,7 +274,7 @@ template<class T> void Transform(VecType<T>& im1, const VecType<T>& im2,
 						<< "!=" << im2.size());
 	size_t sz = im1.size();
 #pragma omp parallel for
-	for (int offset = 0; offset < (int) sz; offset++) {
+	for (size_t offset = 0; offset < sz; offset++) {
 		func(im1[offset], im2[offset], im3[offset]);
 	}
 }
@@ -719,6 +720,23 @@ public:
 			}
 		}
 		return A;
+	}
+	template<ImageType I> void set(const Image<T,1,I>& img){
+		resize(img.width,img.height);
+		std::memcpy(data.data(),img.data.data(),img.size()*sizeof(T));
+	}
+	template<ImageType I> void get(Image<T,1,I>& img){
+		img.resize(rows, cols);
+		std::memcpy(img.data.data(),data.data(),img.size()*sizeof(T));
+	}
+	void set(const std::vector<T>& in){
+		data=in;
+	}
+	template<int C,ImageType I> void set(const Image<T,C,I>& img, int c){
+		resize(img.width,img.height);
+		for(size_t idx=0;idx<img.size();idx++){
+			data[idx]=img[idx][c];
+		}
 	}
 	DenseMat<T>& operator=(const DenseMat<T>& rhs) {
 		if (this == &rhs) {
@@ -1707,7 +1725,7 @@ public:
 	template<class F> void apply(F f) {
 		size_t sz = size();
 #pragma omp parallel for
-		for (int offset = 0; offset < (int) sz; offset++) {
+		for (size_t offset = 0; offset < sz; offset++) {
 			f(offset, data[offset]);
 		}
 	}
@@ -1734,7 +1752,7 @@ template<class T> void Transform(DenseVol<T>& im1, DenseVol<T>& im2,
 						<< im1.dimensions() << "!=" << im2.dimensions());
 	size_t sz = im1.size();
 #pragma omp parallel for
-	for (int offset = 0; offset < (int) sz; offset++) {
+	for (size_t offset = 0; offset < sz; offset++) {
 		func(im1.data[offset], im2.data[offset]);
 	}
 }
@@ -1747,7 +1765,7 @@ template<class T> void Transform(DenseVol<T>& im1, const DenseVol<T>& im2,
 						<< im1.dimensions() << "!=" << im2.dimensions());
 	size_t sz = im1.size();
 #pragma omp parallel for
-	for (int offset = 0; offset < (int) sz; offset++) {
+	for (size_t offset = 0; offset < sz; offset++) {
 		func(im1.data[offset], im2.data[offset], im3.data[offset],
 				im4.data[offset]);
 	}
@@ -1756,7 +1774,7 @@ template<class T> void Transform(DenseVol<T>& im1,
 		const std::function<void(T&)>& func) {
 	size_t sz = im1.size();
 #pragma omp parallel for
-	for (int offset = 0; offset < (int) sz; offset++) {
+	for (size_t offset = 0; offset < sz; offset++) {
 		func(im1.data[offset]);
 	}
 }
@@ -1768,7 +1786,7 @@ template<class T> void Transform(DenseVol<T>& im1, const DenseVol<T>& im2,
 						<< im1.dimensions() << "!=" << im2.dimensions());
 	size_t sz = im1.size();
 #pragma omp parallel for
-	for (int offset = 0; offset < (int) sz; offset++) {
+	for (size_t offset = 0; offset < sz; offset++) {
 		func(im1.data[offset], im2.data[offset]);
 	}
 }
@@ -1781,7 +1799,7 @@ template<class T> void Transform(DenseVol<T>& im1, const DenseVol<T>& im2,
 						<< im1.dimensions() << "!=" << im2.dimensions());
 	size_t sz = im1.size();
 #pragma omp parallel for
-	for (int offset = 0; offset < (int) sz; offset++) {
+	for (size_t offset = 0; offset < sz; offset++) {
 		func(im1.data[offset], im2.data[offset], im3.data[offset]);
 	}
 }
@@ -1809,7 +1827,7 @@ template<class T> void Transform(DenseVol<T>& im1, DenseVol<T>& im2,
 						<< im1.dimensions() << "!=" << im2.dimensions());
 	size_t sz = im1.size();
 #pragma omp parallel for
-	for (int offset = 0; offset < (int) sz; offset++) {
+	for (size_t offset = 0; offset < sz; offset++) {
 		func(offset, im1.data[offset], im2.data[offset]);
 	}
 }

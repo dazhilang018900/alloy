@@ -126,7 +126,7 @@ public:
 	template<class F> void apply(F f) {
 		size_t sz = size();
 #pragma omp parallel for
-		for (int offset = 0; offset < (int) sz; offset++) {
+		for (size_t offset = 0; offset < sz; offset++) {
 			f(offset, data[offset]);
 		}
 	}
@@ -427,7 +427,7 @@ template<class T, int C> void Transform(Vector<T, C>& im1,
 		const std::function<void(vec<T, C>&)>& func) {
 	size_t sz = im1.size();
 #pragma omp parallel for
-	for (int offset = 0; offset < (int) sz; offset++) {
+	for (size_t offset = 0; offset <  sz; offset++) {
 		func(im1.data[offset]);
 	}
 }
@@ -440,7 +440,7 @@ template<class T, int C> void Transform(Vector<T, C>& im1,
 						<< "!=" << im2.size());
 	size_t sz = im1.size();
 #pragma omp parallel for
-	for (int offset = 0; offset < (int) sz; offset++) {
+	for (size_t offset = 0; offset <  sz; offset++) {
 		func(im1.data[offset], im2.data[offset]);
 	}
 }
@@ -456,7 +456,7 @@ template<class T, int C> void Transform(Vector<T, C>& im1,
 						<< "!=" << im2.size());
 	size_t sz = im1.size();
 #pragma omp parallel for
-	for (int offset = 0; offset < (int) sz; offset++) {
+	for (size_t offset = 0; offset <  sz; offset++) {
 		func(im1.data[offset], im2.data[offset], im3.data[offset],
 				im4.data[offset]);
 	}
@@ -470,7 +470,7 @@ template<class T, int C> void Transform(Vector<T, C>& im1,
 						<< "!=" << im2.size());
 	size_t sz = im1.size();
 #pragma omp parallel for
-	for (int offset = 0; offset < (int) sz; offset++) {
+	for (size_t offset = 0; offset < sz; offset++) {
 		func(im1.data[offset], im2.data[offset], im3.data[offset]);
 	}
 }
@@ -737,7 +737,7 @@ template<class T, int C> vec<double, C> dotVec(const Vector<T, C>& a,
 	for (int c = 0; c < C; c++) {
 		double cans = 0;
 #pragma omp parallel for reduction(+:cans)
-		for (int i = 0; i < (int) sz; i++) {
+		for (size_t i = 0; i < sz; i++) {
 			cans += (double) a[i][c] * (double) b[i][c];
 		}
 		ans[c] = cans;
@@ -753,7 +753,7 @@ template<class T, int C> double dot(const Vector<T, C>& a,
 						<< "!=" << b.size());
 	size_t sz = a.size();
 #pragma omp parallel for reduction(+:ans)
-	for (int i = 0; i < (int) sz; i++) {
+	for (size_t i = 0; i < sz; i++) {
 		ans += dot(vec<double, C>(a[i]), vec<double, C>(b[i]));
 	}
 	return ans;
@@ -767,7 +767,7 @@ template<class T> double dot(const std::vector<T>& a,const std::vector<T>& b) {
 	size_t sz = a.size();
 
 //#pragma omp parallel for reduction(+:ans)
-	for (int i = 0; i < (int) sz; i++) {
+	for (size_t i = 0; i < sz; i++) {
 		ans += double(a[i])*double(b[i]);
 	}
 
@@ -777,7 +777,7 @@ template<class T, int C> T lengthSqr(const Vector<T, C>& a) {
 	T ans(0);
 	size_t sz = a.size();
 #pragma omp parallel for reduction(+:ans)
-	for (int i = 0; i < (int) sz; i++) {
+	for (size_t i = 0; i < sz; i++) {
 		ans += dot(a[i], a[i]);
 	}
 	return ans;
@@ -786,7 +786,7 @@ template<class T, int C> T lengthL1(const Vector<T, C>& a) {
 	T ans(0);
 	size_t sz = a.size();
 #pragma omp parallel for reduction(+:ans)
-	for (int i = 0; i < (int) sz; i++) {
+	for (size_t i = 0; i < sz; i++) {
 		for (int c = 0; c < C; c++) {
 			ans += std::abs(a[i][c]);
 		}
@@ -796,7 +796,7 @@ template<class T, int C> T lengthL1(const Vector<T, C>& a) {
 template<class T, int C> T lengthInf(const Vector<T, C>& a) {
 	T ans(0);
 	size_t sz = a.size();
-	for (int i = 0; i < (int) sz; i++) {
+	for (size_t i = 0; i < sz; i++) {
 		for (int c = 0; c < C; c++) {
 			ans = std::max(ans,std::abs(a[i][c]));
 		}
@@ -808,7 +808,7 @@ template<class T, int C> vec<T, C> lengthVecInf(const Vector<T, C>& a) {
 	size_t sz = a.size();
 #pragma omp parallel for
 	for (int c = 0; c < C; c++) {
-		for (int i = 0; i < (int) sz; i++) {
+		for (size_t i = 0; i < sz; i++) {
 			ans[c]=std::max(ans[c], std::abs(a[i][c]));
 		}
 	}
@@ -821,7 +821,7 @@ template<class T, int C> vec<T, C> lengthVecL1(const Vector<T, C>& a) {
 	for (int c = 0; c < C; c++) {
 		T cans = 0;
 #pragma omp parallel for reduction(+:cans)
-		for (int i = 0; i < (int) sz; i++) {
+		for (size_t i = 0; i < sz; i++) {
 			cans += std::abs(a[i][c]);
 		}
 		ans[c] = cans;
@@ -835,7 +835,7 @@ template<class T, int C> vec<T, C> maxVec(const Vector<T, C>& a) {
 	for (int c = 0; c < C; c++) {
 		T tmp(std::numeric_limits<T>::min());
 //#pragma omp parallel for reduction(max:tmp)
-		for (int i = 0; i < (int) sz; i++) {
+		for (size_t i = 0; i < sz; i++) {
 			if (a[i][c] > tmp)
 				tmp = a[i][c];
 		}
@@ -850,7 +850,7 @@ template<class T, int C> vec<T, C> minVec(const Vector<T, C>& a) {
 	for (int c = 0; c < C; c++) {
 		T tmp(std::numeric_limits<T>::max());
 //#pragma omp parallel for reduction(min:tmp)
-		for (int i = 0; i < (int) sz; i++) {
+		for (size_t i = 0; i < sz; i++) {
 			if (a[i][c] < tmp)
 				tmp = a[i][c];
 		}
@@ -862,7 +862,7 @@ template<class T, int C> T max(const Vector<T, C>& a) {
 	size_t sz = a.size();
 	T tmp(std::numeric_limits<T>::min());
 //#pragma omp parallel for reduction(max:tmp)
-	for (int i = 0; i < (int) sz; i++) {
+	for (size_t i = 0; i < sz; i++) {
 		for (int c = 0; c < C; c++) {
 			if (a[i][c] > tmp)
 				tmp = a[i][c];
@@ -874,7 +874,7 @@ template<class T, int C> T min(const Vector<T, C>& a) {
 	size_t sz = a.size();
 	T tmp(std::numeric_limits<T>::max());
 //#pragma omp parallel for reduction(min:tmp)
-	for (int i = 0; i < (int) sz; i++) {
+	for (size_t i = 0; i < sz; i++) {
 		for (int c = 0; c < C; c++) {
 			if (a[i][c] < tmp)
 				tmp = a[i][c];
@@ -892,7 +892,7 @@ template<class T, int C> vec<double, C> lengthVecSqr(const Vector<T, C>& a) {
 	for (int c = 0; c < C; c++) {
 		double cans = 0;
 #pragma omp parallel for reduction(+:cans)
-		for (int i = 0; i < (int) sz; i++) {
+		for (size_t i = 0; i < sz; i++) {
 			double val = a[i][c];
 			cans += val * val;
 		}
@@ -906,40 +906,40 @@ template<class T, int C> vec<double, C> lengthVec(const Vector<T, C>& a) {
 
 template<class T> Vector<T, 3> Transform(const matrix<T, 3, 3>& M,
 		const Vector<T, 3>& v) {
-	int sz=(int)v.size();
+	size_t sz=v.size();
 	Vector<T, 3> out(sz);
 #pragma omp parallel for
-	for(int idx=0;idx<sz;idx++){
+	for(size_t idx=0;idx<sz;idx++){
 		out[idx]=Transform(M,v[idx]);
 	}
 	return out;
 }
 template<class T> Vector<T, 4> Transform(const matrix<T, 3, 3>& M,
 		const Vector<T, 4>& v) {
-	int sz=(int)v.size();
+	size_t sz=v.size();
 	Vector<T, 4> out(sz);
 #pragma omp parallel for
-	for(int idx=0;idx<sz;idx++){
+	for(size_t idx=0;idx<sz;idx++){
 		out[idx]=Transform(M,v[idx]);
 	}
 	return out;
 }
 template<class T> Vector<T, 3> Transform(const matrix<T, 4, 4>& M,
 		const Vector<T, 3>& v) {
-	int sz=(int)v.size();
+	size_t sz=v.size();
 	Vector<T, 3> out(sz);
 #pragma omp parallel for
-	for(int idx=0;idx<sz;idx++){
+	for(size_t idx=0;idx<sz;idx++){
 		out[idx]=Transform(M,v[idx]);
 	}
 	return out;
 }
 template<class T> Vector<T, 4> Transform(const matrix<T, 4, 4>& M,
 		const Vector<T, 4>& v) {
-	int sz=(int)v.size();
+	size_t sz=v.size();
 	Vector<T, 4> out(sz);
 #pragma omp parallel for
-	for(int idx=0;idx<sz;idx++){
+	for(size_t idx=0;idx<sz;idx++){
 		out[idx]=Transform(M,v[idx]);
 	}
 	return out;

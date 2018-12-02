@@ -1,13 +1,15 @@
 #include "CubeLUT.h"
 #include <iostream>
 #include <sstream>
+//Based on Adobe's Specification:
+//http://wwwimages.adobe.com/content/dam/Adobe/en/products/speedgrade/cc/pdfs/cube-lut-specification-1.0.pdf
 namespace aly {
 void ReadCubeFromFile(const std::string& f, CubeLUT& lut) {
 	std::ifstream in(f);
 	if (!in.is_open()) {
 		throw std::runtime_error("ERROR: Impossible to open cube file.");
 	}
-	CubeLUT::LUTState status=lut.LoadCubeFile(in);
+	CubeLUT::LUTState status=lut.load(in);
 	if(status!=CubeLUT::LUTState::OK){
 		throw std::runtime_error(MakeString()<<"Failed to load cube file. Error "<<static_cast<int>(status));
 	}
@@ -18,7 +20,7 @@ void WriteCubeFromFile(const std::string& f,const CubeLUT& lut){
 	if (!out.is_open()) {
 		throw std::runtime_error("ERROR: Impossible to write cube file.");
 	}
-	CubeLUT::LUTState status=lut.SaveCubeFile(out);
+	CubeLUT::LUTState status=lut.save(out);
 	if(status!=CubeLUT::LUTState::OK){
 		throw std::runtime_error(MakeString()<<"Failed to save cube file. Error "<<static_cast<int>(status));
 	}
@@ -77,7 +79,7 @@ float3 CubeLUT::ParseTableRow(const std::string & lineOfText) {
 	}
 	return f;
 } // ParseTableRow
-CubeLUT::LUTState CubeLUT::LoadCubeFile(std::ifstream & infile) {
+CubeLUT::LUTState CubeLUT::load(std::ifstream & infile) {
 	// Set defaults
 	status = LUTState::OK;
 	title.clear();
@@ -198,7 +200,7 @@ CubeLUT::LUTState CubeLUT::LoadCubeFile(std::ifstream & infile) {
 	}
 	return status;
 } // LoadCubeFile
-CubeLUT::LUTState CubeLUT::SaveCubeFile(std::ofstream & outfile) const {
+CubeLUT::LUTState CubeLUT::save(std::ofstream & outfile) const {
 	if (status != LUTState::OK)
 		return status; // Write only good Cubes
 	// Write keywords

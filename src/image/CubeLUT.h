@@ -1,9 +1,13 @@
 #ifndef CubeLUT_H
 #define CubeLUT_H
+
 #include <string>
 #include <vector>
 #include <fstream>
 #include "math/AlloyMath.h"
+
+//Based on Adobe's Specification:
+//http://wwwimages.adobe.com/content/dam/Adobe/en/products/speedgrade/cc/pdfs/cube-lut-specification-1.0.pdf
 namespace aly{
 class CubeLUT {
 public:
@@ -24,8 +28,8 @@ public:
 	table3D LUT3D;
 	int rows,cols,slices;
 	CubeLUT(void):rows(0),cols(0),slices(0) { status = LUTState::NotInitialized; };
-	LUTState LoadCubeFile(std::ifstream & infile);
-	LUTState SaveCubeFile(std::ofstream & outfile) const;
+	LUTState load(std::ifstream & infile);
+	LUTState save(std::ofstream & outfile) const;
 	float3 operator()(float x, float y, float z) const;
 	float3 operator()(int i, int j, int k) const;
 private:

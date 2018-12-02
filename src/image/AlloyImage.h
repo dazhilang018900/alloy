@@ -450,7 +450,7 @@ public:
 	template<class F> void apply(F f) {
 		size_t sz = size();
 #pragma omp parallel for
-		for (int offset = 0; offset < (int) sz; offset++) {
+		for (size_t offset = 0; offset < sz; offset++) {
 			f(offset, data[offset]);
 		}
 	}
@@ -642,7 +642,7 @@ template<class T, int C, ImageType I> std::string Image<T, C, I>::updateHashCode
 		std::uniform_int_distribution<int> wSampler(0, width - 1);
 		std::uniform_int_distribution<int> hSampler(0, height - 1);
 		std::vector<vec<T, C>> sample(MAX_SAMPLES);
-		for (int i = 0; i < (int) MAX_SAMPLES; i++) {
+		for (size_t i = 0; i < MAX_SAMPLES; i++) {
 			sample[i] = this->operator()(wSampler(mt), hSampler(mt));
 		}
 		hashCode = HashCode(sample, method);
@@ -658,7 +658,7 @@ template<class T, int C, ImageType I> void Transform(Image<T, C, I>& im1,
 						<< im1.dimensions() << "!=" << im2.dimensions());
 	size_t sz = im1.size();
 #pragma omp parallel for
-	for (int offset = 0; offset < (int) sz; offset++) {
+	for (size_t offset = 0; offset < sz; offset++) {
 		func(im1.data[offset], im2.data[offset]);
 	}
 }
@@ -666,7 +666,7 @@ template<class T, int C, ImageType I> void Transform(Image<T, C, I>& im1,
 		const std::function<void(vec<T, C>&)>& func) {
 	size_t sz = im1.size();
 #pragma omp parallel for
-	for (int offset = 0; offset < (int) sz; offset++) {
+	for (size_t offset = 0; offset < sz; offset++) {
 		func(im1.data[offset]);
 	}
 }
@@ -679,7 +679,7 @@ template<class T, int C, ImageType I> void Transform(Image<T, C, I>& im1,
 						<< im1.dimensions() << "!=" << im2.dimensions());
 	size_t sz = im1.size();
 #pragma omp parallel for
-	for (int offset = 0; offset < (int) sz; offset++) {
+	for (size_t offset = 0; offset < sz; offset++) {
 		func(im1.data[offset], im2.data[offset]);
 	}
 }
@@ -692,7 +692,7 @@ template<class T, int C, ImageType I> void Transform(Image<T, C, I>& im1,
 						<< im1.dimensions() << "!=" << im2.dimensions());
 	size_t sz = im1.size();
 #pragma omp parallel for
-	for (int offset = 0; offset < (int) sz; offset++) {
+	for (size_t offset = 0; offset < sz; offset++) {
 		func(im1.data[offset], im2.data[offset], im3.data[offset]);
 	}
 }
@@ -708,7 +708,7 @@ template<class T, int C, ImageType I> void Transform(Image<T, C, I>& im1,
 						<< im1.dimensions() << "!=" << im2.dimensions());
 	size_t sz = im1.size();
 #pragma omp parallel for
-	for (int offset = 0; offset < (int) sz; offset++) {
+	for (size_t offset = 0; offset < sz; offset++) {
 		func(im1.data[offset], im2.data[offset], im3.data[offset],
 				im4.data[offset]);
 	}
@@ -738,7 +738,7 @@ template<class T, int C, ImageType I> void Transform(Image<T, C, I>& im1,
 						<< im1.dimensions() << "!=" << im2.dimensions());
 	size_t sz = im1.size();
 #pragma omp parallel for
-	for (int offset = 0; offset < (int) sz; offset++) {
+	for (size_t offset = 0; offset < sz; offset++) {
 		func(offset, im1.data[offset], im2.data[offset]);
 	}
 }
@@ -1217,17 +1217,17 @@ template<class T, ImageType I> void ConvertImage(const Image<T, 4, I>& in,
 	out.resize(in.width, in.height);
 	out.id = in.id;
 	out.setPosition(in.position());
-	int N = (int) out.size();
+	size_t N =  out.size();
 
 	if (sRGB) {
 #pragma omp parallel for
-		for (int i = 0; i < N; i++) {
+		for (size_t i = 0; i < N; i++) {
 			vec<T, 4> c = in[i];
 			out[i] = vec<T, 1>(T(0.21 * c.x + 0.72 * c.y + 0.07 * c.z));
 		}
 	} else {
 #pragma omp parallel for
-		for (int i = 0; i < N; i++) {
+		for (size_t i = 0; i < N; i++) {
 			vec<T, 4> c = in[i];
 			out[i] = vec<T, 1>(T(0.30 * c.x + 0.59 * c.y + 0.11 * c.z));
 		}
@@ -1238,17 +1238,17 @@ template<class T, ImageType I> void ConvertImage(const Image<T, 4, I>& in,
 	out.resize(in.width, in.height);
 	out.id = in.id;
 	out.setPosition(in.position());
-	int N = out.size();
+	size_t N = out.size();
 
 	if (sRGB) {
 #pragma omp parallel for
-		for (int i = 0; i < N; i++) {
+		for (size_t i = 0; i < N; i++) {
 			vec<T, 4> c = in[i];
 			out[i] = vec<T, 2>(T(0.21 * c.x + 0.72 * c.y + 0.07 * c.z), c.w);
 		}
 	} else {
 #pragma omp parallel for
-		for (int i = 0; i < N; i++) {
+		for (size_t i = 0; i < N; i++) {
 			vec<T, 4> c = in[i];
 			out[i] = vec<T, 2>(T(0.30 * c.x + 0.59 * c.y + 0.11 * c.z), c.w);
 		}
@@ -1259,17 +1259,17 @@ template<class T, ImageType I> void ConvertImage(const Image<T, 3, I>& in,
 	out.resize(in.width, in.height);
 	out.id = in.id;
 	out.setPosition(in.position());
-	int N = (int) out.size();
+	size_t N=out.size();
 
 	if (sRGB) {
 #pragma omp parallel for
-		for (int i = 0; i < N; i++) {
+		for (size_t i = 0; i < N; i++) {
 			vec<T, 3> c = in[i];
 			out[i] = vec<T, 1>(T(0.21 * c.x + 0.72 * c.y + 0.07 * c.z));
 		}
 	} else {
 #pragma omp parallel for
-		for (int i = 0; i < N; i++) {
+		for (size_t i = 0; i < N; i++) {
 			vec<T, 3> c = in[i];
 			out[i] = vec<T, 1>(T(0.30 * c.x + 0.59 * c.y + 0.11 * c.z));
 		}
