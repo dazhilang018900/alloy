@@ -237,9 +237,12 @@ float2 DictionaryLearning::normalize(int index, float percent) {
 			(int) values.size() - 1)];
 	float upper = values[clamp((int) ((1.0f - percent) * values.size()), 0,
 			(int) values.size() - 1)];
+
 	std::cout << "Soft Limits [" << lower << "," << upper << "]" << std::endl;
-	return float2((1.0f - 2 * percent) / (upper - lower),
-			-(1.0f - 2 * percent) * lower + percent);
+	if(upper-lower<1E-6){
+		return float2(1.0f,-lower);
+	}
+	return float2((1.0f - 2 * percent) / (upper - lower),-(1.0f - 2 * percent) * lower + percent);
 }
 void FilterBank::score(const aly::Image1ub& image, aly::Image1f& out) {
 	out.resize(image.width, image.height);
@@ -278,6 +281,7 @@ float FilterBank::score(const SamplePatch& patch) const {
 	for (int ii = 0; ii < patch.size(); ii++) {
 		err += (double) (data[ii]) * (patch.data[ii] - avg);
 	}
+	err/=patch.size();
 	return std::abs(err);
 }
 void FilterBank::score(const aly::Image1ub& image, aly::DenseMat<float>& out) {
@@ -303,6 +307,7 @@ void FilterBank::score(const aly::Image1ub& image, aly::DenseMat<float>& out) {
 							* (image(x, y).x / 255.0f - avg);
 				}
 			}
+			err/=(width*height);
 			out(i, j) = std::abs(err);
 		}
 	}
@@ -331,6 +336,7 @@ void FilterBank::score(const DenseMat<float>& image, aly::DenseMat<float>& out) 
 							* (image(clamp(x,0,image.rows-1), clamp(y,0,image.cols-1)) - avg);
 				}
 			}
+			err/=(width*height);
 			out(i, j) = std::abs(err);
 		}
 	}
@@ -360,6 +366,7 @@ void FilterBank::score(const aly::ImageRGB& image, aly::DenseMat<float>& out) {
 							* (RGBtoGray(image(x, y), true) - avg);
 				}
 			}
+			err/=(double)(width*height);
 			out(i, j) = aly::sum(aly::abs(float3(err.x, err.y, err.z)));
 		}
 	}

@@ -733,18 +733,22 @@ public:
 		return A;
 	}
 	template<ImageType I> void set(const Image<T,1,I>& img){
-		resize(img.width,img.height);
-		std::memcpy(data.data(),img.data.data(),img.size()*sizeof(T));
+		resize(img.height,img.width);
+		for(size_t idx=0;idx<img.size();idx++){
+			data[idx]=img[idx].x;
+		}
 	}
 	template<ImageType I> void get(Image<T,1,I>& img){
-		img.resize(rows, cols);
-		std::memcpy(img.data.data(),data.data(),img.size()*sizeof(T));
+		img.resize(cols,rows);
+		for(size_t idx=0;idx<img.size();idx++){
+			img[idx].x=data[idx];
+		}
 	}
 	void set(const std::vector<T>& in){
 		data=in;
 	}
 	template<int C,ImageType I> void set(const Image<T,C,I>& img, int c){
-		resize(img.width,img.height);
+		resize(img.height,img.width);
 		for(size_t idx=0;idx<img.size();idx++){
 			data[idx]=img[idx][c];
 		}

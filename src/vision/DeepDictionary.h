@@ -18,7 +18,7 @@ struct FilterBankWeights{
 	float normalizeScale=1;
 	float normalizeOffset=0;
 	inline float evaluate(float x) const {
-		return weight*((x-normalizeOffset)*normalizeScale);
+		return weight*((x+normalizeOffset)*normalizeScale);
 	}
 };
 struct FilterBankTensor{

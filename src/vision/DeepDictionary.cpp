@@ -127,7 +127,7 @@ void FilterLayer::learnInput(DictionaryLearning& dictionary, int inputIndex) {
 		FilterBankWeights& w = t.weights[idx];
 		w.normalizeScale = scaleOffset.x;
 		w.normalizeOffset = scaleOffset.y;
-		w.weight = 1.0f / outputSize;
+		w.weight = 1.0f / inputSize;
 	}
 	dictionary.writeFilterBanks(MakeDesktopFile(MakeString()<<label<<"_filter.png"));
 
@@ -174,6 +174,7 @@ void DeepDictionary::train(const std::vector<ImageRGB>& images, int subsample) {
 			WriteImageToRawFile(MakeDesktopFile(MakeString()<<layers[0].getName()<<"_"<<n<<"_"<<k<<".xml"),tmp);
 		}
 	}
+
 	std::exit(0);
 	for (int l = 1; l < (int) layers.size(); l++) {
 		FilterLayer& layer = layers[l];
