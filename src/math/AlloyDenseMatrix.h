@@ -175,7 +175,12 @@ public:
 							<< cols << "]");
 		return data[i][j];
 	}
-	const vec<T, C>& operator()(size_t i, size_t j) const {
+	const vec<T, C>& operator()(int i,int j) const {
+		if (i >= (size_t) rows || j >= (size_t) cols || i < 0 || j < 0)
+			throw std::runtime_error(
+					MakeString() << "Index (" << i << "," << j
+							<< ") exceeds matrix bounds [" << rows << ","
+							<< cols << "]");
 		return data[i][j];
 	}
 	inline DenseMatrix<T, C> transpose() const {
