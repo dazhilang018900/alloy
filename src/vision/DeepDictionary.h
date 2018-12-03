@@ -44,17 +44,22 @@ private:
 	int patchSize;
 	int sparsity;
 	int angleSamples;
+	std::string label;
 	void learnInput(DictionaryLearning& dictionary,int inputIndex);
 public:
-	FilterLayer(int featuresIn,int featuresOut,int patchSize);
+	FilterLayer(const std::string& label,int featuresIn,int featuresOut,int patchSize);
 	void setSparsity(int s);
 	void setAngleSamples(int s);
+	std::string getName() const {
+		return label;
+	}
 	size_t getInputSize() const {
 		return inputSize;
 	}
 	size_t getOutputSize() const {
 		return outputSize;
 	}
+	void stash();
 	void learnInput(const std::vector<Image1ub>& images,int inputIndex,int subsample);
 	void learnInput(const std::vector<LayerData>& images,int inputIndex,int subsample);
 	void learnInput(const std::vector<ImageRGB>& images,int inputIndex,int subsample);
@@ -66,7 +71,10 @@ class DeepDictionary {
 private:
 	std::vector<FilterLayer> layers;
 public:
-	DeepDictionary(const std::initializer_list<int>& outputSizes,int inputPatchSize,int sparsity,int angles);
+	DeepDictionary(
+			const std::initializer_list<int>& outputSizes,
+			const std::initializer_list<int>& filterSizes,
+			int sparsity,int angles);
 	void train(const std::vector<ImageRGB>& images,int subsample);
 	virtual ~DeepDictionary(){}
 };

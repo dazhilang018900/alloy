@@ -32,11 +32,12 @@ DictionaryLearningEx::DictionaryLearningEx() :
 }
 bool DictionaryLearningEx::init(Composite& rootNode) {
 	ReadImageFromFile(getFullPath("images/mountains.jpg"), img);
-	int patchSize = 16;
-	int subsample = 16;
+	int patchSize = 11;
+	int subsample = 11;
 	int sparsity = 3;
 	int angleSamples = 8;
-	DeepDictionary dictionary({64,64},patchSize,sparsity,angleSamples);
+	DeepDictionary dictionary({64,64},{patchSize,patchSize},sparsity,angleSamples);
+	dictionary.train({img},subsample);
 	ImageRGB est;
 	aly::Volume3f weights;
 	//learning.estimate(img, est, weights, sparsity);

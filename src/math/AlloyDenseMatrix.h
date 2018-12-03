@@ -111,7 +111,7 @@ public:
 	void setZero() {
 		data.assign(data.size(), vec<T, C>(0));
 	}
-	void set(size_t i, size_t j, const vec<T, C>& value) {
+	void set(int i, int j, const vec<T, C>& value) {
 		if (i >= (size_t) rows || j >= (size_t) cols || i < 0 || j < 0)
 			throw std::runtime_error(
 					MakeString() << "Index (" << i << "," << j
@@ -119,7 +119,7 @@ public:
 							<< cols << "]");
 		data[i][j] = value;
 	}
-	void set(size_t i, size_t j, const T& value) {
+	void set(int i, int j, const T& value) {
 		if (i >= (size_t) rows || j >= (size_t) cols || i < 0 || j < 0)
 			throw std::runtime_error(
 					MakeString() << "Index (" << i << "," << j
@@ -127,7 +127,7 @@ public:
 							<< cols << "]");
 		data[i][j] = vec<T, C>(value);
 	}
-	vec<T, C>& operator()(size_t i, size_t j) {
+	vec<T, C>& operator()(int i, int j) {
 		if (i >= (size_t) rows || j >= (size_t) cols || i < 0 || j < 0)
 			throw std::runtime_error(
 					MakeString() << "Index (" << i << "," << j
@@ -136,7 +136,7 @@ public:
 		return data[i][j];
 	}
 
-	vec<T, C> get(size_t i, size_t j) const {
+	vec<T, C> get(int i, int j) const {
 		if (i >= (size_t) rows || j >= (size_t) cols || i < 0 || j < 0)
 			throw std::runtime_error(
 					MakeString() << "Index (" << i << "," << j

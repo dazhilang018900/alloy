@@ -72,30 +72,38 @@ void FilterLayer::evaluate(const ImageRGB& in, LayerData& out) {
 	mat[0].set(gray);
 	evaluate(mat,out);
 }
+
 void FilterLayer::evaluate(const LayerData& in, LayerData& out) {
 	DenseMat<float> accum, tmp;
-	assert(in.size() == tensors[0].size());
+	assert(in.size() == tensors.size());
 	assert(in.size() == inputSize);
-	assert(tensors.size() == outputSize);
 	out.resize(outputSize);
+
 	for (int outIdx = 0; outIdx < outputSize; outIdx++) {
-		FilterBankTensor& tensor = tensors[outIdx];
 		for (int inIdx = 0; inIdx < inputSize; inIdx++) {
 			const DenseMat<float>& input = in[inIdx];
+			FilterBankTensor& tensor = tensors[inIdx];
+			assert(tensor.size() == outputSize);
 			if (inIdx == 0) {
 				accum.resize(input.rows, input.cols);
 				accum.setZero();
 			}
-			tensor.filters[inIdx].score(input, tmp);
-			auto fw = tensor.weights[inIdx];
+			tensor.filters[outIdx].score(input, tmp);
+			auto fw = tensor.weights[outIdx];
+			std::cout<<"Blend "<<fw.normalizeScale<<" "<<fw.normalizeOffset<<" "<<fw.weight<<std::endl;
 #pragma omp parallel for
 			for (size_t idx = 0; idx < accum.size(); idx++) {
 				accum.data[idx] += fw.evaluate(tmp.data[idx]);
 			}
 		}
+		std::cout<<"Out Size "<<accum.dimensions()<<std::endl;
+		out[outIdx]=accum;
 	}
 
 //include max pool operation here
+}
+void FilterLayer::stash(){
+
 }
 void FilterLayer::learnInput(const std::vector<ImageRGB>& images,
 		int inputIndex, int subsample) {
@@ -121,9 +129,10 @@ void FilterLayer::learnInput(DictionaryLearning& dictionary, int inputIndex) {
 		w.normalizeOffset = scaleOffset.y;
 		w.weight = 1.0f / outputSize;
 	}
+	dictionary.writeFilterBanks(MakeDesktopFile(MakeString()<<label<<"_filter.png"));
+
 }
-FilterLayer::FilterLayer(int featuresIn, int featuresOut, int patchSize) :
-		inputSize(featuresIn), outputSize(featuresOut), patchSize(patchSize), sparsity(
+FilterLayer::FilterLayer(const std::string& label,int featuresIn, int featuresOut, int patchSize) : label(label),inputSize(featuresIn), outputSize(featuresOut), patchSize(patchSize), sparsity(
 				3), angleSamples(8) {
 	tensors.resize(featuresIn, FilterBankTensor(featuresOut));
 }
@@ -133,34 +142,45 @@ void FilterLayer::setSparsity(int s) {
 void FilterLayer::setAngleSamples(int s) {
 	angleSamples = s;
 }
-DeepDictionary::DeepDictionary(const std::initializer_list<int>& outputSizes,
-		int inputPatchSize, int sparsity, int angles) {
+DeepDictionary::DeepDictionary(
+		const std::initializer_list<int>& outputSizes,
+		const std::initializer_list<int>& filterSizes, int sparsity, int angles) {
 	int lastSize = 1;
-	int patchSize = inputPatchSize;
+	auto sizeIter=filterSizes.begin();
+	int count=0;
 	for (int f : outputSizes) {
-		FilterLayer layer(lastSize, f, patchSize);
+		FilterLayer layer(MakeString()<<"layer"<<count,lastSize, f, *sizeIter);
 		layer.setSparsity(sparsity);
 		layer.setAngleSamples(angles);
 		layers.push_back(layer);
 		lastSize = f;
-		patchSize /= 2; //expect maxpool operation between layers.
+		sizeIter++;
+		count++;
 	}
 }
 void DeepDictionary::train(const std::vector<ImageRGB>& images, int subsample) {
 	if (layers.size() == 0) {
 		throw std::runtime_error("No layers in dictionary.");
 	}
-	layers[0].learnInput(images, subsample, 0);
 	std::vector<LayerData> trainingSet(images.size());
 	std::vector<LayerData> newTrainingSet;
+	layers[0].learnInput(images, 0, subsample);
+	layers[0].stash();
 	for (int n = 0; n < images.size(); n++) {
 		layers[0].evaluate(images[n], trainingSet[n]);
+		for(int k=0;k<trainingSet[n].size();k++){
+			Image1f tmp;
+			trainingSet[n][k].get(tmp);
+			WriteImageToRawFile(MakeDesktopFile(MakeString()<<layers[0].getName()<<"_"<<n<<"_"<<k<<".xml"),tmp);
+		}
 	}
+	std::exit(0);
 	for (int l = 1; l < (int) layers.size(); l++) {
 		FilterLayer& layer = layers[l];
 		for (int n = 0; n < layer.getInputSize(); n++) {
 			layer.learnInput(trainingSet, n, subsample);
 		}
+		layer.stash();
 		newTrainingSet.resize(images.size());
 		for (int n = 0; n < layer.getInputSize(); n++) {
 			//Compute output of each layer and store.

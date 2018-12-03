@@ -662,11 +662,22 @@ public:
 			data[cols * i + j] = vec[i];
 		}
 	}
-	T& operator()(size_t i, size_t j) {
-		return data[cols * i + j];
+	T& operator()(int i, int j) {
+		assert(i<rows);
+		assert(j<cols);
+		assert(i>=0);
+		assert(j>=0);
+		return data[cols * (size_t)i + j];
 	}
-	const T& operator()(size_t i, size_t j) const {
-		return data[cols * i + j];
+	const T& operator()(int i, int j) const {
+		assert(i<rows);
+		assert(j<cols);
+		assert(i>=0);
+		assert(j>=0);
+		return data[cols * (size_t)i + j];
+	}
+	inline bool contains(int i,int j) const {
+		return (i>=0&& j>=0 && i<rows && j<cols);
 	}
 	inline DenseMat<T> transpose() const {
 		DenseMat<T> M(cols, rows);

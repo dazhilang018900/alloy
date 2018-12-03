@@ -56,7 +56,7 @@ void SamplePatch::sample(const DenseMat<float>& gray) {
 		for (int i = 0; i < width; i++) {
 			float2 pix(width * (i / (float) (width - 1) - 0.5f),
 					height * (j / (float) (height - 1) - 0.5f));
-			data[i + j * width] = gray(position.x + pix.x, position.y + pix.y);
+			data[i + j * width] = gray(clamp((int)(position.x + pix.x),0,gray.rows-1),clamp((int)(position.y + pix.y),0,gray.cols-1));
 		}
 	}
 }
@@ -307,6 +307,7 @@ void FilterBank::score(const aly::Image1ub& image, aly::DenseMat<float>& out) {
 		}
 	}
 }
+
 void FilterBank::score(const DenseMat<float>& image, aly::DenseMat<float>& out) {
 	out.resize(image.rows,image.cols);
 #pragma omp parallel for
@@ -317,7 +318,7 @@ void FilterBank::score(const DenseMat<float>& image, aly::DenseMat<float>& out) 
 				for (int ii = 0; ii < width; ii++) {
 					int x = i + ii - width / 2;
 					int y = j + jj - height / 2;
-					avg += image(x, y);
+					avg += image(clamp(x,0,image.rows-1), clamp(y,0,image.cols-1));
 				}
 			}
 			avg /= (width * height);
@@ -327,7 +328,7 @@ void FilterBank::score(const DenseMat<float>& image, aly::DenseMat<float>& out) 
 					int x = i + ii - width / 2;
 					int y = j + jj - height / 2;
 					err += data[ii + jj * width]
-							* (image(x, y) - avg);
+							* (image(clamp(x,0,image.rows-1), clamp(y,0,image.cols-1)) - avg);
 				}
 			}
 			out(i, j) = std::abs(err);
@@ -1016,7 +1017,7 @@ void DictionaryLearning::initializeFilters(int patchWidth, int patchHeight,
 	for (int n = 0; n < filterBanks.size(); n++) {
 		filterBanks[n].normalize();
 	}
-	std::cout << "Filters " << filterBanks.size() << std::endl;
+	std::cout << "Filters: " << filterBanks.size() <<" Filter Size: "<<patchWidth<<" x "<<patchHeight<< std::endl;
 }
 void DictionaryLearning::setTrainingData(const std::vector<Image1ub>& images,
 		int subsample) {
