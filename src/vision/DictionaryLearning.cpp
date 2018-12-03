@@ -108,23 +108,24 @@ float SamplePatch::residual(const std::vector<FilterBank>& banks,
 	}
 	return (float) err;
 }
-std::vector<float> SamplePatch::getLabelWeights(const std::vector<FilterBank>& banks){
-	std::vector<float> histogram(5,0.0f);
-	for(int k=0;k<weights.size();k++){
-		int idx=static_cast<int>(banks[k].type);
-		assert(idx>=0&&idx<5);
-		histogram[idx]+=std::abs(weights[k]);
+std::vector<float> SamplePatch::getLabelWeights(
+		const std::vector<FilterBank>& banks) {
+	std::vector<float> histogram(5, 0.0f);
+	for (int k = 0; k < weights.size(); k++) {
+		int idx = static_cast<int>(banks[k].type);
+		assert(idx >= 0 && idx < 5);
+		histogram[idx] += std::abs(weights[k]);
 	}
 	/*
-	FilterType label=FilterType::Unknown;
-	float bestWeight=0;
-	for(int n=1;n<histogram.size();n++){
-		if(histogram[n]>bestWeight){
-			label=static_cast<FilterType>(n);
-			bestWeight=histogram[n];
-		}
-	}
-	*/
+	 FilterType label=FilterType::Unknown;
+	 float bestWeight=0;
+	 for(int n=1;n<histogram.size();n++){
+	 if(histogram[n]>bestWeight){
+	 label=static_cast<FilterType>(n);
+	 bestWeight=histogram[n];
+	 }
+	 }
+	 */
 	return histogram;
 }
 float SamplePatch::synthesize(const std::vector<FilterBank>& banks,
@@ -168,68 +169,156 @@ double FilterBank::score(const std::vector<float>& sample, bool correlation) {
 	}
 }
 
-void DictionaryLearning::maxPool(const aly::Image3f& image,aly::Image3f& out,int size){
-	out.resize(image.width/size,image.height/size);
-	for(int j=0;j<out.height;j++){
-		for(int i=0;i<out.width;i++){
+void DictionaryLearning::maxPool(const aly::Image3f& image, aly::Image3f& out,
+		int size) {
+	out.resize(image.width / size, image.height / size);
+	for (int j = 0; j < out.height; j++) {
+		for (int i = 0; i < out.width; i++) {
 			float3 maxVal(-1E30f);
-			for(int jj=0;jj<size;jj++){
-				for(int ii=0;ii<size;ii++){
-					maxVal=aly::max(maxVal,image(i*size+ii,j*size+jj));
+			for (int jj = 0; jj < size; jj++) {
+				for (int ii = 0; ii < size; ii++) {
+					maxVal = aly::max(maxVal,
+							image(i * size + ii, j * size + jj));
 				}
 			}
-			out(i,j)=maxVal;
+			out(i, j) = maxVal;
 		}
 	}
 }
-void DictionaryLearning::normalize(aly::Image3f& image,float percent,int stride){
+void DictionaryLearning::normalize(aly::Image3f& image, float percent,int stride) {
 	std::vector<float> values;
-	values.reserve(3*image.size()/stride);
-	for(int i=0;i<image.width;i+=stride){
-		for(int j=0;j<image.height;j+=stride){
-			float3 samp=image(RandomUniform(i,i+stride),RandomUniform(j,j+stride));
+	values.reserve(3 * image.size() / stride);
+	for (int i = 0; i < image.width; i += stride) {
+		for (int j = 0; j < image.height; j += stride) {
+			float3 samp = image(RandomUniform(i, i + stride),
+					RandomUniform(j, j + stride));
 			values.push_back(samp.x);
 			values.push_back(samp.y);
 			values.push_back(samp.z);
 		}
 	}
-	std::sort(values.begin(),values.end());
-	float lower=values[clamp((int)(percent*values.size()),0,(int)values.size()-1)];
-	float upper=values[clamp((int)((1.0f-percent)*values.size()),0,(int)values.size()-1)];
-	std::cout<<"Soft Limits ["<<lower<<","<<upper<<"]"<<std::endl;
-	if(upper-lower<1E-6f){
-		for(float3& v:image.data){
-			v=aly::clamp((v-lower),0.0f,1.0f);
+	std::sort(values.begin(), values.end());
+	float lower = values[clamp((int) (percent * values.size()), 0,
+			(int) values.size() - 1)];
+	float upper = values[clamp((int) ((1.0f - percent) * values.size()), 0,
+			(int) values.size() - 1)];
+	std::cout << "Soft Limits [" << lower << "," << upper << "]" << std::endl;
+	if (upper - lower < 1E-6f) {
+		for (float3& v : image.data) {
+			v = aly::clamp((v - lower), 0.0f, 1.0f);
 		}
 	} else {
-		for(float3& v:image.data){
-			v=aly::clamp((1.0f-2*percent)*(v-lower)/(upper-lower)+percent,0.0f,1.0f);
+		for (float3& v : image.data) {
+			v = aly::clamp(
+					(1.0f - 2 * percent) * (v - lower) / (upper - lower)
+							+ percent, 0.0f, 1.0f);
 		}
 	}
 }
-void FilterBank::score(const aly::Image1f& image, aly::Image1f& out) {
+float2 DictionaryLearning::normalize(int index,float percent) {
+	std::vector<float> values;
+	values.reserve(patches.size());
+	for(SamplePatch& p:patches){
+		values.push_back(filterBanks[index].score(p));
+	}
+	std::sort(values.begin(), values.end());
+	float lower = values[clamp((int) (percent * values.size()), 0,
+			(int) values.size() - 1)];
+	float upper = values[clamp((int) ((1.0f - percent) * values.size()), 0,
+			(int) values.size() - 1)];
+	std::cout << "Soft Limits [" << lower << "," << upper << "]" << std::endl;
+	return float2((1.0f - 2 * percent) / (upper - lower),-(1.0f - 2 * percent) *lower+percent);
+}
+void FilterBank::score(const aly::Image1ub& image, aly::Image1f& out) {
 	out.resize(image.width, image.height);
 #pragma omp parallel for
 	for (int j = 0; j < image.height; j++) {
 		for (int i = 0; i < image.width; i++) {
-			double avg=0;
+			double avg = 0;
 			for (int jj = 0; jj < height; jj++) {
 				for (int ii = 0; ii < width; ii++) {
 					int x = i + ii - width / 2;
 					int y = j + jj - height / 2;
-					avg+=image(x, y).x;
+					avg += image(x, y).x/255.0f;
 				}
 			}
-			avg/=(width*height);
+			avg /= (width * height);
 			double err = 0;
 			for (int jj = 0; jj < height; jj++) {
 				for (int ii = 0; ii < width; ii++) {
 					int x = i + ii - width / 2;
 					int y = j + jj - height / 2;
-					err += data[ii + jj * width] * (image(x, y).x-avg);
+					err += data[ii + jj * width] * (image(x, y).x/255.0f - avg);
 				}
 			}
 			out(i, j) = std::abs(err);
+		}
+	}
+}
+float FilterBank::score(const SamplePatch& patch) const {
+	double err = 0;
+	double avg;
+	for (int ii = 0; ii < patch.size(); ii++) {
+		avg += (double) (patch.data[ii]);
+	}
+	avg/=patch.size();
+	for (int ii = 0; ii < patch.size(); ii++) {
+		err += (double) (data[ii]) * (patch.data[ii] - avg);
+	}
+	return std::abs(err);
+}
+void FilterBank::score(const aly::Image1ub& image,aly::DenseMat<float>& out){
+	out.resize(image.width, image.height);
+#pragma omp parallel for
+	for (int j = 0; j < image.height; j++) {
+		for (int i = 0; i < image.width; i++) {
+			double avg = 0;
+			for (int jj = 0; jj < height; jj++) {
+				for (int ii = 0; ii < width; ii++) {
+					int x = i + ii - width / 2;
+					int y = j + jj - height / 2;
+					avg += image(x, y).x/255.0f;
+				}
+			}
+			avg /= (width * height);
+			double err = 0;
+			for (int jj = 0; jj < height; jj++) {
+				for (int ii = 0; ii < width; ii++) {
+					int x = i + ii - width / 2;
+					int y = j + jj - height / 2;
+					err += data[ii + jj * width] * (image(x, y).x/255.0f - avg);
+				}
+			}
+			out(i, j) = std::abs(err);
+		}
+	}
+}
+void FilterBank::score(const aly::ImageRGB& image,aly::DenseMat<float>& out){
+	out.resize(image.width, image.height);
+#pragma omp parallel for
+	for (int j = 0; j < image.height; j++) {
+		for (int i = 0; i < image.width; i++) {
+			double avg(0.0);
+			for (int jj = 0; jj < height; jj++) {
+				for (int ii = 0; ii < width; ii++) {
+					int x = i + ii - width / 2;
+					int y = j + jj - height / 2;
+					float3 c = ToRGBf(image(x, y));
+					avg +=  RGBtoGray(c,true);
+				}
+			}
+			avg /= double(width * height);
+			double3 err(0.0);
+			for (int jj = 0; jj < height; jj++) {
+				for (int ii = 0; ii < width; ii++) {
+					int x = i + ii - width / 2;
+					int y = j + jj - height / 2;
+					float3 c = ToRGBf(image(x,y));
+					err += (double) (data[ii + jj * width])
+							* (RGBtoGray(image(x, y),true) - avg);
+				}
+			}
+			out(i, j) = aly::sum(aly::abs(float3(err.x, err.y, err.z)));
 		}
 	}
 }
@@ -244,10 +333,10 @@ void FilterBank::score(const aly::ImageRGB& image, aly::Image3f& out) {
 					int x = i + ii - width / 2;
 					int y = j + jj - height / 2;
 					float3 c = ToRGBf(image(x, y));
-					avg+=  double3(c.x, c.y, c.z);
+					avg += double3(c.x, c.y, c.z);
 				}
 			}
-			avg/=double(width*height);
+			avg /= double(width * height);
 			double3 err(0.0);
 			for (int jj = 0; jj < height; jj++) {
 				for (int ii = 0; ii < width; ii++) {
@@ -255,7 +344,7 @@ void FilterBank::score(const aly::ImageRGB& image, aly::Image3f& out) {
 					int y = j + jj - height / 2;
 					float3 c = ToRGBf(image(x, y));
 					err += (double) (data[ii + jj * width])
-							* (double3(c.x, c.y, c.z)-avg);
+							* (double3(c.x, c.y, c.z) - avg);
 				}
 			}
 			out(i, j) = aly::abs(float3(err.x, err.y, err.z));
@@ -504,18 +593,19 @@ std::vector<int> DictionaryLearning::solveOrthoMatchingPursuit(int sparsity,
 	return order;
 }
 void DictionaryLearning::optimizeDictionary(float errorThreshold,
-		int maxIterations,int startIndex) {
+		int maxIterations, int startIndex) {
 	std::vector<size_t> activeSet;
 	DenseMat<float> E, U, D, Vt;
 	int M = patches[0].data.size();
 	int W = filterBanks.size();
 	double lastError = residual();
-	std::vector<int> order(W-startIndex);
+	std::vector<int> order(W - startIndex);
 	for (int k = startIndex; k < W; k++) {
-		order[k-startIndex] = k;
+		order[k - startIndex] = k;
 	}
 
-	std::cout << "Initial Error " << lastError <<" order "<<order.size()<< std::endl;
+	std::cout << "Initial Error " << lastError << " order " << order.size()
+			<< std::endl;
 	for (int iter = 0; iter < maxIterations; iter++) {
 		Shuffle(order);
 		for (int kidx = 0; kidx < order.size(); kidx++) {
@@ -722,13 +812,13 @@ void WritePatchesToFile(const std::string& file,
 	Tile(tiles, out, N, M);
 	WriteImageToFile(file, out);
 }
-void DictionaryLearning::estimate(const aly::ImageRGB& img, aly::ImageRGB& out,aly::Volume3f& labels,
-		int sparsity) {
+void DictionaryLearning::estimate(const aly::ImageRGB& img, aly::ImageRGB& out,
+		aly::Volume3f& labels, int sparsity) {
 	int width = filterBanks[0].width;
 	int height = filterBanks[0].height;
 	out.resize(width * (img.width / width), height * (img.height / height));
 	out.set(aly::RGB(0, 0, 0));
-	labels.resize((img.width / width),(img.height / height),5);
+	labels.resize((img.width / width), (img.height / height), 5);
 	size_t index = 0;
 #pragma omp parallel for
 	for (int j = 0; j < out.height; j += height) {
@@ -740,15 +830,16 @@ void DictionaryLearning::estimate(const aly::ImageRGB& img, aly::ImageRGB& out,a
 				p.sample(img, c);
 				solveOrthoMatchingPursuit(sparsity, p);
 				p.synthesize(filterBanks, tmp);
-				std::vector<float> w=p.getLabelWeights(filterBanks);
-				for(int idx=0;idx<w.size();idx++){
-					labels(i/width,j/height,idx)[c]=w[idx];
+				std::vector<float> w = p.getLabelWeights(filterBanks);
+				for (int idx = 0; idx < w.size(); idx++) {
+					labels(i / width, j / height, idx)[c] = w[idx];
 				}
 				int count = 0;
 				for (int jj = 0; jj < height; jj++) {
 					for (int ii = 0; ii < width; ii++) {
 						float val = tmp[count++];
-						out(ii + i, jj + j)[c] = clamp((int) (val * 255.0f), 0,255);
+						out(ii + i, jj + j)[c] = clamp((int) (val * 255.0f), 0,
+								255);
 					}
 				}
 			}
@@ -793,7 +884,7 @@ void DictionaryLearning::writeFilterBanks(const std::string& outImage) {
 }
 void DictionaryLearning::stash(const ImageRGB& img, int subsample) {
 	aly::Image1f gray;
-	ConvertImage(img, gray);
+	ConvertImage(img, gray,true);
 	int N = img.height / subsample;
 	int M = img.width / subsample;
 	ImageRGBA edges(M, N);
@@ -912,6 +1003,7 @@ void DictionaryLearning::setTrainingData(const std::vector<Image1ub>& images,
 	}
 	std::cout << "Patches " << patches.size() << std::endl;
 }
+
 void DictionaryLearning::setTrainingData(const std::vector<ImageRGB>& images,
 		int subsample) {
 	int patchWidth = filterBanks[0].width;
@@ -920,7 +1012,7 @@ void DictionaryLearning::setTrainingData(const std::vector<ImageRGB>& images,
 	patches.clear();
 	for (int nn = 0; nn < images.size(); nn++) {
 		const ImageRGB& img = images[nn];
-		ConvertImage(img, gray);
+		ConvertImage(img, gray,true);
 		int N = img.height / subsample;
 		int M = img.width / subsample;
 		for (int n = 0; n < N; n++) {

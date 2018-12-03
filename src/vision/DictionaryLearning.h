@@ -25,6 +25,7 @@
 
 #include "image/AlloyImage.h"
 #include "image/AlloyVolume.h"
+#include "math/AlloyOptimizationMath.h"
 #include <set>
 namespace aly {
 enum FilterType{
@@ -34,6 +35,7 @@ enum FilterType{
 	Line=3,
 	Texture=4
 };
+class SamplePatch;
 struct FilterBank {
 	int width, height;
 	float angle;
@@ -43,8 +45,10 @@ struct FilterBank {
 	size_t size() const {
 		return data.size();
 	}
-	void score(const aly::Image1f& image,aly::Image1f& out);
+	void score(const aly::Image1ub& image,aly::Image1f& out);
 	void score(const aly::ImageRGB& image,aly::Image3f& out);
+	void score(const aly::Image1ub& image,aly::DenseMat<float>& out);
+	void score(const aly::ImageRGB& image,aly::DenseMat<float>& out);
 	inline const float& operator[](const size_t& sz) const {
 		if(sz>=data.size()){
 			throw std::runtime_error("Filter bank index out of bounds.");
@@ -57,6 +61,7 @@ struct FilterBank {
 		}
 		return data[sz];
 	}
+	float score(const SamplePatch& patch) const;
 	FilterBank(int width=0, int height=0) :
 			data(width * height), width(width), height(height), type(FilterType::Flat),angle(0),shift(0) {
 	}
@@ -127,7 +132,8 @@ protected:
 public:
 	DictionaryLearning();
 	void maxPool(const aly::Image3f& image,aly::Image3f& out,int size);
-	void normalize(aly::Image3f& image,float percent,int stride=16);
+	float2 normalize(int index,float percent);
+	void normalize(aly::Image3f& image, float percent,int stride);
 	std::vector<SamplePatch>& getSamplePatch() {
 		return patches;
 	}

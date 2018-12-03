@@ -38,7 +38,7 @@ bool SANITY_CHECK_IMAGE();
 bool SANITY_CHECK_IMAGE_IO();
 bool SANITY_CHECK_PYRAMID();
 enum class ImageType {
-	UNKNOWN=-1,
+	UNKNOWN = -1,
 	BYTE = 0,
 	UBYTE = 1,
 	SHORT = 2,
@@ -73,14 +73,16 @@ template<class L, class R> std::basic_ostream<L, R>& operator <<(
 	return ss;
 }
 template<class T, int C, ImageType I> struct Image;
-template<class T, int C, ImageType I> void WriteImageToRawFile(const std::string& fileName, const Image<T, C, I>& img);
-template<class T, int C, ImageType I> bool ReadImageFromRawFile(const std::string& fileName, Image<T, C, I>& img);
+template<class T, int C, ImageType I> void WriteImageToRawFile(
+		const std::string& fileName, const Image<T, C, I>& img);
+template<class T, int C, ImageType I> bool ReadImageFromRawFile(
+		const std::string& fileName, Image<T, C, I>& img);
 template<class T, int C, ImageType I> struct Image {
 protected:
 	int x, y;
 	std::string hashCode;
 public:
-	Vector<T,C> vector;//Treat whole image as vector. Useful!
+	Vector<T, C> vector; //Treat whole image as vector. Useful!
 	std::vector<vec<T, C>>& data;
 	typedef vec<T, C> ValueType;
 	typedef typename std::vector<ValueType>::iterator iterator;
@@ -117,14 +119,14 @@ public:
 	const int channels;
 	const ImageType type;
 	std::string updateHashCode(size_t MAX_SAMPLES = 0, HashMethod method =
-		HashMethod::SHA256);
+			HashMethod::SHA256);
 	std::string getHashCode() {
 		return hashCode;
 	}
 	template<class Archive> void serialize(Archive & archive) {
 		archive(cereal::make_nvp(MakeString() << type << channels, id),
-			CEREAL_NVP(width), CEREAL_NVP(height), CEREAL_NVP(x),
-			CEREAL_NVP(y), CEREAL_NVP(hashCode),CEREAL_NVP(vector));
+				CEREAL_NVP(width), CEREAL_NVP(height), CEREAL_NVP(x),
+				CEREAL_NVP(y), CEREAL_NVP(hashCode), CEREAL_NVP(vector));
 	}
 	inline void writeToXML(const std::string& fileName) const {
 		WriteImageToRawFile(fileName, *this);
@@ -139,16 +141,16 @@ public:
 		data.assign(data.size(), val);
 	}
 	inline bool contains(const float2& pt) const {
-		return (pt.x>=0&&pt.y>=0&&pt.x<width&&pt.y<height);
+		return (pt.x >= 0 && pt.y >= 0 && pt.x < width && pt.y < height);
 	}
 	inline bool contains(const int2& pt) const {
-		return (pt.x>=0&&pt.y>=0&&pt.x<width&&pt.y<height);
+		return (pt.x >= 0 && pt.y >= 0 && pt.x < width && pt.y < height);
 	}
-	inline bool contains(int x,int y) const {
-		return (x>=0&&y>=0&&x<width&&y<height);
+	inline bool contains(int x, int y) const {
+		return (x >= 0 && y >= 0 && x < width && y < height);
 	}
-	inline bool contains(float x,float y) const {
-		return (x>=0&&y>=0&&x<width&&y<height);
+	inline bool contains(float x, float y) const {
+		return (x >= 0 && y >= 0 && x < width && y < height);
 	}
 	void set(T* val) {
 		if (val == nullptr)
@@ -174,8 +176,10 @@ public:
 		data = val;
 	}
 	void set(const std::vector<T>& val) {
-		if(val.size()*sizeof(T)!=data.size()*typeSize())throw std::runtime_error("Could not assign vector to image because sizes mismatch.");
-		std::memcpy(ptr(),val.data(),data.size()*typeSize());
+		if (val.size() * sizeof(T) != data.size() * typeSize())
+			throw std::runtime_error(
+					"Could not assign vector to image because sizes mismatch.");
+		std::memcpy(ptr(), val.data(), data.size() * typeSize());
 	}
 	void set(vec<T, C>* val) {
 		if (val == nullptr)
@@ -197,43 +201,44 @@ public:
 	}
 
 	Image(int w, int h, int x = 0, int y = 0, uint64_t id = 0) :
-		x(x), y(y),data(vector.data), width(w), height(h), id(id), channels(C), type(
-			I) {
-		data.resize(w*h);
+			x(x), y(y), data(vector.data), width(w), height(h), id(id), channels(
+					C), type(I) {
+		data.resize(w * h);
 	}
 	Image(int2 dims, int x = 0, int y = 0, uint64_t id = 0) :
-		x(x), y(y),data(vector.data), width(dims.x), height(dims.y), id(id), channels(C), type(
-			I) {
-		data.resize(dims.x*dims.y);
+			x(x), y(y), data(vector.data), width(dims.x), height(dims.y), id(
+					id), channels(C), type(I) {
+		data.resize(dims.x * dims.y);
 	}
 	Image(int w, int h, int2 pos, uint64_t id = 0) :
-		x(pos.x), y(pos.y),data(vector.data), width(w), height(h), id(id), channels(
-			C), type(I) {
-		data.resize(w*h);
+			x(pos.x), y(pos.y), data(vector.data), width(w), height(h), id(id), channels(
+					C), type(I) {
+		data.resize(w * h);
 	}
 	Image(T* ptr, int w, int h, int x = 0, int y = 0, uint64_t id = 0) :
-		Image(w, h, x, y, id) {
+			Image(w, h, x, y, id) {
 		set(ptr);
 	}
 	Image(vec<T, C>* ptr, int w, int h, int x = 0, int y = 0, uint64_t id = 0) :
-		Image(w, h, x, y, id) {
+			Image(w, h, x, y, id) {
 		set(ptr);
 	}
 	Image(int w, int h, vec<T, C>* ptr) :
-		Image(w, h, 0, 0, 0) {
+			Image(w, h, 0, 0, 0) {
 		set(ptr);
 	}
 	Image(const std::vector<vec<T, C>>& ref, int w, int h, int x = 0, int y = 0,
-		uint64_t id = 0) :data(vector.data),
-		x(x), y(y), width(w), height(h), id(id), channels(C), type(
-			I) {
-		data=ref;
+			uint64_t id = 0) :
+			data(vector.data), x(x), y(y), width(w), height(h), id(id), channels(
+					C), type(I) {
+		data = ref;
 	}
 	Image() :
-		x(0), y(0),data(vector.data), width(0), height(0), id(0), channels(C), type(I) {
+			x(0), y(0), data(vector.data), width(0), height(0), id(0), channels(
+					C), type(I) {
 	}
 	Image(const Image<T, C, I>& img) :
-		Image(img.width, img.height, img.x, img.y, img.id) {
+			Image(img.width, img.height, img.x, img.y, img.id) {
 		set(img.data);
 	}
 
@@ -265,7 +270,7 @@ public:
 		return data.size();
 	}
 	size_t typeSize() const {
-		return sizeof(vec<T, C>);
+		return sizeof(vec<T, C> );
 	}
 	void resize(int w, int h) {
 		data.resize(w * h);
@@ -273,8 +278,8 @@ public:
 		width = w;
 		height = h;
 	}
-	void resize(int2 dims){
-		resize(dims.x,dims.y);
+	void resize(int2 dims) {
+		resize(dims.x, dims.y);
 	}
 	inline void clear() {
 		data.clear();
@@ -303,16 +308,16 @@ public:
 		return &(data.front()[0]);
 	}
 	inline void copyTo(std::vector<T>& out) const {
-		if(size()>0){
-			out.resize(size()*C);
-			std::memcpy(out.data(),ptr(),size()*typeSize());
+		if (size() > 0) {
+			out.resize(size() * C);
+			std::memcpy(out.data(), ptr(), size() * typeSize());
 		}
 	}
-	inline void copyTo(std::vector<vec<T,C>>& out) const {
-		out=data;
+	inline void copyTo(std::vector<vec<T, C>>& out) const {
+		out = data;
 	}
 	void setZero() {
-		data.assign(data.size(), vec<T, C>((T)0));
+		data.assign(data.size(), vec<T, C>((T) 0));
 	}
 	inline const vec<T, C>& operator[](const size_t i) const {
 		return data[i];
@@ -321,35 +326,40 @@ public:
 		return data[i];
 	}
 	inline vec<T, C>& operator()(int i, int j) {
-		return data[clamp(i, 0, width - 1) + clamp(j, 0, height - 1) * (size_t)width];
+		return data[clamp(i, 0, width - 1)
+				+ clamp(j, 0, height - 1) * (size_t) width];
 	}
-	inline 	vec<T, C>& operator()(const int2 ij) {
+	inline vec<T, C>& operator()(const int2 ij) {
 		return data[clamp(ij.x, 0, width - 1)
-			+ clamp(ij.y, 0, height - 1) * width];
+				+ clamp(ij.y, 0, height - 1) * width];
 	}
-	inline 	const vec<T, C>& operator()(int i, int j) const {
-		return data[clamp(i, 0, width - 1) + clamp(j, 0, height - 1) *(size_t) width];
+	inline const vec<T, C>& operator()(int i, int j) const {
+		return data[clamp(i, 0, width - 1)
+				+ clamp(j, 0, height - 1) * (size_t) width];
 	}
-	inline 	const vec<T, C>& operator()(const int2 ij) const {
+	inline const vec<T, C>& operator()(const int2 ij) const {
 		return data[clamp(ij.x, 0, width - 1)
-			+ clamp(ij.y, 0, height - 1) * width];
+				+ clamp(ij.y, 0, height - 1) * width];
 	}
-	inline 	T& operator()(int i, int j, int c) {
-		return data[clamp(i, 0, width - 1) + clamp(j, 0, height - 1) *(size_t) width][c];
+	inline T& operator()(int i, int j, int c) {
+		return data[clamp(i, 0, width - 1)
+				+ clamp(j, 0, height - 1) * (size_t) width][c];
 	}
-	inline 	const T& operator()(int i, int j, int c) const {
-		return data[clamp(i, 0, width - 1) + clamp(j, 0, height - 1) *(size_t)width][c];
+	inline const T& operator()(int i, int j, int c) const {
+		return data[clamp(i, 0, width - 1)
+				+ clamp(j, 0, height - 1) * (size_t) width][c];
 	}
 	inline float operator()(float x, float y, int c) const {
 		int i = static_cast<int>(std::floor(x));
 		int j = static_cast<int>(std::floor(y));
-		float rgb00 = (float)operator()(i, j)[c];
-		float rgb10 = (float)operator()(i + 1, j)[c];
-		float rgb11 = (float)operator()(i + 1, j + 1)[c];
-		float rgb01 = (float)operator()(i, j + 1)[c];
+		float rgb00 = (float) operator()(i, j)[c];
+		float rgb10 = (float) operator()(i + 1, j)[c];
+		float rgb11 = (float) operator()(i + 1, j + 1)[c];
+		float rgb01 = (float) operator()(i, j + 1)[c];
 		float dx = x - i;
 		float dy = y - j;
-		return ((rgb00 * (1.0f - dx) + rgb10 * dx) * (1.0f - dy)+ (rgb01 * (1.0f - dx) + rgb11 * dx) * dy);
+		return ((rgb00 * (1.0f - dx) + rgb10 * dx) * (1.0f - dy)
+				+ (rgb01 * (1.0f - dx) + rgb11 * dx) * dy);
 	}
 	inline vec<float, C> operator()(float x, float y) {
 		int i = static_cast<int>(std::floor(x));
@@ -361,7 +371,7 @@ public:
 		float dx = x - i;
 		float dy = y - j;
 		return ((rgb00 * (1.0f - dx) + rgb10 * dx) * (1.0f - dy)
-			+ (rgb01 * (1.0f - dx) + rgb11 * dx) * dy);
+				+ (rgb01 * (1.0f - dx) + rgb11 * dx) * dy);
 	}
 	inline vec<float, C> operator()(float x, float y) const {
 		int i = static_cast<int>(std::floor(x));
@@ -373,7 +383,7 @@ public:
 		float dx = x - i;
 		float dy = y - j;
 		return ((rgb00 * (1.0f - dx) + rgb10 * dx) * (1.0f - dy)
-			+ (rgb01 * (1.0f - dx) + rgb11 * dx) * dy);
+				+ (rgb01 * (1.0f - dx) + rgb11 * dx) * dy);
 	}
 	matrix<float, C, 2> gradient(float x, float y) const {
 		vec<float, C> v21 = vec<float, C>(operator()(x + 1, y));
@@ -510,14 +520,14 @@ public:
 		upSample(out);
 		return out;
 	}
-	vec<T, C> min(T valt=std::numeric_limits<T>::max()) const {
+	vec<T, C> min(T valt = std::numeric_limits<T>::max()) const {
 		vec<T, C> minVal(valt);
 		for (const vec<T, C>& val : data) {
 			minVal = aly::minVec(val, minVal);
 		}
 		return minVal;
 	}
-	vec<T, C> max(T valt=std::numeric_limits<T>::min()) const {
+	vec<T, C> max(T valt = std::numeric_limits<T>::min()) const {
 		vec<T, C> maxVal(valt);
 		for (const vec<T, C>& val : data) {
 			maxVal = aly::maxVec(val, maxVal);
@@ -790,11 +800,43 @@ template<class T, int C, ImageType I> Image<T, C, I> operator+(
 	Transform(out, img, f);
 	return out;
 }
+template<class T, int C, ImageType I> Image<T, C, I> operator+(
+		const Image<T, C, I>& img, const T& scalar) {
+	Image<T, C, I> out(img.width, img.height, img.position());
+	std::function<void(vec<T, C>&, const vec<T, C>&)> f =
+			[=](vec<T,C>& val1,const vec<T,C>& val2) {val1=val2+scalar;};
+	Transform(out, img, f);
+	return out;
+}
+template<class T, int C, ImageType I> Image<T, C, I> operator+(const T& scalar,
+		const Image<T, C, I>& img) {
+	Image<T, C, I> out(img.width, img.height, img.position());
+	std::function<void(vec<T, C>&, const vec<T, C>&)> f =
+			[=](vec<T,C>& val1,const vec<T,C>& val2) {val1=val2+scalar;};
+	Transform(out, img, f);
+	return out;
+}
 template<class T, int C, ImageType I> Image<T, C, I> operator-(
 		const Image<T, C, I>& img, const vec<T, C>& scalar) {
 	Image<T, C, I> out(img.width, img.height, img.position());
 	std::function<void(vec<T, C>&, const vec<T, C>&)> f =
 			[=](vec<T,C>& val1,const vec<T,C>& val2) {val1=val2-scalar;};
+	Transform(out, img, f);
+	return out;
+}
+template<class T, int C, ImageType I> Image<T, C, I> operator-(
+		const Image<T, C, I>& img, const T& scalar) {
+	Image<T, C, I> out(img.width, img.height, img.position());
+	std::function<void(vec<T, C>&, const vec<T, C>&)> f =
+			[=](vec<T,C>& val1,const vec<T,C>& val2) {val1=val2-scalar;};
+	Transform(out, img, f);
+	return out;
+}
+template<class T, int C, ImageType I> Image<T, C, I> operator-(const T& scalar,
+		const Image<T, C, I>& img) {
+	Image<T, C, I> out(img.width, img.height, img.position());
+	std::function<void(vec<T, C>&, const vec<T, C>&)> f =
+			[=](vec<T,C>& val1,const vec<T,C>& val2) {val1=scalar-val2;};
 	Transform(out, img, f);
 	return out;
 }
@@ -806,11 +848,43 @@ template<class T, int C, ImageType I> Image<T, C, I> operator*(
 	Transform(out, img, f);
 	return out;
 }
+template<class T, int C, ImageType I> Image<T, C, I> operator*(
+		const Image<T, C, I>& img, const T& scalar) {
+	Image<T, C, I> out(img.width, img.height, img.position());
+	std::function<void(vec<T, C>&, const vec<T, C>&)> f =
+			[=](vec<T,C>& val1,const vec<T,C>& val2) {val1=val2*scalar;};
+	Transform(out, img, f);
+	return out;
+}
+template<class T, int C, ImageType I> Image<T, C, I> operator*(const T& scalar,
+		const Image<T, C, I>& img) {
+	Image<T, C, I> out(img.width, img.height, img.position());
+	std::function<void(vec<T, C>&, const vec<T, C>&)> f =
+			[=](vec<T,C>& val1,const vec<T,C>& val2) {val1=val2*scalar;};
+	Transform(out, img, f);
+	return out;
+}
 template<class T, int C, ImageType I> Image<T, C, I> operator/(
 		const Image<T, C, I>& img, const vec<T, C>& scalar) {
 	Image<T, C, I> out(img.width, img.height, img.position());
 	std::function<void(vec<T, C>&, const vec<T, C>&)> f =
 			[=](vec<T,C>& val1,const vec<T,C>& val2) {val1=val2/scalar;};
+	Transform(out, img, f);
+	return out;
+}
+template<class T, int C, ImageType I> Image<T, C, I> operator/(
+		const Image<T, C, I>& img, const T& scalar) {
+	Image<T, C, I> out(img.width, img.height, img.position());
+	std::function<void(vec<T, C>&, const vec<T, C>&)> f =
+			[=](vec<T,C>& val1,const vec<T,C>& val2) {val1=val2/scalar;};
+	Transform(out, img, f);
+	return out;
+}
+template<class T, int C, ImageType I> Image<T, C, I> operator/(const T& scalar,
+		const Image<T, C, I>& img) {
+	Image<T, C, I> out(img.width, img.height, img.position());
+	std::function<void(vec<T, C>&, const vec<T, C>&)> f =
+			[=](vec<T,C>& val1,const vec<T,C>& val2) {val1=scalar/val2;};
 	Transform(out, img, f);
 	return out;
 }
@@ -875,7 +949,6 @@ template<class T, int C, ImageType I> Image<T, C, I>& operator/=(
 	return out;
 }
 
-
 template<class T, int C, ImageType I> Image<T, C, I>& operator+=(
 		Image<T, C, I>& out, const T& scalar) {
 	std::function<void(vec<T, C>&)> f = [=](vec<T,C>& val1) {val1+=scalar;};
@@ -900,7 +973,6 @@ template<class T, int C, ImageType I> Image<T, C, I>& operator/=(
 	Transform(out, f);
 	return out;
 }
-
 
 template<class T, int C, ImageType I> Image<T, C, I> operator+(
 		const Image<T, C, I>& img1, const Image<T, C, I>& img2) {
@@ -1034,15 +1106,17 @@ template<class T, int C, ImageType I> void WriteImageToRawFile(
 }
 template<class T, int C, ImageType I> bool ReadImageFromRawFile(
 		const std::string& file, Image<T, C, I>& img) {
-	std::string xmlFile = GetFileWithoutExtension(file)+".xml";
-	std::string rawFile = GetFileWithoutExtension(file)+".raw";
+	std::string xmlFile = GetFileWithoutExtension(file) + ".xml";
+	std::string rawFile = GetFileWithoutExtension(file) + ".raw";
 	MipavHeader header;
 	img.clear();
-	if(!ReadMipavHeaderFromFile(xmlFile,header)){
+	if (!ReadMipavHeaderFromFile(xmlFile, header)) {
 		return false;
 	}
-	if(header.dimensions>3||header.dimensions<2){
-		throw std::runtime_error(MakeString() << "Channels " <<header.dimensions<<"/"<<C<< " do not match.");
+	if (header.dimensions > 3 || header.dimensions < 2) {
+		throw std::runtime_error(
+				MakeString() << "Channels " << header.dimensions << "/" << C
+						<< " do not match.");
 	}
 	std::string typeName = "";
 	switch (img.type) {
@@ -1076,20 +1150,24 @@ template<class T, int C, ImageType I> bool ReadImageFromRawFile(
 	default:
 		break;
 	}
-	if(ToLower(header.dataType)!=typeName){
-		throw std::runtime_error(MakeString() << "Type " <<header.dataType<<"/"<<typeName<< " do not match.");
+	if (ToLower(header.dataType) != typeName) {
+		throw std::runtime_error(
+				MakeString() << "Type " << header.dataType << "/" << typeName
+						<< " do not match.");
 		return false;
 	}
-	img.resize(header.extents[0],header.extents[1]);
+	img.resize(header.extents[0], header.extents[1]);
 	FILE* f = fopen(rawFile.c_str(), "rb");
 	if (f == NULL) {
-		throw std::runtime_error(MakeString() << "Could not open " <<rawFile<< " for reading.");
+		throw std::runtime_error(
+				MakeString() << "Could not open " << rawFile
+						<< " for reading.");
 		return false;
 	}
 	for (int c = 0; c < img.channels; c++) {
 		for (int j = 0; j < img.height; j++) {
 			for (int i = 0; i < img.width; i++) {
-				fread(&img(i,j,c), sizeof(T), 1, f);
+				fread(&img(i, j, c), sizeof(T), 1, f);
 			}
 		}
 	}
@@ -1132,7 +1210,6 @@ typedef Image<int, 2, ImageType::INT> Image2i;
 typedef Image<uint32_t, 2, ImageType::UINT> Image2ui;
 typedef Image<float, 2, ImageType::FLOAT> Image2f;
 
-
 typedef Image<int8_t, 1, ImageType::BYTE> Image1b;
 typedef Image<uint8_t, 1, ImageType::UBYTE> Image1ub;
 typedef Image<uint16_t, 1, ImageType::USHORT> Image1us;
@@ -1149,7 +1226,8 @@ typedef Image<double, 4, ImageType::DOUBLE> Image4d;
 
 void WriteImageToFile(const std::string& file, const ImageRGBA& img);
 void WriteImageToFile(const std::string& file, const ImageRGB& img);
-void WriteImageToFile(const std::string& file, const ImageRGB& img,int quality);
+void WriteImageToFile(const std::string& file, const ImageRGB& img,
+		int quality);
 void WriteImageToFile(const std::string& file, const ImageRGBAf& img);
 void WriteImageToFile(const std::string& file, const ImageRGBf& img);
 
@@ -1206,18 +1284,28 @@ void ConvertImage(const Image1ub& in, Image1f& out);
 void ConvertImage(const Image1f& in, Image1us& out);
 void ConvertImage(const Image1f& in, Image1ub& out);
 
-inline void ConvertImage(const Image1f& in, Image1f& out){out=in;}
-inline void ConvertImage(const ImageRGB& in, ImageRGB& out){out=in;}
-inline void ConvertImage(const ImageRGBA& in, ImageRGBA& out){out=in;}
-inline void ConvertImage(const ImageRGBf& in, ImageRGBf& out){out=in;}
-inline void ConvertImage(const ImageRGBAf& in, ImageRGBAf& out){out=in;}
+inline void ConvertImage(const Image1f& in, Image1f& out) {
+	out = in;
+}
+inline void ConvertImage(const ImageRGB& in, ImageRGB& out) {
+	out = in;
+}
+inline void ConvertImage(const ImageRGBA& in, ImageRGBA& out) {
+	out = in;
+}
+inline void ConvertImage(const ImageRGBf& in, ImageRGBf& out) {
+	out = in;
+}
+inline void ConvertImage(const ImageRGBAf& in, ImageRGBAf& out) {
+	out = in;
+}
 
 template<class T, ImageType I> void ConvertImage(const Image<T, 4, I>& in,
 		Image<T, 1, I>& out, bool sRGB = true) {
 	out.resize(in.width, in.height);
 	out.id = in.id;
 	out.setPosition(in.position());
-	size_t N =  out.size();
+	size_t N = out.size();
 
 	if (sRGB) {
 #pragma omp parallel for
@@ -1259,7 +1347,7 @@ template<class T, ImageType I> void ConvertImage(const Image<T, 3, I>& in,
 	out.resize(in.width, in.height);
 	out.id = in.id;
 	out.setPosition(in.position());
-	size_t N=out.size();
+	size_t N = out.size();
 
 	if (sRGB) {
 #pragma omp parallel for
@@ -1275,55 +1363,64 @@ template<class T, ImageType I> void ConvertImage(const Image<T, 3, I>& in,
 		}
 	}
 }
-inline void MakeCheckerBoard(ImageRGBA& img, int horizTiles,int vertTiles){
-	const int width=img.width;
-	const int height=img.height;
+inline void MakeCheckerBoard(ImageRGBA& img, int horizTiles, int vertTiles) {
+	const int width = img.width;
+	const int height = img.height;
 	const int cellWidth = width / horizTiles;
 	const int cellHeight = height / vertTiles;
 	for (int i = 0; i < width; i++) {
 		for (int j = 0; j < height; j++) {
 			bool vt = (i / cellWidth) % 2 == 0;
 			bool ht = (j / cellHeight) % 2 == 0;
-			img(i, j) =((vt && !ht) || (!vt && ht)) ?aly::RGBA(0, 0, 0, 0) : aly::RGBA(255, 255, 255, 255);
+			img(i, j) =
+					((vt && !ht) || (!vt && ht)) ?
+							aly::RGBA(0, 0, 0, 0) :
+							aly::RGBA(255, 255, 255, 255);
 		}
 	}
 }
-inline void MakeCheckerBoard(ImageRGB& img, int horizTiles,int vertTiles){
-	const int width=img.width;
-	const int height=img.height;
+inline void MakeCheckerBoard(ImageRGB& img, int horizTiles, int vertTiles) {
+	const int width = img.width;
+	const int height = img.height;
 	const int cellWidth = width / horizTiles;
 	const int cellHeight = height / vertTiles;
 	for (int i = 0; i < width; i++) {
 		for (int j = 0; j < height; j++) {
 			bool vt = (i / cellWidth) % 2 == 0;
 			bool ht = (j / cellHeight) % 2 == 0;
-			img(i, j) =((vt && !ht) || (!vt && ht)) ?aly::ubyte3(0, 0, 0) : aly::ubyte3(255, 255, 255);
+			img(i, j) =
+					((vt && !ht) || (!vt && ht)) ?
+							aly::ubyte3(0, 0, 0) : aly::ubyte3(255, 255, 255);
 		}
 	}
 }
-inline void MakeCheckerBoard(ImageRGBAf& img, int horizTiles,int vertTiles){
-	const int width=img.width;
-	const int height=img.height;
+inline void MakeCheckerBoard(ImageRGBAf& img, int horizTiles, int vertTiles) {
+	const int width = img.width;
+	const int height = img.height;
 	const int cellWidth = width / horizTiles;
 	const int cellHeight = height / vertTiles;
 	for (int i = 0; i < width; i++) {
 		for (int j = 0; j < height; j++) {
 			bool vt = (i / cellWidth) % 2 == 0;
 			bool ht = (j / cellHeight) % 2 == 0;
-			img(i, j) =((vt && !ht) || (!vt && ht)) ?RGBAf(0, 0, 0, 0) : RGBAf(1.0f,1.0f,1.0f,1.0f);
+			img(i, j) =
+					((vt && !ht) || (!vt && ht)) ?
+							RGBAf(0, 0, 0, 0) : RGBAf(1.0f, 1.0f, 1.0f, 1.0f);
 		}
 	}
 }
-inline void MakeCheckerBoard(ImageRGBf& img, int horizTiles,int vertTiles){
-	const int width=img.width;
-	const int height=img.height;
+inline void MakeCheckerBoard(ImageRGBf& img, int horizTiles, int vertTiles) {
+	const int width = img.width;
+	const int height = img.height;
 	const int cellWidth = width / horizTiles;
 	const int cellHeight = height / vertTiles;
 	for (int i = 0; i < width; i++) {
 		for (int j = 0; j < height; j++) {
 			bool vt = (i / cellWidth) % 2 == 0;
 			bool ht = (j / cellHeight) % 2 == 0;
-			img(i, j) =((vt && !ht) || (!vt && ht)) ?RGBf(0, 0, 0) : RGBf(1.0f,1.0f,1.0f);
+			img(i, j) =
+					((vt && !ht) || (!vt && ht)) ?
+							RGBf(0, 0, 0) : RGBf(1.0f, 1.0f, 1.0f);
 		}
 	}
 }
@@ -1349,7 +1446,7 @@ template<class T, int C, ImageType I> void Transpose(Image<T, C, I>& in) {
 #pragma omp parallel for
 	for (int i = 0; i < in.width; i++) {
 		for (int j = 0; j < in.height / 2; j++) {
-			std::swap(in(i, j), in(in.width- 1 - i, in.height - 1 - j));
+			std::swap(in(i, j), in(in.width - 1 - i, in.height - 1 - j));
 		}
 	}
 }
@@ -1361,11 +1458,10 @@ template<class T, int C, ImageType I> void FlipHorizontal(Image<T, C, I>& in) {
 		}
 	}
 }
-template<class T, int C, ImageType I> void DownSample5x5(const Image<T, C, I>& in,
-		Image<T, C, I>& out) {
-	static const float Kernel[5][5] = { { 1, 4, 6, 4, 1 },
-			{ 4, 16, 24, 16, 4 }, { 6, 24, 36, 24, 6 }, { 4, 16, 24, 16, 4 }, {
-					1, 4, 6, 4, 1 } };
+template<class T, int C, ImageType I> void DownSample5x5(
+		const Image<T, C, I>& in, Image<T, C, I>& out) {
+	static const float Kernel[5][5] = { { 1, 4, 6, 4, 1 }, { 4, 16, 24, 16, 4 },
+			{ 6, 24, 36, 24, 6 }, { 4, 16, 24, 16, 4 }, { 1, 4, 6, 4, 1 } };
 	out.resize(in.width / 2, in.height / 2);
 #pragma omp parallel for
 	for (int j = 0; j < out.height; j++) {
@@ -1374,20 +1470,16 @@ template<class T, int C, ImageType I> void DownSample5x5(const Image<T, C, I>& i
 			for (int ii = 0; ii < 5; ii++) {
 				for (int jj = 0; jj < 5; jj++) {
 					vsum += Kernel[ii][jj]
-							* vec<float, C>(
-									in(2 * i + ii - 2, 2 * j + jj - 2));
+							* vec<float, C>(in(2 * i + ii - 2, 2 * j + jj - 2));
 				}
 			}
 			out(i, j) = vec<T, C>(vsum / 256.0f);
 		}
 	}
 }
-template<class T, int C, ImageType I> void DownSample3x3(const Image<T, C, I>& in,
-		Image<T, C, I>& out) {
-	static const float Kernel[3][3] = {
-			{ 1,  2,  1},
-			{ 2,  4,  2},
-			{ 1,  2,  1} };
+template<class T, int C, ImageType I> void DownSample3x3(
+		const Image<T, C, I>& in, Image<T, C, I>& out) {
+	static const float Kernel[3][3] = { { 1, 2, 1 }, { 2, 4, 2 }, { 1, 2, 1 } };
 	out.resize(in.width / 2, in.height / 2);
 #pragma omp parallel for
 	for (int j = 0; j < out.height; j++) {
@@ -1395,7 +1487,8 @@ template<class T, int C, ImageType I> void DownSample3x3(const Image<T, C, I>& i
 			vec<float, C> vsum(0.0);
 			for (int ii = 0; ii < 3; ii++) {
 				for (int jj = 0; jj < 3; jj++) {
-					vsum += Kernel[ii][jj]* vec<float, C>(in(2 * i + ii - 2, 2 * j + jj - 2));
+					vsum += Kernel[ii][jj]
+							* vec<float, C>(in(2 * i + ii - 2, 2 * j + jj - 2));
 				}
 			}
 			out(i, j) = vec<T, C>(vsum / 16.0f);
@@ -1404,7 +1497,7 @@ template<class T, int C, ImageType I> void DownSample3x3(const Image<T, C, I>& i
 }
 template<class T, int C, ImageType I> void DownSample(const Image<T, C, I>& in,
 		Image<T, C, I>& out) {
-	DownSample5x5(in,out);
+	DownSample5x5(in, out);
 }
 template<class T, int C, ImageType I> void UpSample(const Image<T, C, I>& in,
 		Image<T, C, I>& out) {
@@ -1421,7 +1514,8 @@ template<class T, int C, ImageType I> void UpSample(const Image<T, C, I>& in,
 					int iii = i + ii - 2;
 					int jjj = j + jj - 2;
 					if (iii % 2 == 0 && jjj % 2 == 0) {
-						vsum += Kernel[ii][jj]* vec<double, C>(in(iii / 2, jjj / 2));
+						vsum += Kernel[ii][jj]
+								* vec<double, C>(in(iii / 2, jjj / 2));
 					}
 				}
 			}
@@ -1451,7 +1545,7 @@ template<class T, int C, ImageType I> void Tile(
 		int runX = 0;
 		int runY = 0;
 		for (int c = 0; c < cols; c++) {
-			if (index >= (int)in.size())
+			if (index >= (int) in.size())
 				break;
 			const Image<T, C, I>& img = in[index++];
 			runX += img.width;
@@ -1460,7 +1554,7 @@ template<class T, int C, ImageType I> void Tile(
 		maxX = std::max(runX, maxX);
 		lines[r] = maxY;
 		maxY += runY;
-		if (index >= (int)in.size())
+		if (index >= (int) in.size())
 			break;
 	}
 	out.resize(maxX, maxY);
@@ -1470,13 +1564,13 @@ template<class T, int C, ImageType I> void Tile(
 		int runX = 0;
 		int runY = lines[r];
 		for (int c = 0; c < cols; c++) {
-			if (index >= (int)in.size())
+			if (index >= (int) in.size())
 				break;
 			const Image<T, C, I>& img = in[index++];
 			Set(img, out, int2(runX, runY));
 			runX += img.width;
 		}
-		if (index >= (int)in.size())
+		if (index >= (int) in.size())
 			break;
 	}
 }
@@ -1527,8 +1621,8 @@ template<class T, int C, ImageType I> void Tile(
 	}
 }
 template<class T, int C, ImageType I> void Tile(
-		const std::list<Image<T, C, I>>& in, Image<T, C, I>& out,
-		int rows, int cols) {
+		const std::list<Image<T, C, I>>& in, Image<T, C, I>& out, int rows,
+		int cols) {
 	int maxX = 0;
 	int maxY = 0;
 	std::vector<int> lines(rows, 0);
@@ -1587,7 +1681,6 @@ void ConvertImage(const Image2f& in, ImageRGBAf& out);
 
 void ConvertImage(const Image1f& in, ImageRGBf& out);
 void ConvertImage(const Image2f& in, ImageRGBf& out);
-
 
 void ConvertImage(const Image1f& in, ImageRGBA& out);
 void ConvertImage(const Image2f& in, ImageRGBA& out);
