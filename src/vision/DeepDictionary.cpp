@@ -67,18 +67,16 @@ void FilterLayer::learnInput(const std::vector<LayerData>& images,
 }
 void FilterLayer::evaluate(const ImageRGB& in, LayerData& out) {
 	Image1f gray;
-	ConvertImage(in,gray);
+	ConvertImage(in, gray, true);
 	std::vector<DenseMat<float>> mat(1);
 	mat[0].set(gray);
-	evaluate(mat,out);
+	evaluate(mat, out);
 }
-
 void FilterLayer::evaluate(const LayerData& in, LayerData& out) {
 	DenseMat<float> accum, tmp;
 	assert(in.size() == tensors.size());
 	assert(in.size() == inputSize);
 	out.resize(outputSize);
-
 	for (int outIdx = 0; outIdx < outputSize; outIdx++) {
 		for (int inIdx = 0; inIdx < inputSize; inIdx++) {
 			const DenseMat<float>& input = in[inIdx];
@@ -90,19 +88,21 @@ void FilterLayer::evaluate(const LayerData& in, LayerData& out) {
 			}
 			tensor.filters[outIdx].score(input, tmp);
 			auto fw = tensor.weights[outIdx];
-			std::cout<<"Blend "<<fw.normalizeScale<<" "<<fw.normalizeOffset<<" "<<fw.weight<<std::endl;
 #pragma omp parallel for
 			for (size_t idx = 0; idx < accum.size(); idx++) {
 				accum.data[idx] += fw.evaluate(tmp.data[idx]);
 			}
 		}
-		std::cout<<"Out Size "<<accum.dimensions()<<std::endl;
-		out[outIdx]=accum;
+#pragma omp parallel for
+		for (size_t idx = 0; idx < accum.size(); idx++) {
+			accum.data[idx] = clamp(accum.data[idx], 0.0f, 1.0f);
+		}
+		out[outIdx] = accum;
 	}
 
 //include max pool operation here
 }
-void FilterLayer::stash(){
+void FilterLayer::stash() {
 
 }
 void FilterLayer::learnInput(const std::vector<ImageRGB>& images,
@@ -118,22 +118,23 @@ void FilterLayer::learnInput(DictionaryLearning& dictionary, int inputIndex) {
 		dictionary.addFilters(1);
 		dictionary.optimizeWeights(sparsity);
 	}
-	dictionary.optimizeDictionary(1E-5f, 128, 3);
+	dictionary.optimizeDictionary(1E-5f, 128, sparsity);
 	FilterBankTensor& t = tensors[inputIndex];
 	t.filters = dictionary.getFilterBanks();
 	for (int idx = 0; idx < outputSize; idx++) {
-		float2 scaleOffset = dictionary.normalize(idx, 0.05f);
-		std::cout << "Normalization " << scaleOffset << std::endl;
+		float2 scaleOffset = dictionary.normalize(idx, 0.001f);
 		FilterBankWeights& w = t.weights[idx];
-		w.normalizeScale = scaleOffset.x;
-		w.normalizeOffset = scaleOffset.y;
+		w.normalizeScale = scaleOffset.x * 0.75;
+		w.normalizeOffset = scaleOffset.y * 0.75;
 		w.weight = 1.0f / inputSize;
 	}
-	dictionary.writeFilterBanks(MakeDesktopFile(MakeString()<<label<<"_filter.png"));
-
+	dictionary.writeFilterBanks(
+			MakeDesktopFile(MakeString() << label << "_filter.png"));
 }
-FilterLayer::FilterLayer(const std::string& label,int featuresIn, int featuresOut, int patchSize) : label(label),inputSize(featuresIn), outputSize(featuresOut), patchSize(patchSize), sparsity(
-				3), angleSamples(8) {
+FilterLayer::FilterLayer(const std::string& label, int featuresIn,
+		int featuresOut, int patchSize) :
+		label(label), inputSize(featuresIn), outputSize(featuresOut), patchSize(
+				patchSize), sparsity(3), angleSamples(8) {
 	tensors.resize(featuresIn, FilterBankTensor(featuresOut));
 }
 void FilterLayer::setSparsity(int s) {
@@ -142,14 +143,15 @@ void FilterLayer::setSparsity(int s) {
 void FilterLayer::setAngleSamples(int s) {
 	angleSamples = s;
 }
-DeepDictionary::DeepDictionary(
-		const std::initializer_list<int>& outputSizes,
-		const std::initializer_list<int>& filterSizes, int sparsity, int angles) {
+DeepDictionary::DeepDictionary(const std::initializer_list<int>& outputSizes,
+		const std::initializer_list<int>& filterSizes, int sparsity,
+		int angles) {
 	int lastSize = 1;
-	auto sizeIter=filterSizes.begin();
-	int count=0;
+	auto sizeIter = filterSizes.begin();
+	int count = 0;
 	for (int f : outputSizes) {
-		FilterLayer layer(MakeString()<<"layer"<<count,lastSize, f, *sizeIter);
+		FilterLayer layer(MakeString() << "layer" << count, lastSize, f,
+				*sizeIter);
 		layer.setSparsity(sparsity);
 		layer.setAngleSamples(angles);
 		layers.push_back(layer);
@@ -168,13 +170,16 @@ void DeepDictionary::train(const std::vector<ImageRGB>& images, int subsample) {
 	layers[0].stash();
 	for (int n = 0; n < images.size(); n++) {
 		layers[0].evaluate(images[n], trainingSet[n]);
-		for(int k=0;k<trainingSet[n].size();k++){
+		for (int k = 0; k < trainingSet[n].size(); k++) {
 			Image1f tmp;
 			trainingSet[n][k].get(tmp);
-			WriteImageToRawFile(MakeDesktopFile(MakeString()<<layers[0].getName()<<"_"<<n<<"_"<<k<<".xml"),tmp);
+			WriteImageToRawFile(
+					MakeDesktopFile(
+							MakeString() << layers[0].getName() << "_"
+									<< ZeroPad(n, 2) << "_" << ZeroPad(k, 3)
+									<< ".xml"), tmp);
 		}
 	}
-
 	std::exit(0);
 	for (int l = 1; l < (int) layers.size(); l++) {
 		FilterLayer& layer = layers[l];

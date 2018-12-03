@@ -44,9 +44,7 @@ void SamplePatch::sample(const aly::Image1f& gray) {
 	data.resize(width * height);
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {
-			float2 pix(width * (i / (float) (width - 1) - 0.5f),
-					height * (j / (float) (height - 1) - 0.5f));
-			data[i + j * width] = gray(position.x + pix.x, position.y + pix.y);
+			data[i + j * width] = gray(position.x + i - width / 2,position.y + j - height / 2);
 		}
 	}
 }
@@ -54,9 +52,9 @@ void SamplePatch::sample(const DenseMat<float>& gray) {
 	data.resize(width * height);
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {
-			float2 pix(width * (i / (float) (width - 1) - 0.5f),
-					height * (j / (float) (height - 1) - 0.5f));
-			data[i + j * width] = gray(clamp((int)(position.x + pix.x),0,gray.rows-1),clamp((int)(position.y + pix.y),0,gray.cols-1));
+			data[i + j * width] = gray(
+					clamp(position.x + i - width / 2, 0, gray.rows - 1),
+					clamp(position.y + j - height / 2, 0, gray.cols - 1));
 		}
 	}
 }
@@ -64,10 +62,8 @@ void SamplePatch::sample(const aly::Image3f& colors, int c) {
 	data.resize(width * height);
 	for (int j = 0; j < height; j++) {
 		for (int i = 0; i < width; i++) {
-			float2 pix(width * (i / (float) (width - 1) - 0.5f),
-					height * (j / (float) (height - 1) - 0.5f));
-			data[i + j * width] =
-					colors(position.x + pix.x, position.y + pix.y)[c];
+			data[i + j * width] = colors(position.x + i - width / 2,
+					position.y + j - height / 2)[c];
 		}
 	}
 }
@@ -77,8 +73,8 @@ void SamplePatch::sample(const aly::ImageRGB& colors, int c) {
 		for (int i = 0; i < width; i++) {
 			float2 pix(width * (i / (float) (width - 1) - 0.5f),
 					height * (j / (float) (height - 1) - 0.5f));
-			data[i + j * width] =
-					colors(position.x + pix.x, position.y + pix.y)[c] / 255.0f;
+			data[i + j * width] = colors(position.x + i - width / 2,
+					position.y + j - height / 2)[c] / 255.0f;
 		}
 	}
 }
@@ -237,13 +233,33 @@ float2 DictionaryLearning::normalize(int index, float percent) {
 			(int) values.size() - 1)];
 	float upper = values[clamp((int) ((1.0f - percent) * values.size()), 0,
 			(int) values.size() - 1)];
+	if (upper - lower < 1E-5) {
+		return float2(1.0f, -lower);
+	}
+	return float2((1.0f - 2 * percent) / (upper - lower),-(1.0f - 2 * percent) * lower/ (upper - lower) + percent);
+}
+float2 DictionaryLearning::normalize(const DenseMat<float>& img, int index,int stride, float percent) {
+	std::vector<float> values;
+	values.reserve(img.size() / stride);
+	for (int i = 0; i < img.rows; i += stride) {
+		for (int j = 0; j < img.cols; j += stride) {
+			float samp = img(RandomUniform(i, i + stride),RandomUniform(j, j + stride));
+			values.push_back(samp);
+		}
+	}
+	std::sort(values.begin(), values.end());
+	float lower = values[clamp((int) (percent * values.size()), 0,
+			(int) values.size() - 1)];
+	float upper = values[clamp((int) ((1.0f - percent) * values.size()), 0,
+			(int) values.size() - 1)];
 
 	std::cout << "Soft Limits [" << lower << "," << upper << "]" << std::endl;
-	if(upper-lower<1E-6){
-		return float2(1.0f,-lower);
+	if (upper - lower < 1E-5) {
+		return float2(1.0f, -lower);
 	}
-	return float2((1.0f - 2 * percent) / (upper - lower),-(1.0f - 2 * percent) * lower + percent);
+	return float2((1.0f - 2 * percent) / (upper - lower),-(1.0f - 2 * percent) * lower/ (upper - lower) + percent);
 }
+
 void FilterBank::score(const aly::Image1ub& image, aly::Image1f& out) {
 	out.resize(image.width, image.height);
 #pragma omp parallel for
@@ -271,19 +287,7 @@ void FilterBank::score(const aly::Image1ub& image, aly::Image1f& out) {
 		}
 	}
 }
-float FilterBank::score(const SamplePatch& patch) const {
-	double err = 0;
-	double avg;
-	for (int ii = 0; ii < patch.size(); ii++) {
-		avg += (double) (patch.data[ii]);
-	}
-	avg /= patch.size();
-	for (int ii = 0; ii < patch.size(); ii++) {
-		err += (double) (data[ii]) * (patch.data[ii] - avg);
-	}
-	err/=patch.size();
-	return std::abs(err);
-}
+
 void FilterBank::score(const aly::Image1ub& image, aly::DenseMat<float>& out) {
 	out.resize(image.width, image.height);
 #pragma omp parallel for
@@ -307,14 +311,14 @@ void FilterBank::score(const aly::Image1ub& image, aly::DenseMat<float>& out) {
 							* (image(x, y).x / 255.0f - avg);
 				}
 			}
-			err/=(width*height);
 			out(i, j) = std::abs(err);
 		}
 	}
 }
 
-void FilterBank::score(const DenseMat<float>& image, aly::DenseMat<float>& out) {
-	out.resize(image.rows,image.cols);
+void FilterBank::score(const DenseMat<float>& image,
+		aly::DenseMat<float>& out) {
+	out.resize(image.rows, image.cols);
 #pragma omp parallel for
 	for (int j = 0; j < image.cols; j++) {
 		for (int i = 0; i < image.rows; i++) {
@@ -323,7 +327,7 @@ void FilterBank::score(const DenseMat<float>& image, aly::DenseMat<float>& out) 
 				for (int ii = 0; ii < width; ii++) {
 					int x = i + ii - width / 2;
 					int y = j + jj - height / 2;
-					avg += image(clamp(x,0,image.rows-1), clamp(y,0,image.cols-1));
+					avg += image(clamp(x, 0, image.rows - 1),clamp(y, 0, image.cols - 1));
 				}
 			}
 			avg /= (width * height);
@@ -332,14 +336,25 @@ void FilterBank::score(const DenseMat<float>& image, aly::DenseMat<float>& out) 
 				for (int ii = 0; ii < width; ii++) {
 					int x = i + ii - width / 2;
 					int y = j + jj - height / 2;
-					err += data[ii + jj * width]
-							* (image(clamp(x,0,image.rows-1), clamp(y,0,image.cols-1)) - avg);
+					float v=image(clamp(x, 0, image.rows - 1),clamp(y, 0, image.cols - 1));
+					err += data[ii + jj * width]* (v - avg);
 				}
 			}
-			err/=(width*height);
 			out(i, j) = std::abs(err);
 		}
 	}
+}
+float FilterBank::score(const SamplePatch& patch) const {
+	double err = 0;
+	double avg = 0;
+	for (int ii = 0; ii < patch.size(); ii++) {
+		avg += (double) (patch.data[ii]);
+	}
+	avg /= patch.size();
+	for (int ii = 0; ii < patch.size(); ii++) {
+		err += (double) (data[ii]) * (patch.data[ii] - avg);
+	}
+	return std::abs(err);
 }
 void FilterBank::score(const aly::ImageRGB& image, aly::DenseMat<float>& out) {
 	out.resize(image.width, image.height);
@@ -366,7 +381,6 @@ void FilterBank::score(const aly::ImageRGB& image, aly::DenseMat<float>& out) {
 							* (RGBtoGray(image(x, y), true) - avg);
 				}
 			}
-			err/=(double)(width*height);
 			out(i, j) = aly::sum(aly::abs(float3(err.x, err.y, err.z)));
 		}
 	}
@@ -873,8 +887,7 @@ void DictionaryLearning::estimate(const aly::ImageRGB& img, aly::ImageRGB& out,
 	for (int j = 0; j < out.height; j += height) {
 		for (int i = 0; i < out.width; i += width) {
 			std::vector<float> tmp;
-			float2 center = float2(i + width * 0.5f, j + height * 0.5f);
-			SamplePatch p(center, width, height);
+			SamplePatch p(int2(i+width/2,j+height/2), width, height);
 			for (int c = 0; c < 3; c++) {
 				p.sample(img, c);
 				solveOrthoMatchingPursuit(sparsity, p);
@@ -943,9 +956,7 @@ void DictionaryLearning::stash(const ImageRGB& img, int subsample) {
 #pragma omp parallel for
 	for (int n = 0; n < N; n++) {
 		for (int m = 0; m < M; m++) {
-			float2 center = float2(m * subsample + subsample * 0.5f,
-					n * subsample + subsample * 0.5f);
-			SamplePatch patch(center, patchWidth, patchHeight);
+			SamplePatch patch(int2(n+patchWidth/2,m+patchHeight/2), patchWidth, patchHeight);
 			std::vector<int> order = solveOrthoMatchingPursuit(4, gray, patch);
 			if (order.size() > 3) {
 				edges(m, n) = RGBA(order[0], order[1], order[2], order[3]);
@@ -1024,7 +1035,8 @@ void DictionaryLearning::initializeFilters(int patchWidth, int patchHeight,
 	for (int n = 0; n < filterBanks.size(); n++) {
 		filterBanks[n].normalize();
 	}
-	std::cout << "Filters: " << filterBanks.size() <<" Filter Size: "<<patchWidth<<" x "<<patchHeight<< std::endl;
+	std::cout << "Filters: " << filterBanks.size() << " Filter Size: "
+			<< patchWidth << " x " << patchHeight << std::endl;
 }
 void DictionaryLearning::setTrainingData(const std::vector<Image1ub>& images,
 		int subsample) {
@@ -1040,9 +1052,7 @@ void DictionaryLearning::setTrainingData(const std::vector<Image1ub>& images,
 
 		for (int n = 0; n < N; n++) {
 			for (int m = 0; m < M; m++) {
-				float2 center = float2(m * subsample + subsample * 0.5f,
-						n * subsample + subsample * 0.5f);
-				SamplePatch p(center, patchWidth, patchHeight);
+				SamplePatch p(int2(m*patchWidth+patchWidth/2,n*patchWidth+patchHeight/2), patchWidth, patchHeight);
 				p.sample(gray);
 				p.weights.resize(filterBanks.size(), 0.0f);
 				patches.push_back(p);
@@ -1060,9 +1070,7 @@ void DictionaryLearning::addTrainingData(const DenseMat<float>& img,
 	int M = img.rows / subsample;
 	for (int n = 0; n < N; n++) {
 		for (int m = 0; m < M; m++) {
-			float2 center = float2(m * subsample + subsample * 0.5f,
-					n * subsample + subsample * 0.5f);
-			SamplePatch p(center, patchWidth, patchHeight);
+			SamplePatch p(int2(m*subsample+patchWidth/2,n*subsample+patchHeight/2), patchWidth, patchHeight);
 			p.sample(img);
 			p.weights.resize(filterBanks.size(), 0.0f);
 			patches.push_back(p);
@@ -1070,8 +1078,8 @@ void DictionaryLearning::addTrainingData(const DenseMat<float>& img,
 		}
 	}
 }
-void DictionaryLearning::setTrainingData(const std::vector<DenseMat<float>>& images,
-		int subsample) {
+void DictionaryLearning::setTrainingData(
+		const std::vector<DenseMat<float>>& images, int subsample) {
 	patches.clear();
 	for (const DenseMat<float>& img : images) {
 		addTrainingData(img);
@@ -1088,11 +1096,10 @@ void DictionaryLearning::setTrainingData(const std::vector<ImageRGB>& images,
 		ConvertImage(img, gray, true);
 		int N = img.height / subsample;
 		int M = img.width / subsample;
+		std::cout<<"Training Range "<<gray.min()<<" "<<gray.max()<<std::endl;
 		for (int n = 0; n < N; n++) {
 			for (int m = 0; m < M; m++) {
-				float2 center = float2(m * subsample + subsample * 0.5f,
-						n * subsample + subsample * 0.5f);
-				SamplePatch p(center, patchWidth, patchHeight);
+				SamplePatch p(int2(m*subsample+patchWidth/2,n*subsample+patchHeight/2), patchWidth, patchHeight);
 				p.sample(gray);
 				patches.push_back(p);
 			}

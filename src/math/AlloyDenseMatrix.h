@@ -74,6 +74,37 @@ public:
 	reverse_iterator rend(int i) const {
 		return data[i].rend();
 	}
+	inline vec<T, C> min(T val=std::numeric_limits<T>::max()) const {
+		vec<T, C> minVal(val);
+		for (const vec<T, C>& val : data) {
+			minVal = aly::minVec(val, minVal);
+		}
+		return minVal;
+	}
+	inline vec<T, C> max(T val=std::numeric_limits<T>::min()) const {
+		vec<T, C> maxVal(val);
+		for (const vec<T, C>& val : data) {
+			maxVal = aly::maxVec(val, maxVal);
+		}
+		return maxVal;
+	}
+	inline std::pair<vec<T, C>, vec<T, C>> range() const {
+		vec<T, C> maxVal(std::numeric_limits<T>::min());
+		vec<T, C> minVal(std::numeric_limits<T>::max());
+		for (const vec<T, C>& val : data) {
+			maxVal = aly::maxVec(val, maxVal);
+			minVal = aly::minVec(val, minVal);
+		}
+		return std::pair<vec<T, C>, vec<T, C>>(minVal, maxVal);
+	}
+	inline vec<T, C> mean() const {
+		vec<double, C> mean(0.0);
+		for (const vec<T, C>& val : data) {
+			mean += vec<double, C>(val);
+		}
+		mean = mean / (double) data.size();
+		return vec<T, C>(mean);
+	}
 	template<class Archive> void serialize(Archive & archive) {
 		archive(CEREAL_NVP(rows), CEREAL_NVP(cols),
 				cereal::make_nvp(MakeString() << "matrix" << C, data));

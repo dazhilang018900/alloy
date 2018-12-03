@@ -167,6 +167,20 @@ public:
 	const T* ptr() const {
 		return data.data();
 	}
+	T min(T valt = std::numeric_limits<T>::max()) const {
+		T minVal(valt);
+		for (const T& val : data) {
+			minVal = std::min(val, minVal);
+		}
+		return minVal;
+	}
+	T max(T valt = std::numeric_limits<T>::min()) const {
+		T maxVal(valt);
+		for (const T& val : data) {
+			maxVal = std::max(val, maxVal);
+		}
+		return maxVal;
+	}
 	const T& operator[](const size_t i) const override {
 		if (i >= data.size())
 			throw std::runtime_error(
@@ -661,6 +675,20 @@ public:
 		for (int i = 0; i < rows; i++) {
 			data[cols * i + j] = vec[i];
 		}
+	}
+	T min(T valt = std::numeric_limits<T>::max()) const {
+		T minVal(valt);
+		for (const T& val : data) {
+			minVal = std::min(val, minVal);
+		}
+		return minVal;
+	}
+	T max(T valt = std::numeric_limits<T>::min()) const {
+		T maxVal(valt);
+		for (const T& val : data) {
+			maxVal = std::max(val, maxVal);
+		}
+		return maxVal;
 	}
 	T& operator()(int i, int j) {
 		assert(i<rows);
@@ -1746,15 +1774,15 @@ public:
 	}
 	T min(T valt = std::numeric_limits<T>::max()) const {
 		T minVal(valt);
-		for (T& val : data) {
-			minVal = aly::minVec(val, minVal);
+		for (const T& val : data) {
+			minVal = std::min(val, minVal);
 		}
 		return minVal;
 	}
 	T max(T valt = std::numeric_limits<T>::min()) const {
 		T maxVal(valt);
-		for (T& val : data) {
-			maxVal = aly::maxVec(val, maxVal);
+		for (const T& val : data) {
+			maxVal = std::max(val, maxVal);
 		}
 		return maxVal;
 	}

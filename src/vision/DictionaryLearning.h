@@ -62,6 +62,20 @@ struct FilterBank {
 		}
 		return data[sz];
 	}
+	float min(float valt = std::numeric_limits<float>::max()) const {
+		float minVal(valt);
+		for (const float& val : data) {
+			minVal = std::min(val, minVal);
+		}
+		return minVal;
+	}
+	float max(float valt = std::numeric_limits<float>::min()) const {
+		float maxVal(valt);
+		for (const float& val : data) {
+			maxVal = std::max(val, maxVal);
+		}
+		return maxVal;
+	}
 	float score(const SamplePatch& patch) const;
 	FilterBank(int width=0, int height=0) :
 			data(width * height), width(width), height(height), type(FilterType::Flat),angle(0),shift(0) {
@@ -82,7 +96,7 @@ struct FilterBank {
 };
 struct SamplePatch {
 	int width, height;
-	float2 position;
+	int2 position;
 	std::vector<float> data;
 	std::vector<float> weights;
 	size_t size() const {
@@ -105,7 +119,7 @@ struct SamplePatch {
 	void load(Archive & archive) {
 		archive(CEREAL_NVP(width), CEREAL_NVP(height), CEREAL_NVP(position),CEREAL_NVP(data), CEREAL_NVP(weights));
 	}
-	SamplePatch(float2 center, int patchWidth, int patchHeight) :
+	SamplePatch(int2 center, int patchWidth, int patchHeight) :
 			position(center),width(patchWidth), height(
 					patchHeight) {
 		data.resize(patchWidth * patchHeight);
@@ -134,7 +148,8 @@ protected:
 public:
 	DictionaryLearning();
 	void maxPool(const aly::Image3f& image,aly::Image3f& out,int size);
-	float2 normalize(int index,float percent);
+	float2 normalize(int index, float percent);
+	float2 normalize(const DenseMat<float>& img, int index,int stride, float percent);
 	void normalize(aly::Image3f& image, float percent,int stride);
 	std::vector<SamplePatch>& getSamplePatch() {
 		return patches;
