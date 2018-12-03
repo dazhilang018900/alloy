@@ -25,32 +25,24 @@
 #include "vision/DictionaryLearning.h"
 #include "vision/SpringLevelSet2D.h"
 #include "vision/SpringlsSecondOrder.h"
+#include "vision/DeepDictionary.h"
 using namespace aly;
 DictionaryLearningEx::DictionaryLearningEx() :
 		Application(1200, 1000, "Learning Toy", false) {
 }
 bool DictionaryLearningEx::init(Composite& rootNode) {
 	ReadImageFromFile(getFullPath("images/mountains.jpg"), img);
-	int patchSize = 11;
-	int subsample = 11;
+	int patchSize = 16;
+	int subsample = 16;
 	int sparsity = 3;
 	int angleSamples = 8;
-	learning.initializeFilters(patchSize, patchSize, angleSamples); //creates 43 filters
-	learning.setTrainingData( { img }, subsample);
-
-	learning.optimizeWeights(sparsity);
-	learning.writeFilterBanks(MakeDesktopFile("filterbanks_before.png"));
-	while (learning.getFilterCount() < 64) {
-		learning.addFilters(1);
-		learning.optimizeWeights(sparsity);
-	}
-	learning.optimizeDictionary(1E-5f, 128, 3);
-	learning.writeFilterBanks(MakeDesktopFile("filterbanks_after.png"));
+	DeepDictionary dictionary({64,64},patchSize,sparsity,angleSamples);
 	ImageRGB est;
 	aly::Volume3f weights;
-	learning.estimate(img, est, weights, sparsity);
-	WriteImageToFile(MakeDesktopFile("estimate.png"), est);
-	WriteVolumeToFile(MakeDesktopFile("weights.xml"), weights);
+	//learning.estimate(img, est, weights, sparsity);
+	//WriteImageToFile(MakeDesktopFile("estimate.png"), est);
+	//WriteVolumeToFile(MakeDesktopFile("weights.xml"), weights);
+	/*
 	{
 		aly::Image3f scores;
 		aly::Image3f pool;
@@ -67,7 +59,7 @@ bool DictionaryLearningEx::init(Composite& rootNode) {
 			count++;
 		}
 	}
-
+*/
 	img = est;
 	frameBuffersDirty = true;
 	BorderCompositePtr layout = BorderCompositePtr(

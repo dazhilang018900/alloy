@@ -47,6 +47,7 @@ struct FilterBank {
 	}
 	void score(const aly::Image1ub& image,aly::Image1f& out);
 	void score(const aly::ImageRGB& image,aly::Image3f& out);
+	void score(const aly::DenseMat<float>& image,aly::DenseMat<float>& out);
 	void score(const aly::Image1ub& image,aly::DenseMat<float>& out);
 	void score(const aly::ImageRGB& image,aly::DenseMat<float>& out);
 	inline const float& operator[](const size_t& sz) const {
@@ -110,6 +111,7 @@ struct SamplePatch {
 		data.resize(patchWidth * patchHeight);
 	}
 	void sample(const aly::Image1f& gray);
+	void sample(const DenseMat<float>& gray);
 	void sample(const aly::ImageRGBf& gray,int c);
 	void sample(const aly::ImageRGB& gray,int c);
 	float residual(const std::vector<FilterBank>& banks,bool correlation);
@@ -162,6 +164,8 @@ public:
 	}
 	void setTrainingData(const std::vector<ImageRGB>& img, int subsample = 8);
 	void setTrainingData(const std::vector<Image1ub>& img, int subsample = 8);
+	void setTrainingData(const std::vector<DenseMat<float>>& images,int subsample = 8);
+	void addTrainingData(const DenseMat<float>& images,int subsample = 8);
 };
 void WritePatchesToFile(const std::string& file,const std::vector<SamplePatch>& patches);
 void WriteFilterBanksToFile(const std::string& file,
