@@ -472,7 +472,7 @@ void WriteImageToFile(const std::string& file, const ImageRGBA& image) {
 			throw std::runtime_error(
 					MakeString() << "Could not write " << file);
 		}
-	} else if(ext=="jpg"){
+	} else if(ext == "jpg" || ext == "jpeg"){
 		ImageRGB tmp;
 		ConvertImage(image,tmp);
 		stbi_write_jpg(file.c_str(), tmp.width, tmp.height, 3,tmp.data.data(),90);
