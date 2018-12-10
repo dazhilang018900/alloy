@@ -1130,7 +1130,7 @@ void FileDialog::addFileExtensionRule(const FileFilterRule& rule) {
 }
 void FileDialog::setValue(const std::string& file) {
 	fileLocation->setValue(file);
-	setSelectedFile(file);
+	if(isVisible())setSelectedFile(file);
 }
 std::string FileDialog::getValue() const {
 	return fileLocation->getValue();
