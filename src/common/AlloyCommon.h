@@ -71,6 +71,9 @@ namespace aly {
 	int ExtractInteger(const std::string& str);//Returns infinity if not found.
 	bool BeginsWith(const std::string& str, const std::string& pattern);
 	bool EndsWith(const std::string& str, const std::string& pattern);
+	bool MatchWildCard(const std::string& str, const std::string& pattern);//supports matching * and ? strings
+	bool MatchWildCardIgnoreCase(const std::string& str, const std::string& pattern);
+	int ReplaceAll(std::string& str, const std::string& from, const std::string& to);
 	std::string ToLower(const std::string& str);
 	std::string ToUpper(const std::string& str);
 	bool ContainsIgnoreCase(const std::string& str, const std::string& pattern);

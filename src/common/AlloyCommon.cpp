@@ -34,6 +34,49 @@ void SANITY_CHECK_STRINGS(){
 	std::cout<<"["<<LongestCommonPrefix(std::vector<std::string>{"abracadabra","abra","abradoodle"})<<"]"<<std::endl;
 	std::cout<<"["<<LongestCommonPrefix(std::vector<std::string>{"abracadabra","abra","abradoodle","dabra"})<<"]"<<std::endl;
 }
+//no need to reinvent the wheel
+//https://www.geeksforgeeks.org/wildcard-character-matching/
+bool MatchWildCardInternal(const char *first,const char * second){
+    // If we reach at the end of both strings, we are done
+    if (*first == '\0' && *second == '\0')
+        return true;
+
+    // Make sure that the characters after '*' are present
+    // in second string. This function assumes that the first
+    // string will not contain two consecutive '*'
+    if (*first == '*' && *(first+1) != '\0' && *second == '\0')
+        return false;
+
+    // If the first string contains '?', or current characters
+    // of both strings match
+    if (*first == '?' || *first == *second)
+        return MatchWildCardInternal(first+1, second+1);
+
+    // If there is *, then there are two possibilities
+    // a) We consider current character of second string
+    // b) We ignore current character of second string.
+    if (*first == '*')
+        return MatchWildCardInternal(first+1, second) || MatchWildCardInternal(first, second+1);
+    return false;
+}
+bool MatchWildCard(const std::string& str, const std::string& pattern){
+	return MatchWildCardInternal(str.c_str(),pattern.c_str());
+}
+bool MatchWildCardIgnoreCase(const std::string& str, const std::string& pattern){
+	std::string strTmp=ToUpper(str);
+	std::string patTmp=ToUpper(pattern);
+	return MatchWildCardInternal(strTmp.c_str(),patTmp.c_str());
+}
+int ReplaceAll(std::string& str, const std::string& from, const std::string& to) {
+    size_t start_pos = 0;
+    int count=0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+        count++;
+    }
+    return count;
+}
 std::vector<std::string> Tokenize(const std::string& str) {
 	std::stringstream ss;
 	std::vector<std::string> tokens;
