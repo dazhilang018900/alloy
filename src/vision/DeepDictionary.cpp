@@ -93,14 +93,20 @@ void FilterLayer::evaluate(const LayerData& in, LayerData& out) {
 				accum.data[idx] += fw.evaluate(tmp.data[idx]);
 			}
 		}
+		DenseMat<float>& ref = out[outIdx];
+		ref.resize(((accum.rows%2==0)?accum.rows / 2:(1+accum.rows/2)),(accum.cols%2==0)?accum.cols / 2:(1+accum.cols/2));
+		//max pool and threshold
 #pragma omp parallel for
-		for (size_t idx = 0; idx < accum.size(); idx++) {
-			accum.data[idx] = clamp(accum.data[idx], 0.0f, 1.0f);
+		for (int j = 0; j < accum.cols; j += 2) {
+			for (int i = 0; i < accum.rows; i += 2) {
+				float v1 = accum(i, j);
+				float v2 = accum(std::min(i + 1, accum.rows - 1), j);
+				float v3 = accum(i, std::min(j + 1, accum.cols - 1));
+				float v4 = accum(std::min(i + 1, accum.rows - 1),std::min(j + 1, accum.cols - 1));
+				ref(i / 2, j / 2) = aly::clamp(std::max(std::max(v1, v2), std::max(v3, v4)), 0.0f,1.0f);
+			}
 		}
-		out[outIdx] = accum;
 	}
-
-//include max pool operation here
 }
 void FilterLayer::stash() {
 
@@ -118,7 +124,7 @@ void FilterLayer::learnInput(DictionaryLearning& dictionary, int inputIndex) {
 		dictionary.addFilters(1);
 		dictionary.optimizeWeights(sparsity);
 	}
-	dictionary.optimizeDictionary(1E-5f, 128, sparsity);
+	dictionary.optimizeDictionary(1E-5f, 128, 1);
 	FilterBankTensor& t = tensors[inputIndex];
 	t.filters = dictionary.getFilterBanks();
 	for (int idx = 0; idx < outputSize; idx++) {
@@ -128,8 +134,7 @@ void FilterLayer::learnInput(DictionaryLearning& dictionary, int inputIndex) {
 		w.normalizeOffset = scaleOffset.y * 0.75;
 		w.weight = 1.0f / inputSize;
 	}
-	dictionary.writeFilterBanks(
-			MakeDesktopFile(MakeString() << label << "_filter.png"));
+	dictionary.writeFilterBanks(MakeDesktopFile(MakeString() <<"filter_"<< label <<"_"<<ZeroPad(inputIndex,3)<<"_filter.png"));
 }
 FilterLayer::FilterLayer(const std::string& label, int featuresIn,
 		int featuresOut, int patchSize) :
@@ -173,24 +178,38 @@ void DeepDictionary::train(const std::vector<ImageRGB>& images, int subsample) {
 		for (int k = 0; k < trainingSet[n].size(); k++) {
 			Image1f tmp;
 			trainingSet[n][k].get(tmp);
-			WriteImageToRawFile(
+			WriteImageToFile(
 					MakeDesktopFile(
 							MakeString() << layers[0].getName() << "_"
-									<< ZeroPad(n, 2) << "_" << ZeroPad(k, 3)
-									<< ".xml"), tmp);
+									<< ZeroPad(n+1, 2) << "_" << ZeroPad(k+1, 3)
+									<< ".tiff"), tmp);
 		}
 	}
-	std::exit(0);
 	for (int l = 1; l < (int) layers.size(); l++) {
+		std::cout << "Learning Layer " << l << " Training set "
+				<< trainingSet.size() << " Channels " << trainingSet[0].size()
+				<< std::endl;
 		FilterLayer& layer = layers[l];
 		for (int n = 0; n < layer.getInputSize(); n++) {
+			std::cout << "Learning Input Channel " << n + 1 << "/"<< layer.getInputSize() << std::endl;
 			layer.learnInput(trainingSet, n, subsample);
 		}
+		//Add here optimize weighting between layers to minize error.
 		layer.stash();
 		newTrainingSet.resize(images.size());
-		for (int n = 0; n < layer.getInputSize(); n++) {
+
+		for (int n = 0; n < images.size(); n++) {
 			//Compute output of each layer and store.
 			layer.evaluate(trainingSet[n], newTrainingSet[n]);
+			for (int k = 0; k < newTrainingSet[n].size(); k++) {
+				Image1f tmp;
+				newTrainingSet[n][k].get(tmp);
+				WriteImageToFile(
+						MakeDesktopFile(
+								MakeString() << layer.getName() << "_"
+										<< ZeroPad(n+1, 2) << "_" << ZeroPad(k+1, 3)
+										<< ".tiff"), tmp);
+			}
 		}
 		trainingSet = newTrainingSet;
 		newTrainingSet.clear();

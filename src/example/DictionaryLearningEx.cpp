@@ -35,8 +35,8 @@ bool DictionaryLearningEx::init(Composite& rootNode) {
 	int patchSize = 11;
 	int subsample = 11;
 	int sparsity = 3;
-	int angleSamples = 8;
-	DeepDictionary dictionary({64,64},{patchSize,patchSize},sparsity,angleSamples);
+	int angleSamples = 4;
+	DeepDictionary dictionary({32,32,32,32},{patchSize,patchSize,patchSize,patchSize},sparsity,angleSamples);
 	dictionary.train({img},subsample);
 	ImageRGB est;
 	aly::Volume3f weights;

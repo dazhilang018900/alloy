@@ -874,7 +874,11 @@ void WriteImageToFile(const std::string& file, const Image1f& img) {
 			throw std::runtime_error(
 					MakeString() << "Could not write " << file);
 		}
-	} else {
+	} else if (ext == "tiff"||ext=="tif") {
+		Image1ub tmp;
+		ConvertImage(img,tmp);
+		WriteTiffImageToFileInternal(file,tmp);
+	}else {
 		Image1ub rgb;
 		rgb.resize(img.width, img.height);
 		rgb.id = img.id;
