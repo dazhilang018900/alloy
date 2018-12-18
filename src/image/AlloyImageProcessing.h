@@ -30,7 +30,7 @@ enum BayerFilter {
 void Demosaic(const Image1ub& gray, ImageRGB& color,const BayerFilter& filter=BayerFilter::RGGB);
 void Demosaic(const Image1ub& gray, ImageRGBf& color,const BayerFilter& filter=BayerFilter::RGGB);
 void Undistort(const ImageRGBf& in,ImageRGBf& out,double fx,double fy,double cx,double cy,double k1,double k2,double k3,double p1,double p2);
-void Undistort(const ImageRGB& in,ImageRGB& out,double fx,double fy,double c,double cy,double k1,double k2,double k3,double p1,double p2);
+void Undistort(const ImageRGB& in,ImageRGB& out,double fx,double fy,double cx,double cy,double k1,double k2,double k3,double p1,double p2);
 
 template<class T, size_t M, size_t N> void GaussianKernel(T (&kernel)[M][N],
 		T sigmaX = T(0.607902736 * (M - 1) * 0.5),

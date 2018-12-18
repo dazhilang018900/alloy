@@ -67,11 +67,11 @@
 #include <stdexcept>
 using namespace std;
 namespace aly {
-bool SetCurrentWorkingDirectory(const std::string& pathname){
+bool SetCurrentWorkingDirectory(const std::string& pathname) {
 #ifdef ALY_WINDOWS
-    return ::_chdir(pathname.c_str()) >= 0;
+	return ::_chdir(pathname.c_str()) >= 0;
 #else
-    return ::chdir(pathname.c_str()) >= 0;
+	return ::chdir(pathname.c_str()) >= 0;
 #endif
 }
 bool MakeDirectoryInternal(const std::string& dir);
@@ -138,30 +138,39 @@ std::string FormatSize(size_t size) {
 	static const size_t tb = ((size_t) 1 << (size_t) 40);
 
 	if (size < kb) {
-		return MakeString() << std::setw(5) << std::setfill(' ') << size << " B ";
+		return MakeString() << std::setw(5) << std::setfill(' ') << size
+				<< " B ";
 	} else if (size < mb) {
 		if (size % kb == 0) {
-			return MakeString() << std::setw(5) << std::setfill(' ') << (size >> (size_t) 10) << " KB";
+			return MakeString() << std::setw(5) << std::setfill(' ')
+					<< (size >> (size_t) 10) << " KB";
 		} else {
-			return MakeString() << std::setw(5) << std::setprecision(2) << size / (double) kb << " KB";
+			return MakeString() << std::setw(5) << std::setprecision(2)
+					<< size / (double) kb << " KB";
 		}
 	} else if (size < gb) {
 		if (size % mb == 0) {
-			return MakeString() << std::setw(5) << std::setfill(' ') << (size >> (size_t) 20) << " MB";
+			return MakeString() << std::setw(5) << std::setfill(' ')
+					<< (size >> (size_t) 20) << " MB";
 		} else {
-			return MakeString() << std::setw(5) << std::setprecision(2) << size / (double) mb << " MB";
+			return MakeString() << std::setw(5) << std::setprecision(2)
+					<< size / (double) mb << " MB";
 		}
 	} else if (size < tb) {
 		if (size % gb == 0) {
-			return MakeString() << std::setw(5) << std::setfill(' ') << (size >> (size_t) 30) << " GB";
+			return MakeString() << std::setw(5) << std::setfill(' ')
+					<< (size >> (size_t) 30) << " GB";
 		} else {
-			return MakeString() << std::setw(5) << std::setprecision(2) << size / (double) gb << " GB";
+			return MakeString() << std::setw(5) << std::setprecision(2)
+					<< size / (double) gb << " GB";
 		}
 	} else {
 		if (size % tb == 0) {
-			return MakeString() << std::setw(5) << (size >> (size_t) 40) << " TB";
+			return MakeString() << std::setw(5) << (size >> (size_t) 40)
+					<< " TB";
 		} else {
-			return MakeString() << std::setw(5) << std::setprecision(2) << size / (double) tb << " TB";
+			return MakeString() << std::setw(5) << std::setprecision(2)
+					<< size / (double) tb << " TB";
 		}
 	}
 }
@@ -174,7 +183,8 @@ std::string FormatTime(const std::time_t& t) {
 	} else if (hour > 12) {
 		hour -= 12;
 	}
-	return MakeString() << std::setw(2) << std::setfill(' ') << hour << ":" << std::setw(2) << std::setfill(' ') << timed->tm_min << " "
+	return MakeString() << std::setw(2) << std::setfill(' ') << hour << ":"
+			<< std::setw(2) << std::setfill(' ') << timed->tm_min << " "
 			<< ((timed->tm_hour >= 12) ? "pm" : "am");
 }
 std::string FormatDate(const std::time_t& t) {
@@ -185,7 +195,8 @@ std::string FormatDate(const std::time_t& t) {
 	} else if (hour > 12) {
 		hour -= 12;
 	}
-	return MakeString() << std::setw(2) << std::setfill('0') << timed->tm_mon << "/" << std::setw(2) << std::setfill('0') << timed->tm_mday << "/"
+	return MakeString() << std::setw(2) << std::setfill('0') << timed->tm_mon
+			<< "/" << std::setw(2) << std::setfill('0') << timed->tm_mday << "/"
 			<< timed->tm_year + 1900;
 }
 std::string FormatDateAndTime(const std::time_t& t) {
@@ -196,9 +207,12 @@ std::string FormatDateAndTime(const std::time_t& t) {
 	} else if (hour > 12) {
 		hour -= 12;
 	}
-	return MakeString() << std::setw(2) << std::setfill(' ') << hour << ":" << std::setw(2) << std::setfill(' ') << timed->tm_min << " "
-			<< ((timed->tm_hour >= 12) ? "pm" : "am") << " " << std::setw(2) << std::setfill('0') << timed->tm_mon << "/" << std::setw(2) << std::setfill('0')
-			<< timed->tm_mday << "/" << timed->tm_year + 1900;
+	return MakeString() << std::setw(2) << std::setfill(' ') << hour << ":"
+			<< std::setw(2) << std::setfill(' ') << timed->tm_min << " "
+			<< ((timed->tm_hour >= 12) ? "pm" : "am") << " " << std::setw(2)
+			<< std::setfill('0') << timed->tm_mon << "/" << std::setw(2)
+			<< std::setfill('0') << timed->tm_mday << "/"
+			<< timed->tm_year + 1900;
 }
 std::vector<std::string> SplitPath(const std::string& file) {
 	const char c = ALY_PATH_SEPARATOR.c_str()[0];
@@ -226,6 +240,37 @@ std::string ReadTextFile(const std::string& str) {
 	} else {
 		throw std::runtime_error(MakeString() << "Could not open " << str);
 	}
+}
+std::string ReadTextFileTail(const std::string& filename, int maxLines) {
+	std::ifstream fs;
+	fs.open(filename, std::fstream::in);
+	std::stringstream ss;
+	if (fs.is_open()) {
+		//Got to the last character before EOF
+		fs.seekg(-1, std::ios_base::end);
+		int lineCount = 0;
+		//Start searching for \n occurrences
+		fs.seekg(-1, std::ios_base::cur);
+		for (int i = fs.tellg(); i >= 0; i--) {
+			if (fs.peek() == '\n') {
+				//Found
+				fs.get();
+				lineCount++;
+				if (lineCount >= maxLines)
+					break;
+			}
+			//Move one character back
+			fs.seekg(i, std::ios_base::beg);
+		}
+		std::string line;
+		//std::cout<<"Found lines "<<lineCount<<" / "<<maxLines<<std::endl;
+		while (std::getline(fs, line)) {
+			ss << line << "\n";
+		}
+	} else {
+		throw std::runtime_error(MakeString() << "Could not open " << filename);
+	}
+	return ss.str();
 }
 std::vector<char> ReadBinaryFile(const std::string& str) {
 	streampos size;
@@ -256,7 +301,8 @@ void WriteBinaryFile(const std::string& str, const std::vector<char>& data) {
 	} else
 		throw runtime_error(MakeString() << "Could not write " << str);
 }
-void WriteBinaryFile(const std::string& str, const char* data, size_t elements) {
+void WriteBinaryFile(const std::string& str, const char* data,
+		size_t elements) {
 	ofstream file(str, ios::out | ios::binary);
 	if (file.is_open()) {
 		file.write(data, elements);
@@ -281,11 +327,12 @@ bool IsDirectory(const std::string& file) {
 bool IsFile(const std::string& file) {
 	return FileExists(file) && filesystem::internal::is_file(file);
 }
-std::vector<std::string> AutoComplete(const std::string& str, const std::vector<std::string>& list, int maxSuggestions) {
+std::vector<std::string> AutoComplete(const std::string& str,
+		const std::vector<std::string>& list, int maxSuggestions) {
 	std::vector<std::string> suggestions = list;
 #ifdef ALY_WINDOWS
 	static const std::locale local;
-	//use case insenstive complete on windows.
+//use case insenstive complete on windows.
 	std::sort(suggestions.begin(), suggestions.end(),
 			[](const std::string& first, const std::string& second) {
 				return std::lexicographical_compare(first.begin(), first.end(), second.begin(), second.end(),
@@ -293,9 +340,10 @@ std::vector<std::string> AutoComplete(const std::string& str, const std::vector<
 			}
 	);
 #else
-	std::sort(suggestions.begin(), suggestions.end(), [](const std::string& first, const std::string& second) {
-		return std::lexicographical_compare(first.begin(), first.end(), second.begin(), second.end());
-	});
+	std::sort(suggestions.begin(), suggestions.end(),
+			[](const std::string& first, const std::string& second) {
+				return std::lexicographical_compare(first.begin(), first.end(), second.begin(), second.end());
+			});
 #endif
 
 	for (size_t index = 0; index < suggestions.size(); index++) {
@@ -308,7 +356,8 @@ std::vector<std::string> AutoComplete(const std::string& str, const std::vector<
 		if (std::lexicographical_compare(str.begin(), str.end(), entry.begin(), entry.end(),
 						[](char c1, char c2) {return (std::tolower(c1, local) < std::tolower(c2, local));})) {
 #else
-		if (std::lexicographical_compare(str.begin(), str.end(), entry.begin(), entry.end())) {
+		if (std::lexicographical_compare(str.begin(), str.end(), entry.begin(),
+				entry.end())) {
 #endif
 			suggestions.erase(suggestions.begin(), suggestions.begin() + index);
 			break;
@@ -316,7 +365,10 @@ std::vector<std::string> AutoComplete(const std::string& str, const std::vector<
 	}
 
 	if (maxSuggestions > 0 && suggestions.size() > 0) {
-		suggestions.erase(suggestions.begin() + std::min((size_t) maxSuggestions, suggestions.size()), suggestions.end());
+		suggestions.erase(
+				suggestions.begin()
+						+ std::min((size_t) maxSuggestions, suggestions.size()),
+				suggestions.end());
 	}
 	return suggestions;
 }
@@ -385,7 +437,8 @@ bool RemoveDirectoryRecursive(const std::string& dir) {
 				q.push(fd.fileLocation);
 			} else {
 				if (!RemoveFile(fd.fileLocation)) {
-					std::cerr << "Could not remove " << fd.fileLocation << std::endl;
+					std::cerr << "Could not remove " << fd.fileLocation
+							<< std::endl;
 				}
 			}
 		}
@@ -423,12 +476,13 @@ std::string GetFileWithoutExtension(const std::string& fileName) {
 	}
 	return fileName;
 }
-std::string ReplaceFileExtension(const std::string& file, const std::string& ext) {
+std::string ReplaceFileExtension(const std::string& file,
+		const std::string& ext) {
 	return GetFileWithoutExtension(file) + "." + ext;
 }
 
 std::string GetFileDirectoryPath(const std::string& fileName) {
-	if (fileName.size()>0&&fileName.find_last_of(ALY_PATH_SEPARATOR) != string::npos) {
+	if (fileName.size() > 0 && fileName.find_last_of(ALY_PATH_SEPARATOR) != string::npos) {
 		size_t end = fileName.find_last_of(ALY_PATH_SEPARATOR);
 		return fileName.substr(0, end);
 	}
@@ -445,18 +499,23 @@ std::string GetParentDirectory(const std::string& file) {
 	}
 }
 #ifndef ALY_WINDOWS
-std::vector<std::string> GetDirectoryFileListing(const std::string& dirName, const std::string& ext, const std::string& mask) {
+std::vector<std::string> GetDirectoryFileListing(const std::string& dirName,
+		const std::string& ext, const std::string& mask) {
 	std::vector<std::string> files;
 	dirent* dp;
 	std::string cleanPath = RemoveTrailingSlash(dirName) + ALY_PATH_SEPARATOR;
 	DIR* dirp = opendir(cleanPath.c_str());
-	if(dirp){
+	if (dirp) {
 		while ((dp = readdir(dirp)) != NULL) {
 			string fileName(dp->d_name);
 			if (fileName != ".." && fileName != ".") {
 				if (dp->d_type == DT_REG) {
-					if (ext.length() == 0 || GetFileExtension(fileName) == ext) {
-						if (mask.length() == 0 || (mask.length() > 0 && fileName.find(mask) < fileName.length()))
+					if (ext.length() == 0
+							|| GetFileExtension(fileName) == ext) {
+						if (mask.length() == 0
+								|| (mask.length() > 0
+										&& fileName.find(mask)
+												< fileName.length()))
 							files.push_back(cleanPath + fileName);
 					}
 				}
@@ -473,7 +532,8 @@ FileDescription GetFileDescription(const std::string& fileLocation) {
 		return FileDescription();
 	struct stat attrib;
 	stat(fileLocation.c_str(), &attrib);
-	FileType type = IsDirectory(fileLocation) ? FileType::Directory : FileType::File;
+	FileType type =
+			IsDirectory(fileLocation) ? FileType::Directory : FileType::File;
 	size_t fileSize = attrib.st_size;
 #ifdef ALY_APPLE
 	std::time_t creationTime = attrib.st_ctimespec.tv_sec;
@@ -485,10 +545,12 @@ FileDescription GetFileDescription(const std::string& fileLocation) {
 	std::time_t modifiedTime = attrib.st_mtim.tv_sec;
 #endif
 	bool readOnly = attrib.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO);
-	return FileDescription(fileLocation, type, fileSize, readOnly, creationTime, accessTime, modifiedTime);
+	return FileDescription(fileLocation, type, fileSize, readOnly, creationTime,
+			accessTime, modifiedTime);
 }
 
-std::vector<FileDescription> GetDirectoryDescriptionListing(const std::string& dirName) {
+std::vector<FileDescription> GetDirectoryDescriptionListing(
+		const std::string& dirName) {
 	std::vector<FileDescription> files;
 	dirent* dp;
 	std::string cleanPath = RemoveTrailingSlash(dirName) + ALY_PATH_SEPARATOR;
@@ -519,7 +581,9 @@ std::vector<FileDescription> GetDirectoryDescriptionListing(const std::string& d
 				std::time_t modifiedTime = attrib.st_mtim.tv_sec;
 #endif
 				bool readOnly = attrib.st_mode & (S_IRWXU | S_IRWXG | S_IRWXO);
-				files.push_back(FileDescription(fileLocation, type, fileSize, readOnly, creationTime, accessTime, modifiedTime));
+				files.push_back(
+						FileDescription(fileLocation, type, fileSize, readOnly,
+								creationTime, accessTime, modifiedTime));
 			}
 		}
 		closedir(dirp);
@@ -546,7 +610,8 @@ std::vector<std::string> GetDirectoryListing(const std::string& dirName) {
 	if (dirp) {
 		while ((dp = readdir(dirp)) != NULL) {
 			string fileName(dp->d_name);
-			if (dp->d_type == DT_REG || dp->d_type == DT_DIR || dp->d_type == DT_LNK) {
+			if (dp->d_type == DT_REG || dp->d_type == DT_DIR
+					|| dp->d_type == DT_LNK) {
 				if (fileName != ".." && fileName != ".") {
 					files.push_back(cleanPath + fileName);
 				}
@@ -600,9 +665,12 @@ std::vector<std::string> GetDrives() {
 	drives.push_back(ALY_PATH_SEPARATOR);
 	for (FileDescription fd : GetDirectoryDescriptionListing("/media")) {
 		if (fd.fileType == FileType::Directory) {
-			for (FileDescription cfd : GetDirectoryDescriptionListing(fd.fileLocation)) {
+			for (FileDescription cfd : GetDirectoryDescriptionListing(
+					fd.fileLocation)) {
 				if (cfd.fileType == FileType::Directory) {
-					drives.push_back(RemoveTrailingSlash(cfd.fileLocation) + ALY_PATH_SEPARATOR);
+					drives.push_back(
+							RemoveTrailingSlash(
+									cfd.fileLocation) + ALY_PATH_SEPARATOR);
 				}
 			}
 		}

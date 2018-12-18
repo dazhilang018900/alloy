@@ -48,6 +48,12 @@ public:
 	void setLabel(const std::string& label) {
 		this->label = label;
 	}
+	void setText(const std::string& label) {
+		this->label = label;
+	}
+	std::string getText() const {
+		return label;
+	}
 	std::string getLabel() const {
 		return label;
 	}

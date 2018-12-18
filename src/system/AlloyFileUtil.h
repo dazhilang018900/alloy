@@ -113,6 +113,7 @@ namespace aly {
 		const std::string& dirName);
 	std::vector<std::string> GetDirectoryListing(const std::string& dirName);
 	std::string ReadTextFile(const std::string& str);
+	std::string ReadTextFileTail(const std::string& str,int maxLines);
 	std::vector<char> ReadBinaryFile(const std::string& str);
 	void WriteTextFile(const std::string& file,const std::string& str);
 	void WriteBinaryFile(const std::string& str, const std::vector<char>& data);
