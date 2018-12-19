@@ -103,7 +103,7 @@ void FilterLayer::evaluate(const LayerData& in, LayerData& out) {
 				float v2 = accum(std::min(i + 1, accum.rows - 1), j);
 				float v3 = accum(i, std::min(j + 1, accum.cols - 1));
 				float v4 = accum(std::min(i + 1, accum.rows - 1),std::min(j + 1, accum.cols - 1));
-				ref(i / 2, j / 2) = aly::clamp(std::max(std::max(v1, v2), std::max(v3, v4)), 0.0f,1.0f);
+				ref(i / 2, j / 2) = std::max(std::max(std::max(v1, v2), std::max(v3, v4)), 0.0f);//relu
 			}
 		}
 	}
