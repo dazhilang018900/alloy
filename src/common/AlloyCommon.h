@@ -74,6 +74,9 @@ namespace aly {
 	bool MatchWildCard(const std::string& str, const std::string& pattern);//supports matching * and ? strings
 	bool MatchWildCardIgnoreCase(const std::string& str, const std::string& pattern);
 	int ReplaceAll(std::string& str, const std::string& from, const std::string& to);
+	int ReplaceFirst(std::string& str, const std::string& from, const std::string& to);
+	int ReplaceLast(std::string& str, const std::string& from, const std::string& to);
+
 	std::string ToLower(const std::string& str);
 	std::string ToUpper(const std::string& str);
 	bool ContainsIgnoreCase(const std::string& str, const std::string& pattern);

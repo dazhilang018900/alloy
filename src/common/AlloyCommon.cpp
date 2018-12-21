@@ -77,6 +77,22 @@ int ReplaceAll(std::string& str, const std::string& from, const std::string& to)
     }
     return count;
 }
+int ReplaceFirst(std::string& str, const std::string& from, const std::string& to) {
+    size_t start_pos = 0;
+    if((start_pos = str.find(from)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        return 1;
+    }
+    return 0;
+}
+int ReplaceLast(std::string& str, const std::string& from, const std::string& to) {
+    size_t start_pos = 0;
+    if((start_pos = str.rfind(from)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        return 1;
+    }
+    return 0;
+}
 std::vector<std::string> Tokenize(const std::string& str) {
 	std::stringstream ss;
 	std::vector<std::string> tokens;
