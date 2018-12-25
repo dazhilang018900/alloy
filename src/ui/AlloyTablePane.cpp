@@ -698,6 +698,33 @@ int TableStringEntry::compare(const std::shared_ptr<TableEntry>& entry) const {
 	return (std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end())) ?
 			-1 : 1;
 }
+
+TableLinkEntry::TableLinkEntry(const std::string& name,
+		const std::string& label, bool modifiable,
+		const HorizontalAlignment& alignment) :
+		TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
+	value = TextLinkPtr(
+			new TextLink(name, CoordPX(2.0f, 0.0f),CoordPerPX(1.0f, 1.0f, -4.0f, 0.0f)));
+	value->backgroundColor = MakeColor(0, 0, 0, 0);
+	value->borderColor = MakeColor(0, 0, 0, 0);
+	value->borderWidth = UnitPX(0.0f);
+	value->setAlignment(alignment, VerticalAlignment::Middle);
+	value->setLabel(label);
+	value->setTruncate(true);
+	Composite::add(value);
+}
+
+int TableLinkEntry::compare(const std::shared_ptr<TableEntry>& entry) const {
+	TableLinkEntryPtr other = std::dynamic_pointer_cast < TableLinkEntry
+			> (entry);
+	std::string a = getValue();
+	std::string b = other->getValue();
+	if (a == b)
+		return 0;
+	return (std::lexicographical_compare(a.begin(), a.end(), b.begin(), b.end())) ?
+			-1 : 1;
+}
+
 TableIconStringEntry::TableIconStringEntry(const std::string& name,
 		int iconCode, const std::string& label, bool modifiable,
 		const HorizontalAlignment& alignment) :

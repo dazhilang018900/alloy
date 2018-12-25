@@ -29,6 +29,7 @@
 #include "ui/AlloySelectionBox.h"
 #include "ui/AlloyToggleWidget.h"
 #include "ui/AlloyProgressBar.h"
+
 #include <string>
 #include <vector>
 namespace aly {
@@ -50,6 +51,22 @@ namespace aly {
 				value->setValue(val);
 			}
 			ModifiableLabelPtr getRegion() const {
+				return value;
+			}
+			virtual int compare(const std::shared_ptr<TableEntry>& entry) const override;
+	};
+	class TableLinkEntry : public TableEntry {
+		protected:
+			TextLinkPtr value;
+		public:
+			TableLinkEntry(const std::string& name, const std::string& value, bool modifiable=false, const HorizontalAlignment& alignment= HorizontalAlignment::Left);
+			std::string getValue() const{
+				return value->getLabel();
+			}
+			void setValue(const std::string& val) {
+				value->setLabel(val);
+			}
+			TextLinkPtr getRegion() const {
 				return value;
 			}
 			virtual int compare(const std::shared_ptr<TableEntry>& entry) const override;
@@ -288,6 +305,7 @@ namespace aly {
 	typedef std::shared_ptr<TableCheckBoxEntry> TableCheckBoxEntryPtr;
 	typedef std::shared_ptr<TableToggleBoxEntry> TableToggleBoxEntryPtr;
 	typedef std::shared_ptr<TableStringEntry> TableStringEntryPtr;
+	typedef std::shared_ptr<TableLinkEntry> TableLinkEntryPtr;
 }
 
 #endif
