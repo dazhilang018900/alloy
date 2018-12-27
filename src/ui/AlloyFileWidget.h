@@ -22,6 +22,7 @@
 #ifndef SRC_UI_ALLOYFILEWIDGET_H_
 #define SRC_UI_ALLOYFILEWIDGET_H_
 #include "ui/AlloyBorderComposite.h"
+#include "ui/AlloyAdjustableComposite.h"
 #include "ui/AlloyTextWidget.h"
 #include "ui/AlloyListBox.h"
 #include "ui/AlloyButton.h"
@@ -102,7 +103,7 @@ struct FileFilterRule {
 };
 class FileButton;
 
-class FileDialog: public Composite {
+class FileDialog: public AdjustableComposite {
 private:
 	std::vector<std::shared_ptr<FileFilterRule>> filterRules;
 	std::shared_ptr<FileField> fileLocation;

@@ -577,10 +577,11 @@ FileButton::FileButton(const std::string& name, const AUnit2D& pos,
 			AlloyApplicationContext()->getGlassPane();
 	fileDialog = std::shared_ptr<FileDialog>(
 			new FileDialog("File Dialog",
-					CoordPerPX(0.5, 0.5, -450 + 7.5f, -250 - 7.5f),
-					CoordPX(700, 500), type));
+					CoordPerPX(0.5, 0.5, -350 - 15, -250 - 15),
+					CoordPX(700+30, 500+30), type));
 	fileDialog->setVisible(false);
 	glassPanel->add(fileDialog);
+
 	if (type == FileDialogType::SaveFile) {
 		fileDialog->onSelect = [this](const std::vector<std::string>& file) {
 			if (onSave)onSave(file.front());
@@ -720,8 +721,8 @@ FileSelector::FileSelector(const std::string& name, const AUnit2D& pos,
 			AlloyApplicationContext()->getGlassPane();
 	fileDialog = std::shared_ptr<FileDialog>(
 			new FileDialog("Open File",
-					CoordPerPX(0.5, 0.5, -450 + 7.5f, -250 - 7.5f),
-					CoordPX(900, 500),
+					CoordPerPX(0.5, 0.5, -450 - 15, -250 - 15),
+					CoordPX(900+30, 500+30),
 					directoryInput ?
 							FileDialogType::SelectDirectory :
 							FileDialogType::OpenFile));
@@ -779,10 +780,11 @@ FileSelector::FileSelector(const std::string& name, const AUnit2D& pos,
 
 FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims, const FileDialogType& type, pixel fileEntryHeight) :
-		Composite(name, pos, dims), type(type), fileEntryHeight(fileEntryHeight) {
+		AdjustableComposite(name, pos, dims), type(type), fileEntryHeight(fileEntryHeight) {
+	AdjustableComposite::setDragEnabled(true);
 	containerRegion = std::shared_ptr<BorderComposite>(
-			new BorderComposite("Container", CoordPX(0, 15),
-					CoordPerPX(1.0, 1.0, -15, -15)));
+			new BorderComposite("Container", CoordPX(15, 15),
+					CoordPerPX(1.0, 1.0, -30, -30)));
 	actionButton = std::shared_ptr<TextIconButton>(
 			new TextIconButton(
 					(type == FileDialogType::SaveFile) ?
@@ -1141,7 +1143,15 @@ void FileDialog::update() {
 }
 void FileDialog::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
-	box2px bounds = containerRegion->getBounds();
+	box2px bounds=this->getBounds();
+	if(context->isMouseOver(this,false)){
+		nvgBeginPath(nvg);
+		nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
+				bounds.dimensions.x, bounds.dimensions.y,15.0f);
+		nvgFillColor(nvg, context->theme.LIGHT.toSemiTransparent(0.5f));
+		nvgFill(nvg);
+	}
+	bounds = containerRegion->getBounds();
 
 	NVGpaint shadowPaint = nvgBoxGradient(nvg, bounds.position.x,
 			bounds.position.y, bounds.dimensions.x, bounds.dimensions.y,
@@ -1173,7 +1183,7 @@ void FileDialog::draw(AlloyContext* context) {
 	nvgStrokeColor(nvg, context->theme.LIGHT);
 	nvgStroke(nvg);
 
-	Composite::draw(context);
+	AdjustableComposite::draw(context);
 
 }
 FileEntry::FileEntry(FileDialog* dialog, const std::string& name,
