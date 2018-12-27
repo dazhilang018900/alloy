@@ -24,9 +24,8 @@
 using namespace std;
 namespace aly {
 	ColorSelector::ColorSelector(const std::string& name, const AUnit2D& pos,
-		const AUnit2D& dims, bool showText) :
-		Composite(name, pos, dims) {
-
+		const AUnit2D& dims, bool showText) :Composite(name, pos, dims) {
+		setDragEnabled(true);
 		backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 		borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
 		borderWidth = UnitPX(1.0f);
@@ -73,7 +72,7 @@ namespace aly {
 		}
 		colorWheel = ColorWheelPtr(
 			new ColorWheel("Color Wheel", CoordPX(0.0f, 0.0f),
-				CoordPerPX(1.0f, 0.0f, 0.0f, 300.0f)));
+				CoordPerPX(1.0f, 0.0f, 0.0f, 304.0f)));
 		colorWheel->setAspectRatio(1.0f);
 		colorWheel->setAspectRule(AspectRule::FixedHeight);
 		colorLabel->onMouseDown =
@@ -102,12 +101,11 @@ namespace aly {
 				return false;
 			};
 		}
-		colorSelectionPanel = MakeComposite("Color Selection Panel",
+		colorSelectionPanel = std::shared_ptr<Composite>(new Composite("Color Selection Panel",
 			CoordPerPX(0.5f, 0.5, 0.0f, 0.0f),
-			CoordPX(
-				18 + 300.0f
-				+ (60 + AlloyApplicationContext()->theme.SPACING.x)
-				* 5, 22 + 300.0f), COLOR_NONE);
+			CoordPX(30+18 + 300.0f+ (60)* 5, 22 + 300.0f+20.0f)));
+		colorSelectionPanel->backgroundColor=MakeColor(COLOR_NONE);
+		colorSelectionPanel->setDragEnabled(true);
 		colorSelectionPanel->setVisible(false);
 		colorSelectionPanel->setOrigin(Origin::MiddleCenter);
 
@@ -225,11 +223,11 @@ namespace aly {
 			return true;
 		};
 		CompositePtr hContainer = MakeComposite("Horizontal Layout",
-			CoordPX(0.0f, 18.0f), CoordPerPX(1.0f, 1.0f, -30.0f, -22.0f),
+			CoordPX(18.0f, 18.0f), CoordPerPX(1.0f, 1.0f, -22.0f-15.0f, -22.0f-15.0f),
 			AlloyApplicationContext()->theme.LIGHT);
 
 		hContainer->setRoundCorners(true);
-		hContainer->setOrientation(Orientation::Horizontal);
+		hContainer->setOrientation(Orientation::Horizontal,pixel2(1.0f,2.0f),pixel2(1.0f,2.0f));
 		hContainer->add(colorWheel);
 		hContainer->add(redSlider);
 		hContainer->add(greenSlider);
@@ -237,10 +235,11 @@ namespace aly {
 		hContainer->add(lumSlider);
 		hContainer->add(alphaSlider);
 		colorSelectionPanel->add(hContainer);
+
 		colorSelectionPanel->onEvent =
 			[=](AlloyContext* context, const InputEvent& e) {
 			if (colorSelectionPanel->isVisible()) {
-				if (e.type == InputType::MouseButton&&e.isDown() && !context->isMouseContainedIn(hContainer->getBounds())) {
+				if (e.type == InputType::MouseButton&&e.isDown() && !context->isMouseContainedIn(colorSelectionPanel->getBounds())) {
 					colorSelectionPanel->setVisible(false);
 					context->getGlassPane()->setVisible(false);
 					if (onSelect) {
@@ -251,6 +250,7 @@ namespace aly {
 			}
 			return false;
 		};
+
 		colorSelectionPanel->add(cancelButton);
 		Application::addListener(colorSelectionPanel.get());
 		if (showText) {
@@ -557,6 +557,10 @@ namespace aly {
 	}
 	void ColorSelector::draw(AlloyContext* context) {
 		bool hover = context->isMouseContainedIn(this);
+		bool isOver=false;
+		if (context->isMouseOver(colorSelectionPanel.get(), false)) {
+			isOver=true;
+		}
 		if (colorWheel->isVisible()) {
 			*colorLabel->foregroundColor = colorWheel->getSelectedColor();
 		}
@@ -570,7 +574,9 @@ namespace aly {
 			colorLabel->borderWidth = UnitPX(1.0f);
 			colorLabel->borderColor = MakeColor(context->theme.LIGHTER);
 		}
-
 		Composite::draw(context);
+		if(isOver&&context->getCursor()==nullptr){
+			context->setCursor(&aly::Cursor::Position);
+		}
 	}
 }

@@ -21,6 +21,7 @@
 #ifndef ALLOYCOLORSELECTOR_H_
 #define ALLOYCOLORSELECTOR_H_
 #include "ui/AlloyComposite.h"
+#include "ui/AlloyAdjustableComposite.h"
 #include "ui/AlloySlider.h"
 #include "ui/AlloyTextWidget.h"
 #include "ui/AlloyGlyph.h"
