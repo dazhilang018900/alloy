@@ -34,6 +34,9 @@ public:
 	bool isVerticalScrollVisible() const;
 	Orientation getOrientation() const ;
 	bool isHorizontalScrollVisible() const;
+	void setCellPadding(const pixel2& pix);
+	void setCellSpacing(const pixel2& pix);
+
 	void setAlwaysShowVerticalScrollBar(bool show);
 	void setAlwaysShowHorizontalScrollBar(bool show);
 	void resetScrollPosition();

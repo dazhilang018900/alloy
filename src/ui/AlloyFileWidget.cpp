@@ -782,6 +782,7 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims, const FileDialogType& type, pixel fileEntryHeight) :
 		AdjustableComposite(name, pos, dims), type(type), fileEntryHeight(fileEntryHeight) {
 	AdjustableComposite::setDragEnabled(true);
+	cellPadding=pixel2(7,7);
 	containerRegion = std::shared_ptr<BorderComposite>(
 			new BorderComposite("Container", CoordPX(15, 15),
 					CoordPerPX(1.0, 1.0, -30, -30)));

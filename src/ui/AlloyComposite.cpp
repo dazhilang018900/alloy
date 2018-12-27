@@ -25,6 +25,13 @@ std::shared_ptr<Composite> MakeComposite(const std::string& name,
 	composite->setOrientation(orientation);
 	return composite;
 }
+void Composite::setCellPadding(const pixel2& pix){
+	cellPadding=pix;
+}
+void Composite::setCellSpacing(const pixel2& pix){
+	cellSpacing=pix;
+}
+
 void Composite::setAlwaysShowVerticalScrollBar(bool show) {
 	alwaysShowVerticalScrollBar = show;
 	scrollEnabled |= show;
