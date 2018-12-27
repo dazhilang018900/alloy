@@ -25,7 +25,6 @@ using namespace std;
 namespace aly {
 	ColorSelector::ColorSelector(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims, bool showText) :Composite(name, pos, dims) {
-		setDragEnabled(true);
 		backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 		borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
 		borderWidth = UnitPX(1.0f);
