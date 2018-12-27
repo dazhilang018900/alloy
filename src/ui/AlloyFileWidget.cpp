@@ -1144,12 +1144,14 @@ void FileDialog::update() {
 void FileDialog::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds=this->getBounds();
+	bool isOver=false;
 	if(context->isMouseOver(this,false)){
 		nvgBeginPath(nvg);
 		nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
 				bounds.dimensions.x, bounds.dimensions.y,15.0f);
 		nvgFillColor(nvg, context->theme.LIGHT.toSemiTransparent(0.5f));
 		nvgFill(nvg);
+		isOver=true;
 	}
 	bounds = containerRegion->getBounds();
 
@@ -1184,7 +1186,9 @@ void FileDialog::draw(AlloyContext* context) {
 	nvgStroke(nvg);
 
 	AdjustableComposite::draw(context);
-
+	if(isOver&&context->getCursor()==nullptr){
+		context->setCursor(&aly::Cursor::Position);
+	}
 }
 FileEntry::FileEntry(FileDialog* dialog, const std::string& name,
 		float fontHeight) :
