@@ -118,15 +118,17 @@ std::string CodePointToUTF8(int cp) {
 	return std::string(str);
 }
 bool MakeDirectory(const std::string& dir) {
-	std::string parent = dir;
-	std::list<std::string> createList;
-	while (!aly::FileExists(parent)) {
-		createList.push_front(parent);
-		parent = aly::RemoveTrailingSlash(aly::GetParentDirectory(parent));
-	}
-	for (std::string d : createList) {
-		if (!aly::MakeDirectoryInternal(d)) {
-			return false;
+	if(!FileExists(dir)){
+		std::string parent = dir;
+		std::list<std::string> createList;
+		while (!aly::FileExists(parent)) {
+			createList.push_front(parent);
+			parent = aly::RemoveTrailingSlash(aly::GetParentDirectory(parent));
+		}
+		for (std::string d : createList) {
+			if (!aly::MakeDirectoryInternal(d)) {
+				return false;
+			}
 		}
 	}
 	return true;
