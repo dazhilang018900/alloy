@@ -8,7 +8,54 @@
 #include "ui/AlloySlider.h"
 #include "ui/AlloyApplication.h"
 #include "ui/AlloyDrawUtil.h"
-namespace aly{
+namespace aly {
+
+void Slider::setSliderColor(const Color& startColor, const Color& endColor) {
+	sliderTrack->startColor = startColor;
+	sliderTrack->endColor = endColor;
+}
+void Slider::setMinValue(const Number& v) {
+	minValue = v;
+}
+void Slider::setMaxValue(const Number& v) {
+	maxValue = v;
+}
+Slider::Slider(const std::string& name, const Number& min, const Number& max,
+		const Number& val) :
+		Composite(name), minValue(min), maxValue(max), value(val), sliderPosition(
+				0.0) {
+}
+Slider::Slider(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,
+		const Number& min, const Number& max, const Number& val) :
+		Composite(name, pos, dims), minValue(min), maxValue(max), value(val), sliderPosition(
+				0.0) {
+}
+void Slider::setValue(int value) {
+	setValue((double) value);
+}
+void Slider::setValue(float value) {
+	setValue((double) value);
+}
+const Number& Slider::getValue() {
+	return value;
+}
+const Number& Slider::getMinValue() {
+	return minValue;
+}
+const Number& Slider::getMaxValue() {
+	return maxValue;
+}
+void Slider::setOnChangeEvent(
+		const std::function<void(const Number& value)>& func) {
+	onChangeEvent = func;
+}
+void Slider::setLabelFormatter(
+		const std::function<std::string(const Number& value)>& func) {
+	if (valueLabel.get() != nullptr) {
+		valueLabel->labelFormatter = func;
+	}
+}
+
 SliderTrack::SliderTrack(const std::string& name, Orientation orient,
 		const Color& st, const Color& ed) :
 		Composite(name), orientation(orient), activeRegion(0.0f, 0.0f), currentPosition(
@@ -313,14 +360,30 @@ HorizontalSlider::HorizontalSlider(const std::string& label,
 						AlloyApplicationContext()->theme.LIGHTER.toRGBA(),
 						HorizontalAlignment::Left, VerticalAlignment::Bottom));
 		sliderLabel->setTruncate(false);
+
 		add(
-				valueLabel = MakeTextLabel("Value",
-						CoordPerPX(0.0f, 0.0f, 0.0f, 2.0f),
-						CoordPerPX(1.0f, 1.0f, -trackPadding,
-								-(handleSize - trackPadding * 0.75f)),
-						FontType::Normal, UnitPerPX(1.0f, -2),
-						AlloyApplicationContext()->theme.LIGHTER.toRGBA(),
-						HorizontalAlignment::Right, VerticalAlignment::Bottom));
+				valueLabel = std::shared_ptr<ModifiableNumber>(
+						new ModifiableNumber("Value",
+								CoordPerPX(0.5f, 0.0f, 0.0f, 0.0f),
+								CoordPerPX(0.5f, 1.0f, -trackPadding,
+										-(handleSize - trackPadding * 0.75f)),
+								value.type(), true)));
+
+		valueLabel->fontType = FontType::Normal;
+		valueLabel->fontSize = UnitPerPX(1.0f, -2);
+		valueLabel->backgroundColor = MakeColor(COLOR_NONE);
+		valueLabel->borderColor = MakeColor(COLOR_NONE);
+		valueLabel->borderWidth = UnitPX(0.0f);
+		valueLabel->textColor = MakeColor(
+				AlloyApplicationContext()->theme.LIGHTER);
+		valueLabel->setAlignment(HorizontalAlignment::Right,
+				VerticalAlignment::Bottom);
+		valueLabel->onTextEntered = [this](NumberField* field) {
+			this->setValue(valueLabel->getValue().toDouble());
+			if (onChangeEvent)
+				onChangeEvent(this->value);
+
+		};
 	} else {
 		sliderTrack->position = CoordPerPX(0.0f, 0.5f, 0.0f,
 				-0.5f * handleSize);
@@ -331,20 +394,22 @@ HorizontalSlider::HorizontalSlider(const std::string& label,
 	this->onPack = [this]() {
 		this->setValue(sliderPosition);
 	};
-	this->onEvent =
-			[this](AlloyContext* context, const InputEvent& event) {
-				if (event.type == InputType::Scroll&&isVisible() && context->isMouseContainedIn(this)) {
-					double oldV = getBlendValue();
-					double newV = clamp(event.scroll.y*0.1f + oldV, 0.0, 1.0);
-					if (newV != oldV) {
-						this->setBlendValue(newV);
-						if (onChangeEvent)onChangeEvent(this->value);
-						return true;
-					}
-				}
-				return false;
-			};
 	Application::addListener(this);
+}
+bool HorizontalSlider::onEventHandler(AlloyContext* context,
+		const InputEvent& event) {
+	if (event.type == InputType::Scroll && isVisible()
+			&& context->isMouseContainedIn(this)) {
+		double oldV = getBlendValue();
+		double newV = clamp(event.scroll.y * 0.1f + oldV, 0.0, 1.0);
+		if (newV != oldV) {
+			this->setBlendValue(newV);
+			if (onChangeEvent)
+				onChangeEvent(this->value);
+			return true;
+		}
+	}
+	return Composite::onEventHandler(context, event);
 }
 void HorizontalSlider::setValue(double value) {
 	double interp = clamp(
@@ -360,6 +425,8 @@ void HorizontalSlider::setValue(double value) {
 	sliderPosition = value;
 	this->value.setValue(
 			clamp(value, minValue.toDouble(), maxValue.toDouble()));
+	if (valueLabel.get() != nullptr)
+		valueLabel->setNumberValue(this->value);
 }
 void HorizontalSlider::update() {
 	double interp = (sliderHandle->getBoundsPositionX()
@@ -370,6 +437,8 @@ void HorizontalSlider::update() {
 			+ interp * maxValue.toDouble());
 	sliderPosition = val;
 	value.setValue(clamp(val, minValue.toDouble(), maxValue.toDouble()));
+	if (valueLabel.get() != nullptr)
+		valueLabel->setNumberValue(this->value);
 }
 bool HorizontalSlider::onMouseDown(AlloyContext* context, Region* region,
 		const InputEvent& event) {
@@ -414,13 +483,7 @@ bool HorizontalSlider::onMouseDrag(AlloyContext* context, Region* region,
 	}
 	return false;
 }
-void HorizontalSlider::draw(AlloyContext* context) {
-	if (valueLabel.get() != nullptr) {
-		valueLabel->setLabel(labelFormatter(value));
-	}
-	Composite::draw(context);
-}
-////
+
 VerticalSlider::VerticalSlider(const std::string& label,
 		const AUnit2D& position, const AUnit2D& dimensions, const Number& min,
 		const Number& max, const Number& value) :
@@ -471,32 +534,47 @@ VerticalSlider::VerticalSlider(const std::string& label,
 					AlloyApplicationContext()->theme.LIGHTER.toRGBA(),
 					HorizontalAlignment::Center, VerticalAlignment::Top));
 	add(
-			valueLabel = MakeTextLabel("Value", CoordPercent(0.0f, 1.0f),
-					CoordPercent(1.0f, 0.1f), FontType::Normal,
-					UnitPerPX(1.0f, -2),
-					AlloyApplicationContext()->theme.LIGHTER.toRGBA(),
-					HorizontalAlignment::Center, VerticalAlignment::Bottom));
+			valueLabel = std::shared_ptr<ModifiableNumber>(
+					new ModifiableNumber("Value",
+							CoordPerPX(0.0f, 1.0f, 0.0f, -4.0f),
+							CoordPerPX(1.0f, 0.1f, 0.0f, 4.0f), value.type(),
+							true)));
+
+	valueLabel->fontType = FontType::Normal;
+	valueLabel->fontSize = UnitPerPX(1.0f, -2);
+	valueLabel->backgroundColor = MakeColor(COLOR_NONE);
+	valueLabel->borderColor = MakeColor(COLOR_NONE);
+	valueLabel->borderWidth = UnitPX(0.0f);
+	valueLabel->textColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
+	valueLabel->setAlignment(HorizontalAlignment::Center,
+			VerticalAlignment::Bottom);
 	valueLabel->setOrigin(Origin::BottomLeft);
+	valueLabel->onTextEntered = [this](NumberField* field) {
+		this->setValue(valueLabel->getValue().toDouble());
+		if (onChangeEvent)
+			onChangeEvent(this->value);
+	};
 	add(sliderTrack);
 	this->onPack = [this]() {
 		this->setValue(sliderPosition);
 	};
-	this->onEvent =
-			[this](AlloyContext* context, const InputEvent& event) {
-				if (event.type == InputType::Scroll&&isVisible() && context->isMouseContainedIn(this)) {
-					double oldV = getBlendValue();
-					double newV = clamp(event.scroll.y*0.1f + oldV, 0.0, 1.0);
-					if (newV != oldV) {
-						this->setBlendValue(newV);
-						if (onChangeEvent)onChangeEvent(this->value);
-						return true;
-					}
-				}
-				return false;
-			};
 	Application::addListener(this);
 }
-
+bool VerticalSlider::onEventHandler(AlloyContext* context,
+		const InputEvent& event) {
+	if (event.type == InputType::Scroll && isVisible()
+			&& context->isMouseContainedIn(this)) {
+		double oldV = getBlendValue();
+		double newV = clamp(event.scroll.y * 0.1f + oldV, 0.0, 1.0);
+		if (newV != oldV) {
+			this->setBlendValue(newV);
+			if (onChangeEvent)
+				onChangeEvent(this->value);
+			return true;
+		}
+	}
+	return Composite::onEventHandler(context, event);
+}
 void VerticalSlider::setValue(double value) {
 	double interp = 1.0f
 			- clamp(
@@ -513,6 +591,9 @@ void VerticalSlider::setValue(double value) {
 	sliderPosition = value;
 	this->value.setValue(
 			clamp(value, minValue.toDouble(), maxValue.toDouble()));
+	if (valueLabel.get() != nullptr)
+		valueLabel->setNumberValue(this->value);
+
 }
 void VerticalSlider::update() {
 	double interp = (sliderHandle->getBoundsPositionY()
@@ -523,6 +604,8 @@ void VerticalSlider::update() {
 			+ (1.0 - interp) * maxValue.toDouble());
 	sliderPosition = val;
 	value.setValue(clamp(val, minValue.toDouble(), maxValue.toDouble()));
+	if (valueLabel.get() != nullptr)
+		valueLabel->setNumberValue(this->value);
 }
 bool VerticalSlider::onMouseDown(AlloyContext* context, Region* region,
 		const InputEvent& event) {
@@ -556,19 +639,17 @@ bool VerticalSlider::onMouseDrag(AlloyContext* context, Region* region,
 	}
 	return false;
 }
-void VerticalSlider::draw(AlloyContext* context) {
-	if (valueLabel.get() != nullptr) {
-		valueLabel->setLabel(labelFormatter(value));
-	}
-	Composite::draw(context);
-}
 
+void RangeSlider::setSliderColor(const Color& startColor,
+		const Color& endColor) {
+	sliderTrack->startColor = startColor;
+	sliderTrack->endColor = endColor;
+}
 RangeSlider::RangeSlider(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims, const Number& min, const Number& max,
 		const Number& lowerValue, const Number& upperValue, bool showLabel) :
 		Composite(name, pos, dims), minValue(min), maxValue(max), lowerValue(
 				lowerValue), upperValue(upperValue), sliderPosition(0.0) {
-	labelFormatter = [](const Number& value) {return value.toString();};
 	this->position = position;
 	this->dimensions = dimensions;
 	float handleSize = 30.0f;
@@ -629,21 +710,46 @@ RangeSlider::RangeSlider(const std::string& name, const AUnit2D& pos,
 						VerticalAlignment::Bottom));
 		sliderLabel->setOrigin(Origin::TopCenter);
 		add(
-				lowerValueLabel = MakeTextLabel("Lower Value",
+				lowerValueLabel = std::shared_ptr<ModifiableNumber>(new ModifiableNumber("Lower Value",
 						CoordPerPX(0.0f, 0.0f, trackPadding, 2.0f),
-						CoordPerPX(1.0f, 1.0f, 0.0f,
+						CoordPerPX(0.35f, 1.0f, 0.0f,
 								-(handleSize - trackPadding * 0.75f)),
-						FontType::Normal, UnitPerPX(1.0f, -2),
-						AlloyApplicationContext()->theme.LIGHTER.toRGBA(),
-						HorizontalAlignment::Left, VerticalAlignment::Bottom));
+						lowerValue.type(),true)));
 		add(
-				upperValueLabel = MakeTextLabel("Upper Value",
-						CoordPerPX(0.0f, 0.0f, 0.0f, 2.0f),
-						CoordPerPX(1.0f, 1.0f, -trackPadding,
+				upperValueLabel = std::shared_ptr<ModifiableNumber>(new ModifiableNumber("Upper Value",
+						CoordPerPX(0.65f, 0.0f, 0.0f, 2.0f),
+						CoordPerPX(0.35f, 1.0f, -trackPadding,
 								-(handleSize - trackPadding * 0.75f)),
-						FontType::Normal, UnitPerPX(1.0f, -2),
-						AlloyApplicationContext()->theme.LIGHTER.toRGBA(),
-						HorizontalAlignment::Right, VerticalAlignment::Bottom));
+						upperValue.type(),true)));
+
+		lowerValueLabel->fontType = FontType::Normal;
+		lowerValueLabel->fontSize = UnitPerPX(1.0f, -2);
+		lowerValueLabel->backgroundColor = MakeColor(COLOR_NONE);
+		lowerValueLabel->borderColor = MakeColor(COLOR_NONE);
+		lowerValueLabel->borderWidth = UnitPX(0.0f);
+		lowerValueLabel->textColor = MakeColor(
+				AlloyApplicationContext()->theme.LIGHTER);
+		lowerValueLabel->setAlignment(HorizontalAlignment::Left,
+				VerticalAlignment::Bottom);
+		lowerValueLabel->onTextEntered = [this](NumberField* field) {
+			this->setValue(double2(lowerValueLabel->getValue().toDouble(),upperValueLabel->getValue().toDouble()));
+			if (onChangeEvent)onChangeEvent(this->lowerValue,this->upperValue);
+
+		};
+		upperValueLabel->fontType = FontType::Normal;
+		upperValueLabel->fontSize = UnitPerPX(1.0f, -2);
+		upperValueLabel->backgroundColor = MakeColor(COLOR_NONE);
+		upperValueLabel->borderColor = MakeColor(COLOR_NONE);
+		upperValueLabel->borderWidth = UnitPX(0.0f);
+		upperValueLabel->textColor = MakeColor(
+				AlloyApplicationContext()->theme.LIGHTER);
+		upperValueLabel->setAlignment(HorizontalAlignment::Right,
+				VerticalAlignment::Bottom);
+		upperValueLabel->onTextEntered = [this](NumberField* field) {
+			this->setValue(double2(lowerValueLabel->getValue().toDouble(),upperValueLabel->getValue().toDouble()));
+			if (onChangeEvent)onChangeEvent(this->lowerValue,this->upperValue);
+
+		};
 	} else {
 		sliderTrack->position = CoordPerPX(0.0f, 0.5f, 0.0f,
 				-0.5f * handleSize);
@@ -656,6 +762,7 @@ RangeSlider::RangeSlider(const std::string& name, const AUnit2D& pos,
 	};
 	this->onEvent =
 			[this](AlloyContext* context, const InputEvent& event) {
+
 				if (event.type == InputType::Scroll&&isVisible() && context->isMouseContainedIn(this)) {
 					double2 oldV = getBlendValue();
 					double2 newV = clamp(event.scroll.y*0.1 + oldV, double2(0.0), double2(1.0));
@@ -671,14 +778,14 @@ RangeSlider::RangeSlider(const std::string& name, const AUnit2D& pos,
 	setUpperValue(upperValue.toDouble());
 	Application::addListener(this);
 }
-void RangeSlider::draw(AlloyContext* context) {
+inline void RangeSlider::setLabelFormatter(
+		const std::function<std::string(const Number& value)>& func) {
 	if (lowerValueLabel.get() != nullptr) {
-		lowerValueLabel->setLabel(labelFormatter(lowerValue));
+		lowerValueLabel->labelFormatter = func;
 	}
 	if (upperValueLabel.get() != nullptr) {
-		upperValueLabel->setLabel(labelFormatter(upperValue));
+		upperValueLabel->labelFormatter = func;
 	}
-	Composite::draw(context);
 }
 void RangeSlider::setBlendValue(double2 value) {
 	value = clamp(value, 0.0, 1.0);
@@ -781,6 +888,13 @@ void RangeSlider::update() {
 					- sliderTrack->getBoundsPositionX()
 					+ 0.5f * upperSliderHandle->getBoundsDimensionsX())
 					/ sliderTrack->getBoundsDimensionsX());
+
+	if (lowerValueLabel.get() != nullptr) {
+		lowerValueLabel->setNumberValue(lowerValue);
+	}
+	if (upperValueLabel.get() != nullptr) {
+		upperValueLabel->setNumberValue(upperValue);
+	}
 }
 void RangeSlider::setLowerValue(double value) {
 	double interp = clamp(
@@ -800,6 +914,9 @@ void RangeSlider::setLowerValue(double value) {
 					- sliderTrack->getBoundsPositionX()
 					+ 0.5f * lowerSliderHandle->getBoundsDimensionsX())
 					/ sliderTrack->getBoundsDimensionsX());
+	if (lowerValueLabel.get() != nullptr) {
+		lowerValueLabel->setNumberValue(lowerValue);
+	}
 }
 void RangeSlider::setUpperValue(double value) {
 	double interp = clamp(
@@ -820,9 +937,11 @@ void RangeSlider::setUpperValue(double value) {
 					- sliderTrack->getBoundsPositionX()
 					+ 0.5f * upperSliderHandle->getBoundsDimensionsX())
 					/ sliderTrack->getBoundsDimensionsX());
+	if (upperValueLabel.get() != nullptr) {
+		upperValueLabel->setNumberValue(upperValue);
+	}
 }
 void RangeSlider::setValue(double2 value) {
-
 	double interp = clamp(
 			(value.x - minValue.toDouble())
 					/ (maxValue.toDouble() - minValue.toDouble()), 0.0, 1.0);
@@ -859,7 +978,12 @@ void RangeSlider::setValue(double2 value) {
 					- sliderTrack->getBoundsPositionX()
 					+ 0.5f * upperSliderHandle->getBoundsDimensionsX())
 					/ sliderTrack->getBoundsDimensionsX());
-
+	if (lowerValueLabel.get() != nullptr) {
+		lowerValueLabel->setNumberValue(lowerValue);
+	}
+	if (upperValueLabel.get() != nullptr) {
+		upperValueLabel->setNumberValue(upperValue);
+	}
 }
 
 }

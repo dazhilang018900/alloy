@@ -62,10 +62,12 @@ void ModifiableNumber::draw(AlloyContext* context) {
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;
 	bool f = context->isFocused(this) && modifiable;
-	if (!f && isFocused && onTextEntered) {
+	std::string formatedValue;
+
+	if (!f && focused && onTextEntered) {
 		onTextEntered(this);
 	}
-	isFocused = f;
+	focused = f;
 	if (hover) {
 		context->setCursor(&Cursor::TextInsert);
 	}
@@ -89,7 +91,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 		nvgFill(nvg);
 	}
 
-	if (isFocused) {
+	if (focused) {
 		nvgFillColor(nvg, context->theme.LIGHTER);
 		nvgBeginPath(nvg);
 		nvgRect(nvg, bounds.position.x + lineWidth * 0.5f + PADDING,
@@ -108,7 +110,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 	textOffsetX = x + 2.0f * lineWidth + PADDING;
 	float textY = y;
 
-	if (isFocused) {
+	if (focused) {
 		th = std::min(std::max(8.0f, h - 4 * PADDING),
 				this->fontSize.toPixels(bounds.dimensions.y, context->dpmm.y,
 						context->pixelRatio));
@@ -116,7 +118,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 		th = this->fontSize.toPixels(bounds.dimensions.y, context->dpmm.y,
 				context->pixelRatio);
 	}
-	if (!valid && !showDefaultLabel && isFocused) {
+	if (!valid && !showDefaultLabel && focused) {
 		nvgBeginPath(nvg);
 		nvgRect(nvg, x + PADDING, y + PADDING, w - 2 * PADDING,
 				h - 2 * PADDING);
@@ -126,7 +128,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 	}
 	nvgFontSize(nvg, th);
 	nvgFontFaceId(nvg, context->getFontHandle(fontType));
-	if (isFocused) {
+	if (focused) {
 		nvgTextMetrics(nvg, &ascender, &descender, &lineh);
 		box2px clipBounds = getCursorBounds();
 		clipBounds.intersect(
@@ -156,7 +158,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 		}
 		float cursorOffset = textOffsetX
 				+ (cursorStart ? positions[cursorStart - 1].maxx - 1 : 0);
-		if (cursorEnd != cursorStart && isFocused) {
+		if (cursorEnd != cursorStart && focused) {
 			int lo = std::min(cursorEnd, cursorStart);
 			int hi = std::max(cursorEnd, cursorStart);
 			float x0 = textOffsetX + (lo ? positions[lo - 1].maxx - 1 : 0);
@@ -165,7 +167,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 			nvgRect(nvg, x0, textY + (h - lineh) / 2 + PADDING, x1 - x0,
 					lineh - 2 * PADDING);
 			nvgFillColor(nvg,
-					isFocused ?
+					focused ?
 							context->theme.DARK.toSemiTransparent(0.5f) :
 							context->theme.DARK.toSemiTransparent(0.25f));
 			nvgFill(nvg);
@@ -187,6 +189,11 @@ void ModifiableNumber::draw(AlloyContext* context) {
 		}
 		popScissor(nvg);
 	} else {
+		if(labelFormatter){
+			formatedValue=labelFormatter(numberValue);
+		} else {
+			formatedValue=this->value;
+		}
 		if (truncate) {
 			pushScissor(nvg, getCursorBounds());
 		}
@@ -199,7 +206,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 		if (showDefaultLabel) {
 			tw = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
 		} else {
-			tw = nvgTextBounds(nvg, 0, 0, value.c_str(), nullptr, nullptr);
+			tw = nvgTextBounds(nvg, 0, 0, formatedValue.c_str(), nullptr, nullptr);
 		}
 		switch (horizontalAlignment) {
 		case HorizontalAlignment::Left:
@@ -235,7 +242,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 			nvgLineCap(nvg, NVG_SQUARE);
 			nvgStrokeWidth(nvg, (fontType == FontType::Bold) ? 2.0f : 1.0f);
 			nvgStrokeColor(nvg,
-					(!valid && !isFocused && !showDefaultLabel) ?
+					(!valid && !focused && !showDefaultLabel) ?
 							*invalidNumberColor : *textColor);
 			nvgBeginPath(nvg);
 			nvgMoveTo(nvg, bounds.position.x + start.x,
@@ -249,8 +256,8 @@ void ModifiableNumber::draw(AlloyContext* context) {
 					*textColor, *textAltColor);
 
 		} else {
-			drawText(nvg, bounds.position + offset, value, fontStyle,
-					(!valid && !isFocused) ? *invalidNumberColor : *textColor,
+			drawText(nvg, bounds.position + offset, formatedValue, fontStyle,
+					(!valid && !focused) ? *invalidNumberColor : *textColor,
 					*textAltColor);
 
 		}
@@ -258,6 +265,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 			popScissor(nvg);
 		}
 	}
+
 	if (borderColor->a > 0) {
 		nvgLineJoin(nvg, NVG_ROUND);
 		nvgBeginPath(nvg);
@@ -278,7 +286,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 		nvgStroke(nvg);
 		nvgLineJoin(nvg, NVG_MITER);
 	}
-	if (!isFocused && value.size() == 0) {
+	if (!focused && value.size() == 0) {
 		showDefaultLabel = true;
 	}
 }
@@ -546,7 +554,7 @@ void NumberField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 			if (onTextEntered) {
 				onTextEntered(this);
 			}
-			isFocused = false;
+			focused = false;
 			AlloyApplicationContext()->setMouseFocusObject(nullptr);
 			break;
 		}
@@ -583,7 +591,7 @@ bool NumberField::handleCursorInput(AlloyContext* context,
 }
 bool NumberField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (isVisible() && modifiable) {
-		if (!isFocused || th <= 0)
+		if (!focused || th <= 0)
 			return false;
 		switch (e.type) {
 		case InputType::MouseButton:
@@ -620,10 +628,10 @@ void NumberField::draw(AlloyContext* context) {
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;
 	bool f = context->isFocused(this) && modifiable;
-	if (!f && isFocused && onTextEntered) {
+	if (!f && focused && onTextEntered) {
 		onTextEntered(this);
 	}
-	isFocused = f;
+	focused = f;
 	if (hover) {
 		context->setCursor(&Cursor::TextInsert);
 	}
@@ -699,7 +707,7 @@ void NumberField::draw(AlloyContext* context) {
 		nvgRect(nvg, x0, textY + (h - lineh) / 2 + PADDING, x1 - x0,
 				lineh - 2 * PADDING);
 		nvgFillColor(nvg,
-				isFocused ?
+				focused ?
 						context->theme.DARK.toSemiTransparent(0.5f) :
 						context->theme.DARK.toSemiTransparent(0.25f));
 		nvgFill(nvg);
@@ -712,7 +720,7 @@ void NumberField::draw(AlloyContext* context) {
 		nvgFillColor(nvg, *textColor);
 		nvgText(nvg, textOffsetX, textY + h / 2, value.c_str(), NULL);
 	}
-	if (isFocused && showCursor) {
+	if (focused && showCursor) {
 		nvgBeginPath(nvg);
 		nvgMoveTo(nvg, cursorOffset, textY + h / 2 - lineh / 2 + PADDING);
 		nvgLineTo(nvg, cursorOffset, textY + h / 2 + lineh / 2 - PADDING);
@@ -722,7 +730,7 @@ void NumberField::draw(AlloyContext* context) {
 		nvgStroke(nvg);
 	}
 	popScissor(nvg);
-	if (!isFocused && value.size() == 0) {
+	if (!focused && value.size() == 0) {
 		showDefaultLabel = true;
 	}
 }

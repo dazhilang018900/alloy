@@ -37,11 +37,18 @@ bool ControlsEx::init(Composite& rootNode) {
 			new HorizontalSlider("Horizontal Slider", CoordPercent(0.5f, 0.7f),
 					CoordPX(350.0f, 50.0f),Double(1), Double(12), Double(7)));
 	rootNode.add(hslider2);
-
+	hslider2->setLabelFormatter([](const Number& num){
+		std::string str=MakeString()<<std::setprecision(4)<<num.toFloat();
+		return str;
+	});
 	VSliderPtr vslider1 = VSliderPtr(
 			new VerticalSlider("Vert Slider", CoordPerPX(0.85f, 0.1f, 0, 0),
-					CoordPX(100.0f, 200.0f), Integer(0), Integer(20),
-					Integer(70)));
+					CoordPX(100.0f, 200.0f), Integer(0), Integer(100),
+					Integer(20)));
+	vslider1->setLabelFormatter([](const Number& num){
+		std::string str=MakeString()<<num.toInteger()<<"%";
+		return str;
+	});
 	rootNode.add(vslider1);
 
 	CheckBoxPtr checkbox = CheckBoxPtr(
@@ -90,7 +97,6 @@ bool ControlsEx::init(Composite& rootNode) {
 	modifyLabel->setRoundCorners(false);
 	modifyLabel->horizontalAlignment = HorizontalAlignment::Center;
 	modifyLabel->verticalAlignment = VerticalAlignment::Middle;
-
 	rootNode.add(modifyLabel);
 	ModifiableNumberPtr modifyNumber = ModifiableNumberPtr(
 		new ModifiableNumber("NaN", CoordPerPX(0.5f, 1.0f,100.0f, -100.0f), CoordPX(80, 30),NumberType::Float));

@@ -23,6 +23,7 @@
 #define SRC_UI_ALLOYSLIDERWIDGET_H_
 #include "ui/AlloyComposite.h"
 #include "ui/AlloyTextWidget.h"
+#include "ui/AlloyNumberWidget.h"
 namespace aly{
 
 enum class SliderHandleShape {Whole,Hat, HalfLeft, HalfRight};
@@ -71,62 +72,33 @@ protected:
 	Number maxValue;
 	Number value;
 	TextLabelPtr sliderLabel;
-	TextLabelPtr valueLabel;
+	ModifiableNumberPtr valueLabel;
 	std::shared_ptr<SliderHandle> sliderHandle;
 	std::shared_ptr<SliderTrack> sliderTrack;
-	std::function<std::string(const Number& value)> labelFormatter;
 	std::function<void(const Number& value)> onChangeEvent;
 	virtual void update()=0;
 	double sliderPosition;
 public:
-	void setSliderColor(const Color& startColor, const Color& endColor) {
-		sliderTrack->startColor = startColor;
-		sliderTrack->endColor = endColor;
-	}
-	void setMinValue(const Number& v) {
-		minValue=v;
-	}
-	void setMaxValue(const Number& v) {
-		maxValue = v;
-	}
+	void setSliderColor(const Color& startColor, const Color& endColor);
+	void setMinValue(const Number& v);
+	void setMaxValue(const Number& v);
 	Slider(const std::string& name, const Number& min, const Number& max,
-			const Number& val) :
-			Composite(name), minValue(min), maxValue(max), value(val), sliderPosition(
-					0.0) {
-		labelFormatter = [](const Number& value) {return value.toString();};
-	}
+			const Number& val);
 	Slider(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,
-			const Number& min, const Number& max, const Number& val) :
-			Composite(name, pos, dims), minValue(min), maxValue(max), value(
-					val), sliderPosition(0.0) {
-		labelFormatter = [](const Number& value) {return value.toString();};
-	}
+			const Number& min, const Number& max, const Number& val);
 	double getBlendValue() const;
 	void setBlendValue(double value);
 	virtual void setValue(double value)=0;
-	inline void setValue(int value) {
-		setValue((double) value);
-	}
-	inline void setValue(float value) {
-		setValue((double) value);
-	}
-	const Number& getValue() {
-		return value;
-	}
-	const Number& getMinValue() {
-		return minValue;
-	}
-	const Number& getMaxValue() {
-		return maxValue;
-	}
-	inline void setOnChangeEvent(
-			const std::function<void(const Number& value)>& func) {
-		onChangeEvent = func;
-	}
-	inline void setLabelFormatter(
-			const std::function<std::string(const Number& value)>& func) {
-		labelFormatter = func;
-	}
+	void setValue(int value);
+	void setValue(float value);
+
+	const Number& getValue();
+	const Number& getMinValue();
+	const Number& getMaxValue();
+	void setOnChangeEvent(
+			const std::function<void(const Number& value)>& func);
+	void setLabelFormatter(
+			const std::function<std::string(const Number& value)>& func);
 };
 
 std::shared_ptr<Region> MakeRegion(const std::string& name,
@@ -167,7 +139,8 @@ public:
 		const Number& value = Float(0.0f)):HorizontalSlider(label,position,dimensions,true,minValue,maxValue,value) {
 
 	}
-	virtual void draw(AlloyContext* context) override;
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+			override;
 	virtual inline ~HorizontalSlider() {
 	}
 };
@@ -180,20 +153,16 @@ protected:
 	Number lowerValue;
 	Number upperValue;
 	TextLabelPtr sliderLabel;
-	TextLabelPtr lowerValueLabel;
-	TextLabelPtr upperValueLabel;
+	ModifiableNumberPtr lowerValueLabel;
+	ModifiableNumberPtr upperValueLabel;
 	std::shared_ptr<SliderHandle> lowerSliderHandle;
 	std::shared_ptr<SliderHandle> upperSliderHandle;
 	std::shared_ptr<SliderTrack> sliderTrack;
-	std::function<std::string(const Number& value)> labelFormatter;
 	void update();
 	double2 sliderPosition;
 public:
 	std::function<void(const Number& lowerValue, const Number& upperValue)> onChangeEvent;
-	void setSliderColor(const Color& startColor, const Color& endColor) {
-		sliderTrack->startColor = startColor;
-		sliderTrack->endColor = endColor;
-	}
+	void setSliderColor(const Color& startColor, const Color& endColor);
 	RangeSlider(const std::string& name, const AUnit2D& pos,const AUnit2D& dims,const Number& min, const Number& max,
 		const Number& lowerValue, const Number& upperValue,bool showLabel=true);
 	double2 getBlendValue() const;
@@ -224,15 +193,12 @@ public:
 		const std::function<void(const Number& lowerValue,const Number& upperValue)>& func) {
 		onChangeEvent = func;
 	}
-	inline void setLabelFormatter(
-		const std::function<std::string(const Number& value)>& func) {
-		labelFormatter = func;
-	}
+	void setLabelFormatter(
+		const std::function<std::string(const Number& value)>& func);
 	bool onMouseDown(AlloyContext* context, Region* region,
 		const InputEvent& event);
 	bool onMouseDrag(AlloyContext* context, Region* region,
 		const InputEvent& event);
-	virtual void draw(AlloyContext* context) override;
 	virtual inline ~RangeSlider() {
 	}
 };
@@ -250,7 +216,8 @@ public:
 			const AUnit2D& dimensions, const Number& minValue = Float(0.0f),
 			const Number& maxValue = Float(1.0f),
 			const Number& value = Float(0.0f));
-	virtual void draw(AlloyContext* context) override;
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+			override;
 	virtual inline ~VerticalSlider() {
 	}
 };

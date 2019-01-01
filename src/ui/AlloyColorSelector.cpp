@@ -110,99 +110,78 @@ namespace aly {
 
 		redSlider = std::shared_ptr<VerticalSlider>(
 			new VerticalSlider("R", CoordPX(0.0f, 0.0f),
-				CoordPerPX(0.0f, 1.0f, 60.0f, 0.0f), Float(0.0), Float(1.0),
-				Float(0.5)));
-		redSlider->setLabelFormatter(
-			[](const Number& value) {
-			std::string str = MakeString() << (int)aly::round(255.0f*value.toFloat());
-			return str;
-		});
+				CoordPerPX(0.0f, 1.0f, 60.0f, 0.0f), Integer(0), Integer(255),
+				Integer(128)));
+
 		redSlider->setOnChangeEvent([this](const Number& value) {
 			Color c = colorWheel->getSelectedColor();
-			c.r = value.toFloat();
+			c.r = value.toFloat()/255.0f;
 			colorWheel->setColor(c);
 			HSV hsv = c.toHSV();
-			lumSlider->setValue(hsv.z);
+			lumSlider->setValue(hsv.z*255.0f);
 			updateColorSliders(c);
 		});
 
 		greenSlider = std::shared_ptr<VerticalSlider>(
 			new VerticalSlider("G", CoordPX(0.0f, 0.0f),
-				CoordPerPX(0.0f, 1.0f, 60.0f, 0.0f), Float(0.0), Float(1.0),
-				Float(0.5)));
+				CoordPerPX(0.0f, 1.0f, 60.0f, 0.0f),Integer(0), Integer(255),
+				Integer(128)));
 		greenSlider->setOnChangeEvent([this](const Number& value) {
 			Color c = colorWheel->getSelectedColor();
-			c.g = value.toFloat();
+			c.g = value.toFloat()/255.0f;
 			colorWheel->setColor(c);
 			HSV hsv = c.toHSV();
-			lumSlider->setValue(hsv.z);
+			lumSlider->setValue(hsv.z*255.0f);
 			updateColorSliders(c);
 		});
-		greenSlider->setLabelFormatter(
-			[](const Number& value) {
-			string str = MakeString() << (int)aly::round(255.0f*value.toFloat());
-			return str;
-		});
+
 		blueSlider = std::shared_ptr<VerticalSlider>(
 			new VerticalSlider("B", CoordPX(0.0f, 0.0f),
-				CoordPerPX(0.0f, 1.0f, 60.0f, 0.0f), Float(0.0), Float(1.0),
-				Float(0.5)));
+				CoordPerPX(0.0f, 1.0f, 60.0f, 0.0f), Integer(0), Integer(255),
+				Integer(128)));
 		blueSlider->setOnChangeEvent([this](const Number& value) {
 			Color c = colorWheel->getSelectedColor();
-			c.b = value.toFloat();
+			c.b = value.toFloat()/255.0f;
 			colorWheel->setColor(c);
 			HSV hsv = c.toHSV();
-			lumSlider->setValue(hsv.z);
+			lumSlider->setValue(hsv.z*255.0f);
 			updateColorSliders(c);
 		});
-		blueSlider->setLabelFormatter(
-			[](const Number& value) {
-			string str = MakeString() << (int)aly::round(255.0f*value.toFloat());
-			return str;
-		});
+
 		lumSlider = std::shared_ptr<VerticalSlider>(
 			new VerticalSlider("L", CoordPX(0.0f, 0.0f),
-				CoordPerPX(0.0f, 1.0f, 60.0f, 0.0f), Float(0.0), Float(1.0),
-				Float(0.5)));
-		lumSlider->setLabelFormatter(
-			[](const Number& value) {
-			string str = MakeString() << (int)aly::round(255.0f*value.toFloat());
-			return str;
-		});
+				CoordPerPX(0.0f, 1.0f, 60.0f, 0.0f),Integer(0), Integer(255),
+				Integer(128)));
+
 		lumSlider->setOnChangeEvent([this](const Number& value) {
 			Color c = colorWheel->getSelectedColor();
 			HSVA hsv = c.toHSVA();
-			hsv.z = value.toFloat();
+			hsv.z = value.toFloat()/255.0f;
 			c = HSVAtoRGBAf(hsv);
 			colorWheel->setColor(c);
-			redSlider->setValue(c.r);
-			greenSlider->setValue(c.g);
-			blueSlider->setValue(c.b);
+			redSlider->setValue(c.r*255.0f);
+			greenSlider->setValue(c.g*255.0f);
+			blueSlider->setValue(c.b*255.0f);
 			updateColorSliders(c);
 		});
 
 		alphaSlider = std::shared_ptr<VerticalSlider>(
 			new VerticalSlider("A", CoordPX(0.0f, 0.0f),
-				CoordPerPX(0.0f, 1.0f, 60.0f, 0.0f), Float(0.0), Float(1.0),
-				Float(0.5)));
-		alphaSlider->setLabelFormatter(
-			[](const Number& value) {
-			string str = MakeString() << (int)aly::round(255.0f*value.toFloat());
-			return str;
-		});
+				CoordPerPX(0.0f, 1.0f, 60.0f, 0.0f),Integer(0), Integer(255),
+				Integer(128)));
+
 		alphaSlider->setOnChangeEvent([this](const Number& value) {
 			Color c = colorWheel->getSelectedColor();
-			c.a = value.toFloat();
+			c.a = value.toFloat()/255.0f;
 			colorWheel->setColor(c);
 			updateColorSliders(c);
 		});
 		colorWheel->setOnChangeEvent([this](const Color& c) {
-
-			redSlider->setValue(c.r);
-			greenSlider->setValue(c.g);
-			blueSlider->setValue(c.b);
+			redSlider->setValue(c.r*255.0f);
+			greenSlider->setValue(c.g*255.0f);
+			blueSlider->setValue(c.b*255.0f);
 			HSV hsv = c.toHSV();
-			lumSlider->setValue(hsv.z);
+			lumSlider->setValue(hsv.z*255.0f);
 			updateColorSliders(c);
 		});
 		IconButtonPtr cancelButton = std::shared_ptr<IconButton>(
@@ -274,11 +253,11 @@ namespace aly {
 		*colorLabel->foregroundColor = c;
 		HSVA hsv = c.toHSVA();
 		colorWheel->setColor(c);
-		redSlider->setValue(c.r);
-		greenSlider->setValue(c.g);
-		blueSlider->setValue(c.b);
-		lumSlider->setValue(hsv.z);
-		alphaSlider->setValue(c.a);
+		redSlider->setValue(c.r*255.0f);
+		greenSlider->setValue(c.g*255.0f);
+		blueSlider->setValue(c.b*255.0f);
+		lumSlider->setValue(hsv.z*255.0f);
+		alphaSlider->setValue(c.a*255.0f);
 		updateColorSliders(c);
 		if (onSelect) {
 			onSelect(c);

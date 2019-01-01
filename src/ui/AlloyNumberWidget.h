@@ -44,7 +44,7 @@ protected:
 	int cursorStart = 0, cursorEnd = 0, textStart = 0;
 	bool dragging = false;
 	bool valid = true;
-	bool isFocused=false;
+	bool focused=false;
 	std::string lastValue;
 	Number numberValue;
 	NumberType numberType;
@@ -54,6 +54,9 @@ public:
 	AColor invalidNumberColor;
 	bool isValid() const {
 		return valid;
+	}
+	bool isFocused() const {
+		return focused;
 	}
 	void setModifiable(bool m) {
 		modifiable = m;
@@ -93,7 +96,7 @@ public:
 	FontType fontType;
 	FontStyle fontStyle;
 	AColor textAltColor;
-
+	std::function<std::string(const Number& value)> labelFormatter;
 	HorizontalAlignment horizontalAlignment = HorizontalAlignment::Left;
 	VerticalAlignment verticalAlignment = VerticalAlignment::Top;
 	void setAlignment(const HorizontalAlignment& horizontalAlignment,
