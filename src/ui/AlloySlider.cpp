@@ -732,7 +732,9 @@ RangeSlider::RangeSlider(const std::string& name, const AUnit2D& pos,
 		lowerValueLabel->setAlignment(HorizontalAlignment::Left,
 				VerticalAlignment::Bottom);
 		lowerValueLabel->onTextEntered = [this](NumberField* field) {
-			this->setValue(double2(lowerValueLabel->getValue().toDouble(),upperValueLabel->getValue().toDouble()));
+			double2 val=double2(lowerValueLabel->getValue().toDouble(),upperValueLabel->getValue().toDouble());
+			val.y=std::max(val.x,val.y);
+			this->setValue(val);
 			if (onChangeEvent)onChangeEvent(this->lowerValue,this->upperValue);
 
 		};
@@ -746,7 +748,9 @@ RangeSlider::RangeSlider(const std::string& name, const AUnit2D& pos,
 		upperValueLabel->setAlignment(HorizontalAlignment::Right,
 				VerticalAlignment::Bottom);
 		upperValueLabel->onTextEntered = [this](NumberField* field) {
-			this->setValue(double2(lowerValueLabel->getValue().toDouble(),upperValueLabel->getValue().toDouble()));
+			double2 val=double2(lowerValueLabel->getValue().toDouble(),upperValueLabel->getValue().toDouble());
+			val.x=std::min(val.x,val.y);
+			this->setValue(val);
 			if (onChangeEvent)onChangeEvent(this->lowerValue,this->upperValue);
 
 		};
