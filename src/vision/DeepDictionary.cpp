@@ -194,7 +194,7 @@ void DeepDictionary::train(const std::vector<ImageRGB>& images, int subsample) {
 			std::cout << "Learning Input Channel " << n + 1 << "/"<< layer.getInputSize() << std::endl;
 			layer.learnInput(trainingSet, n, subsample);
 		}
-		//Add here optimize weighting between layers to minize error.
+		//Add here optimize weighting between layers to minimize error.
 		layer.stash();
 		newTrainingSet.resize(images.size());
 

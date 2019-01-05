@@ -36,6 +36,15 @@ enum FilterType{
 	Texture=4
 };
 class SamplePatch;
+/*
+class ImagePatchSampler{
+	std::vector<DenseMat<float>> data;
+	std::vector<std::pair<size_t,aly::box2i>> inputRects;
+	std::vector<std::pair<size_t,aly::box2i>> outputRects;
+	void ImagePatchSample(int inWidth,int inHeight,int outWidth,int outHeight);
+	void add(const ImageRGB& image,int spacing);
+};
+*/
 struct FilterBank {
 	int width, height;
 	float angle;

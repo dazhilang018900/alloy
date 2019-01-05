@@ -185,7 +185,7 @@ namespace aly {
 			updateColorSliders(c);
 		});
 		IconButtonPtr cancelButton = std::shared_ptr<IconButton>(
-			new IconButton(0xf00d, CoordPerPX(1.0, 0.0, -30, 30),
+			new IconButton(0xf00d, CoordPerPX(1.0, 0.0, -31, 31),
 				CoordPX(30, 30), IconType::CIRCLE));
 		cancelButton->setOrigin(Origin::BottomLeft);
 		cancelButton->backgroundColor = MakeColor(COLOR_NONE);
