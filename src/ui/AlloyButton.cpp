@@ -304,8 +304,8 @@ void IconButton::draw(AlloyContext* context) {
 
 			nvgBeginPath(nvg);
 			nvgEllipse(nvg, center.x + offset.x, center.y + offset.y,
-					radii.x - HALF_PIX(lineWidth) + hoverOffset,
-					radii.y - HALF_PIX(lineWidth) + hoverOffset);
+					radii.x - 1.0f-HALF_PIX(lineWidth) + hoverOffset,
+					radii.y -1.0f- HALF_PIX(lineWidth) + hoverOffset);
 			nvgStrokeColor(nvg, (hover) ? *borderColor : *iconColor);
 			nvgStrokeWidth(nvg, lineWidth);
 			nvgStroke(nvg);
@@ -315,18 +315,18 @@ void IconButton::draw(AlloyContext* context) {
 				nvgRoundedRect(nvg,
 						bounds.position.x + offset.x + lineWidth - hoverOffset,
 						bounds.position.y + offset.y + lineWidth - hoverOffset,
-						bounds.dimensions.x - 2 * lineWidth
+						bounds.dimensions.x - 2 * (1.0f+lineWidth)
 								+ hoverOffset * 2.0f,
-						bounds.dimensions.y - 2 * lineWidth
+						bounds.dimensions.y - 2 * (1.0f+lineWidth)
 								+ hoverOffset * 2.0f,
 						context->theme.CORNER_RADIUS);
 			} else {
 				nvgRect(nvg,
 						bounds.position.x + offset.x + lineWidth - hoverOffset,
 						bounds.position.y + offset.y + lineWidth - hoverOffset,
-						bounds.dimensions.x - 2 * lineWidth
+						bounds.dimensions.x - 2 * (lineWidth+1.0f)
 								+ hoverOffset * 2.0f,
-						bounds.dimensions.y - 2 * lineWidth
+						bounds.dimensions.y - 2 * (lineWidth+1.0f)
 								+ hoverOffset * 2.0f);
 			}
 			nvgStrokeColor(nvg,
