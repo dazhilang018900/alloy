@@ -553,7 +553,8 @@ template<class T> Vec<T> operator/(const VecType<T>& img1,
 }
 template<class T> struct DenseMat {
 public:
-	std::vector<T> data; //, aligned_allocator<T, 64>
+	Vec<T> vector;
+	std::vector<T>& data; //, aligned_allocator<T, 64>
 	int rows, cols;
 	typedef T ValueType;
 	typedef typename std::vector<ValueType>::iterator iterator;
@@ -609,10 +610,10 @@ public:
 		return aly::dim2(rows, cols);
 	}
 	DenseMat() :
-			rows(0), cols(0) {
+			data(vector.data), rows(0), cols(0) {
 	}
 	DenseMat(int rows, int cols) :
-			rows(rows), cols(cols) {
+			data(vector.data),rows(rows), cols(cols) {
 		data.resize(rows * (size_t) cols);
 	}
 	void resize(int rows, int cols) {

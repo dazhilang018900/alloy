@@ -18,7 +18,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "math/AlloyTensor3.h"
+#include "AlloyTensor4.h"
 namespace aly {
 
 }
