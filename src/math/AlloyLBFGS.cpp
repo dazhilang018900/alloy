@@ -24,7 +24,7 @@
 namespace aly {
 void SANITY_CHECK_LBFGS(){
 	const int N=10;
-	const std::function<float(Vec<float>& x, Vec<float>& grad)> rosenbrock=[=](Vec<float>& x, Vec<float>& grad){
+	const std::function<float(const Vec<float>& x,Vec<float>& grad)> rosenbrock=[=](const Vec<float>& x,Vec<float>& grad){
         float fx = 0.0;
         for(int i = 0; i < N; i += 2)
         {
@@ -36,7 +36,7 @@ void SANITY_CHECK_LBFGS(){
         }
         return fx;
 	};
-	const std::function<float(Vec<float>& x, Vec<float>& grad)> quadratic=[=](Vec<float>& x, Vec<float>& grad){
+	const std::function<float(const Vec<float>& x,Vec<float>& grad)> quadratic=[=](const Vec<float>& x,Vec<float>& grad){
 	    Vec<float> d(N);
 	    for(int i = 0; i < N; i++)
 	        d[i] = (float)i;
@@ -189,7 +189,7 @@ public:
 	///
 	/// \return Number of iterations used.
 	///
-	int minimize(const std::function<Scalar(Vector& x, Vector& grad)>& f,
+	int minimize(const std::function<Scalar(const Vector& x,Vector& grad)>& f,
 			Vector& x, Scalar& fx,const std::function<bool(int, double)>& iterationMonitor = nullptr) {
 		const Scalar ZERO_TOLERANCE=1E-20f;
 		const int n = (int)x.size();
@@ -293,7 +293,7 @@ public:
 	}
 };
 
-template<class T> void SolveGradientDescentInternal(const std::function<T(Vec<T>& x, Vec<T>& grad)>& f,aly::Vec<T>& x, T& fx, int iterations, T stepSize,const std::function<bool(int, double)>& iterationMonitor = nullptr){
+template<class T> void SolveGradientDescentInternal(const std::function<T(const Vec<T>& x,const Vec<T>& grad)>& f,aly::Vec<T>& x, T& fx, int iterations, T stepSize,const std::function<bool(int, double)>& iterationMonitor = nullptr){
 	int N=x.size();
 	Vec<T> grad(N);
 	grad.set(T(0));
@@ -317,17 +317,17 @@ template<class T> void SolveGradientDescentInternal(const std::function<T(Vec<T>
 	}
 }
 
-void SolveGradientDescent(const std::function<double(Vec<double>& x, Vec<double>& grad)>& f,aly::Vec<double>& x, double& fx,int iterations,double stepSize,const std::function<bool(int, double)>& iterationMonitor){
+void SolveGradientDescent(const std::function<double(const Vec<double>& x,const Vec<double>& grad)>& f,aly::Vec<double>& x, double& fx,int iterations,double stepSize,const std::function<bool(int, double)>& iterationMonitor){
 	SolveGradientDescentInternal(f,x,fx,iterations,stepSize,iterationMonitor);
 }
-void SolveGradientDescent(const std::function<float(Vec<float>& x, Vec<float>& grad)>& f,aly::Vec<float>& x, float& fx,int iterations,float stepSize,const std::function<bool(int, double)>& iterationMonitor){
+void SolveGradientDescent(const std::function<float(const Vec<float>& x,const Vec<float>& grad)>& f,aly::Vec<float>& x, float& fx,int iterations,float stepSize,const std::function<bool(int, double)>& iterationMonitor){
 	SolveGradientDescentInternal(f,x,fx,iterations,stepSize,iterationMonitor);
 }
-int SolveLBFGS(const std::function<float(Vec<float>& x, Vec<float>& grad)>& f,aly::Vec<float>& x, float& fx,const LBFGSParam<float>& param,const std::function<bool(int, double)>& iterationMonitor){
+int SolveLBFGS(const std::function<float(const Vec<float>& x,const Vec<float>& grad)>& f,aly::Vec<float>& x, float& fx,const LBFGSParam<float>& param,const std::function<bool(int, double)>& iterationMonitor){
 	LBFGSSolver<float> solver(param);
 	return solver.minimize(f,x,fx,iterationMonitor);
 }
-int SolveLBFGS(const std::function<double(Vec<double>& x, Vec<double>& grad)>& f,aly::Vec<double>& x, double& fx,const LBFGSParam<double>& param,const std::function<bool(int, double)>& iterationMonitor){
+int SolveLBFGS(const std::function<double(const Vec<double>& x,const Vec<double>& grad)>& f,aly::Vec<double>& x, double& fx,const LBFGSParam<double>& param,const std::function<bool(int, double)>& iterationMonitor){
 	LBFGSSolver<double> solver(param);
 	return solver.minimize(f,x,fx,iterationMonitor);
 }

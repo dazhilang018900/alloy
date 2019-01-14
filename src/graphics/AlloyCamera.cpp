@@ -694,6 +694,13 @@ aly::float2 CameraProjector::getPrincipalPoint() const {
 aly::float3 CameraProjector::getDirection(const float2& q) const {
 	return normalize(inverse(R) * Kinv * float3(q.x, q.y, 1.0f));
 }
+
+aly::float3 CameraProjector::getAxisX() const {
+	return normalize(inverse(R) * Kinv * float3(1.0f, 0.0f, 0.0f));
+}
+aly::float3 CameraProjector::getAxisY() const {
+	return normalize(inverse(R) * Kinv * float3(0.0f, 1.0f, 0.0f));
+}
 aly::float2 CameraProjector::transformWorldToImage(
 		const aly::float3& pt) const {
 	aly::float3 pix = K * (R * pt + T);

@@ -204,10 +204,10 @@ public:
 typedef LBFGSParam<float> LBFGSParamFloat;
 typedef LBFGSParam<double> LBFGSParamDouble;
 
-int SolveLBFGS(const std::function<float(Vec<float>& x, Vec<float>& grad)>& f,aly::Vec<float>& x, float& fx,const LBFGSParam<float>& param=LBFGSParamFloat(),const std::function<bool(int, double)>& iterationMonitor = nullptr);
-int SolveLBFGS(const std::function<double(Vec<double>& x, Vec<double>& grad)>& f,aly::Vec<double>& x, double& fx,const LBFGSParam<double>& param=LBFGSParamDouble(),const std::function<bool(int, double)>& iterationMonitor = nullptr);
-void SolveGradientDescent(const std::function<double(Vec<double>& x, Vec<double>& grad)>& f,aly::Vec<double>& x, double& fx,int iterations,double stepSize,const std::function<bool(int, double)>& iterationMonitor = nullptr);
-void SolveGradientDescent(const std::function<float(Vec<float>& x, Vec<float>& grad)>& f,aly::Vec<float>& x, float& fx,int iterations,float stepSize,const std::function<bool(int, double)>& iterationMonitor = nullptr);
+int SolveLBFGS(const std::function<float(const Vec<float>& x,Vec<float>& grad)>& f,aly::Vec<float>& x, float& fx,const LBFGSParam<float>& param=LBFGSParamFloat(),const std::function<bool(int, double)>& iterationMonitor = nullptr);
+int SolveLBFGS(const std::function<double(const Vec<double>& x,Vec<double>& grad)>& f,aly::Vec<double>& x, double& fx,const LBFGSParam<double>& param=LBFGSParamDouble(),const std::function<bool(int, double)>& iterationMonitor = nullptr);
+void SolveGradientDescent(const std::function<const double(Vec<double>& x,Vec<double>& grad)>& f,aly::Vec<double>& x, double& fx,int iterations,double stepSize,const std::function<bool(int, double)>& iterationMonitor = nullptr);
+void SolveGradientDescent(const std::function<const float(Vec<float>& x,Vec<float>& grad)>& f,aly::Vec<float>& x, float& fx,int iterations,float stepSize,const std::function<bool(int, double)>& iterationMonitor = nullptr);
 
 } // namespace LBFGSpp
 #endif // LBFGS_H

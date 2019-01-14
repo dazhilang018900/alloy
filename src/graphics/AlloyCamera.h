@@ -284,6 +284,9 @@ struct CameraProjector {
 	aly::float3 getOrigin() const;
 	aly::float3x4 getProjection() const;
 	aly::float3 getDirection(const aly::float2& q) const;
+	aly::float3 getAxisX() const;
+	aly::float3 getAxisY() const;
+
 	aly::float2 getFocalLength() const;
 	aly::float2 getPrincipalPoint() const;
 	const aly::float3x3& getRotation() const {return R;}
