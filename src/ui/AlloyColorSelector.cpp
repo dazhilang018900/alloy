@@ -29,7 +29,6 @@ namespace aly {
 		borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
 		borderWidth = UnitPX(1.0f);
 		setRoundCorners(true);
-
 		if (showText) {
 			textLabel = MakeTextLabel(name, CoordPercent(0.0f, 0.0f),
 				CoordPercent(1.0f, 1.0f), FontType::Bold, UnitPercent(1.0f),
@@ -100,7 +99,7 @@ namespace aly {
 				return false;
 			};
 		}
-		colorSelectionPanel = std::shared_ptr<Composite>(new Composite("Color Selection Panel",
+		colorSelectionPanel = std::shared_ptr<DragableEdgeComposite>(new DragableEdgeComposite("Color Selection Panel",
 			CoordPerPX(0.5f, 0.5, 0.0f, 0.0f),
 			CoordPX(30+18 + 300.0f+ (60)* 5, 22 + 300.0f+20.0f)));
 		colorSelectionPanel->backgroundColor=MakeColor(COLOR_NONE);
@@ -237,6 +236,13 @@ namespace aly {
 		add(colorLabel);
 		AlloyApplicationContext()->getGlassPane()->add(colorSelectionPanel);
 		setColor(*colorLabel->foregroundColor);
+	}
+	DragableEdgeComposite::DragableEdgeComposite(const std::string& name, const AUnit2D& pos,
+			const AUnit2D& dims) :Composite(name, pos, dims) {
+	}
+	bool DragableEdgeComposite::acceptDragEvent(const pixel2& cursor) const {
+		AlloyContext* context=AlloyApplicationContext().get();
+		return (context->isMouseOver((Region*)this,false));
 	}
 	void ColorSelector::updateColorSliders(const Color& c) {
 		redSlider->setSliderColor(Color(0.0f, c.g, c.b), Color(1.0f, c.g, c.b));

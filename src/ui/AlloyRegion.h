@@ -125,6 +125,9 @@ public:
 	std::function<bool(AlloyContext* context, const InputEvent& event)> onScroll;
 	std::function<bool(AlloyContext* context, const InputEvent& event)> onMouseDrag;
 	void setDragOffset(const pixel2& cursor, const pixel2& delta);
+	virtual bool acceptDragEvent(const pixel2& cursor) const {
+		return true;
+	}
 	bool addDragOffset(const pixel2& delta);
 
 	virtual void setDragEnabled(bool enabled) {

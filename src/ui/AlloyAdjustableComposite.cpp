@@ -36,7 +36,9 @@ void AdjustableComposite::draw(AlloyContext* context) {
 					&& context->isLeftMouseButtonDown())
 					|| (dragButton == GLFW_MOUSE_BUTTON_RIGHT
 							&& context->isRightMouseButtonDown())) {
-				context->setCursor(&Cursor::Position);
+				if (!context->isMouseDown()) {
+					context->setCursor(&Cursor::Position);
+				}
 			}
 			break;
 		case WindowPosition::Top:

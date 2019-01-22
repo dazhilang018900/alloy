@@ -120,10 +120,11 @@ private:
 	const FileDialogType type;
 	pixel fileEntryHeight;
 	bool valid = false;
+	bool dragAccept=false;
 	void updateDirectoryList();
 	bool updateValidity();
 public:
-
+	virtual bool acceptDragEvent(const pixel2& cursor) const override;
 	void addFileExtensionRule(const std::string& name,const std::string& extension);
 	void addFileExtensionRule(const FileFilterRule& rule);
 	void addFileExtensionRule(const std::string& name,const std::initializer_list<std::string> & extension);

@@ -22,7 +22,7 @@
 #include "ui/AlloyApplication.h"
 #include "ui/AlloyDrawUtil.h"
 #include <cctype>
-namespace aly{
+namespace aly {
 bool ListEntry::onEventHandler(AlloyContext* context, const InputEvent& event) {
 	return Composite::onEventHandler(context, event);
 }
@@ -158,7 +158,6 @@ bool ListBox::onMouseDown(ListEntry* entry, AlloyContext* context,
 	}
 	return false;
 }
-
 
 FileField::FileField(const std::string& name, const AUnit2D& position,
 		const AUnit2D& dimensions, bool directoryInput) :
@@ -578,7 +577,7 @@ FileButton::FileButton(const std::string& name, const AUnit2D& pos,
 	fileDialog = std::shared_ptr<FileDialog>(
 			new FileDialog("File Dialog",
 					CoordPerPX(0.5, 0.5, -350 - 15, -250 - 15),
-					CoordPX(700+30, 500+30), type));
+					CoordPX(700 + 30, 500 + 30), type));
 	fileDialog->setVisible(false);
 	glassPanel->add(fileDialog);
 
@@ -722,7 +721,7 @@ FileSelector::FileSelector(const std::string& name, const AUnit2D& pos,
 	fileDialog = std::shared_ptr<FileDialog>(
 			new FileDialog("Open File",
 					CoordPerPX(0.5, 0.5, -450 - 15, -250 - 15),
-					CoordPX(900+30, 500+30),
+					CoordPX(900 + 30, 500 + 30),
 					directoryInput ?
 							FileDialogType::SelectDirectory :
 							FileDialogType::OpenFile));
@@ -780,9 +779,10 @@ FileSelector::FileSelector(const std::string& name, const AUnit2D& pos,
 
 FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims, const FileDialogType& type, pixel fileEntryHeight) :
-		AdjustableComposite(name, pos, dims), type(type), fileEntryHeight(fileEntryHeight) {
+		AdjustableComposite(name, pos, dims), type(type), fileEntryHeight(
+				fileEntryHeight) {
 	AdjustableComposite::setDragEnabled(true);
-	cellPadding=pixel2(7,7);
+	cellPadding = pixel2(7, 7);
 	containerRegion = std::shared_ptr<BorderComposite>(
 			new BorderComposite("Container", CoordPX(15, 15),
 					CoordPerPX(1.0, 1.0, -30, -30)));
@@ -897,7 +897,7 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	northRegion->add(upDirButton);
 
 	std::vector<std::string> drives = GetDrives();
-	float offset=(drives.size()>6)?Composite::scrollBarSize+2.0f:2.0f;
+	float offset = (drives.size() > 6) ? Composite::scrollBarSize + 2.0f : 2.0f;
 	directoryTree = std::shared_ptr<Composite>(
 			new Composite("Container", CoordPX(10, 0),
 					CoordPerPX(1.0, 1.0, -10, 0)));
@@ -1076,7 +1076,6 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	add(cancelButton);
 }
 
-
 std::string FileFilterRule::toString() {
 	std::stringstream ss;
 	if (extensions.size() == 0) {
@@ -1108,6 +1107,9 @@ bool FileFilterRule::accept(const std::string& file) {
 	}
 	return false;
 }
+bool FileDialog::acceptDragEvent(const pixel2& cursor) const {
+	return dragAccept;
+}
 void FileDialog::addFileExtensionRule(const std::string& name,
 		const std::string& extension) {
 	using extensions = std::initializer_list<std::string>;
@@ -1133,7 +1135,8 @@ void FileDialog::addFileExtensionRule(const FileFilterRule& rule) {
 }
 void FileDialog::setValue(const std::string& file) {
 	fileLocation->setValue(file);
-	if(isVisible())setSelectedFile(file);
+	if (isVisible())
+		setSelectedFile(file);
 }
 std::string FileDialog::getValue() const {
 	return fileLocation->getValue();
@@ -1144,15 +1147,15 @@ void FileDialog::update() {
 }
 void FileDialog::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
-	box2px bounds=this->getBounds();
-	bool isOver=false;
-	if(context->isMouseOver(this,false)){
+	box2px bounds = this->getBounds();
+	bool isOver = false;
+	if (context->isMouseOver(this, false)) {
 		nvgBeginPath(nvg);
 		nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
-				bounds.dimensions.x, bounds.dimensions.y,15.0f);
+				bounds.dimensions.x, bounds.dimensions.y, 15.0f);
 		nvgFillColor(nvg, context->theme.LIGHT.toSemiTransparent(0.5f));
 		nvgFill(nvg);
-		isOver=true;
+		isOver = true;
 	}
 	bounds = containerRegion->getBounds();
 
@@ -1187,8 +1190,13 @@ void FileDialog::draw(AlloyContext* context) {
 	nvgStroke(nvg);
 
 	AdjustableComposite::draw(context);
-	if(isOver&&context->getCursor()==nullptr){
+	if (isOver && context->getCursor() == nullptr) {
 		context->setCursor(&aly::Cursor::Position);
+		dragAccept = true;
+	} else {
+		if (!context->isMouseDown()) {
+			dragAccept = false;
+		}
 	}
 }
 FileEntry::FileEntry(FileDialog* dialog, const std::string& name,
@@ -1315,12 +1323,14 @@ MultiFileSelector::MultiFileSelector(const std::string& name,
 	Composite::add(downButton);
 	Composite::add(eraseButton);
 	Composite::add(bgRegion);
-	valueRegion->onDeleteEntry=[this](const std::vector<ListEntryPtr>& removalList){
-		fireEvent();
-	};
-	eraseButton->onMouseDown = [this](AlloyContext* context, const InputEvent& e) {
-		return valueRegion->removeAll();
-	};
+	valueRegion->onDeleteEntry =
+			[this](const std::vector<ListEntryPtr>& removalList) {
+				fireEvent();
+			};
+	eraseButton->onMouseDown =
+			[this](AlloyContext* context, const InputEvent& e) {
+				return valueRegion->removeAll();
+			};
 	upButton->onMouseDown = [this](AlloyContext* context, const InputEvent& e) {
 		if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
 			std::vector<ListEntryPtr>& entries = valueRegion->getEntries();

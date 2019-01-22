@@ -244,33 +244,6 @@ void Region::drawBoundsLabel(AlloyContext* context, const std::string& name,
 	nvgStrokeColor(nvg, c);
 	nvgStrokeWidth(nvg, 1.0f);
 	nvgStroke(nvg);
-
-	/*
-	 const int FONT_PADDING = 2;
-	 const int FONT_SIZE_PX = 16;
-	 nvgLineJoin(nvg, NVG_MITER);
-	 nvgFontSize(nvg, (float) FONT_SIZE_PX);
-	 nvgFontFaceId(nvg, font);
-	 nvgTextAlign(nvg, NVG_ALIGN_TOP | NVG_ALIGN_LEFT);
-	 float twidth = std::ceil(
-	 nvgTextBounds(nvg, 0, 0, name.c_str(), nullptr, nullptr));
-	 float xoffset = (bounds.dimensions.x - twidth - 2 * FONT_PADDING)
-	 * 0.5f;
-	 if (twidth <= bounds.dimensions.x
-	 && FONT_SIZE_PX <= bounds.dimensions.y) {
-	 nvgBeginPath(nvg);
-	 nvgFillColor(nvg, c);
-	 nvgRoundedRect(nvg, bounds.position.x + xoffset,
-	 bounds.position.y - 4, twidth + 2 * FONT_PADDING,
-	 FONT_SIZE_PX + FONT_PADDING + 5, 5);
-	 nvgFill(nvg);
-
-	 nvgFillColor(nvg, Color(COLOR_WHITE));
-	 nvgText(nvg, bounds.position.x + FONT_PADDING + xoffset,
-	 bounds.position.y + 1 + FONT_PADDING, name.c_str(),
-	 nullptr);
-	 }
-	 */
 	popScissor(nvg);
 }
 void Region::setDragOffset(const pixel2& cursor, const pixel2& delta) {

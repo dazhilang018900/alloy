@@ -80,7 +80,8 @@ std::shared_ptr<GLTextureRGB> Application::loadTextureRGB(
 std::shared_ptr<Font> Application::loadFont(const std::string& name,
 		const std::string& file) {
 	return std::shared_ptr<Font>(
-			new Font(name, AlloyDefaultContext()->getFullPath(file), context.get()));
+			new Font(name, AlloyDefaultContext()->getFullPath(file),
+					context.get()));
 }
 Application::Application(int w, int h, const std::string& title,
 		bool showDebugIcon) :
@@ -121,33 +122,35 @@ void Application::draw() {
 }
 void Application::drawUI() {
 	//if (context->dirtyUI) {
-		context->setCursor(nullptr);
-		/*
-		if (uiFrameBuffer->width() != context->screenSize.x
-				|| uiFrameBuffer->height() != context->screenSize.y) {
-			uiFrameBuffer->initialize(context->screenSize.x,
-					context->screenSize.y);
-		}
-		uiFrameBuffer->begin();
-*/
-		glViewport(0, 0, context->screenSize.x,context->screenSize.y);
-		NVGcontext* nvg = context->nvgContext;
-		nvgBeginFrame(nvg, context->screenSize.x,context->screenSize.y,1.0f); //(float) context->pixelRatio
-		nvgScissor(nvg, 0.0f, 0.0f, (float)context->screenSize.x,(float)context->screenSize.y);
-		rootRegion.draw(context.get());
-		nvgScissor(nvg, 0.0f, 0.0f, (float)context->screenSize.x,(float)context->screenSize.y);
-		Region* onTop = context->getOnTopRegion();
-		if (onTop != nullptr) {
-			if (onTop->isVisible())
-				onTop->draw(context.get());
-		}
-		const Cursor* cursor = context->getCursor();
-		if (!cursor) {
-			cursor = &Cursor::Normal;
-		}
-		nvgEndFrame(nvg);
-		//uiFrameBuffer->end();
-		context->dirtyUI = false;
+	context->setCursor(nullptr);
+	/*
+	 if (uiFrameBuffer->width() != context->screenSize.x
+	 || uiFrameBuffer->height() != context->screenSize.y) {
+	 uiFrameBuffer->initialize(context->screenSize.x,
+	 context->screenSize.y);
+	 }
+	 uiFrameBuffer->begin();
+	 */
+	glViewport(0, 0, context->screenSize.x, context->screenSize.y);
+	NVGcontext* nvg = context->nvgContext;
+	nvgBeginFrame(nvg, context->screenSize.x, context->screenSize.y, 1.0f); //(float) context->pixelRatio
+	nvgScissor(nvg, 0.0f, 0.0f, (float) context->screenSize.x,
+			(float) context->screenSize.y);
+	rootRegion.draw(context.get());
+	nvgScissor(nvg, 0.0f, 0.0f, (float) context->screenSize.x,
+			(float) context->screenSize.y);
+	Region* onTop = context->getOnTopRegion();
+	if (onTop != nullptr) {
+		if (onTop->isVisible())
+			onTop->draw(context.get());
+	}
+	const Cursor* cursor = context->getCursor();
+	if (!cursor) {
+		cursor = &Cursor::Normal;
+	}
+	nvgEndFrame(nvg);
+	//uiFrameBuffer->end();
+	context->dirtyUI = false;
 	//}
 	//imageShader->draw(uiFrameBuffer->getTexture(), pixel2(0, 0),pixel2(context->viewSize));
 }
@@ -195,13 +198,14 @@ void Application::drawDebugUI() {
 				Color(64, 64, 64));
 		yoffset += 16;
 
-		txt=MakeString()<<"Cursor "<< context->cursorPosition;
-		drawText(nvg, 5, yoffset, txt.c_str(), FontStyle::Outline,
-				Color(255), Color(64, 64, 64));
+		txt = MakeString() << "Cursor " << context->cursorPosition;
+		drawText(nvg, 5, yoffset, txt.c_str(), FontStyle::Outline, Color(255),
+				Color(64, 64, 64));
 		yoffset += 16;
 		if (context->mouseOverRegion != nullptr) {
 			txt = MakeString() << "Mouse Over ["
-					<< context->mouseOverRegion->name << "] "<<int2(context->mouseOverRegion->getBounds().dimensions);
+					<< context->mouseOverRegion->name << "] "
+					<< int2(context->mouseOverRegion->getBounds().dimensions);
 
 			drawText(nvg, 5, yoffset, txt.c_str(), FontStyle::Outline,
 					Color(255), Color(64, 64, 64));
@@ -326,18 +330,20 @@ void Application::fireEvent(const InputEvent& event) {
 	}
 
 	//Fire events
-	if (context->mouseDownRegion != nullptr
-			&& event.type != InputType::MouseButton
-			&& context->mouseDownRegion->isDragEnabled()) {
-		if (context->mouseDownRegion->onMouseDrag) {
-			consumed |= context->mouseDownRegion->onMouseDrag(context.get(),
-					event);
+	Region* mdr = context->mouseDownRegion;
+	if (mdr != nullptr && event.type != InputType::MouseButton
+			&& mdr->isDragEnabled()
+			&& mdr->acceptDragEvent(context->cursorPosition)) {
+		if (mdr->onMouseDrag) {
+			consumed |= mdr->onMouseDrag(context.get(), event);
 		} else {
-			if (	(context->leftMouseButton&&context->mouseDownRegion->getDragButton()==GLFW_MOUSE_BUTTON_LEFT)||
-					(context->rightMouseButton&&context->mouseDownRegion->getDragButton()==GLFW_MOUSE_BUTTON_RIGHT)||
-					(context->middleMouseButton&&context->mouseDownRegion->getDragButton()==GLFW_MOUSE_BUTTON_MIDDLE)) {
-				//context->setOnTopRegion(context->mouseDownRegion);
-				context->mouseDownRegion->setDragOffset(context->cursorPosition,
+			if ((context->leftMouseButton
+					&& mdr->getDragButton() == GLFW_MOUSE_BUTTON_LEFT)
+					|| (context->rightMouseButton
+							&& mdr->getDragButton() == GLFW_MOUSE_BUTTON_RIGHT)
+					|| (context->middleMouseButton
+							&& mdr->getDragButton() == GLFW_MOUSE_BUTTON_MIDDLE)) {
+				mdr->setDragOffset(context->cursorPosition,
 						context->cursorDownPosition);
 			}
 		}
@@ -400,18 +406,18 @@ void Application::onCursorPos(double xpos, double ypos) {
 	context->hasFocus = true;
 	context->cursorPosition = pixel2((pixel) (xpos), (pixel) (ypos));
 	InputEvent& e = inputEvent;
-	e=InputEvent();
+	e = InputEvent();
 	e.type = InputType::Cursor;
-	if(context->leftMouseButton){
-		e.button=GLFW_MOUSE_BUTTON_LEFT;
-	} else if(context->rightMouseButton){
-		e.button=GLFW_MOUSE_BUTTON_RIGHT;
-	} else if(context->middleMouseButton){
-		e.button=GLFW_MOUSE_BUTTON_MIDDLE;
+	if (context->leftMouseButton) {
+		e.button = GLFW_MOUSE_BUTTON_LEFT;
+	} else if (context->rightMouseButton) {
+		e.button = GLFW_MOUSE_BUTTON_RIGHT;
+	} else if (context->middleMouseButton) {
+		e.button = GLFW_MOUSE_BUTTON_MIDDLE;
 	} else {
-		e.button=-1;
+		e.button = -1;
 	}
-	e.mods=0;
+	e.mods = 0;
 	GLFWwindow* window = context->window;
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)
 			| glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT))
@@ -433,7 +439,7 @@ void Application::onWindowFocus(int focused) {
 	if (focused) {
 		context->hasFocus = true;
 		InputEvent& e = inputEvent;
-		e=InputEvent();
+		e = InputEvent();
 		e.type = InputType::Cursor;
 		e.cursor = context->cursorPosition;
 		fireEvent(e);
@@ -473,10 +479,10 @@ void Application::onCursorEnter(int enter) {
 		context->hasFocus = false;
 		context->mouseOverRegion = nullptr;
 		InputEvent& e = inputEvent;
-		e=InputEvent();
+		e = InputEvent();
 		e.type = InputType::Cursor;
 		e.cursor = context->cursorPosition;
-		e.mods=0;
+		e.mods = 0;
 		GLFWwindow* window = context->window;
 		if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)
 				| glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT))
@@ -497,7 +503,7 @@ void Application::onCursorEnter(int enter) {
 }
 void Application::onScroll(double xoffset, double yoffset) {
 	InputEvent& e = inputEvent;
-	e=InputEvent();
+	e = InputEvent();
 	e.cursor = context->cursorPosition;
 	e.type = InputType::Scroll;
 	e.scroll = pixel2((pixel) xoffset, (pixel) yoffset);
@@ -520,7 +526,7 @@ void Application::onScroll(double xoffset, double yoffset) {
 }
 void Application::onMouseButton(int button, int action, int mods) {
 	InputEvent& e = inputEvent;
-	e=InputEvent();
+	e = InputEvent();
 	e.type = InputType::MouseButton;
 	e.cursor = context->cursorPosition;
 	std::chrono::steady_clock::time_point currentTime =
@@ -540,62 +546,62 @@ void Application::onMouseButton(int button, int action, int mods) {
 }
 void Application::onKey(int key, int scancode, int action, int mods) {
 	/*
-	if (isprint(key)) {
-		//Seems to be problem in GLFW for Ubuntu 15, it fires onKey() instead of onChar() when letters are pressed.
-		InputEvent& e = inputEvent;
-		e.type = InputType::Character;
-		e.action = action;
-		e.key=key;
-		e.codepoint=key;
-		GLFWwindow* window = context->window;
-		e.mods = 0;
-		if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)
-				| glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT))
-			e.mods |= GLFW_MOD_SHIFT;
-		if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)
-				| glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL))
-			e.mods |= GLFW_MOD_CONTROL;
-		if (glfwGetKey(window, GLFW_KEY_LEFT_ALT)
-				| glfwGetKey(window, GLFW_KEY_RIGHT_ALT))
-			e.mods |= GLFW_MOD_ALT;
-		if (glfwGetKey(window, GLFW_KEY_LEFT_SUPER)
-				| glfwGetKey(window, GLFW_KEY_RIGHT_SUPER))
-			e.mods |= GLFW_MOD_SUPER;
-		e.cursor = context->cursorPosition;
-		fireEvent(e);
-	} else {
-		*/
-		InputEvent& e = inputEvent;
-		e=InputEvent();
-		e.type = InputType::Key;
-		e.action = action;
-		e.key = key;
-		e.scancode = scancode;
-		e.mods = mods;
-		e.cursor = context->cursorPosition;
-		if (key == GLFW_KEY_F11 && e.action == GLFW_PRESS) {
-			for (int i = 0; i < 1000; i++) {
-				std::string screenShot = MakeString() << GetDesktopDirectory()
-						<< ALY_PATH_SEPARATOR<<"screenshot"<<std::setw(4)<<std::setfill('0')<<i<<".png";
-				if(!FileExists(screenShot)) {
-					std::cout<<"Saving "<<screenShot<<std::endl;
-					ImageRGBA img;
-					getScreenShot(img);
-					WriteImageToFile(screenShot,img);
-					break;
-				}
+	 if (isprint(key)) {
+	 //Seems to be problem in GLFW for Ubuntu 15, it fires onKey() instead of onChar() when letters are pressed.
+	 InputEvent& e = inputEvent;
+	 e.type = InputType::Character;
+	 e.action = action;
+	 e.key=key;
+	 e.codepoint=key;
+	 GLFWwindow* window = context->window;
+	 e.mods = 0;
+	 if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)
+	 | glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT))
+	 e.mods |= GLFW_MOD_SHIFT;
+	 if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)
+	 | glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL))
+	 e.mods |= GLFW_MOD_CONTROL;
+	 if (glfwGetKey(window, GLFW_KEY_LEFT_ALT)
+	 | glfwGetKey(window, GLFW_KEY_RIGHT_ALT))
+	 e.mods |= GLFW_MOD_ALT;
+	 if (glfwGetKey(window, GLFW_KEY_LEFT_SUPER)
+	 | glfwGetKey(window, GLFW_KEY_RIGHT_SUPER))
+	 e.mods |= GLFW_MOD_SUPER;
+	 e.cursor = context->cursorPosition;
+	 fireEvent(e);
+	 } else {
+	 */
+	InputEvent& e = inputEvent;
+	e = InputEvent();
+	e.type = InputType::Key;
+	e.action = action;
+	e.key = key;
+	e.scancode = scancode;
+	e.mods = mods;
+	e.cursor = context->cursorPosition;
+	if (key == GLFW_KEY_F11 && e.action == GLFW_PRESS) {
+		for (int i = 0; i < 1000; i++) {
+			std::string screenShot = MakeString() << GetDesktopDirectory()
+					<< ALY_PATH_SEPARATOR<<"screenshot"<<std::setw(4)<<std::setfill('0')<<i<<".png";
+			if(!FileExists(screenShot)) {
+				std::cout<<"Saving "<<screenShot<<std::endl;
+				ImageRGBA img;
+				getScreenShot(img);
+				WriteImageToFile(screenShot,img);
+				break;
 			}
 		}
+	}
 
-		fireEvent(e);
+	fireEvent(e);
 	//}
 }
 void Application::onChar(unsigned int codepoint) {
 	InputEvent& e = inputEvent;
-	e=InputEvent();
+	e = InputEvent();
 	e.type = InputType::Character;
 	e.codepoint = codepoint;
-	e.clicks=0;
+	e.clicks = 0;
 	e.cursor = context->cursorPosition;
 	GLFWwindow* window = context->window;
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)
@@ -620,18 +626,23 @@ void Application::runOnce(const std::string& fileName) {
 	getScreenShot(img);
 	WriteImageToFile(fileName, img);
 }
-void Application::loadFonts(){
+void Application::loadFonts() {
 	context->loadFont(FontType::Normal, "sans", "fonts/Roboto-Regular.ttf");
 	context->loadFont(FontType::Bold, "sans-bold", "fonts/Roboto-Bold.ttf");
-	context->loadFont(FontType::Italic, "sans-italic","fonts/Roboto-Italic.ttf");
+	context->loadFont(FontType::Italic, "sans-italic",
+			"fonts/Roboto-Italic.ttf");
 	context->loadFont(FontType::Code, "sans", "fonts/Hack-Regular.ttf");
 	context->loadFont(FontType::CodeBold, "sans-bold", "fonts/Hack-Bold.ttf");
-	context->loadFont(FontType::CodeItalic, "sans-bold-italic","fonts/Hack-Italic.ttf");
-	context->loadFont(FontType::CodeBoldItalic, "sans-bold-italic","fonts/Hack-BoldItalic.ttf");
+	context->loadFont(FontType::CodeItalic, "sans-bold-italic",
+			"fonts/Hack-Italic.ttf");
+	context->loadFont(FontType::CodeBoldItalic, "sans-bold-italic",
+			"fonts/Hack-BoldItalic.ttf");
 	context->loadFont(FontType::Entypo, "entypo", "fonts/entypo.ttf");
 	context->loadFont(FontType::Icon, "basic_icons", "fonts/fontawesome.ttf");
-	context->loadFont(FontType::AwesomeRegular, "regular_icons", "fonts/fa-regular.ttf");
-	context->loadFont(FontType::AwesomeSolid, "solid_icons", "fonts/fa-solid.ttf");
+	context->loadFont(FontType::AwesomeRegular, "regular_icons",
+			"fonts/fa-regular.ttf");
+	context->loadFont(FontType::AwesomeSolid, "solid_icons",
+			"fonts/fa-solid.ttf");
 	context->loadFont(FontType::AwesomeBrands, "brands", "fonts/fa-brands.ttf");
 }
 void Application::run(int swapInterval) {
@@ -709,7 +720,8 @@ void Application::run(int swapInterval) {
 			context->setOffScreenVisible(false);
 		}
 	} while (!glfwWindowShouldClose(context->window) && !forceClose);
-	if(onExit)onExit();
+	if (onExit)
+		onExit();
 }
 }
 

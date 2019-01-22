@@ -26,7 +26,13 @@
 #include "ui/AlloyTextWidget.h"
 #include "ui/AlloyGlyph.h"
 namespace aly {
-
+	class DragableEdgeComposite: public Composite{
+	protected:
+		bool dragAccept=false;
+	public:
+		DragableEdgeComposite(const std::string& name, const AUnit2D& pos,const AUnit2D& dims);
+		virtual bool acceptDragEvent(const pixel2& cursor) const override;
+	};
 	struct ColorWheel : public Composite {
 	protected:
 		Color selectedColor;
@@ -58,7 +64,7 @@ namespace aly {
 	private:
 		TextLabelPtr textLabel;
 		GlyphRegionPtr colorLabel;
-		CompositePtr colorSelectionPanel;
+		std::shared_ptr<DragableEdgeComposite> colorSelectionPanel;
 		std::shared_ptr<CheckerboardGlyph> checkerboard;
 		std::shared_ptr<VerticalSlider> redSlider;
 		std::shared_ptr<VerticalSlider> greenSlider;
@@ -81,6 +87,7 @@ namespace aly {
 			const AUnit2D& dims, bool showText = true);
 		virtual void draw(AlloyContext* context) override;
 	};
+	typedef std::shared_ptr<DragableEdgeComposite> DragableEdgeCompositePtr;
 	typedef std::shared_ptr<ColorSelector> ColorSelectorPtr;
 	typedef std::shared_ptr<ColorWheel> ColorWheelPtr;
 }
