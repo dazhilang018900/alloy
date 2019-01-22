@@ -451,8 +451,7 @@ void AlloyContext::setOffScreenVisible(bool vis) {
 }
 AlloyContext::AlloyContext(int width, int height, const std::string& title,
 		const Theme& theme) :
-		nvgContext(nullptr), window(nullptr), theme(theme) {
-
+		nvgContext(nullptr), window(nullptr), theme(theme),title(title) {
 	threadId = std::this_thread::get_id();
 	if (glfwInit() != GL_TRUE) {
 		throw std::runtime_error("Could not initialize GLFW.");

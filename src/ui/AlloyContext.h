@@ -146,6 +146,7 @@ namespace aly {
 	class Region;
 	class AlloyContext {
 	private:
+		std::string title;
 		std::thread::id threadId;
 		std::mutex taskLock;
 		std::list<std::string> assetDirectories;
