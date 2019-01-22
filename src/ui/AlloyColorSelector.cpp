@@ -241,8 +241,23 @@ namespace aly {
 			const AUnit2D& dims) :Composite(name, pos, dims) {
 	}
 	bool DragableEdgeComposite::acceptDragEvent(const pixel2& cursor) const {
-		AlloyContext* context=AlloyApplicationContext().get();
-		return (context->isMouseOver((Region*)this,false));
+		return dragAccept;
+	}
+	void DragableEdgeComposite::draw(AlloyContext* context) {
+		NVGcontext* nvg = context->nvgContext;
+		box2px bounds = this->getBounds();
+		bool isOver = false;
+		if (context->isMouseOver(this, false)) {
+			nvgBeginPath(nvg);
+			nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
+					bounds.dimensions.x, bounds.dimensions.y, 15.0f);
+			nvgFillColor(nvg, context->theme.LIGHT.toSemiTransparent(0.5f));
+			nvgFill(nvg);
+			dragAccept=true;
+		}else {
+			dragAccept=false;
+		}
+		Composite::draw(context);
 	}
 	void ColorSelector::updateColorSliders(const Color& c) {
 		redSlider->setSliderColor(Color(0.0f, c.g, c.b), Color(1.0f, c.g, c.b));

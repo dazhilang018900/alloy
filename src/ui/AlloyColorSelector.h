@@ -32,6 +32,7 @@ namespace aly {
 	public:
 		DragableEdgeComposite(const std::string& name, const AUnit2D& pos,const AUnit2D& dims);
 		virtual bool acceptDragEvent(const pixel2& cursor) const override;
+		void draw(AlloyContext* context) override;
 	};
 	struct ColorWheel : public Composite {
 	protected:
