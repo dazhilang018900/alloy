@@ -737,8 +737,8 @@ void AlloyContext::update(Composite& rootNode) {
 	double cursorElapsed = std::chrono::duration<double>(
 			endTime - lastCursorTime).count();
 	if (deferredTasks.size() > 0) {
-		executeDeferredTasks();
 		cursorLocator.reset(screenSize);
+		executeDeferredTasks();
 		rootNode.updateCursor(&cursorLocator);
 		dirtyCursorLocator = false;
 		mouseOverRegion = locate(cursorPosition);

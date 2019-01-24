@@ -246,9 +246,8 @@ namespace aly {
 		void sortColumn(int c);
 	public:
 		friend class TableRow;
-		box2px getDragBox() const {
-			return dragBox;
-		}
+		box2px getDragBox() const;
+		void setEnableMultiSelection(bool enable);
 		void setSortColumn(int c,bool toggle=true);
 		void setSortEnabled(int c, bool s);
 		void sortSelectedColumn();
@@ -257,39 +256,22 @@ namespace aly {
 		pixel getColumnWidthPixels(int c) const;
 		AUnit1D getColumnWidth(int c) const;
 
-		std::vector<std::shared_ptr<TableRow>>& getRows() {
-			return rows;
-		}
-		void addRow(const std::shared_ptr<TableRow>& entry) {
-			rows.push_back(entry);
-			dirty = true;
-		}
+		std::vector<std::shared_ptr<TableRow>>& getRows() ;
+		void addRow(const std::shared_ptr<TableRow>& entry);
+		int getColumns() const;
 		virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 			double pixelRatio, bool clamp) override;
 		virtual void draw(AlloyContext* context) override;
-		void clearRows() {
-			rows.clear();
-			lastSelected.clear();
-			dirty = true;
-		}
-		TableRow* getLastSelected() {
-			if (lastSelected.size() > 0)
-				return lastSelected.back();
-			else
-				return nullptr;
-		}
+		void clearRows();
+		TableRow* getLastSelected();
 		bool isDraggingOver(TableRow* entry);
 		TablePane(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,int columns, float entryHeight = 30.0f);
 		std::shared_ptr<TableRow> addRow(const std::string& name="");
-		int getColumns() const {
-			return columns;
-		}
+
 		virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
 			override;
 
-		void setEnableMultiSelection(bool enable) {
-			enableMultiSelection = enable;
-		}
+
 		bool onMouseDown(TableRow* entry, AlloyContext* context,const InputEvent& e);
 		std::function<void(TableRow*, const InputEvent&)> onSelect;
 	};

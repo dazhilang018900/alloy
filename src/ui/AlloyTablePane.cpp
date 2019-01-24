@@ -76,6 +76,12 @@ void TablePane::setSortEnabled(int c, bool s) {
 		columnHeaders[c]->setIcon(0x0);
 	}
 }
+box2px TablePane::getDragBox() const {
+	return dragBox;
+}
+void TablePane::setEnableMultiSelection(bool enable) {
+	enableMultiSelection = enable;
+}
 void TablePane::setSortColumn(int c, bool toggle) {
 	if (!sortMask[c])
 		return;
@@ -126,6 +132,27 @@ void TableRow::setColumn(int c, const std::shared_ptr<TableEntry>& region) {
 	}
 	Composite::add(region);
 	columns[c] = region;
+}
+std::vector<std::shared_ptr<TableRow>>& TablePane::getRows() {
+	return rows;
+}
+void TablePane::addRow(const std::shared_ptr<TableRow>& entry) {
+	rows.push_back(entry);
+	dirty = true;
+}
+int TablePane::getColumns() const {
+	return columns;
+}
+void TablePane::clearRows() {
+	rows.clear();
+	lastSelected.clear();
+	dirty = true;
+}
+TableRow* TablePane::getLastSelected() {
+	if (lastSelected.size() > 0)
+		return lastSelected.back();
+	else
+		return nullptr;
 }
 void TablePane::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
@@ -244,7 +271,8 @@ bool TablePane::onEventHandler(AlloyContext* context, const InputEvent& e) {
 		}
 	}
 	if (e.type == InputType::Key) {
-		if (e.isDown() && e.isControlDown() && e.key == GLFW_KEY_A&& enableMultiSelection) {
+		if (e.isDown() && e.isControlDown() && e.key == GLFW_KEY_A
+				&& enableMultiSelection) {
 			TableRow* lastEntry = nullptr;
 			for (std::shared_ptr<TableRow> entry : rows) {
 				if (!entry->isSelected()) {
@@ -258,18 +286,18 @@ bool TablePane::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			dragBox = box2px(float2(0, 0), float2(0, 0));
 			context->requestPack();
 			return true;
-		} else if(e.key==GLFW_KEY_DOWN&&e.isDown()){
+		} else if (e.key == GLFW_KEY_DOWN && e.isDown()) {
 			return contentRegion->addVerticalScrollPosition(1);
-		}  else if(e.key==GLFW_KEY_UP&&e.isDown()){
+		} else if (e.key == GLFW_KEY_UP && e.isDown()) {
 			return contentRegion->addVerticalScrollPosition(-1);
-		} else if(e.key==GLFW_KEY_PAGE_DOWN&&e.isDown()){
+		} else if (e.key == GLFW_KEY_PAGE_DOWN && e.isDown()) {
 			return contentRegion->addVerticalScrollPosition(5);
-		}  else if(e.key==GLFW_KEY_PAGE_UP&&e.isDown()){
+		} else if (e.key == GLFW_KEY_PAGE_UP && e.isDown()) {
 			return contentRegion->addVerticalScrollPosition(-5);
-		}  else if(e.key==GLFW_KEY_HOME&&e.isDown()){
+		} else if (e.key == GLFW_KEY_HOME && e.isDown()) {
 			contentRegion->scrollToTop();
 			return true;
-		} else if(e.key==GLFW_KEY_END&&e.isDown()){
+		} else if (e.key == GLFW_KEY_END && e.isDown()) {
 			contentRegion->scrollToBottom();
 			return true;
 		}
@@ -312,7 +340,10 @@ bool TablePane::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	return false;
 }
 bool LazyTableComposite::addVerticalScrollPosition(int c) {
-	float t=c*(cellSpacing.y+entryHeight)*(this->verticalScrollTrack->getBoundsDimensionsY()-this->verticalScrollHandle->getBoundsDimensionsY())/std::max(1E-6f,extents.dimensions.y - bounds.dimensions.y);
+	float t = c * (cellSpacing.y + entryHeight)
+			* (this->verticalScrollTrack->getBoundsDimensionsY()
+					- this->verticalScrollHandle->getBoundsDimensionsY())
+			/ std::max(1E-6f, extents.dimensions.y - bounds.dimensions.y);
 	if (verticalScrollHandle->addDragOffset(pixel2(0.0f, t))) {
 		this->scrollPosition.y =
 				(this->verticalScrollHandle->getBoundsPositionY()
@@ -327,8 +358,13 @@ bool LazyTableComposite::addVerticalScrollPosition(int c) {
 	return false;
 }
 void LazyTableComposite::scrollToBottom() {
-	float t =this->verticalScrollTrack->getBoundsPositionY()+ std::max(0.0f,this->verticalScrollTrack->getBoundsDimensionsY()- (float) this->verticalScrollHandle->getBoundsDimensionsY());
-	if (verticalScrollHandle.get()!=nullptr&&verticalScrollHandle->addDragOffset(pixel2(0.0f, t))) {
+	float t =
+			this->verticalScrollTrack->getBoundsPositionY()
+					+ std::max(0.0f,
+							this->verticalScrollTrack->getBoundsDimensionsY()
+									- (float) this->verticalScrollHandle->getBoundsDimensionsY());
+	if (verticalScrollHandle.get() != nullptr
+			&& verticalScrollHandle->addDragOffset(pixel2(0.0f, t))) {
 		this->scrollPosition.y =
 				(this->verticalScrollHandle->getBoundsPositionY()
 						- this->verticalScrollTrack->getBoundsPositionY())
@@ -340,7 +376,7 @@ void LazyTableComposite::scrollToBottom() {
 	}
 }
 void LazyTableComposite::scrollToTop() {
-	if (verticalScrollHandle.get()!=nullptr) {
+	if (verticalScrollHandle.get() != nullptr) {
 		verticalScrollHandle->setDragOffset(pixel2(0.0f, 0.0f));
 		this->scrollPosition.y =
 				(this->verticalScrollHandle->getBoundsPositionY()
@@ -357,15 +393,15 @@ void LazyTableComposite::pack(const pixel2& pos, const pixel2& dims,
 	Region::pack(pos, dims, dpmm, pixelRatio);
 	box2px bounds = getBounds(false);
 	if (verticalScrollTrack.get() == nullptr && isScrollEnabled()) {
-		verticalScrollTrack = std::shared_ptr < ScrollTrack
-				> (new ScrollTrack("Vert Track", Orientation::Vertical));
+		verticalScrollTrack = std::shared_ptr<ScrollTrack>(
+				new ScrollTrack("Vert Track", Orientation::Vertical));
 		verticalScrollTrack->position = CoordPercent(1.0f, 0.0f);
 		verticalScrollTrack->dimensions = CoordPerPX(0.0, 1.0f, scrollBarSize,
 				0.0f);
 		verticalScrollTrack->setOrigin(Origin::TopRight);
 		verticalScrollTrack->parent = parent;
-		verticalScrollHandle = std::shared_ptr < ScrollHandle
-				> (new ScrollHandle("Vert Handle", Orientation::Vertical));
+		verticalScrollHandle = std::shared_ptr<ScrollHandle>(
+				new ScrollHandle("Vert Handle", Orientation::Vertical));
 		verticalScrollHandle->position = CoordPX(0.0f, 0.0f);
 		verticalScrollHandle->dimensions = CoordPerPX(1.0f, 0.0f, 0.0f,
 				scrollBarSize);
@@ -399,15 +435,15 @@ void LazyTableComposite::pack(const pixel2& pos, const pixel2& dims,
 					}
 					return false;
 				};
-		horizontalScrollTrack = std::shared_ptr < ScrollTrack
-				> (new ScrollTrack("Horiz Track", Orientation::Horizontal));
+		horizontalScrollTrack = std::shared_ptr<ScrollTrack>(
+				new ScrollTrack("Horiz Track", Orientation::Horizontal));
 		horizontalScrollTrack->position = CoordPercent(0.0f, 1.0f);
 		horizontalScrollTrack->dimensions = CoordPerPX(1.0, 0.0f, 0.0f,
 				scrollBarSize);
 		horizontalScrollTrack->setOrigin(Origin::BottomLeft);
 		verticalScrollTrack->parent = parent;
-		horizontalScrollHandle = std::shared_ptr < ScrollHandle
-				> (new ScrollHandle("Horiz Handle", Orientation::Horizontal));
+		horizontalScrollHandle = std::shared_ptr<ScrollHandle>(
+				new ScrollHandle("Horiz Handle", Orientation::Horizontal));
 		horizontalScrollHandle->position = CoordPX(0.0f, 0.0f);
 		horizontalScrollHandle->dimensions = CoordPerPX(0.0f, 1.0f,
 				scrollBarSize, 0.0f);
@@ -607,8 +643,8 @@ TablePane::TablePane(const std::string& name, const AUnit2D& pos,
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	borderColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	borderWidth = UnitPX(1.0f);
-	contentRegion = std::shared_ptr < LazyTableComposite
-			> (new LazyTableComposite(name, CoordPX(0.0f, entryHeight),
+	contentRegion = std::shared_ptr<LazyTableComposite>(
+			new LazyTableComposite(name, CoordPX(0.0f, entryHeight),
 					CoordPerPX(1.0f, 1.0f, 0.0f, -entryHeight), entryHeight));
 	contentRegion->setRoundCorners(false);
 	contentRegion->setOrientation(Orientation::Vertical, pixel2(0, 2),
@@ -689,8 +725,8 @@ TableStringEntry::TableStringEntry(const std::string& name,
 }
 
 int TableStringEntry::compare(const std::shared_ptr<TableEntry>& entry) const {
-	TableStringEntryPtr other = std::dynamic_pointer_cast < TableStringEntry
-			> (entry);
+	TableStringEntryPtr other = std::dynamic_pointer_cast<TableStringEntry>(
+			entry);
 	std::string a = getValue();
 	std::string b = other->getValue();
 	if (a == b)
@@ -704,7 +740,8 @@ TableLinkEntry::TableLinkEntry(const std::string& name,
 		const HorizontalAlignment& alignment) :
 		TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
 	value = TextLinkPtr(
-			new TextLink(name, CoordPX(2.0f, 0.0f),CoordPerPX(1.0f, 1.0f, -4.0f, 0.0f)));
+			new TextLink(name, CoordPX(2.0f, 0.0f),
+					CoordPerPX(1.0f, 1.0f, -4.0f, 0.0f)));
 	value->backgroundColor = MakeColor(0, 0, 0, 0);
 	value->borderColor = MakeColor(0, 0, 0, 0);
 	value->borderWidth = UnitPX(0.0f);
@@ -715,8 +752,7 @@ TableLinkEntry::TableLinkEntry(const std::string& name,
 }
 
 int TableLinkEntry::compare(const std::shared_ptr<TableEntry>& entry) const {
-	TableLinkEntryPtr other = std::dynamic_pointer_cast < TableLinkEntry
-			> (entry);
+	TableLinkEntryPtr other = std::dynamic_pointer_cast<TableLinkEntry>(entry);
 	std::string a = getValue();
 	std::string b = other->getValue();
 	if (a == b)
@@ -751,8 +787,8 @@ TableIconStringEntry::TableIconStringEntry(const std::string& name,
 }
 int TableIconStringEntry::compare(
 		const std::shared_ptr<TableEntry>& entry) const {
-	std::shared_ptr<TableIconStringEntry> other = std::dynamic_pointer_cast
-			< TableIconStringEntry > (entry);
+	std::shared_ptr<TableIconStringEntry> other = std::dynamic_pointer_cast<
+			TableIconStringEntry>(entry);
 	std::string a = getValue();
 	std::string b = other->getValue();
 	if (a == b)
@@ -775,8 +811,8 @@ TableNumberEntry::TableNumberEntry(const std::string& name, const Number& init,
 	Composite::add(value);
 }
 int TableNumberEntry::compare(const std::shared_ptr<TableEntry>& entry) const {
-	TableNumberEntryPtr other = std::dynamic_pointer_cast < TableNumberEntry
-			> (entry);
+	TableNumberEntryPtr other = std::dynamic_pointer_cast<TableNumberEntry>(
+			entry);
 	return (int) aly::sign(getValue().toDouble() - other->getValue().toDouble());
 }
 
@@ -795,8 +831,8 @@ TableCheckBoxEntry::TableCheckBoxEntry(const std::string& name, bool init) :
 }
 int TableCheckBoxEntry::compare(
 		const std::shared_ptr<TableEntry>& entry) const {
-	TableCheckBoxEntryPtr other = std::dynamic_pointer_cast < TableCheckBoxEntry
-			> (entry);
+	TableCheckBoxEntryPtr other = std::dynamic_pointer_cast<TableCheckBoxEntry>(
+			entry);
 	bool a = getValue();
 	bool b = other->getValue();
 	return (((a) ? 1 : 0) - ((b) ? 1 : 0));
@@ -816,8 +852,8 @@ TableToggleBoxEntry::TableToggleBoxEntry(const std::string& name, bool init) :
 }
 int TableToggleBoxEntry::compare(
 		const std::shared_ptr<TableEntry>& entry) const {
-	TableToggleBoxEntryPtr other = std::dynamic_pointer_cast
-			< TableToggleBoxEntry > (entry);
+	TableToggleBoxEntryPtr other =
+			std::dynamic_pointer_cast<TableToggleBoxEntry>(entry);
 	bool a = getValue();
 	bool b = other->getValue();
 	return (((a) ? 1 : 0) - ((b) ? 1 : 0));
@@ -835,8 +871,8 @@ TableSelectionEntry::TableSelectionEntry(const std::string& name,
 }
 int TableSelectionEntry::compare(
 		const std::shared_ptr<TableEntry>& entry) const {
-	TableSelectionEntryPtr other = std::dynamic_pointer_cast
-			< TableSelectionEntry > (entry);
+	TableSelectionEntryPtr other =
+			std::dynamic_pointer_cast<TableSelectionEntry>(entry);
 	int a = getValue();
 	int b = other->getValue();
 	return (a - b);
@@ -855,8 +891,8 @@ TableColorEntry::TableColorEntry(const std::string& name, const Color& init) :
 	Composite::add(value);
 }
 int TableColorEntry::compare(const std::shared_ptr<TableEntry>& entry) const {
-	TableColorEntryPtr other = std::dynamic_pointer_cast < TableColorEntry
-			> (entry);
+	TableColorEntryPtr other = std::dynamic_pointer_cast<TableColorEntry>(
+			entry);
 	Color a = getValue();
 	Color b = other->getValue();
 	return (int) aly::sign((a.r + a.g + a.b) - (b.r + b.g + b.b));
@@ -877,8 +913,8 @@ TableProgressBarEntry::TableProgressBarEntry(const std::string& name,
 }
 int TableProgressBarEntry::compare(
 		const std::shared_ptr<TableEntry>& entry) const {
-	TableProgressBarEntryPtr other = std::dynamic_pointer_cast
-			< TableProgressBarEntry > (entry);
+	TableProgressBarEntryPtr other = std::dynamic_pointer_cast<
+			TableProgressBarEntry>(entry);
 	float a = getValue();
 	float b = other->getValue();
 	return (int) aly::sign(a - b);
