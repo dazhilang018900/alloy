@@ -405,6 +405,7 @@ double GaussianMixture::likelihood(const Vec<float>& pt) const {
 }
 bool GaussianMixture::solve(const DenseMat<float>& data, int G, int km_iter,
 		int em_iter, float var_floor) {
+	if(data.size()<=2*G)return false;
 	const float CONV_TOLERANCE = 1E-6f;
 	int D = data.rows;
 	int N = data.cols;
@@ -796,6 +797,7 @@ double GaussianMixtureRGB::likelihood(float3 pt) const {
 }
 bool GaussianMixtureRGB::solve(const std::vector<float3>& data, int G,
 		int km_iter, int em_iter, float var_floor) {
+	if(data.size()<=2*G)return false;
 	const float CONV_TOLERANCE = 1E-6f;
 	int N = (int) data.size();
 	DenseMat<float> W(N, G);
