@@ -66,8 +66,7 @@ const Cursor Cursor::Vertical(0xf07d, 24.0f,
 		NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
 const Cursor Cursor::Position(0xf047, 24.0f,
 		NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
-const Cursor Cursor::Rotate(0xf021, 24.0f,
-		NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
+const Cursor Cursor::Rotate(0xf021, 24.0f, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
 const Cursor Cursor::TextInsert(0xf246, 24.0f,
 		NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
 const Cursor Cursor::SlantDown(0xf07d, 24.0f,
@@ -160,7 +159,7 @@ void ImageGlyph::set(const ImageRGBA& rgba, AlloyContext* context) {
 }
 void ImageGlyph::set(const ImageRGB& rgb, AlloyContext* context) {
 	ImageRGBA rgba;
-	ConvertImage(rgb,rgba);//Slow!!
+	ConvertImage(rgb, rgba); //Slow!!
 	nvgUpdateImage(context->nvgContext, handle, rgba.ptr());
 }
 void ImageGlyph::set(const ImageRGBAf& rgba, AlloyContext* context) {
@@ -181,11 +180,10 @@ ImageGlyph::ImageGlyph(const ImageRGBA& rgba, AlloyContext* context,
 	width = (pixel) rgba.width;
 	height = (pixel) rgba.height;
 }
-ImageGlyph::ImageGlyph(const ImageRGB& rgb, AlloyContext* context,
-		bool mipmap) :
+ImageGlyph::ImageGlyph(const ImageRGB& rgb, AlloyContext* context, bool mipmap) :
 		Glyph("image_rgba", GlyphType::Image, 0, 0) {
 	ImageRGBA rgba;
-	ConvertImage(rgb,rgba);
+	ConvertImage(rgb, rgba);
 	handle = nvgCreateImageRGBA(context->nvgContext, rgba.width, rgba.height,
 			(mipmap) ? NVG_IMAGE_GENERATE_MIPMAPS : 0, rgba.ptr());
 	width = (pixel) rgba.width;
@@ -291,8 +289,8 @@ std::shared_ptr<Font> AlloyContext::loadFont(FontType type,
 	}
 	return std::shared_ptr<Font>();
 }
-std::shared_ptr<Font> AlloyContext::loadFont(int idx,
-		const std::string& name, const std::string& file) {
+std::shared_ptr<Font> AlloyContext::loadFont(int idx, const std::string& name,
+		const std::string& file) {
 
 	try {
 		auto f = std::shared_ptr<Font>(new Font(name, getFullPath(file), this));
@@ -451,7 +449,7 @@ void AlloyContext::setOffScreenVisible(bool vis) {
 }
 AlloyContext::AlloyContext(int width, int height, const std::string& title,
 		const Theme& theme) :
-		nvgContext(nullptr), window(nullptr), theme(theme),title(title) {
+		nvgContext(nullptr), window(nullptr), theme(theme), title(title) {
 	threadId = std::this_thread::get_id();
 	if (glfwInit() != GL_TRUE) {
 		throw std::runtime_error("Could not initialize GLFW.");
@@ -658,6 +656,7 @@ void AlloyContext::clearEvents() {
 	firingListeners = false;
 }
 void AlloyContext::clearEvents(Region* region) {
+	cursorLocator.reset(screenSize);
 	if (mouseOverRegion != nullptr
 			&& (region == mouseOverRegion || mouseOverRegion->hasParent(region)))
 		mouseOverRegion = nullptr;
@@ -671,6 +670,7 @@ void AlloyContext::clearEvents(Region* region) {
 	if (onTopRegion != nullptr
 			&& (region == onTopRegion || onTopRegion->hasParent(region)))
 		onTopRegion = nullptr;
+
 }
 Region* AlloyContext::locate(const pixel2& cursor) const {
 	if (onTopRegion != nullptr) {
@@ -690,7 +690,8 @@ bool AlloyContext::isOffScreenRender() const {
 	return (windowHistory.back() == offscreenWindow);
 }
 bool AlloyContext::begin(bool onScreen) {
-	if(glfwGetCurrentContext())windowHistory.push_back(glfwGetCurrentContext());
+	if (glfwGetCurrentContext())
+		windowHistory.push_back(glfwGetCurrentContext());
 	if (onScreen) {
 		glfwMakeContextCurrent(window);
 	} else {
@@ -737,8 +738,8 @@ void AlloyContext::update(Composite& rootNode) {
 	double cursorElapsed = std::chrono::duration<double>(
 			endTime - lastCursorTime).count();
 	if (deferredTasks.size() > 0) {
-		cursorLocator.reset(screenSize);
 		executeDeferredTasks();
+		cursorLocator.reset(screenSize);
 		rootNode.updateCursor(&cursorLocator);
 		dirtyCursorLocator = false;
 		mouseOverRegion = locate(cursorPosition);
@@ -781,9 +782,44 @@ void AlloyContext::update(Composite& rootNode) {
 void AlloyContext::makeCurrent() {
 	glfwMakeContextCurrent(window);
 }
-void AlloyContext::forceDestroy(){
+void AlloyContext::forceDestroy() {
 	window = nullptr;
 }
+
+void AlloyContext::setCursor(const Cursor* cursor) {
+	this->cursor = cursor;
+}
+const Cursor* AlloyContext::getCursor() const {
+	return cursor;
+}
+std::shared_ptr<AlloyContext>& AlloyContext::getDefaultContext() {
+	return defaultContext;
+}
+pixel2 AlloyContext::getCursorPosition() const {
+	return cursorPosition;
+}
+std::mutex& AlloyContext::getLock() {
+	return glLock;
+}
+const std::mutex& AlloyContext::getLock() const {
+	return glLock;
+}
+box2px AlloyContext::getViewport() const {
+	return box2px(pixel2(0.0f, 0.0f), pixel2(viewSize));
+}
+int AlloyContext::getScreenWidth() {
+	return screenSize.x;
+}
+int AlloyContext::getScreenHeight() {
+	return screenSize.y;
+}
+pixel2 AlloyContext::getRelativeCursorDownPosition() const {
+	return cursorDownPosition;
+}
+bool AlloyContext::hasDeferredTasks() const {
+	return (deferredTasks.size() > 0);
+}
+
 AlloyContext::~AlloyContext() {
 	if (window) {
 		glfwMakeContextCurrent(window);

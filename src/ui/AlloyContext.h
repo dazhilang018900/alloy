@@ -149,6 +149,7 @@ namespace aly {
 		std::string title;
 		std::thread::id threadId;
 		std::mutex taskLock;
+		std::mutex glLock;
 		std::list<std::string> assetDirectories;
 		std::vector<std::shared_ptr<Font>> fonts;
 		std::list<GLFWwindow*> windowHistory;
@@ -202,38 +203,25 @@ namespace aly {
 		void clearEvents(Region* region);
 		void clearEvents();
 		void setOffScreenVisible(bool vis);
-		void setCursor(const Cursor* cursor) {
-			this->cursor = cursor;
-		}
+
 		void forceDestroy();
-		const Cursor* getCursor() const {
-			return cursor;
-		}
-		static inline std::shared_ptr<AlloyContext>& getDefaultContext() {
-			return defaultContext;
-		}
-		pixel2 getCursorPosition() const {
-			return cursorPosition;
-		}
-		box2px getViewport() const {
-			return box2px(pixel2(0.0f, 0.0f), pixel2(viewSize));
-		}
-		int getScreenWidth() {
-			return screenSize.x;
-		}
-		int getScreenHeight() {
-			return screenSize.y;
-		}
+		void setCursor(const Cursor* cursor);
+		const Cursor* getCursor() const ;
+		static std::shared_ptr<AlloyContext>& getDefaultContext();
+		pixel2 getCursorPosition() const ;
+		std::mutex& getLock() ;
+		const std::mutex& getLock() const ;
+		box2px getViewport() const ;
+		int getScreenWidth() ;
+		int getScreenHeight();
+		pixel2 getRelativeCursorDownPosition() const;
+		bool hasDeferredTasks() const ;
 		void addDeferredTask(const std::function<void()>& func, bool block = false);
-		bool hasDeferredTasks() const {
-			return (deferredTasks.size() > 0);
-		}
+
 		bool executeDeferredTasks();
 		std::shared_ptr<Composite>& getGlassPane();
 
-		inline pixel2 getRelativeCursorDownPosition() const {
-			return cursorDownPosition;
-		}
+
 		pixel2 getCursorDownPosition() const;
 		bool fireListeners(const InputEvent& event);
 		void interruptListeners();

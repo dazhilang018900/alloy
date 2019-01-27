@@ -96,6 +96,7 @@ Application::Application(int w, int h, const std::string& title,
 	initInternal();
 }
 void Application::draw() {
+	std::lock_guard<std::mutex> lockMe(context->getLock());
 	glfwSetInputMode(context->window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	glClearColor(0.0, 0.0, 0.0, 10);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
@@ -305,9 +306,7 @@ void Application::fireEvent(const InputEvent& event) {
 			if (event.button == GLFW_MOUSE_BUTTON_MIDDLE) {
 				context->middleMouseButton = true;
 			}
-			context->mouseOverRegion = context->mouseFocusRegion =
-					context->mouseDownRegion = context->locate(
-							context->cursorPosition);
+			context->mouseOverRegion = context->mouseFocusRegion = context->mouseDownRegion = context->locate(context->cursorPosition);
 
 			if (context->mouseDownRegion != nullptr) {
 				context->cursorDownPosition = event.cursor
