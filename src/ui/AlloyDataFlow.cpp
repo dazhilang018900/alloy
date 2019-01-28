@@ -1735,7 +1735,7 @@ namespace aly {
 			NVGcontext* nvg = context->nvgContext;
 			Color lineColor;
 			if(selected){
-				lineColor= Color(255, 159, 235);
+				lineColor= Color(255, 64, 242);
 			} else {
 				lineColor=context->theme.LIGHTEST.toDarker(0.8f);
 			}
@@ -3057,6 +3057,7 @@ namespace aly {
 			mouseOverNode = nullptr;
 			mouseSelectedNode = nullptr;
 			const float nudge = context->theme.CORNER_RADIUS;
+			selectedConnection = closestConnection((AlloyApplicationContext()->getCursorPosition() - getDrawOffset()), std::max(4.0f * scale, 1.0f));
 			if (selectedConnection != nullptr && context->getCursor() == nullptr && !context->getGlassPane()->isVisible()) {
 				context->setCursor(&Cursor::CrossHairs);
 			}
@@ -3289,7 +3290,7 @@ namespace aly {
 			for (ConnectionPtr& connect : data->connections) {
 				router.evaluate(connect);
 			}
-			selectedConnection = closestConnection((AlloyApplicationContext()->getCursorPosition() - getDrawOffset()), std::max(4.0f * scale, 1.0f));
+
 			routingLock.unlock();
 		}
 		void DataFlow::move(const std::shared_ptr<Node>& node, pixel2 position) {
