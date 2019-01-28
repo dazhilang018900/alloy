@@ -1733,12 +1733,18 @@ namespace aly {
 				return;
 			const float scale = flow->getScale();
 			NVGcontext* nvg = context->nvgContext;
-			if (selected) {
+			Color lineColor;
+			if(selected){
+				lineColor= Color(255, 159, 235);
+			} else {
+				lineColor=context->theme.LIGHTEST.toDarker(0.8f);
+			}
+			if (flow->selectedConnection==this) {
 				nvgStrokeWidth(nvg, std::max(scale * 6.0f, 1.0f));
-				nvgStrokeColor(nvg, context->theme.LIGHTEST);
+				nvgStrokeColor(nvg,lineColor.toLighter(0.2f));
 			} else {
 				nvgStrokeWidth(nvg, std::max(scale * 4.0f, 1.0f));
-				nvgStrokeColor(nvg, context->theme.LIGHTEST.toDarker(0.8f));
+				nvgStrokeColor(nvg,lineColor);
 			}
 
 			float2 offset = flow->getDrawOffset();
@@ -3283,8 +3289,7 @@ namespace aly {
 			for (ConnectionPtr& connect : data->connections) {
 				router.evaluate(connect);
 			}
-			Connection* c = closestConnection((AlloyApplicationContext()->getCursorPosition() - getDrawOffset()), std::max(4.0f * scale, 1.0f));
-			selectedConnection = c;
+			selectedConnection = closestConnection((AlloyApplicationContext()->getCursorPosition() - getDrawOffset()), std::max(4.0f * scale, 1.0f));
 			routingLock.unlock();
 		}
 		void DataFlow::move(const std::shared_ptr<Node>& node, pixel2 position) {

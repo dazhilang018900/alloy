@@ -937,6 +937,7 @@ protected:
 	void addNodeInternal(const std::shared_ptr<Node>& node);
 	Connection* closestConnection(const float2& pt, float tolernace);
 public:
+	friend class Connection;
 	friend class Node;
 	friend class ActionDataFlow;
 	void zoom(float s);
