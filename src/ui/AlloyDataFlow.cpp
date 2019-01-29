@@ -3050,7 +3050,7 @@ namespace aly {
 			if (!bounds.contains(pos)) {
 				pos = bounds.center();
 			}
-			setScale(scale, pos);
+			setScale(f, pos);
 			AlloyApplicationContext()->requestPack();
 		}
 		void DataFlow::draw(AlloyContext* context) {
