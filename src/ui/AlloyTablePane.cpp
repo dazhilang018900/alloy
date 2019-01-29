@@ -651,11 +651,9 @@ TablePane::TablePane(const std::string& name, const AUnit2D& pos,
 			pixel2(0, 0));
 	contentRegion->setScrollEnabled(true);
 	contentRegion->setAlwaysShowVerticalScrollBar(true);
-	contentRegion->borderWidth = UnitPX(1.0f);
-	contentRegion->borderColor = MakeColor(
-			AlloyApplicationContext()->theme.DARK);
-	contentRegion->backgroundColor = MakeColor(
-			AlloyApplicationContext()->theme.DARKER);
+	contentRegion->borderWidth = UnitPX(0.0f);
+	contentRegion->borderColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	contentRegion->backgroundColor = MakeColor(	AlloyApplicationContext()->theme.DARKER);
 	dragBox = box2px(float2(0, 0), float2(0, 0));
 	for (int c = 0; c < columns; c++) {
 		TextIconButtonPtr textIcon = TextIconButtonPtr(
