@@ -136,7 +136,7 @@ void TextIconButton::draw(AlloyContext* context) {
 	float th = fontSize.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
 	if (hover) {
-
+		context->setCursor(&Cursor::Normal);
 		nvgBeginPath(nvg);
 		if (roundCorners) {
 			nvgRoundedRect(nvg, bounds.position.x + xoff,

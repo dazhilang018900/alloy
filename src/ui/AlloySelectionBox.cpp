@@ -505,6 +505,9 @@ Selection::Selection(const std::string& label, const AUnit2D& position,
 
 void Selection::draw(AlloyContext* context) {
 	bool hover = context->isMouseContainedIn(this);
+	if(hover){
+		context->setCursor(&Cursor::Normal);
+	}
 	if (!hover && selectionBox->isVisible()
 			&& !context->isLeftMouseButtonDown()) {
 		hide(context);
