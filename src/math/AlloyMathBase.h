@@ -800,6 +800,7 @@ template<int M> vec<float, M> sqr(const vec<float, M>& v) {
 template<int M> vec<double, M> sqr(const vec<double, M>& v) {
 	return v * v;
 }
+
 template<class T, int M> vec<T, M> clamp(const vec<T, M> & v, const T& mn,
 		const T& mx) {
 	vec<T, M> result;
@@ -813,6 +814,15 @@ template<class T, int M> vec<T, M> clamp(const vec<T, M> & v,
 	for (int m = 0; m < M; m++)
 		result[m] = clamp(v[m], mn[m], mx[m]);
 	return result;
+}
+
+template<class T> T smoothstep(T a,T b,T x){
+	T y = clamp((x - a) / (b - a), T(0),T(1));
+	return (y*y*(T(3) - (T(2)*y)));
+}
+template<class T, int M> vec<T, M> smoothstep(const vec<T,M>& a,const vec<T,M>& b,const vec<T,M>& x){
+	vec<T,M> y = clamp((x - a) / (b - a),T(0),T(1));
+	return (y*y*(T(3) - (T(2)*y)));
 }
 // Form a vector or matrix by taking the componentwise max/min of two vectors or matrices
 template<class T, int M> vec<T, M> max(const vec<T, M> & l,
