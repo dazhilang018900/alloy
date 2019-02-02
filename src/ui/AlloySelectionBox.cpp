@@ -426,6 +426,9 @@ Selection::Selection(const std::string& label, const AUnit2D& position,
 			UnitPercent(1.0f), AlloyApplicationContext()->theme.DARK.toRGBA(),
 			HorizontalAlignment::Center, VerticalAlignment::Middle);
 	selectionBox = SelectionBoxPtr(new SelectionBox(label, options));
+	selectionBox->onRemoveFromOnTop=[this](){
+		selectionBox->setVisible(false);
+	};
 	selectionBox->setDetached(true);
 	selectionBox->setVisible(false);
 	selectionBox->position = CoordPercent(0.0f, 0.0f);
@@ -461,6 +464,7 @@ Selection::Selection(const std::string& label, const AUnit2D& position,
 			};
 	selectionBox->onMouseUp =
 			[this](AlloyContext* context, const InputEvent& event) {
+		/*
 				if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
 					hide(context);
 					int newSelection = selectionBox->getSelectedIndex();
@@ -478,7 +482,9 @@ Selection::Selection(const std::string& label, const AUnit2D& position,
 					selectionLabel->setLabel( this->getValue());
 					return true;
 				}
-				else if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
+				else
+				*/
+				if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
 					hide(context);
 				}
 				return false;
@@ -508,10 +514,9 @@ void Selection::draw(AlloyContext* context) {
 	if(hover){
 		context->setCursor(&Cursor::Normal);
 	}
-	if (!hover && selectionBox->isVisible()
-			&& !context->isLeftMouseButtonDown()) {
-		hide(context);
-	}
+	//if (!hover && selectionBox->isVisible()&& !context->isLeftMouseButtonDown()) {
+	//	hide(context);
+	//}
 	Composite::draw(context);
 }
 

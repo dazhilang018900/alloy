@@ -643,8 +643,7 @@ std::shared_ptr<Composite>& AlloyContext::getGlassPane() {
 		glassPane = std::shared_ptr<Composite>(
 				new Composite("Glass Pane", CoordPX(0, 0),
 						CoordPercent(1.0f, 1.0f)));
-		glassPane->backgroundColor = MakeColor(
-				theme.DARKEST.toSemiTransparent(0.5f));
+		glassPane->backgroundColor = MakeColor(COLOR_NONE);
 	}
 	return glassPane;
 }

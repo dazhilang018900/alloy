@@ -118,6 +118,18 @@ MessageDialog::MessageDialog(const std::string& name, const AUnit2D& pos,
 	}
 	add(containerRegion);
 	add(cancelButton);
+	this->onEvent = [=](AlloyContext* context, const InputEvent& e) {
+		if(e.type==InputType::Key&&this->isVisible()) {
+			if(e.key==GLFW_KEY_ESCAPE) {
+				this->setVisible(false);
+				context->getGlassPane()->setVisible(false);
+				return true;
+			}
+		}
+		return false;
+	};
+
+	Application::addListener(this);
 }
 void MessageDialog::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
@@ -168,6 +180,5 @@ MessageDialog::MessageDialog(const std::string& name, bool wrap,
 				CoordPX(400, 200), wrap, option, type) {
 
 }
-
 
 } /* namespace aly */

@@ -106,7 +106,6 @@ namespace aly {
 		colorSelectionPanel->setDragEnabled(true);
 		colorSelectionPanel->setVisible(false);
 		colorSelectionPanel->setOrigin(Origin::MiddleCenter);
-
 		redSlider = std::shared_ptr<VerticalSlider>(
 			new VerticalSlider("R", CoordPX(0.0f, 0.0f),
 				CoordPerPX(0.0f, 1.0f, 60.0f, 0.0f), Integer(0), Integer(255),
@@ -216,7 +215,13 @@ namespace aly {
 		colorSelectionPanel->onEvent =
 			[=](AlloyContext* context, const InputEvent& e) {
 			if (colorSelectionPanel->isVisible()) {
-				if (e.type == InputType::MouseButton&&e.isDown() && !context->isMouseContainedIn(colorSelectionPanel->getBounds())) {
+				if(e.type==InputType::Key&&colorSelectionPanel->isVisible()) {
+					if(e.key==GLFW_KEY_ESCAPE) {
+						colorSelectionPanel->setVisible(false);
+						context->getGlassPane()->setVisible(false);
+						return true;
+					}
+				} else if (e.type == InputType::MouseButton&&e.isDown() && !context->isMouseContainedIn(colorSelectionPanel->getBounds())) {
 					colorSelectionPanel->setVisible(false);
 					context->getGlassPane()->setVisible(false);
 					if (onSelect) {
@@ -236,9 +241,11 @@ namespace aly {
 		add(colorLabel);
 		AlloyApplicationContext()->getGlassPane()->add(colorSelectionPanel);
 		setColor(*colorLabel->foregroundColor);
+
 	}
 	DragableEdgeComposite::DragableEdgeComposite(const std::string& name, const AUnit2D& pos,
 			const AUnit2D& dims) :Composite(name, pos, dims) {
+
 	}
 	bool DragableEdgeComposite::acceptDragEvent(const pixel2& cursor) const {
 		return dragAccept;

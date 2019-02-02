@@ -60,14 +60,20 @@ bool ControlsEx::init(Composite& rootNode) {
 		new RangeSlider("Range", CoordPerPX(0.5f,0.0f,10.0f, 130.0f),
 			CoordPX(250.0f,50.0f),Integer(0), Integer(100), Integer(25), Integer(75)));
 	rootNode.add(rangeSlider);
-	SelectionPtr selection = SelectionPtr(
+	SelectionPtr selection1 = SelectionPtr(
 			new Selection("SF District", CoordPX(5, 350), CoordPX(200, 30),
 					std::vector<std::string> { "Civic Center", "Tenderloin",
 							"Nob Hill", "Mission", "Potrero", "Hayes Valley",
 							"Noe Valey", "Bernal Heights", "Presidio",
 							"Financial District", "SoMa", "Haight", "Richmond",
 							"Sunset", "Chinatown", "Japantown", "Nob Hill" }));
-	rootNode.add(selection);
+	rootNode.add(selection1);
+
+	SelectionPtr selection2 = SelectionPtr(
+			new Selection("LA District", CoordPX(25, 550), CoordPX(200, 30),
+					std::vector<std::string> { "Hermosa Beach","Torrance","Long Beach","Venice","Santa Monica","Manhattan Beach","Hollywood","Paramount","Echo Park","Pasadena" }));
+	rootNode.add(selection2);
+
 	ToggleBoxPtr togglebox = ToggleBoxPtr(
 			new ToggleBox("Toggle", CoordPX(200.0f, 40.0f),
 					CoordPercent(0.4f, 0.07f), false,true));
