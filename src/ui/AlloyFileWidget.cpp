@@ -850,8 +850,12 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	fileLocation->backgroundColor = MakeColor(
 			AlloyApplicationContext()->theme.LIGHT);
 
+	fileLocation->onKeyInput = [this](TextField* field) {
+		this->updateValidity();
+	};
 	fileLocation->onTextEntered = [this](TextField* field) {
 		this->updateDirectoryList();
+
 	};
 	upDirButton = std::shared_ptr<IconButton>(
 			new IconButton(0xf062, CoordPerPX(1.0, 0.0, -40, 7),
