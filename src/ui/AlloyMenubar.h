@@ -31,6 +31,7 @@ protected:
 	std::shared_ptr<MenuItem> requestedSelected;
 	std::shared_ptr<MenuItem> currentVisible;
 	std::shared_ptr<TimerTask> showTimer;
+	std::string hint;
 	const int MENU_DISPLAY_DELAY = 250;
 public:
 	MenuItem* getSelectedItem();
@@ -43,6 +44,12 @@ public:
 	std::function<void()> onSelect;
 	virtual bool isMenu() const {
 		return false;
+	}
+	void setHint(const std::string& str){
+		hint=str;
+	}
+	std::string getHint() const{
+		return hint;
 	}
 	virtual void setVisible(bool visible) override;
 	MenuItem(const std::string& name);
@@ -84,14 +91,15 @@ public:
 	}
 	void setSelectedIndex(int index);
 	void draw(AlloyContext* context) override;
-	std::shared_ptr<MenuItem> addItem(const std::string& selection) {
+	std::shared_ptr<MenuItem> addItem(const std::string& selection,const std::string& hint="") {
 		std::shared_ptr<MenuItem> item = std::shared_ptr<MenuItem>(
 				new MenuItem(selection));
+		item->setHint(hint);
 		options.push_back(item);
 		return item;
 	}
 	void addItem(const std::shared_ptr<MenuItem>& selection);
-	Menu(const std::string& name, float menuWidth = 150.0f,
+	Menu(const std::string& name, float menuWidth = 200.0f,
 			const std::vector<std::shared_ptr<MenuItem>>& options = std::vector<
 					std::shared_ptr<MenuItem>>());
 };

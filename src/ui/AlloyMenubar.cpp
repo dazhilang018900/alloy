@@ -121,12 +121,36 @@ void Menu::draw(AlloyContext* context) {
 			nvgFillColor(nvg, *textColor);
 		}
 		pushScissor(nvg, sbounds);
+		nvgFontFaceId(nvg, context->getFontHandle(FontType::Normal));
+		nvgTextAlign(nvg, NVG_ALIGN_LEFT | NVG_ALIGN_MIDDLE);
+		nvgFontSize(nvg, th);
 		nvgText(nvg,
 				bounds.position.x + offset.x + lineWidth + TextField::PADDING,
 				bounds.position.y + entryHeight / 2 + offset.y,
 				label->name.c_str(), nullptr);
+
+		std::string hint=label->getHint();
+		if(hint.size()>0){
+			if(index==selectedIndex){
+				nvgFillColor(nvg,Color(mix(textAltColor->toRGBAf(),backgroundColor->toRGBAf(),0.5f)));
+			} else {
+				nvgFillColor(nvg, Color(mix(textColor->toRGBAf(),backgroundColor->toRGBAf(),0.5f)));
+			}
+			nvgFontSize(nvg, th-4);
+			nvgFontFaceId(nvg, context->getFontHandle(FontType::Normal));
+			nvgTextAlign(nvg, NVG_ALIGN_RIGHT | NVG_ALIGN_MIDDLE);
+			nvgText(nvg,bounds.position.x + bounds.dimensions.x - lineWidth- TextField::PADDING + offset.x,bounds.position.y + entryHeight / 2 + offset.y,
+					hint.c_str(), nullptr);
+		}
+
 		popScissor(nvg);
 		if (label->isMenu()) {
+			nvgFontSize(nvg, th);
+			if(index==selectedIndex){
+				nvgFillColor(nvg, *textAltColor);
+			} else {
+				nvgFillColor(nvg, *textColor);
+			}
 			nvgFontFaceId(nvg, context->getFontHandle(FontType::Icon));
 			nvgTextAlign(nvg, NVG_ALIGN_RIGHT | NVG_ALIGN_MIDDLE);
 			nvgText(nvg,

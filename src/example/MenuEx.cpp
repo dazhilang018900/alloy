@@ -42,11 +42,11 @@ bool MenuEx::init(Composite& rootNode) {
 	importMenu->addItem("Umbrellas")->onSelect = [=] {std::cout << "Import:Umbrellas" << std::endl;};
 
 	fileMenu->addItem(newMenu);
-	fileMenu->addItem("Open")->onSelect = [=]() {std::cout << "File:Open" << std::endl;};
-	fileMenu->addItem("Save")->onSelect = [=]() {std::cout << "File:Save" << std::endl;};
+	fileMenu->addItem("Open","Ctrl+O")->onSelect = [=]() {std::cout << "File:Open" << std::endl;};
+	fileMenu->addItem("Save","Ctrl+S")->onSelect = [=]() {std::cout << "File:Save" << std::endl;};
 	fileMenu->addItem(importMenu);
-	fileMenu->addItem("Close")->onSelect = [=]() {std::cout << "File:Close" << std::endl;};
-	fileMenu->addItem("Exit")->onSelect = [=]() {std::cout << "File:Exit" << std::endl;};
+	fileMenu->addItem("Close","Esc")->onSelect = [=]() {std::cout << "File:Close" << std::endl;};
+	fileMenu->addItem("Exit","Ctrl+Q")->onSelect = [=]() {std::cout << "File:Exit" << std::endl;};
 
 	editMenu->addItem("Cut")->onSelect = [=]() {std::cout << "Edit:Cut" << std::endl;};
 	editMenu->addItem("Copy")->onSelect = [=]() {std::cout << "Edit:Copy" << std::endl;};
