@@ -166,7 +166,14 @@ namespace aly {
 		}
 		if (onClose) {
 			if (!onClose(pane)){
-				if(wasSelected)selectedPane=pane;
+				if(wasSelected){
+					if(pane!=selectedPane&&onSelect){
+						selectedPane=pane;
+						onSelect(pane);
+					} else {
+						selectedPane=pane;
+					}
+				}
 				return;
 			}
 		}
@@ -230,10 +237,11 @@ namespace aly {
 		if (selectedPane != nullptr) {
 			selectedPane->region->setVisible(false);
 		}
+		bool changed=(selectedPane!=s);
 		selectedPane = s;
 		barRegion->putLast(s->header);
 		s->region->setVisible(true);
-		if(onSelect){
+		if(onSelect&&changed){
 			onSelect(selectedPane);
 		}
 	}
