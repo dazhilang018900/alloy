@@ -26,6 +26,7 @@
 #include <iostream>
 #include <cctype>
 #include <functional>
+#include <math.h>
 namespace aly {
 void SANITY_CHECK_STRINGS(){
 	std::cout<<"["<<LongestCommonPrefix(std::vector<std::string>{"abra"})<<"]"<<std::endl;
@@ -84,6 +85,39 @@ int ReplaceFirst(std::string& str, const std::string& from, const std::string& t
         return 1;
     }
     return 0;
+}
+std::string FormatTimeDuration(double elapsedTime) {
+	std::stringstream ss;
+	if (elapsedTime == 0) {
+		return "0 sec";
+	} else {
+		int sec = (int) std::floor(elapsedTime);
+		if (elapsedTime < 1.0f) {
+			ss << (int) (elapsedTime * 1E3) << " ms";
+		} else if (elapsedTime < 60.0f) {
+			int ms = ((int) (elapsedTime * 1E3)) % 1000;
+			if (ms != 0) {
+				ss << sec << " sec " << ms << " ms";
+			} else {
+				ss << sec << " sec";
+			}
+		} else if (elapsedTime < 3600.0f) {
+			if (sec % 60 != 0) {
+				ss << sec / 60 << " min " << sec % 60 << " sec";
+			} else {
+				ss << sec / 60 << " min";
+			}
+		} else {
+			int hrs = (sec / 3600);
+			int mins = (sec - hrs * 3600) / 60;
+			if (sec % 60 != 0) {
+				ss << hrs << " hrs " << mins << " min " << sec % 60 << " sec";
+			} else {
+				ss << hrs << " hrs " << mins << " min";
+			}
+		}
+		return ss.str();
+	}
 }
 int ReplaceLast(std::string& str, const std::string& from, const std::string& to) {
     size_t start_pos = 0;
@@ -326,5 +360,28 @@ bool ContainsIgnoreCase(const std::string& str, const std::string& pattern) {
 	std::string strl = ToLower(str);
 	std::string patternl = ToLower(pattern);
 	return (strl.find(patternl) != std::string::npos);
+}
+Timer::Timer(const std::string& name):name(name){
+	lastTime=std::chrono::steady_clock::now();
+}
+double Timer::getElapsed(bool reset){
+	std::chrono::steady_clock::time_point currentTime=std::chrono::steady_clock::now();
+	if(reset)lastTime=currentTime;
+	return std::chrono::duration<double>(currentTime - lastTime).count();
+}
+void Timer::reset(){
+	lastTime=std::chrono::steady_clock::now();
+}
+void Timer::tic(){
+	reset();
+}
+double Timer::toc() {
+	double e=getElapsed(true);
+	if(name.size()>0){
+		std::cout<<"["<<name<<"] elapsed time = "<<FormatTimeDuration(e)<<std::endl;
+	} else {
+		std::cout<<"Elapsed time = "<<FormatTimeDuration(e)<<std::endl;
+	}
+	return e;
 }
 }

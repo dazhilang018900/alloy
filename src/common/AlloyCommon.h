@@ -30,6 +30,7 @@
 #include <vector>
 #include <locale>
 #include <memory>
+#include <chrono>
 #include <AlloyCompression.h>
 #define ALLOYERROR(err) throw std::runtime_error(aly::MakeString()<<"Runtime error in "<<std::string(__FILE__)<<" on line "<<__LINE__<<": "<<err);
 #define ALLOYWARNING(err) std::cerr<<"Warning in "<<std::string(__FILE__)<<" on line "<<__LINE__<<": "<<err;
@@ -85,6 +86,19 @@ namespace aly {
 	std::string& Trim(std::string& str);
 	std::string LongestCommonPrefix(const std::vector<std::string>& strs);
 	std::vector<std::string> Tokenize(const std::string& str);
+	std::string FormatTimeDuration(double elapsedTime);
+	class Timer{
+	protected:
+		std::chrono::steady_clock clock;
+		std::chrono::steady_clock::time_point lastTime;
+	public:
+		std::string name;
+		Timer(const std::string& name);
+		double getElapsed(bool reset=false);
+		void reset();
+		void tic();
+		double toc();
+	};
 }
 
 #endif /* ALLOYCOMMON_H_ */
