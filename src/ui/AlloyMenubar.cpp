@@ -324,6 +324,10 @@ void Menu::addItem(const std::shared_ptr<MenuItem>& selection) {
 		Composite::add(selection);
 	}
 }
+void Menu::clear(){
+	options.clear();
+	Composite::clear();
+}
 void Menu::setSelectedIndex(int index) {
 	selectedIndex = index;
 	if (index < 0) {
@@ -419,6 +423,12 @@ Menu::Menu(const std::string& name, float menuWidth,
 								if (selected == nullptr||!selected->isMenu()) {
 									setSelectedIndex(-1);
 									AlloyApplicationContext()->removeOnTopRegion(this);
+								}
+							}
+						} else {
+							if (fireEvent(selectedIndex)) {
+								if (menuBar != nullptr) {
+									menuBar->hideMenus();
 								}
 							}
 						}

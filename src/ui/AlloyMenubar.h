@@ -99,6 +99,7 @@ public:
 		return item;
 	}
 	void addItem(const std::shared_ptr<MenuItem>& selection);
+	virtual void clear() override;
 	Menu(const std::string& name, float menuWidth = 200.0f,
 			const std::vector<std::shared_ptr<MenuItem>>& options = std::vector<
 					std::shared_ptr<MenuItem>>());
