@@ -39,7 +39,10 @@ public:
 				ModifiableNumberPtr field = ModifiableNumberPtr(
 						new ModifiableNumber(MakeString() << "M[" << m << "][" << n << "]", CoordPercent(n / (float) N, m / (float) M),
 								CoordPercent(1.0f / M, 1.0f / N), NumberType::Float));
+				field->backgroundColor=MakeColor(AlloyDefaultContext()->theme.DARKER);
+				field->borderColor=MakeColor(AlloyDefaultContext()->theme.LIGHT);
 				field->setNumberValue(Float(Mat[m][n]));
+				field->setRoundCorners(true);
 				field->setAlignment(HorizontalAlignment::Center, VerticalAlignment::Middle);
 				field->onTextEntered = [this,m,n](NumberField* field) {
 					this->Mat[m][n]=field->getValue().toFloat();
@@ -77,7 +80,10 @@ public:
 		for (int n = 0; n < N; n++) {
 			ModifiableNumberPtr field = ModifiableNumberPtr(
 					new ModifiableNumber(MakeString() << "V[" << n << "]", CoordPercent(n / (float) N, 0.0f), CoordPercent(1.0f / N, 1.0f), NumberType::Float));
+			field->backgroundColor=MakeColor(AlloyDefaultContext()->theme.DARKER);
+			field->borderColor=MakeColor(AlloyDefaultContext()->theme.LIGHT);
 			field->setNumberValue(Float(Mat[n]));
+			field->setRoundCorners(true);
 			field->setAlignment(HorizontalAlignment::Center, VerticalAlignment::Middle);
 			field->onTextEntered = [this,n](NumberField* field) {
 				this->value[n]=field->getValue().toFloat();
@@ -113,6 +119,9 @@ public:
 			ModifiableNumberPtr field = ModifiableNumberPtr(
 					new ModifiableNumber(MakeString() << "V[" << n << "]", CoordPercent(n / (float) N, 0.0f), CoordPercent(1.0f / N, 1.0f),
 							NumberType::Integer));
+			field->backgroundColor=MakeColor(AlloyDefaultContext()->theme.DARKER);
+			field->borderColor=MakeColor(AlloyDefaultContext()->theme.LIGHT);
+			field->setRoundCorners(true);
 			field->setNumberValue(Integer(Mat[n]));
 			field->setAlignment(HorizontalAlignment::Center, VerticalAlignment::Middle);
 			field->onTextEntered = [this,n](NumberField* field) {
@@ -196,7 +205,7 @@ public:
 			if(this->onChange)this->onChange(label,*ref);
 		};
 		setCommonParameters(comp, labelRegion, valueRegion);
-		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
+		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHT);
 		valueRegion->setRoundCorners(true);
 		estimatedHeight += M * entryHeight + SPACING;
 		return valueRegion;
@@ -224,7 +233,8 @@ public:
 			if(this->onChange)this->onChange(label,*ref);
 		};
 		setCommonParameters(comp, labelRegion, valueRegion);
-		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
+		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHT);
+
 		valueRegion->setRoundCorners(true);
 		estimatedHeight += entryHeight + SPACING;
 		return valueRegion;
@@ -252,7 +262,8 @@ public:
 			if(this->onChange)this->onChange(label,*ref);
 		};
 		setCommonParameters(comp, labelRegion, valueRegion);
-		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
+		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHT);
+
 		valueRegion->setRoundCorners(true);
 		estimatedHeight += entryHeight + SPACING;
 		return valueRegion;

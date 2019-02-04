@@ -875,8 +875,14 @@ template<class T, int M> vec<T, M> mix(const vec<T, M> & a, const vec<T, M> & b,
 		const double t) {
 	return vec<T, M>(vec<double, M>(a) * (1 - t) + vec<double, M>(b) * (t));
 }
-template<class T> T mix(const T & a, const T & b, double t) {
-	return (T) ((double) a * (1.0 - t) + (double) b * (t));
+inline float mix(const float & a, const float & b, float t) {
+	return ((float) a * (1.0f - t) + (float) b * (t));
+}
+inline float mix(const float & a, const float & b, double t) {
+	return (float)( a * (1.0 - t) + b * (t));
+}
+inline double mix(const double & a, const double & b, double t) {
+	return ((double) a * (1.0 - t) + (double) b * (t));
 }
 template<class T, int M> vec<T, M> mix(const vec<T, M> & a, const vec<T, M> & b,
 		const vec<T, M> & t) {

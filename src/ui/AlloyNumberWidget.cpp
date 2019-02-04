@@ -97,16 +97,16 @@ void ModifiableNumber::draw(AlloyContext* context) {
 		nvgFillColor(nvg, context->theme.LIGHTER);
 		nvgBeginPath(nvg);
 		if (roundCorners) {
-			nvgRoundedRect(nvg, bounds.position.x + lineWidth * 0.5f + PADDING,
-					bounds.position.y + lineWidth * 0.5f + PADDING,
-					bounds.dimensions.x - lineWidth - 2 * PADDING,
-					bounds.dimensions.y - lineWidth - 2 * PADDING,
+			nvgRoundedRect(nvg, bounds.position.x + lineWidth * 0.5f,
+					bounds.position.y + lineWidth * 0.5f,
+					bounds.dimensions.x - lineWidth ,
+					bounds.dimensions.y - lineWidth ,
 					context->theme.CORNER_RADIUS);
 		} else {
-			nvgRect(nvg, bounds.position.x + lineWidth * 0.5f + PADDING,
-					bounds.position.y + lineWidth * 0.5f + PADDING,
-					bounds.dimensions.x - lineWidth - 2 * PADDING,
-					bounds.dimensions.y - lineWidth - 2 * PADDING);
+			nvgRect(nvg, bounds.position.x + lineWidth * 0.5f ,
+					bounds.position.y + lineWidth * 0.5f ,
+					bounds.dimensions.x - lineWidth ,
+					bounds.dimensions.y - lineWidth );
 		}
 		nvgFill(nvg);
 	}
@@ -301,7 +301,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 		showDefaultLabel = true;
 	}
 	if (ofocus) {
-		const int PAD = 2.0f;
+		const float PAD = 1;
 		nvgLineJoin(nvg, NVG_MITER);
 		nvgBeginPath(nvg);
 		if (roundCorners) {
@@ -314,7 +314,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 					bounds.dimensions.x - 2 * PAD,
 					bounds.dimensions.y - 2 * PAD);
 		}
-		nvgStrokeWidth(nvg, (float) PAD);
+		nvgStrokeWidth(nvg,2.0f);
 		nvgStrokeColor(nvg, context->theme.FOCUS);
 		nvgStroke(nvg);
 	}

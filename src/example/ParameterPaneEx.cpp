@@ -42,44 +42,55 @@ ParameterPaneEx::ParameterPaneEx() :
 	paramFloatList.push_back(Float(12.34f));
 	paramFloatList.push_back(Float(56.78f));
 
-	paramDoubleList.push_back(Double((double)ALY_PI));
-	paramDoubleList.push_back(Double((double)std::exp(1.0)));
-
+	paramDoubleList.push_back(Double((double) ALY_PI));
+	paramDoubleList.push_back(Double((double) std::exp(1.0)));
 	paramString = "Hello";
 }
 bool ParameterPaneEx::init(Composite& rootNode) {
 	paramFile = getContext()->getFullPath("images/sfsunset.png");
 	paramMultiFile.push_back(getContext()->getFullPath("images/sfsunset.png"));
 	paramMultiFile.push_back(getContext()->getFullPath("images/sfmarket.png"));
-	BorderCompositePtr borderComposite = BorderCompositePtr(new BorderComposite("Layout",CoordPX(0.0f,0.0f),CoordPercent(1.0f,1.0f),true));
-	CompositePtr centerPane = CompositePtr(new Composite("Center", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
-	ParameterPanePtr paramPane = ParameterPanePtr(new ParameterPane("Parameter Pane",CoordPX(0.0f,0.0f),CoordPercent(1.0f,1.0f),26.0f));
-
-	paramPane->addGroup("Group 1",true);
-		paramPane->addFileField("File", paramFile);
-		paramPane->addSelectionField("Selection", paramSelect, std::vector<std::string>{"Cool", "Neat", "Awesome", "Boring"});
-		paramPane->addNumberField("Float", paramFloat1);
-		paramPane->addNumberField("Integer", paramInt1);
-		paramPane->addRangeField("Range", paramLow,paramHi);
-		paramPane->addRangeField("Number List",numList,"1, 2, 5-10");
-		paramPane->addRangeField("Range Tween", paramTweenLo, paramTweenHi, Integer(1001), Integer(1100));
-		paramPane->addTextField("String", paramString);
-		
-	paramPane->addGroup("Group 2",true);
-		paramPane->addMultiFileSelector("Multi-File", paramMultiFile);
-		paramPane->addColorField("Color", paramColor);
-		paramPane->addNumberField("Tween", paramFloat2, Float(0.0f),Float(1.0f));
-		paramPane->addToggleBox("Toggle", paramBool1);
-		paramPane->addCheckBox("Check", paramBool2);
-
-
-	paramPane->addGroup("Group 3",true);
-		paramPane->addNumberVectorField("Integers",paramIntegerList,NumberType::Integer,8.0f);
-		paramPane->addNumberVectorField("Floats",paramFloatList,NumberType::Float,8.0f);
-		paramPane->addNumberVectorField("Doubles",paramDoubleList,NumberType::Double,8.0f);
-
+	BorderCompositePtr borderComposite = BorderCompositePtr(
+			new BorderComposite("Layout", CoordPX(0.0f, 0.0f),
+					CoordPercent(1.0f, 1.0f), true));
+	CompositePtr centerPane = CompositePtr(
+			new Composite("Center", CoordPX(0.0f, 0.0f),
+					CoordPercent(1.0f, 1.0f)));
+	ParameterPanePtr paramPane = ParameterPanePtr(
+			new ParameterPane("Parameter Pane", CoordPX(0.0f, 0.0f),
+					CoordPercent(1.0f, 1.0f), 26.0f));
+	vecf = float3(3, 5, 6);
+	veci = int2(200, 300);
+	mat = float4x4::identity();
+	paramPane->addGroup("Group 1", true);
+	paramPane->addFileField("File", paramFile);
+	paramPane->addSelectionField("Selection", paramSelect,
+			std::vector<std::string> { "Cool", "Neat", "Awesome", "Boring" });
+	paramPane->addNumberField("Float", paramFloat1);
+	paramPane->addNumberField("Integer", paramInt1);
+	paramPane->addRangeField("Range", paramLow, paramHi);
+	paramPane->addRangeField("Number List", numList, "1, 2, 5-10");
+	paramPane->addVectorFloatField("Tuple", vecf, 7.0f);
+	paramPane->addVectorIntegerField("Tuple", veci, 4.0f);
+	paramPane->addMatrixField("Matrix", mat, 10.0f);
+	paramPane->addRangeField("Range Tween", paramTweenLo, paramTweenHi,
+			Integer(1001), Integer(1100));
+	paramPane->addTextField("String", paramString);
+	paramPane->addGroup("Group 2", true);
+	paramPane->addMultiFileSelector("Multi-File", paramMultiFile);
+	paramPane->addColorField("Color", paramColor);
+	paramPane->addNumberField("Tween", paramFloat2, Float(0.0f), Float(1.0f));
+	paramPane->addToggleBox("Toggle", paramBool1);
+	paramPane->addCheckBox("Check", paramBool2);
+	paramPane->addGroup("Group 3", true);
+	paramPane->addNumberVectorField("Integers", paramIntegerList,
+			NumberType::Integer, 8.0f);
+	paramPane->addNumberVectorField("Floats", paramFloatList, NumberType::Float,
+			8.0f);
+	paramPane->addNumberVectorField("Doubles", paramDoubleList,
+			NumberType::Double, 8.0f);
 	centerPane->backgroundColor = MakeColor(getContext()->theme.LIGHT);
-	paramPane->backgroundColor=MakeColor(getContext()->theme.DARKER);
+	paramPane->backgroundColor = MakeColor(getContext()->theme.DARKER);
 	borderComposite->setCenter(centerPane);
 	borderComposite->setEast(paramPane, UnitPX(400.0f));
 	rootNode.add(borderComposite);

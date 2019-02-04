@@ -32,6 +32,9 @@ protected:
 	aly::Number paramHi;
 	aly::Number paramTweenLo;
 	aly::Number paramTweenHi;
+	aly::float3 vecf;
+	aly::int2 veci;
+	aly::float4x4 mat;
 	std::vector<aly::Number> paramIntegerList;
 	std::vector<aly::Number> paramFloatList;
 	std::vector<aly::Number> paramDoubleList;
