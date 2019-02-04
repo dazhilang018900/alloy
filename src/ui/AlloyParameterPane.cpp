@@ -641,6 +641,162 @@ namespace aly {
 		estimatedHeight += 4 * entryHeight + SPACING;
 		return valueRegion;
 	}
+	template<int M, int N> std::shared_ptr<MatrixField<M, N>> ParameterPane::addMatrixFieldInternal(
+				const std::string& label, aly::matrix<float, M, N>& value,
+				float aspect) {
+			using namespace aly;
+			CompositePtr comp = CompositePtr(
+					new Composite(label + "_param", CoordPX(0, 0),
+							CoordPerPX(1.0f, 0.0f, 0.0f, M * entryHeight)));
+			TextLabelPtr labelRegion = TextLabelPtr(
+					new TextLabel(label, CoordPX(0.0f, 0.0f),
+							CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+			std::shared_ptr<MatrixField<M, N>> valueRegion = std::shared_ptr<
+					MatrixField<M, N>>(
+					new MatrixField<M, N>(label,
+							CoordPerPX(1.0f, 0.0f, -aspect * entryHeight, 0.0f),
+							CoordPX(aspect * entryHeight, M * entryHeight), value));
+			if (aspect <= 0) {
+				pixel2 labelBounds = labelRegion->getTextDimensions(
+						AlloyDefaultContext().get());
+				labelBounds.x += 10;
+				valueRegion->position = CoordPX(labelBounds.x, 0.0f);
+				valueRegion->dimensions = CoordPerPX(1.0f, 0.0f, -labelBounds.x,
+						M * entryHeight);
+			} else {
+				labelRegion->position = CoordPX(0.0f, 0.0f);
+				labelRegion->dimensions = CoordPerPX(1.0f, 0.0f,
+						-aspect * entryHeight, M * entryHeight);
+			}
+			std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(
+					new AnyValue<aly::matrix<float, M, N>*>(&value));
+			values.push_back(ref);
+			valueRegion->onTextEntered =
+					[=](MatrixField<M,N>* field) {
+						*(ref->getValue<aly::matrix<float,M,N>*>()) = field->getValue();
+						if(this->onChange)this->onChange(label,*ref);
+					};
+			setCommonParameters(comp, labelRegion, valueRegion);
+			valueRegion->backgroundColor = MakeColor(
+					AlloyDefaultContext()->theme.LIGHT);
+			valueRegion->setRoundCorners(true);
+			estimatedHeight += M * entryHeight + SPACING;
+			return valueRegion;
+		}
+
+		template<int N> std::shared_ptr<VectorFloatField<N>> ParameterPane::addVectorFloatFieldInternal(
+				const std::string& label, aly::vec<float, N>& value, float aspect ) {
+			using namespace aly;
+			CompositePtr comp = CompositePtr(
+					new Composite(label + "_param", CoordPX(0, 0),
+							CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+			TextLabelPtr labelRegion = TextLabelPtr(
+					new TextLabel(label, CoordPX(0.0f, 0.0f),
+							CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+			std::shared_ptr<VectorFloatField<N>> valueRegion = std::shared_ptr<
+					VectorFloatField<N>>(
+					new VectorFloatField<N>(label,
+							CoordPerPX(1.0f, 0.0f, -aspect * entryHeight, 0.0f),
+							CoordPX(aspect * entryHeight, entryHeight), value));
+			if (aspect <= 0) {
+				pixel2 labelBounds = labelRegion->getTextDimensions(
+						AlloyDefaultContext().get());
+				labelBounds.x += 10;
+				valueRegion->position = CoordPX(labelBounds.x, 0.0f);
+				valueRegion->dimensions = CoordPerPX(1.0f, 0.0f, -labelBounds.x,
+						entryHeight);
+			} else {
+				labelRegion->position = CoordPX(0.0f, 0.0f);
+				labelRegion->dimensions = CoordPerPX(1.0f, 0.0f,
+						-aspect * entryHeight, entryHeight);
+			}
+			std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(
+					new AnyValue<aly::vec<float, N>*>(&value));
+			values.push_back(ref);
+			valueRegion->onTextEntered = [=](VectorFloatField<N>* field) {
+				*(ref->getValue<aly::vec<float,N>*>()) = field->getValue();
+				if(this->onChange)this->onChange(label,*ref);
+			};
+			setCommonParameters(comp, labelRegion, valueRegion);
+			valueRegion->backgroundColor = MakeColor(
+					AlloyDefaultContext()->theme.LIGHT);
+
+			valueRegion->setRoundCorners(true);
+			estimatedHeight += entryHeight + SPACING;
+			return valueRegion;
+		}
+
+		template<int N> std::shared_ptr<VectorIntegerField<N>> ParameterPane::addVectorIntegerFieldInternal(
+				const std::string& label, aly::vec<int, N>& value, float aspect) {
+			using namespace aly;
+			CompositePtr comp = CompositePtr(
+					new Composite(label + "_param", CoordPX(0, 0),
+							CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+			TextLabelPtr labelRegion = TextLabelPtr(
+					new TextLabel(label, CoordPX(0.0f, 0.0f),
+							CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
+			std::shared_ptr<VectorIntegerField<N>> valueRegion = std::shared_ptr<
+					VectorIntegerField<N>>(
+					new VectorIntegerField<N>(label,
+							CoordPerPX(1.0f, 0.0f, -aspect * entryHeight, 0.0f),
+							CoordPX(aspect * entryHeight, entryHeight), value));
+			if (aspect <= 0) {
+				pixel2 labelBounds = labelRegion->getTextDimensions(
+						AlloyDefaultContext().get());
+				labelBounds.x += 10;
+				valueRegion->position = CoordPX(labelBounds.x, 0.0f);
+				valueRegion->dimensions = CoordPerPX(1.0f, 0.0f, -labelBounds.x,
+						entryHeight);
+			} else {
+				labelRegion->position = CoordPX(0.0f, 0.0f);
+				labelRegion->dimensions = CoordPerPX(1.0f, 0.0f,
+						-aspect * entryHeight, entryHeight);
+			}
+			std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(
+					new AnyValue<aly::vec<int, N>*>(&value));
+			values.push_back(ref);
+			valueRegion->onTextEntered = [=](VectorIntegerField<N>* field) {
+				*(ref->getValue<aly::vec<int, N>*>()) = field->getValue();
+				if(this->onChange)this->onChange(label,*ref);
+			};
+			setCommonParameters(comp, labelRegion, valueRegion);
+			valueRegion->backgroundColor = MakeColor(
+					AlloyDefaultContext()->theme.LIGHT);
+
+			valueRegion->setRoundCorners(true);
+			estimatedHeight += entryHeight + SPACING;
+			return valueRegion;
+		}
+	std::shared_ptr<VectorIntegerField<2>> ParameterPane::addVectorIntegerField(const std::string& label, aly::vec<int, 2>& value, float aspect){
+		return addVectorIntegerField(label,value,aspect);
+	}
+	std::shared_ptr<VectorIntegerField<3>> ParameterPane::addVectorIntegerField(const std::string& label, aly::vec<int, 3>& value, float aspect){
+		return addVectorIntegerFieldInternal(label,value,aspect);
+	}
+	std::shared_ptr<VectorIntegerField<4>> ParameterPane::addVectorIntegerField(const std::string& label, aly::vec<int, 4>& value, float aspect){
+		return addVectorIntegerFieldInternal(label,value,aspect);
+	}
+	std::shared_ptr<VectorFloatField<2>> ParameterPane::addVectorFloatField(const std::string& label, aly::vec<float, 2>& value, float aspect){
+		return addVectorFloatFieldInternal(label,value,aspect);
+	}
+	std::shared_ptr<VectorFloatField<3>> ParameterPane::addVectorFloatField(const std::string& label, aly::vec<float, 3>& value, float aspect){
+		return addVectorFloatFieldInternal(label,value,aspect);
+	}
+	std::shared_ptr<VectorFloatField<4>> ParameterPane::addVectorFloatField(const std::string& label, aly::vec<float, 4>& value, float aspect){
+		return addVectorFloatFieldInternal(label,value,aspect);
+	}
+	std::shared_ptr<MatrixField<2, 2>> ParameterPane::addMatrixField(const std::string& label, aly::matrix<float, 2, 2>& value, float aspect) {
+		return addMatrixFieldInternal(label,value,aspect);
+	}
+	std::shared_ptr<MatrixField<3, 3>> ParameterPane::addMatrixField(const std::string& label, aly::matrix<float, 3, 3>& value, float aspect) {
+		return addMatrixFieldInternal(label,value,aspect);
+	}
+	std::shared_ptr<MatrixField<3, 4>> ParameterPane::addMatrixField(const std::string& label, aly::matrix<float, 3, 4>& value, float aspect) {
+		return addMatrixFieldInternal(label,value,aspect);
+	}
+	std::shared_ptr<MatrixField<4, 4>> ParameterPane::addMatrixField(const std::string& label, aly::matrix<float, 4, 4>& value, float aspect) {
+		return addMatrixFieldInternal(label,value,aspect);
+	}
 	MultiFileSelectorPtr ParameterPane::addMultiDirectorySelector(const std::string& label, std::vector<std::string>& files, float aspect) {
 		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, 4 * entryHeight)));
 		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
