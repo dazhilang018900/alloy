@@ -46,6 +46,7 @@ ParameterPaneEx::ParameterPaneEx() :
 	paramDoubleList.push_back(Double((double) std::exp(1.0)));
 	paramString = "Hello";
 }
+
 bool ParameterPaneEx::init(Composite& rootNode) {
 	paramFile = getContext()->getFullPath("images/sfsunset.png");
 	paramMultiFile.push_back(getContext()->getFullPath("images/sfsunset.png"));
