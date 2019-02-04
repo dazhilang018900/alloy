@@ -364,7 +364,23 @@ aly::RGB RGB888toRGB(uint32_t c){
 	uint32_t b = 255 & (c >> 16);
 	return aly::ubyte3(r,g,b);
 }
-
+Color mix(const Color& start,const Color& end,float alpha){
+	return Color(mix(start.toRGBAf(),end.toRGBAf(),alpha));
+}
+Theme::Theme(){
+	LIGHTEST = Color(255, 255, 255);
+	DARKEST = Color(0, 0, 0);
+	LIGHT = Color(180, 180, 180);
+	DARK = Color(64, 64, 64);
+	NEUTRAL = Color(120, 120, 120);
+	LIGHTER = Color(230, 230, 230);
+	DARKER = Color(32,32,32);
+	FOCUS = Color(128, 213, 255);
+	LINK = Color(128, 0, 0);
+	INVALID=Color(255, 128, 128);
+	CORNER_RADIUS = 5.0f;
+	SPACING = float2(4.0f, 4.0f);
+}
 Color HSVtoColor(const HSV& hsv) {
 	float h = hsv.x * 360.0f;
 	float s = hsv.y;

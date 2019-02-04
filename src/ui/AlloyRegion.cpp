@@ -19,6 +19,8 @@ const RGBA DEBUG_DOWN_COLOR = RGBA(200, 64, 32, 255);
 const RGBA DEBUG_ON_TOP_COLOR = RGBA(120, 120, 0, 255);
 const RGBA DEBUG_ON_TOP_DOWN_COLOR = RGBA(220, 220, 0, 255);
 const RGBA DEBUG_ON_TOP_HOVER_COLOR = RGBA(180, 180, 0, 255);
+const RGBA DEBUG_OBJECT_FOCUS_DOWN_COLOR = RGBA(255, 64, 242,255);
+const RGBA DEBUG_OBJECT_FOCUS_HOVER_COLOR = RGBA(254, 120, 248, 255);
 
 std::shared_ptr<Region> MakeRegion(const std::string& name,
 		const AUnit2D& position, const AUnit2D& dimensions,
@@ -39,6 +41,23 @@ void Region::updateCursor(CursorLocator* cursorLocator) {
 void Region::removeListener() const {
 	Application::removeListener(this);
 }
+bool Region::isCursorFocused() const {
+	return AlloyApplicationContext()->isCursorFocused(this);
+}
+void Region::setFocus(bool f){
+	if(f){
+		AlloyApplicationContext()->setObjectFocus(this);
+	} else {
+		Region* ptr=AlloyApplicationContext()->getObjectFocus();
+		if(ptr==this){
+			AlloyApplicationContext()->setObjectFocus(nullptr);
+		}
+	}
+}
+bool Region::isObjectFocused() const{
+	return AlloyApplicationContext()->isObjectFocused(this);
+}
+
 void Composite::removeListener() const {
 	Application::removeListener(this);
 	for (RegionPtr child : children) {
@@ -212,25 +231,33 @@ void Region::drawBoundsLabel(AlloyContext* context, const std::string& name,
 			bounds.dimensions.y);
 	bool hover = context->isMouseOver(this);
 	bool down = context->isMouseDown(this);
-
+	bool focus= context->isObjectFocused(this);
 	Color c;
 	if (isVisible()) {
-		if (down) {
-			if (ontop) {
-				c = DEBUG_ON_TOP_DOWN_COLOR;
+		if(focus){
+			if (hover) {
+				c=DEBUG_OBJECT_FOCUS_HOVER_COLOR;
 			} else {
-				c = DEBUG_DOWN_COLOR;
+				c=DEBUG_OBJECT_FOCUS_DOWN_COLOR;
 			}
-		} else if (hover) {
-			if (ontop) {
-				c = DEBUG_ON_TOP_HOVER_COLOR;
-			} else {
-				c = DEBUG_HOVER_COLOR;
-			}
-		} else if (ontop) {
-			c = DEBUG_ON_TOP_COLOR;
 		} else {
-			c = DEBUG_STROKE_COLOR;
+			if (down) {
+				if (ontop) {
+					c = DEBUG_ON_TOP_DOWN_COLOR;
+				} else {
+					c = DEBUG_DOWN_COLOR;
+				}
+			} else if (hover) {
+				if (ontop) {
+					c = DEBUG_ON_TOP_HOVER_COLOR;
+				} else {
+					c = DEBUG_HOVER_COLOR;
+				}
+			} else if (ontop) {
+				c = DEBUG_ON_TOP_COLOR;
+			} else {
+				c = DEBUG_STROKE_COLOR;
+			}
 		}
 	} else {
 		c = DEBUG_HIDDEN_COLOR;

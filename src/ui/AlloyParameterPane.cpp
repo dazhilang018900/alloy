@@ -161,6 +161,7 @@ namespace aly {
 
 		valueRegion->textColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->backgroundColor = MakeColor(0, 0, 0, 0);
+		valueRegion->setRoundCorners(false);
 		tweenRegion->backgroundColor = MakeColor(0, 0, 0, 0);
 		tweenRegion->borderWidth = UnitPX(0.0f);
 		comp->add(tweenRegion);

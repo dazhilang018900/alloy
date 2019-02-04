@@ -25,21 +25,27 @@ namespace aly {
 bool Selection::handleMouseClick(AlloyContext* context,
 		const InputEvent& event) {
 	if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
-		box2px bounds = getBounds(false);
-		selectionBox->pack(bounds.position, bounds.dimensions, context->dpmm,
-				context->pixelRatio);
-		int current = getSelectedIndex();
-		if (current >= 0) {
-			selectionBox->setSelectedIndex(current);
-			selectionBox->setSelectionOffset(current);
+		setFocus(true);
+		if(!selectionBox->isVisible()){
+			box2px bounds = getBounds(false);
+			selectionBox->pack(bounds.position, bounds.dimensions, context->dpmm,
+					context->pixelRatio);
+			int current = getSelectedIndex();
+			if (current >= 0) {
+				selectionBox->setSelectedIndex(current);
+				selectionBox->setSelectionOffset(current);
+			} else {
+				selectionBox->setSelectionOffset(0);
+				selectionBox->setSelectedIndex(0);
+			}
+			show(context);
 		} else {
-			selectionBox->setSelectionOffset(0);
-			selectionBox->setSelectedIndex(0);
+			hide(context);
 		}
-		show(context);
 		return true;
 	} else if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
 		hide(context);
+		setFocus(false);
 	}
 	return false;
 }
@@ -392,6 +398,23 @@ SelectionBox::SelectionBox(const std::string& name, const AUnit2D& pos,
 			};
 	Application::addListener(this);
 }
+bool Selection::onEventHandler(AlloyContext* context, const InputEvent& event){
+	if(event.type==InputType::Key&&event.isDown()){
+		if(isObjectFocused()&&!selectionBox->isVisible()){
+			if(event.key==GLFW_KEY_UP){
+				int sz=getSelectionSize();
+				if(sz>0){
+					setSelectedIndex((getSelectedIndex()-1+sz)%sz);
+					return true;
+				}
+			} else if(event.key==GLFW_KEY_DOWN){
+				setSelectedIndex((getSelectedIndex()+1)%getSelectionSize());
+				return true;
+			}
+		}
+	}
+	return Composite::onEventHandler(context,event);
+}
 void Selection::hide(AlloyContext* context) {
 	context->removeOnTopRegion(selectionBox.get());
 	selectionBox->setVisible(false);
@@ -411,7 +434,8 @@ Selection::Selection(const std::string& label, const AUnit2D& position,
 		Composite(label), selectedIndex(-1) {
 	this->position = position;
 	this->dimensions = dimensions;
-	borderColor = MakeColor(COLOR_NONE);
+	borderColor = MakeColor(AlloyApplicationContext()->theme.NEUTRAL);
+	borderWidth=UnitPX(0.0f);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	setRoundCorners(true);
 	CompositePtr valueContainer = MakeComposite(label,
@@ -506,9 +530,28 @@ Selection::Selection(const std::string& label, const AUnit2D& position,
 		}
 		return true;
 	};
-
+	Application::addListener(this);
 }
-
+void Selection::setValue(int selection) {
+	selectedIndex = selection;
+	selectionBox->setSelectedIndex(selection);
+	selectionLabel->setLabel(this->getValue());
+	if (onSelect)
+		onSelect(selectedIndex);
+}
+void Selection::addSelection(const std::string& selection) {
+	selectionBox->addSelection(selection);
+}
+size_t Selection::getSelectionSize() const {
+	return selectionBox->getSelectionSize();
+}
+void Selection::setSelectedIndex(int selection) {
+	selectedIndex = selection;
+	selectionBox->setSelectedIndex(selection);
+	selectionLabel->setLabel(this->getValue());
+	if (onSelect)
+		onSelect(selectedIndex);
+}
 void Selection::draw(AlloyContext* context) {
 	bool hover = context->isMouseContainedIn(this);
 	if(hover){
@@ -518,6 +561,28 @@ void Selection::draw(AlloyContext* context) {
 	//	hide(context);
 	//}
 	Composite::draw(context);
+	box2px bounds = getBounds();
+	NVGcontext* nvg=context->nvgContext;
+	const int PAD = 1.0f;
+	if (isObjectFocused()) {
+		nvgLineJoin(nvg, NVG_MITER);
+		nvgBeginPath(nvg);
+			if (roundCorners) {
+				nvgRoundedRect(nvg, bounds.position.x + PAD,
+						bounds.position.y  + PAD,
+						bounds.dimensions.x - 2 * PAD,
+						bounds.dimensions.y - 2 * PAD,
+						context->theme.CORNER_RADIUS);
+			} else {
+				nvgRect(nvg, bounds.position.x  + PAD,
+						bounds.position.y + PAD,
+						bounds.dimensions.x - 2 * PAD,
+						bounds.dimensions.y - 2 * PAD);
+			}
+		nvgStrokeWidth(nvg, 2.0f);
+		nvgStrokeColor(nvg, context->theme.FOCUS);
+		nvgStroke(nvg);
+	}
 }
 
 

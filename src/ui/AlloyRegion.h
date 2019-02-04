@@ -85,6 +85,9 @@ public:
 	virtual inline bool isScrollEnabled() const {
 		return false;
 	}
+	virtual bool isCursorFocused() const;
+	virtual void setFocus(bool f);
+	virtual bool isObjectFocused() const;
 	virtual std::string getName() const override {
 		return name;
 	}

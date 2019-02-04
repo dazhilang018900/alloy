@@ -41,6 +41,8 @@ public:
 	CheckBox(const std::string& label, const AUnit2D& position,
 			const AUnit2D& dimensions, bool checked ,bool showText=true);
 	virtual void draw(AlloyContext* context) override;
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+			override;
 };
 class ToggleBox: public Composite {
 private:
@@ -60,6 +62,8 @@ public:
 	ToggleBox(const std::string& label, const AUnit2D& position,
 			const AUnit2D& dimensions, bool toggledOn ,bool showText=true);
 	virtual void draw(AlloyContext* context) override;
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+			override;
 };
 
 

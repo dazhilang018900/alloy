@@ -44,7 +44,7 @@ protected:
 	int cursorStart = 0, cursorEnd = 0, textStart = 0;
 	bool dragging = false;
 	bool valid = true;
-	bool focused=false;
+	//bool focused=false;
 	std::string lastValue;
 	Number numberValue;
 	NumberType numberType;
@@ -55,9 +55,11 @@ public:
 	bool isValid() const {
 		return valid;
 	}
+	/*
 	bool isFocused() const {
 		return focused;
 	}
+	*/
 	void setModifiable(bool m) {
 		modifiable = m;
 	}

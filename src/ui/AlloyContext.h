@@ -173,7 +173,8 @@ namespace aly {
 		pixel2 cursorDownPosition = pixel2(-1, -1);
 		Region* mouseOverRegion = nullptr;
 		Region* mouseDownRegion = nullptr;
-		Region* mouseFocusRegion = nullptr;
+		Region* cursorFocusRegion = nullptr;
+		Region* objectFocusRegion = nullptr;
 		Region* onTopRegion = nullptr;
 		const Cursor* cursor = nullptr;
 		std::map<EventHandler*, std::string> listeners;
@@ -217,18 +218,16 @@ namespace aly {
 		pixel2 getRelativeCursorDownPosition() const;
 		bool hasDeferredTasks() const ;
 		void addDeferredTask(const std::function<void()>& func, bool block = false);
-
 		bool executeDeferredTasks();
 		std::shared_ptr<Composite>& getGlassPane();
-
-
 		pixel2 getCursorDownPosition() const;
 		bool fireListeners(const InputEvent& event);
 		void interruptListeners();
 		void setDragObject(Region* region);
 		bool isMouseOver(Region* region, bool includeParent = false) const;
 		bool isMouseDown(Region* region, bool includeParent = false) const;
-		bool isFocused(Region* region);
+		bool isCursorFocused(const Region* region);
+		bool isObjectFocused(const Region* region);
 		bool isControlDown() const {
 			return ((glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) | glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL)) != 0);
 		}
@@ -245,11 +244,17 @@ namespace aly {
 		Region* getMouseDownObject() const {
 			return mouseDownRegion;
 		}
-		inline void setMouseFocusObject(Region* region) {
-			mouseFocusRegion = region;
+		inline void setCursorFocus(Region* region) {
+			cursorFocusRegion = region;
 		}
-		Region* getMouseFocusObject() const {
-			return mouseFocusRegion;
+		inline Region* getCursorFocus() const {
+			return cursorFocusRegion;
+		}
+		inline void setObjectFocus(Region* region) {
+			objectFocusRegion = region;
+		}
+		inline Region* getObjectFocus() const {
+			return objectFocusRegion;
 		}
 		void setOnTopRegion(Region* region);
 		void removeOnTopRegion(Region* region);
@@ -269,7 +274,15 @@ namespace aly {
 		bool isRightMouseButtonDown() const {
 			return rightMouseButton;
 		}
-
+		void setLeftMouseButtonDown(bool f) {
+			leftMouseButton=f;
+		}
+		void setMiddleMouseButtonDown(bool f) {
+			middleMouseButton=f;
+		}
+		void setRightMouseButtonDown(bool f) {
+			rightMouseButton=f;
+		}
 		inline bool isMouseDown() const {
 			return (mouseDownRegion != nullptr);
 		}

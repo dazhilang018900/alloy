@@ -258,13 +258,12 @@ namespace aly {
 				region->draw(context);
 			}
 		}
-		if (context->isMouseOver(maxValueLabel.get(), true)|| context->isFocused(maxValueLabel.get())) {
+		if (context->isMouseOver(maxValueLabel.get(), true)|| context->isCursorFocused(maxValueLabel.get())) {
 			drawLabel(labelFormatter(timeValue), pixel2(tbbox.position.x + tbbox.dimensions.x*0.5f, tbbox.position.y + tbbox.dimensions.y + handleSize), box2px(bounds.position, bounds.dimensions - pixel2( (entryWidth + 0.5f*trackPadding))), true, true, context);
 		}
-		else if (context->isMouseOver(minValueLabel.get(), true) || context->isFocused(minValueLabel.get())) {
+		else if (context->isMouseOver(minValueLabel.get(), true) || context->isCursorFocused(minValueLabel.get())) {
 			drawLabel(labelFormatter(timeValue), pixel2(tbbox.position.x + tbbox.dimensions.x*0.5f, tbbox.position.y + tbbox.dimensions.y + handleSize), box2px(bounds.position + pixel2(entryWidth + 0.5f*trackPadding, 0.0f), bounds.dimensions - pixel2( (entryWidth + 0.5f*trackPadding))), true, true, context);
-		}
-		else {
+		} else {
 			drawLabel(labelFormatter(timeValue), pixel2(tbbox.position.x + tbbox.dimensions.x*0.5f, tbbox.position.y + tbbox.dimensions.y + handleSize), bounds, true, true, context);
 		}
 		if (verticalScrollTrack.get() != nullptr) {

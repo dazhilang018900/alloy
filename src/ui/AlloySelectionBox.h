@@ -107,26 +107,12 @@ public:
 	std::string getSelection(int index) {
 		return selectionBox->getSelection(index);
 	}
-	void setValue(int selection) {
-		selectedIndex = selection;
-		selectionBox->setSelectedIndex(selection);
-		selectionLabel->setLabel(this->getValue());
-		if (onSelect)
-			onSelect(selectedIndex);
-	}
-	void addSelection(const std::string& selection) {
-		selectionBox->addSelection(selection);
-	}
-	size_t getSelectionSize() const {
-		return selectionBox->getSelectionSize();
-	}
-	void setSelectedIndex(int selection) {
-		selectedIndex = selection;
-		selectionBox->setSelectedIndex(selection);
-		selectionLabel->setLabel(this->getValue());
-		if (onSelect)
-			onSelect(selectedIndex);
-	}
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+			override;
+	void setValue(int selection);
+	void addSelection(const std::string& selection) ;
+	size_t getSelectionSize() const ;
+	void setSelectedIndex(int selection);
 	virtual void draw(AlloyContext* context) override;
 	Selection(const std::string& label, const AUnit2D& position,
 			const AUnit2D& dimensions, const std::vector<std::string>& options =

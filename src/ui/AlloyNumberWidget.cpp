@@ -22,7 +22,7 @@
 #include "ui/AlloyApplication.h"
 #include "ui/AlloyDrawUtil.h"
 
-namespace aly{
+namespace aly {
 
 const float NumberField::PADDING = 2;
 pixel2 ModifiableNumber::getTextDimensions(AlloyContext* context) {
@@ -48,6 +48,7 @@ ModifiableNumber::ModifiableNumber(const std::string& name,
 	this->modifiable = modifiable;
 	textAltColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	textColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
+	setRoundCorners(false);
 	fontSize = UnitPX(24);
 }
 
@@ -61,13 +62,14 @@ void ModifiableNumber::draw(AlloyContext* context) {
 	float y = bounds.position.y;
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;
-	bool f = context->isFocused(this) && modifiable;
+	bool f = context->isCursorFocused(this) && modifiable;
 	std::string formatedValue;
 
-	if (!f && focused && onTextEntered) {
+	if (!f && isObjectFocused() && onTextEntered) {
 		onTextEntered(this);
 	}
-	focused = f;
+	setFocus(f);
+	bool ofocus = isObjectFocused();
 	if (hover) {
 		context->setCursor(&Cursor::TextInsert);
 	}
@@ -91,13 +93,21 @@ void ModifiableNumber::draw(AlloyContext* context) {
 		nvgFill(nvg);
 	}
 
-	if (focused) {
+	if (ofocus) {
 		nvgFillColor(nvg, context->theme.LIGHTER);
 		nvgBeginPath(nvg);
-		nvgRect(nvg, bounds.position.x + lineWidth * 0.5f + PADDING,
-				bounds.position.y + lineWidth * 0.5f + PADDING,
-				bounds.dimensions.x - lineWidth - 2 * PADDING,
-				bounds.dimensions.y - lineWidth - 2 * PADDING);
+		if (roundCorners) {
+			nvgRoundedRect(nvg, bounds.position.x + lineWidth * 0.5f + PADDING,
+					bounds.position.y + lineWidth * 0.5f + PADDING,
+					bounds.dimensions.x - lineWidth - 2 * PADDING,
+					bounds.dimensions.y - lineWidth - 2 * PADDING,
+					context->theme.CORNER_RADIUS);
+		} else {
+			nvgRect(nvg, bounds.position.x + lineWidth * 0.5f + PADDING,
+					bounds.position.y + lineWidth * 0.5f + PADDING,
+					bounds.dimensions.x - lineWidth - 2 * PADDING,
+					bounds.dimensions.y - lineWidth - 2 * PADDING);
+		}
 		nvgFill(nvg);
 	}
 	auto currentTime = std::chrono::high_resolution_clock::now();
@@ -110,7 +120,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 	textOffsetX = x + 2.0f * lineWidth + PADDING;
 	float textY = y;
 
-	if (focused) {
+	if (ofocus) {
 		th = std::min(std::max(8.0f, h - 4 * PADDING),
 				this->fontSize.toPixels(bounds.dimensions.y, context->dpmm.y,
 						context->pixelRatio));
@@ -118,7 +128,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 		th = this->fontSize.toPixels(bounds.dimensions.y, context->dpmm.y,
 				context->pixelRatio);
 	}
-	if (!valid && !showDefaultLabel && focused) {
+	if (!valid && !showDefaultLabel && ofocus) {
 		nvgBeginPath(nvg);
 		nvgRect(nvg, x + PADDING, y + PADDING, w - 2 * PADDING,
 				h - 2 * PADDING);
@@ -128,7 +138,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 	}
 	nvgFontSize(nvg, th);
 	nvgFontFaceId(nvg, context->getFontHandle(fontType));
-	if (focused) {
+	if (ofocus) {
 		nvgTextMetrics(nvg, &ascender, &descender, &lineh);
 		box2px clipBounds = getCursorBounds();
 		clipBounds.intersect(
@@ -158,7 +168,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 		}
 		float cursorOffset = textOffsetX
 				+ (cursorStart ? positions[cursorStart - 1].maxx - 1 : 0);
-		if (cursorEnd != cursorStart && focused) {
+		if (cursorEnd != cursorStart && ofocus) {
 			int lo = std::min(cursorEnd, cursorStart);
 			int hi = std::max(cursorEnd, cursorStart);
 			float x0 = textOffsetX + (lo ? positions[lo - 1].maxx - 1 : 0);
@@ -167,7 +177,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 			nvgRect(nvg, x0, textY + (h - lineh) / 2 + PADDING, x1 - x0,
 					lineh - 2 * PADDING);
 			nvgFillColor(nvg,
-					focused ?
+					ofocus ?
 							context->theme.DARK.toSemiTransparent(0.5f) :
 							context->theme.DARK.toSemiTransparent(0.25f));
 			nvgFill(nvg);
@@ -189,10 +199,10 @@ void ModifiableNumber::draw(AlloyContext* context) {
 		}
 		popScissor(nvg);
 	} else {
-		if(labelFormatter){
-			formatedValue=labelFormatter(numberValue);
+		if (labelFormatter) {
+			formatedValue = labelFormatter(numberValue);
 		} else {
-			formatedValue=this->value;
+			formatedValue = this->value;
 		}
 		if (truncate) {
 			pushScissor(nvg, getCursorBounds());
@@ -206,7 +216,8 @@ void ModifiableNumber::draw(AlloyContext* context) {
 		if (showDefaultLabel) {
 			tw = nvgTextBounds(nvg, 0, 0, label.c_str(), nullptr, nullptr);
 		} else {
-			tw = nvgTextBounds(nvg, 0, 0, formatedValue.c_str(), nullptr, nullptr);
+			tw = nvgTextBounds(nvg, 0, 0, formatedValue.c_str(), nullptr,
+					nullptr);
 		}
 		switch (horizontalAlignment) {
 		case HorizontalAlignment::Left:
@@ -242,7 +253,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 			nvgLineCap(nvg, NVG_SQUARE);
 			nvgStrokeWidth(nvg, (fontType == FontType::Bold) ? 2.0f : 1.0f);
 			nvgStrokeColor(nvg,
-					(!valid && !focused && !showDefaultLabel) ?
+					(!valid && !ofocus && !showDefaultLabel) ?
 							*invalidNumberColor : *textColor);
 			nvgBeginPath(nvg);
 			nvgMoveTo(nvg, bounds.position.x + start.x,
@@ -257,7 +268,7 @@ void ModifiableNumber::draw(AlloyContext* context) {
 
 		} else {
 			drawText(nvg, bounds.position + offset, formatedValue, fontStyle,
-					(!valid && !focused) ? *invalidNumberColor : *textColor,
+					(!valid && !ofocus) ? *invalidNumberColor : *textColor,
 					*textAltColor);
 
 		}
@@ -286,8 +297,26 @@ void ModifiableNumber::draw(AlloyContext* context) {
 		nvgStroke(nvg);
 		nvgLineJoin(nvg, NVG_MITER);
 	}
-	if (!focused && value.size() == 0) {
+	if (!ofocus && value.size() == 0) {
 		showDefaultLabel = true;
+	}
+	if (ofocus) {
+		const int PAD = 2.0f;
+		nvgLineJoin(nvg, NVG_MITER);
+		nvgBeginPath(nvg);
+		if (roundCorners) {
+			nvgRoundedRect(nvg, bounds.position.x + PAD,
+					bounds.position.y + PAD, bounds.dimensions.x - 2 * PAD,
+					bounds.dimensions.y - 2 * PAD,
+					context->theme.CORNER_RADIUS);
+		} else {
+			nvgRect(nvg, bounds.position.x + PAD, bounds.position.y + PAD,
+					bounds.dimensions.x - 2 * PAD,
+					bounds.dimensions.y - 2 * PAD);
+		}
+		nvgStrokeWidth(nvg, (float) PAD);
+		nvgStrokeColor(nvg, context->theme.FOCUS);
+		nvgStroke(nvg);
 	}
 }
 bool NumberField::setNumberValue(const Number& val) {
@@ -433,12 +462,11 @@ NumberField::NumberField(const std::string& name, const NumberType& numberType) 
 	modifiable = true;
 	lastTime = std::chrono::high_resolution_clock::now();
 	numberValue = MakeNumber(numberType, 0);
-	invalidNumberColor = MakeColor(255, 128, 128, 255);
+	invalidNumberColor = MakeColor(AlloyApplicationContext()->theme.INVALID);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
 	borderWidth = UnitPX(1.0f);
 	setRoundCorners(true);
-
 	clear();
 }
 NumberField::NumberField(const std::string& name, const AUnit2D& position,
@@ -450,11 +478,10 @@ NumberField::NumberField(const std::string& name, const AUnit2D& position,
 	invalidNumberColor = MakeColor(255, 128, 128, 255);
 	lastTime = std::chrono::high_resolution_clock::now();
 	numberValue = MakeNumber(numberType, 0);
-	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
 	borderWidth = UnitPX(1.0f);
 	setRoundCorners(true);
-
 	clear();
 }
 void NumberField::handleCharacterInput(AlloyContext* context,
@@ -554,8 +581,8 @@ void NumberField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 			if (onTextEntered) {
 				onTextEntered(this);
 			}
-			focused = false;
-			AlloyApplicationContext()->setMouseFocusObject(nullptr);
+			setFocus(false);
+			AlloyApplicationContext()->setCursorFocus(nullptr);
 			break;
 		}
 	}
@@ -576,6 +603,18 @@ bool NumberField::handleMouseInput(AlloyContext* context, const InputEvent& e) {
 			dragging = false;
 		}
 		return true;
+	} else if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
+		if (onTextEntered) {
+			onTextEntered(this);
+		}
+		showCursor = false;
+		int shift = (int) (e.cursor.x - textOffsetX);
+		int cursorPos = fontFace->getCursorPosition(value, th, shift);
+		moveCursorTo(cursorPos);
+		textStart = 0;
+		setFocus(false);
+		AlloyApplicationContext()->setCursorFocus(nullptr);
+		return true;
 	}
 	return false;
 }
@@ -591,7 +630,7 @@ bool NumberField::handleCursorInput(AlloyContext* context,
 }
 bool NumberField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (isVisible() && modifiable) {
-		if (!focused || th <= 0)
+		if (!isObjectFocused() || th <= 0)
 			return false;
 		switch (e.type) {
 		case InputType::MouseButton:
@@ -616,6 +655,7 @@ bool NumberField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	}
 	return Region::onEventHandler(context, e);
 }
+
 void NumberField::draw(AlloyContext* context) {
 	float ascender, descender, lineh;
 	Region::draw(context);
@@ -627,11 +667,12 @@ void NumberField::draw(AlloyContext* context) {
 	float y = bounds.position.y;
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;
-	bool f = context->isFocused(this) && modifiable;
-	if (!f && focused && onTextEntered) {
+	bool f = context->isCursorFocused(this) && modifiable;
+	if (!f && isObjectFocused() && onTextEntered) {
 		onTextEntered(this);
 	}
-	focused = f;
+	setFocus(f);
+	bool ofocus = isObjectFocused();
 	if (hover) {
 		context->setCursor(&Cursor::TextInsert);
 	}
@@ -648,9 +689,8 @@ void NumberField::draw(AlloyContext* context) {
 	float textY = y;
 	NVGpaint bg = nvgBoxGradient(nvg, x + 1, y + 3,
 			std::max(0.0f, w - 2 * PADDING), std::max(0.0f, h - 2 * PADDING),
-			context->theme.CORNER_RADIUS, 4,
-			context->theme.LIGHTEST.toSemiTransparent(0.5f),
-			context->theme.DARKEST.toSemiTransparent(0.5f));
+			context->theme.CORNER_RADIUS, 4, context->theme.LIGHTEST,
+			context->theme.DARKEST);
 	nvgBeginPath(nvg);
 	nvgRoundedRect(nvg, x + PADDING, y + PADDING,
 			std::max(0.0f, w - 2 * PADDING), std::max(0.0f, h - 2 * PADDING),
@@ -707,7 +747,7 @@ void NumberField::draw(AlloyContext* context) {
 		nvgRect(nvg, x0, textY + (h - lineh) / 2 + PADDING, x1 - x0,
 				lineh - 2 * PADDING);
 		nvgFillColor(nvg,
-				focused ?
+				ofocus ?
 						context->theme.DARK.toSemiTransparent(0.5f) :
 						context->theme.DARK.toSemiTransparent(0.25f));
 		nvgFill(nvg);
@@ -720,7 +760,7 @@ void NumberField::draw(AlloyContext* context) {
 		nvgFillColor(nvg, *textColor);
 		nvgText(nvg, textOffsetX, textY + h / 2, value.c_str(), NULL);
 	}
-	if (focused && showCursor) {
+	if (ofocus && showCursor) {
 		nvgBeginPath(nvg);
 		nvgMoveTo(nvg, cursorOffset, textY + h / 2 - lineh / 2 + PADDING);
 		nvgLineTo(nvg, cursorOffset, textY + h / 2 + lineh / 2 - PADDING);
@@ -730,7 +770,18 @@ void NumberField::draw(AlloyContext* context) {
 		nvgStroke(nvg);
 	}
 	popScissor(nvg);
-	if (!focused && value.size() == 0) {
+	if (ofocus) {
+		const int PAD = 2.0f;
+		nvgLineJoin(nvg, NVG_MITER);
+		nvgBeginPath(nvg);
+		nvgRoundedRect(nvg, bounds.position.x + PAD, bounds.position.y + PAD,
+				bounds.dimensions.x - 2 * PAD, bounds.dimensions.y - 2 * PAD,
+				context->theme.CORNER_RADIUS);
+		nvgStrokeWidth(nvg, (float) PAD);
+		nvgStrokeColor(nvg, context->theme.FOCUS);
+		nvgStroke(nvg);
+	}
+	if (!isObjectFocused() && value.size() == 0) {
 		showDefaultLabel = true;
 	}
 }
@@ -750,6 +801,5 @@ std::shared_ptr<NumberField> MakeNumberField(const std::string& name,
 
 	return region;
 }
-
 
 }

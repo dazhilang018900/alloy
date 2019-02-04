@@ -1628,7 +1628,7 @@ namespace aly {
 					break;
 				case GLFW_KEY_A:
 					if (e.isControlDown()) {
-						Region* region = context->getMouseFocusObject();
+						Region* region = context->getCursorFocus();
 						if (region == nullptr || dynamic_cast<TextField*>(region) == nullptr) {
 							for (RegionPtr child : children) {
 								Node* node = dynamic_cast<Node*>(child.get());

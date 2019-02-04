@@ -9,7 +9,7 @@
 #include "ui/AlloyApplication.h"
 #include "ui/AlloyDrawUtil.h"
 
-namespace aly{
+namespace aly {
 TextButton::TextButton(const std::string& label, const AUnit2D& position,
 		const AUnit2D& dimensions, bool truncate) :
 		Region(label), truncate(truncate) {
@@ -20,11 +20,130 @@ TextButton::TextButton(const std::string& label, const AUnit2D& position,
 	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
 	fontSize = UnitPerPX(1.0f, -10);
 	borderWidth = UnitPX(0.0f);
+	setRoundCorners(true);
 	this->aspectRule = AspectRule::FixedHeight;
+	Application::addListener(this);
+}
+bool TextButton::onEventHandler(AlloyContext* context,
+		const InputEvent& event) {
+	if (event.type == InputType::MouseButton && event.isDown()
+			&& context->isMouseOver(this, true)) {
+		if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
+			setFocus(true);
+		} else if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
+			setFocus(false);
+		}
+	} else if (event.type == InputType::Key && event.key == GLFW_KEY_ENTER
+			&& isObjectFocused()) {
+		if (event.isDown()) {
+			context->setMouseDownObject(this);
+			context->setLeftMouseButtonDown(true);
+			if (onMouseDown) {
+				InputEvent e = event;
+				e.type = InputType::MouseButton;
+				e.clicks = 1;
+				e.action = GLFW_PRESS;
+				e.button = GLFW_MOUSE_BUTTON_LEFT;
+				return onMouseDown(context, e);
+			}
+		} else {
+			if (context->getMouseDownObject() == this) {
+				context->setMouseDownObject(nullptr);
+				context->setLeftMouseButtonDown(false);
+			}
+			if (onMouseUp) {
+				InputEvent e = event;
+				e.type = InputType::MouseButton;
+				e.clicks = 1;
+				e.action = GLFW_RELEASE;
+				e.button = GLFW_MOUSE_BUTTON_LEFT;
+				return onMouseUp(context, e);
+			}
+		}
+	}
+	return Region::onEventHandler(context, event);
+}
+bool IconButton::onEventHandler(AlloyContext* context,
+		const InputEvent& event) {
+	if (event.type == InputType::MouseButton && event.isDown()&& context->isMouseOver(this, true)) {
+		if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
+			setFocus(true);
+		} else if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
+			setFocus(false);
+		}
+	} else if (event.type == InputType::Key && event.key == GLFW_KEY_ENTER
+			&& isObjectFocused()) {
+		if (event.isDown()) {
+			context->setMouseDownObject(this);
+			context->setLeftMouseButtonDown(true);
+			if (onMouseDown) {
+				InputEvent e = event;
+				e.type = InputType::MouseButton;
+				e.clicks = 1;
+				e.action = GLFW_PRESS;
+				e.button = GLFW_MOUSE_BUTTON_LEFT;
+				return onMouseDown(context, e);
+			}
+		} else {
+			if (context->getMouseDownObject() == this) {
+				context->setMouseDownObject(nullptr);
+				context->setLeftMouseButtonDown(false);
+			}
+			if (onMouseUp) {
+				InputEvent e = event;
+				e.type = InputType::MouseButton;
+				e.clicks = 1;
+				e.action = GLFW_RELEASE;
+				e.button = GLFW_MOUSE_BUTTON_LEFT;
+				return onMouseUp(context, e);
+			}
+		}
+	}
+	return Composite::onEventHandler(context, event);
+}
+bool TextIconButton::onEventHandler(AlloyContext* context,
+		const InputEvent& event) {
+	if (event.type == InputType::MouseButton && event.isDown()
+			&& context->isMouseOver(this, true)) {
+		if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
+			setFocus(true);
+		} else if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
+			setFocus(false);
+		}
+	}
+	if (event.type == InputType::Key && event.key == GLFW_KEY_ENTER
+			&& isObjectFocused()) {
+		if (event.isDown()) {
+			context->setMouseDownObject(this);
+			context->setLeftMouseButtonDown(true);
+			if (onMouseDown) {
+				InputEvent e = event;
+				e.type = InputType::MouseButton;
+				e.clicks = 1;
+				e.action = GLFW_PRESS;
+				e.button = GLFW_MOUSE_BUTTON_LEFT;
+				return onMouseDown(context, e);
+			}
+		} else {
+			if (context->getMouseDownObject() == this) {
+				context->setMouseDownObject(nullptr);
+				context->setLeftMouseButtonDown(false);
+			}
+			if (onMouseUp) {
+				InputEvent e = event;
+				e.type = InputType::MouseButton;
+				e.clicks = 1;
+				e.action = GLFW_RELEASE;
+				e.button = GLFW_MOUSE_BUTTON_LEFT;
+				return onMouseUp(context, e);
+			}
+		}
+	}
+	return Composite::onEventHandler(context, event);
 }
 void TextButton::draw(AlloyContext* context) {
 	bool hover = context->isMouseOver(this);
-	bool down = context->isMouseDown(this);
+	bool down = context->isMouseDown(this) && context->isLeftMouseButtonDown();
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
 
@@ -36,17 +155,29 @@ void TextButton::draw(AlloyContext* context) {
 	}
 	if (hover) {
 		nvgBeginPath(nvg);
-		nvgRoundedRect(nvg, bounds.position.x + xoff, bounds.position.y + yoff,
-				bounds.dimensions.x, bounds.dimensions.y,
-				context->theme.CORNER_RADIUS);
+		if (roundCorners) {
+			nvgRoundedRect(nvg, bounds.position.x + xoff,
+					bounds.position.y + yoff, bounds.dimensions.x,
+					bounds.dimensions.y, context->theme.CORNER_RADIUS);
+		} else {
+			nvgRect(nvg, bounds.position.x + xoff, bounds.position.y + yoff,
+					bounds.dimensions.x, bounds.dimensions.y);
+
+		}
 		nvgFillColor(nvg, *backgroundColor);
 		nvgFill(nvg);
 
 	} else {
 		nvgBeginPath(nvg);
-		nvgRoundedRect(nvg, bounds.position.x + 1, bounds.position.y + 1,
-				bounds.dimensions.x - 2, bounds.dimensions.y - 2,
-				context->theme.CORNER_RADIUS);
+		if (roundCorners) {
+			nvgRoundedRect(nvg, bounds.position.x + xoff + 1,
+					bounds.position.y + yoff + 1, bounds.dimensions.x - 2,
+					bounds.dimensions.y - 2, context->theme.CORNER_RADIUS);
+		} else {
+			nvgRect(nvg, bounds.position.x + xoff + 1,
+					bounds.position.y + yoff + 1, bounds.dimensions.x - 2,
+					bounds.dimensions.y - 2);
+		}
 		nvgFillColor(nvg, *backgroundColor);
 		nvgFill(nvg);
 	}
@@ -59,9 +190,14 @@ void TextButton::draw(AlloyContext* context) {
 				context->theme.LIGHTEST.toSemiTransparent(0.0f),
 				context->theme.DARK);
 		nvgFillPaint(nvg, hightlightPaint);
-		nvgRoundedRect(nvg, bounds.position.x + xoff, bounds.position.y + yoff,
-				bounds.dimensions.x, bounds.dimensions.y,
-				context->theme.CORNER_RADIUS);
+		if (roundCorners) {
+			nvgRoundedRect(nvg, bounds.position.x + xoff,
+					bounds.position.y + yoff, bounds.dimensions.x,
+					bounds.dimensions.y, context->theme.CORNER_RADIUS);
+		} else {
+			nvgRect(nvg, bounds.position.x + xoff, bounds.position.y + yoff,
+					bounds.dimensions.x, bounds.dimensions.y);
+		}
 		nvgFill(nvg);
 	}
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
@@ -69,17 +205,27 @@ void TextButton::draw(AlloyContext* context) {
 	nvgStrokeWidth(nvg, lineWidth);
 	if (hover) {
 		nvgBeginPath(nvg);
-		nvgRoundedRect(nvg, bounds.position.x + xoff, bounds.position.y + yoff,
-				bounds.dimensions.x, bounds.dimensions.y,
-				context->theme.CORNER_RADIUS);
+		if (roundCorners) {
+			nvgRoundedRect(nvg, bounds.position.x + xoff,
+					bounds.position.y + yoff, bounds.dimensions.x,
+					bounds.dimensions.y, context->theme.CORNER_RADIUS);
+		} else {
+			nvgRect(nvg, bounds.position.x + xoff, bounds.position.y + yoff,
+					bounds.dimensions.x, bounds.dimensions.y);
+		}
 		nvgStrokeColor(nvg, *borderColor);
 		nvgStroke(nvg);
 
 	} else {
 		nvgBeginPath(nvg);
-		nvgRoundedRect(nvg, bounds.position.x + 1, bounds.position.y + 1,
-				bounds.dimensions.x - 2, bounds.dimensions.y - 2,
-				context->theme.CORNER_RADIUS);
+		if (roundCorners) {
+			nvgRoundedRect(nvg, bounds.position.x + 1, bounds.position.y + 1,
+					bounds.dimensions.x - 2, bounds.dimensions.y - 2,
+					context->theme.CORNER_RADIUS);
+		} else {
+			nvgRect(nvg, bounds.position.x + 1, bounds.position.y + 1,
+					bounds.dimensions.x - 2, bounds.dimensions.y - 2);
+		}
 		nvgStrokeColor(nvg, *borderColor);
 		nvgStroke(nvg);
 	}
@@ -99,7 +245,41 @@ void TextButton::draw(AlloyContext* context) {
 	if (truncate) {
 		popScissor(nvg);
 	}
-
+	const int PAD = 1.0f;
+	if (isObjectFocused()) {
+		nvgLineJoin(nvg, NVG_MITER);
+		nvgBeginPath(nvg);
+		if (hover) {
+			if (roundCorners) {
+				nvgRoundedRect(nvg, bounds.position.x + xoff + PAD,
+						bounds.position.y + yoff + PAD,
+						bounds.dimensions.x - 2 * PAD,
+						bounds.dimensions.y - 2 * PAD,
+						context->theme.CORNER_RADIUS);
+			} else {
+				nvgRect(nvg, bounds.position.x + xoff + PAD,
+						bounds.position.y + yoff + PAD,
+						bounds.dimensions.x - 2 * PAD,
+						bounds.dimensions.y - 2 * PAD);
+			}
+		} else {
+			if (roundCorners) {
+				nvgRoundedRect(nvg, bounds.position.x + xoff + 1 + PAD,
+						bounds.position.y + yoff + 1 + PAD,
+						bounds.dimensions.x - 2 * PAD - 2,
+						bounds.dimensions.y - 2 * PAD - 2,
+						context->theme.CORNER_RADIUS);
+			} else {
+				nvgRect(nvg, bounds.position.x + xoff + 1 + PAD,
+						bounds.position.y + yoff + 1 + PAD,
+						bounds.dimensions.x - 2 * PAD - 2,
+						bounds.dimensions.y - 2 * PAD - 2);
+			}
+		}
+		nvgStrokeWidth(nvg, 2.0f);
+		nvgStrokeColor(nvg, context->theme.FOCUS);
+		nvgStroke(nvg);
+	}
 }
 TextIconButton::TextIconButton(const std::string& label, int iconCode,
 		const AUnit2D& position, const AUnit2D& dimensions,
@@ -114,6 +294,7 @@ TextIconButton::TextIconButton(const std::string& label, int iconCode,
 	textColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
 	fontSize = UnitPerPX(1.0f, -10);
+	Application::addListener(this);
 }
 
 void TextIconButton::setLabel(const std::string& label) {
@@ -124,7 +305,7 @@ void TextIconButton::setIcon(int code) {
 }
 void TextIconButton::draw(AlloyContext* context) {
 	bool hover = context->isMouseOver(this);
-	bool down = context->isMouseDown(this);
+	bool down = context->isMouseDown(this) && context->isLeftMouseButtonDown();
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
 	int xoff = 0;
@@ -151,12 +332,13 @@ void TextIconButton::draw(AlloyContext* context) {
 	} else {
 		nvgBeginPath(nvg);
 		if (roundCorners) {
-			nvgRoundedRect(nvg, bounds.position.x + 1, bounds.position.y + 1,
-					bounds.dimensions.x - 2, bounds.dimensions.y - 2,
-					context->theme.CORNER_RADIUS);
+			nvgRoundedRect(nvg, bounds.position.x + xoff + 1,
+					bounds.position.y + yoff + 1, bounds.dimensions.x - 2,
+					bounds.dimensions.y - 2, context->theme.CORNER_RADIUS);
 		} else {
-			nvgRect(nvg, bounds.position.x + 1, bounds.position.y + 1,
-					bounds.dimensions.x - 2, bounds.dimensions.y - 2);
+			nvgRect(nvg, bounds.position.x + xoff + 1,
+					bounds.position.y + yoff + 1, bounds.dimensions.x - 2,
+					bounds.dimensions.y - 2);
 		}
 		nvgFillColor(nvg, *backgroundColor);
 		nvgFill(nvg);
@@ -210,8 +392,44 @@ void TextIconButton::draw(AlloyContext* context) {
 				bounds.position.y + bounds.dimensions.y / 2 + yoff,
 				iconCodeString.c_str(), nullptr);
 	}
+
 	if (truncate) {
 		popScissor(nvg);
+	}
+	const int PAD = 1.0f;
+	if (isObjectFocused()) {
+		nvgLineJoin(nvg, NVG_MITER);
+		nvgBeginPath(nvg);
+		if (hover) {
+			if (roundCorners) {
+				nvgRoundedRect(nvg, bounds.position.x + xoff + PAD,
+						bounds.position.y + yoff + PAD,
+						bounds.dimensions.x - 2 * PAD,
+						bounds.dimensions.y - 2 * PAD,
+						context->theme.CORNER_RADIUS);
+			} else {
+				nvgRect(nvg, bounds.position.x + xoff + PAD,
+						bounds.position.y + yoff + PAD,
+						bounds.dimensions.x - 2 * PAD,
+						bounds.dimensions.y - 2 * PAD);
+			}
+		} else {
+			if (roundCorners) {
+				nvgRoundedRect(nvg, bounds.position.x + xoff + 1 + PAD,
+						bounds.position.y + yoff + 1 + PAD,
+						bounds.dimensions.x - 2 * PAD - 2,
+						bounds.dimensions.y - 2 * PAD - 2,
+						context->theme.CORNER_RADIUS);
+			} else {
+				nvgRect(nvg, bounds.position.x + xoff + 1 + PAD,
+						bounds.position.y + yoff + 1 + PAD,
+						bounds.dimensions.x - 2 * PAD - 2,
+						bounds.dimensions.y - 2 * PAD - 2);
+			}
+		}
+		nvgStrokeWidth(nvg, 2.0f);
+		nvgStrokeColor(nvg, context->theme.FOCUS);
+		nvgStroke(nvg);
 	}
 }
 IconButton::IconButton(int iconCode, const AUnit2D& position,
@@ -225,16 +443,16 @@ IconButton::IconButton(int iconCode, const AUnit2D& position,
 	foregroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
 	iconColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
-
 	this->aspectRatio = 1.0f;
 	this->aspectRule = AspectRule::FixedHeight;
+	Application::addListener(this);
 }
 void IconButton::setIcon(int iconCode) {
 	iconCodeString = CodePointToUTF8(iconCode);
 }
 void IconButton::draw(AlloyContext* context) {
 	bool hover = context->isMouseOver(this);
-	bool down = context->isMouseDown(this);
+	bool down = context->isMouseDown(this) && context->isLeftMouseButtonDown();
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
 	pixel2 center = bounds.position + HALF_PIX(bounds.dimensions);
@@ -304,8 +522,8 @@ void IconButton::draw(AlloyContext* context) {
 
 			nvgBeginPath(nvg);
 			nvgEllipse(nvg, center.x + offset.x, center.y + offset.y,
-					radii.x - 1.0f-HALF_PIX(lineWidth) + hoverOffset,
-					radii.y -1.0f- HALF_PIX(lineWidth) + hoverOffset);
+					radii.x - 1.0f - HALF_PIX(lineWidth) + hoverOffset,
+					radii.y - 1.0f - HALF_PIX(lineWidth) + hoverOffset);
 			nvgStrokeColor(nvg, (hover) ? *borderColor : *iconColor);
 			nvgStrokeWidth(nvg, lineWidth);
 			nvgStroke(nvg);
@@ -315,18 +533,18 @@ void IconButton::draw(AlloyContext* context) {
 				nvgRoundedRect(nvg,
 						bounds.position.x + offset.x + lineWidth - hoverOffset,
 						bounds.position.y + offset.y + lineWidth - hoverOffset,
-						bounds.dimensions.x - 2 * (1.0f+lineWidth)
+						bounds.dimensions.x - 2 * (1.0f + lineWidth)
 								+ hoverOffset * 2.0f,
-						bounds.dimensions.y - 2 * (1.0f+lineWidth)
+						bounds.dimensions.y - 2 * (1.0f + lineWidth)
 								+ hoverOffset * 2.0f,
 						context->theme.CORNER_RADIUS);
 			} else {
 				nvgRect(nvg,
 						bounds.position.x + offset.x + lineWidth - hoverOffset,
 						bounds.position.y + offset.y + lineWidth - hoverOffset,
-						bounds.dimensions.x - 2 * (lineWidth+1.0f)
+						bounds.dimensions.x - 2 * (lineWidth + 1.0f)
 								+ hoverOffset * 2.0f,
-						bounds.dimensions.y - 2 * (lineWidth+1.0f)
+						bounds.dimensions.y - 2 * (lineWidth + 1.0f)
 								+ hoverOffset * 2.0f);
 			}
 			nvgStrokeColor(nvg,
@@ -335,6 +553,42 @@ void IconButton::draw(AlloyContext* context) {
 			nvgStroke(nvg);
 		}
 	}
+	const int PAD = 1.0f;
+	if (isObjectFocused()) {
+		nvgLineJoin(nvg, NVG_MITER);
+		nvgBeginPath(nvg);
+		if (hover) {
+			if (roundCorners) {
+				nvgRoundedRect(nvg, bounds.position.x + offset.x + PAD,
+						bounds.position.y + offset.y + PAD,
+						bounds.dimensions.x - 2 * PAD,
+						bounds.dimensions.y - 2 * PAD,
+						context->theme.CORNER_RADIUS);
+			} else {
+				nvgRect(nvg, bounds.position.x + offset.x + PAD,
+						bounds.position.y + offset.y + PAD,
+						bounds.dimensions.x - 2 * PAD,
+						bounds.dimensions.y - 2 * PAD);
+			}
+		} else {
+			if (roundCorners) {
+				nvgRoundedRect(nvg, bounds.position.x + offset.x + 1 + PAD,
+						bounds.position.y + offset.y + 1 + PAD,
+						bounds.dimensions.x - 2 * PAD - 2,
+						bounds.dimensions.y - 2 * PAD - 2,
+						context->theme.CORNER_RADIUS);
+			} else {
+				nvgRect(nvg, bounds.position.x + offset.x + 1 + PAD,
+						bounds.position.y + offset.y + 1 + PAD,
+						bounds.dimensions.x - 2 * PAD - 2,
+						bounds.dimensions.y - 2 * PAD - 2);
+			}
+		}
+		nvgStrokeWidth(nvg, 2.0f);
+		nvgStrokeColor(nvg, context->theme.FOCUS);
+		nvgStroke(nvg);
+	}
 }
+
 }
 

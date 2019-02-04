@@ -89,6 +89,7 @@ ModifiableLabel::ModifiableLabel(const std::string& name,
 	textColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	fontSize = UnitPX(24);
 	setValue(name);
+	setRoundCorners(false);
 }
 
 void ModifiableLabel::draw(AlloyContext* context) {
@@ -102,11 +103,13 @@ void ModifiableLabel::draw(AlloyContext* context) {
 	float y = bounds.position.y;
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;
-	bool f = context->isFocused(this) && modifiable;
-	if (!f && focused && onTextEntered) {
+	bool f = context->isCursorFocused(this) && modifiable;
+	if (!f && isObjectFocused() && onTextEntered) {
 		onTextEntered(this);
 	}
-	focused = f;
+	setFocus(f);
+
+	bool ofocus=isObjectFocused();
 	if (hover) {
 		context->setCursor(&Cursor::TextInsert);
 	}
@@ -130,13 +133,21 @@ void ModifiableLabel::draw(AlloyContext* context) {
 		nvgFill(nvg);
 	}
 
-	if (focused) {
+	if (ofocus) {
 		nvgFillColor(nvg, context->theme.LIGHTER);
 		nvgBeginPath(nvg);
-		nvgRect(nvg, bounds.position.x + lineWidth * 0.5f + PADDING,
-				bounds.position.y + lineWidth * 0.5f + PADDING,
-				bounds.dimensions.x - lineWidth - 2 * PADDING,
-				bounds.dimensions.y - lineWidth - 2 * PADDING);
+		if(roundCorners){
+			nvgRoundedRect(nvg, bounds.position.x + lineWidth * 0.5f + PADDING,
+					bounds.position.y + lineWidth * 0.5f + PADDING,
+					bounds.dimensions.x - lineWidth - 2 * PADDING,
+					bounds.dimensions.y - lineWidth - 2 * PADDING,context->theme.CORNER_RADIUS);
+		} else {
+			nvgRect(nvg, bounds.position.x + lineWidth * 0.5f + PADDING,
+					bounds.position.y + lineWidth * 0.5f + PADDING,
+					bounds.dimensions.x - lineWidth - 2 * PADDING,
+					bounds.dimensions.y - lineWidth - 2 * PADDING);
+		}
+
 		nvgFill(nvg);
 	}
 	auto currentTime = std::chrono::high_resolution_clock::now();
@@ -148,8 +159,7 @@ void ModifiableLabel::draw(AlloyContext* context) {
 	}
 	textOffsetX = x + 2.0f * lineWidth + PADDING;
 	float textY = y;
-
-	if (focused) {
+	if (ofocus) {
 		th = std::min(std::max(8.0f, h - 4 * PADDING),
 				this->fontSize.toPixels(bounds.dimensions.y, context->dpmm.y,
 						context->pixelRatio));
@@ -159,7 +169,7 @@ void ModifiableLabel::draw(AlloyContext* context) {
 	}
 	nvgFontSize(nvg, th);
 	nvgFontFaceId(nvg, context->getFontHandle(fontType));
-	if (focused) {
+	if (ofocus) {
 		nvgTextMetrics(nvg, &ascender, &descender, &lineh);
 		box2px clipBounds = getCursorBounds();
 		clipBounds.intersect(
@@ -189,7 +199,7 @@ void ModifiableLabel::draw(AlloyContext* context) {
 		}
 		float cursorOffset = textOffsetX
 				+ (cursorStart ? positions[cursorStart - 1].maxx - 1 : 0);
-		if (cursorEnd != cursorStart && focused) {
+		if (cursorEnd != cursorStart && ofocus) {
 			int lo = std::min(cursorEnd, cursorStart);
 			int hi = std::max(cursorEnd, cursorStart);
 			float x0 = textOffsetX + (lo ? positions[lo - 1].maxx - 1 : 0);
@@ -198,7 +208,7 @@ void ModifiableLabel::draw(AlloyContext* context) {
 			nvgRect(nvg, x0, textY + (h - lineh) / 2 + PADDING, x1 - x0,
 					lineh - 2 * PADDING);
 			nvgFillColor(nvg,
-					focused ?
+					ofocus ?
 							context->theme.DARK.toSemiTransparent(0.5f) :
 							context->theme.DARK.toSemiTransparent(0.25f));
 			nvgFill(nvg);
@@ -308,11 +318,25 @@ void ModifiableLabel::draw(AlloyContext* context) {
 		nvgStroke(nvg);
 		nvgLineJoin(nvg, NVG_MITER);
 	}
-	if (!focused && value.size() == 0) {
+	if (!ofocus && value.size() == 0) {
 		showDefaultLabel = true;
 	}
+	if (ofocus) {
+		const int PAD = 2.0f;
+		nvgLineJoin(nvg, NVG_MITER);
+		nvgBeginPath(nvg);
+		if(roundCorners){
+		nvgRoundedRect(nvg, bounds.position.x + PAD, bounds.position.y + PAD,
+				bounds.dimensions.x - 2 * PAD, bounds.dimensions.y - 2 * PAD,context->theme.CORNER_RADIUS);
+		} else {
+			nvgRect(nvg, bounds.position.x + PAD, bounds.position.y + PAD,
+					bounds.dimensions.x - 2 * PAD, bounds.dimensions.y - 2 * PAD);
+		}
+		nvgStrokeWidth(nvg, (float)PAD);
+		nvgStrokeColor(nvg,context->theme.FOCUS);
+		nvgStroke(nvg);
+	}
 }
-
 
 void TextLabel::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
@@ -793,8 +817,8 @@ void TextField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 			if (onTextEntered) {
 				onTextEntered(this);
 			}
-			focused = false;
-			AlloyApplicationContext()->setMouseFocusObject(nullptr);
+			setFocus(false);
+			AlloyApplicationContext()->setCursorFocus(nullptr);
 			break;
 		}
 	}
@@ -815,6 +839,18 @@ bool TextField::handleMouseInput(AlloyContext* context, const InputEvent& e) {
 			dragging = false;
 		}
 		return true;
+	} else if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
+		if (onTextEntered) {
+			onTextEntered(this);
+		}
+		setFocus(false);
+		showCursor = false;
+		int shift = (int) (e.cursor.x - textOffsetX);
+		int cursorPos = fontFace->getCursorPosition(value, th, shift);
+		moveCursorTo(cursorPos);
+		textStart = 0;
+		AlloyApplicationContext()->setCursorFocus(nullptr);
+		return true;
 	}
 	return false;
 }
@@ -829,7 +865,7 @@ bool TextField::handleCursorInput(AlloyContext* context, const InputEvent& e) {
 }
 bool TextField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (isVisible() && modifiable) {
-		if (!focused || th <= 0)
+		if (!isObjectFocused() || th <= 0)
 			return false;
 		switch (e.type) {
 		case InputType::MouseButton:
@@ -860,12 +896,11 @@ void TextField::draw(AlloyContext* context) {
 	std::vector<NVGglyphPosition> positions(value.size());
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
-
-	bool f = context->isFocused(this) && modifiable;
-	if (!f && focused && onTextEntered) {
+	bool f = context->isCursorFocused(this) && modifiable;
+	if (!f && isObjectFocused() && onTextEntered) {
 		onTextEntered(this);
 	}
-	focused = f && modifiable;
+	setFocus(f && modifiable);
 	bool hover = context->isMouseOver(this) && modifiable;
 	float x = bounds.position.x;
 	float y = bounds.position.y;
@@ -874,6 +909,7 @@ void TextField::draw(AlloyContext* context) {
 	if (hover) {
 		context->setCursor(&Cursor::TextInsert);
 	}
+	bool ofocus = isObjectFocused();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
 	auto currentTime = std::chrono::high_resolution_clock::now();
@@ -887,16 +923,14 @@ void TextField::draw(AlloyContext* context) {
 	float textY = y;
 	NVGpaint bg = nvgBoxGradient(nvg, x + 1, y + 3,
 			std::max(0.0f, w - 2 * PADDING), std::max(0.0f, h - 2 * PADDING),
-			context->theme.CORNER_RADIUS, 4,
-			context->theme.LIGHTEST.toSemiTransparent(0.5f),
-			context->theme.DARKEST.toSemiTransparent(0.5f));
+			context->theme.CORNER_RADIUS, 4, context->theme.LIGHTEST,
+			context->theme.DARKEST);
 	nvgBeginPath(nvg);
 	nvgRoundedRect(nvg, x + PADDING, y + PADDING,
 			std::max(0.0f, w - 2 * PADDING), std::max(0.0f, h - 2 * PADDING),
 			context->theme.CORNER_RADIUS);
 	nvgFillPaint(nvg, bg);
 	nvgFill(nvg);
-
 	fontSize = UnitPX(th = std::max(8.0f, h - 4 * PADDING));
 	nvgFontSize(nvg, th);
 	nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
@@ -932,7 +966,7 @@ void TextField::draw(AlloyContext* context) {
 	float cursorOffset = textOffsetX
 			+ (cursorStart ? positions[cursorStart - 1].maxx - 1 : 0);
 
-	if (cursorEnd != cursorStart && focused) {
+	if (cursorEnd != cursorStart && ofocus) {
 		int lo = std::min(cursorEnd, cursorStart);
 		int hi = std::max(cursorEnd, cursorStart);
 		float x0 = textOffsetX + (lo ? positions[lo - 1].maxx - 1 : 0);
@@ -941,7 +975,7 @@ void TextField::draw(AlloyContext* context) {
 		nvgRect(nvg, x0, textY + (h - lineh) / 2 + PADDING, x1 - x0,
 				lineh - 2 * PADDING);
 		nvgFillColor(nvg,
-				focused ?
+				ofocus ?
 						context->theme.DARK.toSemiTransparent(0.5f) :
 						context->theme.DARK.toSemiTransparent(0.25f));
 		nvgFill(nvg);
@@ -954,7 +988,7 @@ void TextField::draw(AlloyContext* context) {
 		nvgFillColor(nvg, *textColor);
 		nvgText(nvg, textOffsetX, textY + h / 2, value.c_str(), NULL);
 	}
-	if (focused && showCursor) {
+	if (ofocus && showCursor) {
 		nvgBeginPath(nvg);
 
 		nvgMoveTo(nvg, cursorOffset, textY + h / 2 - lineh / 2 + PADDING);
@@ -965,7 +999,17 @@ void TextField::draw(AlloyContext* context) {
 		nvgStroke(nvg);
 	}
 	popScissor(nvg);
-	if (!focused && value.size() == 0) {
+	if (ofocus) {
+		const int PAD = 2.0f;
+		nvgLineJoin(nvg, NVG_MITER);
+		nvgBeginPath(nvg);
+		nvgRoundedRect(nvg, bounds.position.x + PAD, bounds.position.y + PAD,
+				bounds.dimensions.x - 2 * PAD, bounds.dimensions.y - 2 * PAD,context->theme.CORNER_RADIUS);
+		nvgStrokeWidth(nvg, (float)PAD);
+		nvgStrokeColor(nvg,context->theme.FOCUS);
+		nvgStroke(nvg);
+	}
+	if (!ofocus && value.size() == 0) {
 		showDefaultLabel = true;
 	}
 }

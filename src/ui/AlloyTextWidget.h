@@ -102,7 +102,6 @@ public:
 class TextField: public Composite {
 protected:
 	bool showDefaultLabel = false;
-	bool focused = false;
 	std::string label;
 	std::string value;
 	float th=0;
@@ -127,9 +126,6 @@ public:
 	AColor textColor = MakeColor(Theme::Default.LIGHTER);
 	void setModifiable(bool m) {
 		modifiable = m;
-	}
-	bool isFocused() const {
-		return focused;
 	}
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
 			override;

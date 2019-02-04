@@ -21,6 +21,8 @@ public:
 	TextButton(const std::string& label, const AUnit2D& position,
 			const AUnit2D& dimensions,bool truncate=true);
 	virtual void draw(AlloyContext* context) override;
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+			override;
 	virtual inline ~TextButton() {
 	}
 };
@@ -40,6 +42,8 @@ public:
 	}
 	void setLabel(const std::string& label);
 	void setIcon(int code);
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+			override;
 	TextIconButton(const std::string& label, int iconCode,
 			const AUnit2D& position, const AUnit2D& dimensions,
 			const HorizontalAlignment& alignment = HorizontalAlignment::Center,
@@ -72,6 +76,8 @@ public:
 	void setTruncate(bool t) {
 		truncate = t;
 	}
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+			override;
 	IconButton(int iconCode, const AUnit2D& position, const AUnit2D& dimensions,
 			IconType iconType = IconType::SQUARE,bool truncate=true);
 	void setIcon(int iconCode);

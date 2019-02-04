@@ -650,7 +650,8 @@ std::shared_ptr<Composite>& AlloyContext::getGlassPane() {
 void AlloyContext::clearEvents() {
 	mouseOverRegion = nullptr;
 	mouseDownRegion = nullptr;
-	mouseFocusRegion = nullptr;
+	cursorFocusRegion = nullptr;
+	objectFocusRegion=nullptr;
 	onTopRegion = nullptr;
 	firingListeners = false;
 }
@@ -662,10 +663,14 @@ void AlloyContext::clearEvents(Region* region) {
 	if (mouseDownRegion != nullptr
 			&& (region == mouseDownRegion || mouseDownRegion->hasParent(region)))
 		mouseDownRegion = nullptr;
-	if (mouseFocusRegion != nullptr
-			&& (region == mouseFocusRegion
-					|| mouseFocusRegion->hasParent(region)))
-		mouseFocusRegion = nullptr;
+	if (cursorFocusRegion != nullptr
+			&& (region == cursorFocusRegion
+					|| cursorFocusRegion->hasParent(region)))
+		cursorFocusRegion = nullptr;
+	if (objectFocusRegion != nullptr
+			&& (region == objectFocusRegion
+					|| objectFocusRegion->hasParent(region)))
+		objectFocusRegion = nullptr;
 	if (onTopRegion != nullptr
 			&& (region == onTopRegion || onTopRegion->hasParent(region)))
 		onTopRegion = nullptr;
@@ -717,12 +722,23 @@ bool AlloyContext::end() {
 	} else
 		return false;
 }
-bool AlloyContext::isFocused(Region* region) {
-	if (mouseFocusRegion != nullptr) {
-		if (mouseFocusRegion->isVisible()) {
-			return (region == mouseFocusRegion);
+bool AlloyContext::isCursorFocused(const Region* region) {
+	if (cursorFocusRegion != nullptr) {
+		if (cursorFocusRegion->isVisible()) {
+			return (region == cursorFocusRegion);
 		} else {
-			mouseFocusRegion = nullptr;
+			cursorFocusRegion = nullptr;
+			return false;
+		}
+	}
+	return false;
+}
+bool AlloyContext::isObjectFocused(const Region* region) {
+	if (objectFocusRegion != nullptr) {
+		if (objectFocusRegion->isVisible()) {
+			return (region == objectFocusRegion);
+		} else {
+			objectFocusRegion = nullptr;
 			return false;
 		}
 	}

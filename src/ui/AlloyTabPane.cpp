@@ -29,8 +29,7 @@ namespace aly {
 		return textLabel->getTextDimensions(context) + pixel2((closeable)?TabBar::TAB_HEIGHT + 4:8.0f, TabBar::TAB_HEIGHT);
 	}
 	TabHeader::TabHeader(const std::string& name, bool closeable,TabPane* parent) :
-		Composite(name, CoordPX(0, 0), CoordPX(120, 30)), parentPane(parent), focused(
-			false),closeable(closeable){
+		Composite(name, CoordPX(0, 0), CoordPX(120, 30)), parentPane(parent),closeable(closeable){
 		backgroundColor = MakeColor(COLOR_NONE);
 		textLabel = TextLabelPtr(
 			new TextLabel(name, CoordPX(2, 2),
@@ -83,7 +82,7 @@ namespace aly {
 		return getBar()->isSelected(parentPane);
 	}
 	void TabHeader::draw(AlloyContext* context) {
-		focused = context->isMouseOver(textLabel.get());
+		setFocus(context->isMouseOver(textLabel.get()));
 		Color bgColor;
 		if (isSelected()) {
 			bgColor = AlloyApplicationContext()->theme.DARK.toLighter(0.5f);
@@ -92,7 +91,7 @@ namespace aly {
 			bgColor = AlloyApplicationContext()->theme.DARK;
 
 		}
-		if (focused) {
+		if (isObjectFocused()) {
 			textLabel->textColor = MakeColor(
 				AlloyApplicationContext()->theme.LIGHTEST);
 		}

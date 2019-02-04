@@ -31,7 +31,6 @@ namespace aly {
 	protected:
 		TextLabelPtr textLabel;
 		TabPane* parentPane;
-		bool focused;
 		bool closeable;
 	public:
 		friend struct TabPane;
@@ -49,7 +48,7 @@ namespace aly {
 		box2px bounds;
 		void setLabel(const std::string& name);
 		bool isFocused() const {
-			return header->focused;
+			return header->isObjectFocused();
 		}
 		virtual ~TabPane() {}
 		TabPane(const std::shared_ptr<Composite>& region,bool closeable=true);

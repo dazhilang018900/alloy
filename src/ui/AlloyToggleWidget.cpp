@@ -31,6 +31,7 @@ namespace aly {
 
 bool CheckBox::handleMouseDown(AlloyContext* context, const InputEvent& event) {
 	if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
+		setFocus(true);
 		this->checked = !this->checked;
 		this->valueLabel->textColor =
 				(this->checked) ?
@@ -38,6 +39,9 @@ bool CheckBox::handleMouseDown(AlloyContext* context, const InputEvent& event) {
 						MakeColor(AlloyApplicationContext()->theme.DARK);
 		if (onChange)
 			onChange(this->checked);
+		return true;
+	} else if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
+		setFocus(false);
 		return true;
 	}
 	return false;
@@ -127,20 +131,19 @@ CheckBox::CheckBox(const std::string& label, const AUnit2D& position,
 			[this](AlloyContext* context, const InputEvent& event) {
 				return handleMouseDown(context, event);
 			};
-	Region::onMouseDown =
-			[this](AlloyContext* context, const InputEvent& event) {
-				return handleMouseDown(context, event);
-			};
 	valueContainer->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
 				return handleMouseDown(context, event);
 			};
+	/*
 	if (showText) {
 		checkLabel->onMouseDown =
 				[this](AlloyContext* context, const InputEvent& event) {
 					return handleMouseDown(context, event);
 				};
 	}
+	*/
+	Application::addListener(this);
 }
 void CheckBox::setValue(bool value) {
 	this->checked = value;
@@ -157,15 +160,36 @@ void CheckBox::draw(AlloyContext* context) {
 			checkLabel->textColor = MakeColor(context->theme.LIGHTER);
 	}
 	Composite::draw(context);
+	const int PAD = 1.0f;
+	box2px bounds = getBounds();
+	NVGcontext* nvg = context->nvgContext;
+	if (isObjectFocused()) {
+		nvgLineJoin(nvg, NVG_MITER);
+		nvgBeginPath(nvg);
+		if (roundCorners) {
+			nvgRoundedRect(nvg, bounds.position.x + PAD, bounds.position.y + PAD,
+					bounds.dimensions.x - 2 * PAD, bounds.dimensions.y - 2 * PAD,context->theme.CORNER_RADIUS);
+		} else {
+			nvgRect(nvg, bounds.position.x + PAD, bounds.position.y + PAD,
+					bounds.dimensions.x - 2 * PAD, bounds.dimensions.y - 2 * PAD);
+		}
+		nvgStrokeWidth(nvg, 2.0f);
+		nvgStrokeColor(nvg, context->theme.FOCUS);
+		nvgStroke(nvg);
+	}
 }
 bool ToggleBox::handleMouseDown(AlloyContext* context,
 		const InputEvent& event) {
 	if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
+		setFocus(true);
 		this->toggledOn = !this->toggledOn;
 		onLabel->setVisible(this->toggledOn);
 		offLabel->setVisible(!this->toggledOn);
 		if (onChange)
 			onChange(this->toggledOn);
+		return true;
+	} else if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
+		setFocus(false);
 		return true;
 	}
 	return false;
@@ -274,17 +298,55 @@ ToggleBox::ToggleBox(const std::string& label, const AUnit2D& position,
 			[this](AlloyContext* context, const InputEvent& event) {
 				return handleMouseDown(context, event);
 			};
+	/*
 	if (showText) {
 		toggleLabel->onMouseDown =
 				[this](AlloyContext* context, const InputEvent& event) {
 					return handleMouseDown(context, event);
 				};
 	}
-	Region::onMouseDown =
-			[this](AlloyContext* context, const InputEvent& event) {
-				return handleMouseDown(context, event);
-			};
+	*/
+	Application::addListener(this);
+}
 
+bool ToggleBox::onEventHandler(AlloyContext* context, const InputEvent& event) {
+	if (event.type == InputType::MouseButton && event.isDown()&&context->isMouseOver(this,true)) {
+		if(event.button==GLFW_MOUSE_BUTTON_LEFT){
+			setFocus(true);
+		} else if(event.button==GLFW_MOUSE_BUTTON_RIGHT){
+			setFocus(false);
+		}
+	} else if (event.type == InputType::Key && event.isDown()
+			&& (event.key == GLFW_KEY_ENTER || event.key == GLFW_KEY_SPACE)
+			&& isObjectFocused()) {
+		this->toggledOn = !this->toggledOn;
+		onLabel->setVisible(this->toggledOn);
+		offLabel->setVisible(!this->toggledOn);
+		if (onChange)
+			onChange(this->toggledOn);
+
+	}
+	return Composite::onEventHandler(context, event);
+}
+bool CheckBox::onEventHandler(AlloyContext* context, const InputEvent& event) {
+	if (event.type == InputType::MouseButton && event.isDown()&&context->isMouseOver(this,true)) {
+		if(event.button==GLFW_MOUSE_BUTTON_LEFT){
+			setFocus(true);
+		} else if(event.button==GLFW_MOUSE_BUTTON_RIGHT){
+			setFocus(false);
+		}
+	} else if (event.type == InputType::Key && event.isDown()
+			&& (event.key == GLFW_KEY_ENTER || event.key == GLFW_KEY_SPACE)
+			&& isObjectFocused()) {
+		this->checked = !this->checked;
+		this->valueLabel->textColor =
+				(this->checked) ?
+						MakeColor(AlloyApplicationContext()->theme.LIGHTER) :
+						MakeColor(AlloyApplicationContext()->theme.DARK);
+		if (onChange)
+			onChange(this->checked);
+	}
+	return Composite::onEventHandler(context, event);
 }
 void ToggleBox::setValue(bool value) {
 	this->toggledOn = value;
@@ -301,6 +363,23 @@ void ToggleBox::draw(AlloyContext* context) {
 		}
 	}
 	Composite::draw(context);
+	const int PAD = 1.0f;
+	box2px bounds = getBounds();
+	NVGcontext* nvg = context->nvgContext;
+	if (isObjectFocused()) {
+		nvgLineJoin(nvg, NVG_MITER);
+		nvgBeginPath(nvg);
+		if (roundCorners) {
+			nvgRoundedRect(nvg, bounds.position.x + PAD, bounds.position.y + PAD,
+					bounds.dimensions.x - 2 * PAD, bounds.dimensions.y - 2 * PAD,context->theme.CORNER_RADIUS);
+		} else {
+			nvgRect(nvg, bounds.position.x + PAD, bounds.position.y + PAD,
+					bounds.dimensions.x - 2 * PAD, bounds.dimensions.y - 2 * PAD);
+		}
+		nvgStrokeWidth(nvg, 2.0f);
+		nvgStrokeColor(nvg, context->theme.FOCUS);
+		nvgStroke(nvg);
+	}
 }
 
 void MessageDialog::setMessage(const std::string& message) {
@@ -309,8 +388,6 @@ void MessageDialog::setMessage(const std::string& message) {
 std::string MessageDialog::getMessage() const {
 	return textLabel->getLabel();
 }
-
-
 
 }
 

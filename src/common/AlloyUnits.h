@@ -260,6 +260,7 @@ struct Color: public NVGcolor {
 	float4 toXYZA();
 	float4 toLABA();
 };
+Color mix(const Color& start,const Color& end,float alpha);
 Color HSVtoColor(const HSV& hsv);
 Color HSVAtoColor(const HSVA& hsv);
 RGBf HSVtoRGBf(const HSV& hsv);
@@ -1107,19 +1108,19 @@ inline AColor MakeColor(const Color& start, const Color& end) {
 
 struct Theme {
 public:
-	Color LIGHTEST = Color(255, 255, 255);
-	Color DARKEST = Color(0, 0, 0);
-	Color LIGHT = Color(180, 180, 180);
-	Color DARK = Color(64, 64, 64);
-	Color NEUTRAL = Color(120, 120, 120);
-	Color LIGHTER = Color(230, 230, 230);
-	Color DARKER = Color(32,32,32);
-
-	Color LINK = Color(128, 0, 0);
-	float CORNER_RADIUS = 5.0f;
-	float2 SPACING = float2(4.0f, 4.0f);
-	Theme() {
-	}
+	Color LIGHTEST;
+	Color DARKEST;
+	Color LIGHT;
+	Color DARK;
+	Color NEUTRAL;
+	Color LIGHTER;
+	Color DARKER;
+	Color FOCUS;
+	Color LINK;
+	Color INVALID;
+	float CORNER_RADIUS;
+	float2 SPACING;
+	Theme();
 	static const Theme Default;
 };
 

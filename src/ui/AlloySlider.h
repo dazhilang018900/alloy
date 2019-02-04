@@ -86,12 +86,13 @@ public:
 			const Number& val);
 	Slider(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,
 			const Number& min, const Number& max, const Number& val);
+	virtual void draw(AlloyContext* context) override;
+
 	double getBlendValue() const;
 	void setBlendValue(double value);
 	virtual void setValue(double value)=0;
 	void setValue(int value);
 	void setValue(float value);
-
 	const Number& getValue();
 	const Number& getMinValue();
 	const Number& getMaxValue();
@@ -166,6 +167,8 @@ public:
 	RangeSlider(const std::string& name, const AUnit2D& pos,const AUnit2D& dims,const Number& min, const Number& max,
 		const Number& lowerValue, const Number& upperValue,bool showLabel=true);
 	double2 getBlendValue() const;
+	virtual void draw(AlloyContext* context) override;
+
 	void setBlendValue(double2 value);
 
 	void setLowerValue(double value);
@@ -193,6 +196,8 @@ public:
 		const std::function<void(const Number& lowerValue,const Number& upperValue)>& func) {
 		onChangeEvent = func;
 	}
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+			override;
 	void setLabelFormatter(
 		const std::function<std::string(const Number& value)>& func);
 	bool onMouseDown(AlloyContext* context, Region* region,
@@ -207,6 +212,7 @@ class VerticalSlider: public Slider {
 protected:
 	virtual void update() override;
 public:
+
 	virtual void setValue(double value) override;
 	bool onMouseDown(AlloyContext* context, Region* region,
 			const InputEvent& event);

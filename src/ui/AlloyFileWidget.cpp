@@ -266,7 +266,7 @@ void FileField::updateSuggestionBox(AlloyContext* context, bool forceValue) {
 }
 bool FileField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (isVisible() && modifiable) {
-		if (!context->isFocused(this) || th <= 0)
+		if (!context->isCursorFocused(this) || th <= 0)
 			return false;
 		switch (e.type) {
 		case InputType::MouseButton:
@@ -333,12 +333,13 @@ void FileField::draw(AlloyContext* context) {
 	float y = bounds.position.y;
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;
-	bool f = context->isFocused(this);
-	if (!f && focused && onTextEntered) {
+	bool f = context->isCursorFocused(this);
+	if (!f &&isObjectFocused()&& onTextEntered) {
 		onTextEntered(this);
 	}
-	focused = f;
-	if (!focused) {
+	setFocus(f);
+	bool ofocus=isObjectFocused();
+	if (!ofocus) {
 		showDefaultLabel = true;
 	}
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
@@ -396,7 +397,7 @@ void FileField::draw(AlloyContext* context) {
 		textOffsetX = textOffsetX - positions[textStart].minx;
 	}
 
-	if (cursorEnd != cursorStart && focused) {
+	if (cursorEnd != cursorStart && ofocus) {
 		int lo = std::min(cursorEnd, cursorStart);
 		int hi = std::max(cursorEnd, cursorStart);
 		float x0 = textOffsetX + (lo ? positions[lo - 1].maxx - 1 : 0);
@@ -405,7 +406,7 @@ void FileField::draw(AlloyContext* context) {
 		nvgRect(nvg, x0, textY + (h - lineh) / 2 + PADDING, x1 - x0,
 				lineh - 2 * PADDING);
 		nvgFillColor(nvg,
-				focused ?
+				ofocus?
 						context->theme.DARK.toSemiTransparent(0.5f) :
 						context->theme.DARK.toSemiTransparent(0.25f));
 		nvgFill(nvg);
@@ -435,7 +436,7 @@ void FileField::draw(AlloyContext* context) {
 		}
 	}
 
-	if (focused && showCursor) {
+	if (ofocus && showCursor) {
 		nvgBeginPath(nvg);
 		float xOffset = textOffsetX
 				+ (cursorStart ? positions[cursorStart - 1].maxx - 1 : 0);
@@ -447,10 +448,18 @@ void FileField::draw(AlloyContext* context) {
 		nvgStroke(nvg);
 	}
 	popScissor(nvg);
-	if (!focused && value.size() == 0) {
+	if (ofocus) {
+		const int PAD = 2.0f;
+		nvgBeginPath(nvg);
+		nvgLineJoin(nvg, NVG_MITER);
+		nvgRoundedRect(nvg, bounds.position.x + PAD, bounds.position.y + PAD,bounds.dimensions.x - 2 * PAD, bounds.dimensions.y - 2 * PAD,context->theme.CORNER_RADIUS);
+		nvgStrokeWidth(nvg, (float)PAD);
+		nvgStrokeColor(nvg,context->theme.FOCUS);
+		nvgStroke(nvg);
+	}
+	if (!isObjectFocused() && value.size() == 0) {
 		showDefaultLabel = true;
 	}
-
 }
 void FileSelector::setValue(const std::string& file) {
 	fileLocation->setValue(file);
@@ -599,7 +608,7 @@ FileButton::FileButton(const std::string& name, const AUnit2D& pos,
 	onMouseDown = [this](AlloyContext* context, const InputEvent& event) {
 		if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
 			std::string file = getValue();
-			AlloyApplicationContext()->setMouseFocusObject(nullptr);
+			AlloyApplicationContext()->setCursorFocus(nullptr);
 			if (FileExists(file)) {
 				openFileDialog(context, file);
 			}
@@ -753,7 +762,7 @@ FileSelector::FileSelector(const std::string& name, const AUnit2D& pos,
 				if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
 					fileLocation->hideDropDown(context);
 					std::string file = getValue();
-					AlloyApplicationContext()->setMouseFocusObject(nullptr);
+					AlloyApplicationContext()->setCursorFocus(nullptr);
 					if (FileExists(file)) {
 						openFileDialog(context, file);
 					}

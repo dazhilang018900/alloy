@@ -23,6 +23,7 @@ protected:
 	std::shared_ptr<ScrollTrack> verticalScrollTrack, horizontalScrollTrack;
 	std::shared_ptr<ScrollHandle> verticalScrollHandle, horizontalScrollHandle;
 	std::vector<std::shared_ptr<Region>> children;
+	std::list<Region*> tabChain;
 	typedef std::shared_ptr<Region> ValueType;
 	pixel2 cellPadding = pixel2(0, 0);
 	pixel2 cellSpacing = pixel2(0, 0);
@@ -36,7 +37,8 @@ public:
 	bool isHorizontalScrollVisible() const;
 	void setCellPadding(const pixel2& pix);
 	void setCellSpacing(const pixel2& pix);
-
+	void appendTabChain(Region* region);
+	void clearTabChain();
 	void setAlwaysShowVerticalScrollBar(bool show);
 	void setAlwaysShowHorizontalScrollBar(bool show);
 	void resetScrollPosition();
@@ -97,7 +99,6 @@ public:
 	virtual void updateCursor(CursorLocator* cursorLocator) override;
 	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 			double pixelRatio, bool clamp = false) override;
-
 	virtual void add(const std::shared_ptr<Region>& region);
 	virtual void insertAtFront(const std::shared_ptr<Region>& region);
 	virtual void pack() override {

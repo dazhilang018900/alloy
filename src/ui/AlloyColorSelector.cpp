@@ -79,21 +79,25 @@ namespace aly {
 				if (!colorSelectionPanel->isVisible()) {
 					colorWheel->reset();
 				}
+				this->setFocus(true);
 				colorSelectionPanel->setVisible(true);
 				context->getGlassPane()->setVisible(true);
+				return true;
+			}else if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
+				this->setFocus(false);
 				return true;
 			}
 			return false;
 		};
+
 		if (showText) {
 			textLabel->onMouseDown =
 				[this](AlloyContext* context, const InputEvent& e) {
 				if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
-					if (!colorSelectionPanel->isVisible()) {
-						colorWheel->reset();
-					}
-					colorSelectionPanel->setVisible(true);
-					context->getGlassPane()->setVisible(true);
+					this->setFocus(true);
+					return true;
+				} else if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
+					this->setFocus(false);
 					return true;
 				}
 				return false;
@@ -583,6 +587,28 @@ namespace aly {
 		Composite::draw(context);
 		if(isOver&&context->getCursor()==nullptr){
 			context->setCursor(&aly::Cursor::Position);
+		}
+		NVGcontext* nvg=context->nvgContext;
+		const int PAD = 1.0f;
+		box2px bounds = getBounds();
+		if (isObjectFocused()) {
+			nvgLineJoin(nvg, NVG_MITER);
+			nvgBeginPath(nvg);
+				if (roundCorners) {
+					nvgRoundedRect(nvg, bounds.position.x + PAD,
+							bounds.position.y  + PAD,
+							bounds.dimensions.x - 2 * PAD,
+							bounds.dimensions.y - 2 * PAD,
+							context->theme.CORNER_RADIUS);
+				} else {
+					nvgRect(nvg, bounds.position.x  + PAD,
+							bounds.position.y + PAD,
+							bounds.dimensions.x - 2 * PAD,
+							bounds.dimensions.y - 2 * PAD);
+				}
+			nvgStrokeWidth(nvg, 2.0f);
+			nvgStrokeColor(nvg, context->theme.FOCUS);
+			nvgStroke(nvg);
 		}
 	}
 }

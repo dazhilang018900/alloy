@@ -221,9 +221,16 @@ void Application::drawDebugUI() {
 					Color(255), Color(64, 64, 64));
 			yoffset += 16;
 		}
-		if (context->mouseFocusRegion != nullptr) {
-			txt = MakeString() << "Mouse Focus ["
-					<< context->mouseFocusRegion->name << "]";
+		if (context->cursorFocusRegion != nullptr) {
+			txt = MakeString() << "Cursor Focus ["
+					<< context->cursorFocusRegion->name << "]";
+			drawText(nvg, 5, yoffset, txt.c_str(), FontStyle::Outline,
+					Color(255), Color(64, 64, 64));
+			yoffset += 16;
+		}
+		if (context->objectFocusRegion != nullptr) {
+			txt = MakeString() << "Region Focus ["
+					<< context->objectFocusRegion->name << "]";
 			drawText(nvg, 5, yoffset, txt.c_str(), FontStyle::Outline,
 					Color(255), Color(64, 64, 64));
 			yoffset += 16;
@@ -306,7 +313,7 @@ void Application::fireEvent(const InputEvent& event) {
 			if (event.button == GLFW_MOUSE_BUTTON_MIDDLE) {
 				context->middleMouseButton = true;
 			}
-			context->mouseOverRegion = context->mouseFocusRegion = context->mouseDownRegion = context->locate(context->cursorPosition);
+			context->mouseOverRegion = context->cursorFocusRegion = context->mouseDownRegion = context->locate(context->cursorPosition);
 
 			if (context->mouseDownRegion != nullptr) {
 				context->cursorDownPosition = event.cursor
@@ -664,7 +671,7 @@ void Application::run(int swapInterval) {
 					if(e.button==GLFW_MOUSE_BUTTON_LEFT) {
 						context->toggleDebug();
 						debug->foregroundColor=context->isDebugEnabled()?MakeColor(255,64,64,255):MakeColor(64,64,64,128);
-						context->setMouseFocusObject(nullptr);
+						context->setCursorFocus(nullptr);
 						return true;
 					}
 					return false;

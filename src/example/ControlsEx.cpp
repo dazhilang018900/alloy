@@ -73,7 +73,6 @@ bool ControlsEx::init(Composite& rootNode) {
 			new Selection("LA District", CoordPX(25, 550), CoordPX(200, 30),
 					std::vector<std::string> { "Hermosa Beach","Torrance","Long Beach","Venice","Santa Monica","Manhattan Beach","Hollywood","Paramount","Echo Park","Pasadena" }));
 	rootNode.add(selection2);
-
 	ToggleBoxPtr togglebox = ToggleBoxPtr(
 			new ToggleBox("Toggle", CoordPX(200.0f, 40.0f),
 					CoordPercent(0.4f, 0.07f), false,true));

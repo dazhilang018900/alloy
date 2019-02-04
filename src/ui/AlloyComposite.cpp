@@ -9,7 +9,7 @@
 #include "ui/AlloyApplication.h"
 #include "ui/AlloyDrawUtil.h"
 #include "ui/AlloySlider.h"
-namespace aly{
+namespace aly {
 const float Composite::scrollBarSize = 15.0f;
 std::shared_ptr<Composite> MakeComposite(const std::string& name,
 		const AUnit2D& position, const AUnit2D& dimensions,
@@ -25,13 +25,18 @@ std::shared_ptr<Composite> MakeComposite(const std::string& name,
 	composite->setOrientation(orientation);
 	return composite;
 }
-void Composite::setCellPadding(const pixel2& pix){
-	cellPadding=pix;
+void Composite::setCellPadding(const pixel2& pix) {
+	cellPadding = pix;
 }
-void Composite::setCellSpacing(const pixel2& pix){
-	cellSpacing=pix;
+void Composite::setCellSpacing(const pixel2& pix) {
+	cellSpacing = pix;
 }
-
+void Composite::appendTabChain(Region* region) {
+	tabChain.push_back(region);
+}
+void Composite::clearTabChain() {
+	tabChain.clear();
+}
 void Composite::setAlwaysShowVerticalScrollBar(bool show) {
 	alwaysShowVerticalScrollBar = show;
 	scrollEnabled |= show;
@@ -97,7 +102,24 @@ bool Composite::onEventHandler(AlloyContext* context, const InputEvent& event) {
 		if (mouseDownRegion != nullptr && !mouseDownRegion->isDragEnabled()) {
 			if (mouseDownRegion->hasParent(this)) {
 				context->setMouseDownObject(this);
-
+			}
+		}
+	}
+	if (event.type == InputType::Key && event.key == GLFW_KEY_TAB) {
+		if (isVisible() && context->isMouseOver(this, true)) {
+			std::cout << "Tab In Region Over Chain" << std::endl;
+			for (auto iter = tabChain.begin(); iter != tabChain.end(); iter++) {
+				Region* ptr = *iter;
+				if (ptr->isObjectFocused()) {
+					ptr->setFocus(false);
+					iter++;
+					if (iter != tabChain.end()) {
+						(*iter)->setFocus(true);
+					} else {
+						tabChain.front()->setFocus(true);
+					}
+					break;
+				}
 			}
 		}
 	}
@@ -170,6 +192,12 @@ void Composite::erase(const std::shared_ptr<Region>& node) {
 			break;
 		}
 	}
+	for (auto iter = tabChain.begin(); iter != tabChain.end(); iter++) {
+		if (*iter == node.get()) {
+			tabChain.erase(iter);
+			break;
+		}
+	}
 }
 void Composite::erase(Region* node) {
 	for (auto iter = children.begin(); iter != children.end(); iter++) {
@@ -177,6 +205,12 @@ void Composite::erase(Region* node) {
 			children.erase(iter);
 			node->parent = nullptr;
 			AlloyDefaultContext()->clearEvents(node);
+			break;
+		}
+	}
+	for (auto iter = tabChain.begin(); iter != tabChain.end(); iter++) {
+		if (*iter == node) {
+			tabChain.erase(iter);
 			break;
 		}
 	}
@@ -252,6 +286,7 @@ void Composite::clear() {
 		node->removeListener();
 		node->parent = nullptr;
 	}
+	tabChain.clear();
 	children.clear();
 }
 Region* Composite::locate(const pixel2& cursor) {
@@ -338,6 +373,7 @@ void Composite::draw(AlloyContext* context) {
 		nvgStroke(nvg);
 		nvgLineJoin(nvg, NVG_MITER);
 	}
+
 }
 void Composite::drawDebug(AlloyContext* context) {
 	drawBoundsLabel(context, name, context->getFontHandle(FontType::Bold));
@@ -369,7 +405,8 @@ void Composite::draw() {
 }
 
 bool Composite::addVerticalScrollPosition(float t) {
-	if (verticalScrollHandle.get()!=nullptr&&verticalScrollHandle->addDragOffset(pixel2(0.0f, t))) {
+	if (verticalScrollHandle.get() != nullptr
+			&& verticalScrollHandle->addDragOffset(pixel2(0.0f, t))) {
 		this->scrollPosition.y =
 				(this->verticalScrollHandle->getBoundsPositionY()
 						- this->verticalScrollTrack->getBoundsPositionY())
@@ -383,7 +420,7 @@ bool Composite::addVerticalScrollPosition(float t) {
 	return false;
 }
 void Composite::scrollToBottom() {
-	if (verticalScrollHandle.get()!=nullptr){
+	if (verticalScrollHandle.get() != nullptr) {
 		float shift =
 				this->verticalScrollTrack->getBoundsPositionY()
 						+ std::max(0.0f,
@@ -402,7 +439,7 @@ void Composite::scrollToBottom() {
 }
 
 void Composite::scrollToTop() {
-	if (verticalScrollHandle.get()!=nullptr){
+	if (verticalScrollHandle.get() != nullptr) {
 		verticalScrollHandle->setDragOffset(pixel2(0.0f, 0.0f));
 		this->scrollPosition.y =
 				(this->verticalScrollHandle->getBoundsPositionY()
@@ -415,7 +452,8 @@ void Composite::scrollToTop() {
 	}
 }
 bool Composite::addHorizontalScrollPosition(float t) {
-	if (horizontalScrollHandle.get()!=nullptr&&horizontalScrollHandle->addDragOffset(pixel2(t, 0.0f))) {
+	if (horizontalScrollHandle.get() != nullptr
+			&& horizontalScrollHandle->addDragOffset(pixel2(t, 0.0f))) {
 		this->scrollPosition.x =
 				(this->horizontalScrollHandle->getBoundsPositionX()
 						- this->horizontalScrollTrack->getBoundsPositionX())
