@@ -32,7 +32,7 @@ namespace aly {
 bool CheckBox::handleMouseDown(AlloyContext* context, const InputEvent& event) {
 	if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
 		setFocus(true);
-		this->checked = !this->checked;
+		this->checked = !(this->checked);
 		this->valueLabel->textColor =
 				(this->checked) ?
 						MakeColor(AlloyApplicationContext()->theme.LIGHTER) :
@@ -182,9 +182,9 @@ bool ToggleBox::handleMouseDown(AlloyContext* context,
 		const InputEvent& event) {
 	if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
 		setFocus(true);
-		this->toggledOn = !this->toggledOn;
+		this->toggledOn = !(this->toggledOn);
 		onLabel->setVisible(this->toggledOn);
-		offLabel->setVisible(!this->toggledOn);
+		offLabel->setVisible(!(this->toggledOn));
 		if (onChange)
 			onChange(this->toggledOn);
 		return true;

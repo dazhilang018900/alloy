@@ -34,12 +34,12 @@ private:
 	bool handleMouseDown(AlloyContext* context, const InputEvent& event);
 public:
 	std::function<void(bool)> onChange;
-	inline bool getValue() {
+	inline bool getValue() const {
 		return checked;
 	}
 	void setValue(bool value);
 	CheckBox(const std::string& label, const AUnit2D& position,
-			const AUnit2D& dimensions, bool checked ,bool showText=true);
+			const AUnit2D& dimensions, bool checked=true ,bool showText=true);
 	virtual void draw(AlloyContext* context) override;
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
 			override;
@@ -53,7 +53,7 @@ private:
 	bool toggledOn;
 	bool handleMouseDown(AlloyContext* context, const InputEvent& e);
 public:
-	inline bool getValue() {
+	inline bool getValue() const {
 		return toggledOn;
 	}
 	std::function<void(bool)> onChange;
