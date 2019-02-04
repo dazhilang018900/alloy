@@ -794,6 +794,9 @@ namespace aly {
 	std::shared_ptr<MatrixField<3, 4>> ParameterPane::addMatrixField(const std::string& label, aly::matrix<float, 3, 4>& value, float aspect) {
 		return addMatrixFieldInternal(label,value,aspect);
 	}
+	std::shared_ptr<MatrixField<4, 3>> ParameterPane::addMatrixField(const std::string& label, aly::matrix<float, 4, 3>& value, float aspect) {
+		return addMatrixFieldInternal(label,value,aspect);
+	}
 	std::shared_ptr<MatrixField<4, 4>> ParameterPane::addMatrixField(const std::string& label, aly::matrix<float, 4, 4>& value, float aspect) {
 		return addMatrixFieldInternal(label,value,aspect);
 	}

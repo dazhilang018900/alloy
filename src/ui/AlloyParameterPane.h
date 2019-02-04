@@ -258,6 +258,8 @@ public:
 			aly::matrix<float, 3, 3>& value, float aspect = -1.0f);
 	std::shared_ptr<MatrixField<3, 4>> addMatrixField(const std::string& label,
 			aly::matrix<float, 3, 4>& value, float aspect = -1.0f);
+	std::shared_ptr<MatrixField<4, 3>> addMatrixField(const std::string& label,
+			aly::matrix<float, 4, 3>& value, float aspect = -1.0f);
 	std::shared_ptr<MatrixField<4, 4>> addMatrixField(const std::string& label,
 			aly::matrix<float, 4, 4>& value, float aspect = -1.0f);
 };
