@@ -79,6 +79,7 @@ protected:
 	virtual void update()=0;
 	double sliderPosition;
 public:
+	virtual void appendTo(TabChain& chain) override;
 	void setSliderColor(const Color& startColor, const Color& endColor);
 	void setMinValue(const Number& v);
 	void setMaxValue(const Number& v);
@@ -162,6 +163,7 @@ protected:
 	void update();
 	double2 sliderPosition;
 public:
+	virtual void appendTo(TabChain& chain) override;
 	std::function<void(const Number& lowerValue, const Number& upperValue)> onChangeEvent;
 	void setSliderColor(const Color& startColor, const Color& endColor);
 	RangeSlider(const std::string& name, const AUnit2D& pos,const AUnit2D& dims,const Number& min, const Number& max,

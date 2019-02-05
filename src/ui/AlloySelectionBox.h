@@ -122,6 +122,8 @@ class SearchBox : public BorderComposite {
 private:
 	std::shared_ptr<TextField> searchField;
 	std::shared_ptr<IconButton> searchIcon;
+protected:
+	virtual void appendTo(TabChain& chain) override;
 public:
 	void setTextColor(const AColor& c);
 	std::function<void(const std::string& query)> onChange;

@@ -17,8 +17,7 @@ MessageDialog::MessageDialog(const std::string& name, const AUnit2D& pos,
 	containerRegion = std::shared_ptr<Composite>(
 			new Composite("Container", CoordPX(0, 15),
 					CoordPerPX(1.0, 1.0, -15, -15)));
-
-	TextButtonPtr actionButton = std::shared_ptr<TextButton>(
+	actionButton = std::shared_ptr<TextButton>(
 			new TextButton(
 					(option == MessageOption::Okay
 							|| option == MessageOption::OkayCancel) ?
@@ -36,7 +35,7 @@ MessageDialog::MessageDialog(const std::string& name, const AUnit2D& pos,
 				}
 				return true;
 			};
-	containerRegion->add(actionButton);
+	containerRegion->add(actionButton,true);
 	if (option == MessageOption::Okay) {
 		actionButton->setOrigin(Origin::TopCenter);
 
@@ -60,7 +59,7 @@ MessageDialog::MessageDialog(const std::string& name, const AUnit2D& pos,
 					}
 					return true;
 				};
-		containerRegion->add(inactionButton);
+		containerRegion->add(inactionButton,true);
 
 	}
 	int code = 0;
@@ -167,6 +166,7 @@ void MessageDialog::draw(AlloyContext* context) {
 	Composite::draw(context);
 }
 void MessageDialog::setVisible(bool visible) {
+	if(visible)actionButton->setFocus(true);
 	if (!Composite::isVisible()) {
 		AlloyApplicationContext()->getGlassPane()->setVisible(true);
 	} else {

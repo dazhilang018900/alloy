@@ -49,6 +49,8 @@ public:
 		label = l;
 		value = clamp(p, 0.0f, 1.0f);
 	}
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+			override;
 	ProgressBar(const std::string& name, const AUnit2D& pt,
 			const AUnit2D& dims);
 };

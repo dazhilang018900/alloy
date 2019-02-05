@@ -33,8 +33,10 @@ void TabChain::focusNext(Region* region){
 			iter++;
 			if(iter==regions.end()){
 				regions.front()->setFocus(true);
+				break;
 			} else {
 				(*iter)->setFocus(true);
+				break;
 			}
 		}
 	}
@@ -44,9 +46,11 @@ void TabChain::focusPrevious(Region* region){
 		if(*iter==region){
 			if(iter==regions.begin()){
 				regions.back()->setFocus(true);
+				break;
 			} else {
 				iter--;
 				(*iter)->setFocus(true);
+				break;
 			}
 		}
 	}
@@ -77,6 +81,13 @@ void Region::focusNext(){
 void Region::focusPrevious(){
 	if(tabChain.parent!=nullptr){
 		tabChain.parent->focusPrevious(this);
+	}
+}
+void Region::printFocus(){
+	if(tabChain.parent!=nullptr){
+		std::cout<<"Tab Chain: "<<*tabChain.parent<<std::endl;
+	} else {
+		std::cout<<getName()<<" has no tab chain."<<std::endl;
 	}
 }
 void Region::appendTo(TabChain& chain){
@@ -212,6 +223,7 @@ void Region::setVisible(bool vis) {
 	}
 }
 bool Region::onEventHandler(AlloyContext* context, const InputEvent& event) {
+
 	if (isVisible() && onEvent)
 		return onEvent(context, event);
 	else

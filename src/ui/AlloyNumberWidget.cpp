@@ -630,8 +630,14 @@ bool NumberField::handleCursorInput(AlloyContext* context,
 }
 bool NumberField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (isVisible() && modifiable) {
-		if (!isObjectFocused() || th <= 0)
-			return false;
+		if(e.type==InputType::MouseButton&&e.isDown()&&context->isMouseOver(this,false)){
+			if(e.button==GLFW_MOUSE_BUTTON_LEFT) {
+				setFocus(true);
+			} else if(e.button==GLFW_MOUSE_BUTTON_RIGHT) {
+				setFocus(false);
+			}
+		}
+		if (!isObjectFocused() || th <= 0)return false;
 		switch (e.type) {
 		case InputType::MouseButton:
 			if (handleMouseInput(context, e))
@@ -733,11 +739,15 @@ void NumberField::draw(AlloyContext* context) {
 			}
 		}
 	}
+	float cursorOffset;
 	if (!showDefaultLabel) {
 		textOffsetX = textOffsetX - positions[textStart].minx;
+		cursorOffset=textOffsetX
+					+ (cursorStart ? positions[cursorStart - 1].maxx - 1 : 0);
+	}  else {
+		cursorOffset=textOffsetX;
 	}
-	float cursorOffset = textOffsetX
-			+ (cursorStart ? positions[cursorStart - 1].maxx - 1 : 0);
+
 	if (cursorEnd != cursorStart && f) {
 		int lo = std::min(cursorEnd, cursorStart);
 		int hi = std::max(cursorEnd, cursorStart);

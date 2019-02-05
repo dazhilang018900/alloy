@@ -55,7 +55,7 @@ bool Composite::isHorizontalScrollVisible() const {
 	}
 	return horizontalScrollTrack->isVisible();
 }
-void Composite::add(const std::shared_ptr<Region>& region) {
+void Composite::add(const std::shared_ptr<Region>& region, bool appendToTab) {
 	if (region.get() == nullptr) {
 		throw std::runtime_error(
 				MakeString() << "Could not add nullptr region to composite ["
@@ -69,6 +69,9 @@ void Composite::add(const std::shared_ptr<Region>& region) {
 						<< "] because it already has a parent ["
 						<< region->parent->name << "].");
 	region->parent = this;
+	if (appendToTab) {
+		appendToTabChain(region.get());
+	}
 }
 void Composite::insertAtFront(const std::shared_ptr<Region>& region) {
 	children.insert(children.begin(), region);
@@ -96,18 +99,6 @@ bool Composite::onEventHandler(AlloyContext* context, const InputEvent& event) {
 		if (mouseDownRegion != nullptr && !mouseDownRegion->isDragEnabled()) {
 			if (mouseDownRegion->hasParent(this)) {
 				context->setMouseDownObject(this);
-			}
-		}
-	}
-	if (event.type == InputType::Key && event.key == GLFW_KEY_TAB) {
-		if (isVisible() && context->isMouseOver(this, true)) {
-			std::cout << "Tab In Region Over Chain "<<tabChain << std::endl;
-			if(isObjectFocused()){
-				if(event.isShiftDown()){
-					focusPrevious();
-				}else {
-					focusNext();
-				}
 			}
 		}
 	}

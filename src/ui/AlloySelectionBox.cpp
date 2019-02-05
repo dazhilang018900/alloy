@@ -635,6 +635,9 @@ void SearchBox::setTextColor(const AColor& c) {
 	searchField->textColor = c;
 	searchIcon->borderColor = c;
 }
+void SearchBox::appendTo(TabChain& chain){
+	chain.add(searchField.get());
+}
 SearchBox::SearchBox(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims) :
 		BorderComposite(name, pos, dims) {

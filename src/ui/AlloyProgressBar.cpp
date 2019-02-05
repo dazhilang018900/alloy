@@ -55,11 +55,29 @@ void ProgressBar::draw(AlloyContext* context) {
 	drawText(nvg, pixel2(x + 0.5f * w, y + 0.5f * h), label, FontStyle::Normal,
 			context->theme.DARK, context->theme.LIGHTER);
 	popScissor(nvg);
+	if (isObjectFocused()) {
+		nvgLineJoin(nvg, NVG_MITER);
+		nvgBeginPath(nvg);
+		nvgRoundedRect(nvg, x, y, w, h, h / 2);
+		nvgStrokeWidth(nvg, 2.0f);
+		nvgStrokeColor(nvg, context->theme.FOCUS);
+		nvgStroke(nvg);
+	}
+}
+bool ProgressBar::onEventHandler(AlloyContext* context, const InputEvent& event){
+	if(event.type==InputType::MouseButton&&event.isDown()&&context->isMouseOver(this,true)){
+		if(event.button==GLFW_MOUSE_BUTTON_LEFT){
+			setFocus(true);
+		} else if(event.button==GLFW_MOUSE_BUTTON_RIGHT){
+			setFocus(false);
+		}
+	}
+	return Composite::onEventHandler(context,event);
 }
 ProgressBar::ProgressBar(const std::string& name, const AUnit2D& pt,
 		const AUnit2D& dims) :
 		Composite(name, pt, dims), value(0), label(name) {
-
+	Application::addListener(this);
 }
 
 

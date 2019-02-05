@@ -98,7 +98,7 @@ public:
 	virtual void updateCursor(CursorLocator* cursorLocator) override;
 	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 			double pixelRatio, bool clamp = false) override;
-	virtual void add(const std::shared_ptr<Region>& region);
+	virtual void add(const std::shared_ptr<Region>& region,bool appendToTab=false);
 	virtual void insertAtFront(const std::shared_ptr<Region>& region);
 	virtual void pack() override {
 		Region::pack();

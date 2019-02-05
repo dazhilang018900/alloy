@@ -132,6 +132,7 @@ public:
 	friend class FileEntry;
 	std::function<void(const std::vector<std::string>&)> onSelect;
 	virtual void draw(AlloyContext* context) override;
+	virtual void setVisible(bool v) override;
 	FileDialog(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,
 			const FileDialogType& type, pixel fileEntryHeight = 30);
 	void update();

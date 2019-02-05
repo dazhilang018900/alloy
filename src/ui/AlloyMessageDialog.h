@@ -23,6 +23,7 @@
 
 #include "AlloyComposite.h"
 #include "AlloyTextWidget.h"
+#include "AlloyButton.h"
 namespace aly {
 
 
@@ -31,15 +32,16 @@ protected:
 	bool returnValue = false;
 	MessageOption option;
 	MessageType type;
+	TextButtonPtr actionButton;
 	std::shared_ptr<Composite> containerRegion;
 	std::shared_ptr<TextLabel> textLabel;
 public:
 	bool getValue() const {
 		return returnValue;
 	}
+	virtual void setVisible(bool v) override;
 	void setMessage(const std::string& message);
         std::string getMessage() const;
-	void setVisible(bool visible);
 	MessageDialog(const std::string& name, const AUnit2D& pos,
 			const AUnit2D& dims, bool wrap, const MessageOption& option,
 			const MessageType& type);

@@ -27,17 +27,15 @@ ControlsEx::ControlsEx() :
 }
 bool ControlsEx::init(Composite& rootNode) {
 
-	HSliderPtr hslider1 = HSliderPtr(
+	HSliderPtr hsliderNoLabel = HSliderPtr(
 			new HorizontalSlider("Integer Slider", CoordPerPX(0.1f, 0.3f, 0, 0),
 					CoordPX(200.0f, 40.0f), false,Integer(1), Integer(12),
 					Integer(7)));
-	rootNode.add(hslider1);
 
-	HSliderPtr hslider2 = HSliderPtr(
+	HSliderPtr hsliderLabel = HSliderPtr(
 			new HorizontalSlider("Horizontal Slider", CoordPercent(0.5f, 0.7f),
 					CoordPX(350.0f, 50.0f),Double(1), Double(12), Double(7)));
-	rootNode.add(hslider2);
-	hslider2->setLabelFormatter([](const Number& num){
+	hsliderLabel->setLabelFormatter([](const Number& num){
 		std::string str=MakeString()<<std::setprecision(4)<<num.toFloat();
 		return str;
 	});
@@ -49,17 +47,17 @@ bool ControlsEx::init(Composite& rootNode) {
 		std::string str=MakeString()<<num.toInteger()<<"%";
 		return str;
 	});
-	rootNode.add(vslider1);
 
 	CheckBoxPtr checkbox = CheckBoxPtr(
 			new CheckBox("Check", CoordPX(10.0f, 100.0f),
 					CoordPercent(0.4f, 0.07f), false,true));
-	rootNode.add(checkbox);
+
+
+
 
 	RangeSliderPtr rangeSlider = RangeSliderPtr(
 		new RangeSlider("Range", CoordPerPX(0.5f,0.0f,10.0f, 130.0f),
 			CoordPX(250.0f,50.0f),Integer(0), Integer(100), Integer(25), Integer(75)));
-	rootNode.add(rangeSlider);
 	SelectionPtr selection1 = SelectionPtr(
 			new Selection("SF District", CoordPX(5, 350), CoordPX(200, 30),
 					std::vector<std::string> { "Civic Center", "Tenderloin",
@@ -67,21 +65,23 @@ bool ControlsEx::init(Composite& rootNode) {
 							"Noe Valey", "Bernal Heights", "Presidio",
 							"Financial District", "SoMa", "Haight", "Richmond",
 							"Sunset", "Chinatown", "Japantown", "Nob Hill" }));
-	rootNode.add(selection1);
+
+
+
 
 	SelectionPtr selection2 = SelectionPtr(
 			new Selection("LA District", CoordPX(25, 550), CoordPX(200, 30),
 					std::vector<std::string> { "Hermosa Beach","Torrance","Long Beach","Venice","Santa Monica","Manhattan Beach","Hollywood","Paramount","Echo Park","Pasadena" }));
-	rootNode.add(selection2);
+
+
+
 	ToggleBoxPtr togglebox = ToggleBoxPtr(
 			new ToggleBox("Toggle", CoordPX(200.0f, 40.0f),
 					CoordPercent(0.4f, 0.07f), false,true));
-	rootNode.add(togglebox);
-
 	TextButtonPtr textButton = TextButtonPtr(
 			new TextButton("Text Button", CoordPX(10.0f, 300.0f),
 					CoordPX(100, 30)));
-	rootNode.add(textButton);
+
 	TextLabelPtr textLabel = TextLabelPtr(
 			new TextLabel("Label", CoordPX(220.0f, 300.0f), CoordPX(100, 30)));
 	textLabel->backgroundColor = MakeColor(128, 0, 0);
@@ -90,21 +90,20 @@ bool ControlsEx::init(Composite& rootNode) {
 	textLabel->setRoundCorners(true);
 	textLabel->horizontalAlignment = HorizontalAlignment::Center;
 	textLabel->verticalAlignment = VerticalAlignment::Middle;
-	rootNode.add(textLabel);
 
 	ModifiableLabelPtr modifyLabel = ModifiableLabelPtr(
-		new ModifiableLabel("Click to edit", CoordPerPX(0.5f,1.0f,-80.0f,-50.0f), CoordPX(160, 40)));
+		new ModifiableLabel("Mod Label", CoordPerPX(0.5f,1.0f,-80.0f,-50.0f), CoordPX(160, 40)));
 	modifyLabel->backgroundColor = MakeColor(32,32,32);
 	modifyLabel->borderColor = MakeColor(64,64,64);
 	modifyLabel->textColor = MakeColor(Color(51, 153, 255));
 	modifyLabel->borderWidth = UnitPX(1.0f);
 	modifyLabel->fontSize = UnitPX(30);
 	modifyLabel->setRoundCorners(false);
+	modifyLabel->setValue("Click to edit");
 	modifyLabel->horizontalAlignment = HorizontalAlignment::Center;
 	modifyLabel->verticalAlignment = VerticalAlignment::Middle;
-	rootNode.add(modifyLabel);
 	ModifiableNumberPtr modifyNumber = ModifiableNumberPtr(
-		new ModifiableNumber("NaN", CoordPerPX(0.5f, 1.0f,100.0f, -100.0f), CoordPX(80, 30),NumberType::Float));
+		new ModifiableNumber("Mod Number", CoordPerPX(0.5f, 1.0f,100.0f, -100.0f), CoordPX(80, 30),NumberType::Float));
 	modifyNumber->backgroundColor = MakeColor(32, 32, 32);
 	modifyNumber->borderColor = MakeColor(64, 64, 64);
 	modifyNumber->textColor = MakeColor(Color(51, 153, 255));
@@ -115,29 +114,25 @@ bool ControlsEx::init(Composite& rootNode) {
 	modifyNumber->horizontalAlignment = HorizontalAlignment::Center;
 	modifyNumber->verticalAlignment = VerticalAlignment::Middle;
 
-	rootNode.add(modifyNumber);
-
 	ColorSelectorPtr colorselect = ColorSelectorPtr(
 			new ColorSelector("Color", CoordPercent(0.5f, 0.4f),
 					CoordPX(200, 50)));
 	colorselect->setOrigin(Origin::MiddleCenter);
 	colorselect->setColor(Color(200, 128, 32));
-	rootNode.add(colorselect);
 
 	ProgressBarPtr pbar = ProgressBarPtr(
 			new ProgressBar("Progress", CoordPercent(0.05f, 0.7f),
 					CoordPercent(0.4f, 0.05f)));
 
-	rootNode.add(pbar);
 
 	TextIconButtonPtr textIcon = std::shared_ptr<TextIconButton>(
 			new TextIconButton("Text Icon", 0xf115,
 					CoordPerPX(1.0f, 1.0f, -110.0f, -40.0f), CoordPX(100, 30)));
-	rootNode.add(textIcon);
+
 	IconButtonPtr iconButton = std::shared_ptr<IconButton>(
 			new IconButton(0xf062, CoordPerPX(1.0f, 0.0f, -35.0f, 5.0f),
 					CoordPX(30, 30)));
-	rootNode.add(iconButton);
+
 
 
 	TextFieldPtr tfield = MakeTextField("Text Field", CoordPercent(0.1f, 0.8f),
@@ -151,24 +146,40 @@ bool ControlsEx::init(Composite& rootNode) {
 			CoordPerPX(0.5f, 0.5f, 0.0f, 35.0f), CoordPX(200.0f, 30.0f),
 			NumberType::Boolean, Theme::Default.LIGHT,
 			Theme::Default.DARKER);
+	bfield->setShowDefaultLabel(true);
+	ifield->setShowDefaultLabel(true);
 	NumberFieldPtr ffield = MakeNumberField("Float Field",
 			CoordPercent(0.1f, 0.4f), CoordPX(200.0f, 30.0f), NumberType::Float,
 			Theme::Default.LIGHT, Theme::Default.DARKER);
 	SearchBoxPtr serachBox = SearchBoxPtr(new SearchBox("Search", CoordPerPX(0.5f, 0.5f, 0.0f,70.0f), CoordPX(200.0f, 30.0f)));
-	rootNode.add(serachBox);
-
 	TextLinkPtr lfield=TextLinkPtr(new TextLink("Hyperlink",CoordPerPX(0.5f, 0.5f, 220.0f, 35.0f), CoordPX(120.0f,30.0f)));
 	lfield->setAlignment(HorizontalAlignment::Center,VerticalAlignment::Middle);
 	lfield->onClick=[=](){
 		std::cout<<"Clicked link!"<<std::endl;
 		return true;
 	};
-	rootNode.add(lfield);
-	rootNode.add(tfield);
-	rootNode.add(bfield);
-	rootNode.add(ifield);
-	rootNode.add(ffield);
-
+	rootNode.add(togglebox,true);
+	rootNode.add(iconButton,true);
+	rootNode.add(checkbox,true);
+	rootNode.add(rangeSlider,true);
+	rootNode.add(vslider1,true);
+	rootNode.add(hsliderNoLabel,true);
+	rootNode.add(colorselect,true);
+	rootNode.add(ffield,true);
+	rootNode.add(textButton,true);
+	rootNode.add(textLabel,true);
+	rootNode.add(selection1,true);
+	rootNode.add(ifield,true);
+	rootNode.add(bfield,true);
+	rootNode.add(lfield,true);
+	rootNode.add(serachBox,true);
+	rootNode.add(pbar,true);
+	rootNode.add(tfield,true);
+	rootNode.add(selection2,true);
+	rootNode.add(hsliderLabel,true);
+	rootNode.add(modifyNumber,true);
+	rootNode.add(modifyLabel,true);
+	rootNode.add(textIcon,true);
 	progressTask = std::unique_ptr<aly::RecurrentTask>(
 			new RecurrentTask([pbar](uint64_t iter) {
 				//std::cout << "Iteration " << iter << std::endl;

@@ -375,6 +375,19 @@ pixel2 AlloyContext::getCursorDownPosition() const {
 }
 bool AlloyContext::fireListeners(const InputEvent& event) {
 	firingListeners = true;
+	if (event.type== InputType::Key&& event.isDown() && event.key == GLFW_KEY_TAB) {
+		if (objectFocusRegion != nullptr && objectFocusRegion->isVisible()) {
+			if (event.isShiftDown()) {
+				objectFocusRegion->focusPrevious();
+				//objectFocusRegion->printFocus();
+				return true;
+			} else {
+				objectFocusRegion->focusNext();
+				//objectFocusRegion->printFocus();
+				return true;
+			}
+		}
+	}
 	for (auto iter = listeners.rbegin(); iter != listeners.rend(); iter++) {
 		if (firingListeners) {
 			EventHandler* handler = iter->first;
@@ -651,7 +664,7 @@ void AlloyContext::clearEvents() {
 	mouseOverRegion = nullptr;
 	mouseDownRegion = nullptr;
 	cursorFocusRegion = nullptr;
-	objectFocusRegion=nullptr;
+	objectFocusRegion = nullptr;
 	onTopRegion = nullptr;
 	firingListeners = false;
 }

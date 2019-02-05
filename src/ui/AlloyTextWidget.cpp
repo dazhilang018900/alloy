@@ -109,7 +109,7 @@ void ModifiableLabel::draw(AlloyContext* context) {
 	}
 	setFocus(f);
 
-	bool ofocus=isObjectFocused();
+	bool ofocus = isObjectFocused();
 	if (hover) {
 		context->setCursor(&Cursor::TextInsert);
 	}
@@ -136,16 +136,17 @@ void ModifiableLabel::draw(AlloyContext* context) {
 	if (ofocus) {
 		nvgFillColor(nvg, context->theme.LIGHTER);
 		nvgBeginPath(nvg);
-		if(roundCorners){
+		if (roundCorners) {
 			nvgRoundedRect(nvg, bounds.position.x + lineWidth * 0.5f,
-					bounds.position.y + lineWidth * 0.5f ,
-					bounds.dimensions.x - lineWidth ,
-					bounds.dimensions.y - lineWidth ,context->theme.CORNER_RADIUS);
-		} else {
-			nvgRect(nvg, bounds.position.x + lineWidth * 0.5f ,
 					bounds.position.y + lineWidth * 0.5f,
-					bounds.dimensions.x - lineWidth ,
-					bounds.dimensions.y - lineWidth );
+					bounds.dimensions.x - lineWidth,
+					bounds.dimensions.y - lineWidth,
+					context->theme.CORNER_RADIUS);
+		} else {
+			nvgRect(nvg, bounds.position.x + lineWidth * 0.5f,
+					bounds.position.y + lineWidth * 0.5f,
+					bounds.dimensions.x - lineWidth,
+					bounds.dimensions.y - lineWidth);
 		}
 
 		nvgFill(nvg);
@@ -325,15 +326,18 @@ void ModifiableLabel::draw(AlloyContext* context) {
 		const float PAD = 1.0f;
 		nvgLineJoin(nvg, NVG_MITER);
 		nvgBeginPath(nvg);
-		if(roundCorners){
-		nvgRoundedRect(nvg, bounds.position.x + PAD, bounds.position.y + PAD,
-				bounds.dimensions.x - 2 * PAD, bounds.dimensions.y - 2 * PAD,context->theme.CORNER_RADIUS);
+		if (roundCorners) {
+			nvgRoundedRect(nvg, bounds.position.x + PAD,
+					bounds.position.y + PAD, bounds.dimensions.x - 2 * PAD,
+					bounds.dimensions.y - 2 * PAD,
+					context->theme.CORNER_RADIUS);
 		} else {
 			nvgRect(nvg, bounds.position.x + PAD, bounds.position.y + PAD,
-					bounds.dimensions.x - 2 * PAD, bounds.dimensions.y - 2 * PAD);
+					bounds.dimensions.x - 2 * PAD,
+					bounds.dimensions.y - 2 * PAD);
 		}
 		nvgStrokeWidth(nvg, 2.0f);
-		nvgStrokeColor(nvg,context->theme.FOCUS);
+		nvgStrokeColor(nvg, context->theme.FOCUS);
 		nvgStroke(nvg);
 	}
 }
@@ -422,15 +426,39 @@ void TextLabel::draw(AlloyContext* context) {
 		nvgStroke(nvg);
 		nvgLineJoin(nvg, NVG_MITER);
 	}
+	const int PAD = 1;
+	if (isObjectFocused()) {
+		nvgLineJoin(nvg, NVG_MITER);
+		nvgBeginPath(nvg);
 
+		if (roundCorners) {
+			nvgRoundedRect(nvg, bounds.position.x + PAD,
+					bounds.position.y + +PAD, bounds.dimensions.x - 2 * PAD,
+					bounds.dimensions.y - 2 * PAD,
+					context->theme.CORNER_RADIUS);
+		} else {
+			nvgRect(nvg, bounds.position.x + PAD, bounds.position.y + PAD,
+					bounds.dimensions.x - 2 * PAD,
+					bounds.dimensions.y - 2 * PAD);
+		}
+		nvgStrokeWidth(nvg, 2.0f);
+		nvgStrokeColor(nvg, context->theme.FOCUS);
+		nvgStroke(nvg);
+	}
 }
 
 TextLink::TextLink(const std::string& name) :
 		TextLabel(name), enabled(true) {
 	this->onMouseDown = [this](AlloyContext* context,const InputEvent& e) {
-		if(e.button==GLFW_MOUSE_BUTTON_LEFT&&onClick&&enabled) {
-			return onClick();
-		} else {
+		if(e.button==GLFW_MOUSE_BUTTON_LEFT) {
+			setFocus(true);
+			if(onClick&&enabled) {
+				return onClick();
+			} else {
+				return false;
+			}
+		} else if(e.button==GLFW_MOUSE_BUTTON_RIGHT) {
+			setFocus(false);
 			return false;
 		}
 	};
@@ -439,9 +467,15 @@ TextLink::TextLink(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims) :
 		TextLabel(name, pos, dims), enabled(true) {
 	this->onMouseDown = [this](AlloyContext* context,const InputEvent& e) {
-		if(e.button==GLFW_MOUSE_BUTTON_LEFT&&onClick&&enabled) {
-			return onClick();
-		} else {
+		if(e.button==GLFW_MOUSE_BUTTON_LEFT) {
+			setFocus(true);
+			if(onClick&&enabled) {
+				return onClick();
+			} else {
+				return false;
+			}
+		} else if(e.button==GLFW_MOUSE_BUTTON_RIGHT) {
+			setFocus(false);
 			return false;
 		}
 	};
@@ -553,7 +587,24 @@ void TextLink::draw(AlloyContext* context) {
 		nvgStroke(nvg);
 		nvgLineJoin(nvg, NVG_MITER);
 	}
-
+	const int PAD = 1;
+	if (isObjectFocused()) {
+		nvgLineJoin(nvg, NVG_MITER);
+		nvgBeginPath(nvg);
+		if (roundCorners) {
+			nvgRoundedRect(nvg, bounds.position.x + PAD,
+					bounds.position.y + +PAD, bounds.dimensions.x - 2 * PAD,
+					bounds.dimensions.y - 2 * PAD,
+					context->theme.CORNER_RADIUS);
+		} else {
+			nvgRect(nvg, bounds.position.x + PAD, bounds.position.y + PAD,
+					bounds.dimensions.x - 2 * PAD,
+					bounds.dimensions.y - 2 * PAD);
+		}
+		nvgStrokeWidth(nvg, 2.0f);
+		nvgStrokeColor(nvg, context->theme.FOCUS);
+		nvgStroke(nvg);
+	}
 }
 pixel2 TextRegion::getTextDimensions(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
@@ -865,6 +916,14 @@ bool TextField::handleCursorInput(AlloyContext* context, const InputEvent& e) {
 }
 bool TextField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	if (isVisible() && modifiable) {
+		if (e.type == InputType::MouseButton && e.isDown()
+				&& context->isMouseOver(this, false)) {
+			if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
+				setFocus(true);
+			} else if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
+				setFocus(false);
+			}
+		}
 		if (!isObjectFocused() || th <= 0)
 			return false;
 		switch (e.type) {
@@ -960,12 +1019,14 @@ void TextField::draw(AlloyContext* context) {
 			}
 		}
 	}
+	float cursorOffset;
 	if (!showDefaultLabel) {
 		textOffsetX = textOffsetX - positions[textStart].minx;
+		cursorOffset = textOffsetX
+				+ (cursorStart ? positions[cursorStart - 1].maxx - 1 : 0);
+	} else {
+		cursorOffset = textOffsetX;
 	}
-	float cursorOffset = textOffsetX
-			+ (cursorStart ? positions[cursorStart - 1].maxx - 1 : 0);
-
 	if (cursorEnd != cursorStart && ofocus) {
 		int lo = std::min(cursorEnd, cursorStart);
 		int hi = std::max(cursorEnd, cursorStart);
@@ -1004,9 +1065,10 @@ void TextField::draw(AlloyContext* context) {
 		nvgLineJoin(nvg, NVG_MITER);
 		nvgBeginPath(nvg);
 		nvgRoundedRect(nvg, bounds.position.x + PAD, bounds.position.y + PAD,
-				bounds.dimensions.x - 2 * PAD, bounds.dimensions.y - 2 * PAD,context->theme.CORNER_RADIUS);
-		nvgStrokeWidth(nvg, (float)PAD);
-		nvgStrokeColor(nvg,context->theme.FOCUS);
+				bounds.dimensions.x - 2 * PAD, bounds.dimensions.y - 2 * PAD,
+				context->theme.CORNER_RADIUS);
+		nvgStrokeWidth(nvg, (float) PAD);
+		nvgStrokeColor(nvg, context->theme.FOCUS);
 		nvgStroke(nvg);
 	}
 	if (!ofocus && value.size() == 0) {

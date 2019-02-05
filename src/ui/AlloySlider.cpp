@@ -14,6 +14,13 @@ void Slider::setSliderColor(const Color& startColor, const Color& endColor) {
 	sliderTrack->startColor = startColor;
 	sliderTrack->endColor = endColor;
 }
+void Slider::appendTo(TabChain& chain){
+	if(valueLabel.get()!=nullptr){
+		chain.add(valueLabel.get());
+	} else {
+		chain.add(this);
+	}
+}
 void Slider::setMinValue(const Number& v) {
 	minValue = v;
 }
@@ -380,7 +387,6 @@ HorizontalSlider::HorizontalSlider(const std::string& label,
 				VerticalAlignment::Bottom);
 		valueLabel->onTextEntered = [this](NumberField* field) {
 			this->setValue(valueLabel->getValue().toDouble());
-			setFocus(true);
 			if (onChangeEvent)
 			onChangeEvent(this->value);
 
@@ -399,12 +405,14 @@ HorizontalSlider::HorizontalSlider(const std::string& label,
 }
 bool HorizontalSlider::onEventHandler(AlloyContext* context,
 		const InputEvent& event) {
-	if (event.type == InputType::MouseButton && event.isDown()
-			&& context->isMouseOver(this, true)) {
-		if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
-			setFocus(true);
-		} else if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
-			setFocus(false);
+	if(valueLabel.get()==nullptr){
+		if (event.type == InputType::MouseButton && event.isDown()
+				&& context->isMouseOver(this, true)) {
+			if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
+				setFocus(true);
+			} else if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
+				setFocus(false);
+			}
 		}
 	}
 	if (event.type == InputType::Scroll && isVisible()
@@ -452,7 +460,6 @@ void HorizontalSlider::update() {
 bool HorizontalSlider::onMouseDown(AlloyContext* context, Region* region,
 		const InputEvent& event) {
 	if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
-		setFocus(true);
 		if (region == sliderTrack.get()) {
 			sliderHandle->setDragOffset(event.cursor,
 					sliderHandle->getBoundsDimensions() * 0.5f);
@@ -607,7 +614,6 @@ VerticalSlider::VerticalSlider(const std::string& label,
 	valueLabel->setOrigin(Origin::BottomLeft);
 	valueLabel->onTextEntered = [this](NumberField* field) {
 		this->setValue(valueLabel->getValue().toDouble());
-		setFocus(true);
 		if (onChangeEvent)
 		onChangeEvent(this->value);
 	};
@@ -619,12 +625,14 @@ VerticalSlider::VerticalSlider(const std::string& label,
 }
 bool VerticalSlider::onEventHandler(AlloyContext* context,
 		const InputEvent& event) {
-	if (event.type == InputType::MouseButton && event.isDown()
-			&& context->isMouseOver(this, true)) {
-		if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
-			setFocus(true);
-		} else if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
-			setFocus(false);
+	if(valueLabel.get()==nullptr){
+		if (event.type == InputType::MouseButton && event.isDown()
+				&& context->isMouseOver(this, true)) {
+			if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
+				setFocus(true);
+			} else if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
+				setFocus(false);
+			}
 		}
 	}
 	if (event.type == InputType::Scroll && isVisible()
@@ -675,7 +683,6 @@ void VerticalSlider::update() {
 bool VerticalSlider::onMouseDown(AlloyContext* context, Region* region,
 		const InputEvent& event) {
 	if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
-		setFocus(true);
 		if (region == sliderTrack.get()) {
 			sliderHandle->setDragOffset(event.cursor,
 					sliderHandle->getBoundsDimensions() * 0.5f);
@@ -803,7 +810,6 @@ RangeSlider::RangeSlider(const std::string& name, const AUnit2D& pos,
 				[this](NumberField* field) {
 					double2 val=double2(lowerValueLabel->getValue().toDouble(),upperValueLabel->getValue().toDouble());
 					val.y=std::max(val.x,val.y);
-					setFocus(true);
 					this->setValue(val);
 					if (onChangeEvent)onChangeEvent(this->lowerValue,this->upperValue);
 
@@ -821,7 +827,6 @@ RangeSlider::RangeSlider(const std::string& name, const AUnit2D& pos,
 				[this](NumberField* field) {
 					double2 val=double2(lowerValueLabel->getValue().toDouble(),upperValueLabel->getValue().toDouble());
 					val.x=std::min(val.x,val.y);
-					setFocus(true);
 					this->setValue(val);
 					if (onChangeEvent)onChangeEvent(this->lowerValue,this->upperValue);
 
@@ -851,12 +856,14 @@ void RangeSlider::setLabelFormatter(
 }
 bool RangeSlider::onEventHandler(AlloyContext* context,
 		const InputEvent& event) {
-	if (event.type == InputType::MouseButton && event.isDown()
-			&& context->isMouseOver(this, true)) {
-		if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
-			setFocus(true);
-		} else if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
-			setFocus(false);
+	if(lowerValueLabel.get()==nullptr){
+		if (event.type == InputType::MouseButton && event.isDown()
+				&& context->isMouseOver(this, true)) {
+			if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
+				setFocus(true);
+			} else if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
+				setFocus(false);
+			}
 		}
 	}
 	if (event.type == InputType::Scroll && isVisible()
@@ -887,7 +894,6 @@ double2 RangeSlider::getBlendValue() const {
 bool RangeSlider::onMouseDown(AlloyContext* context, Region* region,
 		const InputEvent& event) {
 	if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
-		setFocus(true);
 		if (region == sliderTrack.get()) {
 			if (distanceSqr(event.cursor,
 					lowerSliderHandle->getBounds().center())
@@ -1003,6 +1009,14 @@ void RangeSlider::setLowerValue(double value) {
 					/ sliderTrack->getBoundsDimensionsX());
 	if (lowerValueLabel.get() != nullptr) {
 		lowerValueLabel->setNumberValue(lowerValue);
+	}
+}
+void RangeSlider::appendTo(TabChain& chain){
+	if(lowerValueLabel.get()!=nullptr&&lowerValueLabel.get()!=nullptr){
+		chain.add(lowerValueLabel.get());
+		chain.add(upperValueLabel.get());
+	} else {
+		chain.add(this);
 	}
 }
 void RangeSlider::setUpperValue(double value) {

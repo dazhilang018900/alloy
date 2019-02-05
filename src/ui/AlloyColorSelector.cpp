@@ -209,13 +209,12 @@ namespace aly {
 		hContainer->setRoundCorners(true);
 		hContainer->setOrientation(Orientation::Horizontal,pixel2(1.0f,2.0f),pixel2(1.0f,2.0f));
 		hContainer->add(colorWheel);
-		hContainer->add(redSlider);
-		hContainer->add(greenSlider);
-		hContainer->add(blueSlider);
-		hContainer->add(lumSlider);
-		hContainer->add(alphaSlider);
+		hContainer->add(redSlider,true);
+		hContainer->add(greenSlider,true);
+		hContainer->add(blueSlider,true);
+		hContainer->add(lumSlider,true);
+		hContainer->add(alphaSlider,true);
 		colorSelectionPanel->add(hContainer);
-
 		colorSelectionPanel->onEvent =
 			[=](AlloyContext* context, const InputEvent& e) {
 			if (colorSelectionPanel->isVisible()) {
@@ -281,6 +280,7 @@ namespace aly {
 			Color(c.r, c.g, c.b, 1.0f));
 
 	}
+
 	void ColorSelector::setColor(const Color& c) {
 		*colorLabel->foregroundColor = c;
 		HSVA hsv = c.toHSVA();

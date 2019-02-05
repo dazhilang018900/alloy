@@ -46,8 +46,6 @@ protected:
 	friend class TabChain;
 	box2px bounds;
 	box2px extents;
-	void focusNext();
-	void focusPrevious();
 	void drawBoundsLabel(AlloyContext* context, const std::string& name,
 			int font);
 	Region* mouseOverRegion = nullptr;
@@ -69,7 +67,9 @@ public:
 	friend class Composite;
 	friend class BorderComposite;
 	const std::string name;
-
+	void focusNext();
+	void focusPrevious();
+	void printFocus();
 	void setIgnoreCursorEvents(bool ignore) {
 		ignoreCursorEvents = ignore;
 	}
@@ -240,10 +240,18 @@ public:
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
 		std::basic_ostream<C, R> & ss, const TabChain& tabs) {
 	for(Region* region:tabs.regions){
-		if(region->isObjectFocused()){
-			ss<<"[**"<<region->getName()<<"**] ";
+		if(AlloyDefaultContext()->isObjectFocused(region)){
+			if(region==tabs.regions.back()){
+				ss<<"[**"<<region->getName()<<"**]";
+			} else {
+				ss<<"[**"<<region->getName()<<"**] -> ";
+			}
 		} else {
-			ss<<"["<<region->getName()<<"] ";
+			if(region==tabs.regions.back()){
+				ss<<"["<<region->getName()<<"]";
+			} else {
+				ss<<"["<<region->getName()<<"] -> ";
+			}
 		}
 	}
 	return ss;

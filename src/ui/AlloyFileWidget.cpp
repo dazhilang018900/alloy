@@ -1218,6 +1218,10 @@ void FileDialog::update() {
 	lastDirectory = "";
 	updateDirectoryList();
 }
+void FileDialog::setVisible(bool v) {
+	if(v)actionButton->setFocus(true);
+	AdjustableComposite::setVisible(v);
+}
 void FileDialog::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = this->getBounds();

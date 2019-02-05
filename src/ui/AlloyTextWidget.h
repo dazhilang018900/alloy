@@ -63,7 +63,7 @@ public:
 			Region(name), label(name),truncate(true) {
 	}
 	TextLabel(const std::string& name, const AUnit2D& pos, const AUnit2D& dims) :
-			Region(name, pos, dims), label(name) {
+			Region(name, pos, dims), label(name),truncate(true) {
 	}
 
 	virtual void draw(AlloyContext* context) override;
