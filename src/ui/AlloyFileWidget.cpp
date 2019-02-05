@@ -158,7 +158,6 @@ bool ListBox::onMouseDown(ListEntry* entry, AlloyContext* context,
 	}
 	return false;
 }
-
 FileField::FileField(const std::string& name, const AUnit2D& position,
 		const AUnit2D& dimensions, bool directoryInput) :
 		TextField(name, position, dimensions), directoryInput(directoryInput), preferredFieldSize(
@@ -644,6 +643,7 @@ void FileDialog::setSelectedFile(const std::string& file,
 		bool changeDirectory) {
 	std::string dir;
 	bool select = false;
+	newFolderField->setVisible(false);
 	if (changeDirectory) {
 		if (IsDirectory(file)) {
 			dir = file;
@@ -655,8 +655,7 @@ void FileDialog::setSelectedFile(const std::string& file,
 		dir = RemoveTrailingSlash(GetParentDirectory(file));
 		select = true;
 	}
-	std::vector<FileDescription> descriptions = GetDirectoryDescriptionListing(
-			dir);
+	std::vector<FileDescription> descriptions = GetDirectoryDescriptionListing(dir);
 	int i = 0;
 	if (type == FileDialogType::SelectDirectory
 			|| type == FileDialogType::SelectMultiDirectory) {
@@ -849,8 +848,10 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	actionButton->setOrigin(Origin::TopRight);
 	fileLocation = std::shared_ptr<FileField>(
 			new FileField("File Location", CoordPX(10, 7),
-					CoordPerPX(1.0f, 0.0f, -55.0f, 30.0f)));
+					CoordPerPX(1.0f, 0.0f, -86.0f, 30.0f)));
 	fileLocation->setPreferredFieldSize(60);
+	fileLocation->borderWidth=UnitPX(2.0f);
+	fileLocation->borderColor=MakeColor(AlloyApplicationContext()->theme.DARK);
 	if (type == FileDialogType::SaveFile
 			|| type == FileDialogType::OpenMultiFile
 			|| type == FileDialogType::SelectMultiDirectory) {
@@ -878,14 +879,74 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	upDirButton->borderColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	upDirButton->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
-				std::string file=RemoveTrailingSlash(this->getValue());
-				if(IsFile(file)) {
-					this->setValue(GetParentDirectory(RemoveTrailingSlash(GetParentDirectory(file))));
-				} else {
-					this->setValue(GetParentDirectory(file));
+				if(event.button==GLFW_MOUSE_BUTTON_LEFT){
+					std::string file=RemoveTrailingSlash(this->getValue());
+					if(IsFile(file)) {
+						this->setValue(GetParentDirectory(RemoveTrailingSlash(GetParentDirectory(file))));
+					} else {
+						this->setValue(GetParentDirectory(file));
+					}
+					return true;
 				}
-				return true;
+				return false;
 			};
+
+	makeDirButton = std::shared_ptr<IconButton>(
+			new IconButton(0xF07B, CoordPerPX(1.0, 0.0, -73, 7),
+					CoordPX(30, 30)));
+	makeDirButton->foregroundColor = MakeColor(
+			AlloyApplicationContext()->theme.LIGHTER);
+	makeDirButton->borderWidth = UnitPX(0.0f);
+	makeDirButton->backgroundColor = MakeColor(0, 0, 0, 0);
+	makeDirButton->setRoundCorners(true);
+	makeDirButton->iconColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	makeDirButton->borderColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	makeDirButton->onMouseDown =
+			[this](AlloyContext* context, const InputEvent& event) {
+				if(event.button==GLFW_MOUSE_BUTTON_LEFT){
+					newFolderField->setValue("");
+					newFolderField->setFocus(true);
+					newFolderField->setShowDefaultLabel(true);
+					context->setCursorFocus(newFolderField.get());
+					newFolderField->setVisible(true);
+					return true;
+				}
+				return false;
+			};
+
+	newFolderField=std::shared_ptr<TextField>(new TextField("Folder Name",	CoordPerPX(1.0, 0.0, -150-25.0f, 50.0f),CoordPX(150, 30)));
+	newFolderField->onTextEntered=[this](TextField* field){
+		if(field->isVisible()){
+			std::string file=RemoveTrailingSlash(this->getValue());
+			std::string name=field->getValue();
+			std::string f;
+			if(IsFile(file)) {
+				f=RemoveTrailingSlash(GetParentDirectory(file));
+			} else {
+				f=RemoveTrailingSlash(file);
+			}
+			if(name.size()>0){
+				f=MakeString()<<f<<ALY_PATH_SEPARATOR<<name;
+				if(MakeDirectory(f)){
+					this->setValue(RemoveTrailingSlash(f));
+					this->update();
+					return true;
+				}
+			}
+			field->setVisible(false);
+			newFolderField->setFocus(false);
+			return true;
+		} else {
+			newFolderField->setFocus(false);
+			return false;
+		}
+	};
+	newFolderField->backgroundColor=MakeColor(AlloyApplicationContext()->theme.DARK);
+	newFolderField->borderColor=MakeColor(AlloyApplicationContext()->theme.DARK);
+	newFolderField->borderWidth=UnitPX(2.0f);
+	newFolderField->textColor=MakeColor(AlloyApplicationContext()->theme.DARKER);
+	newFolderField->setFocus(false);
+	newFolderField->setRoundCorners(false);
 	cancelButton = std::shared_ptr<IconButton>(
 			new IconButton(0xf00d, CoordPerPX(1.0, 0.0, -30, 30),
 					CoordPX(30, 30), IconType::CIRCLE));
@@ -907,8 +968,8 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	if (fileTypeSelect.get() != nullptr)
 		southRegion->add(fileTypeSelect);
 	northRegion->add(fileLocation);
+	northRegion->add(makeDirButton);
 	northRegion->add(upDirButton);
-
 	std::vector<std::string> drives = GetDrives();
 	float offset = (drives.size() > 6) ? Composite::scrollBarSize + 2.0f : 2.0f;
 	directoryTree = std::shared_ptr<Composite>(
@@ -1079,7 +1140,6 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	directoryTree->borderWidth = UnitPX(1.0f);
 	directoryTree->setOrientation(Orientation::Vertical);
 	directoryTree->setScrollEnabled(true);
-
 	containerRegion->setNorth(northRegion, UnitPX(40));
 	containerRegion->setSouth(southRegion, UnitPX(40));
 	containerRegion->setWest(directoryTree, UnitPX(140.0f));
@@ -1087,6 +1147,7 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	Application::addListener(this);
 	add(containerRegion);
 	add(cancelButton);
+	add(newFolderField);
 }
 
 std::string FileFilterRule::toString() {

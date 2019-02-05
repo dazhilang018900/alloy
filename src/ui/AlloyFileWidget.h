@@ -110,9 +110,10 @@ private:
 	std::shared_ptr<Composite> directoryTree;
 	std::shared_ptr<ListBox> directoryList;
 	std::shared_ptr<Selection> fileTypeSelect;
+	std::shared_ptr<TextField> newFolderField;
 	std::shared_ptr<TextIconButton> actionButton;
 	std::shared_ptr<IconButton> upDirButton;
-
+	std::shared_ptr<IconButton> makeDirButton;
 	std::shared_ptr<IconButton> cancelButton;
 	std::shared_ptr<BorderComposite> containerRegion;
 	std::string lastDirectory;
