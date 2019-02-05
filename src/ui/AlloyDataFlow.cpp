@@ -332,6 +332,7 @@ namespace aly {
 							CoordPerPX(0.0f, 1.0f, std::max(10 + textWidth, 0.5f * Node::DIMENSIONS.x),
 									-2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f)));
 			labelRegion->setValue(label);
+			labelRegion->setRoundCorners(false);
 			labelRegion->setAlignment(HorizontalAlignment::Left, VerticalAlignment::Middle);
 			labelRegion->fontSize = UnitPX(fontSize);
 			labelRegion->fontType = FontType::Bold;
@@ -431,6 +432,7 @@ namespace aly {
 							CoordPerPX(0.0f, 1.0f, std::max(10 + textWidth, 0.5f * Node::DIMENSIONS.x),
 									-2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f)));
 			labelRegion->setValue(label);
+			labelRegion->setRoundCorners(false);
 			labelRegion->setAlignment(HorizontalAlignment::Left, VerticalAlignment::Middle);
 			labelRegion->fontSize = UnitPX(fontSize);
 			labelRegion->fontType = FontType::Bold;
@@ -484,7 +486,7 @@ namespace aly {
 					new ModifiableLabel(name, CoordPX(0.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
 							CoordPerPX(0.0f, 1.0f, std::max(10 + textWidth, 0.5f * Node::DIMENSIONS.x),
 									-2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f)));
-
+			labelRegion->setRoundCorners(false);
 			inputPortComposite = CompositePtr(new Composite("Input Ports", CoordPX(0.0f, InputPort::DIMENSIONS.y), CoordPX(0.0f, InputPort::DIMENSIONS.y)));
 			outputPortComposite = CompositePtr(
 					new Composite("Output Ports", CoordPerPX(0.0f, 1.0f, 0.0f, -2 * OutputPort::DIMENSIONS.y), CoordPX(0.0f, OutputPort::DIMENSIONS.y)));
@@ -582,6 +584,7 @@ namespace aly {
 					new ModifiableLabel(name, CoordPX(2.0f, 2 * InputPort::DIMENSIONS.y + 1.0f),
 							CoordPerPX(0.0f, 1.0f, std::max(10 + textWidth, 0.5f * Node::DIMENSIONS.x),
 									-2 * OutputPort::DIMENSIONS.y - 2 * InputPort::DIMENSIONS.y - 2.0f)));
+			labelRegion->setRoundCorners(false);
 			resizeFunc =
 					[this,iconContainer,labelContainer](float scale) {
 						const float nx=scale*Node::DIMENSIONS.x;
@@ -655,6 +658,7 @@ namespace aly {
 			labelRegion = ModifiableLabelPtr(
 					new ModifiableLabel(name, CoordPerPX(0.5f, 0.0f, 0.0f, 0.0f),
 							CoordPX(std::max(textWidth + 10.0f, Node::DIMENSIONS.x), fontSize + 2 * TextField::PADDING)));
+			labelRegion->setRoundCorners(true);
 			nodeIcon->setAspectRatio(1.0f);
 			nodeIcon->setAspectRule(AspectRule::FixedHeight);
 			outputPort = MakeOutputPort("Output");
@@ -745,7 +749,7 @@ namespace aly {
 			labelRegion = ModifiableLabelPtr(
 					new ModifiableLabel(name, CoordPerPX(0.5f, 0.0f, 0.0f, Node::DIMENSIONS.y - InputPort::DIMENSIONS.y),
 							CoordPX(std::max(textWidth + 10.0f, Node::DIMENSIONS.x), fontSize + 2 * TextField::PADDING)));
-
+			labelRegion->setRoundCorners(true);
 			resizeFunc = [this,iconContainer](float scale) {
 				const float nx=scale*Node::DIMENSIONS.x;
 				const float ny=scale*Node::DIMENSIONS.y;
@@ -1735,7 +1739,7 @@ namespace aly {
 			NVGcontext* nvg = context->nvgContext;
 			Color lineColor;
 			if(selected){
-				lineColor= Color(255, 64, 242);
+				lineColor= context->theme.FOCUS;
 			} else {
 				lineColor=context->theme.LIGHTEST.toDarker(0.8f);
 			}
@@ -1746,7 +1750,6 @@ namespace aly {
 				nvgStrokeWidth(nvg, std::max(scale * 4.0f, 1.0f));
 				nvgStrokeColor(nvg,lineColor);
 			}
-
 			float2 offset = flow->getDrawOffset();
 			nvgLineCap(nvg, NVG_ROUND);
 			nvgLineJoin(nvg, NVG_BEVEL);
