@@ -25,13 +25,29 @@ namespace aly {
 bool SANITY_CHECK_UI();
 
 class Composite;
+class Region;
 class BorderComposite;
+struct TabChain{
+	TabChain* parent;
+	std::list<Region*> regions;
+	TabChain();
+	void add(Region* region);
+	void remove(Region* region);
+	void focusNext(Region* region);
+	void focusPrevious(Region* region);
+	void clear();
+	virtual ~TabChain();
+};
 class Region: public EventHandler {
 private:
 	pixel2 dragOffset = pixel2(0, 0);
+	TabChain tabChain;
 protected:
+	friend class TabChain;
 	box2px bounds;
 	box2px extents;
+	void focusNext();
+	void focusPrevious();
 	void drawBoundsLabel(AlloyContext* context, const std::string& name,
 			int font);
 	Region* mouseOverRegion = nullptr;
@@ -46,12 +62,14 @@ protected:
 	bool roundCorners = false;
 	bool detached = false;
 	bool clampToParentBounds = false;
+	virtual void appendTo(TabChain& chain);
 public:
 	AUnit2D position = CoordPercent(0.0f, 0.0f);
 	AUnit2D dimensions = CoordPercent(1.0f, 1.0f);
 	friend class Composite;
 	friend class BorderComposite;
 	const std::string name;
+
 	void setIgnoreCursorEvents(bool ignore) {
 		ignoreCursorEvents = ignore;
 	}
@@ -219,7 +237,17 @@ public:
 	}
 	virtual void draw(AlloyContext* context) override;
 };
-
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+		std::basic_ostream<C, R> & ss, const TabChain& tabs) {
+	for(Region* region:tabs.regions){
+		if(region->isObjectFocused()){
+			ss<<"[**"<<region->getName()<<"**] ";
+		} else {
+			ss<<"["<<region->getName()<<"] ";
+		}
+	}
+	return ss;
+}
 typedef std::shared_ptr<Draw> DrawPtr;
 typedef std::shared_ptr<Region> RegionPtr;
 }

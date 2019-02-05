@@ -21,7 +21,67 @@ const RGBA DEBUG_ON_TOP_DOWN_COLOR = RGBA(220, 220, 0, 255);
 const RGBA DEBUG_ON_TOP_HOVER_COLOR = RGBA(180, 180, 0, 255);
 const RGBA DEBUG_OBJECT_FOCUS_DOWN_COLOR = RGBA(255, 64, 242,255);
 const RGBA DEBUG_OBJECT_FOCUS_HOVER_COLOR = RGBA(254, 120, 248, 255);
-
+void TabChain::add(Region* region){
+	region->tabChain.parent=this;
+	regions.push_back(region);
+}
+TabChain::TabChain():parent(nullptr){
+}
+void TabChain::focusNext(Region* region){
+	for(auto iter=regions.begin();iter!=regions.end();iter++){
+		if(*iter==region){
+			iter++;
+			if(iter==regions.end()){
+				regions.front()->setFocus(true);
+			} else {
+				(*iter)->setFocus(true);
+			}
+		}
+	}
+}
+void TabChain::focusPrevious(Region* region){
+	for(auto iter=regions.begin();iter!=regions.end();iter++){
+		if(*iter==region){
+			if(iter==regions.begin()){
+				regions.back()->setFocus(true);
+			} else {
+				iter--;
+				(*iter)->setFocus(true);
+			}
+		}
+	}
+}
+void TabChain::remove(Region* region){
+	for(auto iter=regions.begin();iter!=regions.end();iter++){
+		if(*iter==region){
+			regions.erase(iter);
+			if(region->tabChain.parent==this)region->tabChain.parent=nullptr;
+			break;
+		}
+	}
+}
+TabChain::~TabChain(){
+	clear();
+}
+void TabChain::clear(){
+	for(Region* region:regions){
+		if(region->tabChain.parent==this)region->tabChain.parent=nullptr;
+	}
+	regions.clear();
+}
+void Region::focusNext(){
+	if(tabChain.parent!=nullptr){
+		tabChain.parent->focusNext(this);
+	}
+}
+void Region::focusPrevious(){
+	if(tabChain.parent!=nullptr){
+		tabChain.parent->focusPrevious(this);
+	}
+}
+void Region::appendTo(TabChain& chain){
+	chain.add(this);
+}
 std::shared_ptr<Region> MakeRegion(const std::string& name,
 		const AUnit2D& position, const AUnit2D& dimensions,
 		const Color& bgColor, const Color& borderColor,
@@ -47,6 +107,7 @@ bool Region::isCursorFocused() const {
 void Region::setFocus(bool f){
 	if(f){
 		AlloyApplicationContext()->setObjectFocus(this);
+		AlloyApplicationContext()->setCursorFocus(this);
 	} else {
 		Region* ptr=AlloyApplicationContext()->getObjectFocus();
 		if(ptr==this){
@@ -57,7 +118,9 @@ void Region::setFocus(bool f){
 bool Region::isObjectFocused() const{
 	return AlloyApplicationContext()->isObjectFocused(this);
 }
-
+void Composite::appendToTabChain(Region* region){
+	region->appendTo(tabChain);
+}
 void Composite::removeListener() const {
 	Application::removeListener(this);
 	for (RegionPtr child : children) {

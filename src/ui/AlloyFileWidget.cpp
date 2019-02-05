@@ -907,14 +907,13 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 					newFolderField->setValue("");
 					newFolderField->setFocus(true);
 					newFolderField->setShowDefaultLabel(true);
-					context->setCursorFocus(newFolderField.get());
 					newFolderField->setVisible(true);
 					return true;
 				}
 				return false;
 			};
 
-	newFolderField=std::shared_ptr<TextField>(new TextField("Folder Name",	CoordPerPX(1.0, 0.0, -150-25.0f, 50.0f),CoordPX(150, 30)));
+	newFolderField=std::shared_ptr<TextField>(new TextField("Folder Name",	CoordPerPX(1.0, 0.0, -150-25.0f, 55.0f),CoordPX(150, 30)));
 	newFolderField->onTextEntered=[this](TextField* field){
 		if(field->isVisible()){
 			std::string file=RemoveTrailingSlash(this->getValue());

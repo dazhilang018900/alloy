@@ -31,12 +31,6 @@ void Composite::setCellPadding(const pixel2& pix) {
 void Composite::setCellSpacing(const pixel2& pix) {
 	cellSpacing = pix;
 }
-void Composite::appendTabChain(Region* region) {
-	tabChain.push_back(region);
-}
-void Composite::clearTabChain() {
-	tabChain.clear();
-}
 void Composite::setAlwaysShowVerticalScrollBar(bool show) {
 	alwaysShowVerticalScrollBar = show;
 	scrollEnabled |= show;
@@ -107,18 +101,12 @@ bool Composite::onEventHandler(AlloyContext* context, const InputEvent& event) {
 	}
 	if (event.type == InputType::Key && event.key == GLFW_KEY_TAB) {
 		if (isVisible() && context->isMouseOver(this, true)) {
-			std::cout << "Tab In Region Over Chain" << std::endl;
-			for (auto iter = tabChain.begin(); iter != tabChain.end(); iter++) {
-				Region* ptr = *iter;
-				if (ptr->isObjectFocused()) {
-					ptr->setFocus(false);
-					iter++;
-					if (iter != tabChain.end()) {
-						(*iter)->setFocus(true);
-					} else {
-						tabChain.front()->setFocus(true);
-					}
-					break;
+			std::cout << "Tab In Region Over Chain "<<tabChain << std::endl;
+			if(isObjectFocused()){
+				if(event.isShiftDown()){
+					focusPrevious();
+				}else {
+					focusNext();
 				}
 			}
 		}
@@ -192,12 +180,7 @@ void Composite::erase(const std::shared_ptr<Region>& node) {
 			break;
 		}
 	}
-	for (auto iter = tabChain.begin(); iter != tabChain.end(); iter++) {
-		if (*iter == node.get()) {
-			tabChain.erase(iter);
-			break;
-		}
-	}
+	tabChain.remove(node.get());
 }
 void Composite::erase(Region* node) {
 	for (auto iter = children.begin(); iter != children.end(); iter++) {
@@ -208,12 +191,7 @@ void Composite::erase(Region* node) {
 			break;
 		}
 	}
-	for (auto iter = tabChain.begin(); iter != tabChain.end(); iter++) {
-		if (*iter == node) {
-			tabChain.erase(iter);
-			break;
-		}
-	}
+	tabChain.remove(node);
 }
 void Composite::putLast(const std::shared_ptr<Region>& region) {
 	size_t idx = 0;
