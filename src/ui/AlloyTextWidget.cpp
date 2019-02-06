@@ -921,6 +921,11 @@ bool TextField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
 				setFocus(true);
 			} else if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
+				if(isObjectFocused()){
+					if (onTextEntered) {
+						onTextEntered(this);
+					}
+				}
 				setFocus(false);
 			}
 		}

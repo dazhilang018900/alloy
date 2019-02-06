@@ -423,6 +423,8 @@ bool HorizontalSlider::onEventHandler(AlloyContext* context,
 			} else {
 				setValue(std::max(getValue().toInteger()-1,getMinValue().toInteger()));
 			}
+			if (onChangeEvent)
+			onChangeEvent(this->value);
 			return true;
 		} else if(event.key==GLFW_KEY_UP){
 			if(value.type()!=NumberType::Integer){
@@ -430,6 +432,8 @@ bool HorizontalSlider::onEventHandler(AlloyContext* context,
 			} else {
 				setValue(std::min(getValue().toInteger()+1,getMaxValue().toInteger()));
 			}
+			if (onChangeEvent)
+			onChangeEvent(this->value);
 			return true;
 		}
 	}
@@ -664,6 +668,8 @@ bool VerticalSlider::onEventHandler(AlloyContext* context,
 			} else {
 				setValue(std::max(getValue().toInteger()-1,getMinValue().toInteger()));
 			}
+			if (onChangeEvent)
+			onChangeEvent(this->value);
 			return true;
 		} else if(event.key==GLFW_KEY_UP){
 			if(value.type()!=NumberType::Integer){
@@ -671,6 +677,8 @@ bool VerticalSlider::onEventHandler(AlloyContext* context,
 			} else {
 				setValue(std::min(getValue().toInteger()+1,getMaxValue().toInteger()));
 			}
+			if (onChangeEvent)
+			onChangeEvent(this->value);
 			return true;
 		}
 	}

@@ -493,8 +493,10 @@ void NumberField::handleCharacterInput(AlloyContext* context,
 		showCursor = true;
 		cursorEnd = ++cursorStart;
 		showDefaultLabel = false;
-		if (onKeyInput)
-			onKeyInput(this);
+		if(valid){
+			if (onKeyInput)
+				onKeyInput(this);
+		}
 	}
 }
 void NumberField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
@@ -529,8 +531,10 @@ void NumberField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 				value.erase(value.begin() + cursorStart);
 				validate();
 				showDefaultLabel = false;
-				if (onKeyInput)
-					onKeyInput(this);
+				if(valid){
+					if (onKeyInput)
+						onKeyInput(this);
+				}
 			}
 			break;
 		case GLFW_KEY_A:
@@ -574,8 +578,10 @@ void NumberField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 				value.erase(value.begin() + cursorStart);
 			}
 			showDefaultLabel = false;
-			if (onKeyInput)
-				onKeyInput(this);
+			if(valid){
+				if (onKeyInput)
+					onKeyInput(this);
+			}
 			break;
 		case GLFW_KEY_ENTER:
 			if (onTextEntered) {
@@ -634,7 +640,13 @@ bool NumberField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			if(e.button==GLFW_MOUSE_BUTTON_LEFT) {
 				setFocus(true);
 			} else if(e.button==GLFW_MOUSE_BUTTON_RIGHT) {
+				if(isObjectFocused()){
+					if (onTextEntered) {
+						onTextEntered(this);
+					}
+				}
 				setFocus(false);
+
 			}
 		}
 		if (!isObjectFocused() || th <= 0)return false;
