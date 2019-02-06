@@ -180,6 +180,7 @@ bool ControlsEx::init(Composite& rootNode) {
 	rootNode.add(modifyNumber,true);
 	rootNode.add(modifyLabel,true);
 	rootNode.add(textIcon,true);
+	togglebox->setFocus(true);
 	progressTask = std::unique_ptr<aly::RecurrentTask>(
 			new RecurrentTask([pbar](uint64_t iter) {
 				//std::cout << "Iteration " << iter << std::endl;

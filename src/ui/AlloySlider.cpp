@@ -16,6 +16,7 @@ void Slider::setSliderColor(const Color& startColor, const Color& endColor) {
 }
 void Slider::appendTo(TabChain& chain){
 	if(valueLabel.get()!=nullptr){
+		chain.add(this);
 		chain.add(valueLabel.get());
 	} else {
 		chain.add(this);
@@ -415,6 +416,23 @@ bool HorizontalSlider::onEventHandler(AlloyContext* context,
 			}
 		}
 	}
+	if(event.type==InputType::Key&&event.isDown()&&isObjectFocused()){
+		if(event.key==GLFW_KEY_DOWN){
+			if(value.type()!=NumberType::Integer){
+				setValue(std::max(getValue().toFloat()-0.02f*(getMaxValue().toFloat()-getMinValue().toFloat()),getMinValue().toFloat()));
+			} else {
+				setValue(std::max(getValue().toInteger()-1,getMinValue().toInteger()));
+			}
+			return true;
+		} else if(event.key==GLFW_KEY_UP){
+			if(value.type()!=NumberType::Integer){
+				setValue(std::min(getValue().toFloat()+0.02f*(getMaxValue().toFloat()-getMinValue().toFloat()),getMaxValue().toFloat()));
+			} else {
+				setValue(std::min(getValue().toInteger()+1,getMaxValue().toInteger()));
+			}
+			return true;
+		}
+	}
 	if (event.type == InputType::Scroll && isVisible()
 			&& context->isMouseContainedIn(this)) {
 		double oldV = getBlendValue();
@@ -472,6 +490,7 @@ bool HorizontalSlider::onMouseDown(AlloyContext* context, Region* region,
 				onChangeEvent(value);
 			return true;
 		} else if (region == sliderHandle.get()) {
+			if(valueLabel.get()!=nullptr)setFocus(true);
 			update();
 			if (onChangeEvent)
 				onChangeEvent(value);
@@ -602,8 +621,8 @@ VerticalSlider::VerticalSlider(const std::string& label,
 	add(
 			valueLabel = std::shared_ptr<ModifiableNumber>(
 					new ModifiableNumber("Value",
-							CoordPerPX(0.0f, 1.0f, 0.0f, -4.0f),
-							CoordPerPX(1.0f, 0.1f, 0.0f, 4.0f), value.type(),
+							CoordPerPX(0.0f, 1.0f, 2.0f, -4.0f),
+							CoordPerPX(1.0f, 0.1f, -4.0f, 4.0f), value.type(),
 							true)));
 
 	valueLabel->fontType = FontType::Normal;
@@ -715,6 +734,7 @@ bool VerticalSlider::onMouseDown(AlloyContext* context, Region* region,
 				onChangeEvent(value);
 			return true;
 		} else if (region == sliderHandle.get()) {
+			if(valueLabel.get()!=nullptr)setFocus(true);
 			update();
 			if (onChangeEvent)
 				onChangeEvent(value);
@@ -889,6 +909,23 @@ bool RangeSlider::onEventHandler(AlloyContext* context,
 			}
 		}
 	}
+	if(event.type==InputType::Key&&event.isDown()&&isObjectFocused()){
+		if(event.key==GLFW_KEY_DOWN){
+			double2 oldV = getBlendValue();
+			double2 newV = clamp(-0.01 + oldV, double2(0.0),double2(1.0));
+			this->setBlendValue(newV);
+			if (onChangeEvent)
+				onChangeEvent(this->lowerValue, this->upperValue);
+			return true;
+		} else if(event.key==GLFW_KEY_UP){
+			double2 oldV = getBlendValue();
+			double2 newV = clamp(0.01 + oldV, double2(0.0),double2(1.0));
+			this->setBlendValue(newV);
+			if (onChangeEvent)
+				onChangeEvent(this->lowerValue, this->upperValue);
+			return true;
+		}
+	}
 	if (event.type == InputType::Scroll && isVisible()
 			&& context->isMouseContainedIn(this)) {
 		double2 oldV = getBlendValue();
@@ -939,11 +976,13 @@ bool RangeSlider::onMouseDown(AlloyContext* context, Region* region,
 			return true;
 
 		} else if (region == lowerSliderHandle.get()) {
+			if(lowerValueLabel.get()!=nullptr)setFocus(true);
 			update();
 			if (onChangeEvent)
 				onChangeEvent(lowerValue, upperValue);
 			return true;
 		} else if (region == upperSliderHandle.get()) {
+			if(upperValueLabel.get()!=nullptr)setFocus(true);
 			update();
 			if (onChangeEvent)
 				onChangeEvent(lowerValue, upperValue);
@@ -1039,6 +1078,7 @@ void RangeSlider::setLowerValue(double value) {
 }
 void RangeSlider::appendTo(TabChain& chain){
 	if(lowerValueLabel.get()!=nullptr&&lowerValueLabel.get()!=nullptr){
+		chain.add(this);
 		chain.add(lowerValueLabel.get());
 		chain.add(upperValueLabel.get());
 	} else {
