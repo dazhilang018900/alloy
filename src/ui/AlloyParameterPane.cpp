@@ -767,6 +767,11 @@ namespace aly {
 						*(ref->getValue<aly::matrix<float,M,N>*>()) = field->getValue();
 						if(this->onChange)this->onChange(label,*ref);
 					};
+			valueRegion->onKeyInput =
+					[=](MatrixField<M,N>* field) {
+						*(ref->getValue<aly::matrix<float,M,N>*>()) = field->getValue();
+						if(this->onChange)this->onChange(label,*ref);
+					};
 
 			setCommonParameters(comp, labelRegion, valueRegion);
 			valueRegion->backgroundColor = MakeColor(
@@ -810,6 +815,10 @@ namespace aly {
 				*(ref->getValue<aly::vec<float,N>*>()) = field->getValue();
 				if(this->onChange)this->onChange(label,*ref);
 			};
+			valueRegion->onKeyInput = [=](VectorFloatField<N>* field) {
+				*(ref->getValue<aly::vec<float,N>*>()) = field->getValue();
+				if(this->onChange)this->onChange(label,*ref);
+			};
 			setCommonParameters(comp, labelRegion, valueRegion);
 			valueRegion->backgroundColor = MakeColor(
 					AlloyDefaultContext()->theme.LIGHT);
@@ -850,6 +859,10 @@ namespace aly {
 					new AnyValue<aly::vec<int, N>*>(&value));
 			values.push_back(ref);
 			valueRegion->onTextEntered = [=](VectorIntegerField<N>* field) {
+				*(ref->getValue<aly::vec<int, N>*>()) = field->getValue();
+				if(this->onChange)this->onChange(label,*ref);
+			};
+			valueRegion->onKeyInput = [=](VectorIntegerField<N>* field) {
 				*(ref->getValue<aly::vec<int, N>*>()) = field->getValue();
 				if(this->onChange)this->onChange(label,*ref);
 			};
