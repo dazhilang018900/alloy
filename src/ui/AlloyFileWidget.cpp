@@ -333,11 +333,11 @@ void FileField::draw(AlloyContext* context) {
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;
 	bool f = context->isCursorFocused(this);
-	if (!f &&isObjectFocused()&& onTextEntered) {
+	if (!f && isObjectFocused() && onTextEntered) {
 		onTextEntered(this);
 	}
 	setFocus(f);
-	bool ofocus=isObjectFocused();
+	bool ofocus = isObjectFocused();
 	if (!ofocus) {
 		showDefaultLabel = true;
 	}
@@ -405,7 +405,7 @@ void FileField::draw(AlloyContext* context) {
 		nvgRect(nvg, x0, textY + (h - lineh) / 2 + PADDING, x1 - x0,
 				lineh - 2 * PADDING);
 		nvgFillColor(nvg,
-				ofocus?
+				ofocus ?
 						context->theme.DARK.toSemiTransparent(0.5f) :
 						context->theme.DARK.toSemiTransparent(0.25f));
 		nvgFill(nvg);
@@ -451,9 +451,11 @@ void FileField::draw(AlloyContext* context) {
 		const int PAD = 2.0f;
 		nvgBeginPath(nvg);
 		nvgLineJoin(nvg, NVG_MITER);
-		nvgRoundedRect(nvg, bounds.position.x + PAD, bounds.position.y + PAD,bounds.dimensions.x - 2 * PAD, bounds.dimensions.y - 2 * PAD,context->theme.CORNER_RADIUS);
-		nvgStrokeWidth(nvg, (float)PAD);
-		nvgStrokeColor(nvg,context->theme.FOCUS);
+		nvgRoundedRect(nvg, bounds.position.x + PAD, bounds.position.y + PAD,
+				bounds.dimensions.x - 2 * PAD, bounds.dimensions.y - 2 * PAD,
+				context->theme.CORNER_RADIUS);
+		nvgStrokeWidth(nvg, (float) PAD);
+		nvgStrokeColor(nvg, context->theme.FOCUS);
 		nvgStroke(nvg);
 	}
 	if (!isObjectFocused() && value.size() == 0) {
@@ -463,6 +465,24 @@ void FileField::draw(AlloyContext* context) {
 void FileSelector::setValue(const std::string& file) {
 	fileLocation->setValue(file);
 	fileDialog->setValue(file);
+}
+void FileSelector::addFileExtensionRule(const std::string& name,
+		const std::string& extension) {
+	fileDialog->addFileExtensionRule(name, extension);
+}
+void FileSelector::addFileExtensionRule(const FileFilterRule& rule) {
+	fileDialog->addFileExtensionRule(rule);
+}
+void FileSelector::addFileExtensionRule(const std::string& name,
+		const std::initializer_list<std::string>& extension) {
+	fileDialog->addFileExtensionRule(name, extension);
+}
+
+void FileSelector::setFileExtensionRule(int index) {
+	fileDialog->setFileExtensionRule(index);
+}
+std::string FileSelector::getValue() {
+	return fileLocation->getValue();
 }
 void FileSelector::openFileDialog(AlloyContext* context,
 		const std::string& workingDirectory) {
@@ -574,7 +594,23 @@ bool FileDialog::updateValidity() {
 	}
 	return valid;
 }
-
+void FileButton::addFileExtensionRule(const std::string& name,
+		const std::string& extension) {
+	fileDialog->addFileExtensionRule(name, extension);
+}
+void FileButton::addFileExtensionRule(const std::string& name,
+		const std::initializer_list<std::string>& extension) {
+	fileDialog->addFileExtensionRule(name, extension);
+}
+void FileButton::addFileExtensionRule(const FileFilterRule& rule) {
+	fileDialog->addFileExtensionRule(rule);
+}
+void FileButton::setFileExtensionRule(int index) {
+	fileDialog->setFileExtensionRule(index);
+}
+std::string FileButton::getValue() {
+	return fileDialog->getValue();
+}
 FileButton::FileButton(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims, const FileDialogType& type) :
 		IconButton((type == FileDialogType::SaveFile) ? 0xF0C7 : 0xf115, pos,
@@ -655,7 +691,8 @@ void FileDialog::setSelectedFile(const std::string& file,
 		dir = RemoveTrailingSlash(GetParentDirectory(file));
 		select = true;
 	}
-	std::vector<FileDescription> descriptions = GetDirectoryDescriptionListing(dir);
+	std::vector<FileDescription> descriptions = GetDirectoryDescriptionListing(
+			dir);
 	int i = 0;
 	if (type == FileDialogType::SelectDirectory
 			|| type == FileDialogType::SelectMultiDirectory) {
@@ -716,6 +753,9 @@ void FileSelector::setTextColor(const AColor& c) {
 	openIcon->iconColor = c;
 	fileLocation->textColor = c;
 	openIcon->borderColor = c;
+}
+void FileSelector::appendTo(TabChain& chain) {
+	chain.add(fileLocation.get());
 }
 FileSelector::FileSelector(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims, bool directoryInput) :
@@ -850,8 +890,9 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 			new FileField("File Location", CoordPX(10, 7),
 					CoordPerPX(1.0f, 0.0f, -86.0f, 30.0f)));
 	fileLocation->setPreferredFieldSize(60);
-	fileLocation->borderWidth=UnitPX(2.0f);
-	fileLocation->borderColor=MakeColor(AlloyApplicationContext()->theme.DARK);
+	fileLocation->borderWidth = UnitPX(2.0f);
+	fileLocation->borderColor = MakeColor(
+			AlloyApplicationContext()->theme.DARK);
 	if (type == FileDialogType::SaveFile
 			|| type == FileDialogType::OpenMultiFile
 			|| type == FileDialogType::SelectMultiDirectory) {
@@ -879,7 +920,7 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	upDirButton->borderColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	upDirButton->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
-				if(event.button==GLFW_MOUSE_BUTTON_LEFT){
+				if(event.button==GLFW_MOUSE_BUTTON_LEFT) {
 					std::string file=RemoveTrailingSlash(this->getValue());
 					if(IsFile(file)) {
 						this->setValue(GetParentDirectory(RemoveTrailingSlash(GetParentDirectory(file))));
@@ -900,10 +941,11 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	makeDirButton->backgroundColor = MakeColor(0, 0, 0, 0);
 	makeDirButton->setRoundCorners(true);
 	makeDirButton->iconColor = MakeColor(AlloyApplicationContext()->theme.DARK);
-	makeDirButton->borderColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	makeDirButton->borderColor = MakeColor(
+			AlloyApplicationContext()->theme.DARK);
 	makeDirButton->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
-				if(event.button==GLFW_MOUSE_BUTTON_LEFT){
+				if(event.button==GLFW_MOUSE_BUTTON_LEFT) {
 					newFolderField->setValue("");
 					newFolderField->setFocus(true);
 					newFolderField->setShowDefaultLabel(true);
@@ -913,9 +955,12 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 				return false;
 			};
 
-	newFolderField=std::shared_ptr<TextField>(new TextField("Folder Name",	CoordPerPX(1.0, 0.0, -150-25.0f, 55.0f),CoordPX(150, 30)));
-	newFolderField->onTextEntered=[this](TextField* field){
-		if(field->isVisible()){
+	newFolderField = std::shared_ptr<TextField>(
+			new TextField("Folder Name",
+					CoordPerPX(1.0, 0.0, -150 - 25.0f, 55.0f),
+					CoordPX(150, 30)));
+	newFolderField->onTextEntered = [this](TextField* field) {
+		if(field->isVisible()) {
 			std::string file=RemoveTrailingSlash(this->getValue());
 			std::string name=field->getValue();
 			std::string f;
@@ -924,9 +969,9 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 			} else {
 				f=RemoveTrailingSlash(file);
 			}
-			if(name.size()>0){
+			if(name.size()>0) {
 				f=MakeString()<<f<<ALY_PATH_SEPARATOR<<name;
-				if(MakeDirectory(f)){
+				if(MakeDirectory(f)) {
 					this->setValue(RemoveTrailingSlash(f));
 					this->update();
 					return true;
@@ -940,10 +985,13 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 			return false;
 		}
 	};
-	newFolderField->backgroundColor=MakeColor(AlloyApplicationContext()->theme.DARK);
-	newFolderField->borderColor=MakeColor(AlloyApplicationContext()->theme.DARK);
-	newFolderField->borderWidth=UnitPX(2.0f);
-	newFolderField->textColor=MakeColor(AlloyApplicationContext()->theme.DARKER);
+	newFolderField->backgroundColor = MakeColor(
+			AlloyApplicationContext()->theme.DARK);
+	newFolderField->borderColor = MakeColor(
+			AlloyApplicationContext()->theme.DARK);
+	newFolderField->borderWidth = UnitPX(2.0f);
+	newFolderField->textColor = MakeColor(
+			AlloyApplicationContext()->theme.DARKER);
 	newFolderField->setFocus(false);
 	newFolderField->setRoundCorners(false);
 	cancelButton = std::shared_ptr<IconButton>(
@@ -1219,7 +1267,8 @@ void FileDialog::update() {
 	updateDirectoryList();
 }
 void FileDialog::setVisible(bool v) {
-	if(v)actionButton->setFocus(true);
+	if (v)
+		actionButton->setFocus(true);
 	AdjustableComposite::setVisible(v);
 }
 void FileDialog::draw(AlloyContext* context) {
@@ -1308,6 +1357,23 @@ void MultiFileSelector::update() {
 		entry->parent = nullptr;
 	}
 	valueRegion->update();
+}
+void MultiFileSelector::appendTo(TabChain& chain) {
+	chain.add(openFileButton.get());
+}
+void MultiFileSelector::addFileExtensionRule(const std::string& name,
+		const std::string& extension) {
+	openFileButton->addFileExtensionRule(name, extension);
+}
+void MultiFileSelector::addFileExtensionRule(const std::string& name,
+		const std::initializer_list<std::string>& extension) {
+	openFileButton->addFileExtensionRule(name, extension);
+}
+void MultiFileSelector::addFileExtensionRule(const FileFilterRule& rule) {
+	openFileButton->addFileExtensionRule(rule);
+}
+void MultiFileSelector::setFileExtensionRule(int index) {
+	openFileButton->setFileExtensionRule(index);
 }
 void MultiFileSelector::addFiles(const std::vector<std::string>& newFiles) {
 	for (std::string file : newFiles) {

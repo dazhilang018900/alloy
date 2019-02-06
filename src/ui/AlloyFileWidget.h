@@ -54,8 +54,8 @@ public:
 	void setEnableAutoSugest(bool b) {
 		autoSuggest = b;
 	}
-	void setPreferredFieldSize(int w){
-		preferredFieldSize=w;
+	void setPreferredFieldSize(int w) {
+		preferredFieldSize = w;
 	}
 	AColor textColor = MakeColor(Theme::Default.LIGHTER);
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
@@ -67,7 +67,7 @@ public:
 		context->removeOnTopRegion(selectionBox.get());
 	}
 	FileField(const std::string& name, const AUnit2D& position,
-			const AUnit2D& dimensions,bool directoryInput=false);
+			const AUnit2D& dimensions, bool directoryInput = false);
 	virtual void draw(AlloyContext* context) override;
 	virtual void setValue(const std::string& value) override;
 };
@@ -78,16 +78,17 @@ struct FileFilterRule {
 			name(name) {
 		extensions.push_back(extension);
 	}
-	FileFilterRule(const FileFilterRule& rule) :name(rule.name),extensions(rule.extensions) {
+	FileFilterRule(const FileFilterRule& rule) :
+			name(rule.name), extensions(rule.extensions) {
 	}
-	FileFilterRule(const std::string& name="") :
+	FileFilterRule(const std::string& name = "") :
 			name(name) {
 	}
 	template<class Archive> void save(Archive& ar) const {
-		ar(CEREAL_NVP(name),CEREAL_NVP(extensions));
+		ar(CEREAL_NVP(name), CEREAL_NVP(extensions));
 	}
 	template<class Archive> void load(Archive& ar) {
-		ar(CEREAL_NVP(name),CEREAL_NVP(extensions));
+		ar(CEREAL_NVP(name), CEREAL_NVP(extensions));
 	}
 	FileFilterRule(const std::string& name,
 			std::initializer_list<std::string> extension) :
@@ -117,18 +118,20 @@ private:
 	std::shared_ptr<IconButton> cancelButton;
 	std::shared_ptr<BorderComposite> containerRegion;
 	std::string lastDirectory;
-	void setSelectedFile(const std::string& file,bool changeDirectory=true);
+	void setSelectedFile(const std::string& file, bool changeDirectory = true);
 	const FileDialogType type;
 	pixel fileEntryHeight;
 	bool valid = false;
-	bool dragAccept=false;
+	bool dragAccept = false;
 	void updateDirectoryList();
 	bool updateValidity();
 public:
 	virtual bool acceptDragEvent(const pixel2& cursor) const override;
-	void addFileExtensionRule(const std::string& name,const std::string& extension);
+	void addFileExtensionRule(const std::string& name,
+			const std::string& extension);
 	void addFileExtensionRule(const FileFilterRule& rule);
-	void addFileExtensionRule(const std::string& name,const std::initializer_list<std::string> & extension);
+	void addFileExtensionRule(const std::string& name,
+			const std::initializer_list<std::string> & extension);
 	friend class FileEntry;
 	std::function<void(const std::vector<std::string>&)> onSelect;
 	virtual void draw(AlloyContext* context) override;
@@ -152,27 +155,19 @@ private:
 public:
 	void setTextColor(const AColor& c);
 	std::function<void(const std::string& file)> onChange;
+	virtual void appendTo(TabChain& chain) override;
 	void addFileExtensionRule(const std::string& name,
-			const std::string& extension) {
-		fileDialog->addFileExtensionRule(name, extension);
-	}
-	void addFileExtensionRule(const FileFilterRule& rule) {
-		fileDialog->addFileExtensionRule(rule);
-	}
+			const std::string& extension) ;
+	void addFileExtensionRule(const FileFilterRule& rule);
 	void addFileExtensionRule(const std::string& name,
-			const std::initializer_list<std::string>& extension) {
-		fileDialog->addFileExtensionRule(name, extension);
-	}
+			const std::initializer_list<std::string>& extension);
 
-	void setFileExtensionRule(int index) {
-		fileDialog->setFileExtensionRule(index);
-	}
+	void setFileExtensionRule(int index) ;
+	std::string getValue();
 	FileSelector(const std::string& name, const AUnit2D& pos,
-			const AUnit2D& dims,bool directoryInput=false);
+			const AUnit2D& dims, bool directoryInput = false);
 	void setValue(const std::string& file);
-	std::string getValue() {
-		return fileLocation->getValue();
-	}
+
 	void openFileDialog(AlloyContext* context,
 			const std::string& workingDirectory = GetCurrentWorkingDirectory());
 };
@@ -184,29 +179,19 @@ public:
 	std::function<void(const std::vector<std::string>& file)> onOpen;
 	std::function<void(const std::string& file)> onSave;
 	void addFileExtensionRule(const std::string& name,
-			const std::string& extension) {
-		fileDialog->addFileExtensionRule(name, extension);
-	}
+			const std::string& extension) ;
 	void addFileExtensionRule(const std::string& name,
-			const std::initializer_list<std::string>& extension) {
-		fileDialog->addFileExtensionRule(name, extension);
-	}
-	void addFileExtensionRule(const FileFilterRule& rule) {
-		fileDialog->addFileExtensionRule(rule);
-	}
-	void setFileExtensionRule(int index) {
-		fileDialog->setFileExtensionRule(index);
-	}
+			const std::initializer_list<std::string>& extension);
+	void addFileExtensionRule(const FileFilterRule& rule);
+	void setFileExtensionRule(int index) ;
 	FileButton(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,
 			const FileDialogType& type);
 	void setValue(const std::string& file);
-	std::string getValue() {
-		return fileDialog->getValue();
-	}
+	std::string getValue();
 	void openFileDialog(AlloyContext* context,
 			const std::string& workingDirectory = GetCurrentWorkingDirectory());
 };
-class MultiFileEntry : public ListEntry {
+class MultiFileEntry: public ListEntry {
 private:
 	std::string fileName;
 public:
@@ -217,7 +202,7 @@ public:
 	}
 };
 
-class MultiFileSelector: public Composite{
+class MultiFileSelector: public Composite {
 protected:
 	std::shared_ptr<ListBox> valueRegion;
 	std::shared_ptr<FileButton> openFileButton;
@@ -230,23 +215,18 @@ protected:
 	void fireEvent();
 public:
 	std::function<void(const std::vector<std::string>& files)> onChange;
+	virtual void appendTo(TabChain& chain) override;
 	void addFileExtensionRule(const std::string& name,
-		const std::string& extension) {
-		openFileButton->addFileExtensionRule(name, extension);
-	}
+			const std::string& extension);
 	void addFileExtensionRule(const std::string& name,
-		const std::initializer_list<std::string>& extension) {
-		openFileButton->addFileExtensionRule(name, extension);
-	}
-	void addFileExtensionRule(const FileFilterRule& rule) {
-		openFileButton->addFileExtensionRule(rule);
-	}
-	void setFileExtensionRule(int index) {
-		openFileButton->setFileExtensionRule(index);
-	}
+			const std::initializer_list<std::string>& extension);
+	void addFileExtensionRule(const FileFilterRule& rule);
+	void setFileExtensionRule(int index);
 	void addFiles(const std::vector<std::string>& files);
 	void clearEntries();
-	MultiFileSelector(const std::string& name, const AUnit2D& pos, const AUnit2D& dims, bool directoryInput=false, float entryHeight=30.0f);
+	MultiFileSelector(const std::string& name, const AUnit2D& pos,
+			const AUnit2D& dims, bool directoryInput = false,
+			float entryHeight = 30.0f);
 };
 
 typedef std::shared_ptr<FileButton> FileButtonPtr;
@@ -254,6 +234,6 @@ typedef std::shared_ptr<FileSelector> FileSelectorPtr;
 typedef std::shared_ptr<FileDialog> FileDialogPtr;
 typedef std::shared_ptr<FileField> FileFieldPtr;
 typedef std::shared_ptr<MultiFileEntry> MultiFileEntryPtr;
-typedef std::shared_ptr<MultiFileSelector>  MultiFileSelectorPtr;
+typedef std::shared_ptr<MultiFileSelector> MultiFileSelectorPtr;
 }
 #endif /* SRC_UI_ALLOYFILEWIDGET_H_ */

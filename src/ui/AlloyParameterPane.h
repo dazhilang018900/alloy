@@ -63,6 +63,13 @@ public:
 			}
 		}
 	}
+	virtual void appendTo(TabChain& chain) override{
+		for (int m = 0; m < M; m++) {
+			for (int n = 0; n < N; n++) {
+				chain.add(matField[m][n].get());
+			}
+		}
+	}
 	void setValue(const aly::matrix<float, M, N>& m) {
 		Mat = m;
 		for (int m = 0; m < M; m++) {
@@ -109,6 +116,11 @@ public:
 			vecField[n] = field;
 		}
 	}
+	virtual void appendTo(TabChain& chain) override {
+		for (int n = 0; n < N; n++) {
+			chain.add(vecField[n].get());
+		}
+	}
 	void setValue(const aly::vec<float, N>& m) {
 		value = m;
 		for (int n = 0; n < N; n++) {
@@ -119,13 +131,13 @@ public:
 		return value;
 	}
 };
-
 template<int N> class VectorIntegerField: public aly::Composite {
 protected:
 	aly::vec<int, N> value;
 	aly::ModifiableNumberPtr vecField[N];
 public:
 	std::function<void(VectorIntegerField<N>*)> onTextEntered;
+
 	VectorIntegerField(const std::string& name, const aly::AUnit2D& pos,
 			const aly::AUnit2D& dims,
 			const aly::vec<int, N>& Mat = aly::vec<int, N>()) :
@@ -151,6 +163,11 @@ public:
 			};
 			Composite::add(field);
 			vecField[n] = field;
+		}
+	}
+	virtual void appendTo(TabChain& chain) override {
+		for (int n = 0; n < N; n++) {
+			chain.add(vecField[n].get());
 		}
 	}
 	void setValue(const aly::vec<int, N>& m) {

@@ -460,6 +460,9 @@ void HorizontalSlider::update() {
 bool HorizontalSlider::onMouseDown(AlloyContext* context, Region* region,
 		const InputEvent& event) {
 	if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
+		if(valueLabel.get()==nullptr){
+			setFocus(true);
+		}
 		if (region == sliderTrack.get()) {
 			sliderHandle->setDragOffset(event.cursor,
 					sliderHandle->getBoundsDimensions() * 0.5f);
@@ -635,6 +638,23 @@ bool VerticalSlider::onEventHandler(AlloyContext* context,
 			}
 		}
 	}
+	if(event.type==InputType::Key&&event.isDown()&&isObjectFocused()){
+		if(event.key==GLFW_KEY_DOWN){
+			if(value.type()!=NumberType::Integer){
+				setValue(std::max(getValue().toFloat()-0.02f*(getMaxValue().toFloat()-getMinValue().toFloat()),getMinValue().toFloat()));
+			} else {
+				setValue(std::max(getValue().toInteger()-1,getMinValue().toInteger()));
+			}
+			return true;
+		} else if(event.key==GLFW_KEY_UP){
+			if(value.type()!=NumberType::Integer){
+				setValue(std::min(getValue().toFloat()+0.02f*(getMaxValue().toFloat()-getMinValue().toFloat()),getMaxValue().toFloat()));
+			} else {
+				setValue(std::min(getValue().toInteger()+1,getMaxValue().toInteger()));
+			}
+			return true;
+		}
+	}
 	if (event.type == InputType::Scroll && isVisible()
 			&& context->isMouseContainedIn(this)) {
 		double oldV = getBlendValue();
@@ -683,6 +703,9 @@ void VerticalSlider::update() {
 bool VerticalSlider::onMouseDown(AlloyContext* context, Region* region,
 		const InputEvent& event) {
 	if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
+		if(valueLabel.get()==nullptr){
+			setFocus(true);
+		}
 		if (region == sliderTrack.get()) {
 			sliderHandle->setDragOffset(event.cursor,
 					sliderHandle->getBoundsDimensions() * 0.5f);
@@ -894,6 +917,9 @@ double2 RangeSlider::getBlendValue() const {
 bool RangeSlider::onMouseDown(AlloyContext* context, Region* region,
 		const InputEvent& event) {
 	if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
+		if(lowerValueLabel.get()==nullptr){
+			setFocus(true);
+		}
 		if (region == sliderTrack.get()) {
 			if (distanceSqr(event.cursor,
 					lowerSliderHandle->getBounds().center())

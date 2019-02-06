@@ -158,7 +158,6 @@ namespace aly {
 			if(this->onChange)this->onChange(label,*ref);
 		});
 		setCommonParameters(comp, labelRegion, valueRegion);
-
 		valueRegion->textColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->backgroundColor = MakeColor(0, 0, 0, 0);
 		valueRegion->setRoundCorners(false);
@@ -166,6 +165,7 @@ namespace aly {
 		tweenRegion->borderWidth = UnitPX(0.0f);
 		comp->add(tweenRegion);
 		estimatedHeight += entryHeight + SPACING;
+		appendToTabChain(tweenRegion.get());
 		return valueRegion;
 
 	}
@@ -196,6 +196,7 @@ namespace aly {
 		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->setRoundCorners(true);
 		estimatedHeight += entryHeight + SPACING;
+		appendToTabChain(valueRegion.get());
 		return valueRegion;
 	}
 
@@ -223,6 +224,7 @@ namespace aly {
 		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->setRoundCorners(true);
 		estimatedHeight += 4 * entryHeight + SPACING;
+		appendToTabChain(valueRegion.get());
 		return valueRegion;
 	}
 	NumberFieldPtr ParameterPane::addNumberFieldItem(const std::string& label, Number& value, float aspect) {
@@ -252,6 +254,7 @@ namespace aly {
 		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->setRoundCorners(true);
 		estimatedHeight += entryHeight + SPACING;
+		appendToTabChain(valueRegion.get());
 		return valueRegion;
 	}
 	std::pair<ModifiableNumberPtr, ModifiableNumberPtr> ParameterPane::addRangeField(const std::string& label, Number& lowerValue, Number& upperValue,
@@ -341,6 +344,7 @@ namespace aly {
 		setCommonParameters(comp, labelRegion, valueRegion);
 		valueRegion->backgroundColor = MakeColor(0, 0, 0, 0);
 		estimatedHeight += entryHeight + SPACING;
+		appendToTabChain(rangeSlider.get());
 		return std::pair<ModifiableNumberPtr, ModifiableNumberPtr>(lowValueRegion, highValueRegion);
 	}
 	std::pair<NumberFieldPtr, NumberFieldPtr> ParameterPane::addRangeField(const std::string& label, Number& lowerValue, Number& upperValue, float aspect) {
@@ -402,6 +406,8 @@ namespace aly {
 		setCommonParameters(comp, labelRegion, valueRegion);
 		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		estimatedHeight += entryHeight + SPACING;
+		appendToTabChain(lowValueRegion.get());
+		appendToTabChain(highValueRegion.get());
 		return std::pair<NumberFieldPtr, NumberFieldPtr>(lowValueRegion, highValueRegion);
 	}
 	TextFieldPtr ParameterPane::addTextField(const std::string& label, std::string& value, float aspect) {
@@ -429,6 +435,7 @@ namespace aly {
 		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->setRoundCorners(true);
 		estimatedHeight += entryHeight + SPACING;
+		appendToTabChain(valueRegion.get());
 		return valueRegion;
 	}
 	TextFieldPtr ParameterPane::addRangeField(const std::string& label, std::vector<int>& value,const std::string& initialRange, float aspect) {
@@ -457,6 +464,7 @@ namespace aly {
 		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->setRoundCorners(true);
 		estimatedHeight += entryHeight + SPACING;
+		appendToTabChain(valueRegion.get());
 		return valueRegion;
 	}
 	ColorSelectorPtr ParameterPane::addColorField(const std::string& label, Color& value, float aspect) {
@@ -482,6 +490,7 @@ namespace aly {
 		};
 		setCommonParameters(comp, labelRegion, valueRegion);
 		estimatedHeight += entryHeight + SPACING;
+		appendToTabChain(valueRegion.get());
 		return valueRegion;
 	}
 	SelectionPtr ParameterPane::addSelectionField(const std::string& label, int& selectedIndex, const std::vector<std::string>& options, float aspect) {
@@ -509,6 +518,7 @@ namespace aly {
 		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->setRoundCorners(true);
 		estimatedHeight += entryHeight + SPACING;
+		appendToTabChain(valueRegion.get());
 		return valueRegion;
 	}
 	ToggleBoxPtr ParameterPane::addToggleBox(const std::string& label, bool& value, float aspect) {
@@ -533,6 +543,7 @@ namespace aly {
 		};
 		setCommonParameters(comp, labelRegion, valueRegion);
 		estimatedHeight += entryHeight + SPACING;
+		appendToTabChain(valueRegion.get());
 		return valueRegion;
 	}
 	CheckBoxPtr ParameterPane::addCheckBox(const std::string& label, bool& value, float aspect) {
@@ -557,6 +568,7 @@ namespace aly {
 		};
 		setCommonParameters(comp, labelRegion, valueRegion);
 		estimatedHeight += entryHeight + SPACING;
+		appendToTabChain(valueRegion.get());
 		return valueRegion;
 	}
 	FileSelectorPtr ParameterPane::addFileField(const std::string& label, std::string& file, float aspect) {
@@ -584,6 +596,7 @@ namespace aly {
 		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->setRoundCorners(true);
 		estimatedHeight += entryHeight + SPACING;
+		appendToTabChain(valueRegion.get());
 		return valueRegion;
 	}
 	FileSelectorPtr ParameterPane::addDirectoryField(const std::string& label, std::string& file, float aspect) {
@@ -611,6 +624,7 @@ namespace aly {
 			valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 			valueRegion->setRoundCorners(true);
 			estimatedHeight += entryHeight + SPACING;
+			appendToTabChain(valueRegion.get());
 			return valueRegion;
 		}
 	MultiFileSelectorPtr ParameterPane::addMultiFileSelector(const std::string& label, std::vector<std::string>& files, float aspect) {
@@ -618,7 +632,6 @@ namespace aly {
 		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));
 		MultiFileSelectorPtr valueRegion = MultiFileSelectorPtr(
 				new MultiFileSelector("Multi-File Field", CoordPerPX(1.0f, 0.0f, -aspect * entryHeight, 0.0f), CoordPX(aspect * entryHeight, 4 * entryHeight),false,entryHeight));
-
 		if (aspect <= 0) {
 			pixel2 labelBounds = labelRegion->getTextDimensions(AlloyDefaultContext().get());
 			labelBounds.x += entryHeight;
@@ -639,6 +652,7 @@ namespace aly {
 		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->setRoundCorners(true);
 		estimatedHeight += 4 * entryHeight + SPACING;
+		appendToTabChain(valueRegion.get());
 		return valueRegion;
 	}
 	template<int M, int N> std::shared_ptr<MatrixField<M, N>> ParameterPane::addMatrixFieldInternal(
@@ -681,6 +695,7 @@ namespace aly {
 					AlloyDefaultContext()->theme.LIGHT);
 			valueRegion->setRoundCorners(true);
 			estimatedHeight += M * entryHeight + SPACING;
+			appendToTabChain(valueRegion.get());
 			return valueRegion;
 		}
 
@@ -723,6 +738,7 @@ namespace aly {
 
 			valueRegion->setRoundCorners(true);
 			estimatedHeight += entryHeight + SPACING;
+			appendToTabChain(valueRegion.get());
 			return valueRegion;
 		}
 
@@ -762,13 +778,13 @@ namespace aly {
 			setCommonParameters(comp, labelRegion, valueRegion);
 			valueRegion->backgroundColor = MakeColor(
 					AlloyDefaultContext()->theme.LIGHT);
-
 			valueRegion->setRoundCorners(true);
 			estimatedHeight += entryHeight + SPACING;
+			appendToTabChain(valueRegion.get());
 			return valueRegion;
 		}
 	std::shared_ptr<VectorIntegerField<2>> ParameterPane::addVectorIntegerField(const std::string& label, aly::vec<int, 2>& value, float aspect){
-		return addVectorIntegerField(label,value,aspect);
+		return addVectorIntegerFieldInternal(label,value,aspect);
 	}
 	std::shared_ptr<VectorIntegerField<3>> ParameterPane::addVectorIntegerField(const std::string& label, aly::vec<int, 3>& value, float aspect){
 		return addVectorIntegerFieldInternal(label,value,aspect);

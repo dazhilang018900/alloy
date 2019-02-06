@@ -18,7 +18,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 #include "Alloy.h"
 #include "ui/AlloyParameterPane.h"
 #include "example/ParameterPaneEx.h"
@@ -38,10 +37,8 @@ ParameterPaneEx::ParameterPaneEx() :
 	paramTweenHi = Integer(1075);
 	paramIntegerList.push_back(Integer(1001));
 	paramIntegerList.push_back(Integer(1070));
-
 	paramFloatList.push_back(Float(12.34f));
 	paramFloatList.push_back(Float(56.78f));
-
 	paramDoubleList.push_back(Double((double) ALY_PI));
 	paramDoubleList.push_back(Double((double) std::exp(1.0)));
 	paramString = "Hello";
