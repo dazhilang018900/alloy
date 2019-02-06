@@ -317,7 +317,7 @@ bool ToggleBox::onEventHandler(AlloyContext* context, const InputEvent& event) {
 			setFocus(false);
 		}
 	} else if (event.type == InputType::Key && event.isDown()
-			&& (event.key == GLFW_KEY_ENTER || event.key == GLFW_KEY_SPACE)
+			&& event.key == GLFW_KEY_SPACE
 			&& isObjectFocused()) {
 		this->toggledOn = !this->toggledOn;
 		onLabel->setVisible(this->toggledOn);
@@ -336,7 +336,7 @@ bool CheckBox::onEventHandler(AlloyContext* context, const InputEvent& event) {
 			setFocus(false);
 		}
 	} else if (event.type == InputType::Key && event.isDown()
-			&& (event.key == GLFW_KEY_ENTER || event.key == GLFW_KEY_SPACE)
+			&& event.key == GLFW_KEY_SPACE
 			&& isObjectFocused()) {
 		this->checked = !this->checked;
 		this->valueLabel->textColor =
