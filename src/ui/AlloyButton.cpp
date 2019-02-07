@@ -33,9 +33,8 @@ bool TextButton::onEventHandler(AlloyContext* context,
 		} else if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
 			setFocus(false);
 		}
-	} else if (event.type == InputType::Key && event.key == GLFW_KEY_ENTER
-			&& isObjectFocused()) {
-		if (event.isDown()) {
+	} else if (event.type == InputType::Key && event.key == GLFW_KEY_ENTER) {
+		if (event.isDown() && isObjectFocused()) {
 			context->setMouseDownObject(this);
 			context->setLeftMouseButtonDown(true);
 			if (onMouseDown) {
@@ -46,18 +45,18 @@ bool TextButton::onEventHandler(AlloyContext* context,
 				e.button = GLFW_MOUSE_BUTTON_LEFT;
 				return onMouseDown(context, e);
 			}
-		} else {
+		} else if (!event.isDown()) {
 			if (context->getMouseDownObject() == this) {
 				context->setMouseDownObject(nullptr);
 				context->setLeftMouseButtonDown(false);
-			}
-			if (onMouseUp) {
-				InputEvent e = event;
-				e.type = InputType::MouseButton;
-				e.clicks = 1;
-				e.action = GLFW_RELEASE;
-				e.button = GLFW_MOUSE_BUTTON_LEFT;
-				return onMouseUp(context, e);
+				if (onMouseUp) {
+					InputEvent e = event;
+					e.type = InputType::MouseButton;
+					e.clicks = 1;
+					e.action = GLFW_RELEASE;
+					e.button = GLFW_MOUSE_BUTTON_LEFT;
+					return onMouseUp(context, e);
+				}
 			}
 		}
 	}
@@ -65,15 +64,15 @@ bool TextButton::onEventHandler(AlloyContext* context,
 }
 bool IconButton::onEventHandler(AlloyContext* context,
 		const InputEvent& event) {
-	if (event.type == InputType::MouseButton && event.isDown()&& context->isMouseOver(this, true)) {
+	if (event.type == InputType::MouseButton && event.isDown()
+			&& context->isMouseOver(this, true)) {
 		if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
 			setFocus(true);
 		} else if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
 			setFocus(false);
 		}
-	} else if (event.type == InputType::Key && event.key == GLFW_KEY_ENTER
-			&& isObjectFocused()) {
-		if (event.isDown()) {
+	} else if (event.type == InputType::Key && event.key == GLFW_KEY_ENTER) {
+		if (event.isDown() && isObjectFocused()) {
 			context->setMouseDownObject(this);
 			context->setLeftMouseButtonDown(true);
 			if (onMouseDown) {
@@ -84,18 +83,18 @@ bool IconButton::onEventHandler(AlloyContext* context,
 				e.button = GLFW_MOUSE_BUTTON_LEFT;
 				return onMouseDown(context, e);
 			}
-		} else {
+		} else if (!event.isDown()) {
 			if (context->getMouseDownObject() == this) {
 				context->setMouseDownObject(nullptr);
 				context->setLeftMouseButtonDown(false);
-			}
-			if (onMouseUp) {
-				InputEvent e = event;
-				e.type = InputType::MouseButton;
-				e.clicks = 1;
-				e.action = GLFW_RELEASE;
-				e.button = GLFW_MOUSE_BUTTON_LEFT;
-				return onMouseUp(context, e);
+				if (onMouseUp) {
+					InputEvent e = event;
+					e.type = InputType::MouseButton;
+					e.clicks = 1;
+					e.action = GLFW_RELEASE;
+					e.button = GLFW_MOUSE_BUTTON_LEFT;
+					return onMouseUp(context, e);
+				}
 			}
 		}
 	}
@@ -111,9 +110,8 @@ bool TextIconButton::onEventHandler(AlloyContext* context,
 			setFocus(false);
 		}
 	}
-	if (event.type == InputType::Key && event.key == GLFW_KEY_ENTER
-			&& isObjectFocused()) {
-		if (event.isDown()) {
+	if (event.type == InputType::Key && event.key == GLFW_KEY_ENTER) {
+		if (event.isDown() && isObjectFocused()) {
 			context->setMouseDownObject(this);
 			context->setLeftMouseButtonDown(true);
 			if (onMouseDown) {
@@ -124,18 +122,18 @@ bool TextIconButton::onEventHandler(AlloyContext* context,
 				e.button = GLFW_MOUSE_BUTTON_LEFT;
 				return onMouseDown(context, e);
 			}
-		} else {
+		} else if (!event.isDown()) {
 			if (context->getMouseDownObject() == this) {
 				context->setMouseDownObject(nullptr);
 				context->setLeftMouseButtonDown(false);
-			}
-			if (onMouseUp) {
-				InputEvent e = event;
-				e.type = InputType::MouseButton;
-				e.clicks = 1;
-				e.action = GLFW_RELEASE;
-				e.button = GLFW_MOUSE_BUTTON_LEFT;
-				return onMouseUp(context, e);
+				if (onMouseUp) {
+					InputEvent e = event;
+					e.type = InputType::MouseButton;
+					e.clicks = 1;
+					e.action = GLFW_RELEASE;
+					e.button = GLFW_MOUSE_BUTTON_LEFT;
+					return onMouseUp(context, e);
+				}
 			}
 		}
 	}
