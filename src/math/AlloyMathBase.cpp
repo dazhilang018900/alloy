@@ -255,7 +255,14 @@ float RandomGaussian(float mean, float stddev) {
 	std::normal_distribution<float> noise(mean, stddev);
 	return noise(gen);
 }
-
+std::string RandomString(int len) {
+	std::stringstream ss;
+	static const char lookUp[33] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ012345";
+	for (int i = 0; i < len; i++) {
+		ss << lookUp[RandomUniform(0, 31)];
+	}
+	return ss.str();
+}
 template<class T> matrix<T, 4, 4> MakeRotationInternal(const vec<T, 3>& axis,
 		T angle) {
 	matrix<T, 4, 4> M = Identity<T, 4, 4>();
