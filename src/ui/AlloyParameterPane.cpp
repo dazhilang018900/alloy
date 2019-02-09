@@ -217,7 +217,6 @@ namespace aly {
 		appendToTabChain(valueRegion.get());
 		return valueRegion;
 	}
-
 	std::shared_ptr<Region> ParameterPane::addNumberVectorField(const std::string& label,std::vector<Number>& value,const NumberType& type,float aspect) {
 		CompositePtr comp = CompositePtr(new Composite(label + "_param", CoordPX(0, 0), CoordPerPX(1.0f, 0.0f, 0.0f, 4 * entryHeight)));
 		TextLabelPtr labelRegion = TextLabelPtr(new TextLabel(label, CoordPX(0.0f, 0.0f), CoordPerPX(1.0f, 0.0f, 0.0f, entryHeight)));

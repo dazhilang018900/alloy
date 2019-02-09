@@ -81,12 +81,9 @@ bool ParameterPaneEx::init(Composite& rootNode) {
 	paramPane->addToggleBox("Toggle", paramBool1);
 	paramPane->addCheckBox("Check", paramBool2);
 	paramPane->addGroup("Group 3", true);
-	paramPane->addNumberVectorField("Integers", paramIntegerList,
-			NumberType::Integer, 8.0f);
-	paramPane->addNumberVectorField("Floats", paramFloatList, NumberType::Float,
-			8.0f);
-	paramPane->addNumberVectorField("Doubles", paramDoubleList,
-			NumberType::Double, 8.0f);
+	paramPane->addNumberVectorField("Integers", paramIntegerList,NumberType::Integer, 8.0f);
+	paramPane->addNumberVectorField("Floats", paramFloatList, NumberType::Float,8.0f);
+	paramPane->addNumberVectorField("Doubles", paramDoubleList,NumberType::Double, 8.0f);
 	centerPane->backgroundColor = MakeColor(getContext()->theme.LIGHT);
 	paramPane->backgroundColor = MakeColor(getContext()->theme.DARKER);
 	borderComposite->setCenter(centerPane);

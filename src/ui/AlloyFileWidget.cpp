@@ -706,7 +706,8 @@ void FileDialog::setSelectedFile(const std::string& file,
 						continue;
 					}
 					FileEntry* entry = new FileEntry(this,
-							MakeString() << "Entry " << i, fileEntryHeight);
+							MakeString() << "File Entry " << i,
+							fileEntryHeight);
 					directoryList->addEntry(std::shared_ptr<FileEntry>(entry));
 					entry->setValue(fd);
 					if (select && entry->fileDescription.fileLocation == file) {
@@ -734,7 +735,8 @@ void FileDialog::setSelectedFile(const std::string& file,
 						continue;
 					}
 					FileEntry* entry = new FileEntry(this,
-							MakeString() << "Entry " << i, fileEntryHeight);
+							MakeString() << "File Entry " << i,
+							fileEntryHeight);
 					directoryList->addEntry(std::shared_ptr<FileEntry>(entry));
 					entry->setValue(fd);
 					if (select && entry->fileDescription.fileLocation == file) {
@@ -1108,35 +1110,39 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 					|| type == FileDialogType::SelectMultiDirectory);
 	directoryList->onSelect =
 			[this](ListEntry* lentry, const InputEvent& e) {
-				if (e.clicks == 2&&this->type!=FileDialogType::SelectMultiDirectory) {
+				if (e.type==InputType::MouseButton&&e.clicks == 2&&this->type!=FileDialogType::SelectMultiDirectory) {
 					actionButton->onMouseDown(AlloyApplicationContext().get(), e);
 				}
 				else {
 					if (lentry != nullptr) {
 						FileEntry* entry = dynamic_cast<FileEntry*>(lentry);
-						if (this->type == FileDialogType::OpenMultiFile||this->type==FileDialogType::SelectMultiDirectory) { //Should only happen on double click
-							if (entry->fileDescription.fileType == FileType::Directory) {
-								std::string fileName = entry->fileDescription.fileLocation;
-								setSelectedFile(fileName,!(e.clicks==1&&this->type==FileDialogType::SelectMultiDirectory));
-								fileLocation->setValue(fileName);
+						if(e.type==InputType::MouseButton) {
+							if (this->type == FileDialogType::OpenMultiFile||this->type==FileDialogType::SelectMultiDirectory) { //Should only happen on double click
+								if (entry->fileDescription.fileType == FileType::Directory) {
+									std::string fileName = entry->fileDescription.fileLocation;
+									setSelectedFile(fileName,!(e.type==InputType::MouseButton&&e.clicks==1&&this->type==FileDialogType::SelectMultiDirectory));
+									fileLocation->setValue(fileName);
+								}
+								updateValidity();
 							}
-							updateValidity();
-						}
-						else if (this->type == FileDialogType::OpenFile||this->type == FileDialogType::SelectDirectory) {
-							std::string fileName = entry->fileDescription.fileLocation;
-							setSelectedFile(fileName);
-							fileLocation->setValue(fileName);
-							updateValidity();
-						}
-						else if (this->type == FileDialogType::SaveFile) {
-							if (entry->fileDescription.fileType == FileType::Directory) {
+							else if (this->type == FileDialogType::OpenFile||this->type == FileDialogType::SelectDirectory) {
 								std::string fileName = entry->fileDescription.fileLocation;
 								setSelectedFile(fileName);
 								fileLocation->setValue(fileName);
+								updateValidity();
 							}
-							else {
-								fileLocation->setValue(entry->fileDescription.fileLocation);
+							else if (this->type == FileDialogType::SaveFile) {
+								if (entry->fileDescription.fileType == FileType::Directory) {
+									std::string fileName = entry->fileDescription.fileLocation;
+									setSelectedFile(fileName);
+									fileLocation->setValue(fileName);
+								}
+								else {
+									fileLocation->setValue(entry->fileDescription.fileLocation);
+								}
+								updateValidity();
 							}
+						} else {
 							updateValidity();
 						}
 					}
@@ -1159,7 +1165,9 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 						this->setVisible(false);
 						context->getGlassPane()->setVisible(false);
 						return true;
-					} else if(e.key==GLFW_KEY_ENTER) {
+					}
+					/*
+					if(e.key==GLFW_KEY_ENTER) {
 						if (valid) {
 							if (this->onSelect)
 							{
@@ -1181,6 +1189,7 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 							return true;
 						}
 					}
+					*/
 				}
 				return false;
 			};
@@ -1198,7 +1207,8 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	add(cancelButton);
 	add(newFolderField);
 	appendToTabChain(fileLocation.get());
-	if(fileTypeSelect.get()!=nullptr)appendToTabChain(fileTypeSelect.get());
+	if (fileTypeSelect.get() != nullptr)
+		appendToTabChain(fileTypeSelect.get());
 	appendToTabChain(actionButton.get());
 }
 std::string FileFilterRule::toString() {

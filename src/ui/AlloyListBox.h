@@ -131,6 +131,7 @@ public:
         std::function<void(const std::vector<Number>& numbers)> onChange;
         void update();
         void clearEntries();
+        virtual void draw(AlloyContext* context) override;
         void addNumbers(const std::vector<Number>& numbers);
         NumberListBox(const std::string& name, const aly::AUnit2D& pos, const aly::AUnit2D& dims, const NumberType& type, float entryHeight = 30.0f);
 };

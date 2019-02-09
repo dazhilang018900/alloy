@@ -110,7 +110,7 @@ bool DialogsEx::init(Composite& rootNode) {
 	rootNode.add(warningButton,true);
 	rootNode.add(errorButton,true);
 	rootNode.add(questionButton,true);
-	rootNode.add(infoButton,true);
+	rootNode.add(infoButton);
 	return true;
 }
 

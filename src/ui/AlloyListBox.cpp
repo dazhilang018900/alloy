@@ -139,7 +139,7 @@ void ListEntry::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
 	NVGcontext* nvg = context->nvgContext;
 	bool hover = context->isMouseOver(this);
-	bool down = context->isMouseDown(this);
+	bool down = context->isMouseDown(this) && context->isLeftMouseButtonDown();
 	bool selected = this->selected || dialog->isDraggingOver(this);
 	int xoff = 0;
 	int yoff = 0;
@@ -182,7 +182,6 @@ void ListEntry::draw(AlloyContext* context) {
 							+ AlloyApplicationContext()->theme.SPACING.x :
 					0;
 	pixel2 offset(0, 0);
-
 	if (selected) {
 		if (hover) {
 
@@ -198,7 +197,6 @@ void ListEntry::draw(AlloyContext* context) {
 			nvgFillColor(nvg, context->theme.DARK);
 		}
 	}
-
 	box2px labelBounds = getCursorBounds();
 	pushScissor(nvg, labelBounds);
 	if (iconCodeString.size() > 0) {
@@ -561,6 +559,7 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	}
 }
 void ListBox::draw(AlloyContext* context) {
+	box2px bounds = getBounds();
 	if (startItem >= 0) {
 		float2 cursorDown = context->getCursorDownPosition();
 		float2 cursorPos = context->getCursorPosition();
@@ -569,7 +568,7 @@ void ListBox::draw(AlloyContext* context) {
 		float2 endPt = aly::max(cursorDown, cursorPos);
 		dragBox.position = stPt;
 		dragBox.dimensions = endPt - stPt;
-		dragBox.intersect(getBounds());
+		dragBox.intersect(bounds);
 	}
 	pushScissor(context->nvgContext, getCursorBounds());
 	Composite::draw(context);
@@ -608,6 +607,30 @@ void ListBox::draw(AlloyContext* context) {
 		nvgStroke(nvg);
 	}
 }
+
+void NumberListBox::draw(AlloyContext* context) {
+	Composite::draw(context);
+	NVGcontext* nvg = context->nvgContext;
+	const int PAD = 1.0f;
+	box2px bounds = getBounds();
+	if (isObjectFocused()) {
+		nvgLineJoin(nvg, NVG_MITER);
+		nvgBeginPath(nvg);
+		if (roundCorners) {
+			nvgRoundedRect(nvg, bounds.position.x + PAD,
+					bounds.position.y + PAD, bounds.dimensions.x - 2 * PAD,
+					bounds.dimensions.y - 2 * PAD,
+					context->theme.CORNER_RADIUS);
+		} else {
+			nvgRect(nvg, bounds.position.x + PAD, bounds.position.y + PAD,
+					bounds.dimensions.x - 2 * PAD,
+					bounds.dimensions.y - 2 * PAD);
+		}
+		nvgStrokeWidth(nvg, 2.0f);
+		nvgStrokeColor(nvg, context->theme.FOCUS);
+		nvgStroke(nvg);
+	}
+}
 bool ListBox::isDraggingOver(ListEntry* entry) {
 	if (entry->isSelected() || dragBox.intersects(entry->getBounds())) {
 		return true;
@@ -642,7 +665,7 @@ void NumberEntry::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
 	NVGcontext* nvg = context->nvgContext;
 	bool hover = context->isMouseOver(this);
-	bool down = context->isMouseDown(this);
+	bool down = context->isMouseDown(this) && context->isLeftMouseButtonDown();
 	bool selected = this->selected || dialog->isDraggingOver(this);
 	int xoff = 0;
 	int yoff = 0;
@@ -723,9 +746,24 @@ void NumberEntry::draw(AlloyContext* context) {
 		child->draw(context);
 	}
 	popScissor(nvg);
-
+	const int PAD = 1.0f;
+	if (isObjectFocused()) {
+		nvgLineJoin(nvg, NVG_MITER);
+		nvgBeginPath(nvg);
+		if (hover || down) {
+			nvgRoundedRect(nvg, bounds.position.x + xoff,
+					bounds.position.y + yoff, bounds.dimensions.x,
+					bounds.dimensions.y, context->theme.CORNER_RADIUS);
+		} else {
+			nvgRoundedRect(nvg, bounds.position.x + 1, bounds.position.y + 1,
+					bounds.dimensions.x - 2, bounds.dimensions.y - 2,
+					context->theme.CORNER_RADIUS);
+		}
+		nvgStrokeWidth(nvg, 2.0f);
+		nvgStrokeColor(nvg, context->theme.FOCUS);
+		nvgStroke(nvg);
+	}
 }
-
 void NumberListBox::clearEntries() {
 	valueRegion->clearEntries();
 }

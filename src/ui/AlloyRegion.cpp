@@ -305,7 +305,7 @@ void Region::drawBoundsLabel(AlloyContext* context, const std::string& name,
 	pushScissor(nvg, bounds.position.x, bounds.position.y, bounds.dimensions.x,
 			bounds.dimensions.y);
 	bool hover = context->isMouseOver(this);
-	bool down = context->isMouseDown(this);
+	bool down = context->isMouseDown(this)&&context->isLeftMouseButtonDown();
 	bool focus= context->isObjectFocused(this);
 	Color c;
 	if (isVisible()) {
