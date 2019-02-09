@@ -354,7 +354,32 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 		if (e.isDown() && e.key == GLFW_KEY_SPACE) {
 			for (auto entry : listEntries) {
 				if (entry->isObjectFocused()) {
-					entry->setSelected(!entry->isSelected());
+					if (enableMultiSelection) {
+						if (entry->isSelected()) {
+							entry->setSelected(false);
+							for (auto iter = lastSelected.begin();
+									iter != lastSelected.end(); iter++) {
+								if (*iter == entry.get()) {
+									lastSelected.erase(iter);
+									break;
+								}
+							}
+						} else {
+							entry->setSelected(true);
+							lastSelected.push_back(entry.get());
+						}
+					} else {
+						for (ListEntry* child : lastSelected) {
+							child->setSelected(false);
+						}
+						lastSelected.clear();
+						if (entry->isSelected()) {
+							entry->setSelected(false);
+						} else {
+							entry->setSelected(true);
+							lastSelected.push_back(entry.get());
+						}
+					}
 					if (onSelect)
 						onSelect(entry.get(), e);
 					break;
