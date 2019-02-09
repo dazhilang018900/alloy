@@ -72,7 +72,7 @@ void ListBox::update() {
 	AlloyContext* context = AlloyApplicationContext().get();
 	for (std::shared_ptr<ListEntry> entry : listEntries) {
 		if (entry->parent == nullptr) {
-			add(entry);
+			add(entry, true);
 		}
 		if (entry->isSelected()) {
 			lastSelected.push_back(entry.get());
@@ -220,10 +220,10 @@ void ListEntry::draw(AlloyContext* context) {
 	if (isObjectFocused()) {
 		nvgLineJoin(nvg, NVG_MITER);
 		nvgBeginPath(nvg);
-		if (hover||down) {
-			nvgRoundedRect(nvg, bounds.position.x + xoff, bounds.position.y + yoff,
-					bounds.dimensions.x, bounds.dimensions.y,
-					context->theme.CORNER_RADIUS);
+		if (hover || down) {
+			nvgRoundedRect(nvg, bounds.position.x + xoff,
+					bounds.position.y + yoff, bounds.dimensions.x,
+					bounds.dimensions.y, context->theme.CORNER_RADIUS);
 		} else {
 			nvgRoundedRect(nvg, bounds.position.x + 1, bounds.position.y + 1,
 					bounds.dimensions.x - 2, bounds.dimensions.y - 2,
@@ -340,7 +340,7 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	}
 	Region* mouseDownRegion = context->getMouseDownObject();
 	if (mouseDownRegion == nullptr) {
-		bool click=false;
+		bool click = false;
 		for (auto entry : listEntries) {
 			if (entry->isSelected()
 					&& context->isMouseOver(entry.get(), true)) {
@@ -351,7 +351,16 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 		}
 	}
 	if (e.type == InputType::Key) {
-		if (e.isDown() && e.isControlDown() && e.key == GLFW_KEY_A
+		if (e.isDown() && e.key == GLFW_KEY_SPACE) {
+			for (auto entry : listEntries) {
+				if (entry->isObjectFocused()) {
+					entry->setSelected(!entry->isSelected());
+					if (onSelect)
+						onSelect(entry.get(), e);
+					break;
+				}
+			}
+		} else if (e.isDown() && e.isControlDown() && e.key == GLFW_KEY_A
 				&& enableMultiSelection) {
 			for (auto entry : listEntries) {
 				if (!entry->isSelected()) {
@@ -361,15 +370,13 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 						onSelect(entry.get(), e);
 				}
 			}
-		}
-		if (e.isUp() && enableDelete && e.key == GLFW_KEY_DELETE) {
+		} else if (e.isUp() && enableDelete && e.key == GLFW_KEY_DELETE) {
 			if (e.isControlDown()) {
 				removeAll();
 			} else {
 				removeSelected();
 			}
-		}
-		if (e.key == GLFW_KEY_DOWN && e.isDown()) {
+		} else if (e.key == GLFW_KEY_DOWN && e.isDown()) {
 			return addVerticalScrollPosition(1);
 		} else if (e.key == GLFW_KEY_UP && e.isDown()) {
 			return addVerticalScrollPosition(-1);
@@ -698,7 +705,7 @@ void NumberListBox::clearEntries() {
 	valueRegion->clearEntries();
 }
 void NumberListBox::update() {
-	std::vector<std::shared_ptr<ListEntry>>& entries =
+	std::vector<std::shared_ptr<ListEntry>> &entries =
 			valueRegion->getEntries();
 	values.resize(valueRegion->getEntries().size());
 	for (int i = 0; i < (int) entries.size(); i++) {
@@ -717,7 +724,7 @@ void NumberListBox::update() {
 }
 void NumberListBox::fireEvent() {
 	if (onChange) {
-		std::vector<std::shared_ptr<ListEntry>>& entries =
+		std::vector<std::shared_ptr<ListEntry>> &entries =
 				valueRegion->getEntries();
 		values.resize(entries.size());
 		int index = 0;
