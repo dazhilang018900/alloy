@@ -367,13 +367,18 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 							lastSelected.push_back(entry.get());
 						}
 					} else {
-						for (ListEntry* child : lastSelected) {
-							child->setSelected(false);
-						}
-						lastSelected.clear();
+
 						if (entry->isSelected()) {
+							for (ListEntry* child : lastSelected) {
+								child->setSelected(false);
+							}
+							lastSelected.clear();
 							entry->setSelected(false);
 						} else {
+							for (ListEntry* child : lastSelected) {
+								child->setSelected(false);
+							}
+							lastSelected.clear();
 							entry->setSelected(true);
 							lastSelected.push_back(entry.get());
 						}
