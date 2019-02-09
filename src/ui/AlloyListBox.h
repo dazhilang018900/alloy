@@ -100,27 +100,17 @@ public:
 	const std::vector<std::shared_ptr<ListEntry>>& getEntries() const {
 		return listEntries;
 	}
-	void addEntry(const std::shared_ptr<ListEntry>& entry) {
-		listEntries.push_back(entry);
-		dirty = true;
-	}
-	inline void setEnableDelete(bool val){
-		enableDelete=val;
-	}
+	void addEntry(const std::shared_ptr<ListEntry>& entry);
+	void setEnableDelete(bool val);
+	ListEntry* getLastSelected();
+	void setEnableMultiSelection(bool enable);
 	void clearEntries();
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& e) override;
-	ListEntry* getLastSelected() {
-		if (lastSelected.size() > 0)
-			return lastSelected.back();
-		else
-			return nullptr;
-	}
+
 	bool isDraggingOver(ListEntry* entry);
 	ListBox(const std::string& name, const AUnit2D& pos, const AUnit2D& dims);
 	virtual void draw(AlloyContext* context) override;
-	void setEnableMultiSelection(bool enable) {
-		enableMultiSelection = enable;
-	}
+
 	bool onMouseDown(ListEntry* entry, AlloyContext* context,
 			const InputEvent& e);
 	std::function<void(ListEntry*, const InputEvent&)> onSelect;

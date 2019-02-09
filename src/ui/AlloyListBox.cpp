@@ -22,7 +22,24 @@
 #include "ui/AlloyListBox.h"
 #include "ui/AlloyApplication.h"
 #include "ui/AlloyDrawUtil.h"
-namespace aly{
+namespace aly {
+
+void ListBox::addEntry(const std::shared_ptr<ListEntry>& entry) {
+	listEntries.push_back(entry);
+	dirty = true;
+}
+void ListBox::setEnableDelete(bool val) {
+	enableDelete = val;
+}
+ListEntry* ListBox::getLastSelected() {
+	if (lastSelected.size() > 0)
+		return lastSelected.back();
+	else
+		return nullptr;
+}
+void ListBox::setEnableMultiSelection(bool enable) {
+	enableMultiSelection = enable;
+}
 void ListBox::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {
 	if (dirty) {
@@ -196,11 +213,51 @@ void ListEntry::draw(AlloyContext* context) {
 					+ xoff, bounds.position.y + bounds.dimensions.y / 2 + yoff,
 			label.c_str(), nullptr);
 	popScissor(nvg);
+
+	const int PAD = 1.0f;
+	if (isObjectFocused()) {
+		nvgLineJoin(nvg, NVG_MITER);
+		nvgBeginPath(nvg);
+		if (hover) {
+			if (roundCorners) {
+				nvgRoundedRect(nvg, bounds.position.x + xoff + PAD,
+						bounds.position.y + yoff + PAD,
+						bounds.dimensions.x - 2 * PAD,
+						bounds.dimensions.y - 2 * PAD,
+						context->theme.CORNER_RADIUS);
+			} else {
+				nvgRect(nvg, bounds.position.x + xoff + PAD,
+						bounds.position.y + yoff + PAD,
+						bounds.dimensions.x - 2 * PAD,
+						bounds.dimensions.y - 2 * PAD);
+			}
+		} else {
+			if (roundCorners) {
+				nvgRoundedRect(nvg, bounds.position.x + xoff + 1 + PAD,
+						bounds.position.y + yoff + 1 + PAD,
+						bounds.dimensions.x - 2 * PAD - 2,
+						bounds.dimensions.y - 2 * PAD - 2,
+						context->theme.CORNER_RADIUS);
+			} else {
+				nvgRect(nvg, bounds.position.x + xoff + 1 + PAD,
+						bounds.position.y + yoff + 1 + PAD,
+						bounds.dimensions.x - 2 * PAD - 2,
+						bounds.dimensions.y - 2 * PAD - 2);
+			}
+		}
+		nvgStrokeWidth(nvg, 2.0f);
+		nvgStrokeColor(nvg, context->theme.FOCUS);
+		nvgStroke(nvg);
+	}
+
 }
 
 bool ListBox::addVerticalScrollPosition(int c) {
-	if(listEntries.size()>0){
-		float t=c*(cellSpacing.y+listEntries.front()->entryHeight)*(this->verticalScrollTrack->getBoundsDimensionsY()-this->verticalScrollHandle->getBoundsDimensionsY())/std::max(1E-6f,extents.dimensions.y - bounds.dimensions.y);
+	if (listEntries.size() > 0) {
+		float t = c * (cellSpacing.y + listEntries.front()->entryHeight)
+				* (this->verticalScrollTrack->getBoundsDimensionsY()
+						- this->verticalScrollHandle->getBoundsDimensionsY())
+				/ std::max(1E-6f, extents.dimensions.y - bounds.dimensions.y);
 		if (verticalScrollHandle->addDragOffset(pixel2(0.0f, t))) {
 			this->scrollPosition.y =
 					(this->verticalScrollHandle->getBoundsPositionY()
@@ -216,8 +273,13 @@ bool ListBox::addVerticalScrollPosition(int c) {
 	return false;
 }
 void ListBox::scrollToBottom() {
-	float t =this->verticalScrollTrack->getBoundsPositionY()+ std::max(0.0f,this->verticalScrollTrack->getBoundsDimensionsY()- (float) this->verticalScrollHandle->getBoundsDimensionsY());
-	if (verticalScrollHandle.get()!=nullptr&&verticalScrollHandle->addDragOffset(pixel2(0.0f, t))) {
+	float t =
+			this->verticalScrollTrack->getBoundsPositionY()
+					+ std::max(0.0f,
+							this->verticalScrollTrack->getBoundsDimensionsY()
+									- (float) this->verticalScrollHandle->getBoundsDimensionsY());
+	if (verticalScrollHandle.get() != nullptr
+			&& verticalScrollHandle->addDragOffset(pixel2(0.0f, t))) {
 		this->scrollPosition.y =
 				(this->verticalScrollHandle->getBoundsPositionY()
 						- this->verticalScrollTrack->getBoundsPositionY())
@@ -229,7 +291,7 @@ void ListBox::scrollToBottom() {
 	}
 }
 void ListBox::scrollToTop() {
-	if (verticalScrollHandle.get()!=nullptr) {
+	if (verticalScrollHandle.get() != nullptr) {
 		verticalScrollHandle->setDragOffset(pixel2(0.0f, 0.0f));
 		this->scrollPosition.y =
 				(this->verticalScrollHandle->getBoundsPositionY()
@@ -277,7 +339,8 @@ bool ListBox::removeSelected() {
 	return false;
 }
 bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
-	if(!isVisible())return false;
+	if (!isVisible())
+		return false;
 	if (!context->isMouseOver(this, true)) {
 		if (!Composite::onEventHandler(context, e)) {
 			bool ret = false;
@@ -293,12 +356,17 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 	}
 	Region* mouseDownRegion = context->getMouseDownObject();
 	if (mouseDownRegion == nullptr) {
+		bool click=false;
 		for (auto entry : listEntries) {
 			if (entry->isSelected()
 					&& context->isMouseOver(entry.get(), true)) {
 				context->setMouseDownObject(entry.get());
+				click=true;
 				break;
 			}
+		}
+		if(click){
+			setFocus(true);
 		}
 	}
 	if (e.type == InputType::Key) {
@@ -314,24 +382,24 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			}
 		}
 		if (e.isUp() && enableDelete && e.key == GLFW_KEY_DELETE) {
-			if(e.isControlDown()){
+			if (e.isControlDown()) {
 				removeAll();
 			} else {
 				removeSelected();
 			}
 		}
-		if(e.key==GLFW_KEY_DOWN&&e.isDown()){
+		if (e.key == GLFW_KEY_DOWN && e.isDown()) {
 			return addVerticalScrollPosition(1);
-		}  else if(e.key==GLFW_KEY_UP&&e.isDown()){
+		} else if (e.key == GLFW_KEY_UP && e.isDown()) {
 			return addVerticalScrollPosition(-1);
-		} else if(e.key==GLFW_KEY_PAGE_DOWN&&e.isDown()){
+		} else if (e.key == GLFW_KEY_PAGE_DOWN && e.isDown()) {
 			return addVerticalScrollPosition(5);
-		}  else if(e.key==GLFW_KEY_PAGE_UP&&e.isDown()){
+		} else if (e.key == GLFW_KEY_PAGE_UP && e.isDown()) {
 			return addVerticalScrollPosition(-5);
-		}  else if(e.key==GLFW_KEY_HOME&&e.isDown()){
+		} else if (e.key == GLFW_KEY_HOME && e.isDown()) {
 			scrollToTop();
 			return true;
-		} else if(e.key==GLFW_KEY_END&&e.isDown()){
+		} else if (e.key == GLFW_KEY_END && e.isDown()) {
 			scrollToBottom();
 			return true;
 		}
@@ -383,6 +451,7 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 						if (!entry->isSelected()) {
 							entry->setSelected(true);
 							lastSelected.push_back(entry.get());
+							entry->setFocus(true);
 							if (onSelect)
 								onSelect(entry.get(), e);
 						}
@@ -492,6 +561,24 @@ void ListBox::draw(AlloyContext* context) {
 	Composite::draw(context);
 	popScissor(context->nvgContext);
 	NVGcontext* nvg = context->nvgContext;
+	const int PAD = 1.0f;
+	if (isObjectFocused()) {
+		nvgLineJoin(nvg, NVG_MITER);
+		nvgBeginPath(nvg);
+		if (roundCorners) {
+			nvgRoundedRect(nvg, bounds.position.x + PAD,
+					bounds.position.y + PAD, bounds.dimensions.x - 2 * PAD,
+					bounds.dimensions.y - 2 * PAD,
+					context->theme.CORNER_RADIUS);
+		} else {
+			nvgRect(nvg, bounds.position.x + PAD, bounds.position.y + PAD,
+					bounds.dimensions.x - 2 * PAD,
+					bounds.dimensions.y - 2 * PAD);
+		}
+		nvgStrokeWidth(nvg, 2.0f);
+		nvgStrokeColor(nvg, context->theme.FOCUS);
+		nvgStroke(nvg);
+	}
 	if (dragBox.dimensions.x > 0 && dragBox.dimensions.y > 0) {
 		nvgBeginPath(nvg);
 		nvgRect(nvg, dragBox.position.x, dragBox.position.y,
@@ -767,9 +854,10 @@ NumberListBox::NumberListBox(const std::string& name, const AUnit2D& pos,
 			[this](AlloyContext* context, const InputEvent& e) {
 				return valueRegion->removeAll();
 			};
-	valueRegion->onDeleteEntry=[this](const std::vector<ListEntryPtr>& removalList){
-		fireEvent();
-	};
+	valueRegion->onDeleteEntry =
+			[this](const std::vector<ListEntryPtr>& removalList) {
+				fireEvent();
+			};
 
 	upButton->onMouseDown = [this](AlloyContext* context, const InputEvent& e) {
 		if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -804,6 +892,5 @@ NumberListBox::NumberListBox(const std::string& name, const AUnit2D& pos,
 				return false;
 			};
 }
-
 
 }

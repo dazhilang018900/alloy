@@ -39,13 +39,13 @@ bool DialogsEx::init(Composite& rootNode) {
 	}
 	listBox->setEnableMultiSelection(true);
 
-	rootNode.add(saveButton);
-	rootNode.add(openMultiFileButton);
-	rootNode.add(openMultiDirButton);
-	rootNode.add(fileSelector);
-	rootNode.add(colorselect);
-	rootNode.add(listBox);
-	rootNode.add(mfileField);
+	rootNode.add(saveButton,true);
+	rootNode.add(openMultiFileButton,true);
+	rootNode.add(openMultiDirButton,true);
+	rootNode.add(fileSelector,true);
+	rootNode.add(colorselect,true);
+	rootNode.add(listBox,true);
+	rootNode.add(mfileField,true);
 
 	mfileField->addFiles(std::vector<std::string> { getContext()->getFullPath("images" + ALY_PATH_SEPARATOR + "sfsunset.png"), getContext()->getFullPath("images" + ALY_PATH_SEPARATOR + "sfmarket.png")});
 	using extensions = std::initializer_list<std::string>;
@@ -107,10 +107,10 @@ bool DialogsEx::init(Composite& rootNode) {
 	getGlassPane()->add(questionMessage);
 	getGlassPane()->add(infoMessage);
 
-	rootNode.add(warningButton);
-	rootNode.add(errorButton);
-	rootNode.add(questionButton);
-	rootNode.add(infoButton);
+	rootNode.add(warningButton,true);
+	rootNode.add(errorButton,true);
+	rootNode.add(questionButton,true);
+	rootNode.add(infoButton,true);
 	return true;
 }
 

@@ -910,14 +910,14 @@ bool RangeSlider::onEventHandler(AlloyContext* context,
 		}
 	}
 	if(event.type==InputType::Key&&event.isDown()&&isObjectFocused()){
-		if(event.key==GLFW_KEY_DOWN){
+		if(event.key==GLFW_KEY_DOWN||event.key==GLFW_KEY_LEFT){
 			double2 oldV = getBlendValue();
 			double2 newV = clamp(-0.01 + oldV, double2(0.0),double2(1.0));
 			this->setBlendValue(newV);
 			if (onChangeEvent)
 				onChangeEvent(this->lowerValue, this->upperValue);
 			return true;
-		} else if(event.key==GLFW_KEY_UP){
+		} else if(event.key==GLFW_KEY_UP||event.key==GLFW_KEY_RIGHT){
 			double2 oldV = getBlendValue();
 			double2 newV = clamp(0.01 + oldV, double2(0.0),double2(1.0));
 			this->setBlendValue(newV);

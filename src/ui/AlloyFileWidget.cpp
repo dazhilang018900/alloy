@@ -756,6 +756,7 @@ void FileSelector::setTextColor(const AColor& c) {
 }
 void FileSelector::appendTo(TabChain& chain) {
 	chain.add(fileLocation.get());
+	chain.add(openIcon.get());
 }
 FileSelector::FileSelector(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims, bool directoryInput) :
@@ -1195,8 +1196,10 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	add(containerRegion);
 	add(cancelButton);
 	add(newFolderField);
+	appendToTabChain(fileLocation.get());
+	if(fileTypeSelect.get()!=nullptr)appendToTabChain(fileTypeSelect.get());
+	appendToTabChain(actionButton.get());
 }
-
 std::string FileFilterRule::toString() {
 	std::stringstream ss;
 	if (extensions.size() == 0) {
@@ -1344,7 +1347,6 @@ void FileEntry::setValue(const FileDescription& description) {
 MultiFileEntry::MultiFileEntry(ListBox* listBox, const std::string& name,
 		float fontHeight) :
 		ListEntry(listBox, name, fontHeight) {
-
 }
 void MultiFileEntry::setValue(const std::string& file) {
 	this->fileName = file;
@@ -1359,6 +1361,7 @@ void MultiFileSelector::update() {
 	valueRegion->update();
 }
 void MultiFileSelector::appendTo(TabChain& chain) {
+	chain.add(valueRegion.get());
 	chain.add(openFileButton.get());
 }
 void MultiFileSelector::addFileExtensionRule(const std::string& name,
@@ -1397,7 +1400,6 @@ void MultiFileSelector::fireEvent() {
 		onChange(files);
 	}
 }
-
 MultiFileSelector::MultiFileSelector(const std::string& name,
 		const AUnit2D& pos, const AUnit2D& dims, bool directoryInput,
 		float entryHeight) :
