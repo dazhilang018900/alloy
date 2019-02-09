@@ -26,6 +26,7 @@ namespace aly {
 
 void ListBox::addEntry(const std::shared_ptr<ListEntry>& entry) {
 	listEntries.push_back(entry);
+	appendToTabChain(entry.get());
 	dirty = true;
 }
 void ListBox::setEnableDelete(bool val) {
@@ -84,6 +85,7 @@ void ListBox::clearEntries() {
 	for (ListEntryPtr entry : listEntries) {
 		entry->parent = nullptr;
 	}
+	tabChain.clear();
 	listEntries.clear();
 	lastSelected.clear();
 	dirty = true;
@@ -218,32 +220,14 @@ void ListEntry::draw(AlloyContext* context) {
 	if (isObjectFocused()) {
 		nvgLineJoin(nvg, NVG_MITER);
 		nvgBeginPath(nvg);
-		if (hover) {
-			if (roundCorners) {
-				nvgRoundedRect(nvg, bounds.position.x + xoff + PAD,
-						bounds.position.y + yoff + PAD,
-						bounds.dimensions.x - 2 * PAD,
-						bounds.dimensions.y - 2 * PAD,
-						context->theme.CORNER_RADIUS);
-			} else {
-				nvgRect(nvg, bounds.position.x + xoff + PAD,
-						bounds.position.y + yoff + PAD,
-						bounds.dimensions.x - 2 * PAD,
-						bounds.dimensions.y - 2 * PAD);
-			}
+		if (hover||down) {
+			nvgRoundedRect(nvg, bounds.position.x + xoff, bounds.position.y + yoff,
+					bounds.dimensions.x, bounds.dimensions.y,
+					context->theme.CORNER_RADIUS);
 		} else {
-			if (roundCorners) {
-				nvgRoundedRect(nvg, bounds.position.x + xoff + 1 + PAD,
-						bounds.position.y + yoff + 1 + PAD,
-						bounds.dimensions.x - 2 * PAD - 2,
-						bounds.dimensions.y - 2 * PAD - 2,
-						context->theme.CORNER_RADIUS);
-			} else {
-				nvgRect(nvg, bounds.position.x + xoff + 1 + PAD,
-						bounds.position.y + yoff + 1 + PAD,
-						bounds.dimensions.x - 2 * PAD - 2,
-						bounds.dimensions.y - 2 * PAD - 2);
-			}
+			nvgRoundedRect(nvg, bounds.position.x + 1, bounds.position.y + 1,
+					bounds.dimensions.x - 2, bounds.dimensions.y - 2,
+					context->theme.CORNER_RADIUS);
 		}
 		nvgStrokeWidth(nvg, 2.0f);
 		nvgStrokeColor(nvg, context->theme.FOCUS);
@@ -361,12 +345,9 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			if (entry->isSelected()
 					&& context->isMouseOver(entry.get(), true)) {
 				context->setMouseDownObject(entry.get());
-				click=true;
+				entry->setFocus(true);
 				break;
 			}
-		}
-		if(click){
-			setFocus(true);
 		}
 	}
 	if (e.type == InputType::Key) {
@@ -461,6 +442,7 @@ bool ListBox::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
 				for (std::shared_ptr<ListEntry> entry : listEntries) {
 					entry->setSelected(false);
+					entry->setFocus(false);
 				}
 				lastSelected.clear();
 				if (onSelect) {

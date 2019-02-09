@@ -41,11 +41,11 @@ struct TabChain{
 class Region: public EventHandler {
 private:
 	pixel2 dragOffset = pixel2(0, 0);
-	TabChain tabChain;
 protected:
 	friend class TabChain;
 	box2px bounds;
 	box2px extents;
+	TabChain tabChain;
 	void drawBoundsLabel(AlloyContext* context, const std::string& name,
 			int font);
 	Region* mouseOverRegion = nullptr;

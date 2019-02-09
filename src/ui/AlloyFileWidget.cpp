@@ -794,6 +794,7 @@ FileSelector::FileSelector(const std::string& name, const AUnit2D& pos,
 	openIcon->borderColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	openIcon->borderWidth = UnitPX(0.0f);
 	openIcon->backgroundColor = MakeColor(COLOR_NONE);
+	openIcon->setRoundCorners(true);
 	openIcon->iconColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	setCenter(fileLocation);
 	setEast(openIcon, UnitPX(30.0f));
