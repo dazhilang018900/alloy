@@ -31,6 +31,8 @@ protected:
 	aly::ModifiableNumberPtr matField[M][N];
 public:
 	std::function<void(MatrixField<M, N>*)> onTextEntered;
+	std::function<void(MatrixField<M, N>*)> onKeyInput;
+
 	MatrixField(const std::string& name, const aly::AUnit2D& pos,
 			const aly::AUnit2D& dims, const aly::matrix<float, M, N>& Mat =
 					aly::matrix<float, M, N>()) :
@@ -58,12 +60,18 @@ public:
 						onTextEntered(this);
 					}
 				};
+				field->onKeyInput = [this,m,n](NumberField* field) {
+					this->Mat[m][n]=field->getValue().toFloat();
+					if(onKeyInput) {
+						onKeyInput(this);
+					}
+				};
 				Composite::add(field);
 				matField[m][n] = field;
 			}
 		}
 	}
-	virtual void appendTo(TabChain& chain) override{
+	virtual void appendTo(TabChain& chain) override {
 		for (int m = 0; m < M; m++) {
 			for (int n = 0; n < N; n++) {
 				chain.add(matField[m][n].get());
@@ -89,6 +97,8 @@ protected:
 	aly::ModifiableNumberPtr vecField[N];
 public:
 	std::function<void(VectorFloatField<N>*)> onTextEntered;
+	std::function<void(VectorFloatField<N>*)> onKeyInput;
+
 	VectorFloatField(const std::string& name, const aly::AUnit2D& pos,
 			const aly::AUnit2D& dims,
 			const aly::vec<float, N>& Mat = aly::vec<float, N>()) :
@@ -110,6 +120,12 @@ public:
 				this->value[n]=field->getValue().toFloat();
 				if(onTextEntered) {
 					onTextEntered(this);
+				}
+			};
+			field->onKeyInput = [this,n](NumberField* field) {
+				this->value[n]=field->getValue().toFloat();
+				if(onKeyInput) {
+					onKeyInput(this);
 				}
 			};
 			Composite::add(field);
@@ -137,6 +153,7 @@ protected:
 	aly::ModifiableNumberPtr vecField[N];
 public:
 	std::function<void(VectorIntegerField<N>*)> onTextEntered;
+	std::function<void(VectorIntegerField<N>*)> onKeyInput;
 
 	VectorIntegerField(const std::string& name, const aly::AUnit2D& pos,
 			const aly::AUnit2D& dims,
@@ -159,6 +176,12 @@ public:
 				this->value[n]=field->getValue().toInteger();
 				if(onTextEntered) {
 					onTextEntered(this);
+				}
+			};
+			field->onKeyInput = [this,n](NumberField* field) {
+				this->value[n]=field->getValue().toInteger();
+				if(onKeyInput) {
+					onKeyInput(this);
 				}
 			};
 			Composite::add(field);
@@ -197,11 +220,11 @@ protected:
 	void updateGroups();
 	template<int M, int N> std::shared_ptr<MatrixField<M, N>> addMatrixFieldInternal(
 			const std::string& label, aly::matrix<float, M, N>& value,
-			float aspect );
+			float aspect);
 	template<int N> std::shared_ptr<VectorFloatField<N>> addVectorFloatFieldInternal(
-			const std::string& label, aly::vec<float, N>& value, float aspect );
+			const std::string& label, aly::vec<float, N>& value, float aspect);
 	template<int N> std::shared_ptr<VectorIntegerField<N>> addVectorIntegerFieldInternal(
-			const std::string& label, aly::vec<int, N>& value, float aspect );
+			const std::string& label, aly::vec<int, N>& value, float aspect);
 public:
 	std::function<void(const std::string& name, const AnyInterface& value)> onChange;
 	AColor entryTextColor;

@@ -152,6 +152,20 @@ namespace aly {
 			*(ref->getValue<Number*>()) = val;
 			if(this->onChange)this->onChange(label,*ref);
 		};
+		valueRegion->onKeyInput = [=](NumberField* field) {
+			Number val = field->getValue();
+			if (val < minValue) {
+				val = minValue;
+				field->setNumberValue(val);
+			}
+			if (val > maxValue) {
+				val = maxValue;
+				field->setNumberValue(val);
+			}
+			tweenRegion->setValue(val.toDouble());
+			*(ref->getValue<Number*>()) = val;
+			if(this->onChange)this->onChange(label,*ref);
+		};
 		tweenRegion->setOnChangeEvent([=](const aly::Number& value) {
 			valueRegion->setNumberValue(value);
 			*(ref->getValue<Number*>()) =value;
@@ -189,6 +203,10 @@ namespace aly {
 		std::shared_ptr<AnyInterface> ref = std::shared_ptr<AnyInterface>(new AnyValue<Number*>(&value));
 		values.push_back(ref);
 		valueRegion->onTextEntered = [=](NumberField* field) {
+			*(ref->getValue<Number*>()) = field->getValue();
+			if(this->onChange)this->onChange(label,*ref);
+		};
+		valueRegion->onKeyInput = [=](NumberField* field) {
 			*(ref->getValue<Number*>()) = field->getValue();
 			if(this->onChange)this->onChange(label,*ref);
 		};
@@ -250,6 +268,10 @@ namespace aly {
 			*(ref->getValue<Number*>()) = field->getValue();
 			if(this->onChange)this->onChange(label,*ref);
 		};
+		valueRegion->onKeyInput = [=](NumberField* field) {
+					*(ref->getValue<Number*>()) = field->getValue();
+					if(this->onChange)this->onChange(label,*ref);
+				};
 		setCommonParameters(comp, labelRegion, valueRegion);
 		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->setRoundCorners(true);
@@ -318,7 +340,39 @@ namespace aly {
 			}
 			if(this->onChange)this->onChange(label,*ref);
 		};
+		lowValueRegion->onKeyInput = [=](NumberField* field) {
+			if (field->getValue() < minValue) {
+				field->setNumberValue(minValue);
+			}
+			if (field->getValue() > maxValue) {
+				field->setNumberValue(maxValue);
+			}
+			*((ref->getValue<std::pair<Number*, Number*>>()).first) = field->getValue();
+			rangeSlider->setLowerValue(field->getValue().toDouble());
+			if (field->getValue() > highValueRegion->getValue()) {
+				*((ref->getValue<std::pair<Number*, Number*>>()).second) = field->getValue();
+				highValueRegion->setNumberValue(field->getValue());
+				rangeSlider->setUpperValue(field->getValue().toDouble());
+			}
+			if(this->onChange)this->onChange(label,*ref);
+		};
 		highValueRegion->onTextEntered = [=](NumberField* field) {
+			if (field->getValue() < minValue) {
+				field->setNumberValue(minValue);
+			}
+			if (field->getValue() > maxValue) {
+				field->setNumberValue(maxValue);
+			}
+			*((ref->getValue<std::pair<Number*, Number*>>()).second) = field->getValue();
+			rangeSlider->setUpperValue(field->getValue().toDouble());
+			if (field->getValue() < lowValueRegion->getValue()) {
+				*((ref->getValue<std::pair<Number*, Number*>>()).first) = field->getValue();
+				lowValueRegion->setNumberValue(field->getValue());
+				rangeSlider->setLowerValue(field->getValue().toDouble());
+			}
+			if(this->onChange)this->onChange(label,*ref);
+		};
+		highValueRegion->onKeyInput = [=](NumberField* field) {
 			if (field->getValue() < minValue) {
 				field->setNumberValue(minValue);
 			}
@@ -400,6 +454,22 @@ namespace aly {
 			}
 			if(this->onChange)this->onChange(label,*ref);
 		};
+		lowValueRegion->onKeyInput= [=](NumberField* field) {
+			*((ref->getValue<std::pair<Number*, Number*>>()).first) = field->getValue();
+			if (field->getValue() > highValueRegion->getValue()) {
+				*((ref->getValue<std::pair<Number*, Number*>>()).second) = field->getValue();
+				highValueRegion->setNumberValue(field->getValue());
+			}
+			if(this->onChange)this->onChange(label,*ref);
+		};
+		highValueRegion->onKeyInput = [=](NumberField* field) {
+			*((ref->getValue<std::pair<Number*, Number*>>()).second) = field->getValue();
+			if (field->getValue() < lowValueRegion->getValue()) {
+				*((ref->getValue<std::pair<Number*, Number*>>()).first) = field->getValue();
+				lowValueRegion->setNumberValue(field->getValue());
+			}
+			if(this->onChange)this->onChange(label,*ref);
+		};
 		highValueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		highValueRegion->borderWidth = UnitPX(0.0f);
 		highValueRegion->setRoundCorners(true);
@@ -431,6 +501,9 @@ namespace aly {
 		valueRegion->onTextEntered = [=](TextField* field) {
 			*(ref->getValue<std::string*>()) = field->getValue();
 		};
+		valueRegion->onKeyInput = [=](TextField* field) {
+			*(ref->getValue<std::string*>()) = field->getValue();
+		};
 		setCommonParameters(comp, labelRegion, valueRegion);
 		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->setRoundCorners(true);
@@ -460,6 +533,10 @@ namespace aly {
 		valueRegion->onTextEntered = [=](TextField* field) {
 			*(ref->getValue<std::vector<int>*>()) = aly::ExtractIntegerRange(field->getValue());
 		};
+		valueRegion->onKeyInput = [=](TextField* field) {
+			*(ref->getValue<std::vector<int>*>()) = aly::ExtractIntegerRange(field->getValue());
+		};
+
 		setCommonParameters(comp, labelRegion, valueRegion);
 		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
 		valueRegion->setRoundCorners(true);
@@ -690,6 +767,12 @@ namespace aly {
 						*(ref->getValue<aly::matrix<float,M,N>*>()) = field->getValue();
 						if(this->onChange)this->onChange(label,*ref);
 					};
+			valueRegion->onKeyInput =
+					[=](MatrixField<M,N>* field) {
+						*(ref->getValue<aly::matrix<float,M,N>*>()) = field->getValue();
+						if(this->onChange)this->onChange(label,*ref);
+					};
+
 			setCommonParameters(comp, labelRegion, valueRegion);
 			valueRegion->backgroundColor = MakeColor(
 					AlloyDefaultContext()->theme.LIGHT);
@@ -729,6 +812,10 @@ namespace aly {
 					new AnyValue<aly::vec<float, N>*>(&value));
 			values.push_back(ref);
 			valueRegion->onTextEntered = [=](VectorFloatField<N>* field) {
+				*(ref->getValue<aly::vec<float,N>*>()) = field->getValue();
+				if(this->onChange)this->onChange(label,*ref);
+			};
+			valueRegion->onKeyInput = [=](VectorFloatField<N>* field) {
 				*(ref->getValue<aly::vec<float,N>*>()) = field->getValue();
 				if(this->onChange)this->onChange(label,*ref);
 			};
@@ -772,6 +859,10 @@ namespace aly {
 					new AnyValue<aly::vec<int, N>*>(&value));
 			values.push_back(ref);
 			valueRegion->onTextEntered = [=](VectorIntegerField<N>* field) {
+				*(ref->getValue<aly::vec<int, N>*>()) = field->getValue();
+				if(this->onChange)this->onChange(label,*ref);
+			};
+			valueRegion->onKeyInput = [=](VectorIntegerField<N>* field) {
 				*(ref->getValue<aly::vec<int, N>*>()) = field->getValue();
 				if(this->onChange)this->onChange(label,*ref);
 			};

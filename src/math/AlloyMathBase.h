@@ -2574,6 +2574,7 @@ int RandomUniform(int min, int max);
 double RandomUniform(double min, double max);
 double RandomGaussian(double mean, double stddev);
 float RandomGaussian(float mean, float stddev);
+std::string RandomString(int len);
 
 }
 #endif /* INCLUDE_CORE_ALLOYMATHBASE_H_ */

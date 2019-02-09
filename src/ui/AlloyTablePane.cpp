@@ -315,8 +315,7 @@ bool TablePane::onEventHandler(AlloyContext* context, const InputEvent& e) {
 				bounds.dimensions.y -= entryHeight;
 				dragBox.intersect(bounds);
 			}
-		} else if (!context->isMouseDown()
-				&& e.type == InputType::MouseButton) {
+		} else if (!context->isMouseDown()&& e.type == InputType::MouseButton) {
 			if (enableMultiSelection) {
 				TableRow* lastEntry = nullptr;
 				for (std::shared_ptr<TableRow> entry : rows) {
