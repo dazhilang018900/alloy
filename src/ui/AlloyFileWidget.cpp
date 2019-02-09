@@ -1158,41 +1158,42 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 					}
 				}
 			};
-	this->onEvent =
-			[this](AlloyContext* context, const InputEvent& e) {
-				if(e.type==InputType::Key&&isVisible()) {
-					if(e.key==GLFW_KEY_ESCAPE) {
-						this->setVisible(false);
-						context->getGlassPane()->setVisible(false);
-						return true;
-					}
-					/*
-					if(e.key==GLFW_KEY_ENTER) {
-						if (valid) {
-							if (this->onSelect)
-							{
-								std::vector<std::string> files;
-								if (this->type != FileDialogType::OpenMultiFile&&this->type!=FileDialogType::SelectMultiDirectory) {
-									files.push_back(this->getValue());
-								}
-								else {
-									for (std::shared_ptr<ListEntry> entry : directoryList->getEntries()) {
-										if (entry->isSelected()) {
-											files.push_back(dynamic_cast<FileEntry*>(entry.get())->fileDescription.fileLocation);
-										}
-									}
-								}
-								if (files.size() > 0)this->onSelect(files);
-							}
-							this->setVisible(false);
-							context->getGlassPane()->setVisible(false);
-							return true;
-						}
-					}
-					*/
-				}
-				return false;
-			};
+	this->onEvent = [this](AlloyContext* context, const InputEvent& e) {
+		if(e.type==InputType::Key&&isVisible()) {
+			if(e.key==GLFW_KEY_ESCAPE) {
+				this->setVisible(false);
+				context->getGlassPane()->setVisible(false);
+				return true;
+			}
+			/*
+			 if(e.key==GLFW_KEY_ENTER) {
+
+			 if (valid) {
+			 if (this->onSelect)
+			 {
+			 std::vector<std::string> files;
+			 if (this->type != FileDialogType::OpenMultiFile&&this->type!=FileDialogType::SelectMultiDirectory) {
+			 files.push_back(this->getValue());
+			 }
+			 else {
+			 for (std::shared_ptr<ListEntry> entry : directoryList->getEntries()) {
+			 if (entry->isSelected()) {
+			 files.push_back(dynamic_cast<FileEntry*>(entry.get())->fileDescription.fileLocation);
+			 }
+			 }
+			 }
+			 if (files.size() > 0)this->onSelect(files);
+			 }
+			 this->setVisible(false);
+			 context->getGlassPane()->setVisible(false);
+			 return true;
+			 }
+			 }
+
+			 */
+		}
+		return false;
+	};
 	directoryTree->borderColor = MakeColor(
 			AlloyApplicationContext()->theme.DARK);
 	directoryTree->borderWidth = UnitPX(1.0f);
