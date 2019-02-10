@@ -32,12 +32,11 @@ bool CascadeEx::init(Composite& rootNode) {
 	vscroller->borderWidth=UnitPX(1.0f);
 	vscroller->borderColor=MakeColor(getContext()->theme.LIGHTER);
 	for(int n=0;n<N;n++){
-		RegionPtr region=RegionPtr(new Region(MakeString()<<"R"<<n,CoordPX(0.0f,0.0f),CoordPerPX(0.0f,1.0f,200.0f,0.0f)));
+		RegionPtr region=RegionPtr(new Region(MakeString()<<"R"<<n,CoordPX(0.0f,0.0f),CoordPerPX(1.0f,0.0f,0.0f,200.0f)));
 		region->setRoundCorners(true);
 		region->backgroundColor=MakeColor(Color((-n+N)%N/(float)(N-1),((n*13+3)%N)/(float)(N-1),((n*43+2)%N)/(float)(N-1)));
 		vscroller->add(region);
 	}
-
 	return true;
 }
 
