@@ -93,8 +93,9 @@ namespace aly {
 		std::chrono::steady_clock::time_point lastTime;
 	public:
 		std::string name;
-		Timer(const std::string& name);
+		Timer(const std::string& name="");
 		double getElapsed(bool reset=false);
+		bool resetAfterElapsed(double timeOut);
 		void reset();
 		void tic();
 		double toc();

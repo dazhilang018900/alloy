@@ -369,6 +369,14 @@ double Timer::getElapsed(bool reset){
 	if(reset)lastTime=currentTime;
 	return std::chrono::duration<double>(currentTime - lastTime).count();
 }
+bool Timer::resetAfterElapsed(double timeOut){
+	double t=getElapsed(false);
+	if(t>=timeOut){
+		reset();
+		return true;
+	}
+	return false;
+}
 void Timer::reset(){
 	lastTime=std::chrono::steady_clock::now();
 }

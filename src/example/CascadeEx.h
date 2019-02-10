@@ -8,12 +8,13 @@
 #ifndef SRC_EXAMPLE_CASCADEEX_H_
 #define SRC_EXAMPLE_CASCADEEX_H_
 
+#include "../ui/AlloyScrollPane.h"
 #include "ui/AlloyApplication.h"
-#include "ui/AlloyScrollPanel.h"
 namespace aly {
 class CascadeEx : public aly::Application{
 protected:
-	ScrollPanelPtr scroller;
+	ScrollPanelPtr hscroller;
+	ScrollPanelPtr vscroller;
 public:
 	CascadeEx();
 	bool init(aly::Composite& rootNode);

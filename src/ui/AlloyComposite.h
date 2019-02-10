@@ -17,13 +17,11 @@ protected:
 	bool scrollEnabled = false;
 	bool alwaysShowVerticalScrollBar = false;
 	bool alwaysShowHorizontalScrollBar = false;
-
 	float horizontalScrollExtent = 0;
 	pixel2 scrollPosition = pixel2(0, 0);
 	std::shared_ptr<ScrollTrack> verticalScrollTrack, horizontalScrollTrack;
 	std::shared_ptr<ScrollHandle> verticalScrollHandle, horizontalScrollHandle;
 	std::vector<std::shared_ptr<Region>> children;
-
 	typedef std::shared_ptr<Region> ValueType;
 	pixel2 cellPadding = pixel2(0, 0);
 	pixel2 cellSpacing = pixel2(0, 0);
@@ -64,6 +62,8 @@ public:
 	bool addVerticalScrollPosition(float pix);
 	virtual void scrollToBottom();
 	virtual void scrollToTop();
+	virtual void scrollToLeft();
+	virtual void scrollToRight();
 	bool addHorizontalScrollPosition(float pix);
 	void putLast(const std::shared_ptr<Region>& region);
 	void putFirst(const std::shared_ptr<Region>& region);
@@ -100,12 +100,8 @@ public:
 			double pixelRatio, bool clamp = false) override;
 	virtual void add(const std::shared_ptr<Region>& region,bool appendToTab=false);
 	virtual void insertAtFront(const std::shared_ptr<Region>& region);
-	virtual void pack() override {
-		Region::pack();
-	}
-	virtual void pack(AlloyContext* context) override {
-		Region::pack(context);
-	}
+	virtual void pack() override;
+	virtual void pack(AlloyContext* context) override;
 	void draw();
 	virtual ~Composite();
 };

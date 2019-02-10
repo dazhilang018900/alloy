@@ -5,8 +5,8 @@
  *      Author: blake
  */
 
-#ifndef SRC_UI_ALLOYSCROLLPANEL_H_
-#define SRC_UI_ALLOYSCROLLPANEL_H_
+#ifndef SRC_UI_ALLOYSCROLLPANE_H_
+#define SRC_UI_ALLOYSCROLLPANE_H_
 
 #include "ui/AlloyComposite.h"
 #include "ui/AlloyButton.h"
@@ -16,6 +16,7 @@ class ArrowButton: public Region {
 protected:
 	Direction dir;
 public:
+	std::function<void()> onMousePressed;
 	ArrowButton(const std::string& label, const AUnit2D& position, const AUnit2D& dimensions,const Direction& dir);
 	virtual void draw(AlloyContext* context) override;
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event) override;
@@ -23,19 +24,22 @@ public:
 };
 typedef std::shared_ptr<ArrowButton> ArrowButtonPtr;
 
-class ScrollPanel :public Composite {
+class ScrollPane :public Composite {
 protected:
 	ArrowButtonPtr leftButton;
 	ArrowButtonPtr rightButton;
 	ArrowButtonPtr upButton;
 	ArrowButtonPtr downButton;
-	CompositePtr content;
+	Timer timer;
 public:
+	virtual void updateCursor(CursorLocator* cursorLocator) override;
 	virtual void draw(AlloyContext* context) override;
-	ScrollPanel(const std::string& name, const AUnit2D& pos, const AUnit2D& dims, const Orientation& orient);
-	void addPanel(const RegionPtr& ptr);
-	virtual ~ScrollPanel(){}
+	virtual void drawDebug(AlloyContext* context) override;
+	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
+			double pixelRatio, bool clamp = false) override;
+	ScrollPane(const std::string& name, const AUnit2D& pos, const AUnit2D& dims, const Orientation& orient,float scrollStep=10.0f,float buttonWidth=40.0f);
+	virtual ~ScrollPane(){}
 };
-typedef std::shared_ptr<ScrollPanel> ScrollPanelPtr;
+typedef std::shared_ptr<ScrollPane> ScrollPanelPtr;
 } /* namespace aly */
-#endif /* SRC_UI_ALLOYSCROLLPANEL_H_ */
+#endif /* SRC_UI_ALLOYSCROLLPANE_H_ */

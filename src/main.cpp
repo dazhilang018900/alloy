@@ -195,11 +195,9 @@ int main(int argc, char *argv[]) {
 		MAKE_EXAMPLE(SpringlsSegmentation3DEx),MAKE_EXAMPLE(Enright3DEx),MAKE_EXAMPLE(NonNegativeLeastSquaresEx),
 		MAKE_EXAMPLE(MeshDistanceFieldEx),MAKE_EXAMPLE(CascadeEx)
 	};
-
 	std::sort(apps.begin(),apps.end(),[=](const ExamplePtr& a,const ExamplePtr& b){
 		return std::lexicographical_compare(a->name.begin(), a->name.end(), b->name.begin(), b->name.end());
 	});
-
 	aly::WorkerTaskPtr workerTask;
 	try {
 		//Example name is specified in a makefile at compile time so 
