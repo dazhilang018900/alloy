@@ -19,4 +19,4 @@ FluidParticles2D::~FluidParticles2D() {
 	// TODO Auto-generated destructor stub
 }
 
-} /* namespace intel */
+}

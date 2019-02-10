@@ -88,6 +88,7 @@
 #include "math/AlloyOptimization.h"
 #include "vision/AlloyGaussianMixture.h"
 #include "example/MeshDistanceFieldEx.h"
+#include "example/CascadeEx.h"
 /*
  For simple execution, main method should look like:
  int main(int argc, char *argv[]) {
@@ -168,7 +169,7 @@ bool SANITY_CHECK() {
 }
 int main(int argc, char *argv[]) {
 	//change me when adding new example!
-	const int N=67;
+	const int N=68;
 	std::array<ExamplePtr,N> apps = {
 		MAKE_EXAMPLE(UnitsEx), MAKE_EXAMPLE(CompositeEx),MAKE_EXAMPLE(EventsEx), 
 		MAKE_EXAMPLE(DragEx), MAKE_EXAMPLE(TweenEx),MAKE_EXAMPLE(ImageEx), 
@@ -189,16 +190,12 @@ int main(int argc, char *argv[]) {
 		MAKE_EXAMPLE(GrabCutEx),MAKE_EXAMPLE(ActiveContour3DEx),MAKE_EXAMPLE(ProceduralSkyEx),
 		MAKE_EXAMPLE(ShadowCastEx),MAKE_EXAMPLE(ActiveContour2DEx),MAKE_EXAMPLE(FluidSimulationEx),
 		MAKE_EXAMPLE(SuperPixelEx),MAKE_EXAMPLE(MagicPixelEx),MAKE_EXAMPLE(MultiActiveManifold2DEx),
-		MAKE_EXAMPLE(MultiActiveContour3DEx), MAKE_EXAMPLE(MultiSpringls2DEx),
-		MAKE_EXAMPLE(MultiSpringlsSecondOrder2DEx),
-		MAKE_EXAMPLE(Springls2DEx),
-		MAKE_EXAMPLE(SpringlsSecondOrder2DEx),
-		MAKE_EXAMPLE(DictionaryLearningEx),
-		MAKE_EXAMPLE(SpringlsSegmentation3DEx),
-		MAKE_EXAMPLE(Enright3DEx),
-		MAKE_EXAMPLE(NonNegativeLeastSquaresEx),
-		MAKE_EXAMPLE(MeshDistanceFieldEx)
+		MAKE_EXAMPLE(MultiActiveContour3DEx), MAKE_EXAMPLE(MultiSpringls2DEx),MAKE_EXAMPLE(MultiSpringlsSecondOrder2DEx),
+		MAKE_EXAMPLE(Springls2DEx),MAKE_EXAMPLE(SpringlsSecondOrder2DEx),MAKE_EXAMPLE(DictionaryLearningEx),
+		MAKE_EXAMPLE(SpringlsSegmentation3DEx),MAKE_EXAMPLE(Enright3DEx),MAKE_EXAMPLE(NonNegativeLeastSquaresEx),
+		MAKE_EXAMPLE(MeshDistanceFieldEx),MAKE_EXAMPLE(CascadeEx)
 	};
+
 	std::sort(apps.begin(),apps.end(),[=](const ExamplePtr& a,const ExamplePtr& b){
 		return std::lexicographical_compare(a->name.begin(), a->name.end(), b->name.begin(), b->name.end());
 	});

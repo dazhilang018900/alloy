@@ -59,7 +59,9 @@ enum class Winding {
 enum class TopologyRule2D {
 	Unconstrained, Connect4, Connect8
 };
-
+enum class Direction {
+	Left=0, Right=1, Up=2, Down=3
+};
 enum class MeshType {
 	Triangle=3, Quad=4
 };
@@ -131,6 +133,20 @@ enum WindowPosition {
 enum class FontStyle {
 	Normal = 0, Shadow = 1, Glow = 2, Outline = 3
 };
+template<class C, class R> std::basic_ostream<C, R> & operator <<(
+	std::basic_ostream<C, R> & ss, const Direction& type) {
+	switch (type) {
+	case Direction::Left:
+		return ss << "Left";
+	case Direction::Right:
+		return ss << "Right";
+	case Direction::Up:
+		return ss << "Up";
+	case Direction::Down:
+		return ss<< "Down";
+	}
+	return ss;
+}
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
 	std::basic_ostream<C, R> & ss, const MouseButton& type) {
 	switch (type) {
