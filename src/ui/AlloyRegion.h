@@ -70,71 +70,30 @@ public:
 	void focusNext();
 	void focusPrevious();
 	void printFocus();
-	void setIgnoreCursorEvents(bool ignore) {
-		ignoreCursorEvents = ignore;
-	}
-	void setClampDragToParentBounds(bool clamp) {
-		clampToParentBounds = clamp;
-	}
-	void setDetached(bool enable) {
-		detached = enable;
-	}
-	void setDragOffset(const pixel2& offset) {
-		dragOffset = offset;
-	}
-	int getDragButton() const {
-		return dragButton;
-	}
-	void clampDragOffset();
-	inline void setRoundCorners(bool round) {
-		this->roundCorners = round;
-	}
-	inline bool hasParent(Region* region) const {
-		return (parent != nullptr
-				&& (parent == region || parent->hasParent(region)));
-	}
-	inline bool isDetached() const {
-		return (parent != nullptr && parent->isDetached()) || detached;
-	}
 	std::function<bool(AlloyContext*, const InputEvent& event)> onEvent;
+	virtual Region* locate(const pixel2& cursor);
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)override;
 
-	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
-			override;
-	virtual inline bool isScrollEnabled() const {
-		return false;
-	}
 	virtual bool isCursorFocused() const;
 	virtual void setFocus(bool f);
 	virtual bool isObjectFocused() const;
-	virtual std::string getName() const override {
-		return name;
-	}
-	virtual inline pixel2 getDrawOffset() const {
-		if (parent != nullptr) {
-			return parent->getDrawOffset();
-		} else {
-			return pixel2(0, 0);
-		}
-	}
-
-	virtual Region* locate(const pixel2& cursor);
-	inline void setAspectRule(const AspectRule& aspect) {
-		aspectRule = aspect;
-	}
-	inline void setAspectRatio(double val) {
-		aspectRatio = val;
-	}
-	inline void setBounds(const AUnit2D& pt, const AUnit2D& dim) {
-		position = pt;
-		dimensions = dim;
-	}
-	inline void setBounds(const pixel2& pt, const pixel2& dim) {
-		bounds.position = pt;
-		bounds.dimensions = dim;
-	}
-	inline void setBounds(const box2px& bbox) {
-		bounds = bbox;
-	}
+	void clampDragOffset();
+	void setIgnoreCursorEvents(bool ignore);
+	void setClampDragToParentBounds(bool clamp);
+	void setDetached(bool enable);
+	void setDragOffset(const pixel2& offset);
+	int getDragButton() const;
+	void setRoundCorners(bool round);
+	bool hasParent(Region* region) const;
+	bool isDetached() const;
+	virtual inline bool isScrollEnabled() const;
+	virtual std::string getName() const override;
+	virtual pixel2 getDrawOffset() const;
+	void setAspectRule(const AspectRule& aspect);
+	void setAspectRatio(double val);
+	void setBounds(const AUnit2D& pt, const AUnit2D& dim);
+	void setBounds(const pixel2& pt, const pixel2& dim);
+	void setBounds(const box2px& bbox);
 	AColor backgroundColor = MakeColor(COLOR_NONE);
 	AColor borderColor = MakeColor(COLOR_NONE);
 	AUnit1D borderWidth = UnitPX(2);
@@ -146,60 +105,26 @@ public:
 	std::function<bool(AlloyContext* context, const InputEvent& event)> onScroll;
 	std::function<bool(AlloyContext* context, const InputEvent& event)> onMouseDrag;
 	void setDragOffset(const pixel2& cursor, const pixel2& delta);
-	virtual bool acceptDragEvent(const pixel2& cursor) const {
-		return true;
-	}
 	bool addDragOffset(const pixel2& delta);
-
-	virtual void setDragEnabled(bool enabled) {
-		dragButton = (enabled)?GLFW_MOUSE_BUTTON_LEFT:-1;
-		if (enabled)
-			clampToParentBounds = true;
-	}
-	virtual void setDragButton(int button) {
-		dragButton = button;
-		if (dragButton!=-1)
-			clampToParentBounds = true;
-	}
-	inline void setOrigin(const Origin& org) {
-		origin = org;
-	}
-	virtual bool isDragEnabled() const {
-		return (dragButton!=-1);
-	}
+	virtual bool acceptDragEvent(const pixel2& cursor) const;
+	virtual void setDragEnabled(bool enabled);
+	virtual void setDragButton(int button);
+	void setOrigin(const Origin& org);
+	virtual bool isDragEnabled() const;
+	pixel2 getBoundsPosition(bool includeOffset = true) const;
+	pixel2 getBoundsDimensions(bool includeOffset = true) const;
+	pixel2 getDragOffset() const;
+	pixel getBoundsPositionX(bool includeOffset = true) const;
+	pixel getBoundsDimensionsX(bool includeOffset = true) const;
+	pixel getBoundsPositionY(bool includeOffset = true) const;
+	pixel getBoundsDimensionsY(bool includeOffset = true) const;
+	Origin getOrigin() const;
+	AspectRule getAspectRule() const;
+	double getAspectRatio() const;
 	virtual box2px getBounds(bool includeOffset = true) const;
 	virtual box2px getExtents() const;
 	virtual box2px getCursorBounds(bool includeOffset = true) const;
-	pixel2 getBoundsPosition(bool includeOffset = true) const {
-		return getBounds(includeOffset).position;
-	}
-	pixel2 getBoundsDimensions(bool includeOffset = true) const {
-		return getBounds(includeOffset).dimensions;
-	}
-	pixel2 getDragOffset() const {
-		return dragOffset;
-	}
-	pixel getBoundsPositionX(bool includeOffset = true) const {
-		return getBounds(includeOffset).position.x;
-	}
-	pixel getBoundsDimensionsX(bool includeOffset = true) const {
-		return getBounds(includeOffset).dimensions.x;
-	}
-	pixel getBoundsPositionY(bool includeOffset = true) const {
-		return getBounds(includeOffset).position.y;
-	}
-	pixel getBoundsDimensionsY(bool includeOffset = true) const {
-		return getBounds(includeOffset).dimensions.y;
-	}
-	Origin getOrigin() const {
-		return origin;
-	}
-	AspectRule getAspectRule() const {
-		return aspectRule;
-	}
-	double getAspectRatio() const {
-		return aspectRatio;
-	}
+
 	virtual void setVisible(bool vis);
 	Region* parent = nullptr;
 	Region(

@@ -10,7 +10,7 @@
 #include "ui/AlloyDrawUtil.h"
 #include "system/AlloyFileUtil.h"
 #include <cctype>
-namespace aly{
+namespace aly {
 uint64_t Region::REGION_COUNTER = 0;
 const RGBA DEBUG_STROKE_COLOR = RGBA(32, 32, 200, 255);
 const RGBA DEBUG_HIDDEN_COLOR = RGBA(128, 128, 128, 0);
@@ -19,19 +19,20 @@ const RGBA DEBUG_DOWN_COLOR = RGBA(200, 64, 32, 255);
 const RGBA DEBUG_ON_TOP_COLOR = RGBA(120, 120, 0, 255);
 const RGBA DEBUG_ON_TOP_DOWN_COLOR = RGBA(220, 220, 0, 255);
 const RGBA DEBUG_ON_TOP_HOVER_COLOR = RGBA(180, 180, 0, 255);
-const RGBA DEBUG_OBJECT_FOCUS_DOWN_COLOR = RGBA(255, 64, 242,255);
+const RGBA DEBUG_OBJECT_FOCUS_DOWN_COLOR = RGBA(255, 64, 242, 255);
 const RGBA DEBUG_OBJECT_FOCUS_HOVER_COLOR = RGBA(254, 120, 248, 255);
-void TabChain::add(Region* region){
-	region->tabChain.parent=this;
+void TabChain::add(Region* region) {
+	region->tabChain.parent = this;
 	regions.push_back(region);
 }
-TabChain::TabChain():parent(nullptr){
+TabChain::TabChain() :
+		parent(nullptr) {
 }
-void TabChain::focusNext(Region* region){
-	for(auto iter=regions.begin();iter!=regions.end();iter++){
-		if(*iter==region){
+void TabChain::focusNext(Region* region) {
+	for (auto iter = regions.begin(); iter != regions.end(); iter++) {
+		if (*iter == region) {
 			iter++;
-			if(iter==regions.end()){
+			if (iter == regions.end()) {
 				regions.front()->setFocus(true);
 				break;
 			} else {
@@ -41,10 +42,10 @@ void TabChain::focusNext(Region* region){
 		}
 	}
 }
-void TabChain::focusPrevious(Region* region){
-	for(auto iter=regions.begin();iter!=regions.end();iter++){
-		if(*iter==region){
-			if(iter==regions.begin()){
+void TabChain::focusPrevious(Region* region) {
+	for (auto iter = regions.begin(); iter != regions.end(); iter++) {
+		if (*iter == region) {
+			if (iter == regions.begin()) {
 				regions.back()->setFocus(true);
 				break;
 			} else {
@@ -55,42 +56,44 @@ void TabChain::focusPrevious(Region* region){
 		}
 	}
 }
-void TabChain::remove(Region* region){
-	for(auto iter=regions.begin();iter!=regions.end();iter++){
-		if(*iter==region){
+void TabChain::remove(Region* region) {
+	for (auto iter = regions.begin(); iter != regions.end(); iter++) {
+		if (*iter == region) {
 			regions.erase(iter);
-			if(region->tabChain.parent==this)region->tabChain.parent=nullptr;
+			if (region->tabChain.parent == this)
+				region->tabChain.parent = nullptr;
 			break;
 		}
 	}
 }
-TabChain::~TabChain(){
+TabChain::~TabChain() {
 	clear();
 }
-void TabChain::clear(){
-	for(Region* region:regions){
-		if(region->tabChain.parent==this)region->tabChain.parent=nullptr;
+void TabChain::clear() {
+	for (Region* region : regions) {
+		if (region->tabChain.parent == this)
+			region->tabChain.parent = nullptr;
 	}
 	regions.clear();
 }
-void Region::focusNext(){
-	if(tabChain.parent!=nullptr){
+void Region::focusNext() {
+	if (tabChain.parent != nullptr) {
 		tabChain.parent->focusNext(this);
 	}
 }
-void Region::focusPrevious(){
-	if(tabChain.parent!=nullptr){
+void Region::focusPrevious() {
+	if (tabChain.parent != nullptr) {
 		tabChain.parent->focusPrevious(this);
 	}
 }
-void Region::printFocus(){
-	if(tabChain.parent!=nullptr){
-		std::cout<<"Tab Chain: "<<*tabChain.parent<<std::endl;
+void Region::printFocus() {
+	if (tabChain.parent != nullptr) {
+		std::cout << "Tab Chain: " << *tabChain.parent << std::endl;
 	} else {
-		std::cout<<getName()<<" has no tab chain."<<std::endl;
+		std::cout << getName() << " has no tab chain." << std::endl;
 	}
 }
-void Region::appendTo(TabChain& chain){
+void Region::appendTo(TabChain& chain) {
 	chain.add(this);
 }
 std::shared_ptr<Region> MakeRegion(const std::string& name,
@@ -115,21 +118,21 @@ void Region::removeListener() const {
 bool Region::isCursorFocused() const {
 	return AlloyApplicationContext()->isCursorFocused(this);
 }
-void Region::setFocus(bool f){
-	if(f){
+void Region::setFocus(bool f) {
+	if (f) {
 		AlloyApplicationContext()->setObjectFocus(this);
 		AlloyApplicationContext()->setCursorFocus(this);
 	} else {
-		Region* ptr=AlloyApplicationContext()->getObjectFocus();
-		if(ptr==this){
+		Region* ptr = AlloyApplicationContext()->getObjectFocus();
+		if (ptr == this) {
 			AlloyApplicationContext()->setObjectFocus(nullptr);
 		}
 	}
 }
-bool Region::isObjectFocused() const{
+bool Region::isObjectFocused() const {
 	return AlloyApplicationContext()->isObjectFocused(this);
 }
-void Composite::appendToTabChain(Region* region){
+void Composite::appendToTabChain(Region* region) {
 	region->appendTo(tabChain);
 }
 void Composite::removeListener() const {
@@ -305,15 +308,15 @@ void Region::drawBoundsLabel(AlloyContext* context, const std::string& name,
 	pushScissor(nvg, bounds.position.x, bounds.position.y, bounds.dimensions.x,
 			bounds.dimensions.y);
 	bool hover = context->isMouseOver(this);
-	bool down = context->isMouseDown(this)&&context->isLeftMouseButtonDown();
-	bool focus= context->isObjectFocused(this);
+	bool down = context->isMouseDown(this) && context->isLeftMouseButtonDown();
+	bool focus = context->isObjectFocused(this);
 	Color c;
 	if (isVisible()) {
-		if(focus){
+		if (focus) {
 			if (hover) {
-				c=DEBUG_OBJECT_FOCUS_HOVER_COLOR;
+				c = DEBUG_OBJECT_FOCUS_HOVER_COLOR;
 			} else {
-				c=DEBUG_OBJECT_FOCUS_DOWN_COLOR;
+				c = DEBUG_OBJECT_FOCUS_DOWN_COLOR;
 			}
 		} else {
 			if (down) {
@@ -365,6 +368,112 @@ void Region::clampDragOffset() {
 				- bounds.position;
 	}
 }
+
+bool Region::acceptDragEvent(const pixel2& cursor) const {
+	return true;
+}
+void Region::setDragEnabled(bool enabled) {
+	dragButton = (enabled) ? GLFW_MOUSE_BUTTON_LEFT : -1;
+	if (enabled)
+		clampToParentBounds = true;
+}
+void Region::setDragButton(int button) {
+	dragButton = button;
+	if (dragButton != -1)
+		clampToParentBounds = true;
+}
+void Region::setOrigin(const Origin& org) {
+	origin = org;
+}
+bool Region::isDragEnabled() const {
+	return (dragButton != -1);
+}
+pixel2 Region::getBoundsPosition(bool includeOffset) const {
+	return getBounds(includeOffset).position;
+}
+pixel2 Region::getBoundsDimensions(bool includeOffset) const {
+	return getBounds(includeOffset).dimensions;
+}
+pixel2 Region::getDragOffset() const {
+	return dragOffset;
+}
+pixel Region::getBoundsPositionX(bool includeOffset) const {
+	return getBounds(includeOffset).position.x;
+}
+pixel Region::getBoundsDimensionsX(bool includeOffset) const {
+	return getBounds(includeOffset).dimensions.x;
+}
+pixel Region::getBoundsPositionY(bool includeOffset) const {
+	return getBounds(includeOffset).position.y;
+}
+pixel Region::getBoundsDimensionsY(bool includeOffset) const {
+	return getBounds(includeOffset).dimensions.y;
+}
+Origin Region::getOrigin() const {
+	return origin;
+}
+AspectRule Region::getAspectRule() const {
+	return aspectRule;
+}
+double Region::getAspectRatio() const {
+	return aspectRatio;
+}
+
+void Region::setIgnoreCursorEvents(bool ignore) {
+	ignoreCursorEvents = ignore;
+}
+void Region::setClampDragToParentBounds(bool clamp) {
+	clampToParentBounds = clamp;
+}
+void Region::setDetached(bool enable) {
+	detached = enable;
+}
+void Region::setDragOffset(const pixel2& offset) {
+	dragOffset = offset;
+}
+int Region::getDragButton() const {
+	return dragButton;
+}
+void Region::setRoundCorners(bool round) {
+	this->roundCorners = round;
+}
+bool Region::hasParent(Region* region) const {
+	return (parent != nullptr && (parent == region || parent->hasParent(region)));
+}
+bool Region::isDetached() const {
+	return (parent != nullptr && parent->isDetached()) || detached;
+}
+bool Region::isScrollEnabled() const {
+	return false;
+}
+std::string Region::getName() const {
+	return name;
+}
+pixel2 Region::getDrawOffset() const {
+	if (parent != nullptr) {
+		return parent->getDrawOffset();
+	} else {
+		return pixel2(0, 0);
+	}
+}
+void Region::setAspectRule(const AspectRule& aspect) {
+	aspectRule = aspect;
+}
+void Region::setAspectRatio(double val) {
+	aspectRatio = val;
+}
+void Region::setBounds(const AUnit2D& pt, const AUnit2D& dim) {
+	position = pt;
+	dimensions = dim;
+}
+void Region::setBounds(const pixel2& pt, const pixel2& dim) {
+	bounds.position = pt;
+	bounds.dimensions = dim;
+}
+void Region::setBounds(const box2px& bbox) {
+	bounds = bbox;
+}
+
 bool Region::addDragOffset(const pixel2& delta) {
 	pixel2 oldOffset = dragOffset;
 	box2px bounds = getBounds();

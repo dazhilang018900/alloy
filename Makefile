@@ -17,7 +17,7 @@ CXXFLAGS:= -DGL_GLEXT_PROTOTYPES=1 -std=c++11 -O3 -w -fPIC -MMD -MP -fopenmp -c 
 CFLAGS:= -DGL_GLEXT_PROTOTYPES=1 -std=c11 -O3 -w -fPIC -MMD -MP -fopenmp -c -g -fmessage-length=0 -I./src/ -I./src/common/ -I./src/common/zstd/common/ -I./src/common/lz4/
 LDLIBS =-L./ -L/usr/lib64 -L/usr/lib/ -L/usr/local/lib/ -L/usr/local/cuda-9.1/lib64/ -L/usr/lib/x86_64-linux-gnu/ -L./ext/glfw/src/
 LIBS = -lglfw -lstdc++ -lgcc -lgomp -lGL -lXext -lGLU -lGLEW -lXi -lXrandr -lX11 -lXxf86vm -lXinerama -lXcursor -lXdamage -lpthread -lm -ldl -ltiff
-CXXFLAGS+= -DZSTD_MULTITHREAD -DXXH_NAMESPACE=ZSTD_ -DZSTD_STATIC_LINKING_ONLY -DXXH_NAMESPACE=LZ4_ -DXXH_STATIC_LINKING_ONLY
+# CXXFLAGS+= -DZSTD_MULTITHREAD -DXXH_NAMESPACE=ZSTD_ -DZSTD_STATIC_LINKING_ONLY -DXXH_NAMESPACE=LZ4_ -DXXH_STATIC_LINKING_ONLY
 CFLAGS+= -Wall -Wextra -Wcast-qual -Wcast-align -Wshadow \
             -Wstrict-aliasing=1 -Wswitch-enum -Wdeclaration-after-statement \
             -Wstrict-prototypes -Wundef -Wpointer-arith -Wformat-security \

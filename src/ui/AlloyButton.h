@@ -88,6 +88,17 @@ public:
 	virtual inline ~IconButton() {
 	}
 };
+class ArrowButton: public Region {
+protected:
+	Direction dir;
+public:
+	std::function<void()> onMousePressed;
+	ArrowButton(const std::string& label, const AUnit2D& position, const AUnit2D& dimensions,const Direction& dir);
+	virtual void draw(AlloyContext* context) override;
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event) override;
+	virtual inline ~ArrowButton() {}
+};
+typedef std::shared_ptr<ArrowButton> ArrowButtonPtr;
 typedef std::shared_ptr<TextButton> TextButtonPtr;
 typedef std::shared_ptr<TextIconButton> TextIconButtonPtr;
 typedef std::shared_ptr<IconButton> IconButtonPtr;

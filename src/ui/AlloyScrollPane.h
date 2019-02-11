@@ -12,17 +12,6 @@
 #include "ui/AlloyButton.h"
 namespace aly {
 
-class ArrowButton: public Region {
-protected:
-	Direction dir;
-public:
-	std::function<void()> onMousePressed;
-	ArrowButton(const std::string& label, const AUnit2D& position, const AUnit2D& dimensions,const Direction& dir);
-	virtual void draw(AlloyContext* context) override;
-	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event) override;
-	virtual inline ~ArrowButton() {}
-};
-typedef std::shared_ptr<ArrowButton> ArrowButtonPtr;
 
 class ScrollPane :public Composite {
 protected:
@@ -34,8 +23,9 @@ protected:
 public:
 	virtual void updateCursor(CursorLocator* cursorLocator) override;
 	virtual void draw(AlloyContext* context) override;
-	virtual void drawDebug(AlloyContext* context) override;
 	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp = false) override;
+
+	virtual void drawDebug(AlloyContext* context) override;
 	ScrollPane(const std::string& name, const AUnit2D& pos, const AUnit2D& dims, const Orientation& orient,float scrollStep=10.0f,float buttonWidth=40.0f);
 	virtual ~ScrollPane(){}
 };
