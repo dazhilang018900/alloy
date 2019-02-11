@@ -35,8 +35,7 @@ public:
 	virtual void updateCursor(CursorLocator* cursorLocator) override;
 	virtual void draw(AlloyContext* context) override;
 	virtual void drawDebug(AlloyContext* context) override;
-	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
-			double pixelRatio, bool clamp = false) override;
+	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp = false) override;
 	ScrollPane(const std::string& name, const AUnit2D& pos, const AUnit2D& dims, const Orientation& orient,float scrollStep=10.0f,float buttonWidth=40.0f);
 	virtual ~ScrollPane(){}
 };
