@@ -19,7 +19,6 @@
 /*-*************************************
 *  Dependencies
 ***************************************/
-#include "common/AlloyDefines.h"
 #include "compiler.h"
 #include "mem.h"
 #include "debug.h"                 /* assert, DEBUGLOG, RAWLOG, g_debuglevel */

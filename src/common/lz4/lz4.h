@@ -35,7 +35,6 @@
 #if defined (__cplusplus)
 extern "C" {
 #endif
-#include "common/AlloyDefines.h"
 #ifndef LZ4_H_2983827168210
 #define LZ4_H_2983827168210
 
