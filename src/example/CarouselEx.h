@@ -5,22 +5,22 @@
  *      Author: blake
  */
 
-#ifndef SRC_EXAMPLE_CASCADEEX_H_
-#define SRC_EXAMPLE_CASCADEEX_H_
+#ifndef SRC_EXAMPLE_CAROUSELEX_H_
+#define SRC_EXAMPLE_CAROUSELEX_H_
 
 #include "../ui/AlloyScrollPane.h"
 #include "ui/AlloyApplication.h"
 namespace aly {
-class CascadeEx : public aly::Application{
+class CarouselEx : public aly::Application{
 protected:
 	ScrollPanelPtr hscroller;
 	ScrollPanelPtr vscroller;
 public:
-	CascadeEx();
+	CarouselEx();
 	bool init(aly::Composite& rootNode);
-	virtual ~CascadeEx(){}
+	virtual ~CarouselEx(){}
 };
 
 } /* namespace aly */
 
-#endif /* SRC_EXAMPLE_CASCADEEX_H_ */
+#endif /* SRC_EXAMPLE_CAROUSELEX_H_ */

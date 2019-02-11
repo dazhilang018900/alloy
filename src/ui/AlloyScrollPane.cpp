@@ -117,22 +117,14 @@ void ArrowButton::draw(AlloyContext* context) {
 		bg = nvgLinearGradient(nvg, x, y + h, x, y, bgcolor, shcolor);
 		break;
 	}
-
 	nvgBeginPath(nvg);
-	nvgRect(nvg, bounds.position.x, bounds.position.y, bounds.dimensions.x,
-			bounds.dimensions.y);
-
+	nvgRect(nvg, bounds.position.x, bounds.position.y, bounds.dimensions.x,bounds.dimensions.y);
 	nvgFillPaint(nvg, bg);
 	nvgFill(nvg);
-
 	nvgFontSize(nvg, th);
 	nvgFontFaceId(nvg, context->getFontHandle(FontType::Icon));
 	nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
-	drawText(nvg,
-			bounds.position + float2(xoff, yoff) + HALF_PIX(bounds.dimensions),
-			CodePointToUTF8(code), FontStyle::Normal, tcolor, *backgroundColor,
-			nullptr);
-
+	drawText(nvg,bounds.position + float2(xoff, yoff) + HALF_PIX(bounds.dimensions),CodePointToUTF8(code), FontStyle::Normal, tcolor, *backgroundColor,nullptr);
 }
 void ScrollPane::updateCursor(CursorLocator* cursorLocator) {
 	if (!ignoreCursorEvents)
@@ -166,7 +158,6 @@ void ScrollPane::updateCursor(CursorLocator* cursorLocator) {
 	if (horizontalScrollHandle.get() != nullptr) {
 		horizontalScrollHandle->updateCursor(cursorLocator);
 	}
-
 }
 void ScrollPane::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;

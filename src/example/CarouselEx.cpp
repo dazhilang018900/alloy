@@ -5,13 +5,12 @@
  *      Author: blake
  */
 
-#include "CascadeEx.h"
+#include "CarouselEx.h"
 namespace aly {
-CascadeEx::CascadeEx() :
-		Application(800, 600, "Cascade Layout Example") {
+CarouselEx::CarouselEx() :
+		Application(800, 600, "Carousel Layout Example") {
 }
-bool CascadeEx::init(Composite& rootNode) {
-
+bool CarouselEx::init(Composite& rootNode) {
 	hscroller=ScrollPanelPtr(new ScrollPane("horizontal scroller",CoordPX(0.0f,25.0f),CoordPerPX(1.0f,0.0f,0.0f,200.0f),Orientation::Horizontal));
 	rootNode.add(hscroller);
 	rootNode.backgroundColor=MakeColor(getContext()->theme.DARKER);

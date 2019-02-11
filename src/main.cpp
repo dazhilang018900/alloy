@@ -83,12 +83,12 @@
 #include "example/Springls3DEx.h"
 #include "example/NonNegativeLeastSquaresEx.h"
 #include "common/AlloyCommon.h"
+#include "example/CarouselEx.h"
 #include "image/AlloyImageEncoder.h"
 #include "graphics/AlloyMeshDistanceField.h"
 #include "math/AlloyOptimization.h"
 #include "vision/AlloyGaussianMixture.h"
 #include "example/MeshDistanceFieldEx.h"
-#include "example/CascadeEx.h"
 /*
  For simple execution, main method should look like:
  int main(int argc, char *argv[]) {
@@ -193,7 +193,7 @@ int main(int argc, char *argv[]) {
 		MAKE_EXAMPLE(MultiActiveContour3DEx), MAKE_EXAMPLE(MultiSpringls2DEx),MAKE_EXAMPLE(MultiSpringlsSecondOrder2DEx),
 		MAKE_EXAMPLE(Springls2DEx),MAKE_EXAMPLE(SpringlsSecondOrder2DEx),MAKE_EXAMPLE(DictionaryLearningEx),
 		MAKE_EXAMPLE(SpringlsSegmentation3DEx),MAKE_EXAMPLE(Enright3DEx),MAKE_EXAMPLE(NonNegativeLeastSquaresEx),
-		MAKE_EXAMPLE(MeshDistanceFieldEx),MAKE_EXAMPLE(CascadeEx)
+		MAKE_EXAMPLE(MeshDistanceFieldEx),MAKE_EXAMPLE(CarouselEx)
 	};
 	std::sort(apps.begin(),apps.end(),[=](const ExamplePtr& a,const ExamplePtr& b){
 		return std::lexicographical_compare(a->name.begin(), a->name.end(), b->name.begin(), b->name.end());
