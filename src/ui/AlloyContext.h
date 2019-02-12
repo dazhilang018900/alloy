@@ -170,7 +170,6 @@ namespace aly {
 		std::chrono::steady_clock::time_point lastAnimateTime;
 		std::chrono::steady_clock::time_point lastUpdateTime;
 		std::chrono::steady_clock::time_point lastCursorTime;
-		pixel2 cursorDownPosition = pixel2(-1, -1);
 		Region* mouseOverRegion = nullptr;
 		Region* mouseDownRegion = nullptr;
 		Region* cursorFocusRegion = nullptr;
@@ -196,6 +195,7 @@ namespace aly {
 		ImageVAO vaoImageOnScreen;
 		ImageVAO vaoImageOffScreen;
 		pixel2 cursorPosition = pixel2(-1, -1);
+		pixel2 cursorDownPosition = pixel2(-1, -1);
 		int doubleClickTime = 300;
 		double2 dpmm;
 		bool hasFocus = false;
@@ -204,7 +204,6 @@ namespace aly {
 		void clearEvents(Region* region);
 		void clearEvents();
 		void setOffScreenVisible(bool vis);
-
 		void forceDestroy();
 		void setCursor(const Cursor* cursor);
 		const Cursor* getCursor() const ;

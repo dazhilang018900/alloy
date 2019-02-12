@@ -70,6 +70,7 @@ public:
 	void focusNext();
 	void focusPrevious();
 	void printFocus();
+	bool hasRoundedCorners() const;
 	std::function<bool(AlloyContext*, const InputEvent& event)> onEvent;
 	virtual Region* locate(const pixel2& cursor);
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)override;

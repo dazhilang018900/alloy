@@ -118,6 +118,9 @@ void Region::removeListener() const {
 bool Region::isCursorFocused() const {
 	return AlloyApplicationContext()->isCursorFocused(this);
 }
+bool Region::hasRoundedCorners() const{
+	return roundCorners;
+}
 void Region::setFocus(bool f) {
 	if (f) {
 		AlloyApplicationContext()->setObjectFocus(this);

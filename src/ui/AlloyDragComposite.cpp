@@ -15,17 +15,19 @@ DragComposite::DragComposite(const std::string& name, const AUnit2D& pos, const 
 }
 void DragComposite::add(const std::shared_ptr<Region>& region,bool appendToTab){
 	Composite::add(region,appendToTab);
-	region->setDragEnabled(true);
 	region->setClampDragToParentBounds(true);
-	//region->onMouseDrag=[=](AlloyContext* context, const InputEvent& event){
-	//	std::cout<<"Dragging "<<region->getName()<<std::endl;
-	//	return false;
-	//};
+	region->setDragEnabled(true);
+	region->onMouseDrag=[=](AlloyContext* context, const InputEvent& event){
+		focusRegion=region;
+		region->setDragOffset(context->cursorPosition,context->cursorDownPosition);
+		return true;
+	};
 	/*
 	region->onMouseDown = [this,region](AlloyContext* context, const InputEvent& e) {
 		if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
 			//Bring component to top by setting it to be drawn last.
 			this->putLast(region);
+			return true;
 		}
 		return false;
 	};
@@ -54,13 +56,42 @@ void DragComposite::draw(AlloyContext* context){
 		nvgFillColor(nvg, *backgroundColor);
 		nvgFill(nvg);
 	}
-
+	Region* dragRegion=context->getMouseDownObject();
+	bool drawLater=false;
+	bool dragging=false;
 	for (std::shared_ptr<Region>& region : children) {
-		if (region->isVisible()) {
-			region->draw(context);
+		if(dragRegion!=region.get()){
+			if(dragRegion!=nullptr&&context->isMouseOver(region.get(),true)){
+				std::cout<<"Over "<<region->getName()<<std::endl;
+			}
+			if (region->isVisible()) {
+				region->draw(context);
+			}
+		} else {
+			nvgBeginPath(nvg);
+			box2f ebound=region->getBounds();
+			ebound.position-=region->getDragOffset();
+			if (region->hasRoundedCorners()) {
+				nvgRoundedRect(nvg, ebound.position.x, ebound.position.y,
+						ebound.dimensions.x, ebound.dimensions.y,
+						context->theme.CORNER_RADIUS);
+			} else {
+				nvgRect(nvg, ebound.position.x, ebound.position.y,
+						ebound.dimensions.x, ebound.dimensions.y);
+			}
+			nvgFillColor(nvg, context->theme.LIGHT);
+			nvgFill(nvg);
+			if(context->isMouseDrag(dragRegion)){
+				drawLater=true;
+				dragging=true;
+			}
 		}
 	}
-
+	if(drawLater){
+		if (dragRegion->isVisible()) {
+			dragRegion->draw(context);
+		}
+	}
 	if (verticalScrollTrack.get() != nullptr) {
 		if (isScrollEnabled()) {
 			if (extents.dimensions.y > h) {
@@ -194,7 +225,7 @@ void DragComposite::pack(const pixel2& pos, const pixel2& dims, const double2& d
 	}
 	pixel2 offset = cellPadding;
 	pixel2 scrollExtent = pixel2(0.0f);
-	for (std::shared_ptr<Region>& region : children) {
+	for (std::shared_ptr<Region>& region:children) {
 		if (!region->isVisible()) {
 			continue;
 		}
@@ -217,9 +248,7 @@ void DragComposite::pack(const pixel2& pos, const pixel2& dims, const double2& d
 		if (orientation == Orientation::Vertical) {
 			offset.y += cellSpacing.y + cbounds.dimensions.y;
 		}
-		scrollExtent = aly::max(
-				cbounds.dimensions + cbounds.position - this->bounds.position,
-				scrollExtent);
+		scrollExtent = aly::max(cbounds.dimensions + cbounds.position - this->bounds.position,scrollExtent);
 	}
 	extents.dimensions = scrollExtent;
 	if (!isScrollEnabled()) {

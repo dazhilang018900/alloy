@@ -451,7 +451,6 @@ void AlloyContext::removeOnTopRegion(Region* region) {
 			onTopRegion->onRemoveFromOnTop();
 		onTopRegion = nullptr;
 	}
-
 }
 void AlloyContext::setOffScreenVisible(bool vis) {
 	if (vis) {

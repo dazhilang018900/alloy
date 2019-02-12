@@ -11,10 +11,12 @@
 #include "ui/AlloyComposite.h"
 namespace aly {
 class DragComposite:public Composite {
+protected:
+	std::shared_ptr<Region> focusRegion;
+	std::vector<int> drawOrder;
 public:
 	virtual void draw(AlloyContext* context) override;
 	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp = false) override;
-
 	DragComposite(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,const Orientation& orient);
 	virtual void add(const std::shared_ptr<Region>& region,bool appendToTab=false) override;
 	virtual ~DragComposite(){}

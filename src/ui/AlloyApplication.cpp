@@ -122,16 +122,7 @@ void Application::draw() {
 	nvgEndFrame(context->nvgContext);
 }
 void Application::drawUI() {
-	//if (context->dirtyUI) {
 	context->setCursor(nullptr);
-	/*
-	 if (uiFrameBuffer->width() != context->screenSize.x
-	 || uiFrameBuffer->height() != context->screenSize.y) {
-	 uiFrameBuffer->initialize(context->screenSize.x,
-	 context->screenSize.y);
-	 }
-	 uiFrameBuffer->begin();
-	 */
 	glViewport(0, 0, context->screenSize.x, context->screenSize.y);
 	NVGcontext* nvg = context->nvgContext;
 	nvgBeginFrame(nvg, context->screenSize.x, context->screenSize.y, 1.0f); //(float) context->pixelRatio
@@ -150,10 +141,7 @@ void Application::drawUI() {
 		cursor = &Cursor::Normal;
 	}
 	nvgEndFrame(nvg);
-	//uiFrameBuffer->end();
 	context->dirtyUI = false;
-	//}
-	//imageShader->draw(uiFrameBuffer->getTexture(), pixel2(0, 0),pixel2(context->viewSize));
 }
 void Application::drawDebugUI() {
 	NVGcontext* nvg = context->nvgContext;
