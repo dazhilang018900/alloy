@@ -768,7 +768,7 @@ namespace houio
 		{
 			writePrefix();
 			stack.push( Token::JID_ARRAY_BEGIN );
-			writeNewline();
+			//writeNewline();
 			write( "[" );
 			++indentLevel;
 			writeNewline();
@@ -788,7 +788,7 @@ namespace houio
 		{
 			writePrefix();
 			stack.push( Token::JID_MAP_BEGIN );
-			writeNewline();
+			//writeNewline();
 			write( "{" );
 			++indentLevel;
 			writeNewline();

@@ -89,6 +89,7 @@
 #include "math/AlloyOptimization.h"
 #include "vision/AlloyGaussianMixture.h"
 #include "example/MeshDistanceFieldEx.h"
+#include "graphics/HoudiniReaderWriter.h"
 /*
  For simple execution, main method should look like:
  int main(int argc, char *argv[]) {
@@ -142,6 +143,7 @@ typedef std::unique_ptr<Example> ExamplePtr;
 #define MAKE_EXAMPLE(NAME) ExamplePtr(new ExampleT<NAME>(#NAME))
 bool SANITY_CHECK() {
 	bool ret = true;
+	SANITY_CHECK_HOUDINI();
 	//ret &= SANITY_CHECK_LOCATOR();
 	//SANITY_CHECK_ANY();
 	//SANITY_CHECK_SVD();
@@ -164,7 +166,7 @@ bool SANITY_CHECK() {
 	//SANITY_CHECK_SVD();
 	//SANITY_CHECK_VIDEOENCODER();
 	//SANITY_CHECK_STRINGS();
-	SANITY_CHECK_MESHDISTANCEFIELD();
+	//SANITY_CHECK_MESHDISTANCEFIELD();
 	return ret;
 }
 int main(int argc, char *argv[]) {
