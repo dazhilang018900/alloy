@@ -28,11 +28,24 @@ void SANITY_CHECK_HOUDINI() {
 	ReadMeshFromFile(
 			"/home/blake/workspace/studio/alloy/assets/models/monkey.ply",
 			monkey);
-	std::cout << "Write Geo" << std::endl;
+	std::cout << "Monkey " << monkey << std::endl;
+	std::cout << "Write Monkey Geo" << std::endl;
 	WriteMeshToHoudini(MakeDesktopFile("monkey.geo"), monkey, false);
-	std::cout << "Write BGeo" << std::endl;
+	std::cout << "Write Monkey BGeo" << std::endl;
 	WriteMeshToHoudini(MakeDesktopFile("monkey.bgeo"), monkey, true);
 	std::cout << "Done" << std::endl;
+
+	Mesh eagle;
+	ReadMeshFromFile(
+			"/home/blake/workspace/studio/alloy/assets/models/eagle.ply",
+			eagle);
+	std::cout << "Eagle " << eagle << std::endl;
+	std::cout << "Write Eagle Geo" << std::endl;
+	WriteMeshToHoudini(MakeDesktopFile("eagle.geo"), eagle, false);
+	std::cout << "Write Eagle BGeo" << std::endl;
+	WriteMeshToHoudini(MakeDesktopFile("eagle.bgeo"), eagle, true);
+	std::cout << "Done" << std::endl;
+
 }
 void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 		bool binary) {
@@ -111,9 +124,10 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 			writer->jsonBeginArray();
 			writer->jsonString("pointattributes");
 			{
-				if (mesh.vertexLocations.size() > 0) {
-					writer->jsonBeginArray();
-					{
+				writer->jsonBeginArray();
+				{
+
+					if (mesh.vertexLocations.size() > 0) {
 						writer->jsonBeginArray();
 						{
 							writer->jsonBeginArray();
@@ -166,11 +180,7 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 						}
 						writer->jsonEndArray();
 					}
-					writer->jsonEndArray();
-				}
-				if (mesh.vertexNormals.size() > 0) {
-					writer->jsonBeginArray();
-					{
+					if (mesh.vertexNormals.size() > 0) {
 						writer->jsonBeginArray();
 						{
 							writer->jsonBeginArray();
@@ -223,11 +233,7 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 						}
 						writer->jsonEndArray();
 					}
-					writer->jsonEndArray();
-				}
-				if (mesh.vertexColors.size() > 0) {
-					writer->jsonBeginArray();
-					{
+					if (mesh.vertexColors.size() > 0) {
 						writer->jsonBeginArray();
 						{
 							writer->jsonBeginArray();
@@ -252,14 +258,14 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 						{
 							writer->jsonBeginArray();
 							writer->jsonString("size");
-							writer->jsonInt(4);
+							writer->jsonInt(3);
 							writer->jsonString("storage");
 							writer->jsonString("fpreal32");
 							writer->jsonString("values");
 							{
 								writer->jsonBeginArray();
 								writer->jsonString("size");
-								writer->jsonInt(4);
+								writer->jsonInt(3);
 								writer->jsonString("storage");
 								writer->jsonString("fpreal32");
 								writer->jsonString("tuples");
@@ -270,7 +276,6 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 										writer->jsonReal32(pt.x);
 										writer->jsonReal32(pt.y);
 										writer->jsonReal32(pt.z);
-										writer->jsonReal32(pt.w);
 										writer->jsonEndArray();
 									}
 									writer->jsonEndArray();
@@ -286,53 +291,52 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 			}
 			writer->jsonEndArray();
 		}
+
+		writer->jsonString("primitives");
+		writer->jsonBeginArray();
 		if (primCount > 0) {
-			writer->jsonString("primitives");
 			writer->jsonBeginArray();
 			{
 				writer->jsonBeginArray();
-				{
-					writer->jsonBeginArray();
-					writer->jsonString("type");
-					writer->jsonString("Polygon_run");
-					writer->jsonEndArray();
-					if (mesh.triIndexes.size() > 0) {
-						writer->jsonBeginArray();
-						writer->jsonString("startvertex");
-						writer->jsonInt(0);
-						writer->jsonString("nprimitives");
-						writer->jsonInt(mesh.triIndexes.size());
-						writer->jsonString("nvertices_rle");
-						{
-							writer->jsonBeginArray();
-							writer->jsonInt(3);
-							writer->jsonInt(mesh.triIndexes.size());
-							writer->jsonEndArray();
-						}
-						writer->jsonEndArray();
-					}
-					if (mesh.quadIndexes.size() > 0) {
-						writer->jsonBeginArray();
-						writer->jsonString("startvertex");
-						writer->jsonInt(mesh.triIndexes.size() * 3);
-						writer->jsonString("nprimitives");
-						writer->jsonInt(mesh.quadIndexes.size());
-						writer->jsonString("nvertices_rle");
-						{
-							writer->jsonBeginArray();
-							writer->jsonInt(4);
-							writer->jsonInt(mesh.quadIndexes.size());
-							writer->jsonEndArray();
-						}
-						writer->jsonEndArray();
-					}
-				}
+				writer->jsonString("type");
+				writer->jsonString("Polygon_run");
 				writer->jsonEndArray();
+				if (mesh.triIndexes.size() > 0) {
+					writer->jsonBeginArray();
+					writer->jsonString("startvertex");
+					writer->jsonInt(0);
+					writer->jsonString("nprimitives");
+					writer->jsonInt(mesh.triIndexes.size());
+					writer->jsonString("nvertices_rle");
+					{
+						writer->jsonBeginArray();
+						writer->jsonInt(3);
+						writer->jsonInt(mesh.triIndexes.size());
+						writer->jsonEndArray();
+					}
+					writer->jsonEndArray();
+				}
+				if (mesh.quadIndexes.size() > 0) {
+					writer->jsonBeginArray();
+					writer->jsonString("startvertex");
+					writer->jsonInt(mesh.triIndexes.size() * 3);
+					writer->jsonString("nprimitives");
+					writer->jsonInt(mesh.quadIndexes.size());
+					writer->jsonString("nvertices_rle");
+					{
+						writer->jsonBeginArray();
+						writer->jsonInt(4);
+						writer->jsonInt(mesh.quadIndexes.size());
+						writer->jsonEndArray();
+					}
+					writer->jsonEndArray();
+				}
 			}
 			writer->jsonEndArray();
 		}
 		writer->jsonEndArray();
 	}
+	writer->jsonEndArray();
 }
 /*
  void ReadMeshFromHoudini(const std::string& file, aly::Mesh& mesh) {
