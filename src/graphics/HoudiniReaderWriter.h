@@ -24,7 +24,7 @@
 namespace aly {
 void SANITY_CHECK_HOUDINI();
 void WriteMeshToHoudini(const std::string& file,const aly::Mesh& mesh,bool binary=true);
-void ReadMeshToHoudini(const std::string& file,aly::Mesh& mesh);
+//void ReadMeshFromHoudini(const std::string& file,aly::Mesh& mesh);
 
 }
 #endif /* COMMON_HOUDINI_HOUDINIREADERWRITER_H_ */

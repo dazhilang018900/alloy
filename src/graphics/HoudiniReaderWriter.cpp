@@ -111,50 +111,53 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 			writer->jsonBeginArray();
 			writer->jsonString("pointattributes");
 			{
-				writer->jsonBeginArray();
-				{
+				if (mesh.vertexLocations.size() > 0) {
 					writer->jsonBeginArray();
 					{
 						writer->jsonBeginArray();
-						writer->jsonString("scope");
-						writer->jsonString("public");
-						writer->jsonString("type");
-						writer->jsonString("numeric");
-						writer->jsonString("name");
-						writer->jsonString("P");
-						writer->jsonString("options");
-						writer->jsonBeginMap();
-						writer->jsonKey("type");
-						writer->jsonBeginMap();
-						writer->jsonKey("type");
-						writer->jsonString("string");
-						writer->jsonKey("value");
-						writer->jsonString("point");
-						writer->jsonEndMap();
-						writer->jsonEndMap();
-						writer->jsonEndArray();
-					}
-					{
-						writer->jsonBeginArray();
-						writer->jsonString("size");
-						writer->jsonInt(3);
-						writer->jsonString("storage");
-						writer->jsonString("fpreal32");
-						writer->jsonString("values");
+						{
+							writer->jsonBeginArray();
+							writer->jsonString("scope");
+							writer->jsonString("public");
+							writer->jsonString("type");
+							writer->jsonString("numeric");
+							writer->jsonString("name");
+							writer->jsonString("P");
+							writer->jsonString("options");
+							writer->jsonBeginMap();
+							writer->jsonKey("type");
+							writer->jsonBeginMap();
+							writer->jsonKey("type");
+							writer->jsonString("string");
+							writer->jsonKey("value");
+							writer->jsonString("point");
+							writer->jsonEndMap();
+							writer->jsonEndMap();
+							writer->jsonEndArray();
+						}
 						{
 							writer->jsonBeginArray();
 							writer->jsonString("size");
 							writer->jsonInt(3);
 							writer->jsonString("storage");
 							writer->jsonString("fpreal32");
-							writer->jsonString("tuples");
+							writer->jsonString("values");
 							{
 								writer->jsonBeginArray();
-								for (float3 pt : mesh.vertexLocations) {
+								writer->jsonString("size");
+								writer->jsonInt(3);
+								writer->jsonString("storage");
+								writer->jsonString("fpreal32");
+								writer->jsonString("tuples");
+								{
 									writer->jsonBeginArray();
-									writer->jsonReal32(pt.x);
-									writer->jsonReal32(pt.y);
-									writer->jsonReal32(pt.z);
+									for (float3 pt : mesh.vertexLocations) {
+										writer->jsonBeginArray();
+										writer->jsonReal32(pt.x);
+										writer->jsonReal32(pt.y);
+										writer->jsonReal32(pt.z);
+										writer->jsonEndArray();
+									}
 									writer->jsonEndArray();
 								}
 								writer->jsonEndArray();
@@ -165,7 +168,121 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 					}
 					writer->jsonEndArray();
 				}
-				writer->jsonEndArray();
+				if (mesh.vertexNormals.size() > 0) {
+					writer->jsonBeginArray();
+					{
+						writer->jsonBeginArray();
+						{
+							writer->jsonBeginArray();
+							writer->jsonString("scope");
+							writer->jsonString("public");
+							writer->jsonString("type");
+							writer->jsonString("numeric");
+							writer->jsonString("name");
+							writer->jsonString("N");
+							writer->jsonString("options");
+							writer->jsonBeginMap();
+							writer->jsonKey("type");
+							writer->jsonBeginMap();
+							writer->jsonKey("type");
+							writer->jsonString("string");
+							writer->jsonKey("value");
+							writer->jsonString("normal");
+							writer->jsonEndMap();
+							writer->jsonEndMap();
+							writer->jsonEndArray();
+						}
+						{
+							writer->jsonBeginArray();
+							writer->jsonString("size");
+							writer->jsonInt(3);
+							writer->jsonString("storage");
+							writer->jsonString("fpreal32");
+							writer->jsonString("values");
+							{
+								writer->jsonBeginArray();
+								writer->jsonString("size");
+								writer->jsonInt(3);
+								writer->jsonString("storage");
+								writer->jsonString("fpreal32");
+								writer->jsonString("tuples");
+								{
+									writer->jsonBeginArray();
+									for (float3 pt : mesh.vertexNormals) {
+										writer->jsonBeginArray();
+										writer->jsonReal32(pt.x);
+										writer->jsonReal32(pt.y);
+										writer->jsonReal32(pt.z);
+										writer->jsonEndArray();
+									}
+									writer->jsonEndArray();
+								}
+								writer->jsonEndArray();
+							}
+							writer->jsonEndArray();
+						}
+						writer->jsonEndArray();
+					}
+					writer->jsonEndArray();
+				}
+				if (mesh.vertexColors.size() > 0) {
+					writer->jsonBeginArray();
+					{
+						writer->jsonBeginArray();
+						{
+							writer->jsonBeginArray();
+							writer->jsonString("scope");
+							writer->jsonString("public");
+							writer->jsonString("type");
+							writer->jsonString("numeric");
+							writer->jsonString("name");
+							writer->jsonString("Cd");
+							writer->jsonString("options");
+							writer->jsonBeginMap();
+							writer->jsonKey("type");
+							writer->jsonBeginMap();
+							writer->jsonKey("type");
+							writer->jsonString("string");
+							writer->jsonKey("value");
+							writer->jsonString("color");
+							writer->jsonEndMap();
+							writer->jsonEndMap();
+							writer->jsonEndArray();
+						}
+						{
+							writer->jsonBeginArray();
+							writer->jsonString("size");
+							writer->jsonInt(4);
+							writer->jsonString("storage");
+							writer->jsonString("fpreal32");
+							writer->jsonString("values");
+							{
+								writer->jsonBeginArray();
+								writer->jsonString("size");
+								writer->jsonInt(4);
+								writer->jsonString("storage");
+								writer->jsonString("fpreal32");
+								writer->jsonString("tuples");
+								{
+									writer->jsonBeginArray();
+									for (float4 pt : mesh.vertexColors) {
+										writer->jsonBeginArray();
+										writer->jsonReal32(pt.x);
+										writer->jsonReal32(pt.y);
+										writer->jsonReal32(pt.z);
+										writer->jsonReal32(pt.w);
+										writer->jsonEndArray();
+									}
+									writer->jsonEndArray();
+								}
+								writer->jsonEndArray();
+							}
+							writer->jsonEndArray();
+						}
+						writer->jsonEndArray();
+					}
+					writer->jsonEndArray();
+				}
 			}
 			writer->jsonEndArray();
 		}
@@ -217,7 +334,9 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 		writer->jsonEndArray();
 	}
 }
-void ReadMeshToHoudini(const std::string& file, aly::Mesh& mesh) {
+/*
+ void ReadMeshFromHoudini(const std::string& file, aly::Mesh& mesh) {
 
-}
+ }
+ */
 }
