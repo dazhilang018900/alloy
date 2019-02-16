@@ -64,9 +64,10 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 	}
 	bool hasPrimitives = (mesh.triIndexes.size() > 0
 			|| mesh.quadIndexes.size() > 0);
-	size_t primCount = mesh.triIndexes.size() + mesh.quadIndexes.size();
-	size_t vertexCount = mesh.triIndexes.size() * 3
-			+ mesh.quadIndexes.size() * 4;
+	size_t primCount = mesh.lineIndexes.size() + mesh.triIndexes.size()
+			+ mesh.quadIndexes.size();
+	size_t vertexCount = mesh.lineIndexes.size() * 2
+			+ mesh.triIndexes.size() * 3 + mesh.quadIndexes.size() * 4;
 	{
 		writer->beginArray();
 		writer->putText("fileversion");
@@ -101,6 +102,10 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 				{
 					std::vector<int> flatten;
 					flatten.reserve(vertexCount);
+					for (uint2 lin : mesh.lineIndexes) {
+						flatten.push_back(lin.x);
+						flatten.push_back(lin.y);
+					}
 					for (uint3 tri : mesh.triIndexes) {
 						flatten.push_back(tri.x);
 						flatten.push_back(tri.y);
@@ -287,10 +292,25 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 				writer->putText("type");
 				writer->putText("Polygon_run");
 				writer->endArray();
-				if (mesh.triIndexes.size() > 0) {
+				if (mesh.lineIndexes.size() > 0) {
 					writer->beginArray();
 					writer->putText("startvertex");
 					writer->putInt(0);
+					writer->putText("nprimitives");
+					writer->putInt(mesh.lineIndexes.size());
+					writer->putText("nvertices_rle");
+					{
+						writer->beginArray();
+						writer->putInt(2);
+						writer->putInt(mesh.lineIndexes.size());
+						writer->endArray();
+					}
+					writer->endArray();
+				}
+				if (mesh.triIndexes.size() > 0) {
+					writer->beginArray();
+					writer->putText("startvertex");
+					writer->putInt(mesh.lineIndexes.size()*2);
 					writer->putText("nprimitives");
 					writer->putInt(mesh.triIndexes.size());
 					writer->putText("nvertices_rle");
@@ -305,7 +325,7 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 				if (mesh.quadIndexes.size() > 0) {
 					writer->beginArray();
 					writer->putText("startvertex");
-					writer->putInt(mesh.triIndexes.size() * 3);
+					writer->putInt(mesh.triIndexes.size() * 3+mesh.lineIndexes.size()*2);
 					writer->putText("nprimitives");
 					writer->putInt(mesh.quadIndexes.size());
 					writer->putText("nvertices_rle");
