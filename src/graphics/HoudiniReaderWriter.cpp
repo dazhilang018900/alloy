@@ -49,19 +49,18 @@ void SANITY_CHECK_HOUDINI() {
 }
 void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 		bool binary) {
+	using namespace aly::houdini;
 	std::string ext = GetFileExtension(file);
 	int flags = std::ios_base::out;
 	std::ofstream out;
-	std::shared_ptr<houio::json::Writer> writer;
+	std::shared_ptr<HJSONWriter> writer;
 	if (binary) {
 		out.open(GetFileWithoutExtension(file) + ".bgeo",
 				std::ios_base::out | std::ios_base::binary);
-		writer = std::shared_ptr<houio::json::Writer>(
-				new houio::json::BinaryWriter(&out));
+		writer = std::shared_ptr<HJSONWriter>(new HoudiniBinaryWriter(&out));
 	} else {
 		out.open(GetFileWithoutExtension(file) + ".geo", std::ios_base::out);
-		writer = std::shared_ptr<houio::json::Writer>(
-				new houio::json::ASCIIWriter(&out));
+		writer = std::shared_ptr<HJSONWriter>(new HoudiniTextWriter(&out));
 	}
 	bool hasPrimitives = (mesh.triIndexes.size() > 0
 			|| mesh.quadIndexes.size() > 0);
@@ -69,274 +68,261 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 	size_t vertexCount = mesh.triIndexes.size() * 3
 			+ mesh.quadIndexes.size() * 4;
 	{
-		writer->jsonBeginArray();
+		writer->beginArray();
+		writer->putText("fileversion");
+		writer->putText("16.5.496");
 
-		writer->jsonString("fileversion");
-		writer->jsonString("16.5.496");
+		writer->putText("hasindex");
+		writer->putBool(false);
 
-		writer->jsonString("hasindex");
-		writer->jsonBool(false);
+		writer->putText("pointcount");
+		writer->putInt(mesh.vertexLocations.size());
 
-		writer->jsonString("pointcount");
-		writer->jsonInt(mesh.vertexLocations.size());
+		writer->putText("vertexcount");
+		writer->putInt(vertexCount);
 
-		writer->jsonString("vertexcount");
-		writer->jsonInt(vertexCount);
+		writer->putText("primitivecount");
+		writer->putInt(primCount);
 
-		writer->jsonString("primitivecount");
-		writer->jsonInt(primCount);
-
-		writer->jsonString("info");
-		writer->jsonBeginMap();
-		writer->jsonKey("software");
-		writer->jsonString("Houdini 16.5.496");
-		writer->jsonKey("artist");
-		writer->jsonString("produser");
-		writer->jsonEndMap();
-		writer->jsonString("topology");
+		writer->putText("info");
+		writer->beginMap();
+		writer->putMapKey("software");
+		writer->putText("Houdini 16.5.496");
+		writer->putMapKey("artist");
+		writer->putText("produser");
+		writer->endMap();
+		writer->putText("topology");
 		{
-			writer->jsonBeginArray();
-			writer->jsonString("pointref");
+			writer->beginArray();
+			writer->putText("pointref");
 			{
-				writer->jsonBeginArray();
-				writer->jsonString("indices");
+				writer->beginArray();
+				writer->putText("indices");
 				{
-					writer->jsonBeginArray();
+					std::vector<int> flatten;
+					flatten.reserve(vertexCount);
 					for (uint3 tri : mesh.triIndexes) {
-						writer->jsonInt(tri.x);
-						writer->jsonInt(tri.y);
-						writer->jsonInt(tri.z);
+						flatten.push_back(tri.x);
+						flatten.push_back(tri.y);
+						flatten.push_back(tri.z);
 					}
 					for (uint4 quad : mesh.quadIndexes) {
-						writer->jsonInt(quad.x);
-						writer->jsonInt(quad.y);
-						writer->jsonInt(quad.z);
-						writer->jsonInt(quad.w);
+						flatten.push_back(quad.x);
+						flatten.push_back(quad.y);
+						flatten.push_back(quad.z);
+						flatten.push_back(quad.w);
 					}
-					writer->jsonEndArray();
+					writer->putUniformArray(flatten);
 				}
-				writer->jsonEndArray();
+				writer->endArray();
 			}
-			writer->jsonEndArray();
+			writer->endArray();
 		}
-		writer->jsonString("attributes");
+		writer->putText("attributes");
 		{
-			writer->jsonBeginArray();
-			writer->jsonString("pointattributes");
+			writer->beginArray();
+			writer->putText("pointattributes");
 			{
-				writer->jsonBeginArray();
+				writer->beginArray();
 				{
 
 					if (mesh.vertexLocations.size() > 0) {
-						writer->jsonBeginArray();
+						writer->beginArray();
 						{
-							writer->jsonBeginArray();
-							writer->jsonString("scope");
-							writer->jsonString("public");
-							writer->jsonString("type");
-							writer->jsonString("numeric");
-							writer->jsonString("name");
-							writer->jsonString("P");
-							writer->jsonString("options");
-							writer->jsonBeginMap();
-							writer->jsonKey("type");
-							writer->jsonBeginMap();
-							writer->jsonKey("type");
-							writer->jsonString("string");
-							writer->jsonKey("value");
-							writer->jsonString("point");
-							writer->jsonEndMap();
-							writer->jsonEndMap();
-							writer->jsonEndArray();
+							writer->beginArray();
+							writer->putText("scope");
+							writer->putText("public");
+							writer->putText("type");
+							writer->putText("numeric");
+							writer->putText("name");
+							writer->putText("P");
+							writer->putText("options");
+							writer->beginMap();
+							writer->putMapKey("type");
+							writer->beginMap();
+							writer->putMapKey("type");
+							writer->putText("string");
+							writer->putMapKey("value");
+							writer->putText("point");
+							writer->endMap();
+							writer->endMap();
+							writer->endArray();
 						}
 						{
-							writer->jsonBeginArray();
-							writer->jsonString("size");
-							writer->jsonInt(3);
-							writer->jsonString("storage");
-							writer->jsonString("fpreal32");
-							writer->jsonString("values");
+							writer->beginArray();
+							writer->putText("size");
+							writer->putInt(3);
+							writer->putText("storage");
+							writer->putText("fpreal32");
+							writer->putText("values");
 							{
-								writer->jsonBeginArray();
-								writer->jsonString("size");
-								writer->jsonInt(3);
-								writer->jsonString("storage");
-								writer->jsonString("fpreal32");
-								writer->jsonString("tuples");
+								writer->beginArray();
+								writer->putText("size");
+								writer->putInt(3);
+								writer->putText("storage");
+								writer->putText("fpreal32");
+								writer->putText("tuples");
 								{
-									writer->jsonBeginArray();
+									writer->beginArray();
 									for (float3 pt : mesh.vertexLocations) {
-										writer->jsonBeginArray();
-										writer->jsonReal32(pt.x);
-										writer->jsonReal32(pt.y);
-										writer->jsonReal32(pt.z);
-										writer->jsonEndArray();
+										writer->putVec3(pt);
 									}
-									writer->jsonEndArray();
+									writer->endArray();
 								}
-								writer->jsonEndArray();
+								writer->endArray();
 							}
-							writer->jsonEndArray();
+							writer->endArray();
 						}
-						writer->jsonEndArray();
+						writer->endArray();
 					}
 					if (mesh.vertexNormals.size() > 0) {
-						writer->jsonBeginArray();
+						writer->beginArray();
 						{
-							writer->jsonBeginArray();
-							writer->jsonString("scope");
-							writer->jsonString("public");
-							writer->jsonString("type");
-							writer->jsonString("numeric");
-							writer->jsonString("name");
-							writer->jsonString("N");
-							writer->jsonString("options");
-							writer->jsonBeginMap();
-							writer->jsonKey("type");
-							writer->jsonBeginMap();
-							writer->jsonKey("type");
-							writer->jsonString("string");
-							writer->jsonKey("value");
-							writer->jsonString("normal");
-							writer->jsonEndMap();
-							writer->jsonEndMap();
-							writer->jsonEndArray();
+							writer->beginArray();
+							writer->putText("scope");
+							writer->putText("public");
+							writer->putText("type");
+							writer->putText("numeric");
+							writer->putText("name");
+							writer->putText("N");
+							writer->putText("options");
+							writer->beginMap();
+							writer->putMapKey("type");
+							writer->beginMap();
+							writer->putMapKey("type");
+							writer->putText("string");
+							writer->putMapKey("value");
+							writer->putText("normal");
+							writer->endMap();
+							writer->endMap();
+							writer->endArray();
 						}
 						{
-							writer->jsonBeginArray();
-							writer->jsonString("size");
-							writer->jsonInt(3);
-							writer->jsonString("storage");
-							writer->jsonString("fpreal32");
-							writer->jsonString("values");
+							writer->beginArray();
+							writer->putText("size");
+							writer->putInt(3);
+							writer->putText("storage");
+							writer->putText("fpreal32");
+							writer->putText("values");
 							{
-								writer->jsonBeginArray();
-								writer->jsonString("size");
-								writer->jsonInt(3);
-								writer->jsonString("storage");
-								writer->jsonString("fpreal32");
-								writer->jsonString("tuples");
+								writer->beginArray();
+								writer->putText("size");
+								writer->putInt(3);
+								writer->putText("storage");
+								writer->putText("fpreal32");
+								writer->putText("tuples");
 								{
-									writer->jsonBeginArray();
+									writer->beginArray();
 									for (float3 pt : mesh.vertexNormals) {
-										writer->jsonBeginArray();
-										writer->jsonReal32(pt.x);
-										writer->jsonReal32(pt.y);
-										writer->jsonReal32(pt.z);
-										writer->jsonEndArray();
+										writer->putVec3(pt);
 									}
-									writer->jsonEndArray();
+									writer->endArray();
 								}
-								writer->jsonEndArray();
+								writer->endArray();
 							}
-							writer->jsonEndArray();
+							writer->endArray();
 						}
-						writer->jsonEndArray();
+						writer->endArray();
 					}
 					if (mesh.vertexColors.size() > 0) {
-						writer->jsonBeginArray();
+						writer->beginArray();
 						{
-							writer->jsonBeginArray();
-							writer->jsonString("scope");
-							writer->jsonString("public");
-							writer->jsonString("type");
-							writer->jsonString("numeric");
-							writer->jsonString("name");
-							writer->jsonString("Cd");
-							writer->jsonString("options");
-							writer->jsonBeginMap();
-							writer->jsonKey("type");
-							writer->jsonBeginMap();
-							writer->jsonKey("type");
-							writer->jsonString("string");
-							writer->jsonKey("value");
-							writer->jsonString("color");
-							writer->jsonEndMap();
-							writer->jsonEndMap();
-							writer->jsonEndArray();
+							writer->beginArray();
+							writer->putText("scope");
+							writer->putText("public");
+							writer->putText("type");
+							writer->putText("numeric");
+							writer->putText("name");
+							writer->putText("Cd");
+							writer->putText("options");
+							writer->beginMap();
+							writer->putMapKey("type");
+							writer->beginMap();
+							writer->putMapKey("type");
+							writer->putText("string");
+							writer->putMapKey("value");
+							writer->putText("color");
+							writer->endMap();
+							writer->endMap();
+							writer->endArray();
 						}
 						{
-							writer->jsonBeginArray();
-							writer->jsonString("size");
-							writer->jsonInt(3);
-							writer->jsonString("storage");
-							writer->jsonString("fpreal32");
-							writer->jsonString("values");
+							writer->beginArray();
+							writer->putText("size");
+							writer->putInt(3);
+							writer->putText("storage");
+							writer->putText("fpreal32");
+							writer->putText("values");
 							{
-								writer->jsonBeginArray();
-								writer->jsonString("size");
-								writer->jsonInt(3);
-								writer->jsonString("storage");
-								writer->jsonString("fpreal32");
-								writer->jsonString("tuples");
+								writer->beginArray();
+								writer->putText("size");
+								writer->putInt(3);
+								writer->putText("storage");
+								writer->putText("fpreal32");
+								writer->putText("tuples");
 								{
-									writer->jsonBeginArray();
+									writer->beginArray();
 									for (float4 pt : mesh.vertexColors) {
-										writer->jsonBeginArray();
-										writer->jsonReal32(pt.x);
-										writer->jsonReal32(pt.y);
-										writer->jsonReal32(pt.z);
-										writer->jsonEndArray();
+										writer->putVec3(pt.xyz());
 									}
-									writer->jsonEndArray();
+									writer->endArray();
 								}
-								writer->jsonEndArray();
+								writer->endArray();
 							}
-							writer->jsonEndArray();
+							writer->endArray();
 						}
-						writer->jsonEndArray();
+						writer->endArray();
 					}
-					writer->jsonEndArray();
+					writer->endArray();
 				}
 			}
-			writer->jsonEndArray();
+			writer->endArray();
 		}
-
-		writer->jsonString("primitives");
-		writer->jsonBeginArray();
+		writer->putText("primitives");
+		writer->beginArray();
 		if (primCount > 0) {
-			writer->jsonBeginArray();
+			writer->beginArray();
 			{
-				writer->jsonBeginArray();
-				writer->jsonString("type");
-				writer->jsonString("Polygon_run");
-				writer->jsonEndArray();
+				writer->beginArray();
+				writer->putText("type");
+				writer->putText("Polygon_run");
+				writer->endArray();
 				if (mesh.triIndexes.size() > 0) {
-					writer->jsonBeginArray();
-					writer->jsonString("startvertex");
-					writer->jsonInt(0);
-					writer->jsonString("nprimitives");
-					writer->jsonInt(mesh.triIndexes.size());
-					writer->jsonString("nvertices_rle");
+					writer->beginArray();
+					writer->putText("startvertex");
+					writer->putInt(0);
+					writer->putText("nprimitives");
+					writer->putInt(mesh.triIndexes.size());
+					writer->putText("nvertices_rle");
 					{
-						writer->jsonBeginArray();
-						writer->jsonInt(3);
-						writer->jsonInt(mesh.triIndexes.size());
-						writer->jsonEndArray();
+						writer->beginArray();
+						writer->putInt(3);
+						writer->putInt(mesh.triIndexes.size());
+						writer->endArray();
 					}
-					writer->jsonEndArray();
+					writer->endArray();
 				}
 				if (mesh.quadIndexes.size() > 0) {
-					writer->jsonBeginArray();
-					writer->jsonString("startvertex");
-					writer->jsonInt(mesh.triIndexes.size() * 3);
-					writer->jsonString("nprimitives");
-					writer->jsonInt(mesh.quadIndexes.size());
-					writer->jsonString("nvertices_rle");
+					writer->beginArray();
+					writer->putText("startvertex");
+					writer->putInt(mesh.triIndexes.size() * 3);
+					writer->putText("nprimitives");
+					writer->putInt(mesh.quadIndexes.size());
+					writer->putText("nvertices_rle");
 					{
-						writer->jsonBeginArray();
-						writer->jsonInt(4);
-						writer->jsonInt(mesh.quadIndexes.size());
-						writer->jsonEndArray();
+						writer->beginArray();
+						writer->putInt(4);
+						writer->putInt(mesh.quadIndexes.size());
+						writer->endArray();
 					}
-					writer->jsonEndArray();
+					writer->endArray();
 				}
 			}
-			writer->jsonEndArray();
+			writer->endArray();
 		}
-		writer->jsonEndArray();
+		writer->endArray();
 	}
-	writer->jsonEndArray();
+	writer->endArray();
 }
 /*
  void ReadMeshFromHoudini(const std::string& file, aly::Mesh& mesh) {
