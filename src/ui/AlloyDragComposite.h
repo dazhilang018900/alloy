@@ -10,10 +10,20 @@
 
 #include "ui/AlloyComposite.h"
 namespace aly {
+struct DragSlot{
+	int index=-1;
+	Region* region=nullptr;
+	float tween=0.0f;
+	box2px bounds;
+	void draw(aly::AlloyContext* context);
+};
 class DragComposite:public Composite {
 protected:
-	std::shared_ptr<Region> focusRegion;
-	std::vector<int> drawOrder;
+	std::vector<DragSlot> currentSlots;
+	std::vector<DragSlot> targetSlots;
+	Timer timer;
+	Region* focusRegion=nullptr;
+
 public:
 	virtual void draw(AlloyContext* context) override;
 	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp = false) override;

@@ -372,7 +372,10 @@ double Timer::getElapsed(bool reset){
 bool Timer::resetAfterElapsed(double timeOut){
 	double t=getElapsed(false);
 	if(t>=timeOut){
-		reset();
+		lastTime=std::chrono::steady_clock::now();
+		if(t-timeOut<0.5f*timeOut){
+			lastTime-=std::chrono::microseconds((int64_t)(1E6*(t-timeOut)));
+		}
 		return true;
 	}
 	return false;
