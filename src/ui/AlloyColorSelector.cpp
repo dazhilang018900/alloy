@@ -331,7 +331,7 @@ namespace aly {
 			}
 			return false;
 		};
-		this->onScroll = [this](AlloyContext* context, const InputEvent& e) {
+		this->onScrollWheel = [this](AlloyContext* context, const InputEvent& e) {
 			hsvColor.x += e.scroll.y*0.01f;
 			if (hsvColor.x < 0.0f)hsvColor.x += 1.0f;
 			if (hsvColor.x > 1.0f)hsvColor.x -= 1.0f;
