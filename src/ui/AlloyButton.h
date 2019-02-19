@@ -91,6 +91,7 @@ public:
 class ArrowButton: public Region {
 protected:
 	Direction dir;
+	Timer waitTimer;
 public:
 	std::function<void()> onMousePressed;
 	ArrowButton(const std::string& label, const AUnit2D& position, const AUnit2D& dimensions,const Direction& dir);

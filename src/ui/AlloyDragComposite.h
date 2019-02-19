@@ -7,23 +7,22 @@
 
 #ifndef SRC_UI_ALLOYDRAGCOMPOSITE_H_
 #define SRC_UI_ALLOYDRAGCOMPOSITE_H_
-
 #include "ui/AlloyComposite.h"
 namespace aly {
 struct DragSlot{
 	int index=-1;
 	Region* region=nullptr;
 	float tween=0.0f;
+	pixel2 start;
 	box2px bounds;
 	void draw(aly::AlloyContext* context);
 };
 class DragComposite:public Composite {
 protected:
-	std::vector<DragSlot> currentSlots;
+	std::vector<DragSlot> sourceSlots;
 	std::vector<DragSlot> targetSlots;
 	Timer timer;
 	Region* focusRegion=nullptr;
-
 public:
 	virtual void draw(AlloyContext* context) override;
 	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp = false) override;

@@ -288,8 +288,8 @@ void Application::fireEvent(const InputEvent& event) {
 	}
 	bool consumed = false;
 	if (event.type == InputType::Scroll && context->mouseOverRegion != nullptr
-			&& context->mouseOverRegion->onScroll) {
-		consumed = context->mouseOverRegion->onScroll(context.get(), event);
+			&& context->mouseOverRegion->onScrollWheel) {
+		consumed = context->mouseOverRegion->onScrollWheel(context.get(), event);
 	} else if (event.type == InputType::MouseButton) {
 		if (event.isDown()) {
 			if (event.button == GLFW_MOUSE_BUTTON_LEFT) {

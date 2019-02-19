@@ -524,7 +524,7 @@ bool ActiveManifold2DEx::init(Composite& rootNode) {
 	glyphRegion->foregroundColor = MakeColor(COLOR_NONE);
 	glyphRegion->backgroundColor = MakeColor(COLOR_NONE);
 	glyphRegion->borderColor = MakeColor(COLOR_NONE);
-	drawContour->onScroll =
+	drawContour->onScrollWheel =
 			[this](AlloyContext* context, const InputEvent& event)
 			{
 				box2px bounds = resizeableRegion->getBounds(false);

@@ -69,11 +69,12 @@ void ArrowButton::draw(AlloyContext* context) {
 	float th = min(w, h) / 2;
 	NVGpaint bg;
 	uint32_t code = 0;
+	const float WAIT_TIME=1.0f;
 	Color bgcolor, shcolor, tcolor;
 	float xoff = 0;
 	float yoff = 0;
 	if (hover) {
-		if (down) {
+		if (down||(waitTimer.getElapsed(false)>=WAIT_TIME&&context->isLeftMouseButtonDown())) {
 			if (onMousePressed)
 				onMousePressed();
 			tcolor = context->theme.LIGHT;
@@ -83,6 +84,7 @@ void ArrowButton::draw(AlloyContext* context) {
 		bgcolor = backgroundColor->toSemiTransparent(0.7f);
 		shcolor = backgroundColor->toSemiTransparent(0.0f);
 	} else {
+		waitTimer.reset();
 		if (down) {
 			tcolor = context->theme.LIGHT;
 		} else {

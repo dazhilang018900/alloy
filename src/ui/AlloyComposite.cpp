@@ -137,6 +137,20 @@ bool Composite::onEventHandler(AlloyContext* context, const InputEvent& event) {
 	}
 	return Region::onEventHandler(context, event);
 }
+
+void Composite::setOrientation(const Orientation& orient, pixel2 cellSpacing,
+		pixel2 cellPadding) {
+	orientation = orient;
+	this->cellSpacing = cellSpacing;
+	this->cellPadding = cellPadding;
+}
+bool Composite::isScrollEnabled() const {
+	return scrollEnabled;
+}
+void Composite::setScrollEnabled(bool enabled) {
+	scrollEnabled = enabled;
+}
+
 pixel2 Composite::getDrawOffset() const {
 	pixel2 offset = getExtents().position;
 	if (parent != nullptr)
@@ -384,6 +398,9 @@ bool Composite::addVerticalScrollPosition(float t) {
 										- (float) this->verticalScrollHandle->getBoundsDimensionsY());
 		updateExtents();
 		AlloyApplicationContext()->requestPack();
+		if (onScroll) {
+			onScroll(scrollPosition);
+		}
 		return true;
 	}
 	return false;
@@ -404,6 +421,10 @@ void Composite::scrollToBottom() {
 										- (float) this->verticalScrollHandle->getBoundsDimensionsY());
 		updateExtents();
 		AlloyApplicationContext()->requestPack();
+		if (onScroll) {
+			onScroll(scrollPosition);
+		}
+
 	}
 }
 
@@ -418,6 +439,10 @@ void Composite::scrollToTop() {
 										- (float) this->verticalScrollHandle->getBoundsDimensionsY());
 		updateExtents();
 		AlloyApplicationContext()->requestPack();
+		if (onScroll) {
+			onScroll(scrollPosition);
+		}
+
 	}
 }
 void Composite::scrollToLeft() {
@@ -431,6 +456,9 @@ void Composite::scrollToLeft() {
 										- (float) this->horizontalScrollHandle->getBoundsDimensionsX());
 		updateExtents();
 		AlloyApplicationContext()->requestPack();
+		if (onScroll) {
+			onScroll(scrollPosition);
+		}
 	}
 }
 void Composite::scrollToRight() {
@@ -449,6 +477,9 @@ void Composite::scrollToRight() {
 										- (float) this->horizontalScrollHandle->getBoundsDimensionsX());
 		updateExtents();
 		AlloyApplicationContext()->requestPack();
+		if (onScroll) {
+			onScroll(scrollPosition);
+		}
 	}
 }
 bool Composite::addHorizontalScrollPosition(float t) {
@@ -462,6 +493,9 @@ bool Composite::addHorizontalScrollPosition(float t) {
 										- (float) this->horizontalScrollHandle->getBoundsDimensionsX());
 		updateExtents();
 		AlloyApplicationContext()->requestPack();
+		if (onScroll) {
+			onScroll(scrollPosition);
+		}
 		return true;
 	}
 	return false;
@@ -472,6 +506,9 @@ void Composite::resetScrollPosition() {
 	}
 	if (horizontalScrollHandle.get() != nullptr) {
 		horizontalScrollHandle->setDragOffset(pixel2(0, 0));
+	}
+	if (onScroll) {
+		onScroll(scrollPosition);
 	}
 	updateExtents();
 }

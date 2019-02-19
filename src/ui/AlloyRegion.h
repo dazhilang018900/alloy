@@ -103,7 +103,7 @@ public:
 	std::function<bool(AlloyContext* context, const InputEvent& event)> onMouseDown;
 	std::function<bool(AlloyContext* context, const InputEvent& event)> onMouseUp;
 	std::function<bool(AlloyContext* context, const InputEvent& event)> onMouseOver;
-	std::function<bool(AlloyContext* context, const InputEvent& event)> onScroll;
+	std::function<bool(AlloyContext* context, const InputEvent& event)> onScrollWheel;
 	std::function<bool(AlloyContext* context, const InputEvent& event)> onMouseDrag;
 	void setDragOffset(const pixel2& cursor, const pixel2& delta);
 	bool addDragOffset(const pixel2& delta);

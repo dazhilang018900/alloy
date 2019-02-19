@@ -42,7 +42,7 @@ public:
 	static const float scrollBarSize;
 	typedef std::vector<ValueType>::iterator iterator;
 	typedef std::vector<ValueType>::const_iterator const_iterator;
-
+	std::function<void(const aly::pixel2& scroll)> onScroll;
 	virtual void clear();
 	std::vector<std::shared_ptr<Region>>& getChildren() {
 		return children;
@@ -69,28 +69,13 @@ public:
 	void putFirst(const std::shared_ptr<Region>& region);
 	void putLast(Region* region);
 	void putFirst(Region* region);
-
-	Composite(
-			const std::string& name = MakeString() << "c" << std::setw(8)
-					<< std::setfill('0') << (REGION_COUNTER++));
+	Composite(const std::string& name = MakeString() << "c" << std::setw(8)<< std::setfill('0') << (REGION_COUNTER++));
 	Composite(const std::string& name, const AUnit2D& pos, const AUnit2D& dims);
 	virtual Region* locate(const pixel2& cursor) override;
-
-	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
-			override;
-	inline void setOrientation(const Orientation& orient, pixel2 cellSpacing =
-			pixel2(5, 5), pixel2 cellPadding = pixel2(0, 0)) {
-		orientation = orient;
-		this->cellSpacing = cellSpacing;
-		this->cellPadding = cellPadding;
-	}
-	virtual inline bool isScrollEnabled() const override {
-		return scrollEnabled;
-	}
-	void setScrollEnabled(bool enabled) {
-		scrollEnabled = enabled;
-	}
-
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)override;
+	void setOrientation(const Orientation& orient, pixel2 cellSpacing =pixel2(5, 5), pixel2 cellPadding = pixel2(0, 0));
+	virtual bool isScrollEnabled() const override;
+	void setScrollEnabled(bool enabled);
 
 	virtual pixel2 getDrawOffset() const override;
 	virtual void draw(AlloyContext* context) override;

@@ -34,7 +34,7 @@ bool AnisotropicFilterEx::init(Composite& rootNode) {
 	imageRegion = MakeGlyphRegion(imageGlyph, CoordPerPX(0.5f,0.5f,-out.width/2,-out.height/2), CoordPX(out.width, out.height), AspectRule::FixedHeight,COLOR_NONE, COLOR_NONE, Color(200, 200, 200, 255), UnitPX(1.0f));
 	imageRegion->setDragEnabled(true);
 	imageRegion->setClampDragToParentBounds(false);
-	imageRegion->onScroll = [this](AlloyContext* context, const InputEvent& event)
+	imageRegion->onScrollWheel = [this](AlloyContext* context, const InputEvent& event)
 	{
 		box2px bounds = imageRegion->getBounds(false);
 		pixel scaling = (pixel)(1 - 0.1f*event.scroll.y);
