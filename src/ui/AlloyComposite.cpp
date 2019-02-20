@@ -45,10 +45,21 @@ bool Composite::isVerticalScrollVisible() const {
 	}
 	return verticalScrollTrack->isVisible();
 }
+bool Composite::isVerticalScrollHandleVisible() const {
+	if (verticalScrollHandle.get() == nullptr) {
+		return false;
+	}
+	return verticalScrollHandle->isVisible();
+}
 Orientation Composite::getOrientation() const {
 	return orientation;
 }
-
+bool Composite::isHorizontalScrollHandleVisible() const {
+	if (horizontalScrollHandle.get() == nullptr) {
+		return false;
+	}
+	return horizontalScrollHandle->isVisible();
+}
 bool Composite::isHorizontalScrollVisible() const {
 	if (horizontalScrollTrack.get() == nullptr) {
 		return false;
@@ -617,6 +628,7 @@ void Composite::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	}
 	pixel2 offset = cellPadding;
 	pixel2 scrollExtent = pixel2(0.0f);
+	AlloyContext* context=AlloyApplicationContext().get();
 	for (std::shared_ptr<Region>& region : children) {
 		if (!region->isVisible()) {
 			continue;
@@ -640,9 +652,10 @@ void Composite::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		if (orientation == Orientation::Vertical) {
 			offset.y += cellSpacing.y + cbounds.dimensions.y;
 		}
-		scrollExtent = aly::max(
-				cbounds.dimensions + cbounds.position - this->bounds.position,
-				scrollExtent);
+			scrollExtent = aly::max(
+					cbounds.dimensions + cbounds.position - this->bounds.position,
+					scrollExtent);
+
 	}
 	extents.dimensions = scrollExtent;
 	if (!isScrollEnabled()) {

@@ -32,8 +32,12 @@ public:
 	void erase(const std::shared_ptr<Region>& node);
 	void erase(Region* node);
 	bool isVerticalScrollVisible() const;
+	bool isVerticalScrollHandleVisible() const;
+
 	Orientation getOrientation() const ;
 	bool isHorizontalScrollVisible() const;
+	bool isHorizontalScrollHandleVisible() const;
+
 	void setCellPadding(const pixel2& pix);
 	void setCellSpacing(const pixel2& pix);
 	void setAlwaysShowVerticalScrollBar(bool show);

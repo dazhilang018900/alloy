@@ -49,16 +49,15 @@ void ScrollPane::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;
-	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
-			context->pixelRatio);
-	if(isHorizontalScrollVisible()){
+	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,context->pixelRatio);
+	if(isHorizontalScrollHandleVisible()){
 		if(leftButton.get()!=nullptr)leftButton->setVisible(scrollPosition.x>0.00001f);
 		if(rightButton.get()!=nullptr)rightButton->setVisible(scrollPosition.x<0.9999f);
 	} else {
 		if(leftButton.get()!=nullptr)leftButton->setVisible(false);
 		if(rightButton.get()!=nullptr)rightButton->setVisible(false);
 	}
-	if(isVerticalScrollVisible()){
+	if(isVerticalScrollHandleVisible()){
 		if(upButton.get()!=nullptr)upButton->setVisible(scrollPosition.y>0.00001f);
 		if(downButton.get()!=nullptr)downButton->setVisible(scrollPosition.y<0.9999f);
 	} else {
@@ -140,17 +139,21 @@ void ScrollPane::draw(AlloyContext* context) {
 void ScrollPane::pack(const pixel2& pos, const pixel2& dims,
 		const double2& dpmm, double pixelRatio, bool clamp) {
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
-	box2px bounds = getBounds();
+	box2px bounds = getBounds(false);
 	if (leftButton.get() != nullptr) {
+		leftButton->parent=parent;
 		leftButton->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
 	}
 	if (rightButton.get() != nullptr) {
+		rightButton->parent=parent;
 		rightButton->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
 	}
 	if (upButton.get() != nullptr) {
+		upButton->parent=parent;
 		upButton->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
 	}
 	if (downButton.get() != nullptr) {
+		downButton->parent=parent;
 		downButton->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
 	}
 }
@@ -191,6 +194,7 @@ ScrollPane::ScrollPane(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims, const Orientation& orient,float scrollStep, float buttonWidth) :
 		Composite(name, pos, dims) {
 	setScrollEnabled(true);
+	setOrientation(orient);
 	if (orient == Orientation::Horizontal) {
 		setAlwaysShowHorizontalScrollBar(true);
 		leftButton = ArrowButtonPtr(
@@ -207,6 +211,7 @@ ScrollPane::ScrollPane(const std::string& name, const AUnit2D& pos,
 				this->addHorizontalScrollPosition(-scrollStep);
 			}
 		};
+
 		rightButton->onMousePressed = [this,scrollStep]() {
 			if(timer.resetAfterElapsed(0.05f)) {
 				this->addHorizontalScrollPosition(scrollStep);

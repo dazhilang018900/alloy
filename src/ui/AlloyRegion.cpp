@@ -121,6 +121,9 @@ bool Region::isCursorFocused() const {
 bool Region::hasRoundedCorners() const{
 	return roundCorners;
 }
+bool Region::isClampedToBounds() const{
+	return clampToParentBounds;
+}
 void Region::setFocus(bool f) {
 	if (f) {
 		AlloyApplicationContext()->setObjectFocus(this);

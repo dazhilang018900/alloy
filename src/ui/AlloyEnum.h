@@ -133,6 +133,15 @@ enum WindowPosition {
 enum class FontStyle {
 	Normal = 0, Shadow = 1, Glow = 2, Outline = 3
 };
+
+inline Orientation OppositeOrientation(Orientation orient){
+	if(orient==Orientation::Horizontal){
+		return Orientation::Vertical;
+	} else if(orient==Orientation::Vertical){
+		return Orientation::Horizontal;
+	}
+	return Orientation::Unspecified;
+}
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
 	std::basic_ostream<C, R> & ss, const Direction& type) {
 	switch (type) {

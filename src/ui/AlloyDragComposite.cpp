@@ -11,23 +11,36 @@
 #include "AlloyApplication.h"
 namespace aly {
 DragComposite::DragComposite(const std::string& name, const AUnit2D& pos,
-		const AUnit2D& dims, const Orientation& orient) :
-		Composite(name, pos, dims) {
+		const AUnit2D& dims, const Orientation& orient,bool clamp) :
+		ScrollPane(name, pos, dims,orient),clamp(clamp) {
 	setOrientation(orient);
 }
 void DragComposite::add(const std::shared_ptr<Region>& region,
 		bool appendToTab) {
 	Composite::add(region, appendToTab);
-	region->setClampDragToParentBounds(true);
 	region->setDragEnabled(true);
+	region->setClampDragToParentBounds(clamp);
 }
 void DragComposite::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;
-	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
-			context->pixelRatio);
+	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,context->pixelRatio);
+	if(isHorizontalScrollHandleVisible()){
+		if(leftButton.get()!=nullptr)leftButton->setVisible(scrollPosition.x>0.00001f);
+		if(rightButton.get()!=nullptr)rightButton->setVisible(scrollPosition.x<0.9999f);
+	} else {
+		if(leftButton.get()!=nullptr)leftButton->setVisible(false);
+		if(rightButton.get()!=nullptr)rightButton->setVisible(false);
+	}
+	if(isVerticalScrollHandleVisible()){
+		if(upButton.get()!=nullptr)upButton->setVisible(scrollPosition.y>0.00001f);
+		if(downButton.get()!=nullptr)downButton->setVisible(scrollPosition.y<0.9999f);
+	} else {
+		if(upButton.get()!=nullptr)upButton->setVisible(false);
+		if(downButton.get()!=nullptr)downButton->setVisible(false);
+	}
 	if (isScrollEnabled()) {
 		pushScissor(nvg, getCursorBounds());
 	}
@@ -141,8 +154,12 @@ void DragComposite::draw(AlloyContext* context) {
 			timer.reset();
 		}
 		focusRegion = dragRegion;
-		if (dragRegion->isVisible()) {
-			dragRegion->draw(context);
+		if(!dragRegion->isClampedToBounds()){
+			context->setOnTopRegion(dragRegion);
+		} else {
+			if(dragRegion->isVisible()){
+				dragRegion->draw(context);
+			}
 		}
 	} else {
 		if (focusRegion != nullptr) {
@@ -154,6 +171,9 @@ void DragComposite::draw(AlloyContext* context) {
 			}
 			children = newRegions;
 			targetSlots.clear();
+			if(!focusRegion->isClampedToBounds()){
+				context->removeOnTopRegion(focusRegion);
+			}
 			context->requestPack();
 		}
 		focusRegion = nullptr;
@@ -172,6 +192,14 @@ void DragComposite::draw(AlloyContext* context) {
 			} else {
 				horizontalScrollTrack->draw(context);
 			}
+			if (leftButton.get() != nullptr&&leftButton->isVisible())
+				leftButton->draw(context);
+			if (rightButton.get() != nullptr&&rightButton->isVisible())
+				rightButton->draw(context);
+			if (upButton.get() != nullptr&&upButton->isVisible())
+				upButton->draw(context);
+			if (downButton.get() != nullptr&&downButton->isVisible())
+				downButton->draw(context);
 		}
 	}
 	if (isScrollEnabled()) {
@@ -310,6 +338,7 @@ void DragComposite::pack(const pixel2& pos, const pixel2& dims,
 	pixel2 scrollExtent = pixel2(0.0f);
 	sourceSlots.resize(children.size());
 	int idx = 0;
+	AlloyContext* context=AlloyApplicationContext().get();
 	for (std::shared_ptr<Region>& region : children) {
 		DragSlot& slot = sourceSlots[idx];
 		slot.index = idx;
@@ -331,7 +360,6 @@ void DragComposite::pack(const pixel2& pos, const pixel2& dims,
 		}
 		region->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
 		box2px cbounds = region->getBounds(false);
-
 		slot.bounds = cbounds;
 		slot.start = slot.bounds.position;
 		slot.bounds.position -= region->getDragOffset();
@@ -342,9 +370,10 @@ void DragComposite::pack(const pixel2& pos, const pixel2& dims,
 			offset.y += cellSpacing.y + cbounds.dimensions.y;
 		}
 		idx++;
-		scrollExtent = aly::max(
-				cbounds.dimensions + cbounds.position - this->bounds.position,
-				scrollExtent);
+		if(context->isOnTop(region.get())){
+			cbounds.clamp(bounds);
+		}
+		scrollExtent = aly::max(cbounds.dimensions + cbounds.position - this->bounds.position,scrollExtent);
 	}
 	if (focusRegion != nullptr) {
 		if (targetSlots.size() == 0) {
@@ -451,9 +480,44 @@ void DragComposite::pack(const pixel2& pos, const pixel2& dims,
 		if (region->onPack)
 			region->onPack();
 	}
-
+	if (leftButton.get() != nullptr) {
+		leftButton->parent=parent;
+		leftButton->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
+	}
+	if (rightButton.get() != nullptr) {
+		rightButton->parent=parent;
+		rightButton->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
+	}
+	if (upButton.get() != nullptr) {
+		upButton->parent=parent;
+		upButton->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
+	}
+	if (downButton.get() != nullptr) {
+		downButton->parent=parent;
+		downButton->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
+	}
 	if (onPack)
 		onPack();
 }
+DragCompositePtr DragBinComposite::getBin(int idx) const{
+	return std::dynamic_pointer_cast<DragComposite>(children[idx]);
+}
+DragCompositePtr DragBinComposite::addBin(const std::string& name, int size){
+	DragCompositePtr comp;
 
+	if(orientation==Orientation::Horizontal){
+		comp=DragCompositePtr(new DragComposite(name,CoordPX(0.0f,0.0f),CoordPerPX(0.0f,1.0f,(float)size,-Composite::scrollBarSize),Orientation::Vertical,false));
+	} else if(orientation==Orientation::Vertical){
+		comp=DragCompositePtr(new DragComposite(name,CoordPX(0.0f,0.0f),CoordPerPX(1.0f,0.0f,-Composite::scrollBarSize,(float)size),Orientation::Horizontal,false));
+	} else {
+		return DragCompositePtr();
+	}
+	ScrollPane::add(comp);
+	return comp;
+}
+
+DragBinComposite::DragBinComposite(const std::string& name, const AUnit2D& pos,const AUnit2D& dims, const Orientation& orient) : ScrollPane(name, pos, dims,orient) {
+	setCellSpacing(pixel2(0.0f));
+	setCellPadding(pixel2(0.0f));
+}
 } /* namespace aly */

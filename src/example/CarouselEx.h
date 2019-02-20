@@ -8,13 +8,14 @@
 #ifndef SRC_EXAMPLE_CAROUSELEX_H_
 #define SRC_EXAMPLE_CAROUSELEX_H_
 
-#include "../ui/AlloyScrollPane.h"
+#include "../ui/AlloyDragComposite.h"
 #include "ui/AlloyApplication.h"
 namespace aly {
 class CarouselEx : public aly::Application{
 protected:
-	ScrollPanelPtr hscroller;
-	ScrollPanelPtr vscroller;
+	DragCompositePtr hscroller;
+	DragCompositePtr vscroller;
+	DragBinCompositePtr hvscroller;
 public:
 	CarouselEx();
 	bool init(aly::Composite& rootNode);
