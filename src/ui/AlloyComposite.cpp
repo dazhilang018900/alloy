@@ -66,6 +66,24 @@ bool Composite::isHorizontalScrollVisible() const {
 	}
 	return horizontalScrollTrack->isVisible();
 }
+void Composite::insert(size_t idx,const std::shared_ptr<Region>& region,bool appendToTab){
+	if (region.get() == nullptr) {
+		throw std::runtime_error(
+				MakeString() << "Could not add nullptr region to composite ["
+						<< getName() << "]");
+	}
+	children.insert(children.begin()+idx,region);
+	if (region->parent != nullptr)
+		throw std::runtime_error(
+				MakeString() << "Cannot add child node [" << region->name
+						<< "] to [" << name
+						<< "] because it already has a parent ["
+						<< region->parent->name << "].");
+	region->parent = this;
+	if (appendToTab) {
+		appendToTabChain(region.get());
+	}
+}
 void Composite::add(const std::shared_ptr<Region>& region, bool appendToTab) {
 	if (region.get() == nullptr) {
 		throw std::runtime_error(
@@ -73,6 +91,7 @@ void Composite::add(const std::shared_ptr<Region>& region, bool appendToTab) {
 						<< getName() << "]");
 	}
 	children.push_back(region);
+
 	if (region->parent != nullptr)
 		throw std::runtime_error(
 				MakeString() << "Cannot add child node [" << region->name

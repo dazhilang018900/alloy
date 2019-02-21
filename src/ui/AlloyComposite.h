@@ -27,6 +27,8 @@ protected:
 	pixel2 cellSpacing = pixel2(0, 0);
 	void updateExtents();
 public:
+	aly::pixel2 getCellSpacing() const;
+	aly::pixel2 getCellPadding() const;
 	void appendToTabChain(Region* region);
 	virtual void removeListener() const override;
 	void erase(const std::shared_ptr<Region>& node);
@@ -88,6 +90,7 @@ public:
 	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 			double pixelRatio, bool clamp = false) override;
 	virtual void add(const std::shared_ptr<Region>& region,bool appendToTab=false);
+	virtual void insert(size_t idx,const std::shared_ptr<Region>& region,bool appendToTab=false);
 	virtual void insertAtFront(const std::shared_ptr<Region>& region);
 	virtual void pack() override;
 	virtual void pack(AlloyContext* context) override;

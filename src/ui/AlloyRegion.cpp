@@ -138,6 +138,12 @@ void Region::setFocus(bool f) {
 bool Region::isObjectFocused() const {
 	return AlloyApplicationContext()->isObjectFocused(this);
 }
+pixel2 Composite::getCellSpacing() const{
+	return cellSpacing;
+}
+pixel2 Composite::getCellPadding() const{
+	return cellPadding;
+}
 void Composite::appendToTabChain(Region* region) {
 	region->appendTo(tabChain);
 }

@@ -26,10 +26,12 @@ protected:
 	Region* focusRegion=nullptr;
 	bool clamp;
 public:
+	std::function<void(const std::shared_ptr<Region>& region, aly::pixel2 cursor)> onDrop;
 	virtual void draw(AlloyContext* context) override;
 	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp = false) override;
 	DragComposite(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,const Orientation& orient,bool clamp=true);
 	virtual void add(const std::shared_ptr<Region>& region,bool appendToTab=false) override;
+	virtual void insert(size_t idx,const std::shared_ptr<Region>& region,bool appendToTab=false) override;
 	virtual ~DragComposite(){}
 };
 typedef std::shared_ptr<DragComposite> DragCompositePtr;
@@ -37,6 +39,7 @@ typedef std::shared_ptr<DragComposite> DragCompositePtr;
 class DragBinComposite:public ScrollPane {
 protected:
 public:
+	void handleDrop(const std::shared_ptr<Region>& region,aly::pixel2 cursor);
 	DragBinComposite(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,const Orientation& orient);
 	DragCompositePtr addBin(const std::string& name,int size);
 	DragCompositePtr getBin(int idx) const ;
