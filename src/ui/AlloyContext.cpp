@@ -626,11 +626,9 @@ bool AlloyContext::isMouseContainedIn(const pixel2& pos,
 }
 bool AlloyContext::isMouseOver(Region* region, bool includeParent) const {
 	if (includeParent) {
-		return (mouseOverRegion == region
-				|| (mouseOverRegion != nullptr
-						&& mouseOverRegion->hasParent(region)));
+		return (region!=nullptr&&(mouseOverRegion == region|| (mouseOverRegion != nullptr&& mouseOverRegion->hasParent(region))));
 	} else {
-		return (mouseOverRegion == region);
+		return (mouseOverRegion == region&&region!=nullptr);
 	}
 }
 void AlloyContext::setMouseDownObject(Region* region) {

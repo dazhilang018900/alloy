@@ -14,8 +14,8 @@ void Slider::setSliderColor(const Color& startColor, const Color& endColor) {
 	sliderTrack->startColor = startColor;
 	sliderTrack->endColor = endColor;
 }
-void Slider::appendTo(TabChain& chain){
-	if(valueLabel.get()!=nullptr){
+void Slider::appendTo(TabChain& chain) {
+	if (valueLabel.get() != nullptr) {
 		chain.add(this);
 		chain.add(valueLabel.get());
 	} else {
@@ -137,6 +137,10 @@ void SliderTrack::draw(AlloyContext* context) {
 		ptr->draw(context);
 	}
 }
+void ScrollHandle::setSlim(bool s) {
+	slim = s;
+}
+
 void SliderHandle::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
@@ -243,7 +247,11 @@ void SliderHandle::draw(AlloyContext* context) {
 	}
 
 }
+void ScrollTrack::setSlim(bool s) {
+	slim = s;
+}
 void ScrollHandle::draw(AlloyContext* context) {
+	const int SLIM_SIZE = 2;
 	if (!visible)
 		return;
 	box2px bounds = getBounds();
@@ -251,35 +259,61 @@ void ScrollHandle::draw(AlloyContext* context) {
 	float y = bounds.position.y;
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;
+	bool hover=slim&&(context->isMouseOver(this,false)||context->isMouseOver(track,false)||context->isMouseDrag(this));
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
 	NVGcontext* nvg = context->nvgContext;
-	if (orientation == Orientation::Vertical) {
-		NVGpaint shadowPaint = nvgBoxGradient(nvg, x + lineWidth - 1,
-				y + lineWidth - 1, w - 2 * lineWidth, h - 2 * lineWidth,
-				(w - 2 - 2 * lineWidth) / 2, 4, context->theme.LIGHTEST,
-				context->theme.NEUTRAL);
-		nvgBeginPath(nvg);
-		nvgRoundedRect(nvg, x + 1 + lineWidth, y + 1 + lineWidth,
-				w - 2 - 2 * lineWidth, h - 2 - 2 * lineWidth,
-				(w - 2 - 2 * lineWidth) / 2);
-		nvgFillPaint(nvg, shadowPaint);
-		nvgFill(nvg);
-	} else if (orientation == Orientation::Horizontal) {
-		NVGpaint shadowPaint = nvgBoxGradient(nvg, x + lineWidth - 1,
-				y + lineWidth - 1, w - 2 * lineWidth, h - 2 * lineWidth,
-				(h - 2 - 2 * lineWidth) / 2, 4, context->theme.LIGHTEST,
-				context->theme.NEUTRAL);
-		nvgBeginPath(nvg);
-		nvgRoundedRect(nvg, x + 1 + lineWidth, y + 1 + lineWidth,
-				w - 2 - 2 * lineWidth, h - 2 - 2 * lineWidth,
-				(h - 2 - 2 * lineWidth) / 2);
-		nvgFillPaint(nvg, shadowPaint);
-		nvgFill(nvg);
+	if (slim) {
+		if (orientation == Orientation::Vertical) {
+			nvgBeginPath(nvg);
+			if(hover){
+				nvgRect(nvg, x+1, y, w-2, h);
+				nvgFillColor(nvg, context->theme.LIGHTEST.toSemiTransparent(0.8f));
+			} else {
+				nvgRect(nvg, x + w - SLIM_SIZE, y, SLIM_SIZE, h);
+				nvgFillColor(nvg, context->theme.LIGHTEST);
+			}
+			nvgFill(nvg);
+		} else if (orientation == Orientation::Horizontal) {
+			nvgBeginPath(nvg);
+			if(hover){
+				nvgRect(nvg, x, y+1, w, h-2);
+				nvgFillColor(nvg, context->theme.LIGHTEST.toSemiTransparent(0.8f));
+			} else {
+				nvgRect(nvg, x, y + h - SLIM_SIZE, w, SLIM_SIZE);
+				nvgFillColor(nvg, context->theme.LIGHTEST);
+			}
+			nvgFill(nvg);
+		}
+	} else {
+		if (orientation == Orientation::Vertical) {
+			NVGpaint shadowPaint = nvgBoxGradient(nvg, x + lineWidth - 1,
+					y + lineWidth - 1, w - 2 * lineWidth, h - 2 * lineWidth,
+					(w - 2 - 2 * lineWidth) / 2, 4, context->theme.LIGHTEST,
+					context->theme.NEUTRAL);
+			nvgBeginPath(nvg);
+			nvgRoundedRect(nvg, x + 1 + lineWidth, y + 1 + lineWidth,
+					w - 2 - 2 * lineWidth, h - 2 - 2 * lineWidth,
+					(w - 2 - 2 * lineWidth) / 2);
+			nvgFillPaint(nvg, shadowPaint);
+			nvgFill(nvg);
+		} else if (orientation == Orientation::Horizontal) {
+			NVGpaint shadowPaint = nvgBoxGradient(nvg, x + lineWidth - 1,
+					y + lineWidth - 1, w - 2 * lineWidth, h - 2 * lineWidth,
+					(h - 2 - 2 * lineWidth) / 2, 4, context->theme.LIGHTEST,
+					context->theme.NEUTRAL);
+			nvgBeginPath(nvg);
+			nvgRoundedRect(nvg, x + 1 + lineWidth, y + 1 + lineWidth,
+					w - 2 - 2 * lineWidth, h - 2 - 2 * lineWidth,
+					(h - 2 - 2 * lineWidth) / 2);
+			nvgFillPaint(nvg, shadowPaint);
+			nvgFill(nvg);
+		}
 	}
 }
 
 void ScrollTrack::draw(AlloyContext* context) {
+	const int SLIM_SIZE = 2;
 	if (!visible)
 		return;
 	box2px bounds = getBounds();
@@ -287,32 +321,55 @@ void ScrollTrack::draw(AlloyContext* context) {
 	float y = bounds.position.y;
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;
-	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
-			context->pixelRatio);
+	bool hover=slim&&(context->isMouseOver(this,false)||context->isMouseOver(handle,false)||context->isMouseDrag(handle));
+	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,context->pixelRatio);
 	NVGcontext* nvg = context->nvgContext;
-
-	if (orientation == Orientation::Vertical) {
-		NVGpaint shadowPaint = nvgBoxGradient(nvg, x + lineWidth + 1, //-1
-		y + lineWidth + 1, //+1
-		w - 2 * lineWidth, h - 2 * lineWidth, (w - 2 * lineWidth) / 2, 4,
-				context->theme.DARKEST.toSemiTransparent(32),
-				context->theme.DARKEST.toSemiTransparent(92));
-		nvgBeginPath(nvg);
-		nvgRoundedRect(nvg, x + lineWidth, y + lineWidth, w - 2 * lineWidth,
-				h - 2 * lineWidth, (w - 2 * lineWidth) / 2);
-		nvgFillPaint(nvg, shadowPaint);
-		nvgFill(nvg);
-	} else if (orientation == Orientation::Horizontal) {
-		NVGpaint shadowPaint = nvgBoxGradient(nvg, x + lineWidth + 1, //-1
-		y + lineWidth + 1, //+1
-		w - 2 * lineWidth, h - 2 * lineWidth, (h - 2 * lineWidth) / 2, 4,
-				context->theme.DARKEST.toSemiTransparent(32),
-				context->theme.DARKEST.toSemiTransparent(92));
-		nvgBeginPath(nvg);
-		nvgRoundedRect(nvg, x + lineWidth, y + lineWidth, w - 2 * lineWidth,
-				h - 2 * lineWidth, (h - 2 * lineWidth) / 2);
-		nvgFillPaint(nvg, shadowPaint);
-		nvgFill(nvg);
+	if (slim) {
+		if (orientation == Orientation::Vertical) {
+			nvgBeginPath(nvg);
+			if(hover){
+				nvgRect(nvg, x, y, w, h);
+				nvgFillColor(nvg, context->theme.DARKEST.toSemiTransparent(0.5f));
+			} else {
+				nvgRect(nvg, x + w - SLIM_SIZE, y, SLIM_SIZE, h);
+				nvgFillColor(nvg, context->theme.DARKEST);
+			}
+			nvgFill(nvg);
+		} else if (orientation == Orientation::Horizontal) {
+			nvgBeginPath(nvg);
+			if(hover){
+				nvgRect(nvg, x, y, w, h);
+				nvgFillColor(nvg, context->theme.DARKEST.toSemiTransparent(0.5f));
+			} else {
+				nvgRect(nvg, x, y + h - SLIM_SIZE, w, SLIM_SIZE);
+				nvgFillColor(nvg, context->theme.DARKEST);
+			}
+			nvgFill(nvg);
+		}
+	} else {
+		if (orientation == Orientation::Vertical) {
+			NVGpaint shadowPaint = nvgBoxGradient(nvg, x + lineWidth + 1, //-1
+			y + lineWidth + 1, //+1
+			w - 2 * lineWidth, h - 2 * lineWidth, (w - 2 * lineWidth) / 2, 4,
+					context->theme.DARKEST.toSemiTransparent(32),
+					context->theme.DARKEST.toSemiTransparent(92));
+			nvgBeginPath(nvg);
+			nvgRoundedRect(nvg, x + lineWidth, y + lineWidth, w - 2 * lineWidth,
+					h - 2 * lineWidth, (w - 2 * lineWidth) / 2);
+			nvgFillPaint(nvg, shadowPaint);
+			nvgFill(nvg);
+		} else if (orientation == Orientation::Horizontal) {
+			NVGpaint shadowPaint = nvgBoxGradient(nvg, x + lineWidth + 1, //-1
+			y + lineWidth + 1, //+1
+			w - 2 * lineWidth, h - 2 * lineWidth, (h - 2 * lineWidth) / 2, 4,
+					context->theme.DARKEST.toSemiTransparent(32),
+					context->theme.DARKEST.toSemiTransparent(92));
+			nvgBeginPath(nvg);
+			nvgRoundedRect(nvg, x + lineWidth, y + lineWidth, w - 2 * lineWidth,
+					h - 2 * lineWidth, (h - 2 * lineWidth) / 2);
+			nvgFillPaint(nvg, shadowPaint);
+			nvgFill(nvg);
+		}
 	}
 }
 HorizontalSlider::HorizontalSlider(const std::string& label,
@@ -406,7 +463,7 @@ HorizontalSlider::HorizontalSlider(const std::string& label,
 }
 bool HorizontalSlider::onEventHandler(AlloyContext* context,
 		const InputEvent& event) {
-	if(valueLabel.get()==nullptr){
+	if (valueLabel.get() == nullptr) {
 		if (event.type == InputType::MouseButton && event.isDown()
 				&& context->isMouseOver(this, true)) {
 			if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -416,24 +473,40 @@ bool HorizontalSlider::onEventHandler(AlloyContext* context,
 			}
 		}
 	}
-	if(event.type==InputType::Key&&event.isDown()&&isObjectFocused()){
-		if(event.key==GLFW_KEY_DOWN||event.key==GLFW_KEY_LEFT){
-			if(value.type()!=NumberType::Integer){
-				setValue(std::max(getValue().toFloat()-0.02f*(getMaxValue().toFloat()-getMinValue().toFloat()),getMinValue().toFloat()));
+	if (event.type == InputType::Key && event.isDown() && isObjectFocused()) {
+		if (event.key == GLFW_KEY_DOWN || event.key == GLFW_KEY_LEFT) {
+			if (value.type() != NumberType::Integer) {
+				setValue(
+						std::max(
+								getValue().toFloat()
+										- 0.02f
+												* (getMaxValue().toFloat()
+														- getMinValue().toFloat()),
+								getMinValue().toFloat()));
 			} else {
-				setValue(std::max(getValue().toInteger()-1,getMinValue().toInteger()));
+				setValue(
+						std::max(getValue().toInteger() - 1,
+								getMinValue().toInteger()));
 			}
 			if (onChangeEvent)
-			onChangeEvent(this->value);
+				onChangeEvent(this->value);
 			return true;
-		} else if(event.key==GLFW_KEY_UP||event.key==GLFW_KEY_RIGHT){
-			if(value.type()!=NumberType::Integer){
-				setValue(std::min(getValue().toFloat()+0.02f*(getMaxValue().toFloat()-getMinValue().toFloat()),getMaxValue().toFloat()));
+		} else if (event.key == GLFW_KEY_UP || event.key == GLFW_KEY_RIGHT) {
+			if (value.type() != NumberType::Integer) {
+				setValue(
+						std::min(
+								getValue().toFloat()
+										+ 0.02f
+												* (getMaxValue().toFloat()
+														- getMinValue().toFloat()),
+								getMaxValue().toFloat()));
 			} else {
-				setValue(std::min(getValue().toInteger()+1,getMaxValue().toInteger()));
+				setValue(
+						std::min(getValue().toInteger() + 1,
+								getMaxValue().toInteger()));
 			}
 			if (onChangeEvent)
-			onChangeEvent(this->value);
+				onChangeEvent(this->value);
 			return true;
 		}
 	}
@@ -482,7 +555,7 @@ void HorizontalSlider::update() {
 bool HorizontalSlider::onMouseDown(AlloyContext* context, Region* region,
 		const InputEvent& event) {
 	if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
-		if(valueLabel.get()==nullptr){
+		if (valueLabel.get() == nullptr) {
 			setFocus(true);
 		}
 		if (region == sliderTrack.get()) {
@@ -494,7 +567,8 @@ bool HorizontalSlider::onMouseDown(AlloyContext* context, Region* region,
 				onChangeEvent(value);
 			return true;
 		} else if (region == sliderHandle.get()) {
-			if(valueLabel.get()!=nullptr)setFocus(true);
+			if (valueLabel.get() != nullptr)
+				setFocus(true);
 			update();
 			if (onChangeEvent)
 				onChangeEvent(value);
@@ -651,7 +725,7 @@ VerticalSlider::VerticalSlider(const std::string& label,
 }
 bool VerticalSlider::onEventHandler(AlloyContext* context,
 		const InputEvent& event) {
-	if(valueLabel.get()==nullptr){
+	if (valueLabel.get() == nullptr) {
 		if (event.type == InputType::MouseButton && event.isDown()
 				&& context->isMouseOver(this, true)) {
 			if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -661,24 +735,40 @@ bool VerticalSlider::onEventHandler(AlloyContext* context,
 			}
 		}
 	}
-	if(event.type==InputType::Key&&event.isDown()&&isObjectFocused()){
-		if(event.key==GLFW_KEY_DOWN){
-			if(value.type()!=NumberType::Integer){
-				setValue(std::max(getValue().toFloat()-0.02f*(getMaxValue().toFloat()-getMinValue().toFloat()),getMinValue().toFloat()));
+	if (event.type == InputType::Key && event.isDown() && isObjectFocused()) {
+		if (event.key == GLFW_KEY_DOWN) {
+			if (value.type() != NumberType::Integer) {
+				setValue(
+						std::max(
+								getValue().toFloat()
+										- 0.02f
+												* (getMaxValue().toFloat()
+														- getMinValue().toFloat()),
+								getMinValue().toFloat()));
 			} else {
-				setValue(std::max(getValue().toInteger()-1,getMinValue().toInteger()));
+				setValue(
+						std::max(getValue().toInteger() - 1,
+								getMinValue().toInteger()));
 			}
 			if (onChangeEvent)
-			onChangeEvent(this->value);
+				onChangeEvent(this->value);
 			return true;
-		} else if(event.key==GLFW_KEY_UP){
-			if(value.type()!=NumberType::Integer){
-				setValue(std::min(getValue().toFloat()+0.02f*(getMaxValue().toFloat()-getMinValue().toFloat()),getMaxValue().toFloat()));
+		} else if (event.key == GLFW_KEY_UP) {
+			if (value.type() != NumberType::Integer) {
+				setValue(
+						std::min(
+								getValue().toFloat()
+										+ 0.02f
+												* (getMaxValue().toFloat()
+														- getMinValue().toFloat()),
+								getMaxValue().toFloat()));
 			} else {
-				setValue(std::min(getValue().toInteger()+1,getMaxValue().toInteger()));
+				setValue(
+						std::min(getValue().toInteger() + 1,
+								getMaxValue().toInteger()));
 			}
 			if (onChangeEvent)
-			onChangeEvent(this->value);
+				onChangeEvent(this->value);
 			return true;
 		}
 	}
@@ -730,7 +820,7 @@ void VerticalSlider::update() {
 bool VerticalSlider::onMouseDown(AlloyContext* context, Region* region,
 		const InputEvent& event) {
 	if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
-		if(valueLabel.get()==nullptr){
+		if (valueLabel.get() == nullptr) {
 			setFocus(true);
 		}
 		if (region == sliderTrack.get()) {
@@ -742,7 +832,8 @@ bool VerticalSlider::onMouseDown(AlloyContext* context, Region* region,
 				onChangeEvent(value);
 			return true;
 		} else if (region == sliderHandle.get()) {
-			if(valueLabel.get()!=nullptr)setFocus(true);
+			if (valueLabel.get() != nullptr)
+				setFocus(true);
 			update();
 			if (onChangeEvent)
 				onChangeEvent(value);
@@ -907,7 +998,7 @@ void RangeSlider::setLabelFormatter(
 }
 bool RangeSlider::onEventHandler(AlloyContext* context,
 		const InputEvent& event) {
-	if(lowerValueLabel.get()==nullptr){
+	if (lowerValueLabel.get() == nullptr) {
 		if (event.type == InputType::MouseButton && event.isDown()
 				&& context->isMouseOver(this, true)) {
 			if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -917,17 +1008,17 @@ bool RangeSlider::onEventHandler(AlloyContext* context,
 			}
 		}
 	}
-	if(event.type==InputType::Key&&event.isDown()&&isObjectFocused()){
-		if(event.key==GLFW_KEY_DOWN||event.key==GLFW_KEY_LEFT){
+	if (event.type == InputType::Key && event.isDown() && isObjectFocused()) {
+		if (event.key == GLFW_KEY_DOWN || event.key == GLFW_KEY_LEFT) {
 			double2 oldV = getBlendValue();
-			double2 newV = clamp(-0.01 + oldV, double2(0.0),double2(1.0));
+			double2 newV = clamp(-0.01 + oldV, double2(0.0), double2(1.0));
 			this->setBlendValue(newV);
 			if (onChangeEvent)
 				onChangeEvent(this->lowerValue, this->upperValue);
 			return true;
-		} else if(event.key==GLFW_KEY_UP||event.key==GLFW_KEY_RIGHT){
+		} else if (event.key == GLFW_KEY_UP || event.key == GLFW_KEY_RIGHT) {
 			double2 oldV = getBlendValue();
-			double2 newV = clamp(0.01 + oldV, double2(0.0),double2(1.0));
+			double2 newV = clamp(0.01 + oldV, double2(0.0), double2(1.0));
 			this->setBlendValue(newV);
 			if (onChangeEvent)
 				onChangeEvent(this->lowerValue, this->upperValue);
@@ -962,7 +1053,7 @@ double2 RangeSlider::getBlendValue() const {
 bool RangeSlider::onMouseDown(AlloyContext* context, Region* region,
 		const InputEvent& event) {
 	if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
-		if(lowerValueLabel.get()==nullptr){
+		if (lowerValueLabel.get() == nullptr) {
 			setFocus(true);
 		}
 		if (region == sliderTrack.get()) {
@@ -984,13 +1075,15 @@ bool RangeSlider::onMouseDown(AlloyContext* context, Region* region,
 			return true;
 
 		} else if (region == lowerSliderHandle.get()) {
-			if(lowerValueLabel.get()!=nullptr)setFocus(true);
+			if (lowerValueLabel.get() != nullptr)
+				setFocus(true);
 			update();
 			if (onChangeEvent)
 				onChangeEvent(lowerValue, upperValue);
 			return true;
 		} else if (region == upperSliderHandle.get()) {
-			if(upperValueLabel.get()!=nullptr)setFocus(true);
+			if (upperValueLabel.get() != nullptr)
+				setFocus(true);
 			update();
 			if (onChangeEvent)
 				onChangeEvent(lowerValue, upperValue);
@@ -1084,8 +1177,8 @@ void RangeSlider::setLowerValue(double value) {
 		lowerValueLabel->setNumberValue(lowerValue);
 	}
 }
-void RangeSlider::appendTo(TabChain& chain){
-	if(lowerValueLabel.get()!=nullptr&&lowerValueLabel.get()!=nullptr){
+void RangeSlider::appendTo(TabChain& chain) {
+	if (lowerValueLabel.get() != nullptr && lowerValueLabel.get() != nullptr) {
 		chain.add(this);
 		chain.add(lowerValueLabel.get());
 		chain.add(upperValueLabel.get());

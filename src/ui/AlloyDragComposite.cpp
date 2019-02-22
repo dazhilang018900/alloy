@@ -351,6 +351,10 @@ void DragComposite::pack(const pixel2& pos, const pixel2& dims,
 				scrollBarSize);
 		verticalScrollHandle->parent = verticalScrollTrack.get();
 		verticalScrollHandle->setDragEnabled(true);
+		verticalScrollHandle->setSlim(slim);
+		verticalScrollTrack->setSlim(slim);
+		verticalScrollTrack->handle=verticalScrollHandle.get();
+		verticalScrollHandle->track=verticalScrollTrack.get();
 		verticalScrollTrack->onMouseDown =
 				[this](AlloyContext* context, const InputEvent& event) {
 					if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -393,6 +397,10 @@ void DragComposite::pack(const pixel2& pos, const pixel2& dims,
 				scrollBarSize, 0.0f);
 		horizontalScrollHandle->parent = horizontalScrollTrack.get();
 		horizontalScrollHandle->setDragEnabled(true);
+		horizontalScrollHandle->setSlim(slim);
+		horizontalScrollTrack->setSlim(slim);
+		horizontalScrollTrack->handle=horizontalScrollHandle.get();
+		horizontalScrollHandle->track=horizontalScrollTrack.get();
 		horizontalScrollTrack->onMouseDown =
 				[this](AlloyContext* context, const InputEvent& event) {
 					if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -589,6 +597,7 @@ void DragComposite::pack(const pixel2& pos, const pixel2& dims,
 DragCompositePtr DragBinComposite::getBin(int idx) const {
 	return std::dynamic_pointer_cast<DragComposite>(children[idx]);
 }
+
 void DragBinComposite::handleDragOver(Region* region) {
 	AlloyContext* context = AlloyApplicationContext().get();
 	aly::pixel2 cursor = context->getCursorPosition();
@@ -598,7 +607,6 @@ void DragBinComposite::handleDragOver(Region* region) {
 		Composite* comp = dynamic_cast<Composite*>(region->parent);
 		if (comp != bin.get()) {
 			box2px bounds = bin->getBounds();
-			bounds.position += bin->getDragOffset();
 			if (bin->isVisible() && context->isMouseContainedIn(bounds)) {
 				std::vector<DragSlot> slots = bin->getSlots();
 				pixel2 cellSpacing = bin->getCellSpacing();
@@ -610,6 +618,7 @@ void DragBinComposite::handleDragOver(Region* region) {
 						cellSpacing.y = 0;
 					}
 					bbox.dimensions += cellSpacing;
+					bbox.position+=slots[m].region->getDrawOffset();
 					if (bbox.contains(cursor)) {
 						bin->setEmptySlot(bbox);
 						found = true;
@@ -624,6 +633,7 @@ void DragBinComposite::handleDragOver(Region* region) {
 		}
 	}
 }
+
 void DragBinComposite::handleDrop(const std::shared_ptr<Region>& region) {
 	AlloyContext* context = AlloyApplicationContext().get();
 	aly::pixel2 cursor = context->getCursorPosition();
@@ -632,7 +642,6 @@ void DragBinComposite::handleDrop(const std::shared_ptr<Region>& region) {
 		bool found = false;
 		bin->setEmptySlot(box2px(pixel2(0.0f), pixel2(0.0f)));
 		box2px bounds = bin->getBounds();
-		bounds.position += bin->getDrawOffset();
 		if (bin->isVisible() && context->isMouseContainedIn(bounds)) {
 			Composite* comp = dynamic_cast<Composite*>(region->parent);
 			if (comp != bin.get()) {
@@ -692,6 +701,7 @@ DragCompositePtr DragBinComposite::addBin(const std::string& name, int size) {
 	} else {
 		return DragCompositePtr();
 	}
+	comp->setSlimScroll(true);
 	ScrollPane::add(comp);
 	return comp;
 }
@@ -699,7 +709,7 @@ DragCompositePtr DragBinComposite::addBin(const std::string& name, int size) {
 DragBinComposite::DragBinComposite(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims, const Orientation& orient) :
 		ScrollPane(name, pos, dims, orient) {
-	setCellSpacing(pixel2(0.0f));
+	setCellSpacing(pixel2(1.0f));
 	setCellPadding(pixel2(0.0f));
 }
 } /* namespace aly */

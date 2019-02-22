@@ -287,7 +287,7 @@ namespace aly {
 		}
 		bool isOnTop(Region* region) const;
 		inline bool isMouseDrag(Region* region) {
-			return (mouseDownRegion == region && leftMouseButton);
+			return (region!=nullptr&&mouseDownRegion == region && leftMouseButton);
 		}
 		inline bool isMouseDrag() {
 			return (mouseDownRegion != nullptr && leftMouseButton);

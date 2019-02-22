@@ -23,7 +23,6 @@
 
 namespace aly {
 bool SANITY_CHECK_UI();
-
 class Composite;
 class Region;
 class BorderComposite;
@@ -156,14 +155,7 @@ public:
 	}
 	virtual void draw(AlloyContext* context) override;
 };
-class ScrollHandle: public Region {
-public:
-	const Orientation orientation;
-	ScrollHandle(const std::string& name, Orientation orient) :
-			Region(name), orientation(orient) {
-	}
-	virtual void draw(AlloyContext* context) override;
-};
+
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
 		std::basic_ostream<C, R> & ss, const TabChain& tabs) {
 	for(Region* region:tabs.regions){

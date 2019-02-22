@@ -25,8 +25,11 @@ protected:
 	typedef std::shared_ptr<Region> ValueType;
 	pixel2 cellPadding = pixel2(0, 0);
 	pixel2 cellSpacing = pixel2(0, 0);
+
+	bool slim;
 	void updateExtents();
 public:
+	void setSlimScroll(bool s);
 	aly::pixel2 getCellSpacing() const;
 	aly::pixel2 getCellPadding() const;
 	void appendToTabChain(Region* region);

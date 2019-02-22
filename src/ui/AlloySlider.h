@@ -27,17 +27,35 @@
 namespace aly{
 
 enum class SliderHandleShape {Whole,Hat, HalfLeft, HalfRight};
+class ScrollHandle;
 class ScrollTrack: public Region {
+protected:
+	bool slim;
 public:
 	const Orientation orientation;
+	ScrollHandle* handle;
 	ScrollTrack(const std::string& name, Orientation orient) :
-			Region(name), orientation(orient) {
+			Region(name),slim(false), orientation(orient),handle(nullptr) {
 	}
+	void setSlim(bool s);
+	virtual void draw(AlloyContext* context) override;
+};
+class ScrollHandle: public Region {
+protected:
+	bool slim;
+public:
+	ScrollTrack* track;
+	const Orientation orientation;
+	ScrollHandle(const std::string& name, Orientation orient) :
+			Region(name),slim(false), orientation(orient),track(nullptr) {
+	}
+	void setSlim(bool s);
 	virtual void draw(AlloyContext* context) override;
 };
 class SliderHandle: public Region {
 protected:
 	SliderHandleShape handleShape;
+
 public:
 	SliderHandle(const std::string& name, const SliderHandleShape& handleShape=SliderHandleShape::Whole) :
 			Region(name),handleShape(handleShape) {

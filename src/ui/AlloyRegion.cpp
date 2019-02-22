@@ -147,6 +147,9 @@ pixel2 Composite::getCellPadding() const{
 void Composite::appendToTabChain(Region* region) {
 	region->appendTo(tabChain);
 }
+void Composite::setSlimScroll(bool s){
+	slim=s;
+}
 void Composite::removeListener() const {
 	Application::removeListener(this);
 	for (RegionPtr child : children) {
@@ -315,7 +318,6 @@ void Region::drawBoundsLabel(AlloyContext* context, const std::string& name,
 			|| bounds.dimensions.x * bounds.dimensions.y == 0) {
 		return;
 	}
-
 	NVGcontext* nvg = context->nvgContext;
 	pushScissor(nvg, bounds.position.x, bounds.position.y, bounds.dimensions.x,
 			bounds.dimensions.y);

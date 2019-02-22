@@ -573,6 +573,10 @@ void Composite::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 				scrollBarSize);
 		verticalScrollHandle->parent = verticalScrollTrack.get();
 		verticalScrollHandle->setDragEnabled(true);
+		verticalScrollHandle->setSlim(slim);
+		verticalScrollTrack->setSlim(slim);
+		verticalScrollTrack->handle=verticalScrollHandle.get();
+		verticalScrollHandle->track=verticalScrollTrack.get();
 		verticalScrollTrack->onMouseDown =
 				[this](AlloyContext* context, const InputEvent& event) {
 					if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -615,6 +619,10 @@ void Composite::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 				scrollBarSize, 0.0f);
 		horizontalScrollHandle->parent = horizontalScrollTrack.get();
 		horizontalScrollHandle->setDragEnabled(true);
+		horizontalScrollHandle->setSlim(slim);
+		horizontalScrollTrack->setSlim(slim);
+		horizontalScrollTrack->handle=horizontalScrollHandle.get();
+		horizontalScrollHandle->track=horizontalScrollTrack.get();
 		horizontalScrollTrack->onMouseDown =
 				[this](AlloyContext* context, const InputEvent& event) {
 					if (event.button == GLFW_MOUSE_BUTTON_LEFT) {

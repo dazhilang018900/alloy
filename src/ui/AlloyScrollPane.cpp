@@ -44,25 +44,35 @@ void ScrollPane::updateCursor(CursorLocator* cursorLocator) {
 		horizontalScrollHandle->updateCursor(cursorLocator);
 	}
 }
+
 void ScrollPane::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;
-	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,context->pixelRatio);
-	if(isHorizontalScrollHandleVisible()){
-		if(leftButton.get()!=nullptr)leftButton->setVisible(scrollPosition.x>0.00001f);
-		if(rightButton.get()!=nullptr)rightButton->setVisible(scrollPosition.x<0.9999f);
+	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
+			context->pixelRatio);
+	if (isHorizontalScrollHandleVisible()) {
+		if (leftButton.get() != nullptr)
+			leftButton->setVisible(scrollPosition.x > 0.00001f);
+		if (rightButton.get() != nullptr)
+			rightButton->setVisible(scrollPosition.x < 0.9999f);
 	} else {
-		if(leftButton.get()!=nullptr)leftButton->setVisible(false);
-		if(rightButton.get()!=nullptr)rightButton->setVisible(false);
+		if (leftButton.get() != nullptr)
+			leftButton->setVisible(false);
+		if (rightButton.get() != nullptr)
+			rightButton->setVisible(false);
 	}
-	if(isVerticalScrollHandleVisible()){
-		if(upButton.get()!=nullptr)upButton->setVisible(scrollPosition.y>0.00001f);
-		if(downButton.get()!=nullptr)downButton->setVisible(scrollPosition.y<0.9999f);
+	if (isVerticalScrollHandleVisible()) {
+		if (upButton.get() != nullptr)
+			upButton->setVisible(scrollPosition.y > 0.00001f);
+		if (downButton.get() != nullptr)
+			downButton->setVisible(scrollPosition.y < 0.9999f);
 	} else {
-		if(upButton.get()!=nullptr)upButton->setVisible(false);
-		if(downButton.get()!=nullptr)downButton->setVisible(false);
+		if (upButton.get() != nullptr)
+			upButton->setVisible(false);
+		if (downButton.get() != nullptr)
+			downButton->setVisible(false);
 	}
 	if (isScrollEnabled()) {
 		pushScissor(nvg, getCursorBounds());
@@ -86,7 +96,8 @@ void ScrollPane::draw(AlloyContext* context) {
 			region->draw(context);
 		}
 	}
-	if (verticalScrollTrack.get() != nullptr) {
+	if (verticalScrollTrack.get() != nullptr
+			|| horizontalScrollTrack.get() != nullptr) {
 		if (isScrollEnabled()) {
 			if (extents.dimensions.y > h) {
 				verticalScrollTrack->draw(context);
@@ -100,13 +111,13 @@ void ScrollPane::draw(AlloyContext* context) {
 			} else {
 				horizontalScrollTrack->draw(context);
 			}
-			if (leftButton.get() != nullptr&&leftButton->isVisible())
+			if (leftButton.get() != nullptr && leftButton->isVisible())
 				leftButton->draw(context);
-			if (rightButton.get() != nullptr&&rightButton->isVisible())
+			if (rightButton.get() != nullptr && rightButton->isVisible())
 				rightButton->draw(context);
-			if (upButton.get() != nullptr&&upButton->isVisible())
+			if (upButton.get() != nullptr && upButton->isVisible())
 				upButton->draw(context);
-			if (downButton.get() != nullptr&&downButton->isVisible())
+			if (downButton.get() != nullptr && downButton->isVisible())
 				downButton->draw(context);
 		}
 	}
@@ -140,20 +151,28 @@ void ScrollPane::pack(const pixel2& pos, const pixel2& dims,
 		const double2& dpmm, double pixelRatio, bool clamp) {
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
 	box2px bounds = getBounds(false);
+	if(verticalScrollTrack.get()!=nullptr){
+		verticalScrollHandle->setSlim(slim);
+		verticalScrollTrack->setSlim(slim);
+	}
+	if(horizontalScrollTrack.get()!=nullptr){
+		horizontalScrollHandle->setSlim(slim);
+		horizontalScrollTrack->setSlim(slim);
+	}
 	if (leftButton.get() != nullptr) {
-		leftButton->parent=parent;
+		leftButton->parent = parent;
 		leftButton->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
 	}
 	if (rightButton.get() != nullptr) {
-		rightButton->parent=parent;
+		rightButton->parent = parent;
 		rightButton->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
 	}
 	if (upButton.get() != nullptr) {
-		upButton->parent=parent;
+		upButton->parent = parent;
 		upButton->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
 	}
 	if (downButton.get() != nullptr) {
-		downButton->parent=parent;
+		downButton->parent = parent;
 		downButton->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
 	}
 }
@@ -191,12 +210,12 @@ void ScrollPane::drawDebug(AlloyContext* context) {
 }
 
 ScrollPane::ScrollPane(const std::string& name, const AUnit2D& pos,
-		const AUnit2D& dims, const Orientation& orient,float scrollStep, float buttonWidth) :
-		Composite(name, pos, dims) {
+		const AUnit2D& dims, const Orientation& orient, float scrollStep,
+		float buttonWidth) :
+		Composite(name, pos, dims){
 	setScrollEnabled(true);
 	setOrientation(orient);
 	if (orient == Orientation::Horizontal) {
-		setAlwaysShowHorizontalScrollBar(true);
 		leftButton = ArrowButtonPtr(
 				new ArrowButton("Left Button", CoordPX(0.0f, 0.0f),
 						CoordPerPX(0.0f, 1.0f, buttonWidth, 0.0f),
@@ -218,7 +237,6 @@ ScrollPane::ScrollPane(const std::string& name, const AUnit2D& pos,
 			}
 		};
 	} else if (orient == Orientation::Vertical) {
-		setAlwaysShowVerticalScrollBar(true);
 		upButton = ArrowButtonPtr(
 				new ArrowButton("Up Button", CoordPX(0.0f, 0.0f),
 						CoordPerPX(1.0f, 0.0f, 0.0f, buttonWidth),
