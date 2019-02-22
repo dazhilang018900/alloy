@@ -709,7 +709,7 @@ DragCompositePtr DragBinComposite::addBin(const std::string& name, int size) {
 DragBinComposite::DragBinComposite(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims, const Orientation& orient) :
 		ScrollPane(name, pos, dims, orient) {
-	setCellSpacing(pixel2(1.0f));
-	setCellPadding(pixel2(0.0f));
+	setCellSpacing(pixel2(3.0f));
+	setCellPadding(pixel2(3.0f));
 }
 } /* namespace aly */

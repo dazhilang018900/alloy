@@ -40,8 +40,8 @@ bool CarouselEx::init(Composite& rootNode) {
 				[=,n](AlloyContext* context,const box2px& bounds) {
 					NVGcontext* nvg = context->nvgContext;
 					nvgBeginPath(nvg);
-					nvgRoundedRect(nvg, bounds.position.x + 3, bounds.position.y + 3,
-							bounds.dimensions.x - 6, bounds.dimensions.y - 6,context->theme.CORNER_RADIUS);
+					nvgRoundedRect(nvg, bounds.position.x + 1, bounds.position.y + 1,
+							bounds.dimensions.x - 4, bounds.dimensions.y - 4,context->theme.CORNER_RADIUS);
 					nvgStrokeWidth(nvg, 2.0f);
 					nvgFillColor(nvg,Color((-n+N)%N/(float)(N-1),((n*13+3)%N)/(float)(N-1),((n*43+2)%N)/(float)(N-1)));
 					nvgStrokeColor(nvg, Color(1.0f, 0.0f, 0.0f));
@@ -49,13 +49,12 @@ bool CarouselEx::init(Composite& rootNode) {
 					nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
 					nvgFontSize(nvg, 30.0f);
 					nvgFontFaceId(nvg, context->getFontHandle(FontType::Normal));
-					float2 offset(0.0f,Composite::scrollBarSize);
-					drawText(nvg, bounds.position + (bounds.dimensions-offset)*0.5f, region->getName(),FontStyle::Outline);
+					drawText(nvg, bounds.position + (bounds.dimensions)*0.5f, region->getName(),FontStyle::Outline);
 				};
 		hscroller->add(region);
 	}
 	rootNode.add(vscroller);
-	vscroller->backgroundColor = MakeColor(getContext()->theme.DARK);
+	vscroller->backgroundColor = MakeColor(getContext()->theme.DARKER);
 	for (int n = 0; n < N; n++) {
 		DrawPtr region = DrawPtr(
 				new Draw(MakeString() << "[" << (char) ('A' + n) << "]",
@@ -86,6 +85,7 @@ bool CarouselEx::init(Composite& rootNode) {
 	for (int n = 0; n < binSizes.size(); n++) {
 		DragCompositePtr bin = hvscroller->addBin(
 				MakeString() << "[" << (char) ('A' + n) << "]", 100);
+		bin->backgroundColor = MakeColor(getContext()->theme.DARK);
 		for (int m = 0; m < binSizes[n]; m++) {
 			DrawPtr region = DrawPtr(
 					new Draw(MakeString() << "[" << (char) ('A' + n) <<":"<<m<< "]",
@@ -95,7 +95,7 @@ bool CarouselEx::init(Composite& rootNode) {
 					[=,n,m](AlloyContext* context,const box2px& bounds) {
 						NVGcontext* nvg = context->nvgContext;
 						nvgBeginPath(nvg);
-						nvgRoundedRect(nvg, bounds.position.x + 3, bounds.position.y + 3,bounds.dimensions.x - 6, bounds.dimensions.y - 6,context->theme.CORNER_RADIUS);
+						nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,bounds.dimensions.x - 5, bounds.dimensions.y - 5,context->theme.CORNER_RADIUS);
 						nvgStrokeWidth(nvg, 2.0f);
 						nvgFillColor(nvg,Color((-n+N)%N/(float)(N-1),((m*13+3)%N)/(float)(N-1),((((m+1)*(n+1))*43+2)%N)/(float)(N-1)));
 						nvgStrokeColor(nvg, Color(1.0f, 0.0f, 0.0f));
@@ -103,8 +103,7 @@ bool CarouselEx::init(Composite& rootNode) {
 						nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
 						nvgFontSize(nvg, 30.0f);
 						nvgFontFaceId(nvg, context->getFontHandle(FontType::Normal));
-						float2 offset(Composite::scrollBarSize,0.0f);
-						drawText(nvg, bounds.position + (bounds.dimensions-offset)*0.5f, region->getName(),FontStyle::Outline);
+						drawText(nvg, bounds.position + (bounds.dimensions)*0.5f, region->getName(),FontStyle::Outline);
 					};
 			bin->add(region);
 		}
