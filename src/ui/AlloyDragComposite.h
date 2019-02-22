@@ -24,9 +24,13 @@ protected:
 	std::vector<DragSlot> targetSlots;
 	Timer timer;
 	Region* focusRegion=nullptr;
+	float slotOffset=0.0f;
 	bool clamp;
 public:
-	std::function<void(const std::shared_ptr<Region>& region, aly::pixel2 cursor)> onDrop;
+	std::function<void(const std::shared_ptr<Region>& region)> onDrop;
+	std::function<void(Region* region)> onDragOver;
+	const std::vector<DragSlot>& getSlots() const;
+	void setEmptySlot(const box2px& box);
 	virtual void draw(AlloyContext* context) override;
 	virtual void pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,double pixelRatio, bool clamp = false) override;
 	DragComposite(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,const Orientation& orient,bool clamp=true);
@@ -39,7 +43,8 @@ typedef std::shared_ptr<DragComposite> DragCompositePtr;
 class DragBinComposite:public ScrollPane {
 protected:
 public:
-	void handleDrop(const std::shared_ptr<Region>& region,aly::pixel2 cursor);
+	void handleDrop(const std::shared_ptr<Region>& region);
+	void handleDragOver(Region* region);
 	DragBinComposite(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,const Orientation& orient);
 	DragCompositePtr addBin(const std::string& name,int size);
 	DragCompositePtr getBin(int idx) const ;
