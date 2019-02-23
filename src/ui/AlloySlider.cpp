@@ -321,7 +321,7 @@ void ScrollTrack::draw(AlloyContext* context) {
 	float y = bounds.position.y;
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;
-	bool hover=slim&&(context->isMouseOver(this,false)||context->isMouseOver(handle,false)||context->isMouseDrag(handle));
+	bool hover=slim&&(handle!=nullptr&&handle->isVisible())&&(context->isMouseOver(this,false)||context->isMouseOver(handle,false)||context->isMouseDrag(handle));
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,context->pixelRatio);
 	NVGcontext* nvg = context->nvgContext;
 	if (slim) {

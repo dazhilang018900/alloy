@@ -84,6 +84,22 @@ make -j4
 ## License
 Alloy is [BSD licensed](https://github.com/rgb2hsv/Alloy-Graphics-Library/edit/master/LICENSE) and only uses libraries that also have a permissive license for commercial and academic use.
 
+Parameter Pane Example
+-------------------------
+[![ParameterPaneEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0037.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/ParameterPaneEx.cpp)
+
+Controls Example
+-------------------------
+[![ControlsEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0006.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/ControlsEx.cpp)
+
+Dialog Example
+-------------------------
+[![DialogEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0007.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/DialogEx.cpp)
+
+Carousel Example
+-------------------------
+[![DialogEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0044.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/CarouselEx.cpp)
+
 Absolute/Relative Positioning Example
 -------------------------
 [![UnitsEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0000.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/UnitsEx.cpp)
@@ -107,18 +123,6 @@ Tween Animation Example
 Image Example
 -------------------------
 [![ImageEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0005.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/ImageEx.cpp)
-
-Controls Example
--------------------------
-[![ControlsEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0006.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/ControlsEx.cpp)
-
-Dialog Example
--------------------------
-[![DialogEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0007.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/DialogEx.cpp)
-
-Parameter Pane Example
--------------------------
-[![ParameterPaneEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0037.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/ParameterPaneEx.cpp)
 
 Timeline Example
 -------------------------
