@@ -755,18 +755,18 @@ DragBinComposite::DragBinComposite(const std::string& name, const AUnit2D& pos,
 }
 DragBinTab::DragBinTab(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims, const Orientation& orient) :
-		Composite(name, pos, dims), orient(orient) {
+		Composite(name, pos, dims), orientation(orient) {
 
 }
 void DragBinTab::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
 	NVGcontext* nvg = context->nvgContext;
 	nvgBeginPath(nvg);
-	if (orient == Orientation::Vertical) {
+	if (orientation == Orientation::Vertical) {
 		nvgRoundedRect(nvg, bounds.position.x+Composite::slimScrollBarSize,bounds.position.y + context->theme.CORNER_RADIUS,
 				bounds.dimensions.x-Composite::slimScrollBarSize,tabSize + context->theme.CORNER_RADIUS,
 				context->theme.CORNER_RADIUS);
-	} else if (orient == Orientation::Horizontal) {
+	} else if (orientation == Orientation::Horizontal) {
 		nvgRoundedRect(nvg, bounds.position.x + context->theme.CORNER_RADIUS,
 				bounds.position.y+Composite::slimScrollBarSize,
 				tabSize + context->theme.CORNER_RADIUS,

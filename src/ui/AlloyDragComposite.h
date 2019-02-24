@@ -45,7 +45,7 @@ typedef std::shared_ptr<DragComposite> DragCompositePtr;
 
 class DragBinTab:public Composite{
 protected:
-	Orientation orient;
+	Orientation orientation;
 public:
 	static float tabSize;
 	DragBinTab(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,const Orientation& orient);
