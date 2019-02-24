@@ -106,12 +106,12 @@ void DragComposite::draw(AlloyContext* context) {
 		if(orientation==Orientation::Vertical&&isVerticalScrollVisible()){
 			nvgBeginPath(nvg);
 			nvgRect(nvg, bounds.position.x, bounds.position.y,Composite::slimScrollBarSize, bounds.dimensions.y);
-			nvgFillColor(nvg,context->theme.DARKEST);
+			nvgFillColor(nvg,context->theme.DARKER);
 			nvgFill(nvg);
 		} else 	if(orientation==Orientation::Horizontal&&isHorizontalScrollVisible()){
 			nvgBeginPath(nvg);
 			nvgRect(nvg, bounds.position.x, bounds.position.y,bounds.dimensions.x,Composite::slimScrollBarSize);
-			nvgFillColor(nvg,context->theme.DARKEST);
+			nvgFillColor(nvg,context->theme.DARKER);
 			nvgFill(nvg);
 		}
 	}
@@ -762,15 +762,19 @@ void DragBinTab::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
 	NVGcontext* nvg = context->nvgContext;
 	nvgBeginPath(nvg);
+	box2px clip=getCursorBounds();
+
 	if (orientation == Orientation::Vertical) {
-		nvgRoundedRect(nvg, bounds.position.x+Composite::slimScrollBarSize,bounds.position.y + context->theme.CORNER_RADIUS,
-				bounds.dimensions.x-Composite::slimScrollBarSize,tabSize + context->theme.CORNER_RADIUS,
+		nvgRoundedRect(nvg, bounds.position.x,bounds.position.y + context->theme.CORNER_RADIUS,
+				bounds.dimensions.x,tabSize + context->theme.CORNER_RADIUS,
 				context->theme.CORNER_RADIUS);
+		clip.intersect(box2px(bounds.position,pixel2(bounds.dimensions.x,tabSize)));
 	} else if (orientation == Orientation::Horizontal) {
 		nvgRoundedRect(nvg, bounds.position.x + context->theme.CORNER_RADIUS,
-				bounds.position.y+Composite::slimScrollBarSize,
+				bounds.position.y,
 				tabSize + context->theme.CORNER_RADIUS,
-				bounds.dimensions.y-Composite::slimScrollBarSize, context->theme.CORNER_RADIUS);
+				bounds.dimensions.y, context->theme.CORNER_RADIUS);
+		clip.intersect(box2px(bounds.position,pixel2(tabSize,bounds.dimensions.y)));
 	}
 	if (context->isMouseDown(this, false)) {
 		if (context->getCursor() == nullptr) {
@@ -785,7 +789,9 @@ void DragBinTab::draw(AlloyContext* context) {
 	} else {
 		nvgFillColor(nvg, context->theme.LIGHTER);
 	}
+	pushScissor(nvg,clip);
 	nvgFill(nvg);
+	popScissor(nvg);
 	Composite::draw(context);
 }
 } /* namespace aly */
