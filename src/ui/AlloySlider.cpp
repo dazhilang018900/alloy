@@ -251,7 +251,7 @@ void ScrollTrack::setSlim(bool s) {
 	slim = s;
 }
 void ScrollHandle::draw(AlloyContext* context) {
-	const int SLIM_SIZE = 2;
+	const float SLIM_SIZE = Composite::slimScrollBarSize;
 	if (!visible)
 		return;
 	box2px bounds = getBounds();
@@ -313,7 +313,7 @@ void ScrollHandle::draw(AlloyContext* context) {
 }
 
 void ScrollTrack::draw(AlloyContext* context) {
-	const int SLIM_SIZE = 2;
+	const float SLIM_SIZE = Composite::slimScrollBarSize;
 	if (!visible)
 		return;
 	box2px bounds = getBounds();
@@ -329,20 +329,20 @@ void ScrollTrack::draw(AlloyContext* context) {
 			nvgBeginPath(nvg);
 			if(hover){
 				nvgRect(nvg, x, y, w, h);
-				nvgFillColor(nvg, context->theme.DARKEST.toSemiTransparent(0.5f));
+				nvgFillColor(nvg, context->theme.DARKER.toSemiTransparent(0.5f));
 			} else {
 				nvgRect(nvg, x + w - SLIM_SIZE, y, SLIM_SIZE, h);
-				nvgFillColor(nvg, context->theme.DARKEST);
+				nvgFillColor(nvg, context->theme.DARKER);
 			}
 			nvgFill(nvg);
 		} else if (orientation == Orientation::Horizontal) {
 			nvgBeginPath(nvg);
 			if(hover){
 				nvgRect(nvg, x, y, w, h);
-				nvgFillColor(nvg, context->theme.DARKEST.toSemiTransparent(0.5f));
+				nvgFillColor(nvg, context->theme.DARKER.toSemiTransparent(0.5f));
 			} else {
 				nvgRect(nvg, x, y + h - SLIM_SIZE, w, SLIM_SIZE);
-				nvgFillColor(nvg, context->theme.DARKEST);
+				nvgFillColor(nvg, context->theme.DARKER);
 			}
 			nvgFill(nvg);
 		}

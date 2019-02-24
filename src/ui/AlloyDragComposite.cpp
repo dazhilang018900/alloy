@@ -10,21 +10,43 @@
 #include "AlloyDrawUtil.h"
 #include "AlloyApplication.h"
 namespace aly {
+float DragBinTab::tabSize = 20.0f;
 DragComposite::DragComposite(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims, const Orientation& orient, bool clamp) :
 		ScrollPane(name, pos, dims, orient), clamp(clamp) {
 	setOrientation(orient);
+	Application::addListener(this);
+}
+bool DragComposite::onEventHandler(AlloyContext* context, const InputEvent& e) {
+	dragRegion = context->getMouseDownObject();
+	if (e.type == InputType::Cursor || e.type == InputType::MouseButton) {
+		dragging = false;
+		if (dragRegion != nullptr) {
+			for (auto r : children) {
+				if (r.get() == dragRegion) {
+					dragging = true;
+					break;
+				}
+			}
+		}
+	}
+	if (dragging && e.type == InputType::Cursor) {
+		dragRegion->setDragOffset(e.cursor, context->cursorDownPosition);
+		context->requestPack();
+	} else if (e.type == InputType::MouseButton && e.isUp()) {
+		context->requestPack();
+		dragging = false;
+	}
+	return ScrollPane::onEventHandler(context, e);
 }
 void DragComposite::add(const std::shared_ptr<Region>& region,
 		bool appendToTab) {
-	Composite::add(region, appendToTab);
-	region->setDragEnabled(true);
+	ScrollPane::add(region, appendToTab);
 	region->setClampDragToParentBounds(clamp);
 }
 void DragComposite::insert(size_t idx, const std::shared_ptr<Region>& region,
 		bool appendToTab) {
-	Composite::insert(idx, region, appendToTab);
-	region->setDragEnabled(true);
+	ScrollPane::insert(idx, region, appendToTab);
 	region->setClampDragToParentBounds(clamp);
 }
 void DragComposite::setEmptySlot(const box2px& box) {
@@ -80,37 +102,36 @@ void DragComposite::draw(AlloyContext* context) {
 		nvgFillColor(nvg, *backgroundColor);
 		nvgFill(nvg);
 	}
-	Region* dragRegion = context->getMouseDownObject();
-	bool dragging = false;
-	for (std::shared_ptr<Region>& region : children) {
-		if (context->getCursor() == nullptr
-				&& context->isMouseOver(region.get(), true)) {
-			context->setCursor(&Cursor::Hand);
-		}
-		if (dragRegion != region.get()) {
-			if (region->isVisible() && focusRegion == nullptr
-					&& targetSlots.size() == 0) {
-				region->draw(context);
-			}
-		} else {
-			region->setDragOffset(context->cursorPosition,
-					context->cursorDownPosition);
-			dragging = true;
+	if(slim){
+		if(orientation==Orientation::Vertical&&isVerticalScrollVisible()){
+			nvgBeginPath(nvg);
+			nvgRect(nvg, bounds.position.x, bounds.position.y,Composite::slimScrollBarSize, bounds.dimensions.y);
+			nvgFillColor(nvg,context->theme.DARKEST);
+			nvgFill(nvg);
+		} else 	if(orientation==Orientation::Horizontal&&isHorizontalScrollVisible()){
+			nvgBeginPath(nvg);
+			nvgRect(nvg, bounds.position.x, bounds.position.y,bounds.dimensions.x,Composite::slimScrollBarSize);
+			nvgFillColor(nvg,context->theme.DARKEST);
+			nvgFill(nvg);
 		}
 	}
-	//int srcIndex = -1, tarIndex = -1;
 	int srcIndex = -1;
 	int tarIndex = -1;
 	float dragOffset = 0.0f;
 	for (const DragSlot& slot : sourceSlots) {
 		if (dragRegion == slot.region || focusRegion == slot.region) {
 			srcIndex = slot.index;
-			dragOffset =((orientation == Orientation::Vertical) ?slot.bounds.dimensions.y+cellSpacing.y  : slot.bounds.dimensions.x+cellSpacing.x);
+			dragOffset = (
+					(orientation == Orientation::Vertical) ?
+							slot.bounds.dimensions.y + cellSpacing.y :
+							slot.bounds.dimensions.x + cellSpacing.x);
 		}
-		box2px bounds = slot.bounds;
-		bounds.position += slot.region->getDrawOffset();
-		bounds.dimensions.y +=(orientation == Orientation::Vertical) ?cellSpacing.y : cellSpacing.x;
-		if (context->isMouseContainedIn(bounds)) {
+		box2px lbounds = slot.bounds;
+		lbounds.position += slot.region->getDrawOffset();
+		lbounds.dimensions.y +=
+				(orientation == Orientation::Vertical) ?
+						cellSpacing.y : cellSpacing.x;
+		if (context->isMouseContainedIn(lbounds)) {
 			tarIndex = slot.index;
 		}
 	}
@@ -119,6 +140,7 @@ void DragComposite::draw(AlloyContext* context) {
 		DragSlot& slot = targetSlots[i];
 		starts[i] = mix(slot.start, slot.bounds.position, slot.tween);
 	}
+
 	pixel2 cursor = context->cursorPosition;
 	float offset = slotOffset;
 	for (int i = 0; i < targetSlots.size(); i++) {
@@ -189,13 +211,13 @@ void DragComposite::draw(AlloyContext* context) {
 		}
 		//std::cout << slot.index << " ";
 	}
-
 	bool move = false;
 	if (timer.resetAfterElapsed(1 / 30.0f)) {
 		move = true;
 	}
 	for (int idx = 0; idx < targetSlots.size(); idx++) {
 		DragSlot& tslot = targetSlots[idx];
+		DragSlot& sslot = sourceSlots[idx];
 		DragSlot mslot = tslot;
 		mslot.bounds.position = mix(tslot.start, tslot.bounds.position,
 				tslot.tween);
@@ -203,8 +225,15 @@ void DragComposite::draw(AlloyContext* context) {
 			tslot.tween = std::min(tslot.tween + 0.1f, 1.0f);
 		}
 		if (dragRegion != mslot.region) {
-			mslot.region->setBounds(mslot.bounds);
-			mslot.region->draw(context);
+			if (dragging || offset != 0) {
+				mslot.region->setDragOffset(
+						mslot.bounds.position - sslot.bounds.position);
+				mslot.region->draw(context);
+			} else {
+				tslot.bounds = sslot.bounds;
+				mslot.region->setDragOffset(pixel2(0.0f));
+				mslot.region->draw(context);
+			}
 		}
 	}
 	if (dragging) {
@@ -222,6 +251,7 @@ void DragComposite::draw(AlloyContext* context) {
 		if (onDragOver) {
 			onDragOver(focusRegion);
 		}
+		context->requestPack();
 	} else {
 		if (focusRegion != nullptr) {
 			RegionPtr drop;
@@ -256,8 +286,9 @@ void DragComposite::draw(AlloyContext* context) {
 			targetSlots.clear();
 			if (!focusRegion->isClampedToBounds()) {
 				context->removeOnTopRegion(focusRegion);
-				if (onDrop && drop.get() != nullptr)
+				if (onDrop && drop.get() != nullptr) {
 					onDrop(drop);
+				}
 			}
 			context->requestPack();
 		}
@@ -349,8 +380,8 @@ void DragComposite::pack(const pixel2& pos, const pixel2& dims,
 		verticalScrollHandle->setDragEnabled(true);
 		verticalScrollHandle->setSlim(slim);
 		verticalScrollTrack->setSlim(slim);
-		verticalScrollTrack->handle=verticalScrollHandle.get();
-		verticalScrollHandle->track=verticalScrollTrack.get();
+		verticalScrollTrack->handle = verticalScrollHandle.get();
+		verticalScrollHandle->track = verticalScrollTrack.get();
 		verticalScrollTrack->onMouseDown =
 				[this](AlloyContext* context, const InputEvent& event) {
 					if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -395,8 +426,8 @@ void DragComposite::pack(const pixel2& pos, const pixel2& dims,
 		horizontalScrollHandle->setDragEnabled(true);
 		horizontalScrollHandle->setSlim(slim);
 		horizontalScrollTrack->setSlim(slim);
-		horizontalScrollTrack->handle=horizontalScrollHandle.get();
-		horizontalScrollHandle->track=horizontalScrollTrack.get();
+		horizontalScrollTrack->handle = horizontalScrollHandle.get();
+		horizontalScrollHandle->track = horizontalScrollTrack.get();
 		horizontalScrollTrack->onMouseDown =
 				[this](AlloyContext* context, const InputEvent& event) {
 					if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -454,8 +485,8 @@ void DragComposite::pack(const pixel2& pos, const pixel2& dims,
 		region->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
 		box2px cbounds = region->getBounds(false);
 		slot.bounds = cbounds;
-		slot.start = slot.bounds.position;
 		slot.bounds.position -= region->getDragOffset();
+		slot.start = slot.bounds.position;
 		if (orientation == Orientation::Horizontal) {
 			offset.x += cellSpacing.x + cbounds.dimensions.x;
 		}
@@ -591,7 +622,8 @@ void DragComposite::pack(const pixel2& pos, const pixel2& dims,
 		onPack();
 }
 DragCompositePtr DragBinComposite::getBin(int idx) const {
-	return std::dynamic_pointer_cast<DragComposite>(children[idx]);
+	return std::dynamic_pointer_cast<DragComposite>(
+			std::dynamic_pointer_cast<Composite>(children[idx])->getChild(0));
 }
 
 void DragBinComposite::handleDragOver(Region* region) {
@@ -614,7 +646,7 @@ void DragBinComposite::handleDragOver(Region* region) {
 						cellSpacing.y = 0;
 					}
 					bbox.dimensions += cellSpacing;
-					bbox.position+=slots[m].region->getDrawOffset();
+					bbox.position += slots[m].region->getDrawOffset();
 					if (bbox.contains(cursor)) {
 						bin->setEmptySlot(bbox);
 						found = true;
@@ -670,42 +702,90 @@ void DragBinComposite::handleDrop(const std::shared_ptr<Region>& region) {
 	}
 }
 DragCompositePtr DragBinComposite::addBin(const std::string& name, int size) {
-	DragCompositePtr comp;
+	DragCompositePtr dcomp;
+	DragBinTabPtr comp;
 	if (orientation == Orientation::Horizontal) {
-		comp = DragCompositePtr(
-				new DragComposite(name, CoordPX(0.0f, 0.0f),
-						CoordPerPX(0.0f, 1.0f, (float) size,
-								-Composite::scrollBarSize),
+		dcomp = DragCompositePtr(
+				new DragComposite(name, CoordPX(0.0f, DragBinTab::tabSize),
+						CoordPerPX(1.0f, 1.0f, 0.0f,
+								-DragBinTab::tabSize
+										- Composite::scrollBarSize),
 						Orientation::Vertical, false));
-		comp->onDrop = [this](const std::shared_ptr<Region>& region) {
+		dcomp->onDrop = [this](const std::shared_ptr<Region>& region) {
 			handleDrop(region);
 		};
-		comp->onDragOver = [this](Region* region) {
+		dcomp->onDragOver = [this](Region* region) {
 			handleDragOver(region);
 		};
+		comp = DragBinTabPtr(
+				new DragBinTab(name + "_tab", CoordPX(0.0f, 0.0f),
+						CoordPerPX(0.0f, 1.0f, (float) size, 0.0f),
+						Orientation::Vertical));
+		comp->add(dcomp);
 	} else if (orientation == Orientation::Vertical) {
-		comp = DragCompositePtr(
-				new DragComposite(name, CoordPX(0.0f, 0.0f),
-						CoordPerPX(1.0f, 0.0f, -Composite::scrollBarSize,
-								(float) size), Orientation::Horizontal, false));
-		comp->onDrop = [this](const std::shared_ptr<Region>& region) {
+		dcomp = DragCompositePtr(
+				new DragComposite(name, CoordPX(DragBinTab::tabSize, 0.0f),
+						CoordPerPX(1.0f, 1.0f,
+								-DragBinTab::tabSize - Composite::scrollBarSize,
+								0.0f), Orientation::Horizontal, false));
+		dcomp->onDrop = [this](const std::shared_ptr<Region>& region) {
 			handleDrop(region);
 		};
-		comp->onDragOver = [this](Region* region) {
+		dcomp->onDragOver = [this](Region* region) {
 			handleDragOver(region);
 		};
+		comp = DragBinTabPtr(
+				new DragBinTab(name + "_tab", CoordPX(0.0f, 0.0f),
+						CoordPerPX(1.0f, 0.0f, 0.0f, (float) size),
+						Orientation::Horizontal));
+		comp->add(dcomp);
 	} else {
 		return DragCompositePtr();
 	}
-	comp->setSlimScroll(true);
-	ScrollPane::add(comp);
-	return comp;
+	dcomp->setSlimScroll(true);
+	dcomp->setCellPadding(pixel2(3.0f));
+	DragComposite::add(comp);
+	return dcomp;
 }
-
 DragBinComposite::DragBinComposite(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims, const Orientation& orient) :
-		ScrollPane(name, pos, dims, orient) {
+		DragComposite(name, pos, dims, orient) {
 	setCellSpacing(pixel2(3.0f));
 	setCellPadding(pixel2(3.0f));
+}
+DragBinTab::DragBinTab(const std::string& name, const AUnit2D& pos,
+		const AUnit2D& dims, const Orientation& orient) :
+		Composite(name, pos, dims), orient(orient) {
+
+}
+void DragBinTab::draw(AlloyContext* context) {
+	box2px bounds = getBounds();
+	NVGcontext* nvg = context->nvgContext;
+	nvgBeginPath(nvg);
+	if (orient == Orientation::Vertical) {
+		nvgRoundedRect(nvg, bounds.position.x+Composite::slimScrollBarSize,bounds.position.y + context->theme.CORNER_RADIUS,
+				bounds.dimensions.x-Composite::slimScrollBarSize,tabSize + context->theme.CORNER_RADIUS,
+				context->theme.CORNER_RADIUS);
+	} else if (orient == Orientation::Horizontal) {
+		nvgRoundedRect(nvg, bounds.position.x + context->theme.CORNER_RADIUS,
+				bounds.position.y+Composite::slimScrollBarSize,
+				tabSize + context->theme.CORNER_RADIUS,
+				bounds.dimensions.y-Composite::slimScrollBarSize, context->theme.CORNER_RADIUS);
+	}
+	if (context->isMouseDown(this, false)) {
+		if (context->getCursor() == nullptr) {
+			context->setCursor(&Cursor::Grab);
+		}
+		nvgFillColor(nvg, context->theme.LIGHTEST);
+	} else if (context->isMouseOver(this, false)) {
+		if (context->getCursor() == nullptr) {
+			context->setCursor(&Cursor::Hand);
+		}
+		nvgFillColor(nvg, context->theme.LIGHTEST);
+	} else {
+		nvgFillColor(nvg, context->theme.LIGHTER);
+	}
+	nvgFill(nvg);
+	Composite::draw(context);
 }
 } /* namespace aly */

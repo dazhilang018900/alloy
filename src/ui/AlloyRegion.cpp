@@ -470,6 +470,7 @@ pixel2 Region::getDrawOffset() const {
 		return pixel2(0, 0);
 	}
 }
+
 void Region::setAspectRule(const AspectRule& aspect) {
 	aspectRule = aspect;
 }
@@ -484,10 +485,11 @@ void Region::setBounds(const pixel2& pt, const pixel2& dim) {
 	bounds.position = pt;
 	bounds.dimensions = dim;
 }
-void Region::setBounds(const box2px& bbox) {
+box2px Region::setBounds(const box2px& bbox) {
+	box2px old=bounds;
 	bounds = bbox;
+	return old;
 }
-
 bool Region::addDragOffset(const pixel2& delta) {
 	pixel2 oldOffset = dragOffset;
 	box2px bounds = getBounds();
@@ -522,6 +524,9 @@ box2px Region::getBounds(bool includeOffset) const {
 }
 box2px Region::getExtents() const {
 	return extents;
+}
+void Region::setExtents(const box2px& bbox){
+	extents=bbox;
 }
 box2px Region::getCursorBounds(bool includeOffset) const {
 	box2px box = (isDetached() ? getBounds(includeOffset) : bounds);

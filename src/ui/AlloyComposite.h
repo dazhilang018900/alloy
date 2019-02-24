@@ -49,13 +49,16 @@ public:
 	void setAlwaysShowHorizontalScrollBar(bool show);
 	void resetScrollPosition();
 	static const float scrollBarSize;
+	static const float slimScrollBarSize;
 	typedef std::vector<ValueType>::iterator iterator;
 	typedef std::vector<ValueType>::const_iterator const_iterator;
 	std::function<void(const aly::pixel2& scroll)> onScroll;
+	std::function<void(Region*)> onErase;
 	virtual void clear();
-	std::vector<std::shared_ptr<Region>>& getChildren() {
-		return children;
-	}
+	std::shared_ptr<Region> getChild(size_t index) const;
+	std::vector<std::shared_ptr<Region>>& getChildren();
+	const std::vector<std::shared_ptr<Region>>& getChildren() const;
+	size_t getChildrenSize() const;
 	iterator begin() {
 		return children.begin();
 	}
@@ -85,7 +88,6 @@ public:
 	void setOrientation(const Orientation& orient, pixel2 cellSpacing =pixel2(5, 5), pixel2 cellPadding = pixel2(0, 0));
 	virtual bool isScrollEnabled() const override;
 	void setScrollEnabled(bool enabled);
-
 	virtual pixel2 getDrawOffset() const override;
 	virtual void draw(AlloyContext* context) override;
 	virtual void drawDebug(AlloyContext* context) override;

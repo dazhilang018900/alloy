@@ -11,6 +11,7 @@
 #include "ui/AlloySlider.h"
 namespace aly {
 const float Composite::scrollBarSize = 15.0f;
+const float Composite::slimScrollBarSize = 2.0f;
 std::shared_ptr<Composite> MakeComposite(const std::string& name,
 		const AUnit2D& position, const AUnit2D& dimensions,
 		const Color& bgColor, const Color& borderColor,
@@ -216,6 +217,9 @@ void Composite::erase(const std::shared_ptr<Region>& node) {
 		}
 	}
 	tabChain.remove(node.get());
+	if(onErase){
+		onErase(node.get());
+	}
 }
 void Composite::erase(Region* node) {
 	for (auto iter = children.begin(); iter != children.end(); iter++) {
@@ -227,6 +231,9 @@ void Composite::erase(Region* node) {
 		}
 	}
 	tabChain.remove(node);
+	if(onErase){
+		onErase(node);
+	}
 }
 void Composite::putLast(const std::shared_ptr<Region>& region) {
 	size_t idx = 0;
@@ -291,6 +298,18 @@ void Composite::putFirst(Region* region) {
 	newList.insert(newList.begin(), children[pivot]);
 	children = newList;
 	AlloyApplicationContext()->requestUpdateCursorLocator();
+}
+std::shared_ptr<Region> Composite::getChild(size_t index) const {
+	return children[index];
+}
+std::vector<std::shared_ptr<Region>>& Composite::getChildren() {
+	return children;
+}
+const std::vector<std::shared_ptr<Region>>& Composite::getChildren() const{
+	return children;
+}
+size_t Composite::getChildrenSize() const{
+	return children.size();
 }
 void Composite::clear() {
 	AlloyDefaultContext()->clearEvents(this);

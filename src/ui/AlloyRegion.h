@@ -94,7 +94,7 @@ public:
 	void setAspectRatio(double val);
 	void setBounds(const AUnit2D& pt, const AUnit2D& dim);
 	void setBounds(const pixel2& pt, const pixel2& dim);
-	void setBounds(const box2px& bbox);
+	aly::box2px setBounds(const box2px& bbox);
 	AColor backgroundColor = MakeColor(COLOR_NONE);
 	AColor borderColor = MakeColor(COLOR_NONE);
 	AUnit1D borderWidth = UnitPX(2);
@@ -124,6 +124,7 @@ public:
 	double getAspectRatio() const;
 	virtual box2px getBounds(bool includeOffset = true) const;
 	virtual box2px getExtents() const;
+	virtual void setExtents(const box2px& bbox);
 	virtual box2px getCursorBounds(bool includeOffset = true) const;
 
 	virtual void setVisible(bool vis);

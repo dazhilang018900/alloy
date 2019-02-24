@@ -24,6 +24,8 @@ protected:
 	std::vector<DragSlot> targetSlots;
 	Timer timer;
 	Region* focusRegion=nullptr;
+	Region* dragRegion=nullptr;
+	bool dragging=false;
 	float slotOffset=0.0f;
 	bool clamp;
 public:
@@ -36,12 +38,21 @@ public:
 	DragComposite(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,const Orientation& orient,bool clamp=true);
 	virtual void add(const std::shared_ptr<Region>& region,bool appendToTab=false) override;
 	virtual void insert(size_t idx,const std::shared_ptr<Region>& region,bool appendToTab=false) override;
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& e) override;
 	virtual ~DragComposite(){}
 };
 typedef std::shared_ptr<DragComposite> DragCompositePtr;
 
-class DragBinComposite:public ScrollPane {
+class DragBinTab:public Composite{
 protected:
+	Orientation orient;
+public:
+	static float tabSize;
+	DragBinTab(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,const Orientation& orient);
+	virtual void draw(AlloyContext* context) override;
+};
+typedef std::shared_ptr<DragBinTab> DragBinTabPtr;
+class DragBinComposite:public DragComposite {
 public:
 	void handleDrop(const std::shared_ptr<Region>& region);
 	void handleDragOver(Region* region);
