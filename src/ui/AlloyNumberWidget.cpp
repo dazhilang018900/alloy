@@ -499,7 +499,7 @@ void NumberField::handleCharacterInput(AlloyContext* context,
 		}
 	}
 }
-void NumberField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
+bool NumberField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 	showCursor = true;
 	if (e.isDown()) {
 		switch (e.key) {
@@ -509,6 +509,7 @@ void NumberField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 			} else {
 				moveCursorTo((int) value.size(), e.isShiftDown());
 			}
+			return true;
 			break;
 		case GLFW_KEY_LEFT:
 			if (cursorStart > 0) {
@@ -516,12 +517,15 @@ void NumberField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 			} else {
 				moveCursorTo(0, e.isShiftDown());
 			}
+			return true;
 			break;
 		case GLFW_KEY_END:
 			moveCursorTo((int) value.size(), e.isShiftDown());
+			return true;
 			break;
 		case GLFW_KEY_HOME:
 			moveCursorTo(0, e.isShiftDown());
+			return true;
 			break;
 		case GLFW_KEY_BACKSPACE:
 			if (cursorEnd != cursorStart)
@@ -536,11 +540,13 @@ void NumberField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 						onKeyInput(this);
 				}
 			}
+			return true;
 			break;
 		case GLFW_KEY_A:
 			if (e.isControlDown()) {
 				cursorEnd = 0;
 				cursorStart = (int) (value.size());
+				return true;
 			}
 			break;
 		case GLFW_KEY_C:
@@ -548,6 +554,7 @@ void NumberField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 				glfwSetClipboardString(context->window,
 						value.substr(std::min(cursorEnd, cursorStart),
 								std::abs(cursorEnd - cursorStart)).c_str());
+				return true;
 			}
 			break;
 		case GLFW_KEY_X:
@@ -556,6 +563,7 @@ void NumberField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 						value.substr(std::min(cursorEnd, cursorStart),
 								std::abs(cursorEnd - cursorStart)).c_str());
 				erase();
+				return true;
 			}
 			break;
 		case GLFW_KEY_V:
@@ -569,6 +577,7 @@ void NumberField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 							cursorStart + (int) std::string(pasteText).size(),
 							e.isShiftDown());
 				}
+				return true;
 			}
 			break;
 		case GLFW_KEY_DELETE:
@@ -582,6 +591,7 @@ void NumberField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 				if (onKeyInput)
 					onKeyInput(this);
 			}
+			return true;
 			break;
 		case GLFW_KEY_ENTER:
 			if (onTextEntered) {
@@ -589,9 +599,11 @@ void NumberField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 			}
 			setFocus(false);
 			AlloyApplicationContext()->setCursorFocus(nullptr);
+			return true;
 			break;
 		}
 	}
+	return false;
 }
 
 bool NumberField::handleMouseInput(AlloyContext* context, const InputEvent& e) {
@@ -659,7 +671,7 @@ bool NumberField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			handleCharacterInput(context, e);
 			break;
 		case InputType::Key:
-			handleKeyInput(context, e);
+			return handleKeyInput(context, e);
 			break;
 		case InputType::Cursor:
 			if (handleCursorInput(context, e))

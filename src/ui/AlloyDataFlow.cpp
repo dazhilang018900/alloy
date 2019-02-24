@@ -1431,12 +1431,12 @@ std::string Group::toString(std::string indent) const {
 }
 bool DataFlow::copySelected() {
 	GroupPtr group = std::dynamic_pointer_cast<Group>(data->clone(true));
-	if (group->nodes.size() == 0)
-		return false;
-	//std::cout << "Copy\n" << group->toString() << std::endl;
-	clipboard = group;
+	if (group->nodes.size() == 0)return false;
+	AlloyApplicationContext()->addDeferredTask([=]{
+		clipboard=group; //fixes issue with destructor
+	});
 	if (onNodeAction) {
-		onNodeAction(clipboard.get(), NodeAction::Copy);
+		onNodeAction(group.get(), NodeAction::Copy);
 	}
 	return true;
 }

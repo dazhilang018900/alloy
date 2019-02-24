@@ -784,7 +784,7 @@ void TextField::handleCharacterInput(AlloyContext* context,
 			onKeyInput(this);
 	}
 }
-void TextField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
+bool TextField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 	showCursor = true;
 	if (e.isDown()) {
 		switch (e.key) {
@@ -794,6 +794,7 @@ void TextField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 			} else {
 				moveCursorTo((int) value.size(), e.isShiftDown());
 			}
+			return true;
 			break;
 		case GLFW_KEY_LEFT:
 			if (cursorStart > 0) {
@@ -801,12 +802,15 @@ void TextField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 			} else {
 				moveCursorTo(0, e.isShiftDown());
 			}
+			return true;
 			break;
 		case GLFW_KEY_END:
 			moveCursorTo((int) value.size(), e.isShiftDown());
+			return true;
 			break;
 		case GLFW_KEY_HOME:
 			moveCursorTo(0, e.isShiftDown());
+			return true;
 			break;
 		case GLFW_KEY_BACKSPACE:
 			if (cursorEnd != cursorStart)
@@ -818,11 +822,13 @@ void TextField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 				if (onKeyInput)
 					onKeyInput(this);
 			}
+			return true;
 			break;
 		case GLFW_KEY_A:
 			if (e.isControlDown()) {
 				cursorEnd = 0;
 				cursorStart = (int) (value.size());
+				return true;
 			}
 			break;
 		case GLFW_KEY_C:
@@ -830,6 +836,7 @@ void TextField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 				glfwSetClipboardString(context->window,
 						value.substr(std::min(cursorEnd, cursorStart),
 								std::abs(cursorEnd - cursorStart)).c_str());
+				return true;
 			}
 			break;
 		case GLFW_KEY_X:
@@ -838,6 +845,7 @@ void TextField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 						value.substr(std::min(cursorEnd, cursorStart),
 								std::abs(cursorEnd - cursorStart)).c_str());
 				erase();
+				return true;
 			}
 			break;
 		case GLFW_KEY_V:
@@ -853,6 +861,7 @@ void TextField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 						onTextEntered(this);
 					}
 				}
+				return true;
 			}
 			break;
 		case GLFW_KEY_DELETE:
@@ -863,6 +872,7 @@ void TextField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 			showDefaultLabel = false;
 			if (onKeyInput)
 				onKeyInput(this);
+			return true;
 			break;
 		case GLFW_KEY_ENTER:
 			if (onTextEntered) {
@@ -870,9 +880,11 @@ void TextField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 			}
 			setFocus(false);
 			AlloyApplicationContext()->setCursorFocus(nullptr);
+			return true;
 			break;
 		}
 	}
+	return false;
 }
 
 bool TextField::handleMouseInput(AlloyContext* context, const InputEvent& e) {
@@ -940,7 +952,7 @@ bool TextField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			handleCharacterInput(context, e);
 			break;
 		case InputType::Key:
-			handleKeyInput(context, e);
+			return handleKeyInput(context, e);
 			break;
 		case InputType::Cursor:
 			if (handleCursorInput(context, e))

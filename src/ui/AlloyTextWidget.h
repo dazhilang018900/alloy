@@ -112,7 +112,7 @@ protected:
 	void erase();
 	bool handleCursorInput(AlloyContext* context, const InputEvent& e);
 	bool handleMouseInput(AlloyContext* context, const InputEvent& e);
-	void handleKeyInput(AlloyContext* context, const InputEvent& e);
+	bool handleKeyInput(AlloyContext* context, const InputEvent& e);
 	void handleCharacterInput(AlloyContext* context, const InputEvent& e);
 	void moveCursorTo(int index, bool isShiftHeld = false);
 	void dragCursorTo(int index);
