@@ -208,7 +208,6 @@ void CarouselComposite::drawDebug(AlloyContext* context) {
 		}
 	}
 }
-
 CarouselComposite::CarouselComposite(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims, const Orientation& orient, float scrollStep,
 		float buttonWidth) :
