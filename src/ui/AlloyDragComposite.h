@@ -7,8 +7,8 @@
 
 #ifndef SRC_UI_ALLOYDRAGCOMPOSITE_H_
 #define SRC_UI_ALLOYDRAGCOMPOSITE_H_
+#include "AlloyCarouselComposite.h"
 #include "ui/AlloyComposite.h"
-#include "ui/AlloyScrollPane.h"
 namespace aly {
 struct DragSlot{
 	int index=-1;
@@ -18,7 +18,7 @@ struct DragSlot{
 	box2px bounds;
 	void draw(aly::AlloyContext* context);
 };
-class DragComposite:public ScrollPane {
+class DragComposite:public CarouselComposite {
 protected:
 	std::vector<DragSlot> sourceSlots;
 	std::vector<DragSlot> targetSlots;

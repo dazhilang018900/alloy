@@ -5,13 +5,13 @@
  *      Author: blake
  */
 
-#include "AlloyScrollPane.h"
+#include "AlloyCarouselComposite.h"
 
 #include "AlloyDrawUtil.h"
 #include "AlloyApplication.h"
 namespace aly {
 
-void ScrollPane::updateCursor(CursorLocator* cursorLocator) {
+void CarouselComposite::updateCursor(CursorLocator* cursorLocator) {
 	if (!ignoreCursorEvents)
 		cursorLocator->add(this);
 	for (std::shared_ptr<Region>& region : children) {
@@ -45,7 +45,7 @@ void ScrollPane::updateCursor(CursorLocator* cursorLocator) {
 	}
 }
 
-void ScrollPane::draw(AlloyContext* context) {
+void CarouselComposite::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
 	float w = bounds.dimensions.x;
@@ -147,7 +147,7 @@ void ScrollPane::draw(AlloyContext* context) {
 	}
 
 }
-void ScrollPane::pack(const pixel2& pos, const pixel2& dims,
+void CarouselComposite::pack(const pixel2& pos, const pixel2& dims,
 		const double2& dpmm, double pixelRatio, bool clamp) {
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
 	box2px bounds = getBounds(false);
@@ -176,7 +176,7 @@ void ScrollPane::pack(const pixel2& pos, const pixel2& dims,
 		downButton->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
 	}
 }
-void ScrollPane::drawDebug(AlloyContext* context) {
+void CarouselComposite::drawDebug(AlloyContext* context) {
 	drawBoundsLabel(context, name, context->getFontHandle(FontType::Bold));
 	for (std::shared_ptr<Region>& region : children) {
 		region->drawDebug(context);
@@ -209,7 +209,7 @@ void ScrollPane::drawDebug(AlloyContext* context) {
 	}
 }
 
-ScrollPane::ScrollPane(const std::string& name, const AUnit2D& pos,
+CarouselComposite::CarouselComposite(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims, const Orientation& orient, float scrollStep,
 		float buttonWidth) :
 		Composite(name, pos, dims){

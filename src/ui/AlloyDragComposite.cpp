@@ -13,7 +13,7 @@ namespace aly {
 float DragBinTab::tabSize = 20.0f;
 DragComposite::DragComposite(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims, const Orientation& orient, bool clamp) :
-		ScrollPane(name, pos, dims, orient), clamp(clamp) {
+		CarouselComposite(name, pos, dims, orient), clamp(clamp) {
 	setOrientation(orient);
 	Application::addListener(this);
 }
@@ -37,16 +37,16 @@ bool DragComposite::onEventHandler(AlloyContext* context, const InputEvent& e) {
 		context->requestPack();
 		dragging = false;
 	}
-	return ScrollPane::onEventHandler(context, e);
+	return CarouselComposite::onEventHandler(context, e);
 }
 void DragComposite::add(const std::shared_ptr<Region>& region,
 		bool appendToTab) {
-	ScrollPane::add(region, appendToTab);
+	CarouselComposite::add(region, appendToTab);
 	region->setClampDragToParentBounds(clamp);
 }
 void DragComposite::insert(size_t idx, const std::shared_ptr<Region>& region,
 		bool appendToTab) {
-	ScrollPane::insert(idx, region, appendToTab);
+	CarouselComposite::insert(idx, region, appendToTab);
 	region->setClampDragToParentBounds(clamp);
 }
 void DragComposite::setEmptySlot(const box2px& box) {
