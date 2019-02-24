@@ -105,15 +105,11 @@ void DragComposite::draw(AlloyContext* context) {
 	for (const DragSlot& slot : sourceSlots) {
 		if (dragRegion == slot.region || focusRegion == slot.region) {
 			srcIndex = slot.index;
-			dragOffset =
-					((orientation == Orientation::Vertical) ?
-							slot.bounds.dimensions.y : slot.bounds.dimensions.x);
+			dragOffset =((orientation == Orientation::Vertical) ?slot.bounds.dimensions.y+cellSpacing.y  : slot.bounds.dimensions.x+cellSpacing.x);
 		}
 		box2px bounds = slot.bounds;
 		bounds.position += slot.region->getDrawOffset();
-		bounds.dimensions.y +=
-				(orientation == Orientation::Vertical) ?
-						cellSpacing.y : cellSpacing.x;
+		bounds.dimensions.y +=(orientation == Orientation::Vertical) ?cellSpacing.y : cellSpacing.x;
 		if (context->isMouseContainedIn(bounds)) {
 			tarIndex = slot.index;
 		}
