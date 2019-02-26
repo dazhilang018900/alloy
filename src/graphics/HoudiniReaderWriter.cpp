@@ -26,12 +26,14 @@
 namespace aly {
 void SANITY_CHECK_HOUDINI() {
 	Mesh monkey;
-	ReadMeshFromFile("/home/blake/workspace/studio/alloy/assets/models/monkey.ply",	monkey);
+	ReadMeshFromFile(
+			"/home/blake/workspace/studio/alloy/assets/models/monkey.ply",
+			monkey);
 	monkey.pointIndexes.resize(monkey.vertexLocations.size());
-	for(int i=0;i<monkey.pointIndexes.size();i++){
-		monkey.pointIndexes[i]=i%100;
+	for (int i = 0; i < monkey.pointIndexes.size(); i++) {
+		monkey.pointIndexes[i] = i % 100;
 	}
-	WritePlyMeshToFile(MakeDesktopFile("monkey_orig.ply"), monkey,false);
+	WritePlyMeshToFile(MakeDesktopFile("monkey_orig.ply"), monkey, false);
 	std::cout << "Write Monkey Geo" << std::endl;
 	WriteMeshToHoudini(MakeDesktopFile("monkey.geo"), monkey, false, false);
 	std::cout << "Write Monkey BGeo" << std::endl;
@@ -40,9 +42,11 @@ void SANITY_CHECK_HOUDINI() {
 	std::cout << "Read Monkey Geo" << std::endl;
 	ReadMeshFromHoudini(MakeDesktopFile("monkey.geo"), monkey);
 	std::cout << "Write Monkey PLY" << std::endl;
-	WritePlyMeshToFile(MakeDesktopFile("monkey.ply"), monkey,false);
+	WritePlyMeshToFile(MakeDesktopFile("monkey.ply"), monkey, false);
 	Mesh eagle;
-	ReadMeshFromFile("/home/blake/workspace/studio/alloy/assets/models/eagle.ply",eagle);
+	ReadMeshFromFile(
+			"/home/blake/workspace/studio/alloy/assets/models/eagle.ply",
+			eagle);
 	std::cout << "Write Eagle Geo" << std::endl;
 	WriteMeshToHoudini(MakeDesktopFile("eagle.bgeo.gz"), eagle, true, true);
 	eagle.clear();
@@ -50,7 +54,7 @@ void SANITY_CHECK_HOUDINI() {
 	ReadMeshFromHoudini(MakeDesktopFile("eagle.bgeo.gz"), eagle);
 	std::cout << "Write Eagle PLY" << std::endl;
 	WriteMeshToFile(MakeDesktopFile("eagle.ply"), eagle);
-	std::cout<<"Done"<<std::endl;
+	std::cout << "Done" << std::endl;
 
 }
 void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
@@ -95,9 +99,9 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 
 	bool hasPrimitives = (mesh.triIndexes.size() > 0
 			|| mesh.quadIndexes.size() > 0);
-	size_t primCount = mesh.pointIndexes.size()+mesh.lineIndexes.size() + mesh.triIndexes.size()
-			+ mesh.quadIndexes.size();
-	size_t vertexCount = mesh.pointIndexes.size()+mesh.lineIndexes.size() * 2
+	size_t primCount = mesh.pointIndexes.size() + mesh.lineIndexes.size()
+			+ mesh.triIndexes.size() + mesh.quadIndexes.size();
+	size_t vertexCount = mesh.pointIndexes.size() + mesh.lineIndexes.size() * 2
 			+ mesh.triIndexes.size() * 3 + mesh.quadIndexes.size() * 4;
 	{
 		writer->beginArray();
@@ -359,7 +363,9 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 				if (mesh.triIndexes.size() > 0) {
 					writer->beginArray();
 					writer->putText("startvertex");
-					writer->putInt(mesh.lineIndexes.size() * 2+mesh.pointIndexes.size());
+					writer->putInt(
+							mesh.lineIndexes.size() * 2
+									+ mesh.pointIndexes.size());
 					writer->putText("nprimitives");
 					writer->putInt(mesh.triIndexes.size());
 					writer->putText("nvertices_rle");
@@ -376,7 +382,8 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 					writer->putText("startvertex");
 					writer->putInt(
 							mesh.triIndexes.size() * 3
-									+ mesh.lineIndexes.size() * 2+mesh.pointIndexes.size());
+									+ mesh.lineIndexes.size() * 2
+									+ mesh.pointIndexes.size());
 					writer->putText("nprimitives");
 					writer->putInt(mesh.quadIndexes.size());
 					writer->putText("nvertices_rle");
@@ -521,6 +528,43 @@ void ReadMeshFromHoudini(const std::string& file, aly::Mesh& mesh) {
 							}
 							foundColors = false;
 						}
+					} else if (vals.back() == "rawpagedata") {
+						if (foundPoints) {
+							ArrayPtr points = pr.second->asArray();
+							sint64 numPointAttributes = points->size();
+							mesh.vertexLocations.resize(numPointAttributes / 3);
+							float* buffer = mesh.vertexLocations.ptr();
+#pragma omp parallel for
+							for (int i = 0; i < numPointAttributes; i++) {
+								buffer[i] = points->getValue(i).as<float>();
+							}
+							foundPoints = false;
+						}
+						if (foundNormals) {
+							ArrayPtr points = pr.second->asArray();
+							sint64 numPointAttributes = points->size();
+							mesh.vertexNormals.resize(numPointAttributes / 3);
+							float* buffer = mesh.vertexNormals.ptr();
+#pragma omp parallel for
+							for (int i = 0; i < numPointAttributes; i++) {
+								buffer[i] = points->getValue(i).as<float>();
+							}
+							foundNormals = false;
+						}
+						if (foundColors) {
+							ArrayPtr points = pr.second->asArray();
+							sint64 numPointAttributes = points->size();
+							mesh.vertexColors.resize(numPointAttributes / 3);
+#pragma omp parallel for
+							for (int i = 0; i < numPointAttributes; i += 3) {
+								mesh.vertexColors[i / 3] = float4(
+										points->getValue(i).as<float>(),
+										points->getValue(i + 1).as<float>(),
+										points->getValue(i + 2).as<float>(),
+										1.0f);
+							}
+							foundColors = false;
+						}
 					}
 				}
 			}
@@ -543,72 +587,81 @@ void ReadMeshFromHoudini(const std::string& file, aly::Mesh& mesh) {
 			}
 		}
 	}
-	if (obj->hasKey("primitives")&& obj->getArray("primitives")->size()>0&& obj->getArray("primitives")->getArray(0)->size()>1) {
-		ArrayPtr primitives = obj->getArray("primitives")->getArray(0)->getArray(1);
-		int startIndex=0;
-		int primSize=0;
-		int primCount=0;
+	if (obj->hasKey("primitives") && obj->getArray("primitives")->size() > 0
+			&& obj->getArray("primitives")->getArray(0)->size() > 1) {
+		ArrayPtr primitives =
+				obj->getArray("primitives")->getArray(0)->getArray(1);
+		int startIndex = 0;
+		int primSize = 0;
+		int primCount = 0;
 		for (int idx = 0; idx < primitives->size(); idx++) {
-			Value v=primitives->getValue(idx);
-			if(v.isString()){
-				std::string str=v.as<std::string>();
-				if(str=="startindex"){
-					v=primitives->getValue(++idx);
-					startIndex=v.as<sint32>();
-				} else if(str=="nvertices_rle"){
-					v=primitives->getValue(++idx);
+			Value v = primitives->getValue(idx);
+			if (v.isString()) {
+				std::string str = v.as<std::string>();
+				if (str == "startindex") {
+					v = primitives->getValue(++idx);
+					startIndex = v.as<sint32>();
+				} else if (str == "nvertices_rle") {
+					v = primitives->getValue(++idx);
 					primSize = v.asArray()->getValue(0).as<sint32>();
 					primCount = v.asArray()->getValue(1).as<sint32>();
 				}
 			}
-			if(primSize==1){
+			if (primSize == 1) {
 				mesh.pointIndexes.resize(primCount);
-				size_t counter=startIndex;
-				for(int i=0;i<primCount;i++){
-					mesh.pointIndexes[i]=vertexIndexes[counter];
+				size_t counter = startIndex;
+				for (int i = 0; i < primCount; i++) {
+					mesh.pointIndexes[i] = vertexIndexes[counter];
 					counter++;
 				}
-				primSize=0;
-				startIndex=0;
-				primCount=0;
+				primSize = 0;
+				startIndex = 0;
+				primCount = 0;
 			}
-			if(primSize==2){
+			if (primSize == 2) {
 				mesh.lineIndexes.resize(primCount);
-				size_t counter=startIndex;
-				for(int i=0;i<primCount;i++){
-					mesh.lineIndexes[i]=uint2(vertexIndexes[counter],vertexIndexes[counter+1]);
-					counter+=2;
+				size_t counter = startIndex;
+				for (int i = 0; i < primCount; i++) {
+					mesh.lineIndexes[i] = uint2(vertexIndexes[counter],
+							vertexIndexes[counter + 1]);
+					counter += 2;
 				}
-				primSize=0;
-				startIndex=0;
-				primCount=0;
+				primSize = 0;
+				startIndex = 0;
+				primCount = 0;
 			}
-			if(primSize==3){
+			if (primSize == 3) {
 				mesh.triIndexes.resize(primCount);
-				size_t counter=startIndex;
-				for(int i=0;i<primCount;i++){
-					mesh.triIndexes[i]=uint3(vertexIndexes[counter],vertexIndexes[counter+1],vertexIndexes[counter+2]);
-					counter+=3;
+				size_t counter = startIndex;
+				for (int i = 0; i < primCount; i++) {
+					mesh.triIndexes[i] = uint3(vertexIndexes[counter],
+							vertexIndexes[counter + 1],
+							vertexIndexes[counter + 2]);
+					counter += 3;
 				}
-				primSize=0;
-				primSize=0;
-				startIndex=0;
-				primCount=0;
+				primSize = 0;
+				primSize = 0;
+				startIndex = 0;
+				primCount = 0;
 			}
-			if(primSize==4){
+			if (primSize == 4) {
 				mesh.quadIndexes.resize(primCount);
-				size_t counter=startIndex;
-				for(int i=0;i<primCount;i++){
-					mesh.quadIndexes[i]=uint4(vertexIndexes[counter],vertexIndexes[counter+1],vertexIndexes[counter+2],vertexIndexes[counter+3]);
-					counter+=4;
+				size_t counter = startIndex;
+				for (int i = 0; i < primCount; i++) {
+					mesh.quadIndexes[i] = uint4(vertexIndexes[counter],
+							vertexIndexes[counter + 1],
+							vertexIndexes[counter + 2],
+							vertexIndexes[counter + 3]);
+					counter += 4;
 				}
-				primSize=0;
-				primSize=0;
-				startIndex=0;
-				primCount=0;
+				primSize = 0;
+				primSize = 0;
+				startIndex = 0;
+				primCount = 0;
 			}
 		}
 	}
+	mesh.updateBoundingBox();
 }
 
 }
