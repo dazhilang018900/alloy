@@ -607,7 +607,8 @@ struct Value {
 	bool isArray() const;
 	bool isObject() const;
 	bool isString() const;
-
+	std::string toString();
+	void buildIndex(std::map<std::string,Value*>& index,std::string parent="");
 	template<typename T>
 	const T as() const;
 
@@ -631,10 +632,10 @@ private:
 		TYPE_NULL, TYPE_VALUE, TYPE_OBJECT, TYPE_ARRAY
 	};
 	Type m_type; // value, array or object?
+	//std::string m_str;
 	Variant m_value;
 	ObjectPtr m_object;
 	ArrayPtr m_array;
-
 	friend Object;
 	friend Array;
 };
@@ -866,6 +867,7 @@ struct HJSONReader: public HJSONHandler {
 	virtual void jsonKey(const std::string &key);
 	virtual void jsonBool(const bool &value);
 	virtual void jsonInt32(const sint32 &value);
+	virtual void jsonUInt32(const uint32 &value);
 	virtual void jsonReal32(const real32 &value);
 	virtual void uaBool(sint64 numElements, HJSONParser *parser);
 	virtual void uaReal32(sint64 numElements, HJSONParser *parser);
@@ -977,7 +979,7 @@ struct HJSONObjectWriter {
 private:
 	HJSONWriter *m_writer;
 };
-
+ObjectPtr ToHoudiniObject( ArrayPtr a );
 }
 }
 

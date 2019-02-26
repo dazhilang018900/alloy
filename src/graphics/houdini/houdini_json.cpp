@@ -1117,7 +1117,69 @@ bool Value::isObject() const {
 bool Value::isString() const {
 	return m_value.which() == 4;
 }
-
+void Value::buildIndex(
+		std::map<std::string, Value*>& index,std::string parent) {
+	if(parent.size()==0){
+		index.clear();
+		parent="";
+	}
+	if (m_type == TYPE_VALUE) {
+		if(isString()){
+			index[((parent.size()>0)?(parent+"."):"")+ as<std::string>()] = this;
+		}
+	} else if (m_type == TYPE_ARRAY) {
+		ArrayPtr ar = asArray();
+		int pad=1+std::ceil(std::log10((double)ar->size()));
+		for (int i = 0; i < ar->size(); i++) {
+			ar->getValue(i).buildIndex(index,MakeString()<<((parent.size()>0)?(parent+"."):"")<<ZeroPad(i,pad));
+		}
+	} else if (m_type == TYPE_OBJECT) {
+		ObjectPtr ob = asObject();
+		std::vector<std::string> keys;
+		ob->getKeys(keys);
+		for (int i = 0; i < keys.size(); i++) {
+			ob->getValue(keys[i]).buildIndex( index,((parent.size()>0)?(parent+"."):"") + keys[i]);
+		}
+	}
+}
+std::string Value::toString() {
+	/*
+	if (m_type == TYPE_VALUE) {
+		return m_str;
+	} else if (m_type == TYPE_ARRAY) {
+		ArrayPtr ar = asArray();
+		std::stringstream ss;
+		ss << "[";
+		for (int i = 0; i < ar->size(); i++) {
+			if (i < ar->size() - 1) {
+				ss << ar->getValue(i).toString() << ",";
+			} else {
+				ss << ar->getValue(i).toString() << "]";
+			}
+		}
+		if (ar->size() == 0)
+			ss << "]";
+		return ss.str();
+	} else if (m_type == TYPE_OBJECT) {
+		ObjectPtr ob = asObject();
+		std::stringstream ss;
+		std::vector<std::string> keys;
+		ob->getKeys(keys);
+		ss << "[";
+		for (int i = 0; i < keys.size(); i++) {
+			if (i < keys.size() - 1) {
+				ss << keys[i] << ":" << ob->getValue(keys[i]).toString() << ",";
+			} else {
+				ss << keys[i] << ":" << ob->getValue(keys[i]).toString() << "]";
+			}
+		}
+		if (keys.size() == 0)
+			ss << "]";
+		return ss.str();
+	}
+	*/
+	return "";
+}
 Value Value::createArray() {
 	Value v;
 	v.m_type = TYPE_ARRAY;
@@ -1364,11 +1426,24 @@ void HJSONReader::jsonBool(const bool &value) {
 void HJSONReader::jsonInt32(const sint32 &value) {
 	jsonValue<sint32>(value);
 }
-
+void HJSONReader::jsonUInt32(const uint32 &value) {
+	jsonValue<sint32>(static_cast<uint32>(value));
+}
 void HJSONReader::jsonReal32(const real32 &value) {
 	jsonValue<real32>(value);
 }
-
+ObjectPtr ToHoudiniObject(ArrayPtr a) {
+	ObjectPtr o = Object::create();
+	int numElements = (int) a->size();
+	for (int i = 0; i < numElements; i += 2) {
+		if (a->getValue(i).isString()) {
+			std::string key = a->get<std::string>(i);
+			Value value = a->getValue(i + 1);
+			o->append(key, value);
+		}
+	}
+	return o;
+}
 void HJSONReader::uaBool(sint64 numElements, HJSONParser *parser) {
 	//In binary JSON files, uniform bool arrays are stored as bit
 	//streams.  This method decodes the bit-stream, calling jsonBool()

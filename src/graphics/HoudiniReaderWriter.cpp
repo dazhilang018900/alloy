@@ -29,51 +29,66 @@ void SANITY_CHECK_HOUDINI() {
 	ReadMeshFromFile(
 			"/home/blake/workspace/studio/alloy/assets/models/monkey.ply",
 			monkey);
-	std::cout << "Monkey " << monkey << std::endl;
 	std::cout << "Write Monkey Geo" << std::endl;
-	WriteMeshToHoudini(MakeDesktopFile("monkey.geo"), monkey, false);
+	WriteMeshToHoudini(MakeDesktopFile("monkey.geo"), monkey, false, false);
 	std::cout << "Write Monkey BGeo" << std::endl;
-	WriteMeshToHoudini(MakeDesktopFile("monkey.bgeo"), monkey, true);
+	WriteMeshToHoudini(MakeDesktopFile("monkey.bgeo"), monkey, true, false);
 	std::cout << "Done" << std::endl;
+	monkey.clear();
+	ReadMeshFromHoudini(MakeDesktopFile("monkey.geo"), monkey);
+	std::cout << "Monkey " << monkey << std::endl;
+	WriteMeshToFile(MakeDesktopFile("monkey.ply"), monkey);
 
 	Mesh eagle;
 	ReadMeshFromFile(
 			"/home/blake/workspace/studio/alloy/assets/models/eagle.ply",
 			eagle);
-	std::cout << "Eagle " << eagle << std::endl;
 	std::cout << "Write Eagle Geo" << std::endl;
-	WriteMeshToHoudini(MakeDesktopFile("eagle.geo"), eagle, false);
-	std::cout << "Write Eagle BGeo" << std::endl;
-	WriteMeshToHoudini(MakeDesktopFile("eagle.bgeo"), eagle, true);
+	WriteMeshToHoudini(MakeDesktopFile("eagle.bgeo.gz"), eagle, true, true);
 	std::cout << "Done" << std::endl;
+	eagle.clear();
+	ReadMeshFromHoudini(MakeDesktopFile("eagle.bgeo.gz"), eagle);
+	std::cout << "Eagle " << eagle << std::endl;
+	WriteMeshToFile(MakeDesktopFile("eagle.ply"), eagle);
+
 }
 void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
-		bool binary,bool compress) {
+		bool binary, bool compress) {
 	using namespace aly::houdini;
 	int flags = std::ios_base::out;
 	std::shared_ptr<std::ostream> out;
 	std::shared_ptr<HJSONWriter> writer;
-	std::string tmpFile;
-	std::string ext=GetFileExtension(file);
-	if(ext=="gz"){
-		tmpFile=GetFileWithoutExtension(file);
+	std::string tmpFile = file;
+	std::string ext = GetFileExtension(file);
+	if (ext == "gz") {
+		tmpFile = GetFileWithoutExtension(file);
 	}
-	tmpFile=GetFileWithoutExtension(tmpFile);
-	if(compress){
+	tmpFile = GetFileWithoutExtension(tmpFile);
+	if (compress) {
 		if (binary) {
-			out=std::shared_ptr<std::ostream>(new ogzstream(tmpFile + ".bgeo.gz",std::ios_base::out | std::ios_base::binary));
-			writer = std::shared_ptr<HJSONWriter>(new HoudiniBinaryWriter(out.get()));
+			out = std::shared_ptr<std::ostream>(
+					new ogzstream(tmpFile + ".bgeo.gz",
+							std::ios_base::out | std::ios_base::binary));
+			writer = std::shared_ptr<HJSONWriter>(
+					new HoudiniBinaryWriter(out.get()));
 		} else {
-			out=std::shared_ptr<std::ostream>(new ogzstream(tmpFile + ".geo.gz", std::ios_base::out));
-			writer = std::shared_ptr<HJSONWriter>(new HoudiniTextWriter(out.get()));
+			out = std::shared_ptr<std::ostream>(
+					new ogzstream(tmpFile + ".geo.gz", std::ios_base::out));
+			writer = std::shared_ptr<HJSONWriter>(
+					new HoudiniTextWriter(out.get()));
 		}
 	} else {
 		if (binary) {
-			out=std::shared_ptr<std::ostream>(new std::ofstream(tmpFile + ".bgeo",std::ios_base::out | std::ios_base::binary));
-			writer = std::shared_ptr<HJSONWriter>(new HoudiniBinaryWriter(out.get()));
+			out = std::shared_ptr<std::ostream>(
+					new std::ofstream(tmpFile + ".bgeo",
+							std::ios_base::out | std::ios_base::binary));
+			writer = std::shared_ptr<HJSONWriter>(
+					new HoudiniBinaryWriter(out.get()));
 		} else {
-			out=std::shared_ptr<std::ostream>(new std::ofstream(tmpFile + ".geo",std::ios_base::out));
-			writer = std::shared_ptr<HJSONWriter>(new HoudiniTextWriter(out.get()));
+			out = std::shared_ptr<std::ostream>(
+					new std::ofstream(tmpFile + ".geo", std::ios_base::out));
+			writer = std::shared_ptr<HJSONWriter>(
+					new HoudiniTextWriter(out.get()));
 		}
 	}
 
@@ -325,7 +340,7 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 				if (mesh.triIndexes.size() > 0) {
 					writer->beginArray();
 					writer->putText("startvertex");
-					writer->putInt(mesh.lineIndexes.size()*2);
+					writer->putInt(mesh.lineIndexes.size() * 2);
 					writer->putText("nprimitives");
 					writer->putInt(mesh.triIndexes.size());
 					writer->putText("nvertices_rle");
@@ -340,7 +355,9 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 				if (mesh.quadIndexes.size() > 0) {
 					writer->beginArray();
 					writer->putText("startvertex");
-					writer->putInt(mesh.triIndexes.size() * 3+mesh.lineIndexes.size()*2);
+					writer->putInt(
+							mesh.triIndexes.size() * 3
+									+ mesh.lineIndexes.size() * 2);
 					writer->putText("nprimitives");
 					writer->putInt(mesh.quadIndexes.size());
 					writer->putText("nvertices_rle");
@@ -359,9 +376,181 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 	}
 	writer->endArray();
 }
-/*
- void ReadMeshFromHoudini(const std::string& file, aly::Mesh& mesh) {
+void ReadMeshFromHoudini(const std::string& file, aly::Mesh& mesh) {
+	using namespace aly::houdini;
+	mesh.clear();
+	std::string ext = GetFileExtension(file);
+	std::shared_ptr<std::istream> in;
+	HJSONReader reader;
+	HJSONParser p;
+	if (ext == "gz") {
+		in = std::shared_ptr<std::istream>(
+				new igzstream(file, std::ios_base::in | std::ios_base::binary));
+	} else if (ext == "bgeo") {
+		in = std::shared_ptr<std::ifstream>(
+				new std::ifstream(file,
+						std::ios_base::in | std::ios_base::binary));
+	} else if (ext == "geo") {
+		in = std::shared_ptr<std::ifstream>(
+				new std::ifstream(file, std::ios_base::in));
+	} else {
+		throw std::runtime_error(
+				MakeString() << "Unsupported extension for " << file);
+	}
+	if (!p.parse(in.get(), &reader)) {
+		throw std::runtime_error(MakeString() << "Could not parse " << file);
+	}
+	// now the reader contains the json data from the complete file
+	// we access it via the root json object.
 
- }
- */
+	// For houdini files, the root json object is an array.
+	// The reason for that is that the order of items needs
+	// to be contained which does not happen for json objects.
+	ArrayPtr root = reader.getRoot().asArray();
+
+	// the houdini root array is a flattened json object
+	// in order to work with it more conveniently (e.g. be able
+	// to query keys for existance etc.), we unflatten the array
+	// into an object again
+	ObjectPtr obj = ToHoudiniObject(root);
+	// now we can start to query the json data for its content. This requires
+	// to know the schema of the layout which unfortunately is not documented.
+	// The logger can be used to learn the schema from any given file.
+	sint64 numVertices = 0;
+	sint64 numPoints = 0;
+	sint64 numPrimitives = 0;
+	if (obj->hasKey("pointcount"))
+		numPoints = obj->get<int>("pointcount", 0);
+	if (obj->hasKey("vertexcount"))
+		numVertices = obj->get<int>("vertexcount", 0);
+	if (obj->hasKey("primitivecount"))
+		numPrimitives = obj->get<int>("primitivecount", 0);
+
+	std::cout << "#points:" << numPoints << std::endl;
+	std::cout << "#verts:" << numVertices << std::endl;
+	std::cout << "#prims:" << numPrimitives << std::endl;
+	if (obj->hasKey("attributes")) {
+		ObjectPtr attributes = ToHoudiniObject(obj->getArray("attributes"));
+		if (attributes->hasKey("pointattributes")) {
+			ArrayPtr pointAttributes = attributes->getArray("pointattributes");
+			bool foundPoints = false;
+			bool foundColors = false;
+			bool foundNormals = false;
+			for (int idx = 0; idx < pointAttributes->size(); idx++) {
+				std::map<std::string, Value*> index;
+				pointAttributes->getValue(idx).buildIndex(index);
+				for (auto pr : index) {
+					auto vals = aly::Split(pr.first, '.', false);
+					std::cout << "Vals " << pr.first << std::endl;
+					if (vals.back() == "P") {
+						foundPoints = true;
+					} else if (vals.back() == "N") {
+						foundNormals = true;
+					} else if (vals.back() == "Cd") {
+						foundColors = true;
+					} else if (vals.back() == "tuples") {
+						if (foundPoints) {
+							ArrayPtr points = pr.second->asArray();
+							sint64 numPointAttributes = points->size();
+							mesh.vertexLocations.resize(numPointAttributes);
+							for (int i = 0; i < numPointAttributes; i++) {
+								ArrayPtr pointAttribute = points->getArray(i);
+								mesh.vertexLocations[i] =
+										float3(
+												pointAttribute->getValue(0).as<
+														real32>(),
+												pointAttribute->getValue(1).as<
+														real32>(),
+												pointAttribute->getValue(2).as<
+														real32>());
+							}
+							foundPoints = false;
+						}
+						if (foundNormals) {
+							ArrayPtr points = pr.second->asArray();
+							sint64 numPointAttributes = points->size();
+							mesh.vertexNormals.resize(numPointAttributes);
+							for (int i = 0; i < numPointAttributes; i++) {
+								ArrayPtr pointAttribute = points->getArray(i);
+								mesh.vertexNormals[i] =
+										float3(
+												pointAttribute->getValue(0).as<
+														real32>(),
+												pointAttribute->getValue(1).as<
+														real32>(),
+												pointAttribute->getValue(2).as<
+														real32>());
+							}
+							foundNormals = false;
+						}
+						if (foundColors) {
+							ArrayPtr points = pr.second->asArray();
+							sint64 numPointAttributes = points->size();
+							mesh.vertexColors.resize(numPointAttributes);
+							for (int i = 0; i < numPointAttributes; i++) {
+								ArrayPtr pointAttribute = points->getArray(i);
+								mesh.vertexColors[i] =
+										float4(
+												pointAttribute->getValue(0).as<
+														real32>(),
+												pointAttribute->getValue(1).as<
+														real32>(),
+												pointAttribute->getValue(2).as<
+														real32>(),
+												(pointAttribute->size() == 4) ?
+														pointAttribute->getValue(
+																3).as<real32>() :
+														1.0f);
+							}
+							foundColors = false;
+						}
+					}
+				}
+			}
+
+		}
+		if (attributes->hasKey("vertexattributes")) {
+			ArrayPtr vertexAttributes = attributes->getArray(
+					"vertexattributes");
+			sint64 numVertexAttributes = vertexAttributes->size();
+			for (int i = 0; i < numVertexAttributes; ++i) {
+				ArrayPtr vertexAttribute = vertexAttributes->getArray(i);
+				// here we pass loading the attribute from the json object to a seperate function
+				//loadAttribute( pointAttribute, numPoints );
+			}
+		}
+		if (attributes->hasKey("primitiveattributes")) {
+			ArrayPtr primitiveAttributes = attributes->getArray(
+					"primitiveattributes");
+			sint64 numPrimitiveAttributes = primitiveAttributes->size();
+			for (int i = 0; i < numPrimitiveAttributes; ++i) {
+				ArrayPtr primitiveAttribute = primitiveAttributes->getArray(i);
+				// here we pass loading the attribute from the json object to a seperate function
+				//loadAttribute( pointAttribute, numPoints );
+			}
+		}
+		if (attributes->hasKey("globalattributes")) {
+			ArrayPtr globalAttributes = attributes->getArray(
+					"globalattributes");
+			sint64 numGlobalAttributes = globalAttributes->size();
+			for (int i = 0; i < numGlobalAttributes; ++i) {
+				ArrayPtr globalAttribute = globalAttributes->getArray(i);
+				// here we pass loading the attribute from the json object to a seperate function
+				//loadAttribute( pointAttribute, numPoints );
+			}
+		}
+	}
+	if (obj->hasKey("topology")) {
+		//loadTopology( toObject(o->getArray("topology")) );
+	}
+	if (obj->hasKey("primitives")) {
+		ArrayPtr primitives = obj->getArray("primitives");
+		int numPrimitives = (int) primitives->size();
+		for (int j = 0; j < numPrimitives; ++j) {
+			ArrayPtr primitive = primitives->getArray(j);
+			//loadPrimitive( primitive );
+		}
+	}
+}
+
 }
