@@ -1333,6 +1333,7 @@ ObjectPtr Object::getObject(const std::string &key) {
 	Value v = getValue(key);
 	if (v.isObject())
 		return v.asObject();
+	std::cerr<<"Could not find object key: "<<key<<std::endl;
 	return ObjectPtr();
 }
 
@@ -1340,6 +1341,7 @@ ArrayPtr Object::getArray(const std::string &key) {
 	Value v = getValue(key);
 	if (v.isArray())
 		return v.asArray();
+	std::cerr<<"Could not find array key: "<<key<<std::endl;
 	return ArrayPtr();
 }
 

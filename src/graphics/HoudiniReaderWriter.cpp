@@ -26,30 +26,26 @@
 namespace aly {
 void SANITY_CHECK_HOUDINI() {
 	Mesh monkey;
-	ReadMeshFromFile(
-			"/home/blake/workspace/studio/alloy/assets/models/monkey.ply",
-			monkey);
+	ReadMeshFromFile("/home/blake/workspace/studio/alloy/assets/models/monkey.ply",	monkey);
 	std::cout << "Write Monkey Geo" << std::endl;
 	WriteMeshToHoudini(MakeDesktopFile("monkey.geo"), monkey, false, false);
 	std::cout << "Write Monkey BGeo" << std::endl;
 	WriteMeshToHoudini(MakeDesktopFile("monkey.bgeo"), monkey, true, false);
-	std::cout << "Done" << std::endl;
 	monkey.clear();
+	std::cout << "Read Monkey Geo" << std::endl;
 	ReadMeshFromHoudini(MakeDesktopFile("monkey.geo"), monkey);
-	std::cout << "Monkey " << monkey << std::endl;
+	std::cout << "Write Monkey PLY" << std::endl;
 	WriteMeshToFile(MakeDesktopFile("monkey.ply"), monkey);
-
 	Mesh eagle;
-	ReadMeshFromFile(
-			"/home/blake/workspace/studio/alloy/assets/models/eagle.ply",
-			eagle);
+	ReadMeshFromFile("/home/blake/workspace/studio/alloy/assets/models/eagle.ply",eagle);
 	std::cout << "Write Eagle Geo" << std::endl;
 	WriteMeshToHoudini(MakeDesktopFile("eagle.bgeo.gz"), eagle, true, true);
-	std::cout << "Done" << std::endl;
 	eagle.clear();
+	std::cout << "Read Eagle Geo" << std::endl;
 	ReadMeshFromHoudini(MakeDesktopFile("eagle.bgeo.gz"), eagle);
-	std::cout << "Eagle " << eagle << std::endl;
+	std::cout << "Write Eagle PLY" << std::endl;
 	WriteMeshToFile(MakeDesktopFile("eagle.ply"), eagle);
+	std::cout<<"Done"<<std::endl;
 
 }
 void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
@@ -425,10 +421,6 @@ void ReadMeshFromHoudini(const std::string& file, aly::Mesh& mesh) {
 		numVertices = obj->get<int>("vertexcount", 0);
 	if (obj->hasKey("primitivecount"))
 		numPrimitives = obj->get<int>("primitivecount", 0);
-
-	std::cout << "#points:" << numPoints << std::endl;
-	std::cout << "#verts:" << numVertices << std::endl;
-	std::cout << "#prims:" << numPrimitives << std::endl;
 	if (obj->hasKey("attributes")) {
 		ObjectPtr attributes = ToHoudiniObject(obj->getArray("attributes"));
 		if (attributes->hasKey("pointattributes")) {
@@ -441,7 +433,6 @@ void ReadMeshFromHoudini(const std::string& file, aly::Mesh& mesh) {
 				pointAttributes->getValue(idx).buildIndex(index);
 				for (auto pr : index) {
 					auto vals = aly::Split(pr.first, '.', false);
-					std::cout << "Vals " << pr.first << std::endl;
 					if (vals.back() == "P") {
 						foundPoints = true;
 					} else if (vals.back() == "N") {
@@ -509,46 +500,75 @@ void ReadMeshFromHoudini(const std::string& file, aly::Mesh& mesh) {
 			}
 
 		}
-		if (attributes->hasKey("vertexattributes")) {
-			ArrayPtr vertexAttributes = attributes->getArray(
-					"vertexattributes");
-			sint64 numVertexAttributes = vertexAttributes->size();
-			for (int i = 0; i < numVertexAttributes; ++i) {
-				ArrayPtr vertexAttribute = vertexAttributes->getArray(i);
-				// here we pass loading the attribute from the json object to a seperate function
-				//loadAttribute( pointAttribute, numPoints );
-			}
-		}
-		if (attributes->hasKey("primitiveattributes")) {
-			ArrayPtr primitiveAttributes = attributes->getArray(
-					"primitiveattributes");
-			sint64 numPrimitiveAttributes = primitiveAttributes->size();
-			for (int i = 0; i < numPrimitiveAttributes; ++i) {
-				ArrayPtr primitiveAttribute = primitiveAttributes->getArray(i);
-				// here we pass loading the attribute from the json object to a seperate function
-				//loadAttribute( pointAttribute, numPoints );
-			}
-		}
-		if (attributes->hasKey("globalattributes")) {
-			ArrayPtr globalAttributes = attributes->getArray(
-					"globalattributes");
-			sint64 numGlobalAttributes = globalAttributes->size();
-			for (int i = 0; i < numGlobalAttributes; ++i) {
-				ArrayPtr globalAttribute = globalAttributes->getArray(i);
-				// here we pass loading the attribute from the json object to a seperate function
-				//loadAttribute( pointAttribute, numPoints );
-			}
-		}
 	}
+	std::vector<uint32_t> vertexIndexes;
 	if (obj->hasKey("topology")) {
-		//loadTopology( toObject(o->getArray("topology")) );
+		ArrayPtr topology = obj->getArray("topology");
+		if (topology->getValue(0).as<std::string>() == "pointref") {
+			topology = topology->getArray(1);
+			if (topology->getValue(0).as<std::string>() == "indices") {
+				topology = topology->getArray(1);
+				sint64 numPointAttributes = topology->size();
+				vertexIndexes.resize(numPointAttributes);
+				for (int i = 0; i < numPointAttributes; i++) {
+					vertexIndexes[i] = topology->getValue(i).as<sint32>();
+				}
+			}
+		}
 	}
-	if (obj->hasKey("primitives")) {
-		ArrayPtr primitives = obj->getArray("primitives");
-		int numPrimitives = (int) primitives->size();
-		for (int j = 0; j < numPrimitives; ++j) {
-			ArrayPtr primitive = primitives->getArray(j);
-			//loadPrimitive( primitive );
+	if (obj->hasKey("primitives")&& obj->getArray("primitives")->size()>0&& obj->getArray("primitives")->getArray(0)->size()>1) {
+		ArrayPtr primitives = obj->getArray("primitives")->getArray(0)->getArray(1);
+		int startIndex=0;
+		int primSize=0;
+		int primCount=0;
+		for (int idx = 0; idx < primitives->size(); idx++) {
+			Value v=primitives->getValue(idx);
+			if(v.isString()){
+				std::string str=v.as<std::string>();
+				if(str=="startindex"){
+					v=primitives->getValue(++idx);
+					startIndex=v.as<sint32>();
+				} else if(str=="nvertices_rle"){
+					v=primitives->getValue(++idx);
+					primSize = v.asArray()->getValue(0).as<sint32>();
+					primCount = v.asArray()->getValue(1).as<sint32>();
+				}
+			}
+			if(primSize==2){
+				mesh.lineIndexes.resize(primCount);
+				size_t counter=startIndex;
+				for(int i=0;i<primCount;i++){
+					mesh.lineIndexes[i]=uint2(vertexIndexes[counter],vertexIndexes[counter+1]);
+					counter+=2;
+				}
+				primSize=0;
+				startIndex=0;
+				primCount=0;
+			}
+			if(primSize==3){
+				mesh.triIndexes.resize(primCount);
+				size_t counter=startIndex;
+				for(int i=0;i<primCount;i++){
+					mesh.triIndexes[i]=uint3(vertexIndexes[counter],vertexIndexes[counter+1],vertexIndexes[counter+2]);
+					counter+=3;
+				}
+				primSize=0;
+				primSize=0;
+				startIndex=0;
+				primCount=0;
+			}
+			if(primSize==4){
+				mesh.quadIndexes.resize(primCount);
+				size_t counter=startIndex;
+				for(int i=0;i<primCount;i++){
+					mesh.quadIndexes[i]=uint4(vertexIndexes[counter],vertexIndexes[counter+1],vertexIndexes[counter+2],vertexIndexes[counter+3]);
+					counter+=4;
+				}
+				primSize=0;
+				primSize=0;
+				startIndex=0;
+				primCount=0;
+			}
 		}
 	}
 }
