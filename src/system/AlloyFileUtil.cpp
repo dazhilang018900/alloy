@@ -275,18 +275,23 @@ std::string ReadTextFileTail(const std::string& filename, int maxLines) {
 	return ss.str();
 }
 std::vector<char> ReadBinaryFile(const std::string& str) {
+	std::vector<char> out;
+	ReadBinaryFile(str,out);
+	return out;
+}
+void ReadBinaryFile(const std::string& str,std::vector<char>& memblock) {
 	streampos size;
 	ifstream file(str, ios::in | ios::binary | ios::ate);
 	if (file.is_open()) {
 		size = file.tellg();
-		std::vector<char> memblock((size_t) size);
+		memblock.resize((size_t) size);
 		file.seekg(0, ios::beg);
 		file.read(memblock.data(), size);
 		file.close();
-		return memblock;
 	} else
 		throw runtime_error(MakeString() << "Could not open " << str);
 }
+
 void WriteTextFile(const std::string& f, const std::string& str) {
 	ofstream file(f, ios::out);
 	if (file.is_open()) {
@@ -473,8 +478,13 @@ std::string GetFileNameWithoutExtension(const std::string& fileName) {
 
 std::string GetFileWithoutExtension(const std::string& fileName) {
 	if (fileName.find_last_of(".") != string::npos) {
+		size_t endPath = fileName.find_last_of(ALY_PATH_SEPARATOR);
 		size_t end = fileName.find_last_of(".");
-		return fileName.substr(0, end);
+		if(endPath==string::npos||endPath<end){//check that "." doesnt occur in parent directory name
+			return fileName.substr(0, end);
+		} else {
+			return fileName;
+		}
 	}
 	return fileName;
 }

@@ -23,7 +23,7 @@
 #include "AlloyMesh.h"
 namespace aly {
 void SANITY_CHECK_HOUDINI();
-void WriteMeshToHoudini(const std::string& file,const aly::Mesh& mesh,bool binary=true);
+void WriteMeshToHoudini(const std::string& file,const aly::Mesh& mesh,bool binary=true,bool compress=true);
 //void ReadMeshFromHoudini(const std::string& file,aly::Mesh& mesh);
 
 }

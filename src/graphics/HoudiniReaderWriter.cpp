@@ -21,6 +21,7 @@
 #include "HoudiniReaderWriter.h"
 #include "houdini/houdini_json.h"
 #include "system/AlloyFileUtil.h"
+#include "system/gzstream.h"
 #include <fstream>
 namespace aly {
 void SANITY_CHECK_HOUDINI() {
@@ -45,23 +46,37 @@ void SANITY_CHECK_HOUDINI() {
 	std::cout << "Write Eagle BGeo" << std::endl;
 	WriteMeshToHoudini(MakeDesktopFile("eagle.bgeo"), eagle, true);
 	std::cout << "Done" << std::endl;
-
 }
 void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
-		bool binary) {
+		bool binary,bool compress) {
 	using namespace aly::houdini;
-	std::string ext = GetFileExtension(file);
 	int flags = std::ios_base::out;
-	std::ofstream out;
+	std::shared_ptr<std::ostream> out;
 	std::shared_ptr<HJSONWriter> writer;
-	if (binary) {
-		out.open(GetFileWithoutExtension(file) + ".bgeo",
-				std::ios_base::out | std::ios_base::binary);
-		writer = std::shared_ptr<HJSONWriter>(new HoudiniBinaryWriter(&out));
-	} else {
-		out.open(GetFileWithoutExtension(file) + ".geo", std::ios_base::out);
-		writer = std::shared_ptr<HJSONWriter>(new HoudiniTextWriter(&out));
+	std::string tmpFile;
+	std::string ext=GetFileExtension(file);
+	if(ext=="gz"){
+		tmpFile=GetFileWithoutExtension(file);
 	}
+	tmpFile=GetFileWithoutExtension(tmpFile);
+	if(compress){
+		if (binary) {
+			out=std::shared_ptr<std::ostream>(new ogzstream(tmpFile + ".bgeo.gz",std::ios_base::out | std::ios_base::binary));
+			writer = std::shared_ptr<HJSONWriter>(new HoudiniBinaryWriter(out.get()));
+		} else {
+			out=std::shared_ptr<std::ostream>(new ogzstream(tmpFile + ".geo.gz", std::ios_base::out));
+			writer = std::shared_ptr<HJSONWriter>(new HoudiniTextWriter(out.get()));
+		}
+	} else {
+		if (binary) {
+			out=std::shared_ptr<std::ostream>(new std::ofstream(tmpFile + ".bgeo",std::ios_base::out | std::ios_base::binary));
+			writer = std::shared_ptr<HJSONWriter>(new HoudiniBinaryWriter(out.get()));
+		} else {
+			out=std::shared_ptr<std::ostream>(new std::ofstream(tmpFile + ".geo",std::ios_base::out));
+			writer = std::shared_ptr<HJSONWriter>(new HoudiniTextWriter(out.get()));
+		}
+	}
+
 	bool hasPrimitives = (mesh.triIndexes.size() > 0
 			|| mesh.quadIndexes.size() > 0);
 	size_t primCount = mesh.lineIndexes.size() + mesh.triIndexes.size()
