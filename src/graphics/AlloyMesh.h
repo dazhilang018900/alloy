@@ -187,7 +187,7 @@ public:
 };
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
 		std::basic_ostream<C, R> & ss, const Mesh & m) {
-	ss << "Mesh Dimensions:" << m.getBoundingBox().dimensions() << std::endl;
+	ss << "Mesh Dimensions:" << m.getBoundingBox().dimensions << std::endl;
 	if(m.vertexLocations.size()>0)ss << "\tVertex Locations: " << m.vertexLocations.size() << std::endl;
 	if(m.vertexNormals.size()>0)ss << "\tVertex Normals: " << m.vertexNormals.size() << std::endl;
 	if(m.vertexColors.size()>0)ss << "\tVertex Colors: " << m.vertexColors.size() << std::endl;
