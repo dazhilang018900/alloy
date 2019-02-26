@@ -27,6 +27,11 @@ namespace aly {
 void SANITY_CHECK_HOUDINI() {
 	Mesh monkey;
 	ReadMeshFromFile("/home/blake/workspace/studio/alloy/assets/models/monkey.ply",	monkey);
+	monkey.pointIndexes.resize(monkey.vertexLocations.size());
+	for(int i=0;i<monkey.pointIndexes.size();i++){
+		monkey.pointIndexes[i]=i%100;
+	}
+	WritePlyMeshToFile(MakeDesktopFile("monkey_orig.ply"), monkey,false);
 	std::cout << "Write Monkey Geo" << std::endl;
 	WriteMeshToHoudini(MakeDesktopFile("monkey.geo"), monkey, false, false);
 	std::cout << "Write Monkey BGeo" << std::endl;
@@ -35,7 +40,7 @@ void SANITY_CHECK_HOUDINI() {
 	std::cout << "Read Monkey Geo" << std::endl;
 	ReadMeshFromHoudini(MakeDesktopFile("monkey.geo"), monkey);
 	std::cout << "Write Monkey PLY" << std::endl;
-	WriteMeshToFile(MakeDesktopFile("monkey.ply"), monkey);
+	WritePlyMeshToFile(MakeDesktopFile("monkey.ply"), monkey,false);
 	Mesh eagle;
 	ReadMeshFromFile("/home/blake/workspace/studio/alloy/assets/models/eagle.ply",eagle);
 	std::cout << "Write Eagle Geo" << std::endl;
@@ -90,9 +95,9 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 
 	bool hasPrimitives = (mesh.triIndexes.size() > 0
 			|| mesh.quadIndexes.size() > 0);
-	size_t primCount = mesh.lineIndexes.size() + mesh.triIndexes.size()
+	size_t primCount = mesh.pointIndexes.size()+mesh.lineIndexes.size() + mesh.triIndexes.size()
 			+ mesh.quadIndexes.size();
-	size_t vertexCount = mesh.lineIndexes.size() * 2
+	size_t vertexCount = mesh.pointIndexes.size()+mesh.lineIndexes.size() * 2
 			+ mesh.triIndexes.size() * 3 + mesh.quadIndexes.size() * 4;
 	{
 		writer->beginArray();
@@ -128,6 +133,9 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 				{
 					std::vector<int> flatten;
 					flatten.reserve(vertexCount);
+					for (uint pt : mesh.pointIndexes) {
+						flatten.push_back(pt);
+					}
 					for (uint2 lin : mesh.lineIndexes) {
 						flatten.push_back(lin.x);
 						flatten.push_back(lin.y);
@@ -318,10 +326,25 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 				writer->putText("type");
 				writer->putText("Polygon_run");
 				writer->endArray();
-				if (mesh.lineIndexes.size() > 0) {
+				if (mesh.pointIndexes.size() > 0) {
 					writer->beginArray();
 					writer->putText("startvertex");
 					writer->putInt(0);
+					writer->putText("nprimitives");
+					writer->putInt(mesh.pointIndexes.size());
+					writer->putText("nvertices_rle");
+					{
+						writer->beginArray();
+						writer->putInt(1);
+						writer->putInt(mesh.pointIndexes.size());
+						writer->endArray();
+					}
+					writer->endArray();
+				}
+				if (mesh.lineIndexes.size() > 0) {
+					writer->beginArray();
+					writer->putText("startvertex");
+					writer->putInt(mesh.pointIndexes.size());
 					writer->putText("nprimitives");
 					writer->putInt(mesh.lineIndexes.size());
 					writer->putText("nvertices_rle");
@@ -336,7 +359,7 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 				if (mesh.triIndexes.size() > 0) {
 					writer->beginArray();
 					writer->putText("startvertex");
-					writer->putInt(mesh.lineIndexes.size() * 2);
+					writer->putInt(mesh.lineIndexes.size() * 2+mesh.pointIndexes.size());
 					writer->putText("nprimitives");
 					writer->putInt(mesh.triIndexes.size());
 					writer->putText("nvertices_rle");
@@ -353,7 +376,7 @@ void WriteMeshToHoudini(const std::string& file, const aly::Mesh& mesh,
 					writer->putText("startvertex");
 					writer->putInt(
 							mesh.triIndexes.size() * 3
-									+ mesh.lineIndexes.size() * 2);
+									+ mesh.lineIndexes.size() * 2+mesh.pointIndexes.size());
 					writer->putText("nprimitives");
 					writer->putInt(mesh.quadIndexes.size());
 					writer->putText("nvertices_rle");
@@ -444,6 +467,7 @@ void ReadMeshFromHoudini(const std::string& file, aly::Mesh& mesh) {
 							ArrayPtr points = pr.second->asArray();
 							sint64 numPointAttributes = points->size();
 							mesh.vertexLocations.resize(numPointAttributes);
+#pragma omp parallel for
 							for (int i = 0; i < numPointAttributes; i++) {
 								ArrayPtr pointAttribute = points->getArray(i);
 								mesh.vertexLocations[i] =
@@ -461,6 +485,7 @@ void ReadMeshFromHoudini(const std::string& file, aly::Mesh& mesh) {
 							ArrayPtr points = pr.second->asArray();
 							sint64 numPointAttributes = points->size();
 							mesh.vertexNormals.resize(numPointAttributes);
+#pragma omp parallel for
 							for (int i = 0; i < numPointAttributes; i++) {
 								ArrayPtr pointAttribute = points->getArray(i);
 								mesh.vertexNormals[i] =
@@ -478,6 +503,7 @@ void ReadMeshFromHoudini(const std::string& file, aly::Mesh& mesh) {
 							ArrayPtr points = pr.second->asArray();
 							sint64 numPointAttributes = points->size();
 							mesh.vertexColors.resize(numPointAttributes);
+#pragma omp parallel for
 							for (int i = 0; i < numPointAttributes; i++) {
 								ArrayPtr pointAttribute = points->getArray(i);
 								mesh.vertexColors[i] =
@@ -510,6 +536,7 @@ void ReadMeshFromHoudini(const std::string& file, aly::Mesh& mesh) {
 				topology = topology->getArray(1);
 				sint64 numPointAttributes = topology->size();
 				vertexIndexes.resize(numPointAttributes);
+#pragma omp parallel for
 				for (int i = 0; i < numPointAttributes; i++) {
 					vertexIndexes[i] = topology->getValue(i).as<sint32>();
 				}
@@ -533,6 +560,17 @@ void ReadMeshFromHoudini(const std::string& file, aly::Mesh& mesh) {
 					primSize = v.asArray()->getValue(0).as<sint32>();
 					primCount = v.asArray()->getValue(1).as<sint32>();
 				}
+			}
+			if(primSize==1){
+				mesh.pointIndexes.resize(primCount);
+				size_t counter=startIndex;
+				for(int i=0;i<primCount;i++){
+					mesh.pointIndexes[i]=vertexIndexes[counter];
+					counter++;
+				}
+				primSize=0;
+				startIndex=0;
+				primCount=0;
 			}
 			if(primSize==2){
 				mesh.lineIndexes.resize(primCount);

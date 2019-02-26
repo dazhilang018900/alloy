@@ -372,7 +372,12 @@ static bool exportFaceGroupToShape(shape_t &shape, std::map<vertex_index, unsign
 	// Flatten vertices and indices
 	for (size_t i = 0; i < faceGroup.size(); i++) {
 		const std::vector<vertex_index> &face = faceGroup[i];
-		if (face.size() == 2) {
+		if (face.size() == 1) {
+			vertex_index i0 = face[0];
+			unsigned int v0 = updateVertex(vertexCache, shape.mesh.positions,shape.mesh.colors, shape.mesh.normals, shape.mesh.texcoords, in_positions, in_colors,in_normals, in_texcoords,i0);
+			shape.mesh.pointIndices.push_back(v0);
+			shape.mesh.material_ids.push_back(material_id);
+		} if (face.size() == 2) {
 			vertex_index i0 = face[0];
 			vertex_index i1 = face[1];
 			unsigned int v0 = updateVertex(vertexCache, shape.mesh.positions,shape.mesh.colors, shape.mesh.normals, shape.mesh.texcoords, in_positions, in_colors,in_normals, in_texcoords,

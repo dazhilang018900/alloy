@@ -832,6 +832,7 @@ void Mesh::clear() {
 	lineIndexes.clear();
 	textureMap.clear();
 	textureImage.clear();
+	pointIndexes.clear();
 	setDirty(true);
 }
 bool Mesh::save(const std::string& file) {
@@ -922,6 +923,11 @@ void WriteObjMeshToFile(const std::string& file, const Mesh& mesh) {
 	if (mesh.textureMap.size() > 0 && mesh.textureImage.size() > 0)
 		out << "usemtl material_0\n";
 	i = 0;
+	for (uint32_t pt : mesh.pointIndexes) {
+		out << "f ";
+		out << (pt + 1) << "\n";
+		i++;
+	}
 	for (uint2 line : mesh.lineIndexes.data) {
 		out << "f ";
 		out << (line.x + 1) << " ";
@@ -996,7 +1002,7 @@ void WritePlyMeshToFile(const std::string& file, const Mesh& mesh,
 	int numPts = (int) (mesh.vertexLocations.size());
 
 	int numPolys = (int) (mesh.quadIndexes.size() + mesh.triIndexes.size()
-			+ mesh.lineIndexes.size());
+			+ mesh.lineIndexes.size()+mesh.pointIndexes.size());
 	std::vector<unsigned char> pointColors;
 
 	if (mesh.vertexColors.size() > 0) {
@@ -1119,6 +1125,13 @@ void WritePlyMeshToFile(const std::string& file, const Mesh& mesh,
 			}
 			ply.putElement(&faceT);
 		}
+		sz = (int) (mesh.pointIndexes.size());
+		for (int i = 0; i < sz; i++) {
+			faceT.nverts = 1;
+			faceT.uvcount = 0;
+			faceT.verts[0] = mesh.pointIndexes[i];
+			ply.putElement(&faceT);
+		}
 	} else {
 		int sz = (int) (mesh.quadIndexes.size());
 		for (int i = 0; i < sz; i++) {
@@ -1142,6 +1155,12 @@ void WritePlyMeshToFile(const std::string& file, const Mesh& mesh,
 				face.nverts = 2;
 				face.verts[j] = mesh.lineIndexes[i][j];
 			}
+			ply.putElement(&face);
+		}
+		sz = (int) (mesh.pointIndexes.size());
+		for (int i = 0; i < sz; i++) {
+			face.nverts = 1;
+			face.verts[0] = mesh.pointIndexes[i];
 			ply.putElement(&face);
 		}
 	}
@@ -1484,12 +1503,14 @@ void ReadObjMeshFromFile(const std::string& file, Mesh& mesh) {
 	uint32_t lineIndexCount = 0;
 	uint32_t triIndexCount = 0;
 	uint32_t quadIndexCount = 0;
+	uint32_t pointIndexCount=0;
 	for (int n = 0; n < (int) shapes.size(); n++) {
 		shape_t& shape = shapes[n];
 		positionCount += (uint32_t) shape.mesh.positions.size();
 		colorCount += (uint32_t) shape.mesh.colors.size();
 		normalCount += (uint32_t) shape.mesh.normals.size();
 		texCount += (uint32_t) shape.mesh.texcoords.size();
+		pointIndexCount+=(uint32_t) shape.mesh.pointIndices.size();
 		lineIndexCount += (uint32_t) shape.mesh.lineIndices.size();
 		triIndexCount += (uint32_t) shape.mesh.triIndices.size();
 		quadIndexCount += (uint32_t) shape.mesh.quadIndices.size();
@@ -1501,16 +1522,21 @@ void ReadObjMeshFromFile(const std::string& file, Mesh& mesh) {
 	mesh.lineIndexes.resize(lineIndexCount / 2);
 	mesh.triIndexes.resize(triIndexCount / 3);
 	mesh.quadIndexes.resize(quadIndexCount / 4);
+	mesh.pointIndexes.resize(pointIndexCount);
 	positionCount = 0;
 	colorCount = 0;
 	normalCount = 0;
 	texCount = 0;
+	pointIndexCount=0;
 	lineIndexCount = 0;
 	triIndexCount = 0;
 	quadIndexCount = 0;
 	mesh.textureMap.clear();
 	for (int n = 0; n < (int) shapes.size(); n++) {
 		shape_t& shape = shapes[n];
+		for (size_t i = 0; i < shape.mesh.pointIndices.size(); i ++) {
+			mesh.pointIndexes[pointIndexCount++] =positionCount + shape.mesh.pointIndices[i];
+		}
 		for (size_t i = 0; i < shape.mesh.lineIndices.size(); i += 2) {
 			mesh.lineIndexes[lineIndexCount++] = uint2(
 					positionCount + shape.mesh.lineIndices[i],
@@ -1626,6 +1652,7 @@ void ReadPlyMeshFromFile(const std::string& file, Mesh &mesh) {
 	mesh.lineIndexes.clear();
 	mesh.triIndexes.clear();
 	mesh.quadIndexes.clear();
+	mesh.pointIndexes.clear();
 	mesh.vertexLocations.clear();
 	mesh.vertexNormals.clear();
 	mesh.vertexColors.clear();
@@ -1752,8 +1779,9 @@ void ReadPlyMeshFromFile(const std::string& file, Mesh &mesh) {
 											faceTex.uvs[2 * i + 1]));
 						}
 					} else if (faceTex.nverts == 2) {
-						mesh.lineIndexes.append(
-								uint2(faceTex.verts[0], faceTex.verts[1]));
+						mesh.lineIndexes.append(uint2(faceTex.verts[0], faceTex.verts[1]));
+					} else if(faceTex.nverts==1){
+						mesh.pointIndexes.push_back(faceTex.verts[0]);
 					}
 				}
 			} else {
@@ -1769,8 +1797,9 @@ void ReadPlyMeshFromFile(const std::string& file, Mesh &mesh) {
 								uint3(face.verts[0], face.verts[1],
 										face.verts[2]));
 					} else if (face.nverts == 2) {
-						mesh.lineIndexes.append(
-								uint2(face.verts[0], face.verts[1]));
+						mesh.lineIndexes.append(uint2(face.verts[0], face.verts[1]));
+					}else if(faceTex.nverts==1){
+						mesh.pointIndexes.push_back(face.verts[0]);
 					}
 				}
 			}

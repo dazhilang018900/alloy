@@ -94,6 +94,7 @@ protected:
 	box3f boundingBox;
 public:
 	friend struct GLMesh;
+
 	Vector3f vertexLocations;
 	Vector3f vertexNormals;
 	Vector4f vertexColors;
@@ -101,7 +102,7 @@ public:
 	Vector4ui quadIndexes;
 	Vector3ui triIndexes;
 	Vector2ui lineIndexes;
-
+	std::vector<uint32_t> pointIndexes;
 	Vector2f textureMap;
 	Image4f textureImage;
 
@@ -118,7 +119,7 @@ public:
 		mesh.quadIndexes = quadIndexes;
 		mesh.triIndexes = triIndexes;
 		mesh.lineIndexes = lineIndexes;
-
+		mesh.pointIndexes=pointIndexes;
 		mesh.textureMap = textureMap;
 		mesh.textureImage = textureImage;
 		mesh.pose = pose;
@@ -129,12 +130,12 @@ public:
 	}
 	void flipNormals();
 	bool isEmpty()const {
-		return (vertexLocations.size()==0&&vertexNormals.size()==0&&vertexColors.size()==0&&lineIndexes.size()==0&&quadIndexes.size()==0&&triIndexes.size()==0&&textureMap.size()==0);
+		return (vertexLocations.size()==0&&pointIndexes.size()==0&&vertexNormals.size()==0&&vertexColors.size()==0&&lineIndexes.size()==0&&quadIndexes.size()==0&&triIndexes.size()==0&&textureMap.size()==0);
 	}
 	template<class Archive> void serialize(Archive & archive) {
 		archive(CEREAL_NVP(pose), CEREAL_NVP(vertexLocations),
 				CEREAL_NVP(vertexNormals), CEREAL_NVP(vertexColors),
-				CEREAL_NVP(quadIndexes), CEREAL_NVP(triIndexes),CEREAL_NVP(lineIndexes),
+				CEREAL_NVP(quadIndexes), CEREAL_NVP(triIndexes),CEREAL_NVP(lineIndexes),CEREAL_NVP(pointIndexes),
 				CEREAL_NVP(textureMap), CEREAL_NVP(textureImage));
 	}
 	void setContext(const std::shared_ptr<AlloyContext>& context);
@@ -186,17 +187,16 @@ public:
 };
 template<class C, class R> std::basic_ostream<C, R> & operator <<(
 		std::basic_ostream<C, R> & ss, const Mesh & m) {
-	ss << "Mesh: " << std::endl;
-	ss << "\tBounds: " << m.getBoundingBox() << std::endl;
-	ss << "\tVertex Locations: " << m.vertexLocations.size() << std::endl;
-	ss << "\tVertex Normals: " << m.vertexNormals.size() << std::endl;
-	ss << "\tVertex Colors: " << m.vertexColors.size() << std::endl;
-	ss << "\tQuad Faces: " << m.quadIndexes.size() << std::endl;
-	ss << "\tTriangle Faces: " << m.triIndexes.size() << std::endl;
-	ss << "\tLine Indexes: " << m.lineIndexes.size() << std::endl;
-	ss << "\tUVs: " << m.textureMap.size() << std::endl;
-	ss << "\tTexture: " << m.textureImage << std::endl;
-	ss << "\tPose: " << m.pose << std::endl;
+	ss << "Mesh Dimensions:" << m.getBoundingBox().dimensions() << std::endl;
+	if(m.vertexLocations.size()>0)ss << "\tVertex Locations: " << m.vertexLocations.size() << std::endl;
+	if(m.vertexNormals.size()>0)ss << "\tVertex Normals: " << m.vertexNormals.size() << std::endl;
+	if(m.vertexColors.size()>0)ss << "\tVertex Colors: " << m.vertexColors.size() << std::endl;
+	if(m.quadIndexes.size()>0)ss << "\tQuad Faces: " << m.quadIndexes.size() << std::endl;
+	if(m.triIndexes.size()>0)ss << "\tTriangle Faces: " << m.triIndexes.size() << std::endl;
+	if(m.lineIndexes.size()>0)ss << "\tLine Indexes: " << m.lineIndexes.size() << std::endl;
+	if(m.pointIndexes.size()>0)ss << "\tPoint Indexes: " << m.pointIndexes.size() << std::endl;
+	if(m.textureMap.size()>0)ss << "\tTexture Map: " << m.textureMap.size() << std::endl;
+	if(m.textureImage.size()>0)ss << "\tTexture Image: " << m.textureImage.dimensions() << std::endl;
 	return ss;
 }
 void ReadMeshFromFile(const std::string& file, Mesh& mesh);

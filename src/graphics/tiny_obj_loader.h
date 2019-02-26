@@ -41,6 +41,7 @@ typedef struct {
   std::vector<float> colors;
   std::vector<float> normals;
   std::vector<float> texcoords;
+  std::vector<unsigned int> pointIndices;
   std::vector<unsigned int> quadIndices;
   std::vector<unsigned int> triIndices;
   std::vector<unsigned int> lineIndices;
