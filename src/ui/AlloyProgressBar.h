@@ -26,9 +26,8 @@
 namespace aly {
 
 
-class ProgressBar: public Composite {
+class ProgressBar: public Region {
 private:
-	TextLabelPtr textLabel;
 	float value;
 	std::string label;
 public:
@@ -57,6 +56,42 @@ public:
 
 
 typedef std::shared_ptr<ProgressBar> ProgressBarPtr;
+
+class ProgressCircle: public Region{
+private:
+	float value;
+	std::string label;
+	float thickness;
+public:
+	AColor foregroundColor;
+	AColor textColor;
+	void setThickness(float p);
+	virtual void draw(AlloyContext* context) override;
+	inline void setValue(float p) {
+		value = clamp(p, 0.0f, 1.0f);
+	}
+	inline float getValue() const {
+		return value;
+	}
+	inline std::string getLabel() const {
+		return label;
+	}
+	inline void setValue(const std::string& l) {
+		label = l;
+	}
+	inline void setValue(const std::string& l, float p) {
+		label = l;
+		value = clamp(p, 0.0f, 1.0f);
+	}
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
+			override;
+	ProgressCircle(const std::string& name, const AUnit2D& pt,
+			const AUnit2D& dims);
+};
+
+
+typedef std::shared_ptr<ProgressCircle> ProgressCirclePtr;
+
 } /* namespace aly */
 
 #endif /* SRC_UI_ALLOYPROGRESSBAR_H_ */
