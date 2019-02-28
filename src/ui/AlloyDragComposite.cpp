@@ -636,10 +636,11 @@ DragCompositePtr DragBinComposite::getBin(int idx) const {
 void DragBinComposite::handleDragOver(Region* region) {
 	AlloyContext* context = AlloyApplicationContext().get();
 	aly::pixel2 cursor = context->getCursorPosition();
+	Composite* comp = dynamic_cast<Composite*>(region->parent);
+	context->setObjectFocus(comp->parent);
 	for (int n = 0; n < children.size(); n++) {
 		auto bin = getBin(n);
 		bool found = false;
-		Composite* comp = dynamic_cast<Composite*>(region->parent);
 		if (comp != bin.get() && bin.get() != nullptr) {
 			box2px bounds = bin->getBounds();
 			if (bin->isVisible() && context->isMouseContainedIn(bounds)) {
@@ -700,12 +701,14 @@ void DragBinComposite::handleDrop(const std::shared_ptr<Region>& region) {
 					bbox.position += slots[m].region->getDrawOffset();
 					if (bbox.contains(cursor)) {
 						bin->insert(m, region);
+						AlloyApplicationContext()->setObjectFocus(bin->parent);
 						found = true;
 						break;
 					}
 				}
 				if (!found) {
 					bin->add(region);
+					AlloyApplicationContext()->setObjectFocus(bin->parent);
 					found = true;
 				}
 			}
