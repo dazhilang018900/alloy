@@ -100,6 +100,26 @@ Carousel Example
 -------------------------
 [![DialogEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0044.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/CarouselEx.cpp)
 
+Table Pane Example
+-------------------------
+[![TablePaneEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0038.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/TablePaneEx.cpp)
+
+DataFlow Example
+-------------------------
+[![DataFlowEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0033.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/DataFlowEx.cpp)
+
+Timeline Example
+-------------------------
+[![TimelineEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0039.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/TimelineEx.cpp)
+
+Expand Bar Example
+-------------------------
+[![ExpandBarEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0008.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/ExpandBarEx.cpp)
+
+Expand Tree Example
+-------------------------
+[![ExpandTreeEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0032.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/ExpandTreeEx.cpp)
+
 Absolute/Relative Positioning Example
 -------------------------
 [![UnitsEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0000.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/UnitsEx.cpp)
@@ -124,18 +144,6 @@ Image Example
 -------------------------
 [![ImageEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0005.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/ImageEx.cpp)
 
-Timeline Example
--------------------------
-[![TimelineEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0039.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/TimelineEx.cpp)
-
-Expand Bar Example
--------------------------
-[![ExpandBarEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0008.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/ExpandBarEx.cpp)
-
-Expand Tree Example
--------------------------
-[![ExpandTreeEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0032.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/ExpandTreeEx.cpp)
-
 Tab Pane Example
 -------------------------
 [![TabPaneEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0036.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/TabPaneEx.cpp)
@@ -151,14 +159,6 @@ Graph Example
 Window Pane Example
 -------------------------
 [![WindowPaneEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0029.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/WindowPaneEx.cpp)
-
-Table Pane Example
--------------------------
-[![TablePaneEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0038.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/TablePaneEx.cpp)
-
-DataFlow Example
--------------------------
-[![DataFlowEx](https://github.com/rgb2hsv/blob/blob/master/screenshots/screenshot0033.png)](https://github.com/rgb2hsv/alloy/blob/master/src/example/DataFlowEx.cpp)
 
 Force Directed Graph Example
 -------------------------

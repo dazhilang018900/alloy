@@ -21,6 +21,7 @@ ArrowButton::ArrowButton(const std::string& label, const AUnit2D& position,
 }
 bool ArrowButton::onEventHandler(AlloyContext* context,
 		const InputEvent& event) {
+	if(!isVisible())return false;
 	if (event.type == InputType::MouseButton && context->isMouseOver(this, true)
 			&& event.isDown()) {
 		if (event.button == GLFW_MOUSE_BUTTON_LEFT) {

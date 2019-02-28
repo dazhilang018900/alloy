@@ -5,7 +5,7 @@
  *      Author: blake
  */
 
-#include "CarouselEx.h"0.0f, 0.0f, 0.0f
+#include "CarouselEx.h"
 #include "ui/AlloyDragComposite.h"
 #include "ui/AlloyDrawUtil.h"
 namespace aly {
@@ -107,6 +107,7 @@ bool CarouselEx::init(Composite& rootNode) {
 				};
 		vscroller->add(region);
 	}
+
 	rootNode.add(hvscroller);
 	hvscroller->backgroundColor = MakeColor(getContext()->theme.DARKEST);
 	rootNode.backgroundColor = MakeColor(getContext()->theme.DARKEST);
@@ -148,7 +149,6 @@ bool CarouselEx::init(Composite& rootNode) {
 						nvgFontFaceId(nvg, context->getFontHandle(FontType::Normal));
 						drawText(nvg, bounds.position + (bounds.dimensions)*0.5f, region->getName(),FontStyle::Outline);
 					};
-
 			bin->add(region);
 		}
 	}

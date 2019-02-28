@@ -43,25 +43,30 @@ public:
 };
 typedef std::shared_ptr<DragComposite> DragCompositePtr;
 
-class DragBinTab:public Composite{
-protected:
-	Orientation orientation;
-public:
-	static float tabSize;
-	DragBinTab(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,const Orientation& orient);
-	virtual void draw(AlloyContext* context) override;
-};
-typedef std::shared_ptr<DragBinTab> DragBinTabPtr;
+
 class DragBinComposite:public DragComposite {
 public:
 	void handleDrop(const std::shared_ptr<Region>& region);
 	void handleDragOver(Region* region);
 	DragBinComposite(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,const Orientation& orient);
-	DragCompositePtr addBin(const std::string& name,int size);
+	DragCompositePtr addBin(const std::string& name,int size,Composite* after=nullptr);
 	DragCompositePtr getBin(int idx) const ;
 	virtual ~DragBinComposite(){}
 };
 typedef std::shared_ptr<DragBinComposite> DragBinCompositePtr;
+
+class DragBinTab:public Composite{
+protected:
+	Orientation orientation;
+	aly::IconButtonPtr addButton;
+	aly::IconButtonPtr delButton;
+public:
+	static float tabSize;
+	friend class DragBinComposite;
+	DragBinTab(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,const Orientation& orient);
+	virtual void draw(AlloyContext* context) override;
+};
+typedef std::shared_ptr<DragBinTab> DragBinTabPtr;
 
 } /* namespace aly */
 
