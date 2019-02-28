@@ -115,8 +115,7 @@ bool CarouselEx::init(Composite& rootNode) {
 	for (int n = 0; n < binSizes.size(); n++) {
 		auto bin = hvscroller->addBin(
 				MakeString() << "[" << (char) ('A' + n) << "]", 100);
-		bin->backgroundColor = MakeColor(getContext()->theme.DARK);
-		bin->setAlwaysShowVerticalScrollBar(true);
+
 		for (int m = 0; m < binSizes[n]; m++) {
 			DrawPtr region = DrawPtr(
 					new Draw(

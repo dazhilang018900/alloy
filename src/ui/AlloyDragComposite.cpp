@@ -809,7 +809,14 @@ DragCompositePtr DragBinComposite::addBin(const std::string& name, int size,Comp
 	} else {
 		DragComposite::add(comp);
 	}
-
+	dcomp->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	dcomp->setAlwaysShowVerticalScrollBar(true);
+	dcomp->onMouseDown=[=](AlloyContext* context,const InputEvent& e){
+		if(e.button==GLFW_MOUSE_BUTTON_LEFT){
+			context->setObjectFocus(comp.get());
+		}
+		return false;
+	};
 	return dcomp;
 }
 DragBinComposite::DragBinComposite(const std::string& name, const AUnit2D& pos,
