@@ -56,7 +56,7 @@ bool CarouselEx::init(Composite& rootNode) {
 						nvgRoundedRect(nvg, bounds.position.x + 2, bounds.position.y + 2,
 								bounds.dimensions.x - 6, bounds.dimensions.y - 6,context->theme.CORNER_RADIUS);
 						nvgStrokeWidth(nvg, 2.0f);
-						nvgStrokeColor(nvg,context->theme.FOCUS);
+						nvgStrokeColor(nvg,context->theme.LIGHTEST);
 						nvgStroke(nvg);
 					}
 					nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
@@ -96,7 +96,7 @@ bool CarouselEx::init(Composite& rootNode) {
 						nvgRoundedRect(nvg, bounds.position.x + 3, bounds.position.y + 3,
 								bounds.dimensions.x - 6-Composite::scrollBarSize, bounds.dimensions.y - 6,context->theme.CORNER_RADIUS);
 						nvgStrokeWidth(nvg, 2.0f);
-						nvgStrokeColor(nvg,context->theme.FOCUS);
+						nvgStrokeColor(nvg,context->theme.LIGHTEST);
 						nvgStroke(nvg);
 					}
 					nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
@@ -141,7 +141,7 @@ bool CarouselEx::init(Composite& rootNode) {
 							nvgBeginPath(nvg);
 							nvgRoundedRect(nvg, bounds.position.x+4, bounds.position.y+4,bounds.dimensions.x - 7, bounds.dimensions.y - 7,context->theme.CORNER_RADIUS);
 							nvgStrokeWidth(nvg, 2.0f);
-							nvgStrokeColor(nvg,context->theme.FOCUS);
+							nvgStrokeColor(nvg,context->theme.LIGHTEST);
 							nvgStroke(nvg);
 						}
 						nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);

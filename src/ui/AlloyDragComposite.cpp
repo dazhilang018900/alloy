@@ -871,10 +871,13 @@ void DragBinTab::draw(AlloyContext* context) {
 				box2px(bounds.position, pixel2(tabSize, bounds.dimensions.y)));
 	}
 	if (context->isMouseDown(this, false)) {
-		if (context->getCursor() == nullptr) {
-			context->setCursor(&Cursor::Grab);
+		if(context->isLeftMouseButtonDown()){
+			context->setObjectFocus(this);
+			if (context->getCursor() == nullptr) {
+				context->setCursor(&Cursor::Grab);
+			}
+			nvgFillColor(nvg, context->theme.LIGHTEST);
 		}
-		nvgFillColor(nvg, context->theme.LIGHTEST);
 	} else if (context->isMouseOver(this, false)) {
 		if (context->getCursor() == nullptr) {
 			context->setCursor(&Cursor::Hand);
@@ -885,7 +888,49 @@ void DragBinTab::draw(AlloyContext* context) {
 	}
 	pushScissor(nvg, clip);
 	nvgFill(nvg);
+	if(isObjectFocused()){
+		nvgBeginPath(nvg);
+		if (orientation == Orientation::Vertical) {
+			nvgRoundedRect(nvg, bounds.position.x+1, bounds.position.y+1,
+					bounds.dimensions.x-2, tabSize-2 + context->theme.CORNER_RADIUS,
+					context->theme.CORNER_RADIUS);
+		} else if (orientation == Orientation::Horizontal) {
+			nvgRoundedRect(nvg, bounds.position.x+1, bounds.position.y+1,
+					tabSize -2+ context->theme.CORNER_RADIUS, bounds.dimensions.y-2,
+					context->theme.CORNER_RADIUS);
+		}
+		nvgStrokeColor(nvg,context->theme.FOCUS);
+		nvgStrokeWidth(nvg,2.0f);
+		nvgStroke(nvg);
+		if (orientation == Orientation::Vertical) {
+			nvgRect(nvg, bounds.position.x+1, bounds.position.y+tabSize,
+					bounds.dimensions.x-2,bounds.dimensions.y-2);
+		} else if (orientation == Orientation::Horizontal) {
+			nvgRect(nvg, bounds.position.x+tabSize, bounds.position.y+1.0f,
+					bounds.dimensions.x-1,bounds.dimensions.y-1);
+		}
+		nvgStroke(nvg);
+	}
 	popScissor(nvg);
 	Composite::draw(context);
+	if(isObjectFocused()){
+		nvgStrokeColor(nvg,context->theme.FOCUS);
+		nvgStrokeWidth(nvg,2.0f);
+		if (orientation == Orientation::Vertical) {
+			pushScissor(nvg,box2px(pixel2(bounds.position.x,bounds.position.y+tabSize),pixel2(bounds.dimensions.x,bounds.dimensions.y)));
+			nvgBeginPath(nvg);
+
+			nvgRect(nvg, bounds.position.x+1, bounds.position.y+tabSize-2,
+					bounds.dimensions.x-2,bounds.dimensions.y-Composite::scrollBarSize-tabSize+1);
+		} else if (orientation == Orientation::Horizontal) {
+			pushScissor(nvg,box2px(pixel2(bounds.position.x+tabSize+1,bounds.position.y),pixel2(bounds.dimensions.x,bounds.dimensions.y)));
+			nvgBeginPath(nvg);
+
+			nvgRect(nvg, bounds.position.x+tabSize-2, bounds.position.y+1.0f,
+					bounds.dimensions.x-Composite::scrollBarSize-tabSize+1,bounds.dimensions.y-2);
+		}
+		nvgStroke(nvg);
+		popScissor(nvg);
+	}
 }
 } /* namespace aly */
