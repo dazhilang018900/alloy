@@ -227,7 +227,7 @@ public:
 		}
 		return minVal;
 	}
-	inline vec<T, C> max(T val=std::numeric_limits<T>::min()) const {
+	inline vec<T, C> max(T val=-std::numeric_limits<T>::max()) const {
 		vec<T, C> maxVal(val);
 		for (const vec<T, C>& val : data) {
 			maxVal = aly::maxVec(val, maxVal);
@@ -235,7 +235,7 @@ public:
 		return maxVal;
 	}
 	inline std::pair<vec<T, C>, vec<T, C>> range() const {
-		vec<T, C> maxVal(std::numeric_limits<T>::min());
+		vec<T, C> maxVal(-std::numeric_limits<T>::max());
 		vec<T, C> minVal(std::numeric_limits<T>::max());
 		for (const vec<T, C>& val : data) {
 			maxVal = aly::maxVec(val, maxVal);

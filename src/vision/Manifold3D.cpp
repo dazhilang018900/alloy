@@ -256,17 +256,11 @@ void Manifold3D::stashPointCloud(const std::string& file){
 	mesh.vertexLocations = particles;
 	mesh.vertexColors = colors;
 	mesh.vertexNormals.resize(particleTracking.size());
-	for(int n=0;n<particleTracking.size();n++){
-		int vertId=particleTracking[n];
-		if(vertId>=0){
-			int r=uint(vertId) & uint(0x00000FFF);
-			int g=(uint(vertId) & uint(0x00FFF000)) >> uint(12);
-			int b=(uint(vertId) & uint(0xFF000000)) >> uint(24);
-			mesh.vertexNormals[n]=float3(r,g,b);
-		} else {
-			mesh.vertexNormals[n]=float3(-1,-1,-1);
-		}
+	if(particleTracking.size()>0){
+		mesh.pointIndexes.resize(particleTracking.size());
+		std::memcmp(mesh.pointIndexes.data(),particleTracking.data(),particleTracking.size()*sizeof(int));
 	}
+	std::cout<<mesh<<std::endl;
 	WriteMeshToFile(file,mesh);
 }
 void Manifold3D::stashSpringls(const std::string& file){
