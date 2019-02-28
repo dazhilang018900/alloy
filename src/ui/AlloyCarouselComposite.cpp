@@ -10,7 +10,9 @@
 #include "AlloyDrawUtil.h"
 #include "AlloyApplication.h"
 namespace aly {
-
+void CarouselComposite::setShowArrows(bool v) {
+	showArrows = v;
+}
 void CarouselComposite::updateCursor(CursorLocator* cursorLocator) {
 	if (!ignoreCursorEvents)
 		cursorLocator->add(this);
@@ -52,27 +54,42 @@ void CarouselComposite::draw(AlloyContext* context) {
 	float h = bounds.dimensions.y;
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
-	if (isHorizontalScrollHandleVisible()) {
-		if (leftButton.get() != nullptr)
-			leftButton->setVisible(scrollPosition.x > 0.00001f);
-		if (rightButton.get() != nullptr)
-			rightButton->setVisible(scrollPosition.x < 0.9999f);
+	if (showArrows) {
+		if (isHorizontalScrollHandleVisible()) {
+			if (leftButton.get() != nullptr)
+				leftButton->setVisible(scrollPosition.x > 0.00001f);
+			if (rightButton.get() != nullptr)
+				rightButton->setVisible(scrollPosition.x < 0.9999f);
+		} else {
+			if (leftButton.get() != nullptr)
+				leftButton->setVisible(false);
+			if (rightButton.get() != nullptr)
+				rightButton->setVisible(false);
+		}
+		if (isVerticalScrollHandleVisible()) {
+			if (upButton.get() != nullptr)
+				upButton->setVisible(scrollPosition.y > 0.00001f);
+			if (downButton.get() != nullptr)
+				downButton->setVisible(scrollPosition.y < 0.9999f);
+		} else {
+			if (upButton.get() != nullptr)
+				upButton->setVisible(false);
+			if (downButton.get() != nullptr)
+				downButton->setVisible(false);
+		}
 	} else {
-		if (leftButton.get() != nullptr)
+		if (leftButton.get() != nullptr) {
 			leftButton->setVisible(false);
-		if (rightButton.get() != nullptr)
+		}
+		if (rightButton.get() != nullptr) {
 			rightButton->setVisible(false);
-	}
-	if (isVerticalScrollHandleVisible()) {
-		if (upButton.get() != nullptr)
-			upButton->setVisible(scrollPosition.y > 0.00001f);
-		if (downButton.get() != nullptr)
-			downButton->setVisible(scrollPosition.y < 0.9999f);
-	} else {
-		if (upButton.get() != nullptr)
+		}
+		if (upButton.get() != nullptr) {
 			upButton->setVisible(false);
-		if (downButton.get() != nullptr)
+		}
+		if (downButton.get() != nullptr) {
 			downButton->setVisible(false);
+		}
 	}
 	if (isScrollEnabled()) {
 		pushScissor(nvg, getCursorBounds());
@@ -119,6 +136,7 @@ void CarouselComposite::draw(AlloyContext* context) {
 				upButton->draw(context);
 			if (downButton.get() != nullptr && downButton->isVisible())
 				downButton->draw(context);
+
 		}
 	}
 	if (isScrollEnabled()) {
@@ -151,29 +169,35 @@ void CarouselComposite::pack(const pixel2& pos, const pixel2& dims,
 		const double2& dpmm, double pixelRatio, bool clamp) {
 	Composite::pack(pos, dims, dpmm, pixelRatio, clamp);
 	box2px bounds = getBounds(false);
-	if(verticalScrollTrack.get()!=nullptr){
+	if (verticalScrollTrack.get() != nullptr) {
 		verticalScrollHandle->setSlim(slim);
 		verticalScrollTrack->setSlim(slim);
 	}
-	if(horizontalScrollTrack.get()!=nullptr){
+	if (horizontalScrollTrack.get() != nullptr) {
 		horizontalScrollHandle->setSlim(slim);
 		horizontalScrollTrack->setSlim(slim);
 	}
-	if (leftButton.get() != nullptr) {
-		leftButton->parent = parent;
-		leftButton->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
-	}
-	if (rightButton.get() != nullptr) {
-		rightButton->parent = parent;
-		rightButton->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
-	}
-	if (upButton.get() != nullptr) {
-		upButton->parent = parent;
-		upButton->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
-	}
-	if (downButton.get() != nullptr) {
-		downButton->parent = parent;
-		downButton->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
+	if (showArrows) {
+		if (leftButton.get() != nullptr) {
+			leftButton->parent = parent;
+			leftButton->pack(bounds.position, bounds.dimensions, dpmm,
+					pixelRatio);
+		}
+		if (rightButton.get() != nullptr) {
+			rightButton->parent = parent;
+			rightButton->pack(bounds.position, bounds.dimensions, dpmm,
+					pixelRatio);
+		}
+		if (upButton.get() != nullptr) {
+			upButton->parent = parent;
+			upButton->pack(bounds.position, bounds.dimensions, dpmm,
+					pixelRatio);
+		}
+		if (downButton.get() != nullptr) {
+			downButton->parent = parent;
+			downButton->pack(bounds.position, bounds.dimensions, dpmm,
+					pixelRatio);
+		}
 	}
 }
 void CarouselComposite::drawDebug(AlloyContext* context) {
@@ -194,24 +218,27 @@ void CarouselComposite::drawDebug(AlloyContext* context) {
 		if (horizontalScrollHandle.get()) {
 			horizontalScrollHandle->drawDebug(context);
 		}
-		if (leftButton.get() != nullptr) {
-			leftButton->drawDebug(context);
-		}
-		if (rightButton.get() != nullptr) {
-			rightButton->drawDebug(context);
-		}
-		if (upButton.get() != nullptr) {
-			upButton->drawDebug(context);
-		}
-		if (downButton.get() != nullptr) {
-			downButton->drawDebug(context);
+		if (showArrows) {
+			if (leftButton.get() != nullptr) {
+				leftButton->drawDebug(context);
+			}
+			if (rightButton.get() != nullptr) {
+				rightButton->drawDebug(context);
+			}
+			if (upButton.get() != nullptr) {
+				upButton->drawDebug(context);
+			}
+			if (downButton.get() != nullptr) {
+				downButton->drawDebug(context);
+			}
 		}
 	}
 }
-CarouselComposite::CarouselComposite(const std::string& name, const AUnit2D& pos,
-		const AUnit2D& dims, const Orientation& orient, float scrollStep,
-		float buttonWidth) :
-		Composite(name, pos, dims){
+
+CarouselComposite::CarouselComposite(const std::string& name,
+		const AUnit2D& pos, const AUnit2D& dims, const Orientation& orient,
+		float scrollStep, float buttonWidth) :
+		Composite(name, pos, dims), showArrows(true) {
 	setScrollEnabled(true);
 	setOrientation(orient);
 	if (orient == Orientation::Horizontal) {

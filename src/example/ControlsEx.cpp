@@ -92,7 +92,7 @@ bool ControlsEx::init(Composite& rootNode) {
 	textLabel->verticalAlignment = VerticalAlignment::Middle;
 
 	ModifiableLabelPtr modifyLabel = ModifiableLabelPtr(
-		new ModifiableLabel("Mod Label", CoordPerPX(0.5f,1.0f,-80.0f,-50.0f), CoordPX(160, 40)));
+		new ModifiableLabel("Mod Label", CoordPerPX(0.5f,1.0f,20.0f,-50.0f), CoordPX(160, 40)));
 	modifyLabel->backgroundColor = MakeColor(32,32,32);
 	modifyLabel->borderColor = MakeColor(64,64,64);
 	modifyLabel->textColor = MakeColor(Color(51, 153, 255));
@@ -133,9 +133,9 @@ bool ControlsEx::init(Composite& rootNode) {
 			new IconButton(0xf062, CoordPerPX(1.0f, 0.0f, -35.0f, 5.0f),
 					CoordPX(30, 30)));
 
+	ProgressCirclePtr progressCircle=ProgressCirclePtr(new ProgressCircle("Progress Circle",CoordPerPX(0.0f,0.8f,240.0f,-5.0f),CoordPX(120.0f,120.0f)));
 
-
-	TextFieldPtr tfield = MakeTextField("Text Field", CoordPercent(0.1f, 0.8f),
+	TextFieldPtr tfield = MakeTextField("Text Field", CoordPerPX(0.0f, 0.8f,2.0f,0.0f),
 			CoordPX(200.0f, 50.0f), Theme::Default.LIGHT,
 			Theme::Default.DARKER);
 	NumberFieldPtr ifield = MakeNumberField("Integer Field",
@@ -175,6 +175,7 @@ bool ControlsEx::init(Composite& rootNode) {
 	rootNode.add(serachBox,true);
 	rootNode.add(pbar,true);
 	rootNode.add(tfield,true);
+	rootNode.add(progressCircle,true);
 	rootNode.add(selection2,true);
 	rootNode.add(hsliderLabel,true);
 	rootNode.add(modifyNumber,true);
@@ -182,13 +183,15 @@ bool ControlsEx::init(Composite& rootNode) {
 	rootNode.add(textIcon,true);
 	togglebox->setFocus(true);
 	progressTask = std::unique_ptr<aly::RecurrentTask>(
-			new RecurrentTask([pbar](uint64_t iter) {
+			new RecurrentTask([pbar,progressCircle](uint64_t iter) {
 				//std::cout << "Iteration " << iter << std::endl;
-					pbar->setValue("Task Executing ...", (iter++) / 20.0f);
-					return (iter<20);
-				}, [pbar]() {
+					pbar->setValue("Task Executing ...",(iter%21) / 20.0f);
+					progressCircle->setValue(MakeString()<<(iter%21)<<" of 20", (iter%21) / 20.0f);
+					return true;
+				}, [pbar,progressCircle]() {
 					pbar->setValue("Task Complete.", 1.0f);
-				}, 100));
+					progressCircle->setValue("20 of 20", 1.0f);
+				}, 300));
 	progressTask->execute();
 
 

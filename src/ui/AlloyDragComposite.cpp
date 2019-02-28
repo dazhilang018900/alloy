@@ -64,27 +64,42 @@ void DragComposite::draw(AlloyContext* context) {
 	float h = bounds.dimensions.y;
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
-	if (isHorizontalScrollHandleVisible()) {
-		if (leftButton.get() != nullptr)
-			leftButton->setVisible(scrollPosition.x > 0.00001f);
-		if (rightButton.get() != nullptr)
-			rightButton->setVisible(scrollPosition.x < 0.9999f);
+	if (showArrows) {
+		if (isHorizontalScrollHandleVisible()) {
+			if (leftButton.get() != nullptr)
+				leftButton->setVisible(scrollPosition.x > 0.00001f);
+			if (rightButton.get() != nullptr)
+				rightButton->setVisible(scrollPosition.x < 0.9999f);
+		} else {
+			if (leftButton.get() != nullptr)
+				leftButton->setVisible(false);
+			if (rightButton.get() != nullptr)
+				rightButton->setVisible(false);
+		}
+		if (isVerticalScrollHandleVisible()) {
+			if (upButton.get() != nullptr)
+				upButton->setVisible(scrollPosition.y > 0.00001f);
+			if (downButton.get() != nullptr)
+				downButton->setVisible(scrollPosition.y < 0.9999f);
+		} else {
+			if (upButton.get() != nullptr)
+				upButton->setVisible(false);
+			if (downButton.get() != nullptr)
+				downButton->setVisible(false);
+		}
 	} else {
-		if (leftButton.get() != nullptr)
+		if (leftButton.get() != nullptr) {
 			leftButton->setVisible(false);
-		if (rightButton.get() != nullptr)
+		}
+		if (rightButton.get() != nullptr) {
 			rightButton->setVisible(false);
-	}
-	if (isVerticalScrollHandleVisible()) {
-		if (upButton.get() != nullptr)
-			upButton->setVisible(scrollPosition.y > 0.00001f);
-		if (downButton.get() != nullptr)
-			downButton->setVisible(scrollPosition.y < 0.9999f);
-	} else {
-		if (upButton.get() != nullptr)
+		}
+		if (upButton.get() != nullptr) {
 			upButton->setVisible(false);
-		if (downButton.get() != nullptr)
+		}
+		if (downButton.get() != nullptr) {
 			downButton->setVisible(false);
+		}
 	}
 	if (isScrollEnabled()) {
 		pushScissor(nvg, getCursorBounds());
@@ -615,17 +630,18 @@ void DragComposite::pack(const pixel2& pos, const pixel2& dims,
 }
 DragCompositePtr DragBinComposite::getBin(int idx) const {
 	return std::dynamic_pointer_cast<DragComposite>(
-			std::dynamic_pointer_cast<Composite>(children[idx])->getChild(0));
+			std::dynamic_pointer_cast<Composite>(children[idx])->getChildren().back());
 }
 
 void DragBinComposite::handleDragOver(Region* region) {
 	AlloyContext* context = AlloyApplicationContext().get();
 	aly::pixel2 cursor = context->getCursorPosition();
+	Composite* comp = dynamic_cast<Composite*>(region->parent);
+	context->setObjectFocus(comp->parent);
 	for (int n = 0; n < children.size(); n++) {
 		auto bin = getBin(n);
 		bool found = false;
-		Composite* comp = dynamic_cast<Composite*>(region->parent);
-		if (comp != bin.get()) {
+		if (comp != bin.get() && bin.get() != nullptr) {
 			box2px bounds = bin->getBounds();
 			if (bin->isVisible() && context->isMouseContainedIn(bounds)) {
 				std::vector<DragSlot> slots = bin->getSlots();
@@ -659,6 +675,10 @@ void DragBinComposite::handleDrop(const std::shared_ptr<Region>& region) {
 	aly::pixel2 cursor = context->getCursorPosition();
 	for (int n = 0; n < children.size(); n++) {
 		auto bin = getBin(n);
+		if (bin.get() == nullptr) {
+			std::cout << "Could not find bin " << n << std::endl;
+			continue;
+		}
 		bool found = false;
 		bin->setEmptySlot(box2px(pixel2(0.0f), pixel2(0.0f)));
 		box2px bounds = bin->getBounds();
@@ -681,19 +701,21 @@ void DragBinComposite::handleDrop(const std::shared_ptr<Region>& region) {
 					bbox.position += slots[m].region->getDrawOffset();
 					if (bbox.contains(cursor)) {
 						bin->insert(m, region);
+						AlloyApplicationContext()->setObjectFocus(bin->parent);
 						found = true;
 						break;
 					}
 				}
 				if (!found) {
 					bin->add(region);
+					AlloyApplicationContext()->setObjectFocus(bin->parent);
 					found = true;
 				}
 			}
 		}
 	}
 }
-DragCompositePtr DragBinComposite::addBin(const std::string& name, int size) {
+DragCompositePtr DragBinComposite::addBin(const std::string& name, int size,Composite* after) {
 	DragCompositePtr dcomp;
 	DragBinTabPtr comp;
 	if (orientation == Orientation::Horizontal) {
@@ -713,6 +735,26 @@ DragCompositePtr DragBinComposite::addBin(const std::string& name, int size) {
 				new DragBinTab(name + "_tab", CoordPX(0.0f, 0.0f),
 						CoordPerPX(0.0f, 1.0f, (float) size, 0.0f),
 						Orientation::Vertical));
+		comp->addButton->onMouseDown =
+				[this,name,size,comp](AlloyContext* context,const InputEvent& e) {
+					if(e.button==GLFW_MOUSE_BUTTON_LEFT) {
+						context->addDeferredTask([this,name,size,comp]() {
+									this->addBin(name+"_new",size,comp.get());
+								});
+						return true;
+					}
+					return false;
+				};
+		comp->delButton->onMouseDown =
+				[this,comp](AlloyContext* context,const InputEvent& e) {
+					if(e.button==GLFW_MOUSE_BUTTON_LEFT) {
+						context->addDeferredTask([this,comp]() {
+									this->erase(comp);
+								});
+						return true;
+					}
+					return false;
+				};
 		comp->add(dcomp);
 	} else if (orientation == Orientation::Vertical) {
 		dcomp = DragCompositePtr(
@@ -730,13 +772,51 @@ DragCompositePtr DragBinComposite::addBin(const std::string& name, int size) {
 				new DragBinTab(name + "_tab", CoordPX(0.0f, 0.0f),
 						CoordPerPX(1.0f, 0.0f, 0.0f, (float) size),
 						Orientation::Horizontal));
+		comp->addButton->onMouseDown =
+				[this,name,size,comp](AlloyContext* context,const InputEvent& e) {
+					if(e.button==GLFW_MOUSE_BUTTON_LEFT) {
+						context->addDeferredTask([this,name,size,comp]() {
+									this->addBin(name+"_new",size,comp.get());
+								});
+						return true;
+					}
+					return false;
+				};
+		comp->delButton->onMouseDown =
+				[this,comp](AlloyContext* context,const InputEvent& e) {
+					if(e.button==GLFW_MOUSE_BUTTON_LEFT) {
+						context->addDeferredTask([this,comp]() {
+									this->erase(comp);
+								});
+						return true;
+					}
+					return false;
+				};
 		comp->add(dcomp);
 	} else {
 		return DragCompositePtr();
 	}
+
 	dcomp->setSlimScroll(true);
 	dcomp->setCellPadding(pixel2(3.0f));
-	DragComposite::add(comp);
+	if(after!=nullptr){
+		for(int i=0;i<children.size();i++){
+			if(children[i].get()==after){
+				DragComposite::insert(i+1,comp);
+				break;
+			}
+		}
+	} else {
+		DragComposite::add(comp);
+	}
+	dcomp->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	dcomp->setAlwaysShowVerticalScrollBar(true);
+	dcomp->onMouseDown=[=](AlloyContext* context,const InputEvent& e){
+		if(e.button==GLFW_MOUSE_BUTTON_LEFT){
+			context->setObjectFocus(comp.get());
+		}
+		return false;
+	};
 	return dcomp;
 }
 DragBinComposite::DragBinComposite(const std::string& name, const AUnit2D& pos,
@@ -744,10 +824,42 @@ DragBinComposite::DragBinComposite(const std::string& name, const AUnit2D& pos,
 		DragComposite(name, pos, dims, orient) {
 	setCellSpacing(pixel2(3.0f));
 	setCellPadding(pixel2(3.0f));
+	setShowArrows(false);
+	if (orient == Orientation::Horizontal) {
+		setAlwaysShowHorizontalScrollBar(true);
+	} else {
+		setAlwaysShowVerticalScrollBar(true);
+	}
 }
 DragBinTab::DragBinTab(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims, const Orientation& orient) :
 		Composite(name, pos, dims), orientation(orient) {
+	borderWidth = UnitPX(0.0f);
+	addButton = IconButtonPtr(
+			new IconButton(0xF067, CoordPerPX(1.0f, 0.0f, -tabSize, 2.0f),
+					CoordPX(tabSize - 2, tabSize - 2), IconType::CIRCLE));
+	delButton = IconButtonPtr(
+			new IconButton(0xF068, CoordPX(2.0f, 2.0f),
+					CoordPX(tabSize - 2, tabSize - 2), IconType::CIRCLE));
+
+	addButton->setRescaleOnHover(false);
+	addButton->backgroundColor = MakeColor(COLOR_NONE);
+	addButton->foregroundColor = MakeColor(COLOR_NONE);
+	addButton->borderColor = MakeColor(COLOR_NONE);
+	addButton->borderWidth = UnitPX(0.0f);
+	addButton->iconColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	addButton->borderColor = MakeColor(AlloyApplicationContext()->theme.LINK);
+
+	delButton->setRescaleOnHover(false);
+	delButton->backgroundColor = MakeColor(COLOR_NONE);
+	delButton->foregroundColor = MakeColor(COLOR_NONE);
+	delButton->borderColor = MakeColor(COLOR_NONE);
+	delButton->borderWidth = UnitPX(0.0f);
+	delButton->iconColor = MakeColor(AlloyApplicationContext()->theme.DARK);
+	delButton->borderColor = MakeColor(AlloyApplicationContext()->theme.LINK);
+
+	add(addButton);
+	add(delButton);
 
 }
 void DragBinTab::draw(AlloyContext* context) {
@@ -755,26 +867,27 @@ void DragBinTab::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
 	nvgBeginPath(nvg);
 	box2px clip = getCursorBounds();
-
 	if (orientation == Orientation::Vertical) {
-		nvgRoundedRect(nvg, bounds.position.x,
-				bounds.position.y + context->theme.CORNER_RADIUS,
+		nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
 				bounds.dimensions.x, tabSize + context->theme.CORNER_RADIUS,
 				context->theme.CORNER_RADIUS);
 		clip.intersect(
 				box2px(bounds.position, pixel2(bounds.dimensions.x, tabSize)));
 	} else if (orientation == Orientation::Horizontal) {
-		nvgRoundedRect(nvg, bounds.position.x + context->theme.CORNER_RADIUS,
-				bounds.position.y, tabSize + context->theme.CORNER_RADIUS,
-				bounds.dimensions.y, context->theme.CORNER_RADIUS);
+		nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
+				tabSize + context->theme.CORNER_RADIUS, bounds.dimensions.y,
+				context->theme.CORNER_RADIUS);
 		clip.intersect(
 				box2px(bounds.position, pixel2(tabSize, bounds.dimensions.y)));
 	}
 	if (context->isMouseDown(this, false)) {
-		if (context->getCursor() == nullptr) {
-			context->setCursor(&Cursor::Grab);
+		if(context->isLeftMouseButtonDown()){
+			context->setObjectFocus(this);
+			if (context->getCursor() == nullptr) {
+				context->setCursor(&Cursor::Grab);
+			}
+			nvgFillColor(nvg, context->theme.LIGHTEST);
 		}
-		nvgFillColor(nvg, context->theme.LIGHTEST);
 	} else if (context->isMouseOver(this, false)) {
 		if (context->getCursor() == nullptr) {
 			context->setCursor(&Cursor::Hand);
@@ -785,7 +898,49 @@ void DragBinTab::draw(AlloyContext* context) {
 	}
 	pushScissor(nvg, clip);
 	nvgFill(nvg);
+	if(isObjectFocused()){
+		nvgBeginPath(nvg);
+		if (orientation == Orientation::Vertical) {
+			nvgRoundedRect(nvg, bounds.position.x+1, bounds.position.y+1,
+					bounds.dimensions.x-2, tabSize-2 + context->theme.CORNER_RADIUS,
+					context->theme.CORNER_RADIUS);
+		} else if (orientation == Orientation::Horizontal) {
+			nvgRoundedRect(nvg, bounds.position.x+1, bounds.position.y+1,
+					tabSize -2+ context->theme.CORNER_RADIUS, bounds.dimensions.y-2,
+					context->theme.CORNER_RADIUS);
+		}
+		nvgStrokeColor(nvg,context->theme.FOCUS);
+		nvgStrokeWidth(nvg,2.0f);
+		nvgStroke(nvg);
+		if (orientation == Orientation::Vertical) {
+			nvgRect(nvg, bounds.position.x+1, bounds.position.y+tabSize,
+					bounds.dimensions.x-2,bounds.dimensions.y-2);
+		} else if (orientation == Orientation::Horizontal) {
+			nvgRect(nvg, bounds.position.x+tabSize, bounds.position.y+1.0f,
+					bounds.dimensions.x-1,bounds.dimensions.y-1);
+		}
+		nvgStroke(nvg);
+	}
 	popScissor(nvg);
 	Composite::draw(context);
+	if(isObjectFocused()){
+		nvgStrokeColor(nvg,context->theme.FOCUS);
+		nvgStrokeWidth(nvg,2.0f);
+		if (orientation == Orientation::Vertical) {
+			pushScissor(nvg,box2px(pixel2(bounds.position.x,bounds.position.y+tabSize),pixel2(bounds.dimensions.x,bounds.dimensions.y)));
+			nvgBeginPath(nvg);
+
+			nvgRect(nvg, bounds.position.x+1, bounds.position.y+tabSize-2,
+					bounds.dimensions.x-2,bounds.dimensions.y-Composite::scrollBarSize-tabSize+1);
+		} else if (orientation == Orientation::Horizontal) {
+			pushScissor(nvg,box2px(pixel2(bounds.position.x+tabSize+1,bounds.position.y),pixel2(bounds.dimensions.x,bounds.dimensions.y)));
+			nvgBeginPath(nvg);
+
+			nvgRect(nvg, bounds.position.x+tabSize-2, bounds.position.y+1.0f,
+					bounds.dimensions.x-Composite::scrollBarSize-tabSize+1,bounds.dimensions.y-2);
+		}
+		nvgStroke(nvg);
+		popScissor(nvg);
+	}
 }
 } /* namespace aly */

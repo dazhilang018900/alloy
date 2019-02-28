@@ -5,7 +5,7 @@
  *      Author: blake
  */
 
-#include "CarouselEx.h"0.0f, 0.0f, 0.0f
+#include "CarouselEx.h"
 #include "ui/AlloyDragComposite.h"
 #include "ui/AlloyDrawUtil.h"
 namespace aly {
@@ -56,7 +56,7 @@ bool CarouselEx::init(Composite& rootNode) {
 						nvgRoundedRect(nvg, bounds.position.x + 2, bounds.position.y + 2,
 								bounds.dimensions.x - 6, bounds.dimensions.y - 6,context->theme.CORNER_RADIUS);
 						nvgStrokeWidth(nvg, 2.0f);
-						nvgStrokeColor(nvg,context->theme.FOCUS);
+						nvgStrokeColor(nvg,context->theme.LIGHTEST);
 						nvgStroke(nvg);
 					}
 					nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
@@ -96,7 +96,7 @@ bool CarouselEx::init(Composite& rootNode) {
 						nvgRoundedRect(nvg, bounds.position.x + 3, bounds.position.y + 3,
 								bounds.dimensions.x - 6-Composite::scrollBarSize, bounds.dimensions.y - 6,context->theme.CORNER_RADIUS);
 						nvgStrokeWidth(nvg, 2.0f);
-						nvgStrokeColor(nvg,context->theme.FOCUS);
+						nvgStrokeColor(nvg,context->theme.LIGHTEST);
 						nvgStroke(nvg);
 					}
 					nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
@@ -107,6 +107,7 @@ bool CarouselEx::init(Composite& rootNode) {
 				};
 		vscroller->add(region);
 	}
+
 	rootNode.add(hvscroller);
 	hvscroller->backgroundColor = MakeColor(getContext()->theme.DARKEST);
 	rootNode.backgroundColor = MakeColor(getContext()->theme.DARKEST);
@@ -114,8 +115,7 @@ bool CarouselEx::init(Composite& rootNode) {
 	for (int n = 0; n < binSizes.size(); n++) {
 		auto bin = hvscroller->addBin(
 				MakeString() << "[" << (char) ('A' + n) << "]", 100);
-		bin->backgroundColor = MakeColor(getContext()->theme.DARK);
-		bin->setAlwaysShowVerticalScrollBar(true);
+
 		for (int m = 0; m < binSizes[n]; m++) {
 			DrawPtr region = DrawPtr(
 					new Draw(
@@ -140,7 +140,7 @@ bool CarouselEx::init(Composite& rootNode) {
 							nvgBeginPath(nvg);
 							nvgRoundedRect(nvg, bounds.position.x+4, bounds.position.y+4,bounds.dimensions.x - 7, bounds.dimensions.y - 7,context->theme.CORNER_RADIUS);
 							nvgStrokeWidth(nvg, 2.0f);
-							nvgStrokeColor(nvg,context->theme.FOCUS);
+							nvgStrokeColor(nvg,context->theme.LIGHTEST);
 							nvgStroke(nvg);
 						}
 						nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
@@ -148,7 +148,6 @@ bool CarouselEx::init(Composite& rootNode) {
 						nvgFontFaceId(nvg, context->getFontHandle(FontType::Normal));
 						drawText(nvg, bounds.position + (bounds.dimensions)*0.5f, region->getName(),FontStyle::Outline);
 					};
-
 			bin->add(region);
 		}
 	}
