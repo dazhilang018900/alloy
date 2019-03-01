@@ -258,9 +258,8 @@ void Manifold3D::stashPointCloud(const std::string& file){
 	mesh.vertexNormals.resize(particleTracking.size());
 	if(particleTracking.size()>0){
 		mesh.pointIndexes.resize(particleTracking.size());
-		std::memcmp(mesh.pointIndexes.data(),particleTracking.data(),particleTracking.size()*sizeof(int));
+		std::memcpy(mesh.pointIndexes.data(),particleTracking.data(),particleTracking.size()*sizeof(int));
 	}
-	std::cout<<mesh<<std::endl;
 	WriteMeshToFile(file,mesh);
 }
 void Manifold3D::stashSpringls(const std::string& file){
