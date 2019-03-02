@@ -32,6 +32,27 @@ bool MenuEx::init(Composite& rootNode) {
 	MenuPtr actionMenu = MenuPtr(new Menu("Action"));
 	MenuPtr helpMenu = MenuPtr(new Menu("Help"));
 	MenuPtr newMenu = MenuPtr(new Menu("New"));
+	MenuPtr recentMenu = MenuPtr(new Menu("Recent"));
+	MenuPtr moreMenu = MenuPtr(new Menu("More"));
+	MenuPopupBar popup=MenuPopupBar(new MenuPopup("Popup"));
+
+	recentMenu->addItem("File1.txt")->onSelect = [=]() {std::cout << "Recent:File1.txt" << std::endl;};
+	recentMenu->addItem("File2.txt")->onSelect = [=]() {std::cout << "Recent:File2.txt" << std::endl;};
+	recentMenu->addItem("File3.txt")->onSelect = [=]() {std::cout << "Recent:File3.txt" << std::endl;};
+	recentMenu->addItem("File4.txt")->onSelect = [=]() {std::cout << "Recent:File4.txt" << std::endl;};
+
+	moreMenu->addItem("More1.txt")->onSelect = [=]() {std::cout << "More:More1.txt" << std::endl;};
+	moreMenu->addItem("More2.txt")->onSelect = [=]() {std::cout << "More:More2.txt" << std::endl;};
+	moreMenu->addItem("More3.txt")->onSelect = [=]() {std::cout << "More:More3.txt" << std::endl;};
+	moreMenu->addItem("More4.txt")->onSelect = [=]() {std::cout << "More:More4.txt" << std::endl;};
+	recentMenu->addItem(moreMenu);
+
+	popup->addItem("Open")->onSelect = [=]() {std::cout << "Popup:Open" << std::endl;};
+	popup->addItem(recentMenu);
+	popup->addItem("Play")->onSelect = [=]() {std::cout << "Popup:Play" << std::endl;};
+	popup->addItem("Restart")->onSelect = [=]() {std::cout << "Popup:Restart" << std::endl;};
+
+
 	newMenu->addItem("House")->onSelect = [=]() {std::cout << "New:House" << std::endl;};
 	newMenu->addItem("Car")->onSelect = [=]() {std::cout << "New:Car" << std::endl;};
 	newMenu->addItem("Bike")->onSelect = [=]() {std::cout << "New:Bike" << std::endl;};
@@ -59,7 +80,6 @@ bool MenuEx::init(Composite& rootNode) {
 	actionMenu->addItem("Run")->onSelect = [=]() {std::cout << "Action:Run" << std::endl;};
 	actionMenu->addItem("Jump")->onSelect = [=]() {std::cout << "Action:Jump" << std::endl;};
 	actionMenu->addItem("Squat")->onSelect = [=]() {std::cout << "Action:Squat" << std::endl;};
-
 
 	MenuPtr bigMenu = MenuPtr(new Menu("Big Menu"));
 	MenuPtr subMenu1 = MenuPtr(new Menu("Submenu 1"));
@@ -106,18 +126,17 @@ bool MenuEx::init(Composite& rootNode) {
 	helpMenu->addItem("How did I get here?")->onSelect = [=](){std::cout << "Help:How did I get here?" << std::endl;};
 	helpMenu->addItem("Where am I going?")->onSelect = [=]() {std::cout << "Help:Where am I going?" << std::endl;};
 	helpMenu->addItem("What day is it?")->onSelect = [=]() {std::cout << "Help:What day is it?" << std::endl;};
-
 	menuBar->addMenu(fileMenu);
 	menuBar->addMenu(editMenu);
 	menuBar->addMenu(actionMenu);
 	menuBar->addMenu(bigMenu);
 	menuBar->addMenu(helpMenu);
-
 	CompositePtr north = MakeComposite("North Composite", CoordPX(0, 0), CoordPercent(1.0, 1.0), Color(128, 16, 32), COLOR_NONE, UnitPX(0));
 	north->add(menuBar);
 	TextLabelPtr label;
 	CompositePtr center = MakeComposite("Center Composite", CoordPX(0, 0),CoordPercent(1.0, 1.0), Color(16, 128, 128));
-	center->add(label = MakeTextLabel("Center", CoordPercent(0.5f, 0.5f), CoordPX(100, 30), FontType::Bold, UnitPT(16.0f), COLOR_WHITE, HorizontalAlignment::Center, VerticalAlignment::Middle));
+	center->add(label = MakeTextLabel("Right-Click", CoordPercent(0.5f, 0.5f), CoordPX(100, 30), FontType::Bold, UnitPT(16.0f), COLOR_WHITE, HorizontalAlignment::Center, VerticalAlignment::Middle));
+	center->add(popup);
 	label->setOrigin(Origin::MiddleCenter);
 	BorderCompositePtr bcomp = std::shared_ptr<BorderComposite>(new BorderComposite("Border Layout", CoordPX(0, 0),CoordPercent(1.0f, 1.0f)));
 	bcomp->setNorth(north,UnitPX(30.0f));

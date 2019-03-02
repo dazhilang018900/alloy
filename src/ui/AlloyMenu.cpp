@@ -18,11 +18,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include "ui/AlloyMenubar.h"
+#include "AlloyMenu.h"
 #include "ui/AlloyApplication.h"
 #include "ui/AlloyDrawUtil.h"
 
-namespace aly{
+namespace aly {
+void Menu::setMaxDisplayEntries(int mx) {
+	maxDisplayEntries = mx;
+}
+bool Menu::isMenu() const {
+	return true;
+}
+std::string Menu::getItem(int index) {
+	return (selectedIndex >= 0) ? options[selectedIndex]->name : name;
+}
+int Menu::getSelectedIndex() const {
+	return selectedIndex;
+}
+void Menu::setSelectionOffset(bool offset) {
+	selectionOffset = offset;
+}
+std::shared_ptr<MenuItem> Menu::addItem(const std::string& selection,
+		const std::string& hint) {
+	std::shared_ptr<MenuItem> item = std::shared_ptr<MenuItem>(
+			new MenuItem(selection));
+	item->setHint(hint);
+	options.push_back(item);
+	return item;
+}
 box2px Menu::getBounds(bool includeBounds) const {
 	box2px bounds = Region::getBounds(includeBounds);
 	AlloyContext* context = AlloyApplicationContext().get();
@@ -92,8 +115,13 @@ void Menu::draw(AlloyContext* context) {
 				pixel2(bounds.dimensions.x, entryHeight))) {
 			newSelectedIndex = index;
 			if (current->isMenu()) {
-				current->position = CoordPX(offset.x + bounds.dimensions.x,
-						offset.y);
+				if(container->rightSide){
+					current->position = CoordPX(offset.x + bounds.dimensions.x,
+							offset.y);
+				} else {
+					current->position = CoordPX(offset.x - bounds.dimensions.x,
+												offset.y);
+				}
 			}
 		}
 		offset.y += entryHeight;
@@ -129,24 +157,33 @@ void Menu::draw(AlloyContext* context) {
 				bounds.position.y + entryHeight / 2 + offset.y,
 				label->name.c_str(), nullptr);
 
-		std::string hint=label->getHint();
-		if(hint.size()>0){
-			if(index==selectedIndex){
-				nvgFillColor(nvg,Color(mix(textAltColor->toRGBAf(),backgroundColor->toRGBAf(),0.5f)));
+		std::string hint = label->getHint();
+		if (hint.size() > 0) {
+			if (index == selectedIndex) {
+				nvgFillColor(nvg,
+						Color(
+								mix(textAltColor->toRGBAf(),
+										backgroundColor->toRGBAf(), 0.5f)));
 			} else {
-				nvgFillColor(nvg, Color(mix(textColor->toRGBAf(),backgroundColor->toRGBAf(),0.5f)));
+				nvgFillColor(nvg,
+						Color(
+								mix(textColor->toRGBAf(),
+										backgroundColor->toRGBAf(), 0.5f)));
 			}
-			nvgFontSize(nvg, th-4);
+			nvgFontSize(nvg, th - 4);
 			nvgFontFaceId(nvg, context->getFontHandle(FontType::Normal));
 			nvgTextAlign(nvg, NVG_ALIGN_RIGHT | NVG_ALIGN_MIDDLE);
-			nvgText(nvg,bounds.position.x + bounds.dimensions.x - lineWidth- TextField::PADDING + offset.x,bounds.position.y + entryHeight / 2 + offset.y,
+			nvgText(nvg,
+					bounds.position.x + bounds.dimensions.x - lineWidth
+							- TextField::PADDING + offset.x,
+					bounds.position.y + entryHeight / 2 + offset.y,
 					hint.c_str(), nullptr);
 		}
 
 		popScissor(nvg);
 		if (label->isMenu()) {
 			nvgFontSize(nvg, th);
-			if(index==selectedIndex){
+			if (index == selectedIndex) {
 				nvgFillColor(nvg, *textAltColor);
 			} else {
 				nvgFillColor(nvg, *textColor);
@@ -320,11 +357,12 @@ void MenuBar::setVisibleItem(const std::shared_ptr<MenuItem>& item,
 }
 void Menu::addItem(const std::shared_ptr<MenuItem>& selection) {
 	options.push_back(selection);
+	selection->setContainer(this->container);
 	if (selection->isMenu()) {
 		Composite::add(selection);
 	}
 }
-void Menu::clear(){
+void Menu::clear() {
 	options.clear();
 	Composite::clear();
 }
@@ -345,6 +383,17 @@ bool Menu::fireEvent(int selectedIndex) {
 		}
 	}
 	return false;
+}
+void MenuItem::setContainer(MenuContainer* cont) {
+	if (cont != nullptr) {
+		container = cont;
+		for (RegionPtr child : children) {
+			MenuItem* m = dynamic_cast<MenuItem*>(child.get());
+			if (m) {
+				m->setContainer(cont);
+			}
+		}
+	}
 }
 void MenuItem::setVisible(bool visible) {
 	if (!visible) {
@@ -382,7 +431,7 @@ void Menu::setVisible(bool visible) {
 	}
 	MenuItem::setVisible(visible);
 }
-void MenuBar::hideMenus() {
+void MenuBar::hide() {
 	for (MenuHeaderPtr header : headers) {
 		AlloyApplicationContext()->removeOnTopRegion(header->menu.get());
 	}
@@ -390,7 +439,8 @@ void MenuBar::hideMenus() {
 Menu::Menu(const std::string& name, float menuWidth,
 		const std::vector<std::shared_ptr<MenuItem>>& labels) :
 		MenuItem(name, CoordPerPX(0.0f, 0.0f, 0.0f, 0.0f),
-				CoordPerPX(0.0f, 0.0f, menuWidth, 0.0f)), options(labels) {
+				CoordPerPX(0.0f, 0.0f, menuWidth, 0.0f)), options(labels), menuWidth(
+				menuWidth) {
 	setDetached(true);
 	setVisible(false);
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.LIGHTEST);
@@ -405,98 +455,6 @@ Menu::Menu(const std::string& name, float menuWidth,
 	onRemoveFromOnTop = [=] {
 		setVisible(false);
 	};
-	onEvent =
-			[this](AlloyContext* context, const InputEvent& event) {
-				if (context->isOnTop(this)&&this->isVisible()) {
-					if (event.type == InputType::MouseButton&&event.isUp() && event.button == GLFW_MOUSE_BUTTON_LEFT) {
-						if (getSelectedIndex() >= 0) {
-							if (fireEvent(selectedIndex)) {
-								if (menuBar != nullptr) {
-									menuBar->hideMenus();
-								}
-							}
-						}
-					} else if (event.type == InputType::MouseButton&&event.isDown() && event.button == GLFW_MOUSE_BUTTON_LEFT) {
-						if (getSelectedIndex()<0) {
-							if (menuBar != nullptr) {
-								MenuItem* selected = getSelectedItem();
-								if (selected == nullptr||!selected->isMenu()) {
-									setSelectedIndex(-1);
-									AlloyApplicationContext()->removeOnTopRegion(this);
-								}
-							}
-						} else {
-							if (fireEvent(selectedIndex)) {
-								if (menuBar != nullptr) {
-									menuBar->hideMenus();
-								}
-							}
-						}
-					}
-					else if (event.type == InputType::MouseButton&&event.isDown() && event.button == GLFW_MOUSE_BUTTON_RIGHT) {
-						setSelectedIndex(-1);
-						AlloyApplicationContext()->removeOnTopRegion(this);
-					}
-					else if (event.type == InputType::Cursor && (int)options.size() > maxDisplayEntries) {
-						box2px bounds = this->getBounds();
-						int elements =
-						(maxDisplayEntries > 0) ? std::min(maxDisplayEntries, (int)options.size()) : (int)options.size();
-						float entryHeight = bounds.dimensions.y / elements;
-
-						box2px lastBounds = bounds, firstBounds = bounds;
-						lastBounds.position.y = bounds.position.y + bounds.dimensions.y - entryHeight;
-						lastBounds.dimensions.y = entryHeight;
-						firstBounds.dimensions.y = entryHeight;
-						if (lastBounds.contains(event.cursor)) {
-							if (downTimer.get() == nullptr) {
-								downTimer = std::shared_ptr<TimerTask>(new TimerTask([this] {
-													double deltaT = 200;
-													scrollingDown = true;
-													while (scrollingDown&&selectionOffset < (int)options.size() - maxDisplayEntries) {
-														this->selectionOffset++;
-														std::this_thread::sleep_for(std::chrono::milliseconds((long)deltaT));
-														deltaT = std::max(30.0, 0.75*deltaT);
-													}
-												}, nullptr, MENU_DISPLAY_DELAY, 30));
-								downTimer->execute();
-							}
-						}
-						else {
-							if (downTimer.get() != nullptr) {
-								scrollingDown = false;
-								downTimer.reset();
-							}
-						}
-						if (firstBounds.contains(event.cursor)) {
-							if (upTimer.get() == nullptr) {
-								upTimer = std::shared_ptr<TimerTask>(new TimerTask([this] {
-													double deltaT = 200;
-													scrollingUp = true;
-													while (scrollingUp&&selectionOffset > 0) {
-														this->selectionOffset--;
-														std::this_thread::sleep_for(std::chrono::milliseconds((long)deltaT));
-														deltaT = std::max(30.0, 0.75*deltaT);
-													}
-												}, nullptr, MENU_DISPLAY_DELAY, 30));
-								upTimer->execute();
-							}
-						}
-						else {
-							if (upTimer.get() != nullptr) {
-								scrollingUp = false;
-								upTimer.reset();
-							}
-						}
-					}
-					else if (event.type == InputType::Cursor) {
-						if (!context->isMouseOver(this)) {
-							setSelectedIndex(-1);
-						}
-					}
-				}
-
-				return false;
-			};
 	Application::addListener(this);
 }
 MenuBar::MenuBar(const std::string& name, const AUnit2D& position,
@@ -511,6 +469,7 @@ MenuBar::MenuBar(const std::string& name, const AUnit2D& position,
 	barRegion->setOrientation(Orientation::Horizontal);
 	//barRegion->cellSpacing.x = 2;
 	//barRegion->cellPadding.x = 2;
+	Application::addListener(this);
 	this->backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 }
 void MenuBar::addMenu(const std::shared_ptr<Menu>& menu) {
@@ -519,9 +478,9 @@ void MenuBar::addMenu(const std::shared_ptr<Menu>& menu) {
 					CoordPerPX(0.0f, 1.0f, 100.0f, 0.0f)));
 	menu->position = CoordPercent(0.0f, 1.0f);
 	menu->setDetached(true);
-	menu->menuBar = this;
+	menu->container = this;
 	Composite::add(menu);
-
+	menu->setContainer(this);
 	headers.push_back(header);
 	barRegion->add(header);
 	header->onMouseOver = [=](AlloyContext* context, const InputEvent& e) {
@@ -539,7 +498,6 @@ MenuItem::MenuItem(const std::string& name) :
 		Composite(name) {
 
 }
-
 MenuItem* MenuItem::getSelectedItem() {
 	if (isMenu()) {
 		if (currentSelected.get() != nullptr) {
@@ -620,5 +578,150 @@ void MenuHeader::draw(AlloyContext* context) {
 	nvgText(nvg, bounds.position.x + bounds.dimensions.x / 2 + xoff,
 			bounds.position.y + bounds.dimensions.y / 2 + yoff + vshift,
 			name.c_str(), nullptr);
+}
+MenuPopup::MenuPopup(const std::string& name, float menuWidth,
+		const std::vector<std::shared_ptr<MenuItem>>& options) :
+		Menu(name, menuWidth, options) {
+	this->container = this;
+}
+bool Menu::onEventHandler(AlloyContext* context, const InputEvent& event) {
+	if (context->isOnTop(this) && this->isVisible()) {
+		bool over = context->isMouseOver(this);
+		if (over
+				&& event.type
+						== InputType::MouseButton&&event.isUp() && event.button == GLFW_MOUSE_BUTTON_LEFT) {
+			if (getSelectedIndex() >= 0) {
+				if (fireEvent(selectedIndex)) {
+					if (container != nullptr) {
+						container->hide();
+					}
+				}
+			} else {
+				if (container != nullptr) {
+					container->hide();
+				}
+			}
+		} else if (over
+				&& event.type
+						== InputType::MouseButton&&event.isDown() && event.button == GLFW_MOUSE_BUTTON_LEFT) {
+			if (getSelectedIndex() < 0) {
+				if (container != nullptr) {
+					MenuItem* selected = getSelectedItem();
+					if (selected == nullptr || !selected->isMenu()) {
+						setSelectedIndex(-1);
+						AlloyApplicationContext()->removeOnTopRegion(this);
+					}
+				}
+			} else {
+				if (fireEvent(selectedIndex)) {
+					setSelectedIndex(-1);
+					if (container != nullptr) {
+						container->hide();
+					}
+				}
+			}
+		}
+		if (event.type == InputType::Cursor
+				&& (int) options.size() > maxDisplayEntries) {
+			box2px bounds = this->getBounds();
+			int elements =
+					(maxDisplayEntries > 0) ?
+							std::min(maxDisplayEntries, (int) options.size()) :
+							(int) options.size();
+			float entryHeight = bounds.dimensions.y / elements;
+
+			box2px lastBounds = bounds, firstBounds = bounds;
+			lastBounds.position.y = bounds.position.y + bounds.dimensions.y
+					- entryHeight;
+			lastBounds.dimensions.y = entryHeight;
+			firstBounds.dimensions.y = entryHeight;
+			if (lastBounds.contains(event.cursor)) {
+				if (downTimer.get() == nullptr) {
+					downTimer =
+							std::shared_ptr<TimerTask>(
+									new TimerTask(
+											[this] {
+												double deltaT = 200;
+												scrollingDown = true;
+												while (scrollingDown&&selectionOffset < (int)options.size() - maxDisplayEntries) {
+													this->selectionOffset++;
+													std::this_thread::sleep_for(std::chrono::milliseconds((long)deltaT));
+													deltaT = std::max(30.0, 0.75*deltaT);
+												}
+											}, nullptr, MENU_DISPLAY_DELAY,
+											30));
+					downTimer->execute();
+				}
+			} else {
+				if (downTimer.get() != nullptr) {
+					scrollingDown = false;
+					downTimer.reset();
+				}
+			}
+			if (firstBounds.contains(event.cursor)) {
+				if (upTimer.get() == nullptr) {
+					upTimer =
+							std::shared_ptr<TimerTask>(
+									new TimerTask(
+											[this] {
+												double deltaT = 200;
+												scrollingUp = true;
+												while (scrollingUp&&selectionOffset > 0) {
+													this->selectionOffset--;
+													std::this_thread::sleep_for(std::chrono::milliseconds((long)deltaT));
+													deltaT = std::max(30.0, 0.75*deltaT);
+												}
+											}, nullptr, MENU_DISPLAY_DELAY,
+											30));
+					upTimer->execute();
+				}
+			} else {
+				if (upTimer.get() != nullptr) {
+					scrollingUp = false;
+					upTimer.reset();
+				}
+			}
+		} else if (event.type == InputType::Cursor) {
+			if (!context->isMouseOver(this)) {
+				setSelectedIndex(-1);
+			}
+		}
+	}
+	return MenuItem::onEventHandler(context, event);
+}
+bool MenuBar::onEventHandler(AlloyContext* context, const InputEvent& event) {
+	if (event.type == InputType::MouseButton && event.isDown()) {
+		if (!context->isMouseOver(this,true)&&event.button==GLFW_MOUSE_BUTTON_LEFT) {
+			hide();
+		}
+	}
+	return MenuItem::onEventHandler(context, event);
+}
+bool MenuPopup::onEventHandler(AlloyContext* context, const InputEvent& event) {
+	if (event.type == InputType::MouseButton && event.isDown()) {
+		if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
+			if (context->isMouseOver(parent, true)) {
+				pixel2 cursor=context->getCursorPosition();
+				pixel2 rbound=float2(context->screenDimensions())- pixel2((float) menuWidth, 0.0f);
+				this->rightSide=(cursor.x<rbound.x-menuWidth);
+				this->position = CoordPX(
+						aly::min(cursor,rbound)
+								- this->parent->getBoundsPosition());
+				this->setDragOffset(pixel2(0.0f, 0.0f));
+				context->setOnTopRegion(this);
+				setVisible(true);
+				context->requestPack();
+				return true;
+			}
+		} else if (isVisible()&&!context->isMouseOver(this,
+				true)&&event.button==GLFW_MOUSE_BUTTON_LEFT) {
+			setSelectedIndex(-1);
+			hide();
+		}
+	}
+	return Menu::onEventHandler(context, event);
+}
+void MenuPopup::hide() {
+	AlloyApplicationContext()->removeOnTopRegion(this);
 }
 }

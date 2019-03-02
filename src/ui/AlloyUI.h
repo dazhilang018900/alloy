@@ -21,11 +21,11 @@
 
 #ifndef ALLOYUI_H_
 #define ALLOYUI_H_
+#include "AlloyMenu.h"
 #include "ui/AlloyRegion.h"
 #include "ui/AlloyComposite.h"
 #include "ui/AlloyAdjustableComposite.h"
 #include "ui/AlloyBorderComposite.h"
-#include "ui/AlloyMenubar.h"
 #include "ui/AlloyGlyph.h"
 #include "ui/AlloyTextWidget.h"
 #include "ui/AlloyNumberWidget.h"

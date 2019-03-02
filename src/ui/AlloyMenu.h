@@ -18,14 +18,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#ifndef SRC_UI_ALLOYMENUBAR_H_
-#define SRC_UI_ALLOYMENUBAR_H_
+#ifndef SRC_UI_ALLOYMENU_H_
+#define SRC_UI_ALLOYMENU_H_
 #include "ui/AlloyComposite.h"
 namespace aly{
-class MenuBar;
+class MenuContainer;
+struct MenuContainer {
+	virtual void hide()=0;
+	bool rightSide=true;
+	virtual ~MenuContainer(){}
+};
 class MenuItem: public Composite {
 protected:
-
 	std::mutex showLock;
 	std::shared_ptr<MenuItem> currentSelected;
 	std::shared_ptr<MenuItem> requestedSelected;
@@ -35,13 +39,15 @@ protected:
 	const int MENU_DISPLAY_DELAY = 250;
 public:
 	MenuItem* getSelectedItem();
-	MenuBar* menuBar = nullptr;
+	MenuContainer* container = nullptr;
 	FontStyle fontStyle = FontStyle::Normal;
 	FontType fontType = FontType::Normal;
 	AUnit1D fontSize = UnitPX(24.0f);
 	AColor textColor = MakeColor(COLOR_WHITE);
 	AColor textAltColor = MakeColor(COLOR_BLACK);
 	std::function<void()> onSelect;
+
+	void setContainer(MenuContainer* cont);
 	virtual bool isMenu() const {
 		return false;
 	}
@@ -66,38 +72,27 @@ protected:
 	std::shared_ptr<MenuItem> label;
 	int maxDisplayEntries = 8;
 	int selectionOffset = 0;
+	int menuWidth=0;
 	bool scrollingDown = false, scrollingUp = false;
 	std::shared_ptr<TimerTask> downTimer, upTimer;
 	std::shared_ptr<AwesomeGlyph> downArrow, upArrow;
 	std::vector<std::shared_ptr<MenuItem>> options;
 	bool fireEvent(int selectedIndex);
 public:
-	virtual bool isMenu() const override {
-		return true;
-	}
+
 	virtual void setVisible(bool visible) override;
-	void setMaxDisplayEntries(int mx) {
-		maxDisplayEntries = mx;
-	}
+
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event);
 	virtual box2px getBounds(bool includeBounds = true) const override;
-	std::string getItem(int index) {
-		return (selectedIndex >= 0) ? options[selectedIndex]->name : name;
-	}
-	int getSelectedIndex() const {
-		return selectedIndex;
-	}
-	inline void setSelectionOffset(bool offset) {
-		selectionOffset = offset;
-	}
+	void setMaxDisplayEntries(int mx);
+	virtual bool isMenu() const override ;
+	std::string getItem(int index);
+	int getSelectedIndex() const;
+	void setSelectionOffset(bool offset);
+	std::shared_ptr<MenuItem> addItem(const std::string& selection,const std::string& hint="");
 	void setSelectedIndex(int index);
 	void draw(AlloyContext* context) override;
-	std::shared_ptr<MenuItem> addItem(const std::string& selection,const std::string& hint="") {
-		std::shared_ptr<MenuItem> item = std::shared_ptr<MenuItem>(
-				new MenuItem(selection));
-		item->setHint(hint);
-		options.push_back(item);
-		return item;
-	}
+
 	void addItem(const std::shared_ptr<MenuItem>& selection);
 	virtual void clear() override;
 	Menu(const std::string& name, float menuWidth = 200.0f,
@@ -117,7 +112,7 @@ public:
 	virtual inline ~MenuHeader() {
 	}
 };
-class MenuBar: public MenuItem {
+class MenuBar: public MenuItem,MenuContainer {
 protected:
 	std::list<std::shared_ptr<MenuHeader>> headers;
 	std::shared_ptr<Composite> barRegion;
@@ -126,13 +121,25 @@ protected:
 	bool active;
 public:
 	void addMenu(const std::shared_ptr<Menu>& menu);
-	void hideMenus();
+	virtual void hide() override;
+
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)override;
 	MenuBar(const std::string& name, const AUnit2D& position,
 			const AUnit2D& dimensions);
+};
+
+class MenuPopup:public Menu, MenuContainer{
+public:
+	MenuPopup(const std::string& name, float menuWidth = 200.0f,
+			const std::vector<std::shared_ptr<MenuItem>>& options = std::vector<
+					std::shared_ptr<MenuItem>>());
+	virtual void hide() override;
+	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)override;
 };
 typedef std::shared_ptr<MenuItem> MenuItemPtr;
 typedef std::shared_ptr<Menu> MenuPtr;
 typedef std::shared_ptr<MenuHeader> MenuHeaderPtr;
 typedef std::shared_ptr<MenuBar> MenuBarPtr;
+typedef std::shared_ptr<MenuPopup> MenuPopupBar;
 }
-#endif /* SRC_UI_ALLOYMENUBAR_H_ */
+#endif /* SRC_UI_ALLOYMENU_H_ */
