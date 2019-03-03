@@ -577,7 +577,9 @@ IconButton::IconButton(int iconCode, const AUnit2D& position,
 	foregroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	borderColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
 	iconColor = MakeColor(AlloyApplicationContext()->theme.LIGHT);
+	this->iconGlowColor=MakeColor(AlloyApplicationContext()->theme.NEUTRAL);
 	this->aspectRatio = 1.0f;
+	this->fontStyle=FontStyle::Normal;
 	this->aspectRule = AspectRule::FixedHeight;
 	Application::addListener(this);
 }
@@ -645,9 +647,9 @@ void IconButton::draw(AlloyContext* context) {
 	}
 	nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
 	drawText(nvg, ibounds.position + HALF_PIX(ibounds.dimensions) + nudge,
-			iconCodeString, FontStyle::Normal,
+			iconCodeString, fontStyle,
 			(hover && borderColor->a > 0) ? *borderColor : *iconColor,
-			*backgroundColor, nullptr);
+			*iconGlowColor, nullptr);
 	if (truncate) {
 		popScissor(nvg);
 	}

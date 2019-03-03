@@ -499,9 +499,11 @@ namespace aly {
 		values.push_back(ref);
 		valueRegion->onTextEntered = [=](TextField* field) {
 			*(ref->getValue<std::string*>()) = field->getValue();
+			if(this->onChange)this->onChange(label,*ref);
 		};
 		valueRegion->onKeyInput = [=](TextField* field) {
 			*(ref->getValue<std::string*>()) = field->getValue();
+			if(this->onChange)this->onChange(label,*ref);
 		};
 		setCommonParameters(comp, labelRegion, valueRegion);
 		valueRegion->backgroundColor = MakeColor(AlloyDefaultContext()->theme.LIGHTER);
@@ -531,9 +533,11 @@ namespace aly {
 		values.push_back(ref);
 		valueRegion->onTextEntered = [=](TextField* field) {
 			*(ref->getValue<std::vector<int>*>()) = aly::ExtractIntegerRange(field->getValue());
+			if(this->onChange)this->onChange(label,*ref);
 		};
 		valueRegion->onKeyInput = [=](TextField* field) {
 			*(ref->getValue<std::vector<int>*>()) = aly::ExtractIntegerRange(field->getValue());
+			if(this->onChange)this->onChange(label,*ref);
 		};
 
 		setCommonParameters(comp, labelRegion, valueRegion);

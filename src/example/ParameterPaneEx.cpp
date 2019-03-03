@@ -57,6 +57,11 @@ bool ParameterPaneEx::init(Composite& rootNode) {
 	ParameterPanePtr paramPane = ParameterPanePtr(
 			new ParameterPane("Parameter Pane", CoordPX(0.0f, 0.0f),
 					CoordPercent(1.0f, 1.0f), 26.0f));
+	/*
+	paramPane->onChange=[this](const std::string& name, const AnyInterface& value){
+		std::cout<<"Change "<<name<<std::endl;
+	};
+*/
 	vecf = float3(3, 5, 6);
 	veci = int2(200, 300);
 	mat = float4x4::identity();

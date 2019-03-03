@@ -123,6 +123,7 @@ private:
 	pixel fileEntryHeight;
 	bool valid = false;
 	bool dragAccept = false;
+	bool glassState=false;
 	void updateDirectoryList();
 	bool updateValidity();
 public:

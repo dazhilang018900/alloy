@@ -64,9 +64,11 @@ private:
 	bool rescale;
 	pixel2 nudge;
 	pixel nudgeSize;
+	FontStyle fontStyle;
 public:
 	AColor foregroundColor;
 	AColor iconColor;
+	AColor iconGlowColor;
 	void setNudgeSize(pixel nz) {
 		nudgeSize = nz;
 	}
@@ -75,6 +77,9 @@ public:
 	}
 	void setTruncate(bool t) {
 		truncate = t;
+	}
+	void setFontStyle(const FontStyle& f){
+		fontStyle=f;
 	}
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
 			override;

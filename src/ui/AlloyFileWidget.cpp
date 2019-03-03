@@ -866,7 +866,7 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 							if (files.size() > 0)this->onSelect(files);
 						}
 						this->setVisible(false);
-						context->getGlassPane()->setVisible(false);
+						context->getGlassPane()->setVisible(glassState);
 						return true;
 					}
 					else {
@@ -1008,7 +1008,7 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 	cancelButton->onMouseDown =
 			[this](AlloyContext* context, const InputEvent& event) {
 				this->setVisible(false);
-				context->getGlassPane()->setVisible(false);
+				context->getGlassPane()->setVisible(glassState);
 				return true;
 			};
 	CompositePtr southRegion = MakeComposite("File Options", CoordPX(0, 0),
@@ -1162,7 +1162,7 @@ FileDialog::FileDialog(const std::string& name, const AUnit2D& pos,
 		if(e.type==InputType::Key&&isVisible()) {
 			if(e.key==GLFW_KEY_ESCAPE) {
 				this->setVisible(false);
-				context->getGlassPane()->setVisible(false);
+				context->getGlassPane()->setVisible(glassState);
 				return true;
 			}
 			/*
@@ -1282,8 +1282,10 @@ void FileDialog::update() {
 	updateDirectoryList();
 }
 void FileDialog::setVisible(bool v) {
-	if (v)
+	if (v) {
+		glassState=AlloyApplicationContext()->getGlassPane()->isVisible();
 		actionButton->setFocus(true);
+	}
 	AdjustableComposite::setVisible(v);
 }
 void FileDialog::draw(AlloyContext* context) {
