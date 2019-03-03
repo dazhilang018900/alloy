@@ -116,12 +116,12 @@ void Composite::insertAtFront(const std::shared_ptr<Region>& region) {
 }
 
 Composite::Composite(const std::string& name) :
-		Region(name), cellPadding(0, 0), cellSpacing(5, 5) {
+		Region(name), cellPadding(0, 0), cellSpacing(5, 5),slim(false) {
 
 }
 Composite::Composite(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims) :
-		Region(name, pos, dims), cellPadding(0, 0), cellSpacing(5, 5) {
+		Region(name, pos, dims), cellPadding(0, 0), cellSpacing(5, 5),slim(false) {
 }
 bool Composite::onEventHandler(AlloyContext* context, const InputEvent& event) {
 	if (isVisible() && isDragEnabled()) {
