@@ -63,6 +63,17 @@ void Application::initInternal() {
 			new ImageShader(ImageShader::Filter::NONE, true, context));
 	//uiFrameBuffer = std::shared_ptr<GLFrameBuffer>(new GLFrameBuffer(true, context));
 	//uiFrameBuffer->initialize(context->viewSize.x, context->viewSize.y);
+
+	{
+		GLFWimage images[1];
+		ImageRGBA img;
+		ReadImageFromFile(
+				context->getFullPath("images/alloy_logo64.png"), img);
+		images[0].pixels=img.ptr();
+		images[0].width=img.width;
+		images[0].height=img.height;
+		glfwSetWindowIcon(context->window, 1, images);
+	}
 }
 std::shared_ptr<GLTextureRGBA> Application::loadTextureRGBA(
 		const std::string& partialFile) {
