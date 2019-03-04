@@ -1,88 +1,12 @@
-Alloy Graphics Library
+![AlloyLogo](https://raw.githubusercontent.com/rgb2hsv/alloy/master/assets/images/alloy_logo128.png) Alloy Graphics Library
 ========
 Alloy is yet another 2D/3D graphics library written in C++11. As mundane as that sounds, this API provides an extensive collection of GUI components and engineering reference implementations of common 2D/3D graphics algorithms for fast prototyping on windows, linux, and mac platforms.
-
-
-## Contents
-- Anti-aliased vector graphics drawing (NanoVG).
-- Truetype fonts (stb_truetype).
-- OpenGL core 3.3 and higher support. Legacy OpenGL will not run, but you won't need it!
-- Generic handling of absolute/relative coordinates in pixels, dp, in, and mm.
-- Tweenable positions, dimensions, font sizes, and colors.
-- GUI components: Region, Composite, Border Layout, Vertical Layout, Horizontal Layout, Scroll Bars, Draw 2D Region, Text Button, Icon Button, Text Icon Button, Text Label, Text Region, Text Field, Number Field, Message Dialog, Selection Box, Drop Down Box, Menu Bar, Vertical Slider, Horizontal Slider, Color Selection, File Dialog, File Field, Multi-File Filed, File Button, List Box, Search Box, Window Pane, Graph Plot, Progress Bar, Expand Region, Expand Tree, Tab Pane, Table Pane, Timeline, Toggle Box, Check Box, Glass Pane, Parameter Pane.
-- Worker, timer, and recurrent worker.
-- Vector types from one to four dimensions.
-- Quaternions.
-- Color space support for RGBA, HSV, CieLAB, XYZ, Gray, and look-up tables.
-- Sparse Matrix, Dense Matrix, Dense Vector, Array, Image, and Volume data structures.
-- Data structure serialization to json, binary, and xml (cereal).
-- Image IO (stb_image and tinyexr) for PNG, JPEG, TIFF, HDR, PSD, BMP, GIF, PNM, PIC, TGA, EXR, and XML (Mipav's encoding).
-- Mesh IO for PLY and OBJ (tinyobj).
-- Dense and sparse matrix solvers including SVD, QR, LU, CG, and BiCGstab.
-- The "Any" class to enable methods with arbitrary left-hand return types.
-- Perspective and orthographic cameras with methods to transform from world to screen or vice versa.
-- "Awesome font" icons.
-- Window screenshot (F11).
-- Arbitrary mouse cursors.
-- Common shaders for deferred rendering in OpenGL 3.3 and higher.
-- Distance Field 2D/3D (fast-marching method).
-- Delaunay Triangulation.
-- Point Kd-Tree 2D/3D (libkdtree).
-- Approximate Nearest Neighbors in N-dimensions (nanoflann).
-- Mesh Kd-Tree (ray-intersection and closest point).
-- SHA1, SHA-256, SHA-384, SHA-512.
-- Cross-Platform file system IO.
-- NURB curves, B-Splines, and Beziers (tinyspline).
-- Catmull-Clark and Loop mesh sub-division.
-- DAISY image descriptors.
-- Mesh primitives for box, icosahedron, sphere, cylinder, torus, plane, cone, pyramid, frustum, capsule, tessellated sphere, grid, and asteroid.
-- Iso-contour generation (with connectivity rules)
-- Dataflow UI for graphics/imaging pipelines
-- Force directed graph
-- "One Euro" filter
 
 ## Dependencies
 GLFW 3.1+ and GLEW. Source code for all other libraries is included in the repository and compiles on windows, linux, and mac.
 
-## Building
-#### Ubuntu Linux:
- 
- ```bash
- sudo apt-get install g++-4.8
- sudo apt-get install gcc-4.8
- sudo apt-get install libglu1-mesa-dev
- sudo apt-get install libxxf86vm-dev 
- sudo apt-get install libxrandr-dev
- sudo apt-get install libxcursor-dev
- sudo apt-get install libxinerama-dev
- sudo apt-get install libxdamage-dev
- sudo apt-get install libxi-dev
- sudo apt-get install libglew-dev
- sudo apt-get install libxi6
- sudo apt-get install libglew1.10
- sudo apt-get install cmake
- cmake -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=g++-4.8 -DCMAKE_C_COMPILER=gcc-4.8
- make -j4
- ```
- 
-#### OS X:
-```bash
-brew update
-brew install glew
-brew install cmake
-brew tap homebrew/versions
-brew install glfw3
-cmake -G "Unix Makefiles" -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_C_COMPILER=clang
-make -j4
-```
-
-#### Windows 10:
- - Download [Visual Studio 2015 Community Edition](https://www.visualstudio.com/downloads/download-visual-studio-vs)
- - Open solution file Alloy-Graphics-Library/vs2015/alloy
- - Change build configuration to Release|x64 for best performance 
-
 ## License
-Alloy is [BSD licensed](https://github.com/rgb2hsv/Alloy-Graphics-Library/edit/master/LICENSE) and only uses libraries that also have a permissive license for commercial and academic use.
+Alloy is [MIT licensed](https://github.com/rgb2hsv/Alloy-Graphics-Library/edit/master/LICENSE) and only uses libraries that also have a permissive license for commercial and academic use.
 
 Parameter Pane Example
 -------------------------
