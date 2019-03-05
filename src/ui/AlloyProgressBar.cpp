@@ -20,6 +20,7 @@ void ProgressBar::draw(AlloyContext* context) {
 	float h = bounds.dimensions.y;
 	const float FADE = 8;
 	box2px cbounds = getCursorBounds();
+	pushScissor(nvg,cbounds);
 	NVGpaint shadowPaint;
 	nvgBeginPath(nvg);
 	if (round) {
@@ -84,6 +85,7 @@ void ProgressBar::draw(AlloyContext* context) {
 		nvgStrokeColor(nvg, context->theme.FOCUS);
 		nvgStroke(nvg);
 	}
+	popScissor(nvg);
 }
 bool ProgressBar::onEventHandler(AlloyContext* context,
 		const InputEvent& event) {

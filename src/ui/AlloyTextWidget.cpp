@@ -115,6 +115,7 @@ void ModifiableLabel::draw(AlloyContext* context) {
 	}
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
+	pushScissor(nvg,getCursorBounds());
 	if (backgroundColor->a > 0) {
 		nvgBeginPath(nvg);
 		if (roundCorners) {
@@ -340,6 +341,7 @@ void ModifiableLabel::draw(AlloyContext* context) {
 		nvgStrokeColor(nvg, context->theme.FOCUS);
 		nvgStroke(nvg);
 	}
+	popScissor(nvg);
 }
 
 void TextLabel::draw(AlloyContext* context) {
