@@ -40,7 +40,7 @@ bool ControlsEx::init(Composite& rootNode) {
 		return str;
 	});
 	VSliderPtr vslider1 = VSliderPtr(
-			new VerticalSlider("Vert Slider", CoordPerPX(0.85f, 0.1f, 0, 0),
+			new VerticalSlider("Vert Slider", CoordPerPX(0.85f, 0.1f, 0.0f, 30.0f),
 					CoordPX(100.0f, 200.0f), Integer(0), Integer(100),
 					Integer(20)));
 	vslider1->setLabelFormatter([](const Number& num){
@@ -129,9 +129,10 @@ bool ControlsEx::init(Composite& rootNode) {
 			new TextIconButton("Text Icon", 0xf115,
 					CoordPerPX(1.0f, 1.0f, -110.0f, -40.0f), CoordPX(100, 30)));
 
-	IconButtonPtr iconButton = std::shared_ptr<IconButton>(
-			new IconButton(0xf062, CoordPerPX(1.0f, 0.0f, -35.0f, 5.0f),
-					CoordPX(30, 30)));
+	IconButtonPtr iconButton = std::shared_ptr<IconButton>(new IconButton(0xF110, CoordPerPX(1.0f, 0.0f, -65.0f, 5.0f),CoordPX(60, 60),IconType::CIRCLE));
+	iconButton->borderWidth=UnitPX(0.0f);
+	iconButton->backgroundColor=MakeColor(COLOR_NONE);
+	iconButton->foregroundColor=MakeColor(COLOR_NONE);
 
 	ProgressCirclePtr progressCircle=ProgressCirclePtr(new ProgressCircle("Progress Circle",CoordPerPX(0.0f,0.8f,240.0f,-5.0f),CoordPX(120.0f,120.0f)));
 
@@ -183,10 +184,11 @@ bool ControlsEx::init(Composite& rootNode) {
 	rootNode.add(textIcon,true);
 	togglebox->setFocus(true);
 	progressTask = std::unique_ptr<aly::RecurrentTask>(
-			new RecurrentTask([pbar,progressCircle](uint64_t iter) {
+			new RecurrentTask([pbar,progressCircle,iconButton](uint64_t iter) {
 				//std::cout << "Iteration " << iter << std::endl;
 					pbar->setValue("Task Executing ...",(iter%21) / 20.0f);
 					progressCircle->setValue(MakeString()<<(iter%21)<<" of 20", (iter%21) / 20.0f);
+					iconButton->setAngle(ToRadians((float)18*(iter%20)));
 					return true;
 				}, [pbar,progressCircle]() {
 					pbar->setValue("Task Complete.", 1.0f);

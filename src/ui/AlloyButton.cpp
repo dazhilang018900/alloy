@@ -570,7 +570,7 @@ IconButton::IconButton(int iconCode, const AUnit2D& position,
 		const AUnit2D& dimensions, IconType iconType, bool truncate) :
 		Composite("Icon", position, dimensions), iconCodeString(
 				CodePointToUTF8(iconCode)), iconType(iconType), truncate(
-				truncate), rescale(true), nudge(0.0f, 0.0f), nudgeSize(0.0f) {
+				truncate), rescale(true), nudge(0.0f, 0.0f), nudgeSize(0.0f),angle(0.0f) {
 	this->position = position;
 	this->dimensions = dimensions;
 	backgroundColor = MakeColor(AlloyApplicationContext()->theme.DARK);
@@ -645,11 +645,15 @@ void IconButton::draw(AlloyContext* context) {
 	if (truncate) {
 		pushScissor(nvg, getCursorBounds());
 	}
+
+	nvgSave(nvg);
+	nvgTranslate(nvg, center.x, center.y);
+	nvgRotate(nvg,angle);
+	nvgTranslate(nvg, -center.x, -center.y);
 	nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
-	drawText(nvg, ibounds.position + HALF_PIX(ibounds.dimensions) + nudge,
-			iconCodeString, fontStyle,
-			(hover && borderColor->a > 0) ? *borderColor : *iconColor,
-			*iconGlowColor, nullptr);
+	drawText(nvg, ibounds.position + HALF_PIX(ibounds.dimensions) + nudge,iconCodeString, fontStyle,(hover && borderColor->a > 0) ? *borderColor : *iconColor,*iconGlowColor, nullptr);
+	nvgRestore(nvg);
+
 	if (truncate) {
 		popScissor(nvg);
 	}

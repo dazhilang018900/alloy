@@ -80,8 +80,8 @@ void Application::initInternal() {
 		images[1].width=img2.width;
 		images[1].height=img2.height;
 		glfwSetWindowIcon(getContext()->window, 2, images);
-	} catch(...){
-
+	} catch(const std::exception& e){
+		std::cerr<<e.what()<<std::endl;
 	}
 }
 std::shared_ptr<GLTextureRGBA> Application::loadTextureRGBA(

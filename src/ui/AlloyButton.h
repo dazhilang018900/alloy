@@ -64,6 +64,7 @@ private:
 	bool rescale;
 	pixel2 nudge;
 	pixel nudgeSize;
+	float angle;
 	FontStyle fontStyle;
 public:
 	AColor foregroundColor;
@@ -71,6 +72,9 @@ public:
 	AColor iconGlowColor;
 	void setNudgeSize(pixel nz) {
 		nudgeSize = nz;
+	}
+	void setAngle(float a){
+		angle=a;
 	}
 	void setNudgePosition(pixel2 n) {
 		nudge = n;
