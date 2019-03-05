@@ -29,6 +29,7 @@ namespace aly {
 class ProgressBar: public Region {
 private:
 	float value;
+	bool round;
 	std::string label;
 public:
 	virtual void draw(AlloyContext* context) override;
@@ -51,7 +52,7 @@ public:
 	virtual bool onEventHandler(AlloyContext* context, const InputEvent& event)
 			override;
 	ProgressBar(const std::string& name, const AUnit2D& pt,
-			const AUnit2D& dims);
+			const AUnit2D& dims, bool round=true);
 };
 
 
