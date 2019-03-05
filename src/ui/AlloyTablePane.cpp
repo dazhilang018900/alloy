@@ -762,23 +762,17 @@ TableIconStringEntry::TableIconStringEntry(const std::string& name,
 		int iconCode, const std::string& label, bool modifiable,
 		const HorizontalAlignment& alignment) :
 		TableEntry(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)) {
-	value = ModifiableLabelPtr(
-			new ModifiableLabel(name, CoordPX(2.0f, 0.0f),
-					CoordPerPX(1.0f, 1.0f, -4.0f - 36.0f, 0.0f), modifiable));
+	const float iconSize=36.0f;
+	value = ModifiableLabelPtr(new ModifiableLabel(name, CoordPX(iconSize, 0.0f),CoordPerPX(1.0f, 1.0f, -iconSize, 0.0f), modifiable));
 	value->backgroundColor = MakeColor(0, 0, 0, 0);
 	value->borderColor = MakeColor(0, 0, 0, 0);
 	value->borderWidth = UnitPX(0.0f);
 	value->setAlignment(alignment, VerticalAlignment::Middle);
 	value->setValue(label);
 	value->fontSize = UnitPX(24.0f);
-	GlyphRegionPtr icon = MakeGlyphRegion(
-			AlloyApplicationContext()->createAwesomeGlyph(iconCode,
-					FontStyle::Normal, 24.0f), CoordPX(2.0f, 2.0f),
-			CoordPerPX(1.0f, 1.0f, 0.0f, -4.0f), *value->backgroundColor,
+	GlyphRegionPtr icon = MakeGlyphRegion(AlloyApplicationContext()->createAwesomeGlyph(iconCode,FontStyle::Normal, 24.0f), CoordPX(0.0f, 0.0f),CoordPerPX(0.0f,1.0f,iconSize,0.0f), *value->backgroundColor,
 			*value->textColor);
-	icon->setAspectRatio(1.0f);
-	icon->setAspectRule(AspectRule::FixedHeight);
-	setOrientation(Orientation::Horizontal, pixel2(4, 4), pixel2(2, 0));
+	//setOrientation(Orientation::Horizontal, pixel2(0, 0), pixel2(0, 0));
 	Composite::add(icon);
 	Composite::add(value);
 }
