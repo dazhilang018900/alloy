@@ -594,6 +594,7 @@ void IconButton::draw(AlloyContext* context) {
 	pixel2 center = bounds.position + HALF_PIX(bounds.dimensions);
 	pixel2 radii = HALF_PIX(bounds.dimensions);
 	pixel2 offset;
+	pushScissor(nvg,getCursorBounds());
 	if (down && rescale) {
 		offset = pixel2(1, 1);
 	} else {
@@ -728,6 +729,7 @@ void IconButton::draw(AlloyContext* context) {
 		nvgStrokeColor(nvg, context->theme.FOCUS);
 		nvgStroke(nvg);
 	}
+	popScissor(nvg);
 }
 
 }
