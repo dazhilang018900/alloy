@@ -240,14 +240,12 @@ void DragComposite::draw(AlloyContext* context) {
 		DragSlot& sslot = sourceSlots[idx];
 
 		DragSlot mslot = tslot;
-		mslot.bounds.position = mix(tslot.start, tslot.bounds.position,
-				tslot.tween);
+		mslot.bounds.position = mix(tslot.start, tslot.bounds.position,tslot.tween);
 		if (move) {
 			tslot.tween = std::min(tslot.tween + 0.1f, 1.0f);
 		}
 		if (dragRegion != mslot.region) {
-			mslot.region->setDragOffset(
-					mslot.bounds.position - sslot.bounds.position);
+			mslot.region->setDragOffset(aly::round(mslot.bounds.position - sslot.bounds.position));
 			mslot.region->draw(context);
 		}
 	}
@@ -865,20 +863,21 @@ DragBinTab::DragBinTab(const std::string& name, const AUnit2D& pos,
 void DragBinTab::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
 	NVGcontext* nvg = context->nvgContext;
-	nvgBeginPath(nvg);
 	box2px clip = getCursorBounds();
 	if (orientation == Orientation::Vertical) {
+		clip.intersect(box2px(bounds.position, pixel2(bounds.dimensions.x, tabSize)));
+		pushScissor(nvg, clip);
+		nvgBeginPath(nvg);
 		nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
 				bounds.dimensions.x, tabSize + context->theme.CORNER_RADIUS,
 				context->theme.CORNER_RADIUS);
-		clip.intersect(
-				box2px(bounds.position, pixel2(bounds.dimensions.x, tabSize)));
 	} else if (orientation == Orientation::Horizontal) {
+		clip.intersect(box2px(bounds.position, pixel2(tabSize, bounds.dimensions.y)));
+		pushScissor(nvg, clip);
+		nvgBeginPath(nvg);
 		nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
 				tabSize + context->theme.CORNER_RADIUS, bounds.dimensions.y,
 				context->theme.CORNER_RADIUS);
-		clip.intersect(
-				box2px(bounds.position, pixel2(tabSize, bounds.dimensions.y)));
 	}
 	if (context->isMouseDown(this, false)) {
 		if(context->isLeftMouseButtonDown()){
@@ -896,7 +895,6 @@ void DragBinTab::draw(AlloyContext* context) {
 	} else {
 		nvgFillColor(nvg, context->theme.LIGHTER);
 	}
-	pushScissor(nvg, clip);
 	nvgFill(nvg);
 	if(isObjectFocused()){
 		nvgBeginPath(nvg);
@@ -924,18 +922,19 @@ void DragBinTab::draw(AlloyContext* context) {
 	popScissor(nvg);
 	Composite::draw(context);
 	if(isObjectFocused()){
+		clip=getCursorBounds();
 		nvgStrokeColor(nvg,context->theme.FOCUS);
 		nvgStrokeWidth(nvg,2.0f);
 		if (orientation == Orientation::Vertical) {
-			pushScissor(nvg,box2px(pixel2(bounds.position.x,bounds.position.y+tabSize),pixel2(bounds.dimensions.x,bounds.dimensions.y)));
+			clip.intersect(box2px(pixel2(bounds.position.x,bounds.position.y+tabSize),pixel2(bounds.dimensions.x,bounds.dimensions.y)));
+			pushScissor(nvg,clip);
 			nvgBeginPath(nvg);
-
 			nvgRect(nvg, bounds.position.x+1, bounds.position.y+tabSize-2,
 					bounds.dimensions.x-2,bounds.dimensions.y-Composite::scrollBarSize-tabSize+1);
 		} else if (orientation == Orientation::Horizontal) {
-			pushScissor(nvg,box2px(pixel2(bounds.position.x+tabSize+1,bounds.position.y),pixel2(bounds.dimensions.x,bounds.dimensions.y)));
+			clip.intersect(box2px(pixel2(bounds.position.x+tabSize+1,bounds.position.y),pixel2(bounds.dimensions.x,bounds.dimensions.y)));
+			pushScissor(nvg,clip);
 			nvgBeginPath(nvg);
-
 			nvgRect(nvg, bounds.position.x+tabSize-2, bounds.position.y+1.0f,
 					bounds.dimensions.x-Composite::scrollBarSize-tabSize+1,bounds.dimensions.y-2);
 		}

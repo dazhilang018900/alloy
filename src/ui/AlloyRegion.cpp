@@ -270,8 +270,7 @@ void Region::pack() {
 void Region::draw(AlloyContext* context) {
 	NVGcontext* nvg = context->nvgContext;
 	box2px bounds = getBounds();
-	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
-			context->pixelRatio);
+	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,context->pixelRatio);
 	if (backgroundColor->a > 0) {
 		nvgBeginPath(nvg);
 		if (roundCorners) {
@@ -537,7 +536,8 @@ box2px Region::getCursorBounds(bool includeOffset) const {
 			box.intersect(parent->getCursorBounds());
 		}
 	}
-
+	box.position=aly::ceil(box.position);
+	box.dimensions=aly::floor(box.dimensions);
 	return box;
 }
 
