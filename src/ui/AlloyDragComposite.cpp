@@ -136,6 +136,7 @@ void DragComposite::draw(AlloyContext* context) {
 	int srcIndex = -1;
 	int tarIndex = -1;
 	float dragOffset = 0.0f;
+	pixel2 rootPos=getBoundsPosition(false);
 	for (const DragSlot& slot : sourceSlots) {
 		if (dragRegion == slot.region || focusRegion == slot.region) {
 			srcIndex = slot.index;
@@ -145,7 +146,7 @@ void DragComposite::draw(AlloyContext* context) {
 							slot.bounds.dimensions.x + cellSpacing.x);
 		}
 		box2px lbounds = slot.bounds;
-		lbounds.position += slot.region->getDrawOffset();
+		lbounds.position += slot.region->getDrawOffset()+rootPos;
 		lbounds.dimensions.y +=
 				(orientation == Orientation::Vertical) ?
 						cellSpacing.y : cellSpacing.x;
@@ -190,10 +191,8 @@ void DragComposite::draw(AlloyContext* context) {
 				}
 				tslot.bounds.position.y = sslot.bounds.position.y + off;
 			} else {
-				if (sslot.bounds.position.y + drawOffset.y
-						+ sslot.bounds.dimensions.y >= cursor.y) {
-					tslot.bounds.position.y = sslot.bounds.position.y
-							+ slotOffset;
+				if (rootPos.y+sslot.bounds.position.y + drawOffset.y+ sslot.bounds.dimensions.y >= cursor.y) {
+					tslot.bounds.position.y = sslot.bounds.position.y+ slotOffset;
 				} else {
 					//std::cout <<getName()<<": "<< children[i]->getName() <<std::endl;
 					tslot.bounds.position.y = sslot.bounds.position.y;
@@ -220,7 +219,7 @@ void DragComposite::draw(AlloyContext* context) {
 				}
 				tslot.bounds.position.x = sslot.bounds.position.x + off;
 			} else {
-				if (sslot.bounds.position.x + drawOffset.x
+				if (rootPos.x+sslot.bounds.position.x + drawOffset.x
 						+ sslot.bounds.dimensions.x >= cursor.x) {
 					tslot.bounds.position.x = sslot.bounds.position.x
 							+ slotOffset;
@@ -490,7 +489,7 @@ void DragComposite::pack(const pixel2& pos, const pixel2& dims,
 		region->pack(bounds.position, bounds.dimensions, dpmm, pixelRatio);
 		box2px cbounds = region->getBounds(false);
 		slot.bounds = cbounds;
-		slot.bounds.position -= region->getDragOffset();
+		slot.bounds.position -= region->getDragOffset()+bounds.position;
 		slot.start = slot.bounds.position;
 		if (orientation == Orientation::Horizontal) {
 			offset.x += cellSpacing.x + cbounds.dimensions.x;
@@ -636,6 +635,7 @@ void DragBinComposite::handleDragOver(Region* region) {
 	aly::pixel2 cursor = context->getCursorPosition();
 	Composite* comp = dynamic_cast<Composite*>(region->parent);
 	context->setObjectFocus(comp->parent);
+
 	for (int n = 0; n < children.size(); n++) {
 		auto bin = getBin(n);
 		bool found = false;
@@ -644,6 +644,7 @@ void DragBinComposite::handleDragOver(Region* region) {
 			if (bin->isVisible() && context->isMouseContainedIn(bounds)) {
 				std::vector<DragSlot> slots = bin->getSlots();
 				pixel2 cellSpacing = bin->getCellSpacing();
+				pixel2 rootPos=bin->getBoundsPosition(false);
 				for (int m = 0; m < slots.size(); m++) {
 					box2px bbox = slots[m].bounds;
 					if (orientation == Orientation::Horizontal) {
@@ -652,6 +653,7 @@ void DragBinComposite::handleDragOver(Region* region) {
 						cellSpacing.y = 0;
 					}
 					bbox.dimensions += cellSpacing;
+					bbox.position+=rootPos;
 					bbox.position += slots[m].region->getDrawOffset();
 					if (bbox.contains(cursor)) {
 						bin->setEmptySlot(bbox);
@@ -680,6 +682,7 @@ void DragBinComposite::handleDrop(const std::shared_ptr<Region>& region) {
 		bool found = false;
 		bin->setEmptySlot(box2px(pixel2(0.0f), pixel2(0.0f)));
 		box2px bounds = bin->getBounds();
+
 		if (bin->isVisible() && context->isMouseContainedIn(bounds)) {
 			Composite* comp = dynamic_cast<Composite*>(region->parent);
 			if (comp != bin.get()) {
@@ -688,6 +691,7 @@ void DragBinComposite::handleDrop(const std::shared_ptr<Region>& region) {
 				}
 				const std::vector<DragSlot>& slots = bin->getSlots();
 				pixel2 cellSpacing = bin->getCellSpacing();
+				pixel2 rootPos=bin->getBoundsPosition(false);
 				if (orientation == Orientation::Horizontal) {
 					cellSpacing.x = 0;
 				} else {
@@ -695,6 +699,7 @@ void DragBinComposite::handleDrop(const std::shared_ptr<Region>& region) {
 				}
 				for (int m = 0; m < slots.size(); m++) {
 					box2px bbox = slots[m].bounds;
+					bbox.position+=rootPos;
 					bbox.dimensions += cellSpacing;
 					bbox.position += slots[m].region->getDrawOffset();
 					if (bbox.contains(cursor)) {
@@ -815,6 +820,7 @@ DragCompositePtr DragBinComposite::addBin(const std::string& name, int size,Comp
 		}
 		return false;
 	};
+
 	return dcomp;
 }
 DragBinComposite::DragBinComposite(const std::string& name, const AUnit2D& pos,
