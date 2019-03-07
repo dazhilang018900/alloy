@@ -157,6 +157,7 @@ public:
 	FontType fontType;
 	FontStyle fontStyle;
 	AColor textAltColor;
+	AColor glowColor;
 	HorizontalAlignment horizontalAlignment = HorizontalAlignment::Left;
 	VerticalAlignment verticalAlignment = VerticalAlignment::Top;
 	void setAlignment(const HorizontalAlignment& horizontalAlignment,

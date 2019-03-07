@@ -234,6 +234,7 @@ void DragComposite::draw(AlloyContext* context) {
 	if (timer.resetAfterElapsed(1 / 30.0f)) {
 		move = true;
 	}
+	bool moving=false;
 	for (int idx = 0; idx < targetSlots.size(); idx++) {
 		DragSlot& tslot = targetSlots[idx];
 		DragSlot& sslot = sourceSlots[idx];
@@ -244,10 +245,15 @@ void DragComposite::draw(AlloyContext* context) {
 			tslot.tween = std::min(tslot.tween + 0.1f, 1.0f);
 		}
 		if (dragRegion != mslot.region) {
-			mslot.region->setDragOffset(aly::round(mslot.bounds.position - sslot.bounds.position));
+			float2 newShift=aly::round(mslot.bounds.position - sslot.bounds.position);
+			if(newShift!=mslot.region->getDragOffset()){
+				moving=true;
+				mslot.region->setDragOffset(newShift);
+			}
 			mslot.region->draw(context);
 		}
 	}
+	if(moving)context->requestPack();
 	if (dragging) {
 		if (focusRegion == nullptr) {
 			timer.reset();

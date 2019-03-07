@@ -87,11 +87,11 @@ ModifiableLabel::ModifiableLabel(const std::string& name,
 	this->modifiable = modifiable;
 	textAltColor = MakeColor(AlloyApplicationContext()->theme.DARK);
 	textColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
+	glowColor = MakeColor(AlloyApplicationContext()->theme.LIGHTER);
 	fontSize = UnitPX(24);
 	setValue(name);
 	setRoundCorners(false);
 }
-
 void ModifiableLabel::draw(AlloyContext* context) {
 
 	float ascender, descender, lineh;
@@ -115,7 +115,7 @@ void ModifiableLabel::draw(AlloyContext* context) {
 	}
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
-	pushScissor(nvg,getCursorBounds());
+	pushScissor(nvg, getCursorBounds());
 	if (backgroundColor->a > 0) {
 		nvgBeginPath(nvg);
 		if (roundCorners) {
@@ -279,7 +279,7 @@ void ModifiableLabel::draw(AlloyContext* context) {
 		if (hover) {
 			nvgLineCap(nvg, NVG_SQUARE);
 			nvgStrokeWidth(nvg, (fontType == FontType::Bold) ? 2.0f : 1.0f);
-			nvgStrokeColor(nvg, *textColor);
+			nvgStrokeColor(nvg, *glowColor);
 			nvgBeginPath(nvg);
 			nvgMoveTo(nvg, bounds.position.x + start.x,
 					bounds.position.y + start.y + th - 2);
@@ -287,14 +287,26 @@ void ModifiableLabel::draw(AlloyContext* context) {
 					bounds.position.y + start.y + th - 2);
 			nvgStroke(nvg);
 		}
-		if (showDefaultLabel) {
-			drawText(nvg, bounds.position + offset, label, fontStyle,
-					*textColor, *textAltColor);
+		if (hover) {
+			if (showDefaultLabel) {
+				drawText(nvg, bounds.position + offset, label, fontStyle,
+						*glowColor, *textAltColor);
 
+			} else {
+				drawText(nvg, bounds.position + offset, value, fontStyle,
+						*glowColor, *textAltColor);
+
+			}
 		} else {
-			drawText(nvg, bounds.position + offset, value, fontStyle,
-					*textColor, *textAltColor);
+			if (showDefaultLabel) {
+				drawText(nvg, bounds.position + offset, label, fontStyle,
+						*textColor, *textAltColor);
 
+			} else {
+				drawText(nvg, bounds.position + offset, value, fontStyle,
+						*textColor, *textAltColor);
+
+			}
 		}
 		if (truncate) {
 			popScissor(nvg);
@@ -935,7 +947,7 @@ bool TextField::onEventHandler(AlloyContext* context, const InputEvent& e) {
 			if (e.button == GLFW_MOUSE_BUTTON_LEFT) {
 				setFocus(true);
 			} else if (e.button == GLFW_MOUSE_BUTTON_RIGHT) {
-				if(isObjectFocused()){
+				if (isObjectFocused()) {
 					if (onTextEntered) {
 						onTextEntered(this);
 					}
