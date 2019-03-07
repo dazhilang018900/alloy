@@ -3443,8 +3443,8 @@ void DataFlow::draw(AlloyContext* context) {
 	float h = bounds.dimensions.y;
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
-	pushScissor(nvg, getCursorBounds());
-	if (backgroundColor->a > 0) {
+	if(!thumbMode)pushScissor(nvg, getCursorBounds());
+	if (backgroundColor->a > 0&&!thumbMode) {
 		nvgBeginPath(nvg);
 		if (roundCorners) {
 			nvgRoundedRect(nvg, bounds.position.x, bounds.position.y,
@@ -3457,7 +3457,7 @@ void DataFlow::draw(AlloyContext* context) {
 		nvgFillColor(nvg, *backgroundColor);
 		nvgFill(nvg);
 	}
-	{
+	if(!thumbMode){
 		nvgBeginPath(nvg);
 		nvgFillColor(nvg, context->theme.DARKER);
 		nvgStrokeWidth(nvg, 1.0f);
@@ -3477,7 +3477,7 @@ void DataFlow::draw(AlloyContext* context) {
 		}
 	}
 
-	if (verticalScrollTrack.get() != nullptr) {
+	if(!thumbMode&&verticalScrollTrack.get() != nullptr) {
 		if (isScrollEnabled()) {
 			if (extents.dimensions.y > h) {
 				verticalScrollTrack->draw(context);
@@ -3493,8 +3493,8 @@ void DataFlow::draw(AlloyContext* context) {
 			}
 		}
 	}
-	popScissor(nvg);
-	if (borderColor->a > 0) {
+	if(!thumbMode)popScissor(nvg);
+	if(!thumbMode&&borderColor->a > 0) {
 
 		nvgLineJoin(nvg, NVG_ROUND);
 		nvgBeginPath(nvg);
@@ -3626,7 +3626,7 @@ void DataFlow::draw(AlloyContext* context) {
 		}
 
 	}
-	if (dragBox.dimensions.x > 0 && dragBox.dimensions.y > 0) {
+	if(!thumbMode&&dragBox.dimensions.x > 0 && dragBox.dimensions.y > 0) {
 		nvgBeginPath(nvg);
 		nvgRect(nvg, dragBox.position.x, dragBox.position.y,
 				dragBox.dimensions.x, dragBox.dimensions.y);
@@ -3640,6 +3640,7 @@ void DataFlow::draw(AlloyContext* context) {
 		nvgStrokeColor(nvg, Color(220, 220, 220));
 		nvgStroke(nvg);
 	}
+	thumbMode=false;
 }
 void DataFlow::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {

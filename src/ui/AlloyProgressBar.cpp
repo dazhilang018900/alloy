@@ -115,8 +115,8 @@ void ProgressCircle::draw(AlloyContext* context) {
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;
 
-	float rOuter = std::min(w, h) / 2.0f - lineWidth;
-	float rInner = aly::round((1.0f - thickness) * rOuter) - lineWidth;
+	float rOuter = aly::round(std::min(w, h) / 2.0f) - 2.0f;
+	float rInner = aly::round((1.0f - thickness) * rOuter) - 2.0f;
 	float2 center(round(x + w * 0.5f), round(y + w * 0.5f));
 	box2px cbounds = getCursorBounds();
 	pushScissor(nvg, cbounds);

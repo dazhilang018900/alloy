@@ -929,6 +929,7 @@ protected:
 	bool draggingNode = false;
 	bool mouseDownInRegion = false;
 	bool enabled = true;
+	bool thumbMode=false;
 	float scale = 1.0f;
 	static std::shared_ptr<Group> clipboard;
 	void setup();

@@ -23,7 +23,7 @@ bool DragComposite::onEventHandler(AlloyContext* context, const InputEvent& e) {
 		dragging = false;
 		if (dragRegion != nullptr) {
 			for (auto r : children) {
-				if (r.get() == dragRegion) {
+				if (r.get()==dragRegion) {
 					dragging = true;
 					break;
 				}
@@ -682,7 +682,6 @@ void DragBinComposite::handleDrop(const std::shared_ptr<Region>& region) {
 		bool found = false;
 		bin->setEmptySlot(box2px(pixel2(0.0f), pixel2(0.0f)));
 		box2px bounds = bin->getBounds();
-
 		if (bin->isVisible() && context->isMouseContainedIn(bounds)) {
 			Composite* comp = dynamic_cast<Composite*>(region->parent);
 			if (comp != bin.get()) {
