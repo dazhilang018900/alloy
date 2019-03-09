@@ -46,15 +46,22 @@ typedef std::shared_ptr<DragComposite> DragCompositePtr;
 
 class DragBinComposite:public DragComposite {
 public:
+	std::function<void(DragComposite* bin,Region* r)> onAddItem;
+	std::function<void(DragComposite* bin,Region* r)> onRemoveItem;
+	std::function<void(DragComposite* bin)> onAddBin;
+	std::function<void(DragComposite* bin)> onRemoveBin;
 	void handleDrop(const std::shared_ptr<Region>& region);
 	void handleDragOver(Region* region);
 	DragBinComposite(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,const Orientation& orient);
 	DragCompositePtr addBin(const std::string& name,int size,Composite* after=nullptr);
 	DragCompositePtr getBin(int idx) const ;
+	void removeBin(DragComposite* region);
+	void removeItem(Region* region);
+	size_t size() const;
 	virtual ~DragBinComposite(){}
 };
-typedef std::shared_ptr<DragBinComposite> DragBinCompositePtr;
 
+typedef std::shared_ptr<DragBinComposite> DragBinCompositePtr;
 class DragBinTab:public Composite{
 protected:
 	Orientation orientation;

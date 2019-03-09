@@ -775,19 +775,22 @@ void Composite::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		if (isScrollEnabled()) {
 			if (this->verticalScrollHandle->getBoundsDimensionsY()
 					< this->verticalScrollTrack->getBoundsDimensionsY() - 1) { //subtract one to avoid round off error in determination track bar size!
+				verticalScrollTrack->setIgnoreCursorEvents(false);
 				verticalScrollTrack->setVisible(true);
 				verticalScrollHandle->setVisible(true);
 			} else {
 				verticalScrollTrack->setVisible(alwaysShowVerticalScrollBar);
 				verticalScrollHandle->setVisible(false);
+				verticalScrollTrack->setIgnoreCursorEvents(true);
 			}
 			if (this->horizontalScrollHandle->getBoundsDimensionsX()
 					< this->horizontalScrollTrack->getBoundsDimensionsX() - 1) { //subtract one to avoid round off error in determination track bar size!
+				horizontalScrollTrack->setIgnoreCursorEvents(false);
 				horizontalScrollTrack->setVisible(true);
 				horizontalScrollHandle->setVisible(true);
 			} else {
-				horizontalScrollTrack->setVisible(
-						alwaysShowHorizontalScrollBar);
+				horizontalScrollTrack->setVisible(alwaysShowHorizontalScrollBar);
+				horizontalScrollTrack->setIgnoreCursorEvents(true);
 				horizontalScrollHandle->setVisible(false);
 			}
 		} else {
@@ -795,6 +798,8 @@ void Composite::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 			verticalScrollHandle->setVisible(false);
 			horizontalScrollTrack->setVisible(alwaysShowHorizontalScrollBar);
 			verticalScrollTrack->setVisible(alwaysShowVerticalScrollBar);
+			horizontalScrollTrack->setIgnoreCursorEvents(true);
+			verticalScrollTrack->setIgnoreCursorEvents(true);
 		}
 	}
 	for (std::shared_ptr<Region>& region : children) {

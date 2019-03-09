@@ -1429,6 +1429,7 @@ std::string Group::toString(std::string indent) const {
 	}
 	return ss.str();
 }
+
 bool DataFlow::copySelected() {
 	GroupPtr group = std::dynamic_pointer_cast<Group>(data->clone(true));
 	if (group->nodes.size() == 0)return false;
@@ -3640,7 +3641,6 @@ void DataFlow::draw(AlloyContext* context) {
 		nvgStrokeColor(nvg, Color(220, 220, 220));
 		nvgStroke(nvg);
 	}
-	thumbMode=false;
 }
 void DataFlow::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 		double pixelRatio, bool clamp) {

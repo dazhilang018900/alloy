@@ -932,7 +932,6 @@ protected:
 	bool thumbMode=false;
 	float scale = 1.0f;
 	static std::shared_ptr<Group> clipboard;
-	void setup();
 	void addConnectionInternal(const std::shared_ptr<Connection>& connection);
 	void addRelationshipInternal(const std::shared_ptr<Relationship>& connection);
 	void addNodeInternal(const std::shared_ptr<Node>& node);
@@ -941,6 +940,7 @@ public:
 	friend class Connection;
 	friend class Node;
 	friend class ActionDataFlow;
+	void setup();
 	void zoom(float s);
 	void addNode(const std::shared_ptr<Node>& node);
 	void removeNode(const std::shared_ptr<Node>& node);
