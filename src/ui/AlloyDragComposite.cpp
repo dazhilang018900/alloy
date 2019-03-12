@@ -756,8 +756,11 @@ DragCompositePtr DragBinComposite::addBin(const std::string& name, int size,
 								-DragBinTab::tabSize
 										- Composite::scrollBarSize),
 						Orientation::Vertical, false));
-		dcomp->onDrop = [this](const std::shared_ptr<Region>& region) {
+		dcomp->onDrop = [this,dcomp](const std::shared_ptr<Region>& region) {
 			handleDrop(region);
+			if(onMoveItem){
+				onMoveItem(dcomp.get(),region.get());
+			}
 		};
 		dcomp->onDragOver = [this](Region* region) {
 			handleDragOver(region);
@@ -892,6 +895,11 @@ DragBinComposite::DragBinComposite(const std::string& name, const AUnit2D& pos,
 	} else {
 		setAlwaysShowVerticalScrollBar(true);
 	}
+	onDrop=[this](const RegionPtr& ptr){
+		if(onMoveBin){
+			onMoveBin(dynamic_cast<DragBinComposite*>(ptr.get()));
+		}
+	};
 }
 DragBinTab::DragBinTab(const std::string& name, const AUnit2D& pos,
 		const AUnit2D& dims, const Orientation& orient) :

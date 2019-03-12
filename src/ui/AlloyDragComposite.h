@@ -48,8 +48,10 @@ class DragBinComposite:public DragComposite {
 public:
 	std::function<void(DragComposite* bin,Region* r)> onAddItem;
 	std::function<void(DragComposite* bin,Region* r)> onRemoveItem;
+	std::function<void(DragComposite* bin,Region* r)> onMoveItem;
 	std::function<void(DragComposite* bin)> onAddBin;
 	std::function<void(DragComposite* bin)> onRemoveBin;
+	std::function<void(DragComposite* bin)> onMoveBin;
 	void handleDrop(const std::shared_ptr<Region>& region);
 	void handleDragOver(Region* region);
 	DragBinComposite(const std::string& name, const AUnit2D& pos, const AUnit2D& dims,const Orientation& orient);
