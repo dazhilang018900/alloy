@@ -49,7 +49,7 @@ std::string getCPU() {
 	int cpuinfo[4] = {0, 0, 0, 0};
 	__cpuid(cpuinfo, 0);
 	std::stringstream ss;
-	ss<<cpuinfo[0]<<cpuinfo[1]<<cpuinfo[2]<<cpuinfo[3];
+	ss<<n2hexstr(cpuinfo[0])<<n2hexstr(cpuinfo[1])<<n2hexstr(cpuinfo[2])<<n2hexstr(cpuinfo[3]);
 	return ss.str();
 }
 std::string getMachine() {
@@ -102,8 +102,9 @@ std::string getNetwork() {
 		if ( sdl && ( sdl->sdl_family == AF_LINK ) && ( sdl->sdl_type == IFT_ETHER ))
 		{
 			std::stringstream mac;
+			unsigned char* ptr=(unsigned char*)(LLADDR(sdl));
 			for(int i=0;i<6;i++) {
-				mac<<n2hexstr(LLADDR(sdl))<<((i<5)?":":"");
+				mac<<n2hexstr(ptr[i])<<((i<5)?":":"");
 			}
 			addresses.push_back(mac.str());
 		}
@@ -155,7 +156,7 @@ std::string getNetwork() {
 #include <mach-o/arch.h>
 std::string getCPU() {
 	const NXArchInfo* info = NXGetLocalArchInfo();
-	return MakeString()<< (unsigned short)info->cputype<< (unsigned short)info->cpusubtype;
+	return MakeString()<< n2hexstr(info->cputype)<< n2hexstr(info->cpusubtype);
 }
 #else
 std::string getCPU() {
