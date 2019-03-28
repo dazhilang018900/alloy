@@ -26,11 +26,11 @@ namespace aly {
 
 GLShader::GLShader(bool onScreen, const std::shared_ptr<AlloyContext>& context) :
 		mVertexShaderHandle(0), mFragmentShaderHandle(0), mGeometryShaderHandle(
-				0), mProgramHandle(0), context(context),onScreen(onScreen) {
+				0), mProgramHandle(0), context(context){
 
 }
 GLShader& GLShader::begin() {
-	context->begin(onScreen);
+	context->begin();
 	glUseProgram(GetProgramHandle());
 	shaderEnabled = true;
 	return *this;
@@ -49,7 +49,7 @@ GLShader& GLShader::draw(GLComponent* comp) {
 	return *this;
 }
 GLShader& GLShader::draw(Mesh& mesh, const GLMesh::PrimitiveType& type,  bool forceVertexColor) {
-	mesh.draw(type,onScreen,forceVertexColor);
+	mesh.draw(type,forceVertexColor);
 	return *this;
 }
 GLShader& GLShader::draw(const std::list<const GLComponent*>& comps) {
@@ -67,14 +67,14 @@ GLShader& GLShader::draw(const std::vector<const GLComponent*>& comps) {
 GLShader& GLShader::draw(const std::list<Mesh*>& meshes,
 		const GLMesh::PrimitiveType& type, bool forceVertexColor) {
 	for (Mesh* mesh : meshes) {
-		mesh->draw(type,onScreen,forceVertexColor);
+		mesh->draw(type,forceVertexColor);
 	}
 	return *this;
 }
 GLShader& GLShader::draw(const std::vector<Mesh*>& meshes,
 	const GLMesh::PrimitiveType& type, bool forceVertexColor) {
 	for (Mesh* mesh : meshes) {
-		mesh->draw(type, onScreen, forceVertexColor);
+		mesh->draw(type, forceVertexColor);
 	}
 	return *this;
 }
@@ -88,12 +88,12 @@ GLShader& GLShader::draw(
 GLShader& GLShader::draw(const std::initializer_list<Mesh*>& meshes,
 		const GLMesh::PrimitiveType& type, bool forceVertexColor) {
 	for (Mesh* mesh : meshes) {
-		mesh->draw(type,onScreen,forceVertexColor);
+		mesh->draw(type,forceVertexColor);
 	}
 	return *this;
 }
 GLShader& GLShader::draw(Mesh* mesh,const GLMesh::PrimitiveType& type, bool forceVertexColor) {
-	mesh->draw(type,onScreen,forceVertexColor);
+	mesh->draw(type,forceVertexColor);
 	return *this;
 }
 void GLShader::initialize(
@@ -103,7 +103,7 @@ void GLShader::initialize(
 		const std::string& pGeometryShaderString) {
 	if (pVertexShaderString.size() == 0 || pFragmentShaderString.size() == 0)
 		return throw std::runtime_error("No shader program specified.");
-	context->begin(onScreen);
+	context->begin();
 	GLint lStatus;
 	char message[4096] = "";
 	mVertexShaderHandle = glCreateShader( GL_VERTEX_SHADER);
@@ -173,7 +173,7 @@ void GLShader::initialize(
 GLShader::~GLShader() {
 	try {
 		if(context.get()!=nullptr){
-			context->begin(onScreen);
+			context->begin();
 			if(mFragmentShaderHandle){
 				glDetachShader(mProgramHandle, mFragmentShaderHandle);
 				glDeleteShader(mFragmentShaderHandle);

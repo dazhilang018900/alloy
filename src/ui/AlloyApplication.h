@@ -40,8 +40,7 @@ private:
 	static std::shared_ptr<AlloyContext>& context;
 	void drawUI();
 	void drawDebugUI();
-	void draw();
-	Composite rootRegion;
+	void draw(const WindowPtr& win);
 	bool showDebugIcon;
 	bool forceClose = false;
 	std::shared_ptr<ImageShader> imageShader;
@@ -65,13 +64,13 @@ public:
 		onResize = onResizeEvent;
 	}
 	void setOnExit(const std::function<void()>& onExitEvent) {
-		onExit= onExitEvent;
+		onExit = onExitEvent;
 	}
 	static inline std::shared_ptr<AlloyContext>& getContext() {
 		return context;
 	}
 	static inline void setContext(const std::shared_ptr<AlloyContext>& c) {
-		context=c;
+		context = c;
 	}
 	static inline void removeListener(const EventHandler* region) {
 		if (context.get() != nullptr) {
@@ -146,25 +145,25 @@ public:
 			const FontStyle& style = FontStyle::Normal, pixel height = 32) {
 		return context->createAwesomeGlyph(codePoint, style, height);
 	}
-	inline std::shared_ptr<Composite> getGlassPane(){
+	inline std::shared_ptr<Composite> getGlassPane() {
 		return getContext()->getGlassPane();
 	}
-	virtual void onWindowRefresh() {
+	virtual void onWindowRefresh(Window* win) {
 	}
-	virtual void onWindowFocus(int focused);
-	void onWindowSize(int width, int height);
-	void onFrameBufferSize(int width, int height);
-	void onChar(unsigned int codepoint);
-	void onKey(int key, int scancode, int action, int mods);
-	void onMouseButton(int button, int action, int mods);
-	void onCursorPos(double xpos, double ypos);
-	void onScroll(double xoffset, double yoffset);
-	void onCursorEnter(int enter);
+	virtual void onWindowFocus(Window* win, int focused);
+	void onWindowSize(Window* win, int width, int height);
+	void onFrameBufferSize(Window* win, int width, int height);
+	void onChar(Window* window, unsigned int codepoint);
+	void onKey(Window* window, int key, int scancode, int action, int mods);
+	void onMouseButton(Window* window, int button, int action, int mods);
+	void onCursorPos(Window* window, double xpos, double ypos);
+	void onScroll(Window* window, double xoffset, double yoffset);
+	void onCursorEnter(Window* window, int enter);
 	void fireEvent(const InputEvent& event);
 	void getScreenShot(ImageRGBA& img);
 	void getScreenShot(ImageRGB& img);
-	inline void setDebug(bool debug){
-		showDebugIcon=debug;
+	inline void setDebug(bool debug) {
+		showDebugIcon = debug;
 	}
 	ImageRGBA getScreenShot();
 	InputEvent getLastInputEvent() {
@@ -175,6 +174,10 @@ public:
 	}
 	Application(int w, int h, const std::string& title = "",
 			bool showDebugIcon = true);
+	Application(const std::string& title, int w=1920, int h=1080, bool showDebugIcon =
+			true) :
+			Application(w, h, title, showDebugIcon) {
+	}
 	float getFrameRate() const {
 		return frameRate;
 	}
@@ -184,14 +187,15 @@ public:
 			const std::string& partialFile);
 	std::shared_ptr<Font> loadFont(const std::string& name,
 			const std::string& partialFile);
-
+	WindowPtr addWindow(const std::string& name, int width = 1920, int height =
+			1080);
+	bool remove(Window* win);
 	virtual void draw(AlloyContext* context) {
 	}
-	Composite& getRoot() {
-		return rootRegion;
+	virtual bool init(Composite& root) = 0;
+	virtual bool init(WindowPtr window) {
+		return init(*(window->ui));
 	}
-
-	virtual bool init(Composite& rootNode)=0;
 	void run(int swapInterval = 0); //no vsync by default
 	void runOnce(const std::string& fileName);
 	virtual inline ~Application() {
@@ -199,9 +203,9 @@ public:
 	}
 };
 inline std::shared_ptr<AlloyContext>& AlloyApplicationContext() {
-	std::shared_ptr<AlloyContext>& context=Application::getContext();
-	if (context.get() == nullptr){
-	    throw std::runtime_error("Cannot get GLFW / NanoVG context.");
+	std::shared_ptr<AlloyContext>& context = Application::getContext();
+	if (context.get() == nullptr) {
+		throw std::runtime_error("Cannot get GLFW / NanoVG context.");
 	}
 	return context;
 }

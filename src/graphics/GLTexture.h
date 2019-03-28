@@ -51,44 +51,28 @@ public:
 		}
 	}
 	virtual void draw() const override {
-		context->begin(onScreen);
-		if (onScreen) {
-			GLuint& vao = context->vaoImageOnScreen.vao;
-			GLuint& positionBuffer = context->vaoImageOnScreen.positionBuffer;
-			GLuint& uvBuffer = context->vaoImageOnScreen.uvBuffer;
-			glBindVertexArray(vao);
-			glEnableVertexAttribArray(0);
-			glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		context->begin();
+		WindowPtr win = context->getCurrentWindow();
+		GLuint& vao = win->vao.vao;
+		GLuint& positionBuffer = win->vao.positionBuffer;
+		GLuint& uvBuffer = win->vao.uvBuffer;
+		glBindVertexArray(vao);
+		glEnableVertexAttribArray(0);
+		glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-			glEnableVertexAttribArray(1);
-			glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			glBindVertexArray(0);
-		}
-		else {
-			GLuint& vao = context->vaoImageOffScreen.vao;
-			GLuint& positionBuffer = context->vaoImageOffScreen.positionBuffer;
-			GLuint& uvBuffer = context->vaoImageOffScreen.uvBuffer;
-			glBindVertexArray(vao);
-			glEnableVertexAttribArray(0);
-			glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
-			glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
+		glEnableVertexAttribArray(1);
+		glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glBindVertexArray(0);
 
-			glEnableVertexAttribArray(1);
-			glBindBuffer(GL_ARRAY_BUFFER, uvBuffer);
-			glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, 0);
-			glDrawArrays(GL_TRIANGLES, 0, 6);
-			glBindBuffer(GL_ARRAY_BUFFER, 0);
-			glBindVertexArray(0);
-		}
 		context->end();
 	}
-	
+
 	virtual void update(bool writeImage) {
-		context->begin(onScreen);
+		context->begin();
 		if (textureId == 0) {
 			glGenTextures(1, &textureId);
 		}
@@ -231,33 +215,41 @@ public:
 					MakeString() << "Texture format not supported "
 							<< textureImage.getTypeName());
 		}
-		if(textureImage.width==0||textureImage.height==0){
+		if (textureImage.width == 0 || textureImage.height == 0) {
 			throw std::runtime_error("Cannot initialize zero size texture.");
 		}
 		CHECK_GL_ERROR();
 		if (mipmap) {
 			glBindTexture( GL_TEXTURE_2D, textureId);
-			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat,textureImage.width, textureImage.height, 0,externalFormat, dataType, (writeImage) ? &textureImage[0]:nullptr);
-			glGenerateMipmap(GL_TEXTURE_2D); 
+			glTexImage2D(GL_TEXTURE_2D, 0, internalFormat, textureImage.width,
+					textureImage.height, 0, externalFormat, dataType,
+					(writeImage) ? &textureImage[0] : nullptr);
+			glGenerateMipmap(GL_TEXTURE_2D);
 		} else {
 			if (multisample) {
 				glBindTexture( GL_TEXTURE_2D_MULTISAMPLE, textureId);
-				glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8,internalFormat, textureImage.width, textureImage.height,true);
+				glTexImage2DMultisample(GL_TEXTURE_2D_MULTISAMPLE, 8,
+						internalFormat, textureImage.width, textureImage.height,
+						true);
 				glTexImage2D(GL_TEXTURE_2D, 0, internalFormat,
 						textureImage.width, textureImage.height, 0,
-						externalFormat, dataType, (writeImage)?&textureImage[0]:nullptr);
+						externalFormat, dataType,
+						(writeImage) ? &textureImage[0] : nullptr);
 			} else {
 				glBindTexture( GL_TEXTURE_2D, textureId);
 				glTexImage2D( GL_TEXTURE_2D, 0, internalFormat,
 						textureImage.width, textureImage.height, 0,
-						externalFormat, dataType, (writeImage)?&textureImage[0]:nullptr);
+						externalFormat, dataType,
+						(writeImage) ? &textureImage[0] : nullptr);
 			}
 		}
 		CHECK_GL_ERROR();
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,mipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,mipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+				mipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+				mipmap ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
 		if (multisample && !mipmap) {
 			glBindTexture( GL_TEXTURE_2D_MULTISAMPLE, 0);
 		} else {
@@ -272,7 +264,7 @@ public:
 	Image<T, C, I>& read() {
 
 		if (textureId) {
-			context->begin(onScreen);
+			context->begin();
 			if (multisample && !mipmap) {
 				glBindTexture( GL_TEXTURE_2D_MULTISAMPLE, textureId);
 			} else {
@@ -292,9 +284,9 @@ public:
 		return textureImage;
 	}
 	void read(Image<T, C, I>& out) {
-		out.resize(textureImage.width,textureImage.height);
+		out.resize(textureImage.width, textureImage.height);
 		if (textureId) {
-			context->begin(onScreen);
+			context->begin();
 			if (multisample && !mipmap) {
 				glBindTexture( GL_TEXTURE_2D_MULTISAMPLE, textureId);
 			} else {
@@ -331,16 +323,17 @@ public:
 	vec<T, C>& operator()(const int i, const int j) {
 		return textureImage(i, j);
 	}
-	GLTexture(bool onScreen = true,const std::shared_ptr<AlloyContext>& context =
-			AlloyDefaultContext()) :
+	GLTexture(bool onScreen = true,
+			const std::shared_ptr<AlloyContext>& context =
+					AlloyDefaultContext()) :
 			GLComponent(onScreen, context), textureId(0), multisample(false), mipmap(
 					false) {
 	}
 
 	GLTexture(int x, int y, int width, int height, int imageWidth,
-			int imageHeight, bool onScreen = true, std::shared_ptr<AlloyContext>& context =
-					AlloyDefaultContext()) :
-			GLComponent(onScreen,context) {
+			int imageHeight, bool onScreen = true,
+			std::shared_ptr<AlloyContext>& context = AlloyDefaultContext()) :
+			GLComponent(onScreen, context) {
 		textureImage.resize(imageWidth, imageHeight);
 		bounds = box2i( { x, y }, { width, height });
 		update();
@@ -356,9 +349,9 @@ public:
 		texture.update();
 		return texture;
 	}
-	GLTexture(const Image<T, C, I>& image,
-			bool onScreen = true,std::shared_ptr<AlloyContext>& context = AlloyDefaultContext()) :
-			GLComponent(onScreen,context) {
+	GLTexture(const Image<T, C, I>& image, bool onScreen = true,
+			std::shared_ptr<AlloyContext>& context = AlloyDefaultContext()) :
+			GLComponent(onScreen, context) {
 		textureImage.set(image);
 		bounds = box2i( { 0, 0 }, { textureImage.width, textureImage.height });
 		update();
@@ -369,9 +362,9 @@ public:
 		setEnableMipmap(mipmap);
 		update();
 	}
-	void resize(int w,int h, bool mipmap = false) {
-		textureImage.resize(w,h);
-		bounds = box2i({ 0, 0 }, { textureImage.width, textureImage.height });
+	void resize(int w, int h, bool mipmap = false) {
+		textureImage.resize(w, h);
+		bounds = box2i( { 0, 0 }, { textureImage.width, textureImage.height });
 		setEnableMipmap(mipmap);
 		update(false);
 	}
@@ -397,7 +390,7 @@ public:
 		update();
 	}
 	virtual ~GLTexture() {
-		context->begin(onScreen);
+		context->begin();
 		if (textureId) {
 			glDeleteTextures(1, &textureId);
 			textureId = 0;

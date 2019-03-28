@@ -31,7 +31,7 @@ GLFrameBuffer::GLFrameBuffer(bool onScreen, std::shared_ptr<AlloyContext> contex
 void GLFrameBuffer::initialize(int w, int h) {
 	if (context.get() == nullptr)throw std::runtime_error("Framebuffer has not been assigend a context.");
 	if(texture.getWidth()==w && texture.getHeight()==h)return;//Nothing to do!
-	context->begin(onScreen);
+	context->begin();
 	if (mFrameBufferId != 0)
 		glDeleteFramebuffers(1, &mFrameBufferId);
 	if (mDepthBufferId != 0)
@@ -45,7 +45,7 @@ void GLFrameBuffer::initialize(int w, int h) {
 	update();
 }
 GLFrameBuffer::~GLFrameBuffer() {
-	context->begin(onScreen);
+	context->begin();
 	if (mFrameBufferId != 0)
 		glDeleteFramebuffers(1, &mFrameBufferId);
 	if (mDepthBufferId != 0)
@@ -56,7 +56,7 @@ void GLFrameBuffer::begin(const float4& clearColor, bool clearColorBit,
 		bool clearDepthBit) const {
 	if (texture.getWidth() * texture.getHeight() == 0)
 		throw std::runtime_error("Framebuffer has not been initialized.");
-	context->begin(onScreen);
+	context->begin();
 	glViewport(0, 0, texture.getWidth(), texture.getHeight());
 	glBindFramebuffer(GL_FRAMEBUFFER, mFrameBufferId);
 	glBindRenderbuffer(GL_RENDERBUFFER, mDepthBufferId);
@@ -82,7 +82,7 @@ void GLFrameBuffer::draw() const {
 }
 void GLFrameBuffer::update() {
 	texture.update();
-	context->begin(onScreen);
+	context->begin();
 	if (mDepthBufferId != 0) {
 		glDeleteRenderbuffers(1, &mDepthBufferId);
 	}

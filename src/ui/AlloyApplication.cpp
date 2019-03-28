@@ -31,57 +31,34 @@ namespace aly {
 std::shared_ptr<AlloyContext>& Application::context =
 		AlloyContext::getDefaultContext();
 void Application::initInternal() {
-	rootRegion.setBounds(CoordPercent(0.0f, 0.0f), CoordPercent(1.0f, 1.0f));
 	context->addAssetDirectory("assets/");
 	context->addAssetDirectory("data/assets/");
 	context->addAssetDirectory("../assets/");
 	context->addAssetDirectory("../../assets/");
 	context->addAssetDirectory("../../../assets/");
 	context->addAssetDirectory("../../../../assets/");
-	glfwSetWindowUserPointer(context->window, this);
-	glfwSetWindowRefreshCallback(context->window,
-			[](GLFWwindow * window ) {Application* app = (Application *)(glfwGetWindowUserPointer(window)); try {app->onWindowRefresh();} catch(...) {app->throwException(std::current_exception());}});
-	glfwSetWindowFocusCallback(context->window,
-			[](GLFWwindow * window, int focused ) {Application* app = (Application *)(glfwGetWindowUserPointer(window)); try {app->onWindowFocus(focused);} catch(...) {app->throwException(std::current_exception());}});
-	glfwSetWindowSizeCallback(context->window,
-			[](GLFWwindow * window, int width, int height ) {Application* app = (Application *)(glfwGetWindowUserPointer(window)); try {app->onWindowSize(width, height);} catch(...) {app->throwException(std::current_exception());}});
-	glfwSetFramebufferSizeCallback(context->window,
-			[](GLFWwindow * window, int width, int height) {Application* app = (Application *)(glfwGetWindowUserPointer(window)); try {app->onFrameBufferSize(width, height);} catch (...) {app->throwException(std::current_exception());}});
-	glfwSetCharCallback(context->window,
-			[](GLFWwindow * window, unsigned int codepoint ) {Application* app = (Application *)(glfwGetWindowUserPointer(window)); try {app->onChar(codepoint);} catch(...) {app->throwException(std::current_exception());}});
-	glfwSetKeyCallback(context->window,
-			[](GLFWwindow * window, int key, int scancode, int action, int mods) {Application* app = (Application *)(glfwGetWindowUserPointer(window)); try {app->onKey(key, scancode,action,mods);} catch(...) {app->throwException(std::current_exception());}});
-	glfwSetMouseButtonCallback(context->window,
-			[](GLFWwindow * window, int button, int action,int mods) {Application* app = (Application *)(glfwGetWindowUserPointer(window)); try {app->onMouseButton(button, action,mods);} catch(...) {app->throwException(std::current_exception());}});
-	glfwSetCursorPosCallback(context->window,
-			[](GLFWwindow * window, double xpos, double ypos ) {Application* app = (Application *)(glfwGetWindowUserPointer(window)); try {app->onCursorPos(xpos, ypos);} catch(...) {app->throwException(std::current_exception());}});
-	glfwSetCursorEnterCallback(context->window,
-			[](GLFWwindow * window, int enter) {Application* app = (Application *)(glfwGetWindowUserPointer(window)); try {app->onCursorEnter(enter);} catch(...) {app->throwException(std::current_exception());}});
-	glfwSetScrollCallback(context->window,
-			[](GLFWwindow * window, double xoffset, double yoffset ) {Application* app = (Application *)(glfwGetWindowUserPointer(window)); try {app->onScroll(xoffset, yoffset);} catch(...) {app->throwException(std::current_exception());}});
 	imageShader = std::shared_ptr<ImageShader>(
 			new ImageShader(ImageShader::Filter::NONE, true, context));
-	//uiFrameBuffer = std::shared_ptr<GLFrameBuffer>(new GLFrameBuffer(true, context));
-	//uiFrameBuffer->initialize(context->viewSize.x, context->viewSize.y);
-
 	try {
 		GLFWimage images[2];
-		ImageRGBA img,img2;
+		ImageRGBA img, img2;
 
-		ReadImageFromFile(
-				getContext()->getFullPath("images/alloy_logo128.png"), img);
-		images[0].pixels=img.ptr();
-		images[0].width=img.width;
-		images[0].height=img.height;
+		ReadImageFromFile(getContext()->getFullPath("images/alloy_logo128.png"),
+				img);
+		images[0].pixels = img.ptr();
+		images[0].width = img.width;
+		images[0].height = img.height;
 
-		ReadImageFromFile(
-				getContext()->getFullPath("images/alloy_logo64.png"), img2);
-		images[1].pixels=img2.ptr();
-		images[1].width=img2.width;
-		images[1].height=img2.height;
-		glfwSetWindowIcon(getContext()->window, 2, images);
-	} catch(const std::exception& e){
-		std::cerr<<e.what()<<std::endl;
+		ReadImageFromFile(getContext()->getFullPath("images/alloy_logo64.png"),
+				img2);
+		images[1].pixels = img2.ptr();
+		images[1].width = img2.width;
+		images[1].height = img2.height;
+		for (auto win : context->windows) {
+			glfwSetWindowIcon(win->handle, 2, images);
+		}
+	} catch (const std::exception& e) {
+		std::cerr << e.what() << std::endl;
 	}
 }
 std::shared_ptr<GLTextureRGBA> Application::loadTextureRGBA(
@@ -105,21 +82,21 @@ std::shared_ptr<Font> Application::loadFont(const std::string& name,
 }
 Application::Application(int w, int h, const std::string& title,
 		bool showDebugIcon) :
-		frameRate(0.0f), rootRegion("Root"), showDebugIcon(showDebugIcon), onResize(
-				nullptr) {
+		frameRate(0.0f), showDebugIcon(showDebugIcon), onResize(nullptr) {
 	if (context.get() == nullptr) {
-		context.reset(new AlloyContext(w, h, title));
+		context.reset(new AlloyContext(title, w, h));
 	} else {
 		throw std::runtime_error(
 				"Cannot instantiate more than one application.");
 	}
 	initInternal();
 }
-void Application::draw() {
+void Application::draw(const WindowPtr& win) {
 	std::lock_guard<std::mutex> lockMe(context->getLock());
-	glfwSetInputMode(context->window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+	glfwSetInputMode(win->handle, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	glClearColor(0.0, 0.0, 0.0, 10);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glClear(
+	GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glViewport(0, 0, context->getFrameBufferWidth(),
@@ -136,21 +113,21 @@ void Application::draw() {
 	if (!cursor) {
 		cursor = &Cursor::Normal;
 	}
-	nvgBeginFrame(context->nvgContext, context->getScreenWidth(),
+	nvgBeginFrame(context->getNVG(), context->getScreenWidth(),
 			context->getScreenHeight(), 1.0f);
 	cursor->draw(context.get());
-	nvgEndFrame(context->nvgContext);
+	nvgEndFrame(context->getNVG());
 }
 void Application::drawUI() {
+	WindowPtr win = context->getCurrentWindow();
 	context->setCursor(nullptr);
-	glViewport(0, 0, context->screenSize.x, context->screenSize.y);
-	NVGcontext* nvg = context->nvgContext;
-	nvgBeginFrame(nvg, context->screenSize.x, context->screenSize.y, 1.0f); //(float) context->pixelRatio
-	nvgScissor(nvg, 0.0f, 0.0f, (float) context->screenSize.x,
-			(float) context->screenSize.y);
-	rootRegion.draw(context.get());
-	nvgScissor(nvg, 0.0f, 0.0f, (float) context->screenSize.x,
-			(float) context->screenSize.y);
+	int2 screenSize = win->getScreenSize();
+	glViewport(0, 0, screenSize.x, screenSize.y);
+	NVGcontext* nvg = win->nvg;
+	nvgBeginFrame(nvg, screenSize.x, screenSize.y, 1.0f); //(float) context->pixelRatio
+	nvgScissor(nvg, 0.0f, 0.0f, (float) screenSize.x, (float) screenSize.y);
+	win->ui->draw(context.get());
+	nvgScissor(nvg, 0.0f, 0.0f, (float) screenSize.x, (float) screenSize.y);
 	Region* onTop = context->getOnTopRegion();
 	if (onTop != nullptr) {
 		if (onTop->isVisible())
@@ -164,17 +141,19 @@ void Application::drawUI() {
 	context->dirtyUI = false;
 }
 void Application::drawDebugUI() {
-	NVGcontext* nvg = context->nvgContext;
-	nvgBeginFrame(nvg, context->getScreenWidth(), context->getScreenHeight(),
-			1.0f);
+	WindowPtr win = context->getCurrentWindow();
+	NVGcontext* nvg = win->nvg;
+	int2 screenSize = win->getScreenSize();
+	box2px viewport = win->getViewport();
+	nvgBeginFrame(nvg, (float) screenSize.x, (float) screenSize.y, 1.0f);
 	nvgResetScissor(nvg);
-	rootRegion.drawDebug(context.get());
+	win->ui->drawDebug(context.get());
 	Region* onTop = context->getOnTopRegion();
 	if (onTop != nullptr) {
 		onTop->drawDebug(context.get());
 	}
 	float cr = context->theme.CORNER_RADIUS;
-	if (context->getViewport().contains(context->cursorPosition)) {
+	if (viewport.contains(context->cursorPosition)) {
 		nvgFontSize(nvg, 15);
 		nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
 
@@ -309,7 +288,8 @@ void Application::fireEvent(const InputEvent& event) {
 	bool consumed = false;
 	if (event.type == InputType::Scroll && context->mouseOverRegion != nullptr
 			&& context->mouseOverRegion->onScrollWheel) {
-		consumed = context->mouseOverRegion->onScrollWheel(context.get(), event);
+		consumed = context->mouseOverRegion->onScrollWheel(context.get(),
+				event);
 	} else if (event.type == InputType::MouseButton) {
 		if (event.isDown()) {
 			if (event.button == GLFW_MOUSE_BUTTON_LEFT) {
@@ -321,7 +301,9 @@ void Application::fireEvent(const InputEvent& event) {
 			if (event.button == GLFW_MOUSE_BUTTON_MIDDLE) {
 				context->middleMouseButton = true;
 			}
-			context->mouseOverRegion = context->cursorFocusRegion = context->mouseDownRegion = context->locate(context->cursorPosition);
+			context->mouseOverRegion = context->cursorFocusRegion =
+					context->mouseDownRegion = context->locate(
+							context->cursorPosition);
 
 			if (context->mouseDownRegion != nullptr) {
 				context->cursorDownPosition = event.cursor
@@ -395,32 +377,25 @@ void Application::fireEvent(const InputEvent& event) {
 	if (consumed)
 		context->dirtyUI = true;
 }
+void Application::onWindowSize(Window* win, int width, int height) {
+	context->dirtyUI = true;
+	win->dirtyUI = true;
+	if (onResize) {
+		onResize(int2(width, height));
+	}
 
-void Application::onWindowSize(int width, int height) {
-	if (context->getScreenWidth() != width
-			|| context->getScreenHeight() != height) {
-		context->screenSize = int2(width, height);
-		context->dirtyUI = true;
-		context->requestPack();
-		if (onResize) {
-			onResize(context->viewSize);
-		}
-	}
 }
-void Application::onFrameBufferSize(int width, int height) {
+void Application::onFrameBufferSize(Window* win, int width, int height) {
 	glViewport(0, 0, width, height);
-	if (context->getFrameBufferWidth() != width
-			|| context->getFrameBufferHeight() != height) {
-		context->viewSize = int2(width, height);
-		context->dirtyUI = true;
-		context->requestPack();
-	}
+	context->dirtyUI = true;
+	win->dirtyUI = true;
 }
-void Application::onCursorPos(double xpos, double ypos) {
+void Application::onCursorPos(Window* win, double xpos, double ypos) {
 	context->hasFocus = true;
 	context->cursorPosition = pixel2((pixel) (xpos), (pixel) (ypos));
 	InputEvent& e = inputEvent;
 	e = InputEvent();
+	e.window = win;
 	e.type = InputType::Cursor;
 	if (context->leftMouseButton) {
 		e.button = GLFW_MOUSE_BUTTON_LEFT;
@@ -432,28 +407,29 @@ void Application::onCursorPos(double xpos, double ypos) {
 		e.button = -1;
 	}
 	e.mods = 0;
-	GLFWwindow* window = context->window;
-	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)
-			| glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT))
+	if (glfwGetKey(win->handle, GLFW_KEY_LEFT_SHIFT)
+			| glfwGetKey(win->handle, GLFW_KEY_RIGHT_SHIFT))
 		e.mods |= GLFW_MOD_SHIFT;
-	if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)
-			| glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL))
+	if (glfwGetKey(win->handle, GLFW_KEY_LEFT_CONTROL)
+			| glfwGetKey(win->handle, GLFW_KEY_RIGHT_CONTROL))
 		e.mods |= GLFW_MOD_CONTROL;
-	if (glfwGetKey(window, GLFW_KEY_LEFT_ALT)
-			| glfwGetKey(window, GLFW_KEY_RIGHT_ALT))
+	if (glfwGetKey(win->handle, GLFW_KEY_LEFT_ALT)
+			| glfwGetKey(win->handle, GLFW_KEY_RIGHT_ALT))
 		e.mods |= GLFW_MOD_ALT;
-	if (glfwGetKey(window, GLFW_KEY_LEFT_SUPER)
-			| glfwGetKey(window, GLFW_KEY_RIGHT_SUPER))
+	if (glfwGetKey(win->handle, GLFW_KEY_LEFT_SUPER)
+			| glfwGetKey(win->handle, GLFW_KEY_RIGHT_SUPER))
 		e.mods |= GLFW_MOD_SUPER;
 	e.cursor = pixel2((pixel) (xpos), (pixel) (ypos));
 	fireEvent(e);
 }
 
-void Application::onWindowFocus(int focused) {
+void Application::onWindowFocus(Window* win, int focused) {
+
 	if (focused) {
 		context->hasFocus = true;
 		InputEvent& e = inputEvent;
 		e = InputEvent();
+		e.window = win;
 		e.type = InputType::Cursor;
 		e.cursor = context->cursorPosition;
 		fireEvent(e);
@@ -465,30 +441,36 @@ void Application::onWindowFocus(int focused) {
 		context->hasFocus = false;
 	}
 }
-
+WindowPtr Application::addWindow(const std::string& name, int width,
+		int height) {
+	return context->addWindow(name, width, height);
+}
+bool Application::remove(Window* win) {
+	return context->remove(win);
+}
 void Application::getScreenShot(ImageRGBA& img) {
 	int w = 0, h = 0;
-	glfwGetFramebufferSize(context->window, &w, &h);
+	glfwGetFramebufferSize(context->getCurrentWindow()->handle, &w, &h);
 	img.resize(w, h);
 	glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, img.ptr());
 	FlipVertical(img);
 }
 void Application::getScreenShot(ImageRGB& img) {
 	int w = 0, h = 0;
-	glfwGetFramebufferSize(context->window, &w, &h);
+	glfwGetFramebufferSize(context->getCurrentWindow()->handle, &w, &h);
 	img.resize(w, h);
 	glReadPixels(0, 0, w, h, GL_RGB, GL_UNSIGNED_BYTE, img.ptr());
 	FlipVertical(img);
 }
 ImageRGBA Application::getScreenShot() {
 	int w = 0, h = 0;
-	glfwGetFramebufferSize(context->window, &w, &h);
+	glfwGetFramebufferSize(context->getCurrentWindow()->handle, &w, &h);
 	ImageRGBA img(w, h);
 	glReadPixels(0, 0, w, h, GL_RGBA, GL_UNSIGNED_BYTE, img.ptr());
 	FlipVertical(img);
 	return img;
 }
-void Application::onCursorEnter(int enter) {
+void Application::onCursorEnter(Window* win, int enter) {
 	if (!enter) {
 		context->hasFocus = false;
 		context->mouseOverRegion = nullptr;
@@ -497,7 +479,8 @@ void Application::onCursorEnter(int enter) {
 		e.type = InputType::Cursor;
 		e.cursor = context->cursorPosition;
 		e.mods = 0;
-		GLFWwindow* window = context->window;
+		e.window = win;
+		GLFWwindow* window = win->handle;
 		if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)
 				| glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT))
 			e.mods |= GLFW_MOD_SHIFT;
@@ -515,13 +498,14 @@ void Application::onCursorEnter(int enter) {
 		context->hasFocus = true;
 	}
 }
-void Application::onScroll(double xoffset, double yoffset) {
+void Application::onScroll(Window* win, double xoffset, double yoffset) {
 	InputEvent& e = inputEvent;
 	e = InputEvent();
 	e.cursor = context->cursorPosition;
 	e.type = InputType::Scroll;
 	e.scroll = pixel2((pixel) xoffset, (pixel) yoffset);
-	GLFWwindow* window = context->window;
+	e.window = win;
+	GLFWwindow* window = win->handle;
 	e.mods = 0;
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)
 			| glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT))
@@ -538,11 +522,12 @@ void Application::onScroll(double xoffset, double yoffset) {
 
 	fireEvent(e);
 }
-void Application::onMouseButton(int button, int action, int mods) {
+void Application::onMouseButton(Window* win, int button, int action, int mods) {
 	InputEvent& e = inputEvent;
 	e = InputEvent();
 	e.type = InputType::MouseButton;
 	e.cursor = context->cursorPosition;
+	e.window = win;
 	std::chrono::steady_clock::time_point currentTime =
 			std::chrono::steady_clock::now();
 	e.button = button;
@@ -558,7 +543,8 @@ void Application::onMouseButton(int button, int action, int mods) {
 	e.action = action;
 	fireEvent(e);
 }
-void Application::onKey(int key, int scancode, int action, int mods) {
+void Application::onKey(Window* win, int key, int scancode, int action,
+		int mods) {
 	/*
 	 if (isprint(key)) {
 	 //Seems to be problem in GLFW for Ubuntu 15, it fires onKey() instead of onChar() when letters are pressed.
@@ -592,6 +578,7 @@ void Application::onKey(int key, int scancode, int action, int mods) {
 	e.key = key;
 	e.scancode = scancode;
 	e.mods = mods;
+	e.window = win;
 	e.cursor = context->cursorPosition;
 	if (key == GLFW_KEY_F11 && e.action == GLFW_PRESS) {
 		for (int i = 0; i < 1000; i++) {
@@ -599,6 +586,7 @@ void Application::onKey(int key, int scancode, int action, int mods) {
 					<< ALY_PATH_SEPARATOR<<"screenshot"<<std::setw(4)<<std::setfill('0')<<i<<".png";
 			if(!FileExists(screenShot)) {
 				std::cout<<"Saving "<<screenShot<<std::endl;
+				win->setCurrent();
 				ImageRGBA img;
 				getScreenShot(img);
 				WriteImageToFile(screenShot,img);
@@ -610,14 +598,15 @@ void Application::onKey(int key, int scancode, int action, int mods) {
 	fireEvent(e);
 	//}
 }
-void Application::onChar(unsigned int codepoint) {
+void Application::onChar(Window* win, unsigned int codepoint) {
 	InputEvent& e = inputEvent;
 	e = InputEvent();
 	e.type = InputType::Character;
 	e.codepoint = codepoint;
 	e.clicks = 0;
 	e.cursor = context->cursorPosition;
-	GLFWwindow* window = context->window;
+	e.window = win;
+	GLFWwindow* window = win->handle;
 	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)
 			| glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT))
 		e.mods |= GLFW_MOD_SHIFT;
@@ -635,7 +624,7 @@ void Application::onChar(unsigned int codepoint) {
 void Application::runOnce(const std::string& fileName) {
 	close();
 	run(0);
-	glfwSwapBuffers(context->window);
+	glfwSwapBuffers(context->getCurrentWindow()->handle);
 	ImageRGBA img;
 	getScreenShot(img);
 	WriteImageToFile(fileName, img);
@@ -661,62 +650,114 @@ void Application::loadFonts() {
 }
 void Application::run(int swapInterval) {
 	const double POLL_INTERVAL_SEC = 0.5f;
-	context->makeCurrent();
+	context->getMainWindow()->setCurrent();
 	loadFonts();
-	if (!init(rootRegion)) {
-		throw std::runtime_error("Error occurred in application init()");
+	auto windows = context->getWindows();
+	for (WindowPtr win : windows) {
+		if (win->app == nullptr) {
+			win->app = this;
+			win->setCurrent();
+			win->registerCallbacks(this);
+			if (!init(win)) {
+				throw std::runtime_error(
+						MakeString()
+								<< "Error occurred in application init() for window "
+								<< win->getName());
+			}
+			win->ui->add(win->glass);
+			if (showDebugIcon) {
+				GlyphRegionPtr debug = MakeGlyphRegion(
+						createAwesomeGlyph(0xf188, FontStyle::Outline, 20),
+						CoordPercent(1.0f, 1.0f), CoordPX(20, 20),
+						RGBA(0, 0, 0, 0), RGBA(64, 64, 64, 128),
+						RGBA(192, 192, 192, 128), UnitPX(0));
+				debug->setOrigin(Origin::BottomRight);
+				debug->onMouseDown =
+						[this,debug](AlloyContext* context,const InputEvent& e) {
+							if(e.button==GLFW_MOUSE_BUTTON_LEFT) {
+								context->toggleDebug();
+								debug->foregroundColor=context->isDebugEnabled()?MakeColor(255,64,64,255):MakeColor(64,64,64,128);
+								context->setCursorFocus(nullptr);
+								return true;
+							}
+							return false;
+						};
+				win->ui->add(debug);
+			}
+			//First pack triggers computation of aspect ratios  for components.
+			win->ui->pack(context.get());
+			win->dirtyUI = true;
+			win->setSwapInterval(swapInterval);
+		}
 	}
-	rootRegion.add(getContext()->getGlassPane());
-	if (showDebugIcon) {
-		GlyphRegionPtr debug = MakeGlyphRegion(
-				createAwesomeGlyph(0xf188, FontStyle::Outline, 20),
-				CoordPercent(1.0f, 1.0f), CoordPX(20, 20), RGBA(0, 0, 0, 0),
-				RGBA(64, 64, 64, 128), RGBA(192, 192, 192, 128), UnitPX(0));
-
-		debug->setOrigin(Origin::BottomRight);
-		debug->onMouseDown =
-				[this,debug](AlloyContext* context,const InputEvent& e) {
-					if(e.button==GLFW_MOUSE_BUTTON_LEFT) {
-						context->toggleDebug();
-						debug->foregroundColor=context->isDebugEnabled()?MakeColor(255,64,64,255):MakeColor(64,64,64,128);
-						context->setCursorFocus(nullptr);
-						return true;
-					}
-					return false;
-				};
-		rootRegion.add(debug);
-	}
-
-	//First pack triggers computation of aspect ratios  for components.
-	rootRegion.pack(context.get());
-	context->getGlassPane()->setVisible(false);
-	context->requestPack();
-	glfwSwapInterval(swapInterval);
 	glfwSetTime(0);
 	uint64_t frameCounter = 0;
 	std::chrono::steady_clock::time_point endTime;
 	std::chrono::steady_clock::time_point lastFpsTime =
 			std::chrono::steady_clock::now();
-	if (!forceClose) {
-		glfwShowWindow(context->window);
-	} else {
+	if (forceClose) {
 		context->executeDeferredTasks();
 		context->dirtyUI = true;
-		context->dirtyLayout = true;
-		draw();
+		for (WindowPtr win : windows) {
+			win->dirtyUI = true;
+			draw(win);
+		}
 		context->dirtyUI = true;
-		context->dirtyLayout = true;
-		context->update(rootRegion);
+		for (WindowPtr win : windows) {
+			win->dirtyUI = true;
+			context->update(*(win->ui));
+		}
+	} else {
+	}
+	for (WindowPtr win : windows) {
+		win->setCurrent();
+		win->setVisible(true);
 	}
 	do {
 		//Events could have modified layout! Pack before draw to make sure things are correctly positioned.
-		if (context->dirtyLayout) {
-			context->dirtyLayout = false;
-			context->dirtyCursorLocator = true;
-			rootRegion.pack();
+		for (WindowPtr win : windows) {
+			win->setCurrent();
+			if (win->app == nullptr) {
+				std::cout << "Window Added " << win->getName() << std::endl;
+				win->app = this;
+				win->registerCallbacks(this);
+				if (!init(win)) {
+					throw std::runtime_error(
+							MakeString()
+									<< "Error occurred in application init() for window "
+									<< win->getName());
+				}
+				if (showDebugIcon) {
+					GlyphRegionPtr debug = MakeGlyphRegion(
+							createAwesomeGlyph(0xf188, FontStyle::Outline, 20),
+							CoordPercent(1.0f, 1.0f), CoordPX(20, 20),
+							RGBA(0, 0, 0, 0), RGBA(64, 64, 64, 128),
+							RGBA(192, 192, 192, 128), UnitPX(0));
+					debug->setOrigin(Origin::BottomRight);
+					debug->onMouseDown =
+							[this,debug](AlloyContext* context,const InputEvent& e) {
+								if(e.button==GLFW_MOUSE_BUTTON_LEFT) {
+									context->toggleDebug();
+									debug->foregroundColor=context->isDebugEnabled()?MakeColor(255,64,64,255):MakeColor(64,64,64,128);
+									context->setCursorFocus(nullptr);
+									return true;
+								}
+								return false;
+							};
+					win->ui->add(debug);
+				}
+				//First pack triggers computation of aspect ratios  for components.
+				win->dirtyUI = true;
+				win->setSwapInterval(swapInterval);
+			}
+			if (win->dirtyUI) {
+				win->dirtyUI = false;
+				win->dirtyLocator = true;
+				win->ui->pack(context.get());
+			}
+			draw(win);
+			context->update(*(win->ui));
 		}
-		draw();
-		context->update(rootRegion);
 		double elapsed =
 				std::chrono::duration<double>(endTime - lastFpsTime).count();
 		frameCounter++;
@@ -725,15 +766,14 @@ void Application::run(int swapInterval) {
 			lastFpsTime = endTime;
 			frameCounter = 0;
 		}
-		glfwSwapBuffers(context->window);
+		for (WindowPtr win : windows) {
+			win->swapBuffers();
+		}
 		glfwPollEvents();
 		for (std::exception_ptr e : caughtExceptions) {
 			std::rethrow_exception(e);
 		}
-		if (glfwWindowShouldClose(context->offscreenWindow)) {
-			context->setOffScreenVisible(false);
-		}
-	} while (!glfwWindowShouldClose(context->window) && !forceClose);
+	} while (!windows.front()->shouldClose() && !forceClose);
 	if (onExit)
 		onExit();
 }

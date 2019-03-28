@@ -93,7 +93,7 @@ void ForceItem::draw(AlloyContext* context, const pixel2& offset, float scale,
 		bool selected) {
 	if (shape == NodeShape::Hidden)
 		return;
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	float lineWidth = scale * 4.0f;
 	nvgStrokeWidth(nvg, lineWidth);
 	if (selected) {
@@ -146,7 +146,7 @@ void SpringItem::draw(AlloyContext* context, const pixel2& offset,
 		float scale) {
 	if (!visible)
 		return;
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	nvgStrokeColor(nvg, context->theme.NEUTRAL);
 	nvgStrokeWidth(nvg, scale * 4.0f);
 	nvgLineCap(nvg, NVG_ROUND);
@@ -459,7 +459,7 @@ void ForceSimulator::draw(AlloyContext* context) {
 	}
 	Region::draw(context);
 	float2 offset = getBoundsPosition() + dragOffset;
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	pushScissor(nvg, getCursorBounds());
 	{
 		std::lock_guard<std::mutex> lockMe(lock);
@@ -771,7 +771,7 @@ BoxForce::BoxForce(float gravConst, const box2f& box) {
 void BoxForce::draw(AlloyContext* context, const pixel2& offset, float scale) {
 	if (!enabled || !visible)
 		return;
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	nvgStrokeWidth(nvg, scale * 4.0f);
 	nvgStrokeColor(nvg, Color(0.8f, 0.8f, 0.8f, 1.0f));
 	nvgBeginPath(nvg);
@@ -1000,7 +1000,7 @@ void QuadTreeNode::draw(AlloyContext* context, const pixel2& offset,
 		}
 	}
 	Color c = colors[depth];
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	nvgFillColor(nvg, c);
 	nvgStrokeColor(nvg, Color(255, 255, 255));
 	nvgStrokeWidth(nvg, scale * 2.0f);
@@ -1037,7 +1037,7 @@ void CircularWallForce::draw(AlloyContext* context, const pixel2& offset,
 		float scale) {
 	if (!enabled || !visible)
 		return;
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	nvgStrokeWidth(nvg, scale * 4.0f);
 	nvgStrokeColor(nvg, Color(0.8f, 0.8f, 0.8f, 1.0f));
 	nvgBeginPath(nvg);

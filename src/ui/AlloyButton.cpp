@@ -63,7 +63,7 @@ void ArrowButton::draw(AlloyContext* context) {
 	bool inside = context->isMouseContainedIn(this)
 			&& context->isLeftMouseButtonDown();
 	bool down = context->isMouseDown(this) && context->isLeftMouseButtonDown();
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	const float x = bounds.position.x;
 	const float y = bounds.position.y;
@@ -278,7 +278,7 @@ bool TextIconButton::onEventHandler(AlloyContext* context,
 void TextButton::draw(AlloyContext* context) {
 	bool hover = context->isMouseOver(this);
 	bool down = context->isMouseDown(this) && context->isLeftMouseButtonDown();
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 
 	int xoff = 0;
@@ -440,7 +440,7 @@ void TextIconButton::setIcon(int code) {
 void TextIconButton::draw(AlloyContext* context) {
 	bool hover = context->isMouseOver(this);
 	bool down = context->isMouseDown(this) && context->isLeftMouseButtonDown();
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	int xoff = 0;
 	int yoff = 0;
@@ -589,7 +589,7 @@ void IconButton::setIcon(int iconCode) {
 void IconButton::draw(AlloyContext* context) {
 	bool hover = context->isMouseOver(this);
 	bool down = context->isMouseDown(this) && context->isLeftMouseButtonDown();
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	pixel2 center = bounds.position + HALF_PIX(bounds.dimensions);
 	pixel2 radii = HALF_PIX(bounds.dimensions);

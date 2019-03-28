@@ -96,7 +96,7 @@ CheckBox::CheckBox(const std::string& label, const AUnit2D& position,
 	}
 	checkBoundsDraw->onDraw =
 			[this](AlloyContext* context, const box2px& clickbox) {
-				NVGcontext* nvg = context->nvgContext;
+				NVGcontext* nvg = context->getNVG();
 				nvgBeginPath(nvg);
 				nvgFillColor(nvg, context->theme.NEUTRAL);
 				nvgRoundedRect(nvg, clickbox.position.x, clickbox.position.y,
@@ -162,7 +162,7 @@ void CheckBox::draw(AlloyContext* context) {
 	Composite::draw(context);
 	const int PAD = 1.0f;
 	box2px bounds = getBounds();
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	if (isObjectFocused()) {
 		nvgLineJoin(nvg, NVG_MITER);
 		nvgBeginPath(nvg);
@@ -229,7 +229,7 @@ ToggleBox::ToggleBox(const std::string& label, const AUnit2D& position,
 	toggleRegion->setIgnoreCursorEvents(true);
 	toggleRegion->onDraw =
 			[this](AlloyContext* context, const box2px& clickbounds) {
-				NVGcontext* nvg = context->nvgContext;
+				NVGcontext* nvg = context->getNVG();
 				nvgBeginPath(nvg);
 				nvgFillColor(nvg, context->theme.NEUTRAL);
 				box2px clickbox = clickRegion->getBounds();
@@ -365,7 +365,7 @@ void ToggleBox::draw(AlloyContext* context) {
 	Composite::draw(context);
 	const int PAD = 1.0f;
 	box2px bounds = getBounds();
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	if (isObjectFocused()) {
 		nvgLineJoin(nvg, NVG_MITER);
 		nvgBeginPath(nvg);

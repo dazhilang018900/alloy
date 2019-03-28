@@ -54,7 +54,7 @@ std::shared_ptr<TextField> MakeTextField(const std::string& name,
 	return region;
 }
 pixel2 TextLabel::getTextDimensions(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 
 	float th = fontSize.toPixels(bounds.dimensions.y, context->dpmm.y,
@@ -66,7 +66,7 @@ pixel2 TextLabel::getTextDimensions(AlloyContext* context) {
 }
 
 pixel2 ModifiableLabel::getTextDimensions(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	float th = fontSize.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
@@ -96,7 +96,7 @@ void ModifiableLabel::draw(AlloyContext* context) {
 
 	float ascender, descender, lineh;
 	std::vector<NVGglyphPosition> positions(value.size());
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	bool hover = context->isMouseOver(this) && modifiable;
 	float x = bounds.position.x;
@@ -357,7 +357,7 @@ void ModifiableLabel::draw(AlloyContext* context) {
 }
 
 void TextLabel::draw(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
@@ -495,7 +495,7 @@ TextLink::TextLink(const std::string& name, const AUnit2D& pos,
 	};
 }
 void TextLink::draw(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	bool hover = context->isMouseOver(this) && enabled;
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
@@ -621,7 +621,7 @@ void TextLink::draw(AlloyContext* context) {
 	}
 }
 pixel2 TextRegion::getTextDimensions(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	std::vector<NVGtextRow> rows(3);
 	float lineh = fontSize.toPixels(bounds.dimensions.y, context->dpmm.y,
@@ -649,7 +649,7 @@ pixel2 TextRegion::getTextDimensions(AlloyContext* context) {
 	return pixel2(w, h);
 }
 void TextRegion::draw(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
@@ -847,7 +847,7 @@ bool TextField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 			break;
 		case GLFW_KEY_C:
 			if (e.isControlDown()) {
-				glfwSetClipboardString(context->window,
+				glfwSetClipboardString(context->getCurrentWindow()->handle,
 						value.substr(std::min(cursorEnd, cursorStart),
 								std::abs(cursorEnd - cursorStart)).c_str());
 				return true;
@@ -855,7 +855,7 @@ bool TextField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 			break;
 		case GLFW_KEY_X:
 			if (e.isControlDown()) {
-				glfwSetClipboardString(context->window,
+				glfwSetClipboardString(context->getCurrentWindow()->handle,
 						value.substr(std::min(cursorEnd, cursorStart),
 								std::abs(cursorEnd - cursorStart)).c_str());
 				erase();
@@ -864,7 +864,7 @@ bool TextField::handleKeyInput(AlloyContext* context, const InputEvent& e) {
 			break;
 		case GLFW_KEY_V:
 			if (e.isControlDown()) {
-				const char* pasteText = glfwGetClipboardString(context->window);
+				const char* pasteText = glfwGetClipboardString(context->getCurrentWindow()->handle);
 				if (pasteText != nullptr) {
 					erase();
 					value.insert(cursorStart, pasteText);
@@ -984,7 +984,7 @@ void TextField::draw(AlloyContext* context) {
 	float ascender, descender, lineh;
 	Region::draw(context);
 	std::vector<NVGglyphPosition> positions(value.size());
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	bool f = context->isCursorFocused(this) && modifiable;
 	if (!f && isObjectFocused() && onTextEntered) {

@@ -131,7 +131,7 @@ MessageDialog::MessageDialog(const std::string& name, const AUnit2D& pos,
 	Application::addListener(this);
 }
 void MessageDialog::draw(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = containerRegion->getBounds();
 	NVGpaint shadowPaint = nvgBoxGradient(nvg, bounds.position.x,
 			bounds.position.y, bounds.dimensions.x, bounds.dimensions.y,

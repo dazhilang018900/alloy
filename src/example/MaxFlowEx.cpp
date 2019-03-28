@@ -136,7 +136,7 @@ bool MaxFlowEx::init(Composite& rootNode) {
 	updateRender();
 	drawRegion->onDraw =
 			[this, SEARCH_RADIUS](const AlloyContext* context, const box2px& bounds) {
-				NVGcontext* nvg = context->nvgContext;
+				NVGcontext* nvg = context->getNVG();
 				nvgLineJoin(nvg,NVG_ROUND);
 				nvgStrokeColor(nvg, Color(64, 64, 64));
 				nvgStrokeWidth(nvg, 2.0f);

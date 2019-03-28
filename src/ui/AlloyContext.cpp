@@ -76,12 +76,199 @@ const Cursor Cursor::SlantUp(0xf07d, 24.0f, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER,
 const Cursor Cursor::CrossHairs(0xf05b, 24.0f,
 		NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER, FontType::Icon, 0.0f,
 		pixel2(-0.25f, -0.25f));
+Window::Window(const std::string& title, int width, int height) :
+		handle(nullptr), nvg(nullptr), visible(false), app(nullptr),dirtyUI(true),dirtyLocator(true) {
+	init(title, width, height);
+}
+Window::Window() :
+		handle(nullptr), nvg(nullptr), visible(false), app(nullptr) ,dirtyUI(false),dirtyLocator(false) {
+}
+int2 Window::getScreenSize() const {
+	int2 dims;
+	glfwGetWindowSize(handle, &dims.x, &dims.y);
+	return dims;
+}
+box2px Window::getViewport() const {
+	return box2px(pixel2(0.0f, 0.0f),
+			pixel2(getFrameBufferSize()));
+}
+float Window::getPixelRatio() const {
+	return (float) getFrameBufferSize().x / (float) getScreenSize().x;
+}
+int2 Window::getFrameBufferSize() const {
+	int2 dims;
+	glfwGetFramebufferSize(handle, &dims.x, &dims.y);
+	return dims;
+}
+
+void Window::init(const std::string& title, int width, int height) {
+	static const float2 TextureCoords[6] = { float2(1.0f, 0.0f), float2(0.0f,
+			0.0f), float2(0.0f, 1.0f), float2(0.0f, 1.0f), float2(1.0f, 1.0f),
+			float2(1.0f, 0.0f) };
+	static const float3 PositionCoords[6] = { float3(1.0f, 1.0f, 0.0f), float3(
+			0.0f, 1.0f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f,
+			0.0f), float3(1.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 0.0f) };
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, 1);
+	glfwWindowHint(GLFW_VISIBLE, 0);
+	name = title;
+	handle = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
+	if (!handle) {
+		glfwTerminate();
+		throw std::runtime_error(
+				MakeString() << "Could not create window: " << title);
+	}
+	glfwMakeContextCurrent(handle);
+	glewExperimental = GL_TRUE;
+	if (glewInit() != GLEW_OK) {
+		throw std::runtime_error(
+				MakeString() << "Could not initialize GLEW for window: "
+						<< title);
+	}
+	glGetError();
+	glDepthFunc(GL_LEQUAL);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	int fwidth, fheight;
+	glfwGetFramebufferSize(handle, &fwidth, &fheight);
+	glViewport(0, 0, fwidth, fheight);
+
+	glGenVertexArrays(1, &vao.vao);
+	glBindVertexArray(vao.vao);
+	glGenBuffers(1, &vao.positionBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vao.positionBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * 6, PositionCoords,
+	GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glGenBuffers(1, &vao.uvBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, vao.uvBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 2 * 6, TextureCoords,
+	GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+	nvg = nvgCreateGL3(NVG_ANTIALIAS | NVG_STENCIL_STROKES);
+
+	ui = CompositePtr(
+			new Composite(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
+	glass = std::shared_ptr<Composite>(
+			new Composite(name + "_glass", CoordPX(0, 0),
+					CoordPercent(1.0f, 1.0f)));
+	glass->backgroundColor = MakeColor(COLOR_NONE);
+	glass->setVisible(false);
+}
+void Window::setCurrent() const {
+	if (handle)
+		glfwMakeContextCurrent(handle);
+}
+CursorLocator* Window::resetLocator() {
+	locator.reset(getScreenSize());
+	return &locator;
+}
+void Window::add(Region* region) {
+	locator.add(region);
+}
+Region* Window::locate(const pixel2& cursor) const {
+	return locator.locate(cursor);
+}
+void Window::setVisible(bool vis) {
+	if (handle) {
+		if (vis) {
+			glfwShowWindow(handle);
+
+		} else {
+			glfwHideWindow(handle);
+		}
+		visible = vis;
+	}
+}
+void Window::registerCallbacks(Application* app) {
+	glfwSetWindowUserPointer(handle, this);
+	glfwSetWindowRefreshCallback(handle, [](GLFWwindow * window ) {
+		Window* win = (Window *)(glfwGetWindowUserPointer(window));
+		try {
+			win->app->onWindowRefresh(win);
+		} catch(...) {
+			win->app->throwException(std::current_exception());
+		}
+	});
+	glfwSetWindowFocusCallback(handle,
+			[](GLFWwindow * window, int focused ) {
+				Window* win = (Window *)(glfwGetWindowUserPointer(window));
+				try {win->app->onWindowFocus(win,focused);} catch(...) {win->app->throwException(std::current_exception());
+				}});
+	glfwSetWindowSizeCallback(handle,
+			[](GLFWwindow * window, int width, int height ) {Window* win = (Window *)(glfwGetWindowUserPointer(window)); try {win->app->onWindowSize(win,width, height);} catch(...) {win->app->throwException(std::current_exception());}});
+	glfwSetFramebufferSizeCallback(handle,
+			[](GLFWwindow * window, int width, int height) {Window* win = (Window *)(glfwGetWindowUserPointer(window)); try {win->app->onFrameBufferSize(win,width, height);} catch (...) {win->app->throwException(std::current_exception());}});
+	glfwSetCharCallback(handle,
+			[](GLFWwindow * window, unsigned int codepoint ) {Window* win = (Window *)(glfwGetWindowUserPointer(window)); try {win->app->onChar(win,codepoint);} catch(...) {win->app->throwException(std::current_exception());}});
+	glfwSetKeyCallback(handle,
+			[](GLFWwindow * window, int key, int scancode, int action, int mods) {Window* win = (Window *)(glfwGetWindowUserPointer(window)); try {win->app->onKey(win,key, scancode,action,mods);} catch(...) {win->app->throwException(std::current_exception());}});
+	glfwSetMouseButtonCallback(handle,
+			[](GLFWwindow * window, int button, int action,int mods) {Window* win = (Window *)(glfwGetWindowUserPointer(window)); try {win->app->onMouseButton(win,button, action,mods);} catch(...) {win->app->throwException(std::current_exception());}});
+	glfwSetCursorPosCallback(handle,
+			[](GLFWwindow * window, double xpos, double ypos ) {Window* win = (Window *)(glfwGetWindowUserPointer(window)); try {win->app->onCursorPos(win,xpos, ypos);} catch(...) {win->app->throwException(std::current_exception());}});
+	glfwSetCursorEnterCallback(handle,
+			[](GLFWwindow * window, int enter) {Window* win = (Window *)(glfwGetWindowUserPointer(window)); try {win->app->onCursorEnter(win,enter);} catch(...) {win->app->throwException(std::current_exception());}});
+	glfwSetScrollCallback(handle,
+			[](GLFWwindow * window, double xoffset, double yoffset ) {Window* win = (Window *)(glfwGetWindowUserPointer(window)); try {win->app->onScroll(win,xoffset, yoffset);} catch(...) {win->app->throwException(std::current_exception());}});
+
+}
+bool Window::isVisible() const {
+	return visible;
+}
+void Window::setFocused() const {
+	glfwFocusWindow(handle);
+}
+bool Window::shouldClose() const {
+	return glfwWindowShouldClose(handle);
+}
+void Window::swapBuffers() const {
+	glfwSwapBuffers(handle);
+}
+void Window::setSwapInterval(int interval) const {
+	glfwSwapInterval(interval);
+}
+
+void Window::begin() const {
+	setCurrent();
+	int2 viewSize = getFrameBufferSize();
+	glViewport(0, 0, viewSize.x, viewSize.y);
+	glScissor(0, 0, viewSize.x, viewSize.y);
+	glClearColor(0.0, 0.0, 0.0, 0.0);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_SCISSOR_TEST);
+}
+Window::~Window() {
+	if (handle) {
+		glfwMakeContextCurrent(handle);
+		if (vao.vao) {
+			glDeleteVertexArrays(1, &vao.vao);
+		}
+		if (vao.uvBuffer) {
+			glDeleteBuffers(1, &vao.uvBuffer);
+		}
+		if (vao.positionBuffer) {
+			glDeleteBuffers(1, &vao.positionBuffer);
+		}
+		nvgDeleteGL3(nvg);
+		glfwDestroyWindow(handle);
+	}
+	handle = nullptr;
+}
 void Cursor::draw(AlloyContext* context) const {
 	pixel2 cursor = context->cursorPosition;
 	if (fontSize > 0.0f && context->hasFocus && cursor.x >= 0 && cursor.y >= 0
 			&& cursor.x < context->getScreenWidth()
 			&& cursor.y < context->getScreenHeight()) {
-		NVGcontext* nvg = context->nvgContext;
+		NVGcontext* nvg = context->getNVG();
 		nvgTextAlign(nvg, align);
 		nvgSave(nvg);
 		nvgFontFaceId(nvg, context->getFontHandle(fontType));
@@ -103,7 +290,7 @@ void Cursor::draw(AlloyContext* context) const {
 }
 Font::Font(const std::string& name, const std::string& file,
 		AlloyContext* context) :
-		nvg(context->nvgContext), handle(0), name(name), file(file) {
+		nvg(context->getNVG()), handle(0), name(name), file(file) {
 	handle = nvgCreateFont(nvg, name.c_str(), file.c_str());
 }
 int Font::getCursorPosition(const std::string & text, float fontSize,
@@ -127,7 +314,7 @@ AwesomeGlyph::AwesomeGlyph(int codePoint, AlloyContext* context,
 		const FontStyle& style, pixel height) :
 		Glyph(CodePointToUTF8(codePoint), GlyphType::Awesome, 0, height), codePoint(
 				codePoint), style(style) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	nvgFontSize(nvg, height);
 	nvgFontFaceId(nvg, context->getFontHandle(FontType::Icon));
 	width = nvgTextBounds(nvg, 0, 0, name.c_str(), nullptr, nullptr);
@@ -135,7 +322,7 @@ AwesomeGlyph::AwesomeGlyph(int codePoint, AlloyContext* context,
 }
 void AwesomeGlyph::draw(const box2px& bounds, const Color& fgColor,
 		const Color& bgColor, AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	nvgFontFaceId(nvg, context->getFontHandle(FontType::Icon));
 	nvgFontSize(nvg, height);
 	nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER);
@@ -147,35 +334,35 @@ ImageGlyph::ImageGlyph(const std::string& file, AlloyContext* context,
 		bool mipmap) :
 		Glyph(GetFileNameWithoutExtension(file), GlyphType::Image, 0, 0), file(
 				file) {
-	handle = nvgCreateImage(context->nvgContext, file.c_str(),
+	handle = nvgCreateImage(context->getNVG(), file.c_str(),
 			(mipmap) ? NVG_IMAGE_GENERATE_MIPMAPS : 0);
 	int w, h;
-	nvgImageSize(context->nvgContext, handle, &w, &h);
+	nvgImageSize(context->getNVG(), handle, &w, &h);
 	width = (pixel) w;
 	height = (pixel) h;
 }
 void ImageGlyph::set(const ImageRGBA& rgba, AlloyContext* context) {
-	nvgUpdateImage(context->nvgContext, handle, rgba.ptr());
+	nvgUpdateImage(context->getNVG(), handle, rgba.ptr());
 }
 void ImageGlyph::set(const ImageRGB& rgb, AlloyContext* context) {
 	ImageRGBA rgba;
 	ConvertImage(rgb, rgba); //Slow!!
-	nvgUpdateImage(context->nvgContext, handle, rgba.ptr());
+	nvgUpdateImage(context->getNVG(), handle, rgba.ptr());
 }
 void ImageGlyph::set(const ImageRGBAf& rgba, AlloyContext* context) {
 	ImageRGBA tmp;
 	ConvertImage(rgba, tmp);
-	nvgUpdateImage(context->nvgContext, handle, tmp.ptr());
+	nvgUpdateImage(context->getNVG(), handle, tmp.ptr());
 }
 ImageGlyph::~ImageGlyph() {
 	AlloyContext* context = AlloyDefaultContext().get();
 	if (context)
-		nvgDeleteImage(context->nvgContext, handle);
+		nvgDeleteImage(context->getNVG(), handle);
 }
 ImageGlyph::ImageGlyph(const ImageRGBA& rgba, AlloyContext* context,
 		bool mipmap) :
 		Glyph("image_rgba", GlyphType::Image, 0, 0) {
-	handle = nvgCreateImageRGBA(context->nvgContext, rgba.width, rgba.height,
+	handle = nvgCreateImageRGBA(context->getNVG(), rgba.width, rgba.height,
 			(mipmap) ? NVG_IMAGE_GENERATE_MIPMAPS : 0, rgba.ptr());
 	width = (pixel) rgba.width;
 	height = (pixel) rgba.height;
@@ -184,14 +371,14 @@ ImageGlyph::ImageGlyph(const ImageRGB& rgb, AlloyContext* context, bool mipmap) 
 		Glyph("image_rgba", GlyphType::Image, 0, 0) {
 	ImageRGBA rgba;
 	ConvertImage(rgb, rgba);
-	handle = nvgCreateImageRGBA(context->nvgContext, rgba.width, rgba.height,
+	handle = nvgCreateImageRGBA(context->getNVG(), rgba.width, rgba.height,
 			(mipmap) ? NVG_IMAGE_GENERATE_MIPMAPS : 0, rgba.ptr());
 	width = (pixel) rgba.width;
 	height = (pixel) rgba.height;
 }
 void ImageGlyph::draw(const box2px& bounds, const Color& fgColor,
 		const Color& bgColor, AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	NVGpaint imgPaint = nvgImagePattern(nvg, bounds.position.x,
 			bounds.position.y, bounds.dimensions.x, bounds.dimensions.y, 0.f,
 			handle, 1.0f);
@@ -215,12 +402,12 @@ CheckerboardGlyph::CheckerboardGlyph(int width, int height, int horizTiles,
 		Glyph("image_rgba", GlyphType::Image, (pixel) width, (pixel) height) {
 	ImageRGBA img(width, height);
 	MakeCheckerBoard(img, horizTiles, vertTiles);
-	handle = nvgCreateImageRGBA(context->nvgContext, width, height,
+	handle = nvgCreateImageRGBA(context->getNVG(), width, height,
 			(mipmap) ? NVG_IMAGE_GENERATE_MIPMAPS : 0, img.ptr());
 }
 void CheckerboardGlyph::draw(const box2px& bounds, const Color& fgColor,
 		const Color& bgColor, AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	NVGpaint imgPaint = nvgImagePattern(nvg, bounds.position.x,
 			bounds.position.y, bounds.dimensions.x, bounds.dimensions.y, 0.f,
 			handle, 1.0f);
@@ -243,7 +430,6 @@ void CheckerboardGlyph::draw(const box2px& bounds, const Color& fgColor,
 		nvgFillColor(nvg, Color(fgColor));
 		nvgFill(nvg);
 	}
-
 }
 void AlloyContext::addAssetDirectory(const std::string& dir) {
 	std::string dirCopy = dir;
@@ -315,6 +501,19 @@ std::shared_ptr<Font> AlloyContext::loadFont(const std::string& name,
 	}
 	return std::shared_ptr<Font>();
 }
+int AlloyContext::getFrameBufferWidth() const {
+	return getCurrentWindow()->getFrameBufferSize().x;
+}
+int AlloyContext::getFrameBufferHeight() const {
+	return getCurrentWindow()->getFrameBufferSize().y;
+}
+
+int2 AlloyContext::getFrameBufferDimensions() const {
+	return getCurrentWindow()->getFrameBufferSize();
+}
+int2 AlloyContext::getScreenDimensions() const {
+	return getCurrentWindow()->getScreenSize();
+}
 std::string AlloyContext::getFullPath(const std::string& partialFile) {
 	std::string fileName = partialFile;
 	if (ALY_PATH_SEPARATOR[0] != '/') {
@@ -360,6 +559,38 @@ std::string AlloyContext::getFullPath(const std::string& partialFile) {
 			MakeString() << "Could not find \"" << fileName << "\"");
 	return std::string("");
 }
+void AlloyContext::begin(const WindowPtr& window) {
+	if (glfwGetCurrentContext()) {
+		windowHistory.push_back(windowMap[glfwGetCurrentContext()]);
+	}
+	window->begin();
+}
+void AlloyContext::end() {
+	if (windowHistory.size() > 0) {
+		windowHistory.back()->setCurrent();
+		windowHistory.pop_back();
+	}
+}
+bool AlloyContext::isControlDown() const {
+	GLFWwindow* window = getCurrentWindow()->handle;
+	return ((glfwGetKey(window, GLFW_KEY_LEFT_CONTROL)
+			| glfwGetKey(window, GLFW_KEY_RIGHT_CONTROL)) != 0);
+}
+bool AlloyContext::isShiftDown() const {
+	GLFWwindow* window = getCurrentWindow()->handle;
+	return ((glfwGetKey(window, GLFW_KEY_LEFT_SHIFT)
+			| glfwGetKey(window, GLFW_KEY_RIGHT_SHIFT)) != 0);
+}
+bool AlloyContext::isAltDown() const {
+	GLFWwindow* window = getCurrentWindow()->handle;
+	return ((glfwGetKey(window, GLFW_KEY_LEFT_ALT)
+			| glfwGetKey(window, GLFW_KEY_RIGHT_ALT)) != 0);
+}
+bool AlloyContext::isSuperDown() const {
+	GLFWwindow* window = getCurrentWindow()->handle;
+	return ((glfwGetKey(window, GLFW_KEY_LEFT_SUPER)
+			| glfwGetKey(window, GLFW_KEY_RIGHT_SUPER)) != 0);
+}
 void AlloyContext::setDragObject(Region* region) {
 	mouseDownRegion = region;
 	cursorDownPosition = cursorPosition - mouseDownRegion->getBoundsPosition();
@@ -375,7 +606,8 @@ pixel2 AlloyContext::getCursorDownPosition() const {
 }
 bool AlloyContext::fireListeners(const InputEvent& event) {
 	firingListeners = true;
-	if (event.type== InputType::Key&& event.isDown() && event.key == GLFW_KEY_TAB) {
+	if (event.type
+			== InputType::Key&& event.isDown() && event.key == GLFW_KEY_TAB) {
 		if (objectFocusRegion != nullptr && objectFocusRegion->isVisible()) {
 			if (event.isShiftDown()) {
 				objectFocusRegion->focusPrevious();
@@ -452,118 +684,37 @@ void AlloyContext::removeOnTopRegion(Region* region) {
 		onTopRegion = nullptr;
 	}
 }
-void AlloyContext::setOffScreenVisible(bool vis) {
-	if (vis) {
-		glfwShowWindow(offscreenWindow);
-	} else {
-		glfwHideWindow(offscreenWindow);
-	}
+WindowPtr AlloyContext::addWindow(const std::string& name, int width,
+		int height) {
+	WindowPtr win(new Window(title, width, height));
+	windowMap[win->handle] = win;
+	windows.push_back(win);
+	return win;
 }
-AlloyContext::AlloyContext(int width, int height, const std::string& title,
+bool AlloyContext::remove(Window* w) {
+	for (auto iter = windows.begin(); iter != windows.end(); iter++) {
+		WindowPtr win = *iter;
+		if (win.get() == w) {
+			windows.erase(iter);
+			windowMap.erase(windowMap.find(win->handle));
+			return true;
+		}
+	}
+	return false;
+}
+AlloyContext::AlloyContext(const std::string& title, int width, int height,
 		const Theme& theme) :
-		nvgContext(nullptr), window(nullptr), theme(theme), title(title) {
-	threadId = std::this_thread::get_id();
+		theme(theme), title(title), firingListeners(false) {
 	if (glfwInit() != GL_TRUE) {
 		throw std::runtime_error("Could not initialize GLFW.");
 	}
 	glfwSetErrorCallback([](int error, const char* desc) {
 		std::cout << "GLFW Error [" << error << "] " << desc << std::endl;
 	});
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, 1);
-	glfwWindowHint(GLFW_VISIBLE, 0);
-	window = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
-
-	if (!window) {
-		glfwTerminate();
-
-		throw std::runtime_error("Could not create window.");
-	}
-	glfwMakeContextCurrent(window);
-	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK) {
-		throw std::runtime_error("Could not initialize GLEW.");
-	}
-	glGetError();
-	glDepthFunc(GL_LEQUAL);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-	glfwGetFramebufferSize(window, &width, &height);
-	glViewport(0, 0, width, height);
-	viewSize = int2(width, height);
-
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, 1);
-	glfwWindowHint(GLFW_VISIBLE, 0);
-	offscreenWindow = glfwCreateWindow(width, height, "Offscreen", NULL, NULL);
-	if (!offscreenWindow) {
-		glfwTerminate();
-		throw std::runtime_error("Could not create window.");
-	}
-	glfwMakeContextCurrent(offscreenWindow);
-	glewExperimental = GL_TRUE;
-	if (glewInit() != GLEW_OK) {
-		throw std::runtime_error("Could not initialize GLEW.");
-	}
-	glGetError();
-	glDepthFunc(GL_LEQUAL);
-	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glViewport(0, 0, width, height);
-	glfwMakeContextCurrent(window);
-
-	nvgContext = nvgCreateGL3(NVG_ANTIALIAS | NVG_STENCIL_STROKES);
-	const float2 TextureCoords[6] = { float2(1.0f, 0.0f), float2(0.0f, 0.0f),
-			float2(0.0f, 1.0f), float2(0.0f, 1.0f), float2(1.0f, 1.0f), float2(
-					1.0f, 0.0f) };
-	const float3 PositionCoords[6] = { float3(1.0f, 1.0f, 0.0f), float3(0.0f,
-			1.0f, 0.0f), float3(0.0f, 0.0f, 0.0f), float3(0.0f, 0.0f, 0.0f),
-			float3(1.0f, 0.0f, 0.0f), float3(1.0f, 1.0f, 0.0f) };
-
-	glGenVertexArrays(1, &vaoImageOnScreen.vao);
-	glBindVertexArray(vaoImageOnScreen.vao);
-	glGenBuffers(1, &vaoImageOnScreen.positionBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vaoImageOnScreen.positionBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * 6, PositionCoords,
-	GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glGenBuffers(1, &vaoImageOnScreen.uvBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vaoImageOnScreen.uvBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 2 * 6, TextureCoords,
-	GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-
-	glfwHideWindow(offscreenWindow);
-	glfwMakeContextCurrent(offscreenWindow);
-	glGenVertexArrays(1, &vaoImageOffScreen.vao);
-	glBindVertexArray(vaoImageOffScreen.vao);
-	glGenBuffers(1, &vaoImageOffScreen.positionBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vaoImageOffScreen.positionBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * 6, PositionCoords,
-	GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-	glGenBuffers(1, &vaoImageOffScreen.uvBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, vaoImageOffScreen.uvBuffer);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 2 * 6, TextureCoords,
-	GL_STATIC_DRAW);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindVertexArray(0);
-	glfwMakeContextCurrent(window);
-
+	WindowPtr mainWindow = addWindow(title, width, height);
 	int widthMM, heightMM;
-
+	numMonitors = 0;
+	glfwGetMonitors(&numMonitors);
 	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 	if (monitor == nullptr)
 		throw std::runtime_error("Could not find monitor.");
@@ -573,17 +724,48 @@ AlloyContext::AlloyContext(int width, int height, const std::string& title,
 	glfwGetMonitorPhysicalSize(monitor, &widthMM, &heightMM);
 	dpmm = double2(mode->width / (double) widthMM,
 			mode->height / (double) heightMM);
-	int winWidth, winHeight, fbWidth, fbHeight;
-	glfwGetWindowSize(window, &winWidth, &winHeight);
-	glfwGetFramebufferSize(window, &fbWidth, &fbHeight);
-	// Calculate pixel ration for hi-dpi devices.
-	screenSize = int2(winWidth, winHeight);
-	viewSize = int2(fbWidth, fbHeight);
-	pixelRatio = pixel((float) fbWidth / (float) winWidth);
+	pixelRatio = mainWindow->getPixelRatio();
 	lastAnimateTime = std::chrono::steady_clock::now();
 	lastCursorTime = std::chrono::steady_clock::now();
 	lastUpdateTime = std::chrono::steady_clock::now();
 	cursor = &Cursor::Normal;
+}
+int AlloyContext::getMonitorCount() const {
+	return numMonitors;
+}
+int2 AlloyContext::getMonitorPhysicalSize(int idx) const {
+	int widthMM, heightMM;
+	int num = 0;
+	GLFWmonitor** monitors = glfwGetMonitors(&num);
+	if (idx < num) {
+		glfwGetMonitorPhysicalSize(monitors[idx], &widthMM, &heightMM);
+		return int2(widthMM, heightMM);
+	} else {
+		return int2(0);
+	}
+}
+int2 AlloyContext::getMonitorSize(int idx) const {
+	int mon = 0;
+	GLFWmonitor** monitors = glfwGetMonitors(&mon);
+	if (idx < mon) {
+		const GLFWvidmode* mode = glfwGetVideoMode(monitors[idx]);
+		return int2(mode->width, mode->height);
+	} else {
+		return int2(0);
+	}
+}
+double2 AlloyContext::getMonitorDpmm(int idx) const {
+	int widthMM, heightMM;
+	int mon = 0;
+	GLFWmonitor** monitors = glfwGetMonitors(&mon);
+	if (idx < mon) {
+		const GLFWvidmode* mode = glfwGetVideoMode(monitors[idx]);
+		glfwGetMonitorPhysicalSize(monitors[idx], &widthMM, &heightMM);
+		return double2(mode->width / (double) widthMM,
+				mode->height / (double) heightMM);
+	} else {
+		return double2(0.0);
+	}
 }
 void AlloyContext::addDeferredTask(const std::function<void()>& func,
 		bool block) {
@@ -626,9 +808,12 @@ bool AlloyContext::isMouseContainedIn(const pixel2& pos,
 }
 bool AlloyContext::isMouseOver(Region* region, bool includeParent) const {
 	if (includeParent) {
-		return (region!=nullptr&&(mouseOverRegion == region|| (mouseOverRegion != nullptr&& mouseOverRegion->hasParent(region))));
+		return (region != nullptr
+				&& (mouseOverRegion == region
+						|| (mouseOverRegion != nullptr
+								&& mouseOverRegion->hasParent(region))));
 	} else {
-		return (mouseOverRegion == region&&region!=nullptr);
+		return (mouseOverRegion == region && region != nullptr);
 	}
 }
 void AlloyContext::setMouseDownObject(Region* region) {
@@ -649,13 +834,7 @@ bool AlloyContext::isMouseDown(Region* region, bool includeParent) const {
 	}
 }
 std::shared_ptr<Composite>& AlloyContext::getGlassPane() {
-	if (glassPane.get() == nullptr) {
-		glassPane = std::shared_ptr<Composite>(
-				new Composite("Glass Pane", CoordPX(0, 0),
-						CoordPercent(1.0f, 1.0f)));
-		glassPane->backgroundColor = MakeColor(COLOR_NONE);
-	}
-	return glassPane;
+	return getCurrentWindow()->glass;
 }
 void AlloyContext::clearEvents() {
 	mouseOverRegion = nullptr;
@@ -666,7 +845,9 @@ void AlloyContext::clearEvents() {
 	firingListeners = false;
 }
 void AlloyContext::clearEvents(Region* region) {
-	cursorLocator.reset(screenSize);
+	for (auto win : windows) {
+		win->resetLocator();
+	}
 	if (mouseOverRegion != nullptr
 			&& (region == mouseOverRegion || mouseOverRegion->hasParent(region)))
 		mouseOverRegion = nullptr;
@@ -694,44 +875,16 @@ Region* AlloyContext::locate(const pixel2& cursor) const {
 				return r;
 		}
 	}
-	return cursorLocator.locate(cursor);
+	return getCurrentWindow()->locate(cursor);
 }
 
 bool AlloyContext::isOnScreenRender() const {
-	return (windowHistory.back() == window);
+	return (getCurrentWindow()->isVisible());
 }
 bool AlloyContext::isOffScreenRender() const {
-	return (windowHistory.back() == offscreenWindow);
+	return (!getCurrentWindow()->isVisible());
 }
-bool AlloyContext::begin(bool onScreen) {
-	if (glfwGetCurrentContext())
-		windowHistory.push_back(glfwGetCurrentContext());
-	if (onScreen) {
-		glfwMakeContextCurrent(window);
-	} else {
-		glfwMakeContextCurrent(offscreenWindow);
-	}
-	return (windowHistory.size() == 1);
 
-}
-void AlloyContext::initOffScreenDraw() {
-	begin(false);
-	glViewport(0, 0, viewSize.x, viewSize.y);
-	glScissor(0, 0, viewSize.x, viewSize.y);
-	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_SCISSOR_TEST);
-	end();
-}
-bool AlloyContext::end() {
-	if (windowHistory.size() > 0) {
-		glfwMakeContextCurrent(windowHistory.back());
-		windowHistory.pop_back();
-		return true;
-	} else
-		return false;
-}
 bool AlloyContext::isCursorFocused(const Region* region) {
 	if (cursorFocusRegion != nullptr) {
 		if (cursorFocusRegion->isVisible()) {
@@ -762,27 +915,26 @@ void AlloyContext::update(Composite& rootNode) {
 			endTime - lastAnimateTime).count();
 	double cursorElapsed = std::chrono::duration<double>(
 			endTime - lastCursorTime).count();
+	WindowPtr win = getCurrentWindow();
 	if (deferredTasks.size() > 0) {
 		executeDeferredTasks();
-		cursorLocator.reset(screenSize);
-		rootNode.updateCursor(&cursorLocator);
-		dirtyCursorLocator = false;
+		rootNode.updateCursor(win->resetLocator());
+		win->dirtyLocator = false;
 		mouseOverRegion = locate(cursorPosition);
 		dirtyCursor = false;
-		dirtyLayout = true;
+		win->dirtyUI= true;
 	}
 	if (updateElapsed > UPDATE_LOCATOR_INTERVAL_SEC) {
-		if (dirtyCursorLocator) {
-			cursorLocator.reset(screenSize);
-			rootNode.updateCursor(&cursorLocator);
-			dirtyCursorLocator = false;
+		if (win->dirtyLocator) {
+			rootNode.updateCursor(win->resetLocator());
+			win->dirtyLocator = false;
 			mouseOverRegion = locate(cursorPosition);
 			dirtyCursor = false;
 		}
 		lastUpdateTime = endTime;
 	}
 	if (cursorElapsed >= UPDATE_CURSOR_INTERVAL_SEC) { //Dont try to animate faster than 60 fps.
-		if (dirtyCursor && !dirtyCursorLocator) {
+		if (dirtyCursor && !win->dirtyLocator) {
 			mouseOverRegion = locate(cursorPosition);
 			dirtyCursor = false;
 		}
@@ -792,23 +944,23 @@ void AlloyContext::update(Composite& rootNode) {
 	if (animateElapsed >= ANIMATE_INTERVAL_SEC) { //Dont try to animate faster than 60 fps.
 		lastAnimateTime = endTime;
 		if (animator.step(animateElapsed)) {
-			dirtyLayout = true;
+			win->dirtyUI= true;
 			dirtyUI = true;
 		}
 	}
-	if (dirtyLayout) {
+	if (win->dirtyUI) {
 		rootNode.pack(this);
 		animator.firePostEvents();
-		dirtyCursorLocator = true;
-		dirtyLayout = false;
+		win->dirtyLocator = true;
+		win->dirtyUI = false;
 	}
 
 }
-void AlloyContext::makeCurrent() {
-	glfwMakeContextCurrent(window);
-}
+
 void AlloyContext::forceDestroy() {
-	window = nullptr;
+	for (auto win : windows) {
+		win->handle = nullptr;
+	}
 }
 
 void AlloyContext::setCursor(const Cursor* cursor) {
@@ -830,13 +982,29 @@ const std::mutex& AlloyContext::getLock() const {
 	return glLock;
 }
 box2px AlloyContext::getViewport() const {
-	return box2px(pixel2(0.0f, 0.0f), pixel2(viewSize));
+	return box2px(pixel2(0.0f, 0.0f),
+			pixel2(getCurrentWindow()->getFrameBufferSize()));
 }
-int AlloyContext::getScreenWidth() {
-	return screenSize.x;
+NVGcontext* AlloyContext::getNVG() const {
+	return getCurrentWindow()->nvg;
 }
-int AlloyContext::getScreenHeight() {
-	return screenSize.y;
+int AlloyContext::getScreenWidth() const {
+	return getCurrentWindow()->getScreenSize().x;
+}
+int2 AlloyContext::getScreenSize() const {
+	return getCurrentWindow()->getScreenSize();
+}
+int AlloyContext::getScreenHeight() const {
+	return getCurrentWindow()->getScreenSize().y;
+}
+WindowPtr AlloyContext::getCurrentWindow() const {
+	auto ptr = glfwGetCurrentContext();
+	if (ptr != nullptr) {
+		return windowMap.at(ptr);
+	} else {
+		throw std::runtime_error("No current window available.");
+		return WindowPtr();
+	}
 }
 pixel2 AlloyContext::getRelativeCursorDownPosition() const {
 	return cursorDownPosition;
@@ -846,22 +1014,9 @@ bool AlloyContext::hasDeferredTasks() const {
 }
 
 AlloyContext::~AlloyContext() {
-	if (window) {
-		glfwMakeContextCurrent(window);
-		if (vaoImageOnScreen.vao) {
-			glDeleteVertexArrays(1, &vaoImageOnScreen.vao);
-		}
-		if (vaoImageOnScreen.uvBuffer) {
-			glDeleteBuffers(1, &vaoImageOnScreen.uvBuffer);
-		}
-		if (vaoImageOnScreen.positionBuffer) {
-			glDeleteBuffers(1, &vaoImageOnScreen.positionBuffer);
-		}
-		nvgDeleteGL3(nvgContext);
-		glfwDestroyWindow(window);
-		window = nullptr;
-		glfwTerminate();
-	}
+	windows.clear();
+	windowMap.clear();
+	glfwTerminate();
 }
 }
 

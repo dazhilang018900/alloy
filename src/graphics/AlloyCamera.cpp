@@ -550,7 +550,7 @@ bool Camera::onEventHandler(AlloyContext* context, const InputEvent& event) {
 			if (activeRegion != nullptr
 					&& !context->isMouseOver(activeRegion, includeParentRegion))
 				return false;
-			handleKeyEvent(context->window, event.key, event.action);
+			handleKeyEvent(context->getCurrentWindow()->handle, event.key, event.action);
 			return false;
 		default:
 			return false;

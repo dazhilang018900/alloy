@@ -43,7 +43,7 @@ void ListEntry::setLabel(const std::string& label) {
 	float th = entryHeight - 2 * TextField::PADDING;
 	fontSize = UnitPX(th);
 	AlloyContext* context = AlloyApplicationContext().get();
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	nvgFontSize(nvg, th);
 	nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_LEFT);
 	nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
@@ -64,7 +64,7 @@ void ListEntry::setIcon(int icon) {
 	float th = entryHeight - 2 * TextField::PADDING;
 	fontSize = UnitPX(th);
 	AlloyContext* context = AlloyApplicationContext().get();
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	nvgFontSize(nvg, th);
 	nvgTextAlign(nvg, NVG_ALIGN_MIDDLE | NVG_ALIGN_LEFT);
 	nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
@@ -326,7 +326,7 @@ void FileField::draw(AlloyContext* context) {
 	Region::draw(context);
 	float ascender, descender, lineh;
 	std::vector<NVGglyphPosition> positions(value.size());
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	float x = bounds.position.x;
 	float y = bounds.position.y;
@@ -1289,7 +1289,7 @@ void FileDialog::setVisible(bool v) {
 	AdjustableComposite::setVisible(v);
 }
 void FileDialog::draw(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = this->getBounds();
 	bool isOver = false;
 	if (context->isMouseOver(this, false)) {

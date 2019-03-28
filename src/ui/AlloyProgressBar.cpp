@@ -12,7 +12,7 @@ namespace aly {
 
 void ProgressBar::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	float x = bounds.position.x;
 
 	float y = bounds.position.y;
@@ -107,7 +107,7 @@ ProgressBar::ProgressBar(const std::string& name, const AUnit2D& pt,
 
 void ProgressCircle::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
 	float x = bounds.position.x;

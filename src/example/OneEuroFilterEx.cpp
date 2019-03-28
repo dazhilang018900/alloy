@@ -73,7 +73,7 @@ bool OneEuroFilterEx::init(Composite& rootNode) {
 	return true;
 }
 void OneEuroFilterEx::drawCursor(AlloyContext* context, const box2px& bounds) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 
 	const float w = 120;
 	const float h = 120;

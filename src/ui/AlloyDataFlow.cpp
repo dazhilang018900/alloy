@@ -190,7 +190,7 @@ DataFlow::~DataFlow() {
 		forceSim->stop();
 }
 void NodeIcon::draw(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	pixel lineWidth = 0;
 	nvgStrokeWidth(nvg, lineWidth);
@@ -331,7 +331,7 @@ float2 Port::getLocation() const {
 }
 void View::setup() {
 	setOrientation(Orientation::Horizontal, pixel2(0, 0));
-	NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
+	NVGcontext* nvg = AlloyApplicationContext()->getNVG();
 	nvgFontSize(nvg, fontSize);
 	nvgFontFaceId(nvg,
 			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
@@ -460,7 +460,7 @@ void Node::setLabel(const std::string& label, bool notify) {
 }
 void Group::setup() {
 	setOrientation(Orientation::Horizontal, pixel2(0, 0));
-	NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
+	NVGcontext* nvg = AlloyApplicationContext()->getNVG();
 	nvgFontSize(nvg, fontSize);
 	nvgFontFaceId(nvg,
 			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
@@ -563,7 +563,7 @@ void Group::setup() {
 void Data::setup() {
 
 	setOrientation(Orientation::Horizontal, pixel2(0, 0));
-	NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
+	NVGcontext* nvg = AlloyApplicationContext()->getNVG();
 	nvgFontSize(nvg, fontSize);
 	nvgFontFaceId(nvg,
 			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
@@ -676,7 +676,7 @@ void Data::setup() {
 }
 void Compute::setup() {
 	setOrientation(Orientation::Horizontal, pixel2(0, 0));
-	NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
+	NVGcontext* nvg = AlloyApplicationContext()->getNVG();
 	nvgFontSize(nvg, fontSize);
 	nvgFontFaceId(nvg,
 			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
@@ -842,7 +842,7 @@ void Source::setup() {
 	iconContainer->add(outputPort);
 	iconContainer->add(parentPort);
 	iconContainer->add(childPort);
-	NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
+	NVGcontext* nvg = AlloyApplicationContext()->getNVG();
 	nvgFontSize(nvg, fontSize);
 	nvgFontFaceId(nvg,
 			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
@@ -891,7 +891,7 @@ void Destination::setup() {
 	inputPort->setParent(this);
 	iconContainer->add(nodeIcon);
 	iconContainer->add(inputPort);
-	NVGcontext* nvg = AlloyApplicationContext()->nvgContext;
+	NVGcontext* nvg = AlloyApplicationContext()->getNVG();
 	nvgFontSize(nvg, fontSize);
 	nvgFontFaceId(nvg,
 			AlloyApplicationContext()->getFont(FontType::Bold)->handle);
@@ -1957,7 +1957,7 @@ void Connection::draw(AlloyContext* context, DataFlow* flow) {
 	if (path.size() == 0)
 		return;
 	const float scale = flow->getScale();
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	Color lineColor;
 	if (selected) {
 		lineColor = context->theme.FOCUS;
@@ -2408,7 +2408,7 @@ void ChildPort::setup() {
 }
 
 void Port::draw(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	nvgFillColor(nvg, context->theme.LIGHT);
 	nvgBeginPath(nvg);
@@ -2450,7 +2450,7 @@ void InputPort::draw(AlloyContext* context) {
 	if (!isVisible())
 		return;
 
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
@@ -2501,7 +2501,7 @@ void InputPort::draw(AlloyContext* context) {
 	}
 }
 void ParentPort::draw(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
@@ -2543,7 +2543,7 @@ void ParentPort::draw(AlloyContext* context) {
 void OutputPort::draw(AlloyContext* context) {
 	if (!isVisible())
 		return;
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
@@ -2601,7 +2601,7 @@ void OutputPort::draw(AlloyContext* context) {
 }
 
 void ChildPort::draw(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
@@ -3006,7 +3006,7 @@ pixel2 Node::getDrawOffset() const {
 			+ parentFlow->getScale() * forceItem->location - centerOffset;
 }
 void Node::draw(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	const float scale = getParentFlow()->getScale();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
@@ -3233,7 +3233,7 @@ bool Group::remove(Relationship* con) {
 }
 
 void Source::draw(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	const float scale = getParentFlow()->getScale();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
@@ -3262,7 +3262,7 @@ void Source::draw(AlloyContext* context) {
 	Composite::draw(context);
 }
 void Destination::draw(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	const float scale = getParentFlow()->getScale();
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
@@ -3330,7 +3330,7 @@ void Relationship::update() {
 void Relationship::draw(AlloyContext* context, float scale) {
 	pixel2 subjectPt = object->getCenter();
 	pixel2 objectPt = subject->getCenter();
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 
 	pixel2 vec = subjectPt - objectPt;
 	float len = length(vec);
@@ -3383,7 +3383,7 @@ void Relationship::draw(AlloyContext* context, float scale) {
 void Relationship::drawText(AlloyContext* context, float scale) {
 	pixel2 scenter = object->getCenter();
 	pixel2 ocenter = subject->getCenter();
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	float r = subject->getRadius();
 	float len = distance(scenter, ocenter);
 	if (len > 2 * r) {
@@ -3437,7 +3437,7 @@ void DataFlow::draw(AlloyContext* context) {
 			}
 		}
 	}
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 
 	box2px bounds = getBounds();
 	float w = bounds.dimensions.x;
@@ -3521,7 +3521,7 @@ void DataFlow::draw(AlloyContext* context) {
 		pixel2 cursor = context->cursorPosition;
 		if (getBounds().contains(cursor)) {
 			float2 offset = getDrawOffset();
-			NVGcontext* nvg = context->nvgContext;
+			NVGcontext* nvg = context->getNVG();
 			nvgStrokeColor(nvg, context->theme.LIGHTEST);
 			box2px bounds = connectingPort->getBounds();
 			pixel2 start;

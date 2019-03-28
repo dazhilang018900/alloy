@@ -144,7 +144,7 @@ namespace aly {
 		Application::addListener(this);
 	}
 	void TimelineSlider::drawLabel(const std::string& label, pixel2 pos, const box2px& bounds, bool clampLeft, bool clampRight, AlloyContext* context) {
-		NVGcontext* nvg = context->nvgContext;
+		NVGcontext* nvg = context->getNVG();
 		float th = 0.75f*handleSize;
 		nvgTextAlign(nvg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
 		nvgFontFaceId(nvg, context->getFontHandle(FontType::Normal));
@@ -176,7 +176,7 @@ namespace aly {
 		drawText(nvg, pixel2(x + 1, y), label, FontStyle::Outline, context->theme.LIGHT, *backgroundColor);
 	}
 	void TimelineSlider::draw(AlloyContext* context) {
-		NVGcontext* nvg = context->nvgContext;
+		NVGcontext* nvg = context->getNVG();
 		box2px bounds = getBounds();
 		float w = bounds.dimensions.x;
 		float h = bounds.dimensions.y;

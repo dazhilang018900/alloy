@@ -256,7 +256,7 @@ Region* Region::locate(const pixel2& cursor) {
 }
 void Region::pack(AlloyContext* context) {
 	if (parent == nullptr) {
-		pack(pixel2(0, 0), pixel2(context->screenDimensions()), context->dpmm,
+		pack(pixel2(0, 0), pixel2(context->getScreenDimensions()), context->dpmm,
 				context->pixelRatio);
 	} else {
 		box2px bounds = parent->getBounds(false);
@@ -268,7 +268,7 @@ void Region::pack() {
 	pack(AlloyApplicationContext().get());
 }
 void Region::draw(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,context->pixelRatio);
 	if (backgroundColor->a > 0) {
@@ -317,7 +317,7 @@ void Region::drawBoundsLabel(AlloyContext* context, const std::string& name,
 			|| bounds.dimensions.x * bounds.dimensions.y == 0) {
 		return;
 	}
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	pushScissor(nvg, bounds.position.x, bounds.position.y, bounds.dimensions.x,
 			bounds.dimensions.y);
 	bool hover = context->isMouseOver(this);

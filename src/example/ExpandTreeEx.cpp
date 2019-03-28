@@ -31,7 +31,7 @@ void ExpandTreeEx::addLeaf(TreeItem* item, const FileDescription& fd) {
 				LeafItemPtr(
 						new LeafItem(
 								[this,fontSize,fd](AlloyContext* context,const box2px& bounds) {
-									NVGcontext* nvg=context->nvgContext;
+									NVGcontext* nvg=context->getNVG();
 									float yoff=2+bounds.position.y;
 									nvgFontSize(nvg,fontSize);
 									nvgFontFaceId(nvg,context->getFontHandle(FontType::Normal));

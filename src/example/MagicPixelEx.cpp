@@ -165,7 +165,7 @@ bool MagicPixelEx::init(Composite& rootNode) {
 			overlayGlyph->set(contour->overlay, context);
 			lastSimTime = currentTime;
 		}
-		NVGcontext* nvg = context->nvgContext;
+		NVGcontext* nvg = context->getNVG();
 		nvgLineCap(nvg, NVG_SQUARE);
 		nvgLineJoin(nvg,NVG_BEVEL);
 		float scale = bounds.dimensions.x / (float)img.width;

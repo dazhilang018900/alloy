@@ -108,7 +108,7 @@ Manifold2D::Manifold2D(bool onScreen,
 }
 Manifold2D::~Manifold2D() {
 	if (vao != 0) {
-		context->begin(onScreen);
+		context->begin();
 		if (glIsBuffer(vertexBuffer) == GL_TRUE)
 			glDeleteBuffers(1, &vertexBuffer);
 		if (glIsBuffer(particleBuffer) == GL_TRUE)
@@ -124,7 +124,7 @@ void Manifold2D::draw() {
 	if (dirty) {
 		update();
 	}
-	context->begin(onScreen);
+	context->begin();
 	if (vao > 0) {
 		glBindVertexArray(vao);
 		if (vertexBuffer > 0) {
@@ -152,7 +152,7 @@ void Manifold2D::draw() {
 	context->end();
 }
 void Manifold2D::update() {
-	context->begin(onScreen);
+	context->begin();
 	if (vao == 0)
 		glGenVertexArrays(1, &vao);
 	if (vertexes.size() > 0) {

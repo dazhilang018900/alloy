@@ -74,7 +74,7 @@ box2px SelectionBox::getBounds(bool includeBounds) const {
 void SelectionBox::draw(AlloyContext* context) {
 
 	context->setDragObject(this);
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	box2px sbounds = bounds;
 	sbounds.position.x += TextField::PADDING;
@@ -562,7 +562,7 @@ void Selection::draw(AlloyContext* context) {
 	//}
 	Composite::draw(context);
 	box2px bounds = getBounds();
-	NVGcontext* nvg=context->nvgContext;
+	NVGcontext* nvg=context->getNVG();
 	const int PAD = 1.0f;
 	if (isObjectFocused()) {
 		nvgLineJoin(nvg, NVG_MITER);

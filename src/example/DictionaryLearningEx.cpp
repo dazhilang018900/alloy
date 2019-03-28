@@ -93,7 +93,7 @@ bool DictionaryLearningEx::init(Composite& rootNode) {
 					CoordPercent(1.0f, 1.0f),
 					[this](AlloyContext* context, const box2px& bounds) {
 						/*
-						 NVGcontext* nvg = context->nvgContext;
+						 NVGcontext* nvg = context->getNVG();
 						 nvgLineCap(nvg, NVG_ROUND);
 						 nvgLineJoin(nvg,NVG_ROUND);
 

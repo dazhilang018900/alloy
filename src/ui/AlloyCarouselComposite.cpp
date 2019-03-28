@@ -48,7 +48,7 @@ void CarouselComposite::updateCursor(CursorLocator* cursorLocator) {
 }
 
 void CarouselComposite::draw(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;

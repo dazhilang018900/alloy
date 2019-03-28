@@ -46,9 +46,10 @@
 #endif
 namespace aly{
 class AlloyContext;
-
+class Window;
 struct InputEvent {
 		InputType type = InputType::Unspecified;
+		aly::Window* window=nullptr;
 		pixel2 cursor = pixel2(-1, -1);
 		pixel2 scroll = pixel2(0, 0);
 		uint32_t codepoint = 0;

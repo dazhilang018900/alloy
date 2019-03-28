@@ -78,7 +78,7 @@ namespace aly {
 	}
 	void ExpandTree::drawDebug(AlloyContext* context) {
 		if (selectedItem) {
-			NVGcontext* nvg = context->nvgContext;
+			NVGcontext* nvg = context->getNVG();
 			nvgStrokeWidth(nvg, 1.0f);
 			nvgStrokeColor(nvg, Color(220, 64, 64));
 			nvgBeginPath(nvg);
@@ -153,7 +153,7 @@ namespace aly {
 		return bounds;
 	}
 	box2px TreeItem::update(AlloyContext* context, const pixel2& offset) {
-		NVGcontext* nvg = context->nvgContext;
+		NVGcontext* nvg = context->getNVG();
 		nvgTextAlign(nvg, NVG_ALIGN_LEFT | NVG_ALIGN_TOP);
 		nvgFontSize(nvg, fontSize);
 		nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
@@ -207,7 +207,7 @@ namespace aly {
 	void TreeItem::draw(ExpandTree* tree, AlloyContext* context,
 		const pixel2& offset) {
 		box2px bounds = getBounds();
-		NVGcontext* nvg = context->nvgContext;
+		NVGcontext* nvg = context->getNVG();
 		nvgFontFaceId(nvg, context->getFontHandle(FontType::Icon));
 		float spaceWidth = fontSize + PADDING * 2;
 		float iconWidth = 0;

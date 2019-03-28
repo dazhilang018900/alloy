@@ -35,16 +35,12 @@ protected:
 	GLuint mProgramHandle;
 	bool shaderEnabled = false;
 	std::shared_ptr<AlloyContext> context;
-	bool onScreen=true;
 	void enableCheck() {
 		if (!shaderEnabled)
 			throw std::runtime_error(
 					"Could not set shader parameter because shader is not enabled. Call shader.begin() first.");
 	}
 public:
-	bool isOnScreenRender() const {
-		return onScreen;
-	}
 	std::shared_ptr<AlloyContext>& getContext() {
 		return context;
 	}

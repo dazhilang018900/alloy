@@ -99,7 +99,7 @@ namespace aly {
 			textLabel->textColor = MakeColor(
 				AlloyApplicationContext()->theme.LIGHTER);
 		}
-		NVGcontext* nvg = context->nvgContext;
+		NVGcontext* nvg = context->getNVG();
 		if (isScrollEnabled()) {
 			pushScissor(nvg, getCursorBounds());
 		}
@@ -125,9 +125,9 @@ namespace aly {
 		}
 	}
 	void TabBar::draw(AlloyContext* context) {
-		pushScissor(context->nvgContext, getCursorBounds());
+		pushScissor(context->getNVG(), getCursorBounds());
 		Composite::draw(context);
-		popScissor(context->nvgContext);
+		popScissor(context->getNVG());
 
 	}
 	void TabBar::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm, double pixelRatio, bool clamp) {
@@ -306,7 +306,7 @@ namespace aly {
 		DrawPtr fadeRegion = DrawPtr(new Draw("Fade Region", CoordPerPX(1.0, 0.0, -2 * TAB_HEIGHT, 0.0f),
 			CoordPX(2 * TAB_HEIGHT, TAB_HEIGHT)));
 		fadeRegion->onDraw = [this](AlloyContext* context, const box2px& bounds) {
-			NVGcontext* nvg = context->nvgContext;
+			NVGcontext* nvg = context->getNVG();
 			NVGpaint hightlightPaint = nvgLinearGradient(nvg, bounds.position.x, bounds.position.y,
 				bounds.position.x + bounds.dimensions.x, bounds.position.y,
 				backgroundColor->toSemiTransparent(0.0f), *backgroundColor);

@@ -679,10 +679,10 @@ TablePane::TablePane(const std::string& name, const AUnit2D& pos,
 	Application::addListener(this);
 }
 void TablePane::draw(AlloyContext* context) {
-	pushScissor(context->nvgContext, getCursorBounds());
+	pushScissor(context->getNVG(), getCursorBounds());
 	Composite::draw(context);
-	popScissor(context->nvgContext);
-	NVGcontext* nvg = context->nvgContext;
+	popScissor(context->getNVG());
+	NVGcontext* nvg = context->getNVG();
 	if (dragBox.dimensions.x > 0 && dragBox.dimensions.y > 0) {
 		nvgBeginPath(nvg);
 		nvgRect(nvg, dragBox.position.x, dragBox.position.y,

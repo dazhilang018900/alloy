@@ -207,7 +207,7 @@ bool FluidSimulationEx::init(Composite& rootNode) {
 									overlayGlyph->set(contour->overlay, context);
 									lastSimTime = currentTime;
 								}
-								NVGcontext* nvg = context->nvgContext;
+								NVGcontext* nvg = context->getNVG();
 								nvgLineCap(nvg, NVG_ROUND);
 								nvgLineJoin(nvg,NVG_ROUND);
 								const Image1f& img=simulation->getPressure();

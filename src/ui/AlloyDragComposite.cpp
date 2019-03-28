@@ -58,7 +58,7 @@ const std::vector<DragSlot>& DragComposite::getSlots() const {
 	return sourceSlots;
 }
 void DragComposite::draw(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	float w = bounds.dimensions.x;
 	float h = bounds.dimensions.y;
@@ -358,7 +358,7 @@ void DragComposite::draw(AlloyContext* context) {
 	}
 }
 void DragSlot::draw(aly::AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = this->bounds;
 	if (region)
 		bounds.position += region->getDrawOffset();
@@ -934,7 +934,7 @@ DragBinTab::DragBinTab(const std::string& name, const AUnit2D& pos,
 }
 void DragBinTab::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px clip = getCursorBounds();
 	if (orientation == Orientation::Vertical) {
 		clip.intersect(

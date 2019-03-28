@@ -254,7 +254,7 @@ namespace aly {
 		return dragAccept;
 	}
 	void DragableEdgeComposite::draw(AlloyContext* context) {
-		NVGcontext* nvg = context->nvgContext;
+		NVGcontext* nvg = context->getNVG();
 		box2px bounds = this->getBounds();
 		bool isOver = false;
 		if (context->isMouseOver(this, false)) {
@@ -411,7 +411,7 @@ namespace aly {
 		}
 	}
 	void ColorWheel::draw(AlloyContext* context) {
-		NVGcontext* nvg = context->nvgContext;
+		NVGcontext* nvg = context->getNVG();
 		box2px bounds = getBounds();
 
 		nvgBeginPath(nvg);
@@ -588,7 +588,7 @@ namespace aly {
 		if(isOver&&context->getCursor()==nullptr){
 			context->setCursor(&aly::Cursor::Position);
 		}
-		NVGcontext* nvg=context->nvgContext;
+		NVGcontext* nvg=context->getNVG();
 		const int PAD = 1.0f;
 		box2px bounds = getBounds();
 		if (isObjectFocused()) {

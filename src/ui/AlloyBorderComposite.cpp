@@ -108,7 +108,7 @@ void BorderComposite::draw(AlloyContext* context) {
 			break;
 		}
 	}
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);

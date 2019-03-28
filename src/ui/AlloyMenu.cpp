@@ -65,7 +65,7 @@ box2px Menu::getBounds(bool includeBounds) const {
 }
 void Menu::draw(AlloyContext* context) {
 	context->setDragObject(this);
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	box2px sbounds = bounds;
 	sbounds.position.x += TextField::PADDING;
@@ -531,7 +531,7 @@ MenuHeader::MenuHeader(const std::shared_ptr<Menu>& menu,
 void MenuHeader::draw(AlloyContext* context) {
 	bool hover = context->isMouseOver(this) || menu->isVisible();
 	bool down = context->isMouseOver(this) && context->isLeftMouseButtonDown();
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	menu->position = CoordPX(bounds.position.x,
 			bounds.position.y + bounds.dimensions.y);
@@ -702,7 +702,7 @@ bool MenuPopup::onEventHandler(AlloyContext* context, const InputEvent& event) {
 		if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
 			if (context->isMouseOver(parent, true)) {
 				pixel2 cursor=context->getCursorPosition();
-				pixel2 rbound=float2(context->screenDimensions())- pixel2((float) menuWidth, 0.0f);
+				pixel2 rbound=float2(context->getScreenDimensions())- pixel2((float) menuWidth, 0.0f);
 				this->rightSide=(cursor.x<rbound.x-menuWidth);
 				this->position = CoordPX(
 						aly::min(cursor,rbound)

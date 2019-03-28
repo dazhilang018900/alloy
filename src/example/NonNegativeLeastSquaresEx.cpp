@@ -72,7 +72,7 @@ bool NonNegativeLeastSquaresEx::init(Composite& rootNode) {
 	draw->setAspectRatio(1.0f);
 	error=0;
 	draw->onDraw = [this](const AlloyContext* context, const box2px& bounds) {
-		NVGcontext* nvg = context->nvgContext;
+		NVGcontext* nvg = context->getNVG();
 		nvgTextAlign(nvg,NVG_ALIGN_TOP|NVG_ALIGN_LEFT);
 		nvgFontFaceId(nvg,context->getFontHandle(FontType::Normal));
 		nvgFontSize(nvg,20);

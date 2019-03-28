@@ -36,7 +36,7 @@ void ActiveManifold2DEx::createTextLevelSet(aly::Image1f& distField,
 		float textSize, float maxDistance) {
 	GLFrameBuffer renderBuffer;
 	//Render text to image
-	NVGcontext* nvg = getContext()->nvgContext;
+	NVGcontext* nvg = getContext()->getNVG();
 	renderBuffer.initialize(w, h);
 	renderBuffer.begin(RGBAf(1.0f, 1.0f, 1.0f, 1.0f));
 	nvgBeginFrame(nvg, w, h, 1.0f);
@@ -290,7 +290,7 @@ bool ActiveManifold2DEx::init(Composite& rootNode) {
 									contour = simulation->getManifold();
 
 								}
-								NVGcontext* nvg = context->nvgContext;
+								NVGcontext* nvg = context->getNVG();
 								nvgLineCap(nvg, NVG_ROUND);
 								nvgLineJoin(nvg,NVG_ROUND);
 								float scale = bounds.dimensions.x / (float)img.width;

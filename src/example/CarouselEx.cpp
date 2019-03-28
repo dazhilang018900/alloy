@@ -43,7 +43,7 @@ bool CarouselEx::init(Composite& rootNode) {
 					} else if(hover) {
 						context->setCursor(&Cursor::Hand);
 					}
-					NVGcontext* nvg = context->nvgContext;
+					NVGcontext* nvg = context->getNVG();
 					nvgBeginPath(nvg);
 					nvgRoundedRect(nvg, bounds.position.x + 1, bounds.position.y + 1,
 							bounds.dimensions.x - 4, bounds.dimensions.y - 4,context->theme.CORNER_RADIUS);
@@ -83,7 +83,7 @@ bool CarouselEx::init(Composite& rootNode) {
 					} else if(hover) {
 						context->setCursor(&Cursor::Hand);
 					}
-					NVGcontext* nvg = context->nvgContext;
+					NVGcontext* nvg = context->getNVG();
 					nvgBeginPath(nvg);
 					nvgRoundedRect(nvg, bounds.position.x + 2, bounds.position.y + 2,
 							bounds.dimensions.x - 4-Composite::scrollBarSize, bounds.dimensions.y - 4,context->theme.CORNER_RADIUS);
@@ -124,7 +124,7 @@ bool CarouselEx::init(Composite& rootNode) {
 							CoordPerPX(1.0f, 0.0f, 0.0f, 100.0f)));
 			region->onDraw =
 					[=,n,m](AlloyContext* context,const box2px& bounds) {
-						NVGcontext* nvg = context->nvgContext;
+						NVGcontext* nvg = context->getNVG();
 						bool hover=context->isMouseOver(region.get(),false);
 						bool down=context->isMouseDown(region.get(),false);
 						if(down) {

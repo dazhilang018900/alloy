@@ -34,7 +34,7 @@ bool DistanceFieldEx::init(Composite& rootNode) {
 	int h = getContext()->getScreenHeight()/2;
 	GLFrameBuffer renderBuffer;
 	//Render text to image
-	NVGcontext* nvg = getContext()->nvgContext;
+	NVGcontext* nvg = getContext()->getNVG();
 	renderBuffer.initialize(w, h);
 	renderBuffer.begin(RGBAf(1.0f, 1.0f, 1.0f, 1.0f));
 		nvgBeginFrame(nvg, w, h, 1.0f);
@@ -76,7 +76,7 @@ bool DistanceFieldEx::init(Composite& rootNode) {
 		return false;
 	};
 	draw->onDraw = [this](const AlloyContext* context, const box2px& bounds) {
-		NVGcontext* nvg = context->nvgContext;
+		NVGcontext* nvg = context->getNVG();
 		nvgStrokeWidth(nvg, 3.0f);
 		nvgStrokeColor(nvg, Color(128, 128, 255));
 		nvgLineCap(nvg, NVG_ROUND);

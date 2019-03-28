@@ -53,7 +53,7 @@ bool SplineEx::init(Composite& rootNode) {
 	draw->setAspectRule(AspectRule::FixedHeight);
 	draw->setAspectRatio(1.0f);
 	draw->onDraw = [this](const AlloyContext* context, const box2px& bounds) {
-		NVGcontext* nvg = context->nvgContext;
+		NVGcontext* nvg = context->getNVG();
 		nvgStrokeWidth(nvg, 3.0f);
 		nvgStrokeColor(nvg, Color(64, 128, 255));
 		float2 pt = curvePoints[0];

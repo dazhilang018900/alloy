@@ -49,7 +49,7 @@ void ListBox::pack(const pixel2& pos, const pixel2& dims, const double2& dpmm,
 	AlloyContext* context = AlloyApplicationContext().get();
 	Region::pack(pos, dims, dpmm, pixelRatio, clamp);
 	pixel2 maxDim = pixel2(this->getBoundsDimensionsX(), 0.0f);
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 
 	for (std::shared_ptr<ListEntry> entry : listEntries) {
@@ -137,7 +137,7 @@ bool ListEntry::isSelected() {
 }
 void ListEntry::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	bool hover = context->isMouseOver(this);
 	bool down = context->isMouseDown(this) && context->isLeftMouseButtonDown();
 	bool selected = this->selected || dialog->isDraggingOver(this);
@@ -575,10 +575,10 @@ void ListBox::draw(AlloyContext* context) {
 		dragBox.dimensions = endPt - stPt;
 		dragBox.intersect(bounds);
 	}
-	pushScissor(context->nvgContext, getCursorBounds());
+	pushScissor(context->getNVG(), getCursorBounds());
 	Composite::draw(context);
-	popScissor(context->nvgContext);
-	NVGcontext* nvg = context->nvgContext;
+	popScissor(context->getNVG());
+	NVGcontext* nvg = context->getNVG();
 	const int PAD = 1.0f;
 	if (isObjectFocused()) {
 		nvgLineJoin(nvg, NVG_MITER);
@@ -615,7 +615,7 @@ void ListBox::draw(AlloyContext* context) {
 
 void NumberListBox::draw(AlloyContext* context) {
 	Composite::draw(context);
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	const int PAD = 1.0f;
 	box2px bounds = getBounds();
 	if (isObjectFocused()) {
@@ -668,7 +668,7 @@ void NumberEntry::setValue(const Number& number) {
 }
 void NumberEntry::draw(AlloyContext* context) {
 	box2px bounds = getBounds();
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	bool hover = context->isMouseOver(this);
 	bool down = context->isMouseDown(this) && context->isLeftMouseButtonDown();
 	bool selected = this->selected || dialog->isDraggingOver(this);

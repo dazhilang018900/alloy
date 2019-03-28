@@ -48,7 +48,7 @@ namespace aly {
 	void GraphPane::draw(AlloyContext* context) {
 		Region::draw(context);
 		box2px rbounds = getBounds();
-		NVGcontext* nvg = context->nvgContext;
+		NVGcontext* nvg = context->getNVG();
 		box2px gbounds = rbounds;
 		nvgLineCap(nvg, NVG_SQUARE);
 		const float LARGE_TEXT = 18.0f;
@@ -124,7 +124,7 @@ namespace aly {
 			const std::vector<float2>& points = curve->points;
 			if (points.size() > 1 && graphBounds.dimensions.x > 0.0f
 				&& graphBounds.dimensions.y > 0.0f) {
-				NVGcontext* nvg = context->nvgContext;
+				NVGcontext* nvg = context->getNVG();
 				float2 last = points[0];
 				last = aly::clamp((last - graphBounds.position) / graphBounds.dimensions,0.0f,1.0f);
 				last.y = 1.0f - last.y;

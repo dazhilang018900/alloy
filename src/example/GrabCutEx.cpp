@@ -192,7 +192,7 @@ bool GrabCutEx::init(Composite& rootNode) {
 	DrawPtr drawRegion =
 			MakeShared<Draw>("Draw", CoordPX(0, 0), CoordPercent(1.0f, 1.0f),
 					[this,dims](AlloyContext* context, const box2px& bounds) {
-						NVGcontext* nvg=context->nvgContext;
+						NVGcontext* nvg=context->getNVG();
 						nvgStrokeWidth(nvg,3.0f);
 						nvgStrokeColor(nvg,Color(100,100,200));
 						nvgBeginPath(nvg);

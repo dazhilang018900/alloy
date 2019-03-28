@@ -71,7 +71,7 @@ SliderTrack::SliderTrack(const std::string& name, Orientation orient,
 }
 
 void SliderTrack::draw(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 	float ax, ay, bx, by;
 	if (orientation == Orientation::Horizontal) {
@@ -142,7 +142,7 @@ void ScrollHandle::setSlim(bool s) {
 }
 
 void SliderHandle::draw(AlloyContext* context) {
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
 
 	const float w = bounds.dimensions.x;
@@ -262,7 +262,7 @@ void ScrollHandle::draw(AlloyContext* context) {
 	bool hover=slim&&(context->isMouseOver(this,false)||context->isMouseOver(track,false)||context->isMouseDrag(this));
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,
 			context->pixelRatio);
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	if (slim) {
 		if (orientation == Orientation::Vertical) {
 			nvgBeginPath(nvg);
@@ -323,7 +323,7 @@ void ScrollTrack::draw(AlloyContext* context) {
 	float h = bounds.dimensions.y;
 	bool hover=slim&&(handle!=nullptr&&handle->isVisible())&&(context->isMouseOver(this,false)||context->isMouseOver(handle,false)||context->isMouseDrag(handle));
 	pixel lineWidth = borderWidth.toPixels(bounds.dimensions.y, context->dpmm.y,context->pixelRatio);
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	if (slim) {
 		if (orientation == Orientation::Vertical) {
 			nvgBeginPath(nvg);
@@ -604,7 +604,7 @@ void Slider::draw(AlloyContext* context) {
 
 	Composite::draw(context);
 	box2px bounds = getBounds();
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	const int PAD = 1.0f;
 	if (isObjectFocused()) {
 		nvgLineJoin(nvg, NVG_MITER);
@@ -627,7 +627,7 @@ void Slider::draw(AlloyContext* context) {
 void RangeSlider::draw(AlloyContext* context) {
 	Composite::draw(context);
 	box2px bounds = getBounds();
-	NVGcontext* nvg = context->nvgContext;
+	NVGcontext* nvg = context->getNVG();
 	const int PAD = 1.0f;
 	if (isObjectFocused()) {
 		nvgLineJoin(nvg, NVG_MITER);

@@ -101,7 +101,7 @@ bool MeshTextureMapEx::init(Composite& rootNode) {
 	Application::addListener(resizeableRegion.get());
 	ImageGlyphPtr imageGlyph = AlloyApplicationContext()->createImageGlyph(img, false);
 	DrawPtr drawContour = DrawPtr(new Draw("Contour Draw", CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f), [this](AlloyContext* context, const box2px& bounds) {
-		NVGcontext* nvg = context->nvgContext;
+		NVGcontext* nvg = context->getNVG();
 		const float minArea = 2.0f;
 		float scale = bounds.dimensions.x / (float)img.width;
 		Vector2f& uvs = mesh.textureMap;
