@@ -28,6 +28,7 @@ struct MenuContainer {
 	bool rightSide=true;
 	virtual ~MenuContainer(){}
 };
+class Menu;
 class MenuItem: public Composite {
 protected:
 	std::mutex showLock;
@@ -36,8 +37,10 @@ protected:
 	std::shared_ptr<MenuItem> currentVisible;
 	std::shared_ptr<TimerTask> showTimer;
 	std::string hint;
+	bool updatePosition=false;
 	const int MENU_DISPLAY_DELAY = 250;
 public:
+	friend Menu;
 	MenuItem* getSelectedItem();
 	MenuContainer* container = nullptr;
 	FontStyle fontStyle = FontStyle::Normal;

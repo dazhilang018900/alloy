@@ -48,7 +48,7 @@ bool MeshWireframeEx::init(Composite& rootNode) {
 	addListener(&camera);
 	//Add render component to root node so it is relatively positioned.
 	rootNode.add(renderRegion);
-	setOnResize([=](const int2& dims) {
+	setOnResize([=](aly::Window* win,const int2& dims) {
 		camera.setDirty(true);
 	});
 	wireframeShader.setFaceColor(Color(0.1f,0.1f,1.0f,0.5f));

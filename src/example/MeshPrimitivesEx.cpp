@@ -79,14 +79,14 @@ bool MeshPrimitivesEx::init(Composite& rootNode) {
 		camera.setDirty(true);
 	};
 	selection->setSelectedIndex(2);
-	setOnResize([=](const int2& dims) {
+	setOnResize([=](aly::Window* win,const int2& dims) {
 		camera.setDirty(true);
 	});
 	wireframeShader.setFaceColor(Color(1.0f, 1.0f, 1.0f, 0.0f));
 	wireframeShader.setEdgeColor(Color(1.0f, 0.8f, 0.1f, 1.0f));
 	wireframeShader.setLineWidth(2.0f);
 	wireframeShader.setSolid(false);
-	setOnResize([this](const int2& dims) {
+	setOnResize([this](aly::Window* win,const int2& dims) {
 		if(!getContext()->hasDeferredTasks()) {
 			getContext()->addDeferredTask([this]() {
 						int w=getContext()->getScreenWidth();

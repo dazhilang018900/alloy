@@ -36,7 +36,7 @@ bool ColorSpaceEx::init(Composite& rootNode) {
 	//Map object geometry into unit bounding box for draw.
 	//Add listener to respond to mouse manipulations
 	addListener(&camera);
-	setOnResize([this](const int2& dims) {
+	setOnResize([this](aly::Window* win,const int2& dims) {
 		camera.setDirty(true);
 	});
 	SelectionPtr selection = SelectionPtr(new Selection("Color Space", CoordPX(5, 5), CoordPX(200, 30), std::vector<std::string>{"RGB", "HSV", "XYZ", "CIELAB"}));

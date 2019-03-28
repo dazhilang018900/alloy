@@ -80,7 +80,7 @@ bool MultiActiveContour3DEx::init(Composite& rootNode) {
 	camera.setPose(MakeTransform(box3f(float3(0.0f), float3(D)), renderBBox));
 	//Add listener to respond to mouse manipulations
 	addListener(&camera);
-	setOnResize([this](const int2& dims) {
+	setOnResize([this](aly::Window* win,const int2& dims) {
 		if(!getContext()->hasDeferredTasks()) {
 			getContext()->addDeferredTask([this]() {
 						int w=getContext()->getScreenWidth();

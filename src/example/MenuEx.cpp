@@ -131,6 +131,7 @@ bool MenuEx::init(Composite& rootNode) {
 	menuBar->addMenu(actionMenu);
 	menuBar->addMenu(bigMenu);
 	menuBar->addMenu(helpMenu);
+
 	CompositePtr north = MakeComposite("North Composite", CoordPX(0, 0), CoordPercent(1.0, 1.0), Color(128, 16, 32), COLOR_NONE, UnitPX(0));
 	north->add(menuBar);
 	TextLabelPtr label;

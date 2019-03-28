@@ -106,7 +106,7 @@ bool Springls3DEx::init(Composite& rootNode) {
 	//Add listener to respond to mouse manipulations
 	addListener(&camera);
 	setOnResize(
-			[this](const int2& dims) {
+			[this](aly::Window* win,const int2& dims) {
 				if(!getContext()->hasDeferredTasks()) {
 					getContext()->addDeferredTask([this]() {
 								box2f bbox = renderRegion->getBounds();

@@ -88,7 +88,7 @@ bool MeshSubdivideEx::init(Composite& rootNode) {
 	wireframeShader.setEdgeColor(Color(1.0f, 0.8f, 0.1f, 1.0f));
 	wireframeShader.setLineWidth(1.5f);
 
-	setOnResize([this](const int2& dims) {
+	setOnResize([this](aly::Window* win,const int2& dims) {
 		if(!getContext()->hasDeferredTasks()) {
 			getContext()->addDeferredTask([this]() {
 						int w=getContext()->getScreenWidth();

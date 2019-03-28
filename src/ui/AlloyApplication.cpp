@@ -40,23 +40,14 @@ void Application::initInternal() {
 	imageShader = std::shared_ptr<ImageShader>(
 			new ImageShader(ImageShader::Filter::NONE, true, context));
 	try {
-		GLFWimage images[2];
-		ImageRGBA img, img2;
-
-		ReadImageFromFile(getContext()->getFullPath("images/alloy_logo128.png"),
-				img);
-		images[0].pixels = img.ptr();
-		images[0].width = img.width;
-		images[0].height = img.height;
-
-		ReadImageFromFile(getContext()->getFullPath("images/alloy_logo64.png"),
-				img2);
-		images[1].pixels = img2.ptr();
-		images[1].width = img2.width;
-		images[1].height = img2.height;
-		for (auto win : context->windows) {
-			glfwSetWindowIcon(win->handle, 2, images);
-		}
+		ReadImageFromFile(getContext()->getFullPath("images/alloy_logo128.png"),iconImage1);
+		iconImages[0].pixels = iconImage1.ptr();
+		iconImages[0].width = iconImage1.width;
+		iconImages[0].height = iconImage1.height;
+		ReadImageFromFile(getContext()->getFullPath("images/alloy_logo64.png"),iconImage2);
+		iconImages[1].pixels = iconImage2.ptr();
+		iconImages[1].width = iconImage2.width;
+		iconImages[1].height = iconImage2.height;
 	} catch (const std::exception& e) {
 		std::cerr << e.what() << std::endl;
 	}
@@ -99,27 +90,25 @@ void Application::draw(const WindowPtr& win) {
 	GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glViewport(0, 0, context->getFrameBufferWidth(),
-			context->getFrameBufferHeight());
+	int2 fbSize = context->getFrameBufferSize();
+	glViewport(0, 0, fbSize.x, fbSize.y);
 	draw(context.get());
 	glDisable(GL_DEPTH_TEST);
-	glViewport(0, 0, context->getFrameBufferWidth(),
-			context->getFrameBufferHeight());
-	drawUI();
+	glViewport(0, 0, fbSize.x, fbSize.y);
+	drawUI(win);
 	if (context->isDebugEnabled()) {
-		drawDebugUI();
+		drawDebugUI(win);
 	}
 	const Cursor* cursor = context->getCursor();
 	if (!cursor) {
 		cursor = &Cursor::Normal;
 	}
-	nvgBeginFrame(context->getNVG(), context->getScreenWidth(),
-			context->getScreenHeight(), 1.0f);
+	int2 screenSize = context->getScreenSize();
+	nvgBeginFrame(win->nvg, screenSize.x, screenSize.y, 1.0f);
 	cursor->draw(context.get());
-	nvgEndFrame(context->getNVG());
+	nvgEndFrame(win->nvg);
 }
-void Application::drawUI() {
-	WindowPtr win = context->getCurrentWindow();
+void Application::drawUI(const WindowPtr& win) {
 	context->setCursor(nullptr);
 	int2 screenSize = win->getScreenSize();
 	glViewport(0, 0, screenSize.x, screenSize.y);
@@ -140,8 +129,7 @@ void Application::drawUI() {
 	nvgEndFrame(nvg);
 	context->dirtyUI = false;
 }
-void Application::drawDebugUI() {
-	WindowPtr win = context->getCurrentWindow();
+void Application::drawDebugUI(const WindowPtr& win) {
 	NVGcontext* nvg = win->nvg;
 	int2 screenSize = win->getScreenSize();
 	box2px viewport = win->getViewport();
@@ -283,7 +271,7 @@ void Application::drawDebugUI() {
 void Application::fireEvent(const InputEvent& event) {
 	if (event.type == InputType::Cursor
 			|| event.type == InputType::MouseButton) {
-		context->requestUpdateCursor();
+		event.window->dirtyLocator = true;
 	}
 	bool consumed = false;
 	if (event.type == InputType::Scroll && context->mouseOverRegion != nullptr
@@ -302,8 +290,7 @@ void Application::fireEvent(const InputEvent& event) {
 				context->middleMouseButton = true;
 			}
 			context->mouseOverRegion = context->cursorFocusRegion =
-					context->mouseDownRegion = context->locate(
-							context->cursorPosition);
+					context->mouseDownRegion = event.window->locate(context->cursorPosition);
 
 			if (context->mouseDownRegion != nullptr) {
 				context->cursorDownPosition = event.cursor
@@ -381,7 +368,7 @@ void Application::onWindowSize(Window* win, int width, int height) {
 	context->dirtyUI = true;
 	win->dirtyUI = true;
 	if (onResize) {
-		onResize(int2(width, height));
+		onResize(win, int2(width,height));
 	}
 
 }
@@ -624,7 +611,7 @@ void Application::onChar(Window* win, unsigned int codepoint) {
 void Application::runOnce(const std::string& fileName) {
 	close();
 	run(0);
-	glfwSwapBuffers(context->getCurrentWindow()->handle);
+	context->getCurrentWindow()->swapBuffers();
 	ImageRGBA img;
 	getScreenShot(img);
 	WriteImageToFile(fileName, img);
@@ -658,12 +645,15 @@ void Application::run(int swapInterval) {
 			win->app = this;
 			win->setCurrent();
 			win->registerCallbacks(this);
+			glfwSetWindowIcon(win->handle, 2, iconImages);
+			
 			if (!init(win)) {
 				throw std::runtime_error(
 						MakeString()
 								<< "Error occurred in application init() for window "
 								<< win->getName());
 			}
+			win->glass->setVisible(true);
 			win->ui->add(win->glass);
 			if (showDebugIcon) {
 				GlyphRegionPtr debug = MakeGlyphRegion(
@@ -686,6 +676,7 @@ void Application::run(int swapInterval) {
 			}
 			//First pack triggers computation of aspect ratios  for components.
 			win->ui->pack(context.get());
+			win->glass->setVisible(false);
 			win->dirtyUI = true;
 			win->setSwapInterval(swapInterval);
 		}
@@ -705,13 +696,12 @@ void Application::run(int swapInterval) {
 		context->dirtyUI = true;
 		for (WindowPtr win : windows) {
 			win->dirtyUI = true;
-			context->update(*(win->ui));
+			context->update(win.get());
 		}
 	} else {
-	}
-	for (WindowPtr win : windows) {
-		win->setCurrent();
-		win->setVisible(true);
+		for (WindowPtr win : windows) {
+			win->setVisible(true);
+		}
 	}
 	do {
 		//Events could have modified layout! Pack before draw to make sure things are correctly positioned.
@@ -721,12 +711,16 @@ void Application::run(int swapInterval) {
 				std::cout << "Window Added " << win->getName() << std::endl;
 				win->app = this;
 				win->registerCallbacks(this);
+				glfwSetWindowIcon(win->handle, 2, iconImages);
+				win->setVisible(true);
 				if (!init(win)) {
 					throw std::runtime_error(
 							MakeString()
 									<< "Error occurred in application init() for window "
 									<< win->getName());
 				}
+				win->glass->setVisible(true);
+				win->ui->add(win->glass);
 				if (showDebugIcon) {
 					GlyphRegionPtr debug = MakeGlyphRegion(
 							createAwesomeGlyph(0xf188, FontStyle::Outline, 20),
@@ -746,7 +740,8 @@ void Application::run(int swapInterval) {
 							};
 					win->ui->add(debug);
 				}
-				//First pack triggers computation of aspect ratios  for components.
+				win->ui->pack(context.get());
+				win->glass->setVisible(false);
 				win->dirtyUI = true;
 				win->setSwapInterval(swapInterval);
 			}
@@ -756,7 +751,7 @@ void Application::run(int swapInterval) {
 				win->ui->pack(context.get());
 			}
 			draw(win);
-			context->update(*(win->ui));
+			context->update(win.get());
 		}
 		double elapsed =
 				std::chrono::duration<double>(endTime - lastFpsTime).count();

@@ -256,7 +256,7 @@ Region* Region::locate(const pixel2& cursor) {
 }
 void Region::pack(AlloyContext* context) {
 	if (parent == nullptr) {
-		pack(pixel2(0, 0), pixel2(context->getScreenDimensions()), context->dpmm,
+		pack(pixel2(0, 0), pixel2(context->getScreenSize()), context->dpmm,
 				context->pixelRatio);
 	} else {
 		box2px bounds = parent->getBounds(false);

@@ -53,7 +53,7 @@ bool DragEx::init(Composite& rootNode) {
 
 	}
 	//Force drag elements inside draw bounds.
-	setOnResize([=](const int2& dims) {
+	setOnResize([=](aly::Window* win,const int2& dims) {
 		box2px bounds(pixel2(0, 0), pixel2((float)dims.x,(float)dims.y));
 		for (TextLabelPtr label : labels) {
 			//Get current location, including drag offset.

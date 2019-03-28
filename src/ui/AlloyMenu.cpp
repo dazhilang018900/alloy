@@ -66,7 +66,7 @@ box2px Menu::getBounds(bool includeBounds) const {
 void Menu::draw(AlloyContext* context) {
 	context->setDragObject(this);
 	NVGcontext* nvg = context->getNVG();
-	box2px bounds = getBounds();
+	box2px bounds = Menu::getBounds();
 	box2px sbounds = bounds;
 	sbounds.position.x += TextField::PADDING;
 	sbounds.dimensions.x -= 2 * TextField::PADDING;
@@ -111,17 +111,16 @@ void Menu::draw(AlloyContext* context) {
 	int newSelectedIndex = -1;
 	for (index = selectionOffset; index < N; index++) {
 		std::shared_ptr<MenuItem> current = options[index];
-		if (context->isMouseContainedIn(bounds.position + offset,
-				pixel2(bounds.dimensions.x, entryHeight))) {
+		if (context->isMouseContainedIn(bounds.position + offset,pixel2(bounds.dimensions.x, entryHeight))) {
 			newSelectedIndex = index;
-			if (current->isMenu()) {
+			if (current->isMenu()&&current->updatePosition){
 				if(container->rightSide){
-					current->position = CoordPX(offset.x + bounds.dimensions.x,
-							offset.y);
+					current->position = CoordPX(offset.x + bounds.dimensions.x,offset.y);
 				} else {
-					current->position = CoordPX(offset.x - bounds.dimensions.x,
-												offset.y);
+					current->position = CoordPX(offset.x - bounds.dimensions.x,offset.y);
 				}
+				context->requestPack();
+				current->updatePosition=false;
 			}
 		}
 		offset.y += entryHeight;
@@ -396,6 +395,7 @@ void MenuItem::setContainer(MenuContainer* cont) {
 	}
 }
 void MenuItem::setVisible(bool visible) {
+	updatePosition=true;
 	if (!visible) {
 		if (isVisible()) {
 			currentVisible = nullptr;
@@ -421,6 +421,7 @@ void MenuItem::setVisible(bool visible) {
 	Composite::setVisible(visible);
 }
 void Menu::setVisible(bool visible) {
+	updatePosition=true;
 	if (!visible) {
 		setSelectedIndex(-1);
 		for (MenuItemPtr& item : options) {
@@ -533,8 +534,7 @@ void MenuHeader::draw(AlloyContext* context) {
 	bool down = context->isMouseOver(this) && context->isLeftMouseButtonDown();
 	NVGcontext* nvg = context->getNVG();
 	box2px bounds = getBounds();
-	menu->position = CoordPX(bounds.position.x,
-			bounds.position.y + bounds.dimensions.y);
+	menu->position = CoordPX(bounds.position.x, bounds.position.y + bounds.dimensions.y);
 
 	int xoff = 0;
 	int yoff = 0;
@@ -702,7 +702,7 @@ bool MenuPopup::onEventHandler(AlloyContext* context, const InputEvent& event) {
 		if (event.button == GLFW_MOUSE_BUTTON_RIGHT) {
 			if (context->isMouseOver(parent, true)) {
 				pixel2 cursor=context->getCursorPosition();
-				pixel2 rbound=float2(context->getScreenDimensions())- pixel2((float) menuWidth, 0.0f);
+				pixel2 rbound=float2(context->getScreenSize())- pixel2((float) menuWidth, 0.0f);
 				this->rightSide=(cursor.x<rbound.x-menuWidth);
 				this->position = CoordPX(
 						aly::min(cursor,rbound)

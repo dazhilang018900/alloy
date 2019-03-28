@@ -88,6 +88,12 @@ int2 Window::getScreenSize() const {
 	glfwGetWindowSize(handle, &dims.x, &dims.y);
 	return dims;
 }
+void Window::requestPack(){
+	dirtyUI=true;
+}
+void Window::requestCursorUpdate(){
+	dirtyLocator=true;
+}
 box2px Window::getViewport() const {
 	return box2px(pixel2(0.0f, 0.0f),
 			pixel2(getFrameBufferSize()));
@@ -174,6 +180,14 @@ void Window::add(Region* region) {
 	locator.add(region);
 }
 Region* Window::locate(const pixel2& cursor) const {
+	Region* onTopRegion=AlloyApplicationContext()->getOnTopRegion();
+	if (onTopRegion != nullptr) {
+		if (onTopRegion->isVisible()) {
+			Region* r = onTopRegion->locate(cursor);
+			if (r != nullptr)
+				return r;
+		}
+	}
 	return locator.locate(cursor);
 }
 void Window::setVisible(bool vis) {
@@ -507,12 +521,8 @@ int AlloyContext::getFrameBufferWidth() const {
 int AlloyContext::getFrameBufferHeight() const {
 	return getCurrentWindow()->getFrameBufferSize().y;
 }
-
-int2 AlloyContext::getFrameBufferDimensions() const {
+int2 AlloyContext::getFrameBufferSize() const {
 	return getCurrentWindow()->getFrameBufferSize();
-}
-int2 AlloyContext::getScreenDimensions() const {
-	return getCurrentWindow()->getScreenSize();
 }
 std::string AlloyContext::getFullPath(const std::string& partialFile) {
 	std::string fileName = partialFile;
@@ -867,16 +877,6 @@ void AlloyContext::clearEvents(Region* region) {
 		onTopRegion = nullptr;
 
 }
-Region* AlloyContext::locate(const pixel2& cursor) const {
-	if (onTopRegion != nullptr) {
-		if (onTopRegion->isVisible()) {
-			Region* r = onTopRegion->locate(cursor);
-			if (r != nullptr)
-				return r;
-		}
-	}
-	return getCurrentWindow()->locate(cursor);
-}
 
 bool AlloyContext::isOnScreenRender() const {
 	return (getCurrentWindow()->isVisible());
@@ -907,7 +907,7 @@ bool AlloyContext::isObjectFocused(const Region* region) {
 	}
 	return false;
 }
-void AlloyContext::update(Composite& rootNode) {
+void AlloyContext::update(Window* win) {
 	endTime = std::chrono::steady_clock::now();
 	double updateElapsed = std::chrono::duration<double>(
 			endTime - lastUpdateTime).count();
@@ -915,27 +915,26 @@ void AlloyContext::update(Composite& rootNode) {
 			endTime - lastAnimateTime).count();
 	double cursorElapsed = std::chrono::duration<double>(
 			endTime - lastCursorTime).count();
-	WindowPtr win = getCurrentWindow();
 	if (deferredTasks.size() > 0) {
 		executeDeferredTasks();
-		rootNode.updateCursor(win->resetLocator());
+		win->ui->updateCursor(win->resetLocator());
 		win->dirtyLocator = false;
-		mouseOverRegion = locate(cursorPosition);
+		mouseOverRegion = win->locate(cursorPosition);
 		dirtyCursor = false;
 		win->dirtyUI= true;
 	}
 	if (updateElapsed > UPDATE_LOCATOR_INTERVAL_SEC) {
 		if (win->dirtyLocator) {
-			rootNode.updateCursor(win->resetLocator());
+			win->ui->updateCursor(win->resetLocator());
 			win->dirtyLocator = false;
-			mouseOverRegion = locate(cursorPosition);
+			mouseOverRegion = win->locate(cursorPosition);
 			dirtyCursor = false;
 		}
 		lastUpdateTime = endTime;
 	}
 	if (cursorElapsed >= UPDATE_CURSOR_INTERVAL_SEC) { //Dont try to animate faster than 60 fps.
 		if (dirtyCursor && !win->dirtyLocator) {
-			mouseOverRegion = locate(cursorPosition);
+			mouseOverRegion = win->locate(cursorPosition);
 			dirtyCursor = false;
 		}
 		dirtyUI = true;
@@ -949,7 +948,7 @@ void AlloyContext::update(Composite& rootNode) {
 		}
 	}
 	if (win->dirtyUI) {
-		rootNode.pack(this);
+		win->ui->pack(this);
 		animator.firePostEvents();
 		win->dirtyLocator = true;
 		win->dirtyUI = false;

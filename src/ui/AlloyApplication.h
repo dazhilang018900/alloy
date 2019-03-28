@@ -38,16 +38,18 @@ private:
 	InputEvent inputEvent;
 	std::chrono::steady_clock::time_point lastClickTime;
 	static std::shared_ptr<AlloyContext>& context;
-	void drawUI();
-	void drawDebugUI();
+	void drawUI(const WindowPtr& win);
+	void drawDebugUI(const WindowPtr& win);
 	void draw(const WindowPtr& win);
 	bool showDebugIcon;
 	bool forceClose = false;
 	std::shared_ptr<ImageShader> imageShader;
 	std::list<std::exception_ptr> caughtExceptions;
 	//std::shared_ptr<GLFrameBuffer> uiFrameBuffer;
-	std::function<void(const int2& dimensions)> onResize;
+	std::function<void(Window* win,const int2& dimensions)> onResize;
 	std::function<void()> onExit;
+	aly::ImageRGBA iconImage1, iconImage2;
+	GLFWimage iconImages[2];
 	void initInternal();
 protected:
 	virtual void loadFonts();
@@ -60,7 +62,7 @@ public:
 		return forceClose;
 	}
 	void setOnResize(
-			const std::function<void(const int2& dimensions)>& onResizeEvent) {
+			const std::function<void(Window* win,const int2& dimensions)>& onResizeEvent) {
 		onResize = onResizeEvent;
 	}
 	void setOnExit(const std::function<void()>& onExitEvent) {

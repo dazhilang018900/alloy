@@ -80,6 +80,8 @@ public:
 	std::string getName() const {
 		return name;
 	}
+	void requestPack();
+	void requestCursorUpdate();
 	Window(const std::string& title, int width, int height);
 	Window();
 	int2 getScreenSize() const;
@@ -369,11 +371,10 @@ public:
 		return (mouseDownRegion != nullptr && leftMouseButton);
 	}
 	pixel pixelRatio;
-	void update(Composite& rootNode);
+	void update(Window* win);
 	void requestPack() {
 		getCurrentWindow()->dirtyUI=true;
 	}
-	Region* locate(const pixel2& cursor) const;
 	void requestUpdateCursor() {
 		dirtyCursor = true;
 	}
@@ -402,8 +403,7 @@ public:
 	std::string getFullPath(const std::string& partialFile);
 	int getFrameBufferWidth() const;
 	int getFrameBufferHeight() const;
-	int2 getFrameBufferDimensions() const;
-	int2 getScreenDimensions() const;
+	int2 getFrameBufferSize() const;
 	inline const char* getFontName(FontType type) const {
 		if (fonts[static_cast<int>(type)].get() == nullptr)
 			throw std::runtime_error("Font type not found.");
