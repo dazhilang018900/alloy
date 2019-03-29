@@ -556,12 +556,12 @@ int AlloyContext::getFontHandle(FontType type) const {
 }
 const char* AlloyContext::getFontName(FontType type,Window* win) const {
 	if (win->fonts[static_cast<int>(type)].get() == nullptr)
-		throw std::runtime_error(MakeString()<<win->getName()<<": Font type not found.");
+		throw std::runtime_error(MakeString()<<win->getName()<<": Font type "<<type<<" not found.");
 	return win->fonts[static_cast<int>(type)]->name.c_str();
 }
 int AlloyContext::getFontHandle(FontType type,Window* win) const {
 	if (win->fonts[static_cast<int>(type)].get() == nullptr)
-		throw std::runtime_error(MakeString()<<win->getName()<<": Font type not found.");
+		throw std::runtime_error(MakeString()<<win->getName()<<": Font type "<<type<<" not found.");
 	return win->fonts[static_cast<int>(type)]->handle;
 }
 std::string AlloyContext::getFullPath(const std::string& partialFile) {

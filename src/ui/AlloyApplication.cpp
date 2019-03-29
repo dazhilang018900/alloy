@@ -98,7 +98,9 @@ void Application::draw(const WindowPtr& win) {
 	glViewport(0, 0, fbSize.x, fbSize.y);
 	drawUI(win);
 	if (context->isDebugEnabled()) {
-		drawDebugUI(win);
+		if(context->focusedWindow==win.get()||context->focusedWindow==nullptr){
+			drawDebugUI(win);
+		}
 	}
 	const Cursor* cursor = context->getCursor();
 	if (!cursor) {
@@ -670,7 +672,7 @@ void Application::run(int swapInterval) {
 			}
 			win->glass->setVisible(true);
 			win->ui->add(win->glass);
-			if (showDebugIcon) {
+			if (showDebugIcon&&win==windows.front()) {
 				GlyphRegionPtr debug = MakeGlyphRegion(
 						createAwesomeGlyph(0xf188, FontStyle::Outline, 20),
 						CoordPercent(1.0f, 1.0f), CoordPX(20, 20),

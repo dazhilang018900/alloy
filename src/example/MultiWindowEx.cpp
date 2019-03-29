@@ -9,17 +9,18 @@
 
 namespace aly {
 MultiWindowEx::MultiWindowEx() :
-		Application("Main Window", 800, 600) {
+		Application("Primary Window", 800, 600) {
 	WindowPtr main=getMainWindow();
 	main->setLocation(100,100);
-	WindowPtr win=addWindow("second", 400, 400, true);
+	WindowPtr win=addWindow("Second Window", 400, 400, true);
 	win->setLocation(950,150);
 }
 bool MultiWindowEx::init(aly::Composite& rootNode) {
-	if (rootNode.getName() == "second") {
+	//init() called on each window. Identify windows by composite name.
+	if (rootNode.getName() == "Second Window") {
 		rootNode.backgroundColor=MakeColor(0.5f,0.5f,0.5f);
 		TextLabelPtr label = TextLabelPtr(
-				new TextLabel("Second Window",
+				new TextLabel("Secondary",
 						CoordPerPX(0.5f, 0.5f, -100.0f, -30.0f), CoordPX(200, 60)));
 		label->setAlignment(HorizontalAlignment::Center,VerticalAlignment::Middle);
 		label->backgroundColor = MakeColor(Color(1.0f, 0.8f, 0.2f));
@@ -28,7 +29,7 @@ bool MultiWindowEx::init(aly::Composite& rootNode) {
 	} else {
 		rootNode.backgroundColor=MakeColor(0.8f,0.8f,0.8f);
 		TextLabelPtr label = TextLabelPtr(
-				new TextLabel("Primary Window",
+				new TextLabel("Primary",
 						CoordPerPX(0.5f, 0.5f, -100.0f, -30.0f), CoordPX(200, 60)));
 		label->setAlignment(HorizontalAlignment::Center,VerticalAlignment::Middle);
 		label->backgroundColor = MakeColor(Color(0.2f, 0.8f, 1.0f));
