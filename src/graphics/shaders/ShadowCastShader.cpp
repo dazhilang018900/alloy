@@ -22,7 +22,7 @@
 #include "graphics/shaders/ShadowCastShader.h"
 namespace aly {
 ShadowCastShader::ShadowCastShader(bool onScreen, const std::shared_ptr<AlloyContext>& context) :
-		GLShader(onScreen, context),blurShader(ImageShader::Filter::MEDIUM_BLUR,onScreen,context) ,imageShader(ImageShader::Filter::NONE,onScreen,context) {
+		GLShader( context),blurShader(ImageShader::Filter::MEDIUM_BLUR,context) ,imageShader(ImageShader::Filter::NONE,context) {
 	initialize({}, R"(#version 330
 layout(location = 0) in vec3 vp; 
 layout(location = 1) in vec2 vt; 

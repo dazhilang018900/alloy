@@ -81,7 +81,7 @@ public:
 	virtual void update() override;
 	void updateVertexColors();
 	void updateVertexPositions();
-	GLMesh(Mesh& mesh, bool onScreen,
+	GLMesh(Mesh& mesh,
 			const std::shared_ptr<AlloyContext>& context =
 					AlloyDefaultContext());
 	virtual ~GLMesh();
@@ -107,7 +107,6 @@ public:
 	Image4f textureImage;
 
 	std::shared_ptr<GLMesh> glOnScreen;
-	std::shared_ptr<GLMesh> glOffScreen;
 	float4x4 pose;
 
 	inline void clone(Mesh& mesh) const {
@@ -157,9 +156,9 @@ public:
 	void scale(float sc);
 	void transform(const float4x4& M);
 	float estimateVoxelSize(int stride = 1);
-	void update(bool onScreen = true);
-	void updateVertexColors(bool onScreen = true);
-	void updateVertexPositions(bool onScreen = true);
+	void update();
+	void updateVertexColors();
+	void updateVertexPositions();
 
 	void clear();
 	void setDirty(bool d);

@@ -828,7 +828,7 @@ namespace aly {
 			contour->setFile(MakeString() << GetDesktopDirectory() << ALY_PATH_SEPARATOR << "contour" << std::setw(4) << std::setfill('0') << simulationIteration << ".bin");
 		}
 		if (unsignedShader.get() == nullptr) {
-			unsignedShader.reset(new UnsignedDistanceShader(true, AlloyApplicationContext()));
+			unsignedShader.reset(new UnsignedDistanceShader( AlloyApplicationContext()));
 			unsignedShader->init(initialLevelSet.width, initialLevelSet.height);
 
 		}

@@ -29,7 +29,7 @@ namespace aly {
 		std::shared_ptr<AlloyContext> context;
 		GLFrameBuffer texture;
 	public:
-		UnsignedDistanceShader(bool onScreen = true,
+		UnsignedDistanceShader(
 			const std::shared_ptr<AlloyContext>& context =
 			AlloyDefaultContext());
 		void init(int width, int height);

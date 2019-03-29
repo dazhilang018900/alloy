@@ -878,7 +878,7 @@ bool SpringLevelSet2D::init() {
 	}
 	if (unsignedShader.get() == nullptr) {
 		unsignedShader.reset(
-				new UnsignedDistanceShader(true, AlloyApplicationContext()));
+				new UnsignedDistanceShader( AlloyApplicationContext()));
 		unsignedShader->init(initialLevelSet.width, initialLevelSet.height);
 
 	}

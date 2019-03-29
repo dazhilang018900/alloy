@@ -1310,7 +1310,7 @@ PreethamSkyRadianceData PreethamSkyRadianceData::compute(float3 sun_direction,
 
 ProceduralSky::ProceduralSky(float sphereRadius, bool onScreen,
 		const std::shared_ptr<AlloyContext>& context) :
-		GLShader(onScreen, context) {
+		GLShader(context) {
 	TessellatedSphere(sphereRadius, 3, SubDivisionScheme::Loop, context).clone(
 			skyMesh);
 	setSunPositionDegrees(110, 72);

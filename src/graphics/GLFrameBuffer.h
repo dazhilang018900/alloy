@@ -30,7 +30,7 @@ protected:
 	unsigned int mFrameBufferId;
 	unsigned int mDepthBufferId;
 public:
-	GLFrameBuffer(bool onScreen=true,std::shared_ptr<AlloyContext> context =
+	GLFrameBuffer(std::shared_ptr<AlloyContext> context =
 			AlloyDefaultContext());
 	virtual void update() override;
 	virtual void draw() const override;

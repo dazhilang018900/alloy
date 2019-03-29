@@ -45,7 +45,7 @@ void GLMesh::draw(const PrimitiveType& type, bool forceVertexColor) const {
 	CHECK_GL_ERROR();
 	if (mesh.isDirty()) {
 		mesh.update();
-		mesh.setDirty( false);
+		mesh.setDirty(false);
 	}
 	context->begin();
 	if (vao > 0)
@@ -87,7 +87,6 @@ void GLMesh::draw(const PrimitiveType& type, bool forceVertexColor) const {
 				glVertexAttribPointer(7 + n, 3, GL_FLOAT, GL_FALSE, 0, 0);
 			}
 		}
-
 		for (int n = 0; n < 4; n++) {
 			if (quadColorBuffer[n] > 0) {
 				glEnableVertexAttribArray(11 + n);
@@ -172,9 +171,9 @@ void GLMesh::draw(const PrimitiveType& type, bool forceVertexColor) const {
 	CHECK_GL_ERROR();
 	context->end();
 }
-GLMesh::GLMesh(Mesh& mesh, bool onScreen,
+GLMesh::GLMesh(Mesh& mesh,
 		const std::shared_ptr<AlloyContext>& context) :
-		GLComponent(onScreen, context), mesh(mesh), vao(0), vertexBuffer(0), normalBuffer(
+		GLComponent( context), mesh(mesh), vao(0), vertexBuffer(0), normalBuffer(
 				0), colorBuffer(0), lineIndexBuffer(0), triIndexBuffer(0), quadIndexBuffer(
 				0), lineCount(0), triCount(0), quadCount(0), vertexCount(0), lineIndexCount(
 				0), triIndexCount(0), quadIndexCount(0) {
@@ -475,12 +474,10 @@ void GLMesh::update() {
 				glDeleteBuffers(1, &quadVertexBuffer[n]);
 			glGenBuffers(1, &quadVertexBuffer[n]);
 			glBindBuffer(GL_ARRAY_BUFFER, quadVertexBuffer[n]);
-			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * quads[n].size(),
-					quads[n].data(), GL_STATIC_DRAW);
+			glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * quads[n].size(),quads[n].data(), GL_STATIC_DRAW);
 			glBindBuffer(GL_ARRAY_BUFFER, 0);
 		}
 		CHECK_GL_ERROR();
-
 		quadIndexCount = (GLuint) mesh.quadIndexes.size();
 	} else if (mesh.type == GLMesh::PrimitiveType::QUADS
 			&& mesh.vertexLocations.size() % 4 == 0) {
@@ -798,12 +795,10 @@ void GLMesh::update() {
 	context->end();
 }
 void Mesh::setContext(const std::shared_ptr<AlloyContext>& context) {
-	glOnScreen.reset(new GLMesh(*this, true, context));
-	glOffScreen.reset(new GLMesh(*this, false, context));
+	glOnScreen.reset(new GLMesh(*this,context));
 }
 Mesh::Mesh(const std::shared_ptr<AlloyContext>& context) :
-		glOnScreen(new GLMesh(*this, true, context)), glOffScreen(
-				new GLMesh(*this, false, context)), pose(float4x4::identity()) {
+		glOnScreen(new GLMesh(*this,context)), pose(float4x4::identity()) {
 }
 Mesh::Mesh() :
 		pose(float4x4::identity()) {
@@ -820,7 +815,7 @@ bool Mesh::load(const std::string& file) {
 }
 void Mesh::draw(const GLMesh::PrimitiveType& type, bool forceVertexColor) {
 	if (glOnScreen.get() == nullptr) {
-		glOnScreen.reset(new GLMesh(*this, true, AlloyDefaultContext()));
+		glOnScreen.reset(new GLMesh(*this,AlloyDefaultContext()));
 	}
 	glOnScreen->draw(type, forceVertexColor);
 }
@@ -1392,32 +1387,17 @@ void Mesh::mapOutOfBoundingBox(float voxelSize) {
 	setDirty(true);
 }
 
-void Mesh::update(bool onScreen) {
-	if (onScreen) {
-		if (glOnScreen.get() == nullptr) {
-			glOnScreen.reset(new GLMesh(*this, true, AlloyDefaultContext()));
-		}
-		glOnScreen->update();
-	} else {
-		if (glOnScreen.get() == nullptr) {
-			glOnScreen.reset(new GLMesh(*this, false, AlloyDefaultContext()));
-		}
-		glOffScreen->update();
+void Mesh::update() {
+	if (glOnScreen.get() == nullptr) {
+		glOnScreen.reset(new GLMesh(*this, AlloyDefaultContext()));
 	}
+	glOnScreen->update();
 }
-void Mesh::updateVertexColors(bool onScreen) {
-	if (onScreen) {
-		glOnScreen->updateVertexColors();
-	} else {
-		glOffScreen->updateVertexColors();
-	}
+void Mesh::updateVertexColors() {
+	glOnScreen->updateVertexColors();
 }
-void Mesh::updateVertexPositions(bool onScreen) {
-	if (onScreen) {
-		glOnScreen->updateVertexPositions();
-	} else {
-		glOffScreen->updateVertexPositions();
-	}
+void Mesh::updateVertexPositions() {
+	glOnScreen->updateVertexPositions();
 }
 Mesh::~Mesh() {
 	// TODO Auto-generated destructor stub
@@ -2333,6 +2313,7 @@ void SubdivideCatmullClark(Mesh& mesh) {
 	if (hasUVs)
 		mesh.textureMap = uvs;
 	mesh.quadIndexes = newQuads;
+	mesh.setType(GLMesh::PrimitiveType::QUADS);
 	mesh.triIndexes.clear();
 	if (mesh.vertexNormals.size() > 0)
 		mesh.updateVertexNormals();
@@ -2500,6 +2481,7 @@ void SubdivideLoop(Mesh& mesh) {
 		mesh.textureMap = uvs;
 	if (mesh.vertexNormals.size() > 0)
 		mesh.updateVertexNormals();
+	mesh.setType(GLMesh::PrimitiveType::TRIANGLES);
 	mesh.setDirty(true);
 }
 void Subdivide(Mesh& mesh, SubDivisionScheme type) {

@@ -45,7 +45,7 @@ public:
 		return context;
 	}
 	// Default constructor.
-	GLShader(bool onScreen = true,const std::shared_ptr<AlloyContext>& context =
+	GLShader(const std::shared_ptr<AlloyContext>& context =
 			AlloyDefaultContext());
 	virtual ~GLShader();
 	// Initialization function to compile the shader.
@@ -62,12 +62,12 @@ public:
 			const std::string& pFragmentShaderString) {
 		initialize( { }, pVertexShaderString, pFragmentShaderString, "");
 	}
-	GLShader(bool  onScreen, std::shared_ptr<AlloyContext>& context,
+	GLShader(std::shared_ptr<AlloyContext>& context,
 			const std::initializer_list<std::string>& attributes,
 			const std::string& pVertexShaderString,
 			const std::string& pFragmentShaderString,
 			const std::string& pGeomShaderString) :
-			GLShader(onScreen, context) {
+			GLShader(context) {
 		initialize(attributes, pVertexShaderString, pFragmentShaderString,
 				pGeomShaderString);
 	}

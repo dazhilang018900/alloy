@@ -23,8 +23,8 @@
 #include "ui/AlloyContext.h"
 namespace aly {
 
-GLFrameBuffer::GLFrameBuffer(bool onScreen, std::shared_ptr<AlloyContext> context) :
-		GLComponent(onScreen, context),texture(onScreen,
+GLFrameBuffer::GLFrameBuffer( std::shared_ptr<AlloyContext> context) :
+		GLComponent( context),texture(
 				context),mFrameBufferId(0), mDepthBufferId(0){
 
 }

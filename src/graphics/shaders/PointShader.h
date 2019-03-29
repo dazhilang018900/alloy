@@ -28,22 +28,22 @@ namespace aly {
 
 class PointColorShader: public GLShader {
 public:
-	PointColorShader( bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
+	PointColorShader( const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
 	void draw(Mesh* mesh, CameraParameters& camera, const box2px& bounds,const box2px& viewport,float scale=1.0f,bool twoSided=false);
 };
 class PointDepthShader: public GLShader {
 public:
-	PointDepthShader( bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
+	PointDepthShader(const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
 	void draw(Mesh* mesh, CameraParameters& camera, const box2px& bounds,const box2px& viewport,float scale=1.0f,bool twoSided=false);
 };
 class PointPositionShader: public GLShader {
 public:
-	PointPositionShader( bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
+	PointPositionShader( const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
 	void draw(Mesh* mesh, CameraParameters& camera, const box2px& bounds,const box2px& viewport,float scale=1.0f,bool twoSided=false);
 };
 class PointFaceIdShader: public GLShader {
 public:
-	PointFaceIdShader( bool onScreen = true,const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
+	PointFaceIdShader(const std::shared_ptr<AlloyContext>& context =AlloyDefaultContext());
 	void draw(Mesh* mesh, CameraParameters& camera, const box2px& bounds,const box2px& viewport,float scale=1.0f,bool twoSided=false);
 	void read(GLFrameBuffer& framebuffer,Image1i& faceIdMap);
 };

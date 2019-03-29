@@ -42,11 +42,11 @@ public:
 	virtual inline ~GLComponent() {
 	}
 
-	GLComponent(bool onScreen = true, const std::shared_ptr<AlloyContext>& context =
+	GLComponent(const std::shared_ptr<AlloyContext>& context =
 			AlloyDefaultContext()) :
 			context(context), bounds() {
 	}
-	GLComponent(const box2i& b, bool onScreen = true, std::shared_ptr<AlloyContext>& context =
+	GLComponent(const box2i& b,  std::shared_ptr<AlloyContext>& context =
 			AlloyDefaultContext()) :
 			context(context), bounds(b) {
 	}
@@ -73,9 +73,9 @@ public:
 			comp->draw();
 		}
 	}
-	GLComponentGroup(bool onScreen = true,const std::shared_ptr<AlloyContext>& context =
+	GLComponentGroup(const std::shared_ptr<AlloyContext>& context =
 			AlloyDefaultContext()) :
-			GLComponent(onScreen,context) {
+			GLComponent(context) {
 
 	}
 	virtual ~GLComponentGroup()=0;

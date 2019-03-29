@@ -38,7 +38,7 @@ void Application::initInternal() {
 	context->addAssetDirectory("../../../assets/");
 	context->addAssetDirectory("../../../../assets/");
 	imageShader = std::shared_ptr<ImageShader>(
-			new ImageShader(ImageShader::Filter::NONE, true, context));
+			new ImageShader(ImageShader::Filter::NONE,  context));
 	try {
 		ReadImageFromFile(getContext()->getFullPath("images/alloy_logo128.png"),iconImage1);
 		iconImages[0].pixels = iconImage1.ptr();
@@ -57,13 +57,13 @@ std::shared_ptr<GLTextureRGBA> Application::loadTextureRGBA(
 	ImageRGBA image;
 	ReadImageFromFile(AlloyDefaultContext()->getFullPath(partialFile), image);
 	return std::shared_ptr<GLTextureRGBA>(
-			new GLTextureRGBA(image, true, context));
+			new GLTextureRGBA(image, context));
 }
 std::shared_ptr<GLTextureRGB> Application::loadTextureRGB(
 		const std::string& partialFile) {
 	ImageRGB image;
 	ReadImageFromFile(AlloyDefaultContext()->getFullPath(partialFile), image);
-	return std::shared_ptr<GLTextureRGB>(new GLTextureRGB(image, true, context));
+	return std::shared_ptr<GLTextureRGB>(new GLTextureRGB(image, context));
 }
 std::shared_ptr<Font> Application::loadFont(const std::string& name,
 		const std::string& file) {
@@ -86,8 +86,7 @@ void Application::draw(const WindowPtr& win) {
 	std::lock_guard<std::mutex> lockMe(context->getLock());
 	glfwSetInputMode(win->handle, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
 	glClearColor(0.0, 0.0, 0.0, 10);
-	glClear(
-	GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	int2 fbSize = context->getFrameBufferSize();

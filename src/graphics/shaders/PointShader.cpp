@@ -23,9 +23,9 @@
 #include "graphics/shaders/PointShader.h"
 namespace aly {
 
-PointColorShader::PointColorShader(bool onScreen,
+PointColorShader::PointColorShader(
 		const std::shared_ptr<AlloyContext>& context) :
-		GLShader(onScreen, context) {
+		GLShader(context) {
 
 	initialize( { },
 			R"(
@@ -171,9 +171,9 @@ void PointColorShader::draw(Mesh* meshes,CameraParameters& camera, const box2px&
 	end();
 }
 
-PointDepthShader::PointDepthShader(bool onScreen,
+PointDepthShader::PointDepthShader(
 		const std::shared_ptr<AlloyContext>& context) :
-		GLShader(onScreen, context) {
+		GLShader( context) {
 
 	initialize( { },
 			R"(
@@ -324,9 +324,9 @@ void PointDepthShader::draw(Mesh* meshes,CameraParameters& camera, const box2px&
 
 }
 
-PointPositionShader::PointPositionShader(bool onScreen,
+PointPositionShader::PointPositionShader(
 		const std::shared_ptr<AlloyContext>& context) :
-		GLShader(onScreen, context) {
+		GLShader(context) {
 
 	initialize( { },
 			R"(
@@ -480,9 +480,9 @@ void PointPositionShader::draw(Mesh* meshes,CameraParameters& camera, const box2
 	glDisable(GL_SCISSOR_TEST);
 	end();
 }
-PointFaceIdShader::PointFaceIdShader(bool onScreen,
+PointFaceIdShader::PointFaceIdShader(
 		const std::shared_ptr<AlloyContext>& context) :
-		GLShader(onScreen, context) {
+		GLShader(context) {
 
 	initialize( { },
 			R"(

@@ -121,7 +121,7 @@ void Window::init(const std::string& title, int width, int height) {
 	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, 1);
 	glfwWindowHint(GLFW_VISIBLE, 0);
 	name = title;
-	handle = glfwCreateWindow(width, height, title.c_str(), NULL, NULL);
+	handle = glfwCreateWindow(width, height, name.c_str(), NULL, NULL);
 	if (!handle) {
 		glfwTerminate();
 		throw std::runtime_error(
@@ -142,7 +142,6 @@ void Window::init(const std::string& title, int width, int height) {
 	int fwidth, fheight;
 	glfwGetFramebufferSize(handle, &fwidth, &fheight);
 	glViewport(0, 0, fwidth, fheight);
-
 	glGenVertexArrays(1, &vao.vao);
 	glBindVertexArray(vao.vao);
 	glGenBuffers(1, &vao.positionBuffer);
@@ -150,21 +149,15 @@ void Window::init(const std::string& title, int width, int height) {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 3 * 6, PositionCoords,
 	GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-
 	glGenBuffers(1, &vao.uvBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, vao.uvBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 2 * 6, TextureCoords,
 	GL_STATIC_DRAW);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
-
 	nvg = nvgCreateGL3(NVG_ANTIALIAS | NVG_STENCIL_STROKES);
-
-	ui = CompositePtr(
-			new Composite(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
-	glass = std::shared_ptr<Composite>(
-			new Composite(name + "_glass", CoordPX(0, 0),
-					CoordPercent(1.0f, 1.0f)));
+	ui = CompositePtr(new Composite(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
+	glass = std::shared_ptr<Composite>(new Composite(name + "_glass", CoordPX(0, 0),CoordPercent(1.0f, 1.0f)));
 	glass->backgroundColor = MakeColor(COLOR_NONE);
 	glass->setVisible(false);
 }
@@ -252,6 +245,7 @@ void Window::setSwapInterval(int interval) const {
 
 void Window::begin() const {
 	setCurrent();
+	/*
 	int2 viewSize = getFrameBufferSize();
 	glViewport(0, 0, viewSize.x, viewSize.y);
 	glScissor(0, 0, viewSize.x, viewSize.y);
@@ -259,6 +253,7 @@ void Window::begin() const {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glDisable(GL_SCISSOR_TEST);
+	*/
 }
 Window::~Window() {
 	if (handle) {

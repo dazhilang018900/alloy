@@ -26,7 +26,7 @@
 
 namespace aly{
 CameraShader::CameraShader(bool onScreen,const std::shared_ptr<AlloyContext>& context) :
-		GLShader(onScreen, context) {
+		GLShader(context) {
 	initialize({},
 			R"(	#version 330
 					layout(location = 3) in vec3 vp0;

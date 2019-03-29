@@ -20,8 +20,8 @@
 */
 #include "graphics/shaders/ContourShaders.h"
 namespace aly{
-UnsignedDistanceShader::UnsignedDistanceShader(bool onScreen,
-	const std::shared_ptr<AlloyContext>& context) :GLShader(onScreen, context), context(context),texture(onScreen,context) {
+UnsignedDistanceShader::UnsignedDistanceShader(
+	const std::shared_ptr<AlloyContext>& context) :GLShader(context), context(context),texture(context) {
 	initialize({},
 		R"(	#version 330
 				layout(location = 0) in vec4 vp;
