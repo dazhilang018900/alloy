@@ -38,13 +38,15 @@ void Application::initInternal() {
 	context->addAssetDirectory("../../../assets/");
 	context->addAssetDirectory("../../../../assets/");
 	imageShader = std::shared_ptr<ImageShader>(
-			new ImageShader(ImageShader::Filter::NONE,  context));
+			new ImageShader(ImageShader::Filter::NONE, context));
 	try {
-		ReadImageFromFile(getContext()->getFullPath("images/alloy_logo128.png"),iconImage1);
+		ReadImageFromFile(getContext()->getFullPath("images/alloy_logo128.png"),
+				iconImage1);
 		iconImages[0].pixels = iconImage1.ptr();
 		iconImages[0].width = iconImage1.width;
 		iconImages[0].height = iconImage1.height;
-		ReadImageFromFile(getContext()->getFullPath("images/alloy_logo64.png"),iconImage2);
+		ReadImageFromFile(getContext()->getFullPath("images/alloy_logo64.png"),
+				iconImage2);
 		iconImages[1].pixels = iconImage2.ptr();
 		iconImages[1].width = iconImage2.width;
 		iconImages[1].height = iconImage2.height;
@@ -56,8 +58,7 @@ std::shared_ptr<GLTextureRGBA> Application::loadTextureRGBA(
 		const std::string& partialFile) {
 	ImageRGBA image;
 	ReadImageFromFile(AlloyDefaultContext()->getFullPath(partialFile), image);
-	return std::shared_ptr<GLTextureRGBA>(
-			new GLTextureRGBA(image, context));
+	return std::shared_ptr<GLTextureRGBA>(new GLTextureRGBA(image, context));
 }
 std::shared_ptr<GLTextureRGB> Application::loadTextureRGB(
 		const std::string& partialFile) {
@@ -66,9 +67,9 @@ std::shared_ptr<GLTextureRGB> Application::loadTextureRGB(
 	return std::shared_ptr<GLTextureRGB>(new GLTextureRGB(image, context));
 }
 std::shared_ptr<Font> Application::loadFont(const std::string& name,
-		const std::string& file) {
+		NVGcontext* nvg, const std::string& file) {
 	return std::shared_ptr<Font>(
-			new Font(name, AlloyDefaultContext()->getFullPath(file),
+			new Font(name, nvg, AlloyDefaultContext()->getFullPath(file),
 					context.get()));
 }
 Application::Application(int w, int h, const std::string& title,
@@ -89,8 +90,9 @@ void Application::draw(const WindowPtr& win) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	glEnable(GL_DEPTH_TEST);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	int2 fbSize = context->getFrameBufferSize();
+	int2 fbSize = win->getFrameBufferSize();
 	glViewport(0, 0, fbSize.x, fbSize.y);
+	nvgFontFaceId(win->nvg,context->getFontHandle(FontType::Normal,win.get()));
 	draw(context.get());
 	glDisable(GL_DEPTH_TEST);
 	glViewport(0, 0, fbSize.x, fbSize.y);
@@ -102,7 +104,7 @@ void Application::draw(const WindowPtr& win) {
 	if (!cursor) {
 		cursor = &Cursor::Normal;
 	}
-	int2 screenSize = context->getScreenSize();
+	int2 screenSize = win->getScreenSize();
 	nvgBeginFrame(win->nvg, screenSize.x, screenSize.y, 1.0f);
 	cursor->draw(context.get());
 	nvgEndFrame(win->nvg);
@@ -142,8 +144,7 @@ void Application::drawDebugUI(const WindowPtr& win) {
 	float cr = context->theme.CORNER_RADIUS;
 	if (viewport.contains(context->cursorPosition)) {
 		nvgFontSize(nvg, 15);
-		nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold));
-
+		nvgFontFaceId(nvg, context->getFontHandle(FontType::Bold,win.get()));
 		/*
 		 int alignment = 0;
 		 if (context->cursorPosition.x < context->width() * 0.5f) {
@@ -168,7 +169,8 @@ void Application::drawDebugUI(const WindowPtr& win) {
 		nvgTextAlign(nvg, NVG_ALIGN_TOP);
 		float yoffset = 5;
 		std::string txt =
-				context->hasFocus ? "Window Has Focus" : "Window Lost Focus";
+				(context->focusedWindow != nullptr) ?
+						context->focusedWindow->getName() : "Window Lost Focus";
 		drawText(nvg, 5, yoffset, txt.c_str(), FontStyle::Outline, Color(255),
 				Color(64, 64, 64));
 		yoffset += 16;
@@ -237,7 +239,7 @@ void Application::drawDebugUI(const WindowPtr& win) {
 					Color(255), Color(64, 64, 64));
 			yoffset += 16;
 		}
-		if (context->hasFocus) {
+		if (context->focusedWindow == win.get()) {
 			nvgBeginPath(nvg);
 			nvgLineCap(nvg, NVG_ROUND);
 			nvgStrokeWidth(nvg, 2.0f);
@@ -289,7 +291,8 @@ void Application::fireEvent(const InputEvent& event) {
 				context->middleMouseButton = true;
 			}
 			context->mouseOverRegion = context->cursorFocusRegion =
-					context->mouseDownRegion = event.window->locate(context->cursorPosition);
+					context->mouseDownRegion = event.window->locate(
+							context->cursorPosition);
 
 			if (context->mouseDownRegion != nullptr) {
 				context->cursorDownPosition = event.cursor
@@ -367,7 +370,7 @@ void Application::onWindowSize(Window* win, int width, int height) {
 	context->dirtyUI = true;
 	win->dirtyUI = true;
 	if (onResize) {
-		onResize(win, int2(width,height));
+		onResize(win, int2(width, height));
 	}
 
 }
@@ -377,7 +380,7 @@ void Application::onFrameBufferSize(Window* win, int width, int height) {
 	win->dirtyUI = true;
 }
 void Application::onCursorPos(Window* win, double xpos, double ypos) {
-	context->hasFocus = true;
+	context->focusedWindow = win;
 	context->cursorPosition = pixel2((pixel) (xpos), (pixel) (ypos));
 	InputEvent& e = inputEvent;
 	e = InputEvent();
@@ -410,9 +413,8 @@ void Application::onCursorPos(Window* win, double xpos, double ypos) {
 }
 
 void Application::onWindowFocus(Window* win, int focused) {
-
 	if (focused) {
-		context->hasFocus = true;
+		context->focusedWindow = win;
 		InputEvent& e = inputEvent;
 		e = InputEvent();
 		e.window = win;
@@ -424,15 +426,24 @@ void Application::onWindowFocus(Window* win, int focused) {
 		context->mouseDownRegion = nullptr;
 		context->cursorPosition = pixel2(-1, -1);
 		context->cursorDownPosition = pixel2(-1, -1);
-		context->hasFocus = false;
+		context->focusedWindow = nullptr;
 	}
 }
-WindowPtr Application::addWindow(const std::string& name, int width,
-		int height) {
-	return context->addWindow(name, width, height);
+void Application::onWindowClose(Window* win) {
+	if (win->isHideOnClose()) {
+		win->setVisible(false);
+	}
+}
+WindowPtr Application::addWindow(const std::string& name, int width, int height,
+		bool hideOnClose) {
+	return context->addWindow(name, width, height, hideOnClose);
 }
 bool Application::remove(Window* win) {
 	return context->remove(win);
+}
+
+std::shared_ptr<Window> Application::getMainWindow() const {
+	return context->windows.front();
 }
 void Application::getScreenShot(ImageRGBA& img) {
 	int w = 0, h = 0;
@@ -458,7 +469,7 @@ ImageRGBA Application::getScreenShot() {
 }
 void Application::onCursorEnter(Window* win, int enter) {
 	if (!enter) {
-		context->hasFocus = false;
+		context->focusedWindow = nullptr;
 		context->mouseOverRegion = nullptr;
 		InputEvent& e = inputEvent;
 		e = InputEvent();
@@ -481,7 +492,7 @@ void Application::onCursorEnter(Window* win, int enter) {
 			e.mods |= GLFW_MOD_SUPER;
 		fireEvent(e);
 	} else {
-		context->hasFocus = true;
+		context->focusedWindow = win;
 	}
 }
 void Application::onScroll(Window* win, double xoffset, double yoffset) {
@@ -616,27 +627,33 @@ void Application::runOnce(const std::string& fileName) {
 	WriteImageToFile(fileName, img);
 }
 void Application::loadFonts() {
-	context->loadFont(FontType::Normal, "sans", "fonts/Roboto-Regular.ttf");
-	context->loadFont(FontType::Bold, "sans-bold", "fonts/Roboto-Bold.ttf");
-	context->loadFont(FontType::Italic, "sans-italic",
-			"fonts/Roboto-Italic.ttf");
-	context->loadFont(FontType::Code, "sans", "fonts/Hack-Regular.ttf");
-	context->loadFont(FontType::CodeBold, "sans-bold", "fonts/Hack-Bold.ttf");
-	context->loadFont(FontType::CodeItalic, "sans-bold-italic",
-			"fonts/Hack-Italic.ttf");
-	context->loadFont(FontType::CodeBoldItalic, "sans-bold-italic",
-			"fonts/Hack-BoldItalic.ttf");
-	context->loadFont(FontType::Entypo, "entypo", "fonts/entypo.ttf");
-	context->loadFont(FontType::Icon, "basic_icons", "fonts/fontawesome.ttf");
-	context->loadFont(FontType::AwesomeRegular, "regular_icons",
-			"fonts/fa-regular.ttf");
-	context->loadFont(FontType::AwesomeSolid, "solid_icons",
-			"fonts/fa-solid.ttf");
-	context->loadFont(FontType::AwesomeBrands, "brands", "fonts/fa-brands.ttf");
+	for (WindowPtr win : context->windows) {
+		win->setCurrent();
+		context->loadFont(FontType::Normal, "sans",
+				"fonts/Roboto-Regular.ttf");
+		context->loadFont(FontType::Bold, "sans-bold", "fonts/Roboto-Bold.ttf");
+		context->loadFont(FontType::Italic, "sans-italic",
+				"fonts/Roboto-Italic.ttf");
+		context->loadFont(FontType::Code, "sans", "fonts/Hack-Regular.ttf");
+		context->loadFont(FontType::CodeBold, "sans-bold",
+				"fonts/Hack-Bold.ttf");
+		context->loadFont(FontType::CodeItalic, "sans-bold-italic",
+				"fonts/Hack-Italic.ttf");
+		context->loadFont(FontType::CodeBoldItalic, "sans-bold-italic",
+				"fonts/Hack-BoldItalic.ttf");
+		context->loadFont(FontType::Entypo, "entypo", "fonts/entypo.ttf");
+		context->loadFont(FontType::Icon, "basic_icons",
+				"fonts/fontawesome.ttf");
+		context->loadFont(FontType::AwesomeRegular, "regular_icons",
+				"fonts/fa-regular.ttf");
+		context->loadFont(FontType::AwesomeSolid, "solid_icons",
+				"fonts/fa-solid.ttf");
+		context->loadFont(FontType::AwesomeBrands, "brands",
+				"fonts/fa-brands.ttf");
+	}
 }
 void Application::run(int swapInterval) {
 	const double POLL_INTERVAL_SEC = 0.5f;
-	context->getMainWindow()->setCurrent();
 	loadFonts();
 	auto windows = context->getWindows();
 	for (WindowPtr win : windows) {
@@ -645,7 +662,6 @@ void Application::run(int swapInterval) {
 			win->setCurrent();
 			win->registerCallbacks(this);
 			glfwSetWindowIcon(win->handle, 2, iconImages);
-			
 			if (!init(win)) {
 				throw std::runtime_error(
 						MakeString()

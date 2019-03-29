@@ -153,6 +153,7 @@ public:
 	virtual void onWindowRefresh(Window* win) {
 	}
 	virtual void onWindowFocus(Window* win, int focused);
+	void onWindowClose(Window* win);
 	void onWindowSize(Window* win, int width, int height);
 	void onFrameBufferSize(Window* win, int width, int height);
 	void onChar(Window* window, unsigned int codepoint);
@@ -183,14 +184,15 @@ public:
 	float getFrameRate() const {
 		return frameRate;
 	}
+	std::shared_ptr<Window> getMainWindow() const;
 	std::shared_ptr<GLTextureRGB> loadTextureRGB(
 			const std::string& partialFile);
 	std::shared_ptr<GLTextureRGBA> loadTextureRGBA(
 			const std::string& partialFile);
-	std::shared_ptr<Font> loadFont(const std::string& name,
+	std::shared_ptr<Font> loadFont(const std::string& name, NVGcontext* nvg,
 			const std::string& partialFile);
 	WindowPtr addWindow(const std::string& name, int width = 1920, int height =
-			1080);
+			1080,bool hideOnClose=true);
 	bool remove(Window* win);
 	virtual void draw(AlloyContext* context) {
 	}

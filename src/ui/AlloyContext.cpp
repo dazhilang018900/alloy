@@ -76,27 +76,40 @@ const Cursor Cursor::SlantUp(0xf07d, 24.0f, NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER,
 const Cursor Cursor::CrossHairs(0xf05b, 24.0f,
 		NVG_ALIGN_MIDDLE | NVG_ALIGN_CENTER, FontType::Icon, 0.0f,
 		pixel2(-0.25f, -0.25f));
-Window::Window(const std::string& title, int width, int height) :
-		handle(nullptr), nvg(nullptr), visible(false), app(nullptr),dirtyUI(true),dirtyLocator(true) {
+Window::Window(const std::string& title, int width, int height,
+		bool hideOnClose) :
+		handle(nullptr), nvg(nullptr), visible(false), app(nullptr), dirtyUI(
+				true), dirtyLocator(true), hideOnClose(hideOnClose) {
 	init(title, width, height);
 }
 Window::Window() :
-		handle(nullptr), nvg(nullptr), visible(false), app(nullptr) ,dirtyUI(false),dirtyLocator(false) {
+		handle(nullptr), nvg(nullptr), visible(false), app(nullptr), dirtyUI(
+				false), dirtyLocator(false), hideOnClose(true) {
 }
 int2 Window::getScreenSize() const {
 	int2 dims;
 	glfwGetWindowSize(handle, &dims.x, &dims.y);
 	return dims;
 }
-void Window::requestPack(){
-	dirtyUI=true;
+void Window::requestPack() {
+	dirtyUI = true;
 }
-void Window::requestCursorUpdate(){
-	dirtyLocator=true;
+bool Window::isHideOnClose() const {
+	return hideOnClose;
+}
+int2 Window::getLocation() const {
+	int2 pos;
+	glfwGetWindowPos(handle,&pos.x,&pos.y);
+	return pos;
+}
+void Window::setLocation(int x, int y) {
+	glfwSetWindowPos(handle, x, y);
+}
+void Window::requestCursorUpdate() {
+	dirtyLocator = true;
 }
 box2px Window::getViewport() const {
-	return box2px(pixel2(0.0f, 0.0f),
-			pixel2(getFrameBufferSize()));
+	return box2px(pixel2(0.0f, 0.0f), pixel2(getFrameBufferSize()));
 }
 float Window::getPixelRatio() const {
 	return (float) getFrameBufferSize().x / (float) getScreenSize().x;
@@ -156,8 +169,11 @@ void Window::init(const std::string& title, int width, int height) {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 	nvg = nvgCreateGL3(NVG_ANTIALIAS | NVG_STENCIL_STROKES);
-	ui = CompositePtr(new Composite(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
-	glass = std::shared_ptr<Composite>(new Composite(name + "_glass", CoordPX(0, 0),CoordPercent(1.0f, 1.0f)));
+	ui = CompositePtr(
+			new Composite(name, CoordPX(0.0f, 0.0f), CoordPercent(1.0f, 1.0f)));
+	glass = std::shared_ptr<Composite>(
+			new Composite(name + "_glass", CoordPX(0, 0),
+					CoordPercent(1.0f, 1.0f)));
 	glass->backgroundColor = MakeColor(COLOR_NONE);
 	glass->setVisible(false);
 }
@@ -173,7 +189,7 @@ void Window::add(Region* region) {
 	locator.add(region);
 }
 Region* Window::locate(const pixel2& cursor) const {
-	Region* onTopRegion=AlloyApplicationContext()->getOnTopRegion();
+	Region* onTopRegion = AlloyApplicationContext()->getOnTopRegion();
 	if (onTopRegion != nullptr) {
 		if (onTopRegion->isVisible()) {
 			Region* r = onTopRegion->locate(cursor);
@@ -204,6 +220,12 @@ void Window::registerCallbacks(Application* app) {
 			win->app->throwException(std::current_exception());
 		}
 	});
+
+	glfwSetWindowCloseCallback(handle,
+			[](GLFWwindow * window) {
+				Window* win = (Window *)(glfwGetWindowUserPointer(window));
+				try {win->app->onWindowClose(win);} catch(...) {win->app->throwException(std::current_exception());
+				}});
 	glfwSetWindowFocusCallback(handle,
 			[](GLFWwindow * window, int focused ) {
 				Window* win = (Window *)(glfwGetWindowUserPointer(window));
@@ -246,14 +268,14 @@ void Window::setSwapInterval(int interval) const {
 void Window::begin() const {
 	setCurrent();
 	/*
-	int2 viewSize = getFrameBufferSize();
-	glViewport(0, 0, viewSize.x, viewSize.y);
-	glScissor(0, 0, viewSize.x, viewSize.y);
-	glClearColor(0.0, 0.0, 0.0, 0.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
-	glEnable(GL_DEPTH_TEST);
-	glDisable(GL_SCISSOR_TEST);
-	*/
+	 int2 viewSize = getFrameBufferSize();
+	 glViewport(0, 0, viewSize.x, viewSize.y);
+	 glScissor(0, 0, viewSize.x, viewSize.y);
+	 glClearColor(0.0, 0.0, 0.0, 0.0);
+	 glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+	 glEnable(GL_DEPTH_TEST);
+	 glDisable(GL_SCISSOR_TEST);
+	 */
 }
 Window::~Window() {
 	if (handle) {
@@ -273,14 +295,15 @@ Window::~Window() {
 	handle = nullptr;
 }
 void Cursor::draw(AlloyContext* context) const {
+	Window* win = context->focusedWindow;
+	if (win == nullptr||win!=context->getCurrentWindow().get())return;
 	pixel2 cursor = context->cursorPosition;
-	if (fontSize > 0.0f && context->hasFocus && cursor.x >= 0 && cursor.y >= 0
-			&& cursor.x < context->getScreenWidth()
-			&& cursor.y < context->getScreenHeight()) {
-		NVGcontext* nvg = context->getNVG();
+	int2 screenSize = win->getScreenSize();
+	if (fontSize > 0.0f && cursor.x >= 0 && cursor.y >= 0&& cursor.x < screenSize.x && cursor.y < screenSize.y) {
+		NVGcontext* nvg = win->nvg;
 		nvgTextAlign(nvg, align);
 		nvgSave(nvg);
-		nvgFontFaceId(nvg, context->getFontHandle(fontType));
+		nvgFontFaceId(nvg, context->getFontHandle(fontType,win));
 		nvgFontSize(nvg, fontSize);
 		nvgFillColor(nvg, Color(255, 255, 255));
 		nvgTranslate(nvg, cursor.x + nudge.x, cursor.y + nudge.y);
@@ -297,9 +320,9 @@ void Cursor::draw(AlloyContext* context) const {
 		nvgRestore(nvg);
 	}
 }
-Font::Font(const std::string& name, const std::string& file,
+Font::Font(const std::string& name, NVGcontext* nvg, const std::string& file,
 		AlloyContext* context) :
-		nvg(context->getNVG()), handle(0), name(name), file(file) {
+		nvg(nvg), handle(0), name(name), file(file) {
 	handle = nvgCreateFont(nvg, name.c_str(), file.c_str());
 }
 int Font::getCursorPosition(const std::string & text, float fontSize,
@@ -470,41 +493,43 @@ void AlloyContext::addAssetDirectory(const std::string& dir) {
 }
 std::shared_ptr<Font> AlloyContext::loadFont(FontType type,
 		const std::string& name, const std::string& file) {
-
+	WindowPtr win=getCurrentWindow();
 	try {
-		auto f = std::shared_ptr<Font>(new Font(name, getFullPath(file), this));
+		auto f = std::shared_ptr<Font>(
+				new Font(name, win->nvg, getFullPath(file), this));
 		int idx = static_cast<int>(type);
-		if (idx >= (int) fonts.size()) {
-			fonts.resize(idx + 1);
+		if (idx >= (int) win->fonts.size()) {
+			win->fonts.resize(idx + 1);
 		}
-		fonts[idx] = f;
-		return fonts[static_cast<int>(type)];
+		win->fonts[idx] = f;
+		return win->fonts[static_cast<int>(type)];
 	} catch (...) {
 		std::cerr << "Could not load font " << type << std::endl;
 	}
 	return std::shared_ptr<Font>();
 }
-std::shared_ptr<Font> AlloyContext::loadFont(int idx, const std::string& name,
-		const std::string& file) {
-
+std::shared_ptr<Font> AlloyContext::loadFont(int idx, const std::string& name, const std::string& file) {
+	WindowPtr win=getCurrentWindow();
 	try {
-		auto f = std::shared_ptr<Font>(new Font(name, getFullPath(file), this));
-		if (idx >= (int) fonts.size()) {
-			fonts.resize(idx + 1);
+		auto f = std::shared_ptr<Font>(
+				new Font(name, win->nvg, getFullPath(file), this));
+		if (idx >= (int) win->fonts.size()) {
+			win->fonts.resize(idx + 1);
 		}
-		fonts[idx] = f;
-		return fonts[idx];
+		win->fonts[idx] = f;
+		return win->fonts[idx];
 	} catch (...) {
 		std::cerr << "Could not load font " << name << std::endl;
 	}
 	return std::shared_ptr<Font>();
 }
-std::shared_ptr<Font> AlloyContext::loadFont(const std::string& name,
-		const std::string& file) {
+std::shared_ptr<Font> AlloyContext::loadFont(const std::string& name, const std::string& file) {
+	WindowPtr win=getCurrentWindow();
 	try {
-		fonts.push_back(
-				std::shared_ptr<Font>(new Font(name, getFullPath(file), this)));
-		return fonts.back();
+		win->fonts.push_back(
+				std::shared_ptr<Font>(
+						new Font(name, win->nvg, getFullPath(file), this)));
+		return win->fonts.back();
 	} catch (...) {
 		std::cerr << "Could not load font " << name << std::endl;
 	}
@@ -518,6 +543,26 @@ int AlloyContext::getFrameBufferHeight() const {
 }
 int2 AlloyContext::getFrameBufferSize() const {
 	return getCurrentWindow()->getFrameBufferSize();
+}
+std::shared_ptr<Font>& AlloyContext::getFont(FontType type) {
+	WindowPtr win=getCurrentWindow();
+	return win->fonts[static_cast<int>(type)];
+}
+const char* AlloyContext::getFontName(FontType type) const {
+	return getFontName(type,getCurrentWindow().get());
+}
+int AlloyContext::getFontHandle(FontType type) const {
+	return getFontHandle(type,getCurrentWindow().get());
+}
+const char* AlloyContext::getFontName(FontType type,Window* win) const {
+	if (win->fonts[static_cast<int>(type)].get() == nullptr)
+		throw std::runtime_error(MakeString()<<win->getName()<<": Font type not found.");
+	return win->fonts[static_cast<int>(type)]->name.c_str();
+}
+int AlloyContext::getFontHandle(FontType type,Window* win) const {
+	if (win->fonts[static_cast<int>(type)].get() == nullptr)
+		throw std::runtime_error(MakeString()<<win->getName()<<": Font type not found.");
+	return win->fonts[static_cast<int>(type)]->handle;
 }
 std::string AlloyContext::getFullPath(const std::string& partialFile) {
 	std::string fileName = partialFile;
@@ -690,8 +735,8 @@ void AlloyContext::removeOnTopRegion(Region* region) {
 	}
 }
 WindowPtr AlloyContext::addWindow(const std::string& name, int width,
-		int height) {
-	WindowPtr win(new Window(title, width, height));
+		int height, bool hideOnClose) {
+	WindowPtr win(new Window(name, width, height, hideOnClose));
 	windowMap[win->handle] = win;
 	windows.push_back(win);
 	return win;
@@ -716,7 +761,7 @@ AlloyContext::AlloyContext(const std::string& title, int width, int height,
 	glfwSetErrorCallback([](int error, const char* desc) {
 		std::cout << "GLFW Error [" << error << "] " << desc << std::endl;
 	});
-	WindowPtr mainWindow = addWindow(title, width, height);
+	WindowPtr mainWindow = addWindow(title, width, height, false);
 	int widthMM, heightMM;
 	numMonitors = 0;
 	glfwGetMonitors(&numMonitors);
@@ -916,7 +961,7 @@ void AlloyContext::update(Window* win) {
 		win->dirtyLocator = false;
 		mouseOverRegion = win->locate(cursorPosition);
 		dirtyCursor = false;
-		win->dirtyUI= true;
+		win->dirtyUI = true;
 	}
 	if (updateElapsed > UPDATE_LOCATOR_INTERVAL_SEC) {
 		if (win->dirtyLocator) {
@@ -938,7 +983,7 @@ void AlloyContext::update(Window* win) {
 	if (animateElapsed >= ANIMATE_INTERVAL_SEC) { //Dont try to animate faster than 60 fps.
 		lastAnimateTime = endTime;
 		if (animator.step(animateElapsed)) {
-			win->dirtyUI= true;
+			win->dirtyUI = true;
 			dirtyUI = true;
 		}
 	}

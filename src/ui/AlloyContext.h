@@ -63,26 +63,32 @@ struct ImageVAO {
 };
 class Application;
 class Composite;
+class Font;
 class Window {
 protected:
 	CursorLocator locator;
 	bool visible;
 	std::string name;
+	bool hideOnClose;
 public:
 	GLFWwindow* handle;
 	NVGcontext* nvg;
 	ImageVAO vao;
 	bool dirtyLocator;
 	bool dirtyUI;
+	std::vector<std::shared_ptr<Font>> fonts;
 	Application* app;
 	std::shared_ptr<Composite> ui;
 	std::shared_ptr<Composite> glass;
 	std::string getName() const {
 		return name;
 	}
+	bool isHideOnClose() const;
+	void setLocation(int x, int y);
+	int2 getLocation() const;
 	void requestPack();
 	void requestCursorUpdate();
-	Window(const std::string& title, int width, int height);
+	Window(const std::string& title, int width, int height,bool hideOnClose=true);
 	Window();
 	int2 getScreenSize() const;
 	int2 getFrameBufferSize() const;
@@ -119,7 +125,7 @@ public:
 	const std::string file;
 	int getCursorPosition(const std::string & text, float fontSize,
 			int xCoord) const;
-	Font(const std::string& name, const std::string& file,
+	Font(const std::string& name,NVGcontext* nvg, const std::string& file,
 			AlloyContext* context);
 };
 struct Glyph {
@@ -214,7 +220,6 @@ private:
 	std::mutex taskLock;
 	std::mutex glLock;
 	std::list<std::string> assetDirectories;
-	std::vector<std::shared_ptr<Font>> fonts;
 	std::list<WindowPtr> windowHistory;
 	std::map<GLFWwindow*, WindowPtr> windowMap;
 	std::vector<WindowPtr> windows;
@@ -261,7 +266,7 @@ public:
 	pixel2 cursorDownPosition = pixel2(-1, -1);
 	int doubleClickTime = 300;
 	double2 dpmm;
-	bool hasFocus = false;
+	Window* focusedWindow=nullptr;
 	const std::vector<WindowPtr>& getWindows() const {
 		return windows;
 	}
@@ -280,7 +285,7 @@ public:
 	WindowPtr getMainWindow() const{
 		return windows[0];
 	}
-	WindowPtr addWindow(const std::string& name,int width,int height);
+	WindowPtr addWindow(const std::string& name,int width,int height,bool hideOnClose=true);
 	bool remove(Window* win);
 	void begin(const WindowPtr& window);
 	inline void begin(){
@@ -404,16 +409,10 @@ public:
 	int getFrameBufferWidth() const;
 	int getFrameBufferHeight() const;
 	int2 getFrameBufferSize() const;
-	inline const char* getFontName(FontType type) const {
-		if (fonts[static_cast<int>(type)].get() == nullptr)
-			throw std::runtime_error("Font type not found.");
-		return fonts[static_cast<int>(type)]->name.c_str();
-	}
-	inline int getFontHandle(FontType type) const {
-		if (fonts[static_cast<int>(type)].get() == nullptr)
-			throw std::runtime_error("Font type not found.");
-		return fonts[static_cast<int>(type)]->handle;
-	}
+	const char* getFontName(FontType type,Window* win) const;
+	int getFontHandle(FontType type,Window* win) const ;
+	const char* getFontName(FontType type) const;
+	int getFontHandle(FontType type) const ;
 	inline std::shared_ptr<ImageGlyph> createImageGlyph(
 			const std::string& fileName, bool mipmap = false) {
 		return std::shared_ptr<ImageGlyph>(new ImageGlyph(fileName, this));
@@ -431,10 +430,7 @@ public:
 		std::shared_ptr<AwesomeGlyph> g = std::shared_ptr<AwesomeGlyph>(
 				new AwesomeGlyph(codePoint, this, style, height));
 		return g;
-	}
-	inline std::shared_ptr<Font>& getFont(FontType type) {
-		return fonts[static_cast<int>(type)];
-	}
+	}std::shared_ptr<Font>& getFont(FontType type);
 	template<class A> std::shared_ptr<Tween>& addTween(AColor& out,
 			const Color& start, const Color& end, double duration, const A& a =
 					Linear()) {
