@@ -90,7 +90,7 @@
 #include "example/MeshDistanceFieldEx.h"
 #include "example/MultiWindowEx.h"
 #include "graphics/HoudiniReaderWriter.h"
-#include "system/MachineID.h"
+#include "system/AlloyNetwork.h"
 /*
  For simple execution, main method should look like:
  int main(int argc, char *argv[]) {
